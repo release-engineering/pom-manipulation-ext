@@ -34,7 +34,7 @@ public class VersioningModelProcessor
 
     @Requirement
     private Logger logger;
-
+    
     @Override
     public File locatePom( final File projectDirectory )
     {
@@ -54,8 +54,6 @@ public class VersioningModelProcessor
 
     private void applyVersioning( final Model model )
     {
-        logger.info( "Applying versioning changes to: " + model );
-
         final VersioningSession session = getSession();
 
         final Set<String> changed = session.getChangedGAVs();

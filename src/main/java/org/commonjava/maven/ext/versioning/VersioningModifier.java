@@ -7,7 +7,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -30,14 +29,7 @@ import org.codehaus.plexus.logging.Logger;
 public class VersioningModifier
 {
 
-    private static final Map<String, Object> OPTIONS;
-
-    static
-    {
-        final Map<String, Object> opts = new HashMap<String, Object>();
-
-        OPTIONS = opts;
-    }
+    private static final Map<String, Object> OPTIONS = null;
 
     @Requirement
     private Logger logger;

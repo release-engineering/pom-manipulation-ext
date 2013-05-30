@@ -17,6 +17,7 @@ public class VersioningSession
 
     private final Set<String> changedGAVs = new HashSet<String>();
 
+    // FIXME: Find SOME better way than a classical singleton to house this state!!!
     public static VersioningSession getInstance()
     {
         return INSTANCE;
