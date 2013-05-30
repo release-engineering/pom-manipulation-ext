@@ -10,13 +10,13 @@ import org.apache.maven.MavenExecutionException;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.model.io.xpp3.MavenXpp3Writer;
 import org.apache.maven.project.MavenProject;
-import org.codehaus.plexus.component.annotations.Component;
 import org.codehaus.plexus.component.annotations.Requirement;
 import org.codehaus.plexus.logging.Logger;
 import org.codehaus.plexus.util.IOUtil;
 import org.codehaus.plexus.util.WriterFactory;
 
-@Component( role = AbstractMavenLifecycleParticipant.class, hint = "versioning" )
+// TODO: Can we eliminate this one??
+//@Component( role = AbstractMavenLifecycleParticipant.class, hint = "versioning" )
 public class VersioningLifecycleParticipant
     extends AbstractMavenLifecycleParticipant
 {
@@ -53,11 +53,18 @@ public class VersioningLifecycleParticipant
     private void rewritePom( final MavenProject project )
         throws MavenExecutionException
     {
-        final File pom = project.getFile();
+        final File dir = project.getOriginalModel()
+                                .getPomFile()
+                                .getParentFile();
+
+        final File pom = dir == null ? new File( "pom.xml" ) : new File( dir, "pom.xml" );
+
         Writer writer = null;
         try
         {
             writer = WriterFactory.newXmlWriter( pom );
+
+            logger.info( "Rewriting: " + pom.getAbsolutePath() );
             new MavenXpp3Writer().write( writer, project.getOriginalModel() );
         }
         catch ( final IOException e )

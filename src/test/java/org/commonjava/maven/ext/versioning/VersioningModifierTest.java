@@ -19,7 +19,9 @@ import org.apache.maven.model.DependencyManagement;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Parent;
 import org.apache.maven.model.Profile;
+import org.apache.maven.model.io.DefaultModelWriter;
 import org.apache.maven.project.MavenProject;
+import org.codehaus.plexus.logging.console.ConsoleLogger;
 import org.junit.Test;
 
 public class VersioningModifierTest
@@ -577,6 +579,11 @@ public class VersioningModifierTest
     private static final class TestVersioningModifier
         extends VersioningModifier
     {
+
+        public TestVersioningModifier()
+        {
+            super( new DefaultModelWriter(), new ConsoleLogger() );
+        }
 
         @Override
         public Set<MavenProject> applyVersioningChanges( final Collection<MavenProject> projects,

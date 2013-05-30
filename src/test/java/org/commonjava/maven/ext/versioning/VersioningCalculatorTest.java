@@ -14,10 +14,9 @@ public class VersioningCalculatorTest
     {
         final Properties props = new Properties();
 
-        final VersionCalculator modder = new VersionCalculator();
-        final boolean init = modder.init( props );
+        final VersionCalculator modder = new VersionCalculator( props );
 
-        assertThat( init, equalTo( false ) );
+        assertThat( modder.isEnabled(), equalTo( false ) );
     }
 
     @Test
@@ -28,10 +27,7 @@ public class VersioningCalculatorTest
         final String s = "foo";
         props.setProperty( VersionCalculator.VERSION_SUFFIX_SYSPROP, s );
 
-        final VersionCalculator modder = new VersionCalculator();
-        final boolean init = modder.init( props );
-
-        assertThat( init, equalTo( true ) );
+        final VersionCalculator modder = new VersionCalculator( props );
 
         final String v = "1.2";
 
@@ -50,10 +46,7 @@ public class VersioningCalculatorTest
         final String s = "foo";
         props.setProperty( VersionCalculator.VERSION_SUFFIX_SYSPROP, s );
 
-        final VersionCalculator modder = new VersionCalculator();
-        final boolean init = modder.init( props );
-
-        assertThat( init, equalTo( true ) );
+        final VersionCalculator modder = new VersionCalculator( props );
 
         final String v = "1.2";
 
@@ -69,10 +62,7 @@ public class VersioningCalculatorTest
         final String s = "foo";
         props.setProperty( VersionCalculator.VERSION_SUFFIX_SYSPROP, s );
 
-        final VersionCalculator modder = new VersionCalculator();
-        final boolean init = modder.init( props );
-
-        assertThat( init, equalTo( true ) );
+        final VersionCalculator modder = new VersionCalculator( props );
 
         final String v = "1.2.GA";
 
@@ -88,10 +78,7 @@ public class VersioningCalculatorTest
         final String s = "foo-1";
         props.setProperty( VersionCalculator.VERSION_SUFFIX_SYSPROP, s );
 
-        final VersionCalculator modder = new VersionCalculator();
-        final boolean init = modder.init( props );
-
-        assertThat( init, equalTo( true ) );
+        final VersionCalculator modder = new VersionCalculator( props );
 
         final String v = "1.2";
 
@@ -107,10 +94,7 @@ public class VersioningCalculatorTest
         final String s = "foo-1";
         props.setProperty( VersionCalculator.VERSION_SUFFIX_SYSPROP, s );
 
-        final VersionCalculator modder = new VersionCalculator();
-        final boolean init = modder.init( props );
-
-        assertThat( init, equalTo( true ) );
+        final VersionCalculator modder = new VersionCalculator( props );
 
         final String v = "1.2.GA";
 
@@ -126,10 +110,7 @@ public class VersioningCalculatorTest
         final String s = "foo-2";
         props.setProperty( VersionCalculator.VERSION_SUFFIX_SYSPROP, s );
 
-        final VersionCalculator modder = new VersionCalculator();
-        final boolean init = modder.init( props );
-
-        assertThat( init, equalTo( true ) );
+        final VersionCalculator modder = new VersionCalculator( props );
 
         final String v = "1.2";
         final String os = ".foo-1";
@@ -146,10 +127,7 @@ public class VersioningCalculatorTest
         final String s = "foo-2";
         props.setProperty( VersionCalculator.VERSION_SUFFIX_SYSPROP, s );
 
-        final VersionCalculator modder = new VersionCalculator();
-        final boolean init = modder.init( props );
-
-        assertThat( init, equalTo( true ) );
+        final VersionCalculator modder = new VersionCalculator( props );
 
         final String v = "1.2.GA";
         final String os = "-foo-1";
@@ -166,10 +144,7 @@ public class VersioningCalculatorTest
         final String s = "foo-2";
         props.setProperty( VersionCalculator.VERSION_SUFFIX_SYSPROP, s );
 
-        final VersionCalculator modder = new VersionCalculator();
-        final boolean init = modder.init( props );
-
-        assertThat( init, equalTo( true ) );
+        final VersionCalculator modder = new VersionCalculator( props );
 
         final String v = "1.2.GA";
         final String sn = "-SNAPSHOT";
@@ -186,10 +161,7 @@ public class VersioningCalculatorTest
         final String s = "foo-2";
         props.setProperty( VersionCalculator.VERSION_SUFFIX_SYSPROP, s );
 
-        final VersionCalculator modder = new VersionCalculator();
-        final boolean init = modder.init( props );
-
-        assertThat( init, equalTo( true ) );
+        final VersionCalculator modder = new VersionCalculator( props );
 
         final String v = "1.2.GA";
         final String sn = "-SNAPSHOT";
@@ -207,10 +179,7 @@ public class VersioningCalculatorTest
         props.setProperty( VersionCalculator.VERSION_SUFFIX_SYSPROP, "foo-0" );
         props.setProperty( VersionCalculator.INCREMENT_SERIAL_SYSPROP, Boolean.toString( Boolean.TRUE ) );
 
-        final VersionCalculator modder = new VersionCalculator();
-        final boolean init = modder.init( props );
-
-        assertThat( init, equalTo( true ) );
+        final VersionCalculator modder = new VersionCalculator( props );
 
         final String v = "1.2.GA";
         final String os = "-foo-1";

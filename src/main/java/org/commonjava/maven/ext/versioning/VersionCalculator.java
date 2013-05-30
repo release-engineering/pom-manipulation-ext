@@ -1,12 +1,16 @@
 package org.commonjava.maven.ext.versioning;
 
+import static org.commonjava.maven.ext.versioning.IdUtils.ga;
+
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.codehaus.plexus.component.annotations.Component;
+import org.apache.maven.project.MavenProject;
 
-@Component( role = VersionCalculator.class, hint = "default" )
 public class VersionCalculator
 {
 
@@ -18,16 +22,37 @@ public class VersionCalculator
 
     private static final String SNAPSHOT_SUFFIX = "-SNAPSHOT";
 
-    private String suffix;
+    private final String suffix;
 
     private boolean incrementSerial = false;
 
-    public boolean init( final Properties properties )
+    public VersionCalculator( final Properties properties )
     {
         suffix = properties.getProperty( VERSION_SUFFIX_SYSPROP );
         incrementSerial = Boolean.parseBoolean( properties.getProperty( INCREMENT_SERIAL_SYSPROP, "false" ) );
+    }
 
+    public boolean isEnabled()
+    {
         return suffix != null;
+    }
+
+    public Map<String, String> calculateVersioningChanges( final Collection<MavenProject> projects )
+    {
+        final Map<String, String> versionsByGA = new HashMap<String, String>();
+
+        for ( final MavenProject project : projects )
+        {
+            final String originalVersion = project.getVersion();
+            final String modifiedVersion = calculate( originalVersion );
+
+            if ( !modifiedVersion.equals( originalVersion ) )
+            {
+                versionsByGA.put( ga( project.getGroupId(), project.getArtifactId() ), modifiedVersion );
+            }
+        }
+
+        return versionsByGA;
     }
 
     public String calculate( final String originalVersion )
