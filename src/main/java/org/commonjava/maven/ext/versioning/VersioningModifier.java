@@ -5,6 +5,7 @@ import static org.commonjava.maven.ext.versioning.IdUtils.gav;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -23,6 +24,12 @@ import org.apache.maven.model.io.ModelWriter;
 import org.apache.maven.project.MavenProject;
 import org.codehaus.plexus.component.annotations.Component;
 import org.codehaus.plexus.component.annotations.Requirement;
+import org.codehaus.plexus.interpolation.InterpolationException;
+import org.codehaus.plexus.interpolation.PrefixAwareRecursionInterceptor;
+import org.codehaus.plexus.interpolation.PrefixedObjectValueSource;
+import org.codehaus.plexus.interpolation.PropertiesBasedValueSource;
+import org.codehaus.plexus.interpolation.RecursionInterceptor;
+import org.codehaus.plexus.interpolation.StringSearchInterpolator;
 import org.codehaus.plexus.logging.Logger;
 
 @Component( role = VersioningModifier.class )
@@ -47,6 +54,7 @@ public class VersioningModifier
     }
 
     public Set<MavenProject> apply( final Collection<MavenProject> projects, final Properties userProperties )
+        throws InterpolationException
     {
         final VersionCalculator calculator = new VersionCalculator( userProperties );
         if ( !calculator.isEnabled() )
@@ -67,6 +75,7 @@ public class VersioningModifier
 
     protected Set<MavenProject> applyVersioningChanges( final Collection<MavenProject> projects,
                                                         final Map<String, String> versionsByGA )
+        throws InterpolationException
     {
         final Set<MavenProject> changed = new HashSet<MavenProject>();
         for ( final MavenProject project : projects )
@@ -92,6 +101,7 @@ public class VersioningModifier
     }
 
     public boolean applyVersioningChanges( final Model model, final Map<String, String> versionsByGA )
+        throws InterpolationException
     {
         boolean changed = false;
 
@@ -100,7 +110,7 @@ public class VersioningModifier
             return changed;
         }
 
-        logger.info( "Looking for applicable versioning changes in: " + gav( model ) );
+        //        logger.info( "Looking for applicable versioning changes in: " + gav( model ) );
 
         String g = model.getGroupId();
         final Parent originalParent = model.getParent();
@@ -127,7 +137,7 @@ public class VersioningModifier
             if ( v != null && model.getVersion() != null )
             {
                 model.setVersion( v );
-                logger.info( "Changed main version in " + gav( model ) );
+                //                logger.info( "Changed main version in " + gav( model ) );
                 changed = true;
             }
         }
@@ -141,6 +151,17 @@ public class VersioningModifier
             bases.addAll( profiles );
         }
 
+        final StringSearchInterpolator interp = new StringSearchInterpolator();
+        if ( model.getProperties() != null )
+        {
+            interp.addValueSource( new PropertiesBasedValueSource( model.getProperties() ) );
+        }
+
+        final List<String> prefixes = Arrays.asList( "pom", "project" );
+        interp.addValueSource( new PrefixedObjectValueSource( prefixes, model, true ) );
+
+        final RecursionInterceptor ri = new PrefixAwareRecursionInterceptor( prefixes, true );
+
         for ( final ModelBase base : bases )
         {
             final DependencyManagement dm = base.getDependencyManagement();
@@ -148,12 +169,12 @@ public class VersioningModifier
             {
                 for ( final Dependency d : dm.getDependencies() )
                 {
-                    ga = ga( d.getGroupId(), d.getArtifactId() );
+                    ga = ga( interp.interpolate( d.getGroupId(), ri ), interp.interpolate( d.getArtifactId(), ri ) );
                     final String v = versionsByGA.get( ga );
                     if ( v != null )
                     {
                         d.setVersion( v );
-                        logger.info( "Changed managed: " + d + " in " + base );
+                        //                        logger.info( "Changed managed: " + d + " in " + base );
                         changed = true;
                     }
                 }
@@ -163,12 +184,12 @@ public class VersioningModifier
             {
                 for ( final Dependency d : base.getDependencies() )
                 {
-                    ga = ga( d.getGroupId(), d.getArtifactId() );
+                    ga = ga( interp.interpolate( d.getGroupId(), ri ), interp.interpolate( d.getArtifactId(), ri ) );
                     final String v = versionsByGA.get( ga );
                     if ( v != null && d.getVersion() != null )
                     {
                         d.setVersion( v );
-                        logger.info( "Changed: " + d + " in " + base );
+                        //                        logger.info( "Changed: " + d + " in " + base );
                         changed = true;
                     }
                 }

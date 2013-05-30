@@ -78,6 +78,13 @@
     <pluginManagement>
       <plugins>
         <plugin>
+          <artifactId>maven-resources-plugin</artifactId>
+          <version>2.6</version>
+          <configuration>
+            <escapeString>\</escapeString>
+          </configuration>
+        </plugin>
+        <plugin>
           <artifactId>maven-release-plugin</artifactId>
           <version>2.1</version>
           <configuration>

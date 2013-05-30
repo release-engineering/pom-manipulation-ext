@@ -7,7 +7,6 @@ import static org.hamcrest.CoreMatchers.nullValue;
 import static org.junit.Assert.assertThat;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -29,6 +28,7 @@ public class VersioningModifierTest
 
     @Test
     public void updateEffectiveAndOriginalModelMainVersions()
+        throws Exception
     {
         final Model orig = new Model();
         orig.setGroupId( "org.foo" );
@@ -47,7 +47,7 @@ public class VersioningModifierTest
         project.setOriginalModel( orig );
 
         final Set<MavenProject> changes =
-            new TestVersioningModifier().applyVersioningChanges( Collections.singleton( project ), versionsByGA );
+            newVersioningModifier().applyVersioningChanges( Collections.singleton( project ), versionsByGA );
 
         assertThat( changes.size(), equalTo( 1 ) );
         assertThat( orig.getVersion(), equalTo( mv ) );
@@ -56,6 +56,7 @@ public class VersioningModifierTest
 
     @Test
     public void updateEffectiveAndOriginalModelParentVersions()
+        throws Exception
     {
         final Model parent = new Model();
         parent.setGroupId( "org.foo" );
@@ -91,7 +92,7 @@ public class VersioningModifierTest
         project.setOriginalModel( orig );
         projects.add( project );
 
-        final Set<MavenProject> changes = new TestVersioningModifier().applyVersioningChanges( projects, versionsByGA );
+        final Set<MavenProject> changes = newVersioningModifier().applyVersioningChanges( projects, versionsByGA );
 
         assertThat( changes.size(), equalTo( 2 ) );
         for ( final MavenProject p : changes )
@@ -122,6 +123,7 @@ public class VersioningModifierTest
 
     @Test
     public void updateEffectiveAndOriginalModelDependencyVersions()
+        throws Exception
     {
         final Model orig = new Model();
         orig.setGroupId( "org.foo" );
@@ -177,7 +179,7 @@ public class VersioningModifierTest
         project.setOriginalModel( orig );
         projects.add( project );
 
-        final Set<MavenProject> changes = new TestVersioningModifier().applyVersioningChanges( projects, versionsByGA );
+        final Set<MavenProject> changes = newVersioningModifier().applyVersioningChanges( projects, versionsByGA );
 
         assertThat( changes.size(), equalTo( 3 ) );
         for ( final MavenProject p : changes )
@@ -238,6 +240,7 @@ public class VersioningModifierTest
 
     @Test
     public void updateEffectiveAndOriginalModelDependencyVersions_OnlyWhenHasVersion()
+        throws Exception
     {
         final Model orig = new Model();
         orig.setGroupId( "org.foo" );
@@ -282,7 +285,7 @@ public class VersioningModifierTest
         project.setOriginalModel( orig );
         projects.add( project );
 
-        final Set<MavenProject> changes = new TestVersioningModifier().applyVersioningChanges( projects, versionsByGA );
+        final Set<MavenProject> changes = newVersioningModifier().applyVersioningChanges( projects, versionsByGA );
 
         assertThat( changes.size(), equalTo( 2 ) );
         for ( final MavenProject p : changes )
@@ -343,6 +346,7 @@ public class VersioningModifierTest
 
     @Test
     public void updateEffectiveAndOriginalModelDependencyVersions_InProfile()
+        throws Exception
     {
         final Model orig = new Model();
         orig.setGroupId( "org.foo" );
@@ -402,7 +406,7 @@ public class VersioningModifierTest
         project.setOriginalModel( orig );
         projects.add( project );
 
-        final Set<MavenProject> changes = new TestVersioningModifier().applyVersioningChanges( projects, versionsByGA );
+        final Set<MavenProject> changes = newVersioningModifier().applyVersioningChanges( projects, versionsByGA );
 
         assertThat( changes.size(), equalTo( 3 ) );
         for ( final MavenProject proj : changes )
@@ -466,6 +470,7 @@ public class VersioningModifierTest
 
     @Test
     public void updateEffectiveAndOriginalModelDependencyVersions_OnlyWhenHasVersion_InProfile()
+        throws Exception
     {
         final Model orig = new Model();
         orig.setGroupId( "org.foo" );
@@ -514,7 +519,7 @@ public class VersioningModifierTest
         project.setOriginalModel( orig );
         projects.add( project );
 
-        final Set<MavenProject> changes = new TestVersioningModifier().applyVersioningChanges( projects, versionsByGA );
+        final Set<MavenProject> changes = newVersioningModifier().applyVersioningChanges( projects, versionsByGA );
 
         assertThat( changes.size(), equalTo( 2 ) );
         for ( final MavenProject proj : changes )
@@ -576,22 +581,9 @@ public class VersioningModifierTest
         }
     }
 
-    private static final class TestVersioningModifier
-        extends VersioningModifier
+    private VersioningModifier newVersioningModifier()
     {
-
-        public TestVersioningModifier()
-        {
-            super( new DefaultModelWriter(), new ConsoleLogger() );
-        }
-
-        @Override
-        public Set<MavenProject> applyVersioningChanges( final Collection<MavenProject> projects,
-                                                         final Map<String, String> versionsByGA )
-        {
-            return super.applyVersioningChanges( projects, versionsByGA );
-        }
-
+        return new VersioningModifier( new DefaultModelWriter(), new ConsoleLogger() );
     }
 
 }

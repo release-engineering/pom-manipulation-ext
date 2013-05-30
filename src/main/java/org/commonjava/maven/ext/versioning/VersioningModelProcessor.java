@@ -16,6 +16,7 @@ import org.apache.maven.model.io.ModelReader;
 import org.apache.maven.model.locator.ModelLocator;
 import org.codehaus.plexus.component.annotations.Component;
 import org.codehaus.plexus.component.annotations.Requirement;
+import org.codehaus.plexus.interpolation.InterpolationException;
 import org.codehaus.plexus.logging.Logger;
 
 @Component( role = ModelProcessor.class )
@@ -34,7 +35,7 @@ public class VersioningModelProcessor
 
     @Requirement
     private Logger logger;
-    
+
     @Override
     public File locatePom( final File projectDirectory )
     {
@@ -53,13 +54,21 @@ public class VersioningModelProcessor
     }
 
     private void applyVersioning( final Model model )
+        throws IOException
     {
         final VersioningSession session = getSession();
 
         final Set<String> changed = session.getChangedGAVs();
-        if ( modder.applyVersioningChanges( model, session.getVersioningChanges() ) )
+        try
         {
-            changed.add( ga( model ) );
+            if ( modder.applyVersioningChanges( model, session.getVersioningChanges() ) )
+            {
+                changed.add( ga( model ) );
+            }
+        }
+        catch ( final InterpolationException e )
+        {
+            throw new IOException( "Interpolation failed while applying versioning changes: " + e.getMessage(), e );
         }
     }
 
