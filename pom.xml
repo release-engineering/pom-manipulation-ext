@@ -21,9 +21,9 @@
     </developer>
   </developers>
   <scm>
-    <connection>scm:git:http://jdcasey@github.com/jdcasey/versioning-extension.git</connection>
-    <developerConnection>scm:git:git@github.com:jdcasey/versioning-extension.git</developerConnection>
-    <url>http://github.com/jdcasey/versioning-extension</url>
+    <connection>scm:git:http://jdcasey@github.com/jdcasey/maven-versioning-extension.git</connection>
+    <developerConnection>scm:git:git@github.com:jdcasey/maven-versioning-extension.git</developerConnection>
+    <url>http://github.com/jdcasey/maven-versioning-extension</url>
   </scm>
   <distributionManagement>
     <repository>
