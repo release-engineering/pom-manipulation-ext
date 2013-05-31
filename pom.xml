@@ -7,6 +7,9 @@
   <version>0.1-SNAPSHOT</version>
   <name>Versioning Extension for Maven</name>
   <url>http://github.com/jdcasey/versioning-extension</url>
+  <description>
+    lib/ext-style extension for Apache Maven that allows manipulation of a version suffix.
+  </description>
   <licenses>
     <license>
       <name>APLv2.0</name>
@@ -317,6 +320,10 @@
           </plugin>
           <plugin>
             <artifactId>maven-gpg-plugin</artifactId>
+          </plugin>
+          <plugin>
+            <groupId>com.github.github</groupId>
+            <artifactId>site-maven-plugin</artifactId>
           </plugin>
         </plugins>
       </build>
