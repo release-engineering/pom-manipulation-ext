@@ -1,0 +1,19 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  
+  <parent>
+    <groupId>org.commonjava.maven.ext.versioning.test</groupId>
+    <artifactId>parent-children-interdep-expr-parent</artifactId>
+    <version>1.0.redhat-1</version>
+  </parent>
+
+  <artifactId>parent-children-interdep-expr-child2</artifactId>
+  
+  <dependencies>
+    <dependency>
+      <groupId>\${project.groupId}</groupId>
+      <artifactId>parent-children-interdep-expr-child1</artifactId>
+    </dependency>
+  </dependencies>
+</project>
