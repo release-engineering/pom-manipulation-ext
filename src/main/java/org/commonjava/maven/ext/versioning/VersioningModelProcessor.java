@@ -57,6 +57,10 @@ public class VersioningModelProcessor
         throws IOException
     {
         final VersioningSession session = getSession();
+        if ( !session.isEnabled() )
+        {
+            return;
+        }
 
         final Set<String> changed = session.getChangedGAVs();
         try

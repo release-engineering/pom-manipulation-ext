@@ -46,6 +46,12 @@ public class VersioningEventSpy
 
             if ( event instanceof ExecutionEvent )
             {
+                final VersioningSession session = getSession();
+                if ( !session.isEnabled() )
+                {
+                    return;
+                }
+
                 final ExecutionEvent ee = (ExecutionEvent) event;
 
                 final ExecutionEvent.Type type = ee.getType();
@@ -54,7 +60,6 @@ public class VersioningEventSpy
                     case ProjectDiscoveryStarted:
                     {
                         logger.info( "Pre-scanning projects to calculate versioning changes..." );
-                        final VersioningSession session = getSession();
                         session.setVersioningChanges( scanner.scanVersioningChanges( session.getRequest(),
                                                                                      ee.getSession() ) );
                         break;
