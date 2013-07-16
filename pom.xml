@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.commonjava.maven.ext</groupId>
   <artifactId>versioning-extension</artifactId>
-  <version>0.2-SNAPSHOT</version>
+  <version>0.2</version>
   <name>Versioning Extension for Maven</name>
   <url>http://github.com/jdcasey/versioning-extension</url>
   <description>
