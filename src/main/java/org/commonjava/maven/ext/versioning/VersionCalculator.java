@@ -14,7 +14,7 @@ import org.apache.maven.project.MavenProject;
 public class VersionCalculator
 {
 
-    private static final String SERIAL_SUFFIX_PATTERN = "(.+)([-.])(\\d+)";
+    private static final String SERIAL_SUFFIX_PATTERN = "(.+)([-.])(\\d+)?";
 
     public static final String VERSION_SUFFIX_SYSPROP = "version.suffix";
 
@@ -102,7 +102,8 @@ public class VersionCalculator
                     final String oldSep = oldSuffixMatcher.group( 2 );
 
                     // grab the old serial number.
-                    final int oldSerial = Integer.parseInt( oldSuffixMatcher.group( 3 ) );
+                    final String oldSerialStr = oldSuffixMatcher.group( 3 );
+                    final int oldSerial = oldSerialStr == null ? 0 : Integer.parseInt( oldSerialStr );
                     useSuffix = suffixBase + oldSep + ( oldSerial + 1 );
                 }
             }

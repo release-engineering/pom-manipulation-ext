@@ -87,6 +87,22 @@ public class VersioningCalculatorTest
     }
 
     @Test
+    public void applySerialSuffix_NonNumericSuffixInVersionTail()
+    {
+        final Properties props = new Properties();
+
+        final String s = "foo-1";
+        props.setProperty( VersionCalculator.VERSION_SUFFIX_SYSPROP, s );
+
+        final VersionCalculator modder = new VersionCalculator( props );
+
+        final String v = "1.2.GA-foo";
+
+        final String result = modder.calculate( v );
+        assertThat( result, equalTo( v + "-1" ) );
+    }
+
+    @Test
     public void applySerialSuffix_NonNumericVersionTail()
     {
         final Properties props = new Properties();
