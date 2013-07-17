@@ -91,7 +91,7 @@ public class VersionCalculator
         final String incrementalSerialSuffix = session.getIncrementalSerialSuffix();
         final String suffix = session.getSuffix();
 
-        final String suff = incrementalSerialSuffix == null ? suffix : incrementalSerialSuffix;
+        final String suff = suffix != null ? suffix : incrementalSerialSuffix;
         final Pattern serialSuffixPattern = Pattern.compile( SERIAL_SUFFIX_PATTERN );
         final Matcher suffixMatcher = serialSuffixPattern.matcher( suff );
 
