@@ -273,6 +273,25 @@ public class VersioningCalculatorTest
         assertThat( result, equalTo( v + "-" + ns ) );
     }
 
+    @Test
+    public void incrementExistingSerialSuffix_UsingRepositoryMetadataWithIrrelevantVersions()
+        throws Exception
+    {
+        setMetadataVersions( "0.0.1", "0.0.2", "0.0.3", "0.0.4", "0.0.5", "0.0.6", "0.0.7", "0.0.7.redhat-1" );
+
+        final Properties props = new Properties();
+
+        props.setProperty( VersioningSession.INCREMENT_SERIAL_SUFFIX_SYSPROP, "redhat-0" );
+        setupSession( props );
+
+        final String v = "0.0.7";
+        //        final String os = "-redhat-2";
+        final String ns = "redhat-2";
+
+        final String result = calculate( v );
+        assertThat( result, equalTo( v + "." + ns ) );
+    }
+
     private void setMetadataVersions( final String... versions )
         throws IOException
     {

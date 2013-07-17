@@ -34,7 +34,7 @@ import org.sonatype.aether.util.metadata.DefaultMetadata;
 public class VersionCalculator
 {
 
-    private static final String SERIAL_SUFFIX_PATTERN = "(.+)([-.])(\\d+)?";
+    private static final String SERIAL_SUFFIX_PATTERN = "([^-.]+)([-.])(\\d+)?$";
 
     private static final String SNAPSHOT_SUFFIX = "-SNAPSHOT";
 
@@ -100,12 +100,18 @@ public class VersionCalculator
         {
             // the "redhat" in "redhat-1"
             final String suffixBase = suffixMatcher.group( 1 );
+            String sep = suffixMatcher.group( 2 );
+            if ( sep == null )
+            {
+                sep = "-";
+            }
+
             final int idx = result.indexOf( suffixBase );
 
-            if ( idx > -1 )
+            if ( idx > 1 )
             {
                 // trim the old suffix off.
-                result = result.substring( 0, idx );
+                result = result.substring( 0, idx - 1 );
             }
 
             // If we're using serial suffixes (-redhat-N) and the flag is set 
@@ -118,7 +124,6 @@ public class VersionCalculator
                 versionCandidates.add( originalVersion );
                 versionCandidates.addAll( getMetadataVersions( groupId, artifactId, session ) );
 
-                String sep = "-";
                 int maxSerial = 0;
 
                 for ( final String version : versionCandidates )
@@ -127,11 +132,33 @@ public class VersionCalculator
 
                     if ( candidateSuffixMatcher.find() )
                     {
+                        final String wholeSuffix = candidateSuffixMatcher.group();
+                        logger.debug( "Group 0 of serial-suffix matcher is: '" + wholeSuffix + "'" );
+                        final int baseIdx = version.indexOf( wholeSuffix );
+
+                        // Need room for at least a character in the base-version, plus a separator like '-'
+                        if ( baseIdx < 2 )
+                        {
+                            logger.debug( "Ignoring invalid version: '" + version
+                                + "' (seems to be naked version suffix with no base)." );
+                            continue;
+                        }
+
+                        final String base = version.substring( 0, baseIdx - 1 );
+                        if ( !result.equals( base ) )
+                        {
+                            logger.debug( "Ignoring irrelevant version: '" + version + "' ('" + base
+                                + "' doesn't match on base-version: '" + result + "')." );
+                            continue;
+                        }
+
                         // grab the old serial number.
                         final String serialStr = candidateSuffixMatcher.group( 3 );
+                        logger.debug( "Group 3 of serial-suffix matcher is: '" + serialStr + "'" );
                         final int serial = serialStr == null ? 0 : Integer.parseInt( serialStr );
                         if ( serial > maxSerial )
                         {
+                            logger.debug( "new max serial number: " + serial + " (previous was: " + maxSerial + ")" );
                             maxSerial = serial;
 
                             // don't assume we're using '-' as suffix-base-to-serial-number separator...
