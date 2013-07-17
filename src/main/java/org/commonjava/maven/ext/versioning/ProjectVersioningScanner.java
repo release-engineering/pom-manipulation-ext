@@ -7,11 +7,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.maven.DefaultMaven;
-import org.apache.maven.execution.MavenExecutionRequest;
 import org.apache.maven.execution.MavenSession;
-import org.apache.maven.model.building.ModelSource;
-import org.apache.maven.model.building.UrlModelSource;
+import org.apache.maven.project.DefaultProjectBuildingRequest;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.project.ProjectBuilder;
 import org.apache.maven.project.ProjectBuildingException;
@@ -34,62 +31,55 @@ public class ProjectVersioningScanner
     @Requirement
     private Logger logger;
 
-    public Map<String, String> scanVersioningChanges( final MavenExecutionRequest request, final MavenSession session )
-        throws ProjectBuildingException
-    {
-        final List<MavenProject> projects = scan( request, session );
+    @Requirement
+    private VersionCalculator calculator;
 
-        final VersionCalculator calculator = new VersionCalculator( session.getUserProperties() );
-        if ( !calculator.isEnabled() )
+    public Map<String, String> scanVersioningChanges( final File rootPom, final MavenSession session,
+                                                      final ProjectBuildingRequest pbr, final boolean recurse )
+        throws ProjectBuildingException, VersionModifierException
+    {
+        final List<MavenProject> projects = scan( rootPom, session, pbr, recurse );
+
+        final VersioningSession vSession = VersioningSession.getInstance();
+        if ( !vSession.isEnabled() )
         {
             logger.info( "Versioning Extension: Nothing to do!" );
             return Collections.emptyMap();
         }
 
-        logger.info( "Versioning Extension: Applying version suffix: " + calculator.getSuffix() );
+        logger.info( "Versioning Extension: Calculating the necessary versioning changes." );
         final Map<String, String> versionsByGA = calculator.calculateVersioningChanges( projects );
 
         return versionsByGA;
     }
 
-    protected List<MavenProject> scan( final MavenExecutionRequest request, final MavenSession session )
+    protected List<MavenProject> scan( final File rootPom, final MavenSession session,
+                                       final ProjectBuildingRequest pbr, final boolean recurse )
         throws ProjectBuildingException
     {
-        request.getProjectBuildingRequest()
-               .setRepositorySession( session.getRepositorySession() );
+        final DefaultProjectBuildingRequest wrapper = new DefaultProjectBuildingRequest( pbr );
+        wrapper.setRepositorySession( session.getRepositorySession() );
 
         final List<MavenProject> projects = new ArrayList<MavenProject>();
 
         // We have no POM file.
-        //
-        if ( request.getPom() == null )
+        if ( rootPom == null )
         {
-            final ModelSource modelSource =
-                new UrlModelSource( DefaultMaven.class.getResource( "project/standalone.xml" ) );
-            final MavenProject project = projectBuilder.build( modelSource, request.getProjectBuildingRequest() )
-                                                       .getProject();
-
-            project.setExecutionRoot( true );
-            projects.add( project );
-            request.setProjectPresent( false );
+            return Collections.emptyList();
         }
         else
         {
-            final List<File> files = Arrays.asList( request.getPom()
-                                                           .getAbsoluteFile() );
-            collectProjects( projects, files, request );
+            final List<File> files = Arrays.asList( rootPom );
+            collectProjects( projects, files, wrapper, recurse );
         }
         return projects;
     }
 
     protected void collectProjects( final List<MavenProject> projects, final List<File> files,
-                                    final MavenExecutionRequest request )
+                                    final ProjectBuildingRequest projectBuildingRequest, final boolean recurse )
         throws ProjectBuildingException
     {
-        final ProjectBuildingRequest projectBuildingRequest = request.getProjectBuildingRequest();
-
-        final List<ProjectBuildingResult> results =
-            projectBuilder.build( files, request.isRecursive(), projectBuildingRequest );
+        final List<ProjectBuildingResult> results = projectBuilder.build( files, recurse, projectBuildingRequest );
 
         for ( final ProjectBuildingResult result : results )
         {

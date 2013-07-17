@@ -40,13 +40,13 @@ public class VersioningEventSpy
             //
             if ( event instanceof MavenExecutionRequest )
             {
-                final VersioningSession session = getSession();
+                final VersioningSession session = VersioningSession.getInstance();
                 session.setRequest( (MavenExecutionRequest) event );
             }
 
             if ( event instanceof ExecutionEvent )
             {
-                final VersioningSession session = getSession();
+                final VersioningSession session = VersioningSession.getInstance();
                 if ( !session.isEnabled() )
                 {
                     return;
@@ -54,14 +54,23 @@ public class VersioningEventSpy
 
                 final ExecutionEvent ee = (ExecutionEvent) event;
 
+                if ( ee.getSession() != null )
+                {
+                    session.setRepositorySystemSession( ee.getSession()
+                                                          .getRepositorySession() );
+                }
+
                 final ExecutionEvent.Type type = ee.getType();
                 switch ( type )
                 {
                     case ProjectDiscoveryStarted:
                     {
                         logger.info( "Pre-scanning projects to calculate versioning changes..." );
-                        session.setVersioningChanges( scanner.scanVersioningChanges( session.getRequest(),
-                                                                                     ee.getSession() ) );
+                        final MavenExecutionRequest req = session.getRequest();
+
+                        session.setVersioningChanges( scanner.scanVersioningChanges( req.getPom(), ee.getSession(),
+                                                                                     req.getProjectBuildingRequest(),
+                                                                                     req.isRecursive() ) );
                         break;
                     }
                     case SessionStarted:
@@ -100,11 +109,6 @@ public class VersioningEventSpy
         }
 
         super.onEvent( event );
-    }
-
-    private VersioningSession getSession()
-    {
-        return VersioningSession.getInstance();
     }
 
 }

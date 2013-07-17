@@ -44,6 +44,9 @@ public class VersioningModifier
     @Requirement
     private ModelWriter writer;
 
+    @Requirement
+    private VersionCalculator calculator;
+
     public VersioningModifier()
     {
     }
@@ -54,16 +57,16 @@ public class VersioningModifier
     }
 
     public Set<MavenProject> apply( final Collection<MavenProject> projects, final Properties userProperties )
-        throws InterpolationException
+        throws InterpolationException, VersionModifierException
     {
-        final VersionCalculator calculator = new VersionCalculator( userProperties );
-        if ( !calculator.isEnabled() )
+        final VersioningSession session = VersioningSession.getInstance();
+        if ( !session.isEnabled() )
         {
             logger.info( "Versioning Extension: Nothing to do!" );
             return Collections.emptySet();
         }
 
-        logger.info( "Versioning Extension: Applying version suffix: " + calculator.getSuffix() );
+        logger.info( "Versioning Extension: Applying version suffix." );
         final Map<String, String> versionsByGA = calculator.calculateVersioningChanges( projects );
         if ( versionsByGA.isEmpty() )
         {

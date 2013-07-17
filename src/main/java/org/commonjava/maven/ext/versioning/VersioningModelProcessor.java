@@ -56,7 +56,7 @@ public class VersioningModelProcessor
     private void applyVersioning( final Model model )
         throws IOException
     {
-        final VersioningSession session = getSession();
+        final VersioningSession session = VersioningSession.getInstance();
         if ( !session.isEnabled() )
         {
             return;
@@ -96,11 +96,6 @@ public class VersioningModelProcessor
         applyVersioning( model );
 
         return model;
-    }
-
-    private VersioningSession getSession()
-    {
-        return VersioningSession.getInstance();
     }
 
 }

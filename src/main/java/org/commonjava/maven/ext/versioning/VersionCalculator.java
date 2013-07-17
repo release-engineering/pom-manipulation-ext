@@ -2,49 +2,67 @@ package org.commonjava.maven.ext.versioning;
 
 import static org.commonjava.maven.ext.versioning.IdUtils.ga;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
-import java.util.Properties;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.maven.artifact.repository.metadata.Versioning;
+import org.apache.maven.artifact.repository.metadata.io.xpp3.MetadataXpp3Reader;
 import org.apache.maven.project.MavenProject;
+import org.codehaus.plexus.component.annotations.Component;
+import org.codehaus.plexus.component.annotations.Requirement;
+import org.codehaus.plexus.logging.Logger;
+import org.codehaus.plexus.util.IOUtil;
+import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
+import org.sonatype.aether.RepositorySystem;
+import org.sonatype.aether.metadata.Metadata;
+import org.sonatype.aether.metadata.Metadata.Nature;
+import org.sonatype.aether.resolution.MetadataRequest;
+import org.sonatype.aether.resolution.MetadataResult;
+import org.sonatype.aether.util.metadata.DefaultMetadata;
 
+@Component( role = VersionCalculator.class )
 public class VersionCalculator
 {
 
     private static final String SERIAL_SUFFIX_PATTERN = "(.+)([-.])(\\d+)?";
 
-    public static final String VERSION_SUFFIX_SYSPROP = "version.suffix";
-
-    public static final String INCREMENT_SERIAL_SYSPROP = "version.serial.increment";
-
     private static final String SNAPSHOT_SUFFIX = "-SNAPSHOT";
 
-    private final String suffix;
+    @Requirement
+    private RepositorySystem repositorySystem;
 
-    private boolean incrementSerial = false;
+    @Requirement
+    private Logger logger;
 
-    public VersionCalculator( final Properties properties )
+    public VersionCalculator()
     {
-        suffix = properties.getProperty( VERSION_SUFFIX_SYSPROP );
-        incrementSerial = Boolean.parseBoolean( properties.getProperty( INCREMENT_SERIAL_SYSPROP, "false" ) );
     }
 
-    public boolean isEnabled()
+    public VersionCalculator( final RepositorySystem repositorySystem, final Logger logger )
     {
-        return suffix != null;
+        this.repositorySystem = repositorySystem;
+        this.logger = logger;
     }
 
     public Map<String, String> calculateVersioningChanges( final Collection<MavenProject> projects )
+        throws VersionModifierException
     {
         final Map<String, String> versionsByGA = new HashMap<String, String>();
 
         for ( final MavenProject project : projects )
         {
             final String originalVersion = project.getVersion();
-            final String modifiedVersion = calculate( originalVersion );
+            final String modifiedVersion = calculate( project.getGroupId(), project.getArtifactId(), originalVersion );
 
             if ( !modifiedVersion.equals( originalVersion ) )
             {
@@ -55,7 +73,8 @@ public class VersionCalculator
         return versionsByGA;
     }
 
-    public String calculate( final String originalVersion )
+    public String calculate( final String groupId, final String artifactId, final String originalVersion )
+        throws VersionModifierException
     {
         String result = originalVersion;
 
@@ -68,44 +87,60 @@ public class VersionCalculator
             result = result.substring( 0, result.length() - SNAPSHOT_SUFFIX.length() );
         }
 
-        final Matcher suffixMatcher = Pattern.compile( SERIAL_SUFFIX_PATTERN )
-                                             .matcher( suffix );
+        final VersioningSession session = VersioningSession.getInstance();
+        final String incrementalSerialSuffix = session.getIncrementalSerialSuffix();
+        final String suffix = session.getSuffix();
 
-        String useSuffix = suffix;
+        final String suff = incrementalSerialSuffix == null ? suffix : incrementalSerialSuffix;
+        final Pattern serialSuffixPattern = Pattern.compile( SERIAL_SUFFIX_PATTERN );
+        final Matcher suffixMatcher = serialSuffixPattern.matcher( suff );
+
+        String useSuffix = suff;
         if ( suffixMatcher.matches() )
         {
             // the "redhat" in "redhat-1"
             final String suffixBase = suffixMatcher.group( 1 );
             final int idx = result.indexOf( suffixBase );
 
-            String oldSuffix = null;
             if ( idx > -1 )
             {
-                // grab the old suffix for serial increment, if necessary
-                oldSuffix = result.substring( idx );
-
                 // trim the old suffix off.
                 result = result.substring( 0, idx );
             }
 
             // If we're using serial suffixes (-redhat-N) and the flag is set 
-            // to increment the existing suffix, read the old one, increment it, 
-            // and set the suffix to be used based on that.
-            if ( incrementSerial && oldSuffix != null )
+            // to increment the existing suffix, read available versions from the
+            // existing POM, plus the repository metadata, and find the highest
+            // serial number to increment...then increment it.
+            if ( incrementalSerialSuffix != null )
             {
-                final Matcher oldSuffixMatcher = Pattern.compile( SERIAL_SUFFIX_PATTERN )
-                                                        .matcher( oldSuffix );
+                final List<String> versionCandidates = new ArrayList<String>();
+                versionCandidates.add( originalVersion );
+                versionCandidates.addAll( getMetadataVersions( groupId, artifactId, session ) );
 
-                if ( oldSuffixMatcher.matches() )
+                String sep = "-";
+                int maxSerial = 0;
+
+                for ( final String version : versionCandidates )
                 {
-                    // don't assume we're using '-' as suffix-base-to-serial-number separator...
-                    final String oldSep = oldSuffixMatcher.group( 2 );
+                    final Matcher candidateSuffixMatcher = serialSuffixPattern.matcher( version );
 
-                    // grab the old serial number.
-                    final String oldSerialStr = oldSuffixMatcher.group( 3 );
-                    final int oldSerial = oldSerialStr == null ? 0 : Integer.parseInt( oldSerialStr );
-                    useSuffix = suffixBase + oldSep + ( oldSerial + 1 );
+                    if ( candidateSuffixMatcher.find() )
+                    {
+                        // grab the old serial number.
+                        final String serialStr = candidateSuffixMatcher.group( 3 );
+                        final int serial = serialStr == null ? 0 : Integer.parseInt( serialStr );
+                        if ( serial > maxSerial )
+                        {
+                            maxSerial = serial;
+
+                            // don't assume we're using '-' as suffix-base-to-serial-number separator...
+                            sep = candidateSuffixMatcher.group( 2 );
+                        }
+                    }
                 }
+
+                useSuffix = suffixBase + sep + ( maxSerial + 1 );
             }
 
             // Now, pare back the trimmed version base to remove non-alphanums 
@@ -157,9 +192,99 @@ public class VersionCalculator
         return result;
     }
 
-    public String getSuffix()
+    private Set<String> getMetadataVersions( final String groupId, final String artifactId,
+                                             final VersioningSession session )
+        throws VersionModifierException
     {
-        return suffix;
+        logger.debug( "Reading available versions from repository metadata." );
+
+        final List<MetadataRequest> reqs = new ArrayList<MetadataRequest>();
+        final MetadataRequest req = new MetadataRequest();
+        req.setRequestContext( "version-calculator" );
+        req.setDeleteLocalCopyIfMissing( true );
+
+        req.setMetadata( new DefaultMetadata( groupId, artifactId, "maven-metadata.xml", Nature.RELEASE_OR_SNAPSHOT ) );
+        reqs.add( req );
+
+        final List<MetadataResult> mdResults =
+            repositorySystem.resolveMetadata( session.getRepositorySystemSession(), reqs );
+
+        final Set<String> versions = new HashSet<String>();
+        if ( mdResults != null )
+        {
+            File mdFile = null;
+            final MetadataXpp3Reader mdReader = new MetadataXpp3Reader();
+            for ( final MetadataResult mdResult : mdResults )
+            {
+                Metadata metadata = mdResult.getMetadata();
+                if ( metadata == null )
+                {
+                    metadata = mdResult.getRequest()
+                                       .getMetadata();
+                }
+
+                if ( metadata == null )
+                {
+                    logger.error( "Cannot find metadata instance associated with MetadataResult: " + mdResult
+                        + ". Skipping..." );
+                    continue;
+                }
+
+                mdFile = metadata.getFile();
+                if ( mdFile == null )
+                {
+                    final Exception exception = mdResult.getException();
+                    if ( exception != null )
+                    {
+                        if ( logger.isDebugEnabled() )
+                        {
+                            logger.error( "Failed to resolve metadata: " + metadata + ". Error: "
+                                              + exception.getMessage(), exception );
+                        }
+                        else
+                        {
+                            logger.error( "Failed to resolve metadata: " + metadata + ". Error: "
+                                + exception.getMessage() );
+                        }
+                    }
+
+                    continue;
+                }
+
+                logger.debug( "Reading: " + mdFile );
+                FileInputStream stream = null;
+                try
+                {
+                    stream = new FileInputStream( mdFile );
+                    final org.apache.maven.artifact.repository.metadata.Metadata md = mdReader.read( stream );
+                    final Versioning versioning = md.getVersioning();
+
+                    if ( versioning != null )
+                    {
+                        logger.debug( "Got versions: " + versioning.getVersions() );
+                        versions.addAll( versioning.getVersions() );
+                    }
+                }
+                catch ( final IOException e )
+                {
+                    throw new VersionModifierException(
+                                                        "Cannot read metadata from: %s to determine last version-suffix serial number. Error: %s",
+                                                        e, mdFile, e.getMessage() );
+                }
+                catch ( final XmlPullParserException e )
+                {
+                    throw new VersionModifierException(
+                                                        "Cannot parse metadata from: %s to determine last version-suffix serial number. Error: %s",
+                                                        e, mdFile, e.getMessage() );
+                }
+                finally
+                {
+                    IOUtil.close( stream );
+                }
+            }
+        }
+
+        return versions;
     }
 
 }

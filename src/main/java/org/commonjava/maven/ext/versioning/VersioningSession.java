@@ -6,9 +6,14 @@ import java.util.Properties;
 import java.util.Set;
 
 import org.apache.maven.execution.MavenExecutionRequest;
+import org.sonatype.aether.RepositorySystemSession;
 
 public class VersioningSession
 {
+
+    public static final String VERSION_SUFFIX_SYSPROP = "version.suffix";
+
+    public static final String INCREMENT_SERIAL_SUFFIX_SYSPROP = "version.incremental.suffix";
 
     private static VersioningSession INSTANCE = new VersioningSession();
 
@@ -18,7 +23,14 @@ public class VersioningSession
 
     private final Set<String> changedGAVs = new HashSet<String>();
 
-    private boolean enabled;
+    // initially enabled, unless userProperties from the session turn it off...
+    private boolean enabled = true;
+
+    private String suffix;
+
+    private String incrementSerialSuffix;
+
+    private RepositorySystemSession repositorySession;
 
     // FIXME: Find SOME better way than a classical singleton to house this state!!!
     public static VersioningSession getInstance()
@@ -30,9 +42,21 @@ public class VersioningSession
     {
         this.request = request;
         final Properties userProps = request.getUserProperties();
-        this.enabled =
-            userProps.getProperty( VersionCalculator.INCREMENT_SERIAL_SYSPROP ) != null
-                || userProps.getProperty( VersionCalculator.VERSION_SUFFIX_SYSPROP ) != null;
+
+        suffix = userProps.getProperty( VERSION_SUFFIX_SYSPROP );
+        incrementSerialSuffix = userProps.getProperty( INCREMENT_SERIAL_SUFFIX_SYSPROP );
+
+        this.enabled = incrementSerialSuffix != null || suffix != null;
+    }
+
+    public String getIncrementalSerialSuffix()
+    {
+        return incrementSerialSuffix;
+    }
+
+    public String getSuffix()
+    {
+        return suffix;
     }
 
     public boolean isEnabled()
@@ -58,6 +82,16 @@ public class VersioningSession
     public Set<String> getChangedGAVs()
     {
         return changedGAVs;
+    }
+
+    public void setRepositorySystemSession( final RepositorySystemSession repositorySession )
+    {
+        this.repositorySession = repositorySession;
+    }
+
+    public RepositorySystemSession getRepositorySystemSession()
+    {
+        return repositorySession;
     }
 
 }
