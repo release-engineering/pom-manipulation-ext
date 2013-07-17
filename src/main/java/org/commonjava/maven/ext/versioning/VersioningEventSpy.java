@@ -1,5 +1,7 @@
 package org.commonjava.maven.ext.versioning;
 
+import static org.codehaus.plexus.util.StringUtils.join;
+
 import java.io.IOException;
 import java.util.List;
 
@@ -75,7 +77,11 @@ public class VersioningEventSpy
                     }
                     case SessionStarted:
                     {
-                        logger.info( "Rewriting projects with versioning changes..." );
+                        logger.info( "Rewriting projects with versioning changes:\n\n  "
+                            + join( session.getVersioningChanges()
+                                           .entrySet()
+                                           .iterator(), "\n  " ) + "\n\n" );
+
                         final List<MavenProject> projects = ee.getSession()
                                                               .getProjects();
 

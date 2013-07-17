@@ -24,7 +24,7 @@ public class VersioningSession
     private final Set<String> changedGAVs = new HashSet<String>();
 
     // initially enabled, unless userProperties from the session turn it off...
-    private boolean enabled = true;
+    private boolean enabled;
 
     private String suffix;
 
