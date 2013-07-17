@@ -1,5 +1,6 @@
 package org.commonjava.maven.ext.versioning;
 
+import java.io.File;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Properties;
@@ -32,6 +33,8 @@ public class VersioningSession
 
     private RepositorySystemSession repositorySession;
 
+    private File markerFile;
+
     // FIXME: Find SOME better way than a classical singleton to house this state!!!
     public static VersioningSession getInstance()
     {
@@ -41,12 +44,31 @@ public class VersioningSession
     public void setRequest( final MavenExecutionRequest request )
     {
         this.request = request;
+        final File pom = request.getPom();
+
+        if ( pom != null )
+        {
+            File dir = pom.getParentFile();
+            if ( dir == null )
+            {
+                dir = pom.getAbsoluteFile()
+                         .getParentFile();
+            }
+
+            markerFile = new File( dir, "target/versioning.log" );
+        }
+
         final Properties userProps = request.getUserProperties();
 
         suffix = userProps.getProperty( VERSION_SUFFIX_SYSPROP );
         incrementSerialSuffix = userProps.getProperty( INCREMENT_SERIAL_SUFFIX_SYSPROP );
 
-        this.enabled = incrementSerialSuffix != null || suffix != null;
+        this.enabled = pom != null && !markerFile.exists() && incrementSerialSuffix != null || suffix != null;
+    }
+
+    public File getMarkerFile()
+    {
+        return markerFile;
     }
 
     public String getIncrementalSerialSuffix()

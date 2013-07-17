@@ -4,7 +4,9 @@ import static org.commonjava.maven.ext.versioning.IdUtils.ga;
 import static org.commonjava.maven.ext.versioning.IdUtils.gav;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -31,6 +33,7 @@ import org.codehaus.plexus.interpolation.PropertiesBasedValueSource;
 import org.codehaus.plexus.interpolation.RecursionInterceptor;
 import org.codehaus.plexus.interpolation.StringSearchInterpolator;
 import org.codehaus.plexus.logging.Logger;
+import org.codehaus.plexus.util.IOUtil;
 
 @Component( role = VersioningModifier.class )
 public class VersioningModifier
@@ -212,22 +215,39 @@ public class VersioningModifier
     {
         final VersioningSession session = VersioningSession.getInstance();
         final Set<String> changed = session.getChangedGAVs();
-        for ( final MavenProject project : projects )
-        {
-            final String ga = ga( project );
-            if ( changed.contains( ga ) )
-            {
-                File pom = project.getFile();
-                if ( pom.getName()
-                        .equals( "interpolated-pom.xml" ) )
-                {
-                    final File dir = pom.getParentFile();
-                    pom = dir == null ? new File( "pom.xml" ) : new File( dir, "pom.xml" );
-                }
 
-                logger.info( "Rewriting: " + project.getId() + "\n       to POM: " + pom );
-                writer.write( pom, OPTIONS, project.getOriginalModel() );
+        final File marker = session.getMarkerFile();
+        PrintWriter pw = null;
+        try
+        {
+            marker.getParentFile()
+                  .mkdirs();
+
+            pw = new PrintWriter( new FileWriter( marker ) );
+
+            for ( final MavenProject project : projects )
+            {
+                final String ga = ga( project );
+                if ( changed.contains( ga ) )
+                {
+                    File pom = project.getFile();
+                    if ( pom.getName()
+                            .equals( "interpolated-pom.xml" ) )
+                    {
+                        final File dir = pom.getParentFile();
+                        pom = dir == null ? new File( "pom.xml" ) : new File( dir, "pom.xml" );
+                    }
+
+                    logger.info( "Rewriting: " + project.getId() + "\n       to POM: " + pom );
+                    writer.write( pom, OPTIONS, project.getOriginalModel() );
+
+                    pw.println( project.getId() );
+                }
             }
+        }
+        finally
+        {
+            IOUtil.close( pw );
         }
     }
 
