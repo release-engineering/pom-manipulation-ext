@@ -9,6 +9,10 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Properties;
 
+import org.apache.maven.artifact.repository.ArtifactRepository;
+import org.apache.maven.artifact.repository.ArtifactRepositoryPolicy;
+import org.apache.maven.artifact.repository.MavenArtifactRepository;
+import org.apache.maven.artifact.repository.layout.DefaultRepositoryLayout;
 import org.apache.maven.artifact.repository.metadata.Metadata;
 import org.apache.maven.artifact.repository.metadata.Versioning;
 import org.apache.maven.artifact.repository.metadata.io.xpp3.MetadataXpp3Writer;
@@ -323,7 +327,14 @@ public class VersioningCalculatorTest
 
     private VersioningSession setupSession( final Properties properties )
     {
-        final MavenExecutionRequest req = new DefaultMavenExecutionRequest().setUserProperties( properties );
+        final ArtifactRepository ar =
+            new MavenArtifactRepository( "test", "http://repo.maven.apache.org/maven2", new DefaultRepositoryLayout(),
+                                         new ArtifactRepositoryPolicy(), new ArtifactRepositoryPolicy() );
+
+        final MavenExecutionRequest req =
+            new DefaultMavenExecutionRequest().setUserProperties( properties )
+                                              .setRemoteRepositories( Arrays.asList( ar ) );
+
         final VersioningSession session = VersioningSession.getInstance();
 
         session.setRequest( req );
