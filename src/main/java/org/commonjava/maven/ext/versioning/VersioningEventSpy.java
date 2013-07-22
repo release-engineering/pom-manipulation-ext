@@ -105,6 +105,10 @@ public class VersioningEventSpy
                 }
             }
         }
+        catch ( final VersionModifierException e )
+        {
+            throw new Error( "Versioning modification failed during project pre-scanning phase: " + e.getMessage(), e );
+        }
         catch ( final ProjectBuildingException e )
         {
             throw new Error( "Versioning modification failed during project pre-scanning phase: " + e.getMessage(), e );

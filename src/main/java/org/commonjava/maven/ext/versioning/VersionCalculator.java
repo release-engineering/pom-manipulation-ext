@@ -15,6 +15,8 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.maven.RepositoryUtils;
+import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.artifact.repository.metadata.Versioning;
 import org.apache.maven.artifact.repository.metadata.io.xpp3.MetadataXpp3Reader;
 import org.apache.maven.project.MavenProject;
@@ -26,6 +28,7 @@ import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 import org.sonatype.aether.RepositorySystem;
 import org.sonatype.aether.metadata.Metadata;
 import org.sonatype.aether.metadata.Metadata.Nature;
+import org.sonatype.aether.repository.RemoteRepository;
 import org.sonatype.aether.resolution.MetadataRequest;
 import org.sonatype.aether.resolution.MetadataResult;
 import org.sonatype.aether.util.metadata.DefaultMetadata;
@@ -91,7 +94,12 @@ public class VersionCalculator
         final String incrementalSerialSuffix = session.getIncrementalSerialSuffix();
         final String suffix = session.getSuffix();
 
+        logger.debug( "Got the following version suffixes:\n  Static: " + suffix + "\nIncremental: "
+            + incrementalSerialSuffix );
+
         final String suff = suffix != null ? suffix : incrementalSerialSuffix;
+
+        logger.debug( "Using suffix: " + suff );
         final Pattern serialSuffixPattern = Pattern.compile( SERIAL_SUFFIX_PATTERN );
         final Matcher suffixMatcher = serialSuffixPattern.matcher( suff );
 
@@ -112,14 +120,17 @@ public class VersionCalculator
             {
                 // trim the old suffix off.
                 result = result.substring( 0, idx - 1 );
+                logger.debug( "Trimmed version (without pre-existing suffix): " + result );
             }
 
             // If we're using serial suffixes (-redhat-N) and the flag is set 
             // to increment the existing suffix, read available versions from the
             // existing POM, plus the repository metadata, and find the highest
             // serial number to increment...then increment it.
-            if ( incrementalSerialSuffix != null )
+            if ( suff.equals( incrementalSerialSuffix ) )
             {
+                logger.debug( "Resolving suffixes already found in metadata to determine increment base." );
+
                 final List<String> versionCandidates = new ArrayList<String>();
                 versionCandidates.add( originalVersion );
                 versionCandidates.addAll( getMetadataVersions( groupId, artifactId, session ) );
@@ -223,20 +234,38 @@ public class VersionCalculator
                                              final VersioningSession session )
         throws VersionModifierException
     {
-        logger.debug( "Reading available versions from repository metadata." );
+        logger.debug( "Reading available versions from repository metadata for: " + groupId + ":" + artifactId );
 
-        final List<MetadataRequest> reqs = new ArrayList<MetadataRequest>();
-        final MetadataRequest req = new MetadataRequest();
-        req.setRequestContext( "version-calculator" );
+        final Set<String> versions = new HashSet<String>();
+        final List<ArtifactRepository> remoteRepositories = session.getRequest()
+                                                                   .getRemoteRepositories();
+        for ( final ArtifactRepository repo : remoteRepositories )
+        {
+            final RemoteRepository remote = RepositoryUtils.toRepo( repo );
+
+            logger.debug( "Checking: " + remote.getUrl() );
+            resolveMetadata( groupId, artifactId, remote, versions, session );
+        }
+
+        return versions;
+    }
+
+    private void resolveMetadata( final String groupId, final String artifactId, final RemoteRepository remote,
+                                  final Set<String> versions, final VersioningSession session )
+        throws VersionModifierException
+    {
+        final MetadataRequest req =
+            new MetadataRequest( new DefaultMetadata( groupId, artifactId, "maven-metadata.xml",
+                                                      Nature.RELEASE_OR_SNAPSHOT ), remote, "version-calculator" );
+
         req.setDeleteLocalCopyIfMissing( true );
 
-        req.setMetadata( new DefaultMetadata( groupId, artifactId, "maven-metadata.xml", Nature.RELEASE_OR_SNAPSHOT ) );
+        final List<MetadataRequest> reqs = new ArrayList<MetadataRequest>();
         reqs.add( req );
 
         final List<MetadataResult> mdResults =
             repositorySystem.resolveMetadata( session.getRepositorySystemSession(), reqs );
 
-        final Set<String> versions = new HashSet<String>();
         if ( mdResults != null )
         {
             File mdFile = null;
@@ -310,8 +339,6 @@ public class VersionCalculator
                 }
             }
         }
-
-        return versions;
     }
 
 }
