@@ -141,6 +141,23 @@ public class VersioningCalculatorTest
     }
 
     @Test
+    public void applySerialSuffix_SimpleSuffixProperty()
+        throws Exception
+    {
+        final Properties props = new Properties();
+
+        final String s = "foo";
+        props.setProperty( VersioningSession.INCREMENT_SERIAL_SUFFIX_SYSPROP, s );
+        setupSession( props );
+
+        final String originalVersion = "1.0.0.Final";
+        final String calcdVersion = "1.0.0.Final-foo-1";
+
+        final String result = calculate( originalVersion );
+        assertThat( result, equalTo( calcdVersion ) );
+    }
+
+    @Test
     public void applySerialSuffix_NonNumericNonSuffixInVersionTail()
         throws Exception
     {
@@ -214,6 +231,7 @@ public class VersioningCalculatorTest
 
         final String s = "foo-2";
         props.setProperty( VersioningSession.VERSION_SUFFIX_SYSPROP, s );
+        props.setProperty( VersioningSession.VERSION_SUFFIX_SNAPSHOT_SYSPROP, "true" );
         setupSession( props );
 
         final String v = "1.2.GA";
@@ -231,6 +249,7 @@ public class VersioningCalculatorTest
 
         final String s = "foo-2";
         props.setProperty( VersioningSession.VERSION_SUFFIX_SYSPROP, s );
+        props.setProperty( VersioningSession.VERSION_SUFFIX_SNAPSHOT_SYSPROP, "true" );
         setupSession( props );
 
         final String v = "1.2.GA";
@@ -239,6 +258,23 @@ public class VersioningCalculatorTest
 
         final String result = calculate( v + os + sn );
         assertThat( result, equalTo( v + "-" + s + sn ) );
+    }
+
+    @Test
+    public void applySuffixReplaceSNAPSHOT()
+        throws Exception
+    {
+        final Properties props = new Properties();
+
+        final String s = "foo";
+        props.setProperty( VersioningSession.INCREMENT_SERIAL_SUFFIX_SYSPROP, s );
+        setupSession( props );
+
+        final String originalVersion = "1.0.0.Final-foo-SNAPSHOT";
+        final String calcdVersion = "1.0.0.Final-foo-1";
+
+        final String result = calculate( originalVersion );
+        assertThat( result, equalTo( calcdVersion ) );
     }
 
     @Test

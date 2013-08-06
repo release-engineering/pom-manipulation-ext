@@ -16,6 +16,8 @@ public class VersioningSession
 
     public static final String INCREMENT_SERIAL_SUFFIX_SYSPROP = "version.incremental.suffix";
 
+    public static final String VERSION_SUFFIX_SNAPSHOT_SYSPROP = "version.suffix.snapshot";
+
     private static VersioningSession INSTANCE = new VersioningSession();
 
     private MavenExecutionRequest request;
@@ -30,6 +32,8 @@ public class VersioningSession
     private String suffix;
 
     private String incrementSerialSuffix;
+
+    private boolean preserveSnapshot;
 
     private RepositorySystemSession repositorySession;
 
@@ -62,6 +66,7 @@ public class VersioningSession
 
         suffix = userProps.getProperty( VERSION_SUFFIX_SYSPROP );
         incrementSerialSuffix = userProps.getProperty( INCREMENT_SERIAL_SUFFIX_SYSPROP );
+        preserveSnapshot = Boolean.parseBoolean( userProps.getProperty( VERSION_SUFFIX_SNAPSHOT_SYSPROP ) );
 
         this.enabled = pom != null && !markerFile.exists() && incrementSerialSuffix != null || suffix != null;
     }
@@ -79,6 +84,11 @@ public class VersioningSession
     public String getSuffix()
     {
         return suffix;
+    }
+
+    public boolean preserveSnapshot()
+    {
+        return preserveSnapshot;
     }
 
     public boolean isEnabled()
