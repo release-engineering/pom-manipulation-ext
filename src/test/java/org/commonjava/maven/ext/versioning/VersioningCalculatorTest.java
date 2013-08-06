@@ -141,6 +141,23 @@ public class VersioningCalculatorTest
     }
 
     @Test
+    public void applySerialSuffix_SimpleSuffixProperty()
+        throws Exception
+    {
+        final Properties props = new Properties();
+
+        final String s = "foo";
+        props.setProperty( VersioningSession.INCREMENT_SERIAL_SUFFIX_SYSPROP, s );
+        setupSession( props );
+
+        final String originalVersion = "1.0.0.Final";
+        final String calcdVersion = "1.0.0.Final-foo-1";
+
+        final String result = calculate( originalVersion );
+        assertThat( result, equalTo( calcdVersion ) );
+    }
+
+    @Test
     public void applySerialSuffix_NonNumericNonSuffixInVersionTail()
         throws Exception
     {

@@ -37,7 +37,7 @@ import org.sonatype.aether.util.metadata.DefaultMetadata;
 public class VersionCalculator
 {
 
-    private static final String SERIAL_SUFFIX_PATTERN = "([^-.]+)([-.])(\\d+)?$";
+    private static final String SERIAL_SUFFIX_PATTERN = "([^-.]+)(?:([-.])(\\d+))?$";
 
     private static final String SNAPSHOT_SUFFIX = "-SNAPSHOT";
 
