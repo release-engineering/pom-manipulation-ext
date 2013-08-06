@@ -222,7 +222,7 @@ public class VersionCalculator
         result += sep + useSuffix;
 
         // tack -SNAPSHOT back on if necessary...
-        if ( snapshot )
+        if ( session.preserveSnapshot() && snapshot )
         {
             result += SNAPSHOT_SUFFIX;
         }
