@@ -8,7 +8,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Reader;
-import java.io.StringWriter;
 import java.io.Writer;
 import java.util.Arrays;
 import java.util.Collection;
@@ -47,13 +46,8 @@ import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 public class VersioningModifier
 {
 
-    private static final Map<String, Object> OPTIONS = null;
-
     @Requirement
     private Logger logger;
-
-    @Requirement
-    private ModelWriter writer;
 
     @Requirement
     private VersionCalculator calculator;
@@ -258,11 +252,6 @@ public class VersioningModifier
                     {
                         pomReader = ReaderFactory.newXmlReader( pom );
                         model = new MavenXpp3Reader().read( pomReader );
-
-                        final StringWriter sWriter = new StringWriter();
-                        writer.write( sWriter, model );
-
-                        logger.info( "Read POM:\n\n\n" + sWriter.toString() + "\n\n\n" );
                     }
                     finally
                     {
@@ -275,18 +264,12 @@ public class VersioningModifier
                     try
                     {
                         pomWriter = WriterFactory.newXmlWriter( pom );
-                        final StringWriter sWriter = new StringWriter();
-                        writer.write( sWriter, model );
-
-                        logger.info( "Writing POM:\n\n\n" + sWriter.toString() + "\n\n\n" );
                         writer.write( pomWriter, model );
                     }
                     finally
                     {
                         IOUtil.close( pomWriter );
                     }
-                    //
-                    //                    writer.write( pom, OPTIONS, project.getOriginalModel() );
 
                     pw.println( project.getId() );
                 }
