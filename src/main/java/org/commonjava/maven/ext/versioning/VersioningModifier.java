@@ -7,6 +7,9 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.Reader;
+import java.io.StringWriter;
+import java.io.Writer;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -23,6 +26,8 @@ import org.apache.maven.model.ModelBase;
 import org.apache.maven.model.Parent;
 import org.apache.maven.model.Profile;
 import org.apache.maven.model.io.ModelWriter;
+import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
+import org.apache.maven.model.io.xpp3.MavenXpp3Writer;
 import org.apache.maven.project.MavenProject;
 import org.codehaus.plexus.component.annotations.Component;
 import org.codehaus.plexus.component.annotations.Requirement;
@@ -34,6 +39,9 @@ import org.codehaus.plexus.interpolation.RecursionInterceptor;
 import org.codehaus.plexus.interpolation.StringSearchInterpolator;
 import org.codehaus.plexus.logging.Logger;
 import org.codehaus.plexus.util.IOUtil;
+import org.codehaus.plexus.util.ReaderFactory;
+import org.codehaus.plexus.util.WriterFactory;
+import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 
 @Component( role = VersioningModifier.class )
 public class VersioningModifier
@@ -211,10 +219,12 @@ public class VersioningModifier
     }
 
     public void rewriteChangedPOMs( final List<MavenProject> projects )
-        throws IOException
+        throws IOException, XmlPullParserException, InterpolationException
     {
         final VersioningSession session = VersioningSession.getInstance();
         final Set<String> changed = session.getChangedGAVs();
+
+        final Map<String, String> changes = session.getVersioningChanges();
 
         final File marker = session.getMarkerFile();
         PrintWriter pw = null;
@@ -239,7 +249,44 @@ public class VersioningModifier
                     }
 
                     logger.info( "Rewriting: " + project.getId() + "\n       to POM: " + pom );
-                    writer.write( pom, OPTIONS, project.getOriginalModel() );
+
+                    final MavenXpp3Writer writer = new MavenXpp3Writer();
+
+                    Reader pomReader = null;
+                    Model model;
+                    try
+                    {
+                        pomReader = ReaderFactory.newXmlReader( pom );
+                        model = new MavenXpp3Reader().read( pomReader );
+
+                        final StringWriter sWriter = new StringWriter();
+                        writer.write( sWriter, model );
+
+                        logger.info( "Read POM:\n\n\n" + sWriter.toString() + "\n\n\n" );
+                    }
+                    finally
+                    {
+                        IOUtil.close( pomReader );
+                    }
+
+                    applyVersioningChanges( model, changes );
+
+                    Writer pomWriter = null;
+                    try
+                    {
+                        pomWriter = WriterFactory.newXmlWriter( pom );
+                        final StringWriter sWriter = new StringWriter();
+                        writer.write( sWriter, model );
+
+                        logger.info( "Writing POM:\n\n\n" + sWriter.toString() + "\n\n\n" );
+                        writer.write( pomWriter, model );
+                    }
+                    finally
+                    {
+                        IOUtil.close( pomWriter );
+                    }
+                    //
+                    //                    writer.write( pom, OPTIONS, project.getOriginalModel() );
 
                     pw.println( project.getId() );
                 }

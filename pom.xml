@@ -272,6 +272,17 @@
           <testResource>
             <directory>src/it</directory>
             <filtering>true</filtering>
+            <excludes>
+              <exclude>expression-not-rewritten/pom.xml</exclude>
+            </excludes>
+            <targetPath>../it</targetPath>
+          </testResource>
+          <testResource>
+            <directory>src/it</directory>
+            <filtering>false</filtering>
+            <includes>
+              <include>expression-not-rewritten/pom.xml</include>
+            </includes>
             <targetPath>../it</targetPath>
           </testResource>
         </testResources>
