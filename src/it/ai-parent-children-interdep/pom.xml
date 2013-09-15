@@ -24,12 +24,12 @@
       <dependency>
         <groupId>org.commonjava.maven.ext.versioning.test</groupId>
         <artifactId>parent-children-interdep-child1</artifactId>
-        <version>1.0</version>
+        <version>1.0.redhat-1</version>
       </dependency>
       <dependency>
         <groupId>org.commonjava.maven.ext.versioning.test</groupId>
         <artifactId>parent-children-interdep-child2</artifactId>
-        <version>1.0</version>
+        <version>1.0.redhat-1</version>
       </dependency>
     </dependencies>
   </dependencyManagement>

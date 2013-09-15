@@ -24,12 +24,12 @@
       <dependency>
         <groupId>\${project.groupId}</groupId>
         <artifactId>parent-children-interdep-expr-child1</artifactId>
-        <version>1.0</version>
+        <version>\${project.version}</version>
       </dependency>
       <dependency>
         <groupId>\${project.groupId}</groupId>
         <artifactId>parent-children-interdep-expr-child2</artifactId>
-        <version>1.0</version>
+        <version>\${project.version}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
