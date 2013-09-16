@@ -1,6 +1,6 @@
 package org.commonjava.maven.ext.versioning;
 
-import static org.commonjava.maven.ext.versioning.IdUtils.ga;
+import static org.commonjava.maven.ext.versioning.IdUtils.gav;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
@@ -41,7 +41,7 @@ public class VersioningModifierTest
         final String mv = orig.getVersion() + "." + suff;
 
         final Map<String, String> versionsByGA = new HashMap<String, String>();
-        versionsByGA.put( ga( orig.getGroupId(), orig.getArtifactId() ), mv );
+        versionsByGA.put( gav( orig.getGroupId(), orig.getArtifactId(), orig.getVersion() ), mv );
 
         final MavenProject project = new MavenProject( eff );
         project.setOriginalModel( orig );
@@ -79,8 +79,8 @@ public class VersioningModifierTest
         final String mv = orig.getVersion() + "." + suff;
 
         final Map<String, String> versionsByGA = new HashMap<String, String>();
-        versionsByGA.put( ga( orig.getGroupId(), orig.getArtifactId() ), mv );
-        versionsByGA.put( ga( origParent.getGroupId(), origParent.getArtifactId() ), mv );
+        versionsByGA.put( gav( orig.getGroupId(), orig.getArtifactId(), orig.getVersion() ), mv );
+        versionsByGA.put( gav( origParent.getGroupId(), origParent.getArtifactId(), origParent.getVersion() ), mv );
 
         final List<MavenProject> projects = new ArrayList<MavenProject>();
 
@@ -161,9 +161,9 @@ public class VersioningModifierTest
         final String mv = orig.getVersion() + "." + suff;
 
         final Map<String, String> versionsByGA = new HashMap<String, String>();
-        versionsByGA.put( ga( orig.getGroupId(), orig.getArtifactId() ), mv );
-        versionsByGA.put( ga( depModel.getGroupId(), depModel.getArtifactId() ), mv );
-        versionsByGA.put( ga( dmModel.getGroupId(), dmModel.getArtifactId() ), mv );
+        versionsByGA.put( gav( orig.getGroupId(), orig.getArtifactId(), orig.getVersion() ), mv );
+        versionsByGA.put( gav( depModel.getGroupId(), depModel.getArtifactId(), depModel.getVersion() ), mv );
+        versionsByGA.put( gav( dmModel.getGroupId(), dmModel.getArtifactId(), dmModel.getVersion() ), mv );
 
         final List<MavenProject> projects = new ArrayList<MavenProject>();
 
@@ -272,8 +272,8 @@ public class VersioningModifierTest
         final String mv = orig.getVersion() + "." + suff;
 
         final Map<String, String> versionsByGA = new HashMap<String, String>();
-        versionsByGA.put( ga( orig.getGroupId(), orig.getArtifactId() ), mv );
-        versionsByGA.put( ga( depModel.getGroupId(), depModel.getArtifactId() ), mv );
+        versionsByGA.put( gav( orig.getGroupId(), orig.getArtifactId(), orig.getVersion() ), mv );
+        versionsByGA.put( gav( depModel.getGroupId(), depModel.getArtifactId(), depModel.getVersion() ), mv );
 
         final List<MavenProject> projects = new ArrayList<MavenProject>();
 
@@ -388,9 +388,9 @@ public class VersioningModifierTest
         final String mv = orig.getVersion() + "." + suff;
 
         final Map<String, String> versionsByGA = new HashMap<String, String>();
-        versionsByGA.put( ga( orig.getGroupId(), orig.getArtifactId() ), mv );
-        versionsByGA.put( ga( depModel.getGroupId(), depModel.getArtifactId() ), mv );
-        versionsByGA.put( ga( dmModel.getGroupId(), dmModel.getArtifactId() ), mv );
+        versionsByGA.put( gav( orig.getGroupId(), orig.getArtifactId(), orig.getVersion() ), mv );
+        versionsByGA.put( gav( depModel.getGroupId(), depModel.getArtifactId(), depModel.getVersion() ), mv );
+        versionsByGA.put( gav( dmModel.getGroupId(), dmModel.getArtifactId(), dmModel.getVersion() ), mv );
 
         final List<MavenProject> projects = new ArrayList<MavenProject>();
 
@@ -506,8 +506,8 @@ public class VersioningModifierTest
         final String mv = orig.getVersion() + "." + suff;
 
         final Map<String, String> versionsByGA = new HashMap<String, String>();
-        versionsByGA.put( ga( orig.getGroupId(), orig.getArtifactId() ), mv );
-        versionsByGA.put( ga( depModel.getGroupId(), depModel.getArtifactId() ), mv );
+        versionsByGA.put( gav( orig.getGroupId(), orig.getArtifactId(), orig.getVersion() ), mv );
+        versionsByGA.put( gav( depModel.getGroupId(), depModel.getArtifactId(), depModel.getVersion() ), mv );
 
         final List<MavenProject> projects = new ArrayList<MavenProject>();
 

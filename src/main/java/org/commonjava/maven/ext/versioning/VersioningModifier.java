@@ -72,29 +72,29 @@ public class VersioningModifier
         }
 
         logger.info( "Versioning Extension: Applying version suffix." );
-        final Map<String, String> versionsByGA = calculator.calculateVersioningChanges( projects );
-        if ( versionsByGA.isEmpty() )
+        final Map<String, String> versionsByGAV = calculator.calculateVersioningChanges( projects );
+        if ( versionsByGAV.isEmpty() )
         {
             return Collections.emptySet();
         }
 
-        return applyVersioningChanges( projects, versionsByGA );
+        return applyVersioningChanges( projects, versionsByGAV );
     }
 
     protected Set<MavenProject> applyVersioningChanges( final Collection<MavenProject> projects,
-                                                        final Map<String, String> versionsByGA )
+                                                        final Map<String, String> versionsByGAV )
         throws InterpolationException
     {
         final Set<MavenProject> changed = new HashSet<MavenProject>();
         for ( final MavenProject project : projects )
         {
-            if ( applyVersioningChanges( project.getOriginalModel(), versionsByGA ) )
+            if ( applyVersioningChanges( project.getOriginalModel(), versionsByGAV ) )
             {
-                final String v = versionsByGA.get( ga( project.getGroupId(), project.getArtifactId() ) );
+                final String v = versionsByGAV.get( gav( project ) );
                 logger.info( project.getName() + " (" + gav( project ) + "): VERSION MODIFIED\n    New version: " + v );
 
                 // this is a bigger model, so only do this if the originalModel was modded.
-                applyVersioningChanges( project.getModel(), versionsByGA );
+                applyVersioningChanges( project.getModel(), versionsByGAV );
                 changed.add( project );
 
                 if ( v != null )
@@ -108,44 +108,53 @@ public class VersioningModifier
         return changed;
     }
 
-    public boolean applyVersioningChanges( final Model model, final Map<String, String> versionsByGA )
+    public boolean applyVersioningChanges( final Model model, final Map<String, String> versionsByGAV )
         throws InterpolationException
     {
         boolean changed = false;
 
-        if ( versionsByGA == null || versionsByGA.isEmpty() )
+        if ( versionsByGAV == null || versionsByGAV.isEmpty() )
         {
-            return changed;
+            return false;
         }
 
-        //        logger.info( "Looking for applicable versioning changes in: " + gav( model ) );
+        // logger.info( "Looking for applicable versioning changes in: " + gav( model ) );
 
         String g = model.getGroupId();
-        final Parent originalParent = model.getParent();
-        if ( originalParent != null )
-        {
-            if ( g == null )
-            {
-                g = originalParent.getGroupId();
-            }
+        String v = model.getVersion();
+        final Parent parent = model.getParent();
 
-            final String parentGA = ga( originalParent.getGroupId(), originalParent.getArtifactId() );
-            final String v = versionsByGA.get( parentGA );
-            if ( versionsByGA.containsKey( parentGA ) )
+        // If the groupId or version is null, it means they must be taken from the parent config
+        if ( g == null && parent != null )
+        {
+            g = parent.getGroupId();
+        }
+        if ( v == null && parent != null )
+        {
+            v = parent.getVersion();
+        }
+
+        // If the parent version is defined, it might be necessary to change it
+        // If the parent version is not defined, it will be taken automatically from the project version
+        if ( parent != null && parent.getVersion() != null )
+        {
+            final String parentGAV = gav( parent.getGroupId(), parent.getArtifactId(), parent.getVersion() );
+            if ( versionsByGAV.containsKey( parentGAV ) )
             {
-                originalParent.setVersion( v );
+                final String newVersion = versionsByGAV.get( parentGAV );
+                parent.setVersion( newVersion );
                 changed = true;
             }
         }
 
-        String ga = ga( g, model.getArtifactId() );
+        String gav = gav( g, model.getArtifactId(), v );
         if ( model.getVersion() != null )
         {
-            final String v = versionsByGA.get( ga );
-            if ( v != null && model.getVersion() != null )
+            final String newVersion = versionsByGAV.get( gav );
+            if ( newVersion != null && model.getVersion() != null )
             {
-                model.setVersion( v );
-                //                logger.info( "Changed main version in " + gav( model ) );
+                model.setVersion( newVersion );
+                // logger.info( "Changed main version in " + gav( model ) );
                 changed = true;
             }
         }
@@ -177,12 +186,12 @@ public class VersioningModifier
             {
                 for ( final Dependency d : dm.getDependencies() )
                 {
-                    ga = ga( interp.interpolate( d.getGroupId(), ri ), interp.interpolate( d.getArtifactId(), ri ) );
-                    final String v = versionsByGA.get( ga );
-                    if ( v != null )
+                    gav = gav( interp.interpolate( d.getGroupId(), ri ), interp.interpolate( d.getArtifactId(), ri ), interp.interpolate( d.getVersion(), ri ) );
+                    final String newVersion = versionsByGAV.get( gav );
+                    if ( newVersion != null )
                     {
-                        d.setVersion( v );
-                        //                        logger.info( "Changed managed: " + d + " in " + base );
+                        d.setVersion( newVersion );
+                        // logger.info( "Changed managed: " + d + " in " + base );
                         changed = true;
                     }
                 }
@@ -192,12 +201,12 @@ public class VersioningModifier
             {
                 for ( final Dependency d : base.getDependencies() )
                 {
-                    ga = ga( interp.interpolate( d.getGroupId(), ri ), interp.interpolate( d.getArtifactId(), ri ) );
-                    final String v = versionsByGA.get( ga );
-                    if ( v != null && d.getVersion() != null )
+                    gav = gav( interp.interpolate( d.getGroupId(), ri ), interp.interpolate( d.getArtifactId(), ri ), interp.interpolate( d.getVersion(), ri ) );
+                    final String newVersion = versionsByGAV.get( gav );
+                    if ( newVersion != null && d.getVersion() != null )
                     {
-                        d.setVersion( v );
-                        //                        logger.info( "Changed: " + d + " in " + base );
+                        d.setVersion( newVersion );
+                        // logger.info( "Changed: " + d + " in " + base );
                         changed = true;
                     }
                 }
@@ -224,8 +233,7 @@ public class VersioningModifier
         PrintWriter pw = null;
         try
         {
-            marker.getParentFile()
-                  .mkdirs();
+            marker.getParentFile().mkdirs();
 
             pw = new PrintWriter( new FileWriter( marker ) );
 
@@ -235,8 +243,7 @@ public class VersioningModifier
                 if ( changed.contains( ga ) )
                 {
                     File pom = project.getFile();
-                    if ( pom.getName()
-                            .equals( "interpolated-pom.xml" ) )
+                    if ( pom.getName().equals( "interpolated-pom.xml" ) )
                     {
                         final File dir = pom.getParentFile();
                         pom = dir == null ? new File( "pom.xml" ) : new File( dir, "pom.xml" );

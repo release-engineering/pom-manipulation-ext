@@ -63,4 +63,9 @@ public final class IdUtils
     {
         return String.format( "%s:%s", g, a );
     }
+
+    public static String gav( final String g, final String a, final String v )
+    {
+        return String.format( "%s:%s:%s", g, a, v );
+    }
 }

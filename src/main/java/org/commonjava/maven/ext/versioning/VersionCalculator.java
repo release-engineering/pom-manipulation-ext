@@ -1,6 +1,7 @@
 package org.commonjava.maven.ext.versioning;
 
 import static org.commonjava.maven.ext.versioning.IdUtils.ga;
+import static org.commonjava.maven.ext.versioning.IdUtils.gav;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -69,7 +70,7 @@ public class VersionCalculator
 
             if ( !modifiedVersion.equals( originalVersion ) )
             {
-                versionsByGA.put( ga( project.getGroupId(), project.getArtifactId() ), modifiedVersion );
+                versionsByGA.put( gav( project ), modifiedVersion );
             }
         }
 
@@ -82,7 +83,7 @@ public class VersionCalculator
         String result = originalVersion;
 
         boolean snapshot = false;
-        // If we're building a snapshot, make sure the resulting version ends 
+        // If we're building a snapshot, make sure the resulting version ends
         // in "-SNAPSHOT"
         if ( result.endsWith( SNAPSHOT_SUFFIX ) )
         {
@@ -94,8 +95,8 @@ public class VersionCalculator
         final String incrementalSerialSuffix = session.getIncrementalSerialSuffix();
         final String suffix = session.getSuffix();
 
-        logger.debug( "Got the following version suffixes:\n  Static: " + suffix + "\nIncremental: "
-            + incrementalSerialSuffix );
+        logger.debug( "Got the following version suffixes:\n  Static: " + suffix + "\nIncremental: " +
+            incrementalSerialSuffix );
 
         final String suff = suffix != null ? suffix : incrementalSerialSuffix;
 
@@ -123,7 +124,7 @@ public class VersionCalculator
                 logger.debug( "Trimmed version (without pre-existing suffix): " + result );
             }
 
-            // If we're using serial suffixes (-redhat-N) and the flag is set 
+            // If we're using serial suffixes (-redhat-N) and the flag is set
             // to increment the existing suffix, read available versions from the
             // existing POM, plus the repository metadata, and find the highest
             // serial number to increment...then increment it.
@@ -150,16 +151,16 @@ public class VersionCalculator
                         // Need room for at least a character in the base-version, plus a separator like '-'
                         if ( baseIdx < 2 )
                         {
-                            logger.debug( "Ignoring invalid version: '" + version
-                                + "' (seems to be naked version suffix with no base)." );
+                            logger.debug( "Ignoring invalid version: '" + version +
+                                "' (seems to be naked version suffix with no base)." );
                             continue;
                         }
 
                         final String base = version.substring( 0, baseIdx - 1 );
                         if ( !result.equals( base ) )
                         {
-                            logger.debug( "Ignoring irrelevant version: '" + version + "' ('" + base
-                                + "' doesn't match on base-version: '" + result + "')." );
+                            logger.debug( "Ignoring irrelevant version: '" + version + "' ('" + base +
+                                "' doesn't match on base-version: '" + result + "')." );
                             continue;
                         }
 
@@ -181,7 +182,7 @@ public class VersionCalculator
                 useSuffix = suffixBase + sep + ( maxSerial + 1 );
             }
 
-            // Now, pare back the trimmed version base to remove non-alphanums 
+            // Now, pare back the trimmed version base to remove non-alphanums
             // like '.' and '-' so we have more control over them...
             int trim = 0;
 
@@ -197,20 +198,20 @@ public class VersionCalculator
                 result = result.substring( 0, result.length() - trim );
             }
         }
-        // If we're not using a serial suffix, and the version already ends 
-        // with the chosen suffix, there's nothing to do! 
+        // If we're not using a serial suffix, and the version already ends
+        // with the chosen suffix, there's nothing to do!
         else if ( originalVersion.endsWith( suffix ) )
         {
             return originalVersion;
         }
 
-        // assume the version is of the form 1.2.3.GA, where appending the 
-        // suffix requires a '-' to concatenate the string of the final version 
+        // assume the version is of the form 1.2.3.GA, where appending the
+        // suffix requires a '-' to concatenate the string of the final version
         // part in OSGi.
         String sep = "-";
 
         // now, check the above assumption...
-        // if the version is of the form: 1.2.3, then we need to append the 
+        // if the version is of the form: 1.2.3, then we need to append the
         // suffix as a final version part using '.'
         if ( Character.isDigit( result.charAt( result.length() - 1 ) ) )
         {
@@ -237,8 +238,7 @@ public class VersionCalculator
         logger.debug( "Reading available versions from repository metadata for: " + groupId + ":" + artifactId );
 
         final Set<String> versions = new HashSet<String>();
-        final List<ArtifactRepository> remoteRepositories = session.getRequest()
-                                                                   .getRemoteRepositories();
+        final List<ArtifactRepository> remoteRepositories = session.getRequest().getRemoteRepositories();
         for ( final ArtifactRepository repo : remoteRepositories )
         {
             final RemoteRepository remote = RepositoryUtils.toRepo( repo );
@@ -275,14 +275,13 @@ public class VersionCalculator
                 Metadata metadata = mdResult.getMetadata();
                 if ( metadata == null )
                 {
-                    metadata = mdResult.getRequest()
-                                       .getMetadata();
+                    metadata = mdResult.getRequest().getMetadata();
                 }
 
                 if ( metadata == null )
                 {
-                    logger.error( "Cannot find metadata instance associated with MetadataResult: " + mdResult
-                        + ". Skipping..." );
+                    logger.error( "Cannot find metadata instance associated with MetadataResult: " + mdResult +
+                        ". Skipping..." );
                     continue;
                 }
 
@@ -294,13 +293,13 @@ public class VersionCalculator
                     {
                         if ( logger.isDebugEnabled() )
                         {
-                            logger.error( "Failed to resolve metadata: " + metadata + ". Error: "
-                                              + exception.getMessage(), exception );
+                            logger.error( "Failed to resolve metadata: " + metadata + ". Error: " +
+                                              exception.getMessage(), exception );
                         }
                         else
                         {
-                            logger.error( "Failed to resolve metadata: " + metadata + ". Error: "
-                                + exception.getMessage() );
+                            logger.error( "Failed to resolve metadata: " + metadata + ". Error: " +
+                                exception.getMessage() );
                         }
                     }
 
