@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.commonjava.maven.ext</groupId>
   <artifactId>versioning-extension</artifactId>
-  <version>0.6-SNAPSHOT</version>
+  <version>0.5-2</version>
   <name>Versioning Extension for Maven</name>
   <url>http://github.com/jdcasey/versioning-extension</url>
   <description>
@@ -60,14 +60,6 @@
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
       <version>4.10</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.maven</groupId>
-      <artifactId>apache-maven</artifactId>
-      <version>${mavenVersion}</version>
-      <type>zip</type>
-      <classifier>bin</classifier>
       <scope>test</scope>
     </dependency>
   </dependencies>
@@ -266,6 +258,17 @@
       <properties>
         <localRepositoryUrl>${project.build.directory}/local-repo</localRepositoryUrl>
       </properties>
+      
+      <dependencies>
+        <dependency>
+          <groupId>org.apache.maven</groupId>
+          <artifactId>apache-maven</artifactId>
+          <version>${mavenVersion}</version>
+          <type>zip</type>
+          <classifier>bin</classifier>
+          <scope>test</scope>
+        </dependency>
+      </dependencies>
       
       <build>
         <testResources>
