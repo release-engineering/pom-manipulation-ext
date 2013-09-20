@@ -109,6 +109,22 @@ public class VersioningCalculatorTest
     }
 
     @Test
+    public void applySerialSuffix_SPnVersionTail()
+        throws Exception
+    {
+        final Properties props = new Properties();
+
+        final String s = "foo-1";
+        props.setProperty( VersioningSession.VERSION_SUFFIX_SYSPROP, s );
+        setupSession( props );
+
+        final String v = "1.2-SP4";
+
+        final String result = calculate( v );
+        assertThat( result, equalTo( v + "-" + s ) );
+    }
+
+    @Test
     public void applySerialSuffix_NumericVersionTail()
         throws Exception
     {
@@ -367,9 +383,8 @@ public class VersioningCalculatorTest
             new MavenArtifactRepository( "test", "http://repo.maven.apache.org/maven2", new DefaultRepositoryLayout(),
                                          new ArtifactRepositoryPolicy(), new ArtifactRepositoryPolicy() );
 
-        final MavenExecutionRequest req =
-            new DefaultMavenExecutionRequest().setUserProperties( properties )
-                                              .setRemoteRepositories( Arrays.asList( ar ) );
+        final MavenExecutionRequest req = new DefaultMavenExecutionRequest().setUserProperties( properties )
+                                                                            .setRemoteRepositories( Arrays.asList( ar ) );
 
         final VersioningSession session = VersioningSession.getInstance();
 

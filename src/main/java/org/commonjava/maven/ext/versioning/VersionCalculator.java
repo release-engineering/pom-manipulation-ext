@@ -1,6 +1,5 @@
 package org.commonjava.maven.ext.versioning;
 
-import static org.commonjava.maven.ext.versioning.IdUtils.ga;
 import static org.commonjava.maven.ext.versioning.IdUtils.gav;
 
 import java.io.File;
@@ -95,8 +94,7 @@ public class VersionCalculator
         final String incrementalSerialSuffix = session.getIncrementalSerialSuffix();
         final String suffix = session.getSuffix();
 
-        logger.debug( "Got the following version suffixes:\n  Static: " + suffix + "\nIncremental: " +
-            incrementalSerialSuffix );
+        logger.debug( "Got the following version suffixes:\n  Static: " + suffix + "\nIncremental: " + incrementalSerialSuffix );
 
         final String suff = suffix != null ? suffix : incrementalSerialSuffix;
 
@@ -151,16 +149,15 @@ public class VersionCalculator
                         // Need room for at least a character in the base-version, plus a separator like '-'
                         if ( baseIdx < 2 )
                         {
-                            logger.debug( "Ignoring invalid version: '" + version +
-                                "' (seems to be naked version suffix with no base)." );
+                            logger.debug( "Ignoring invalid version: '" + version + "' (seems to be naked version suffix with no base)." );
                             continue;
                         }
 
                         final String base = version.substring( 0, baseIdx - 1 );
                         if ( !result.equals( base ) )
                         {
-                            logger.debug( "Ignoring irrelevant version: '" + version + "' ('" + base +
-                                "' doesn't match on base-version: '" + result + "')." );
+                            logger.debug( "Ignoring irrelevant version: '" + version + "' ('" + base + "' doesn't match on base-version: '" + result
+                                + "')." );
                             continue;
                         }
 
@@ -213,7 +210,8 @@ public class VersionCalculator
         // now, check the above assumption...
         // if the version is of the form: 1.2.3, then we need to append the
         // suffix as a final version part using '.'
-        if ( Character.isDigit( result.charAt( result.length() - 1 ) ) )
+        logger.info( "Partial result: " + result );
+        if ( result.matches( ".+[-.]\\d+" ) )
         {
             sep = ".";
         }
@@ -231,14 +229,14 @@ public class VersionCalculator
         return result;
     }
 
-    private Set<String> getMetadataVersions( final String groupId, final String artifactId,
-                                             final VersioningSession session )
+    private Set<String> getMetadataVersions( final String groupId, final String artifactId, final VersioningSession session )
         throws VersionModifierException
     {
         logger.debug( "Reading available versions from repository metadata for: " + groupId + ":" + artifactId );
 
         final Set<String> versions = new HashSet<String>();
-        final List<ArtifactRepository> remoteRepositories = session.getRequest().getRemoteRepositories();
+        final List<ArtifactRepository> remoteRepositories = session.getRequest()
+                                                                   .getRemoteRepositories();
         for ( final ArtifactRepository repo : remoteRepositories )
         {
             final RemoteRepository remote = RepositoryUtils.toRepo( repo );
@@ -250,21 +248,20 @@ public class VersionCalculator
         return versions;
     }
 
-    private void resolveMetadata( final String groupId, final String artifactId, final RemoteRepository remote,
-                                  final Set<String> versions, final VersioningSession session )
+    private void resolveMetadata( final String groupId, final String artifactId, final RemoteRepository remote, final Set<String> versions,
+                                  final VersioningSession session )
         throws VersionModifierException
     {
         final MetadataRequest req =
-            new MetadataRequest( new DefaultMetadata( groupId, artifactId, "maven-metadata.xml",
-                                                      Nature.RELEASE_OR_SNAPSHOT ), remote, "version-calculator" );
+            new MetadataRequest( new DefaultMetadata( groupId, artifactId, "maven-metadata.xml", Nature.RELEASE_OR_SNAPSHOT ), remote,
+                                 "version-calculator" );
 
         req.setDeleteLocalCopyIfMissing( true );
 
         final List<MetadataRequest> reqs = new ArrayList<MetadataRequest>();
         reqs.add( req );
 
-        final List<MetadataResult> mdResults =
-            repositorySystem.resolveMetadata( session.getRepositorySystemSession(), reqs );
+        final List<MetadataResult> mdResults = repositorySystem.resolveMetadata( session.getRepositorySystemSession(), reqs );
 
         if ( mdResults != null )
         {
@@ -275,13 +272,13 @@ public class VersionCalculator
                 Metadata metadata = mdResult.getMetadata();
                 if ( metadata == null )
                 {
-                    metadata = mdResult.getRequest().getMetadata();
+                    metadata = mdResult.getRequest()
+                                       .getMetadata();
                 }
 
                 if ( metadata == null )
                 {
-                    logger.error( "Cannot find metadata instance associated with MetadataResult: " + mdResult +
-                        ". Skipping..." );
+                    logger.error( "Cannot find metadata instance associated with MetadataResult: " + mdResult + ". Skipping..." );
                     continue;
                 }
 
@@ -293,13 +290,11 @@ public class VersionCalculator
                     {
                         if ( logger.isDebugEnabled() )
                         {
-                            logger.error( "Failed to resolve metadata: " + metadata + ". Error: " +
-                                              exception.getMessage(), exception );
+                            logger.error( "Failed to resolve metadata: " + metadata + ". Error: " + exception.getMessage(), exception );
                         }
                         else
                         {
-                            logger.error( "Failed to resolve metadata: " + metadata + ". Error: " +
-                                exception.getMessage() );
+                            logger.error( "Failed to resolve metadata: " + metadata + ". Error: " + exception.getMessage() );
                         }
                     }
 
@@ -322,14 +317,12 @@ public class VersionCalculator
                 }
                 catch ( final IOException e )
                 {
-                    throw new VersionModifierException(
-                                                        "Cannot read metadata from: %s to determine last version-suffix serial number. Error: %s",
-                                                        e, mdFile, e.getMessage() );
+                    throw new VersionModifierException( "Cannot read metadata from: %s to determine last version-suffix serial number. Error: %s", e,
+                                                        mdFile, e.getMessage() );
                 }
                 catch ( final XmlPullParserException e )
                 {
-                    throw new VersionModifierException(
-                                                        "Cannot parse metadata from: %s to determine last version-suffix serial number. Error: %s",
+                    throw new VersionModifierException( "Cannot parse metadata from: %s to determine last version-suffix serial number. Error: %s",
                                                         e, mdFile, e.getMessage() );
                 }
                 finally
