@@ -37,9 +37,6 @@ public class VersioningEventSpy
     {
         try
         {
-            //            logger.info( "EVENT: " + event.getClass()
-            //                                          .getName() + " :: " + event );
-            //
             if ( event instanceof MavenExecutionRequest )
             {
                 final VersioningSession session = VersioningSession.getInstance();
