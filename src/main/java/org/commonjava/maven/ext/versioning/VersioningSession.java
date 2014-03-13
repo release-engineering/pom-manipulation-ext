@@ -45,6 +45,11 @@ public class VersioningSession
         return INSTANCE;
     }
 
+    public VersioningSession()
+    {
+        System.out.println("[INFO] Maven-Versioning-Extension " + getClass().getPackage().getImplementationVersion());
+    }
+
     public void setRequest( final MavenExecutionRequest request )
     {
         this.request = request;
