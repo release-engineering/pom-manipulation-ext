@@ -57,6 +57,16 @@
       <scope>provided</scope>
     </dependency>
     <dependency>
+        <groupId>org.jdom</groupId>
+        <artifactId>jdom</artifactId>
+        <version>1.1</version>
+    </dependency>
+    <dependency>
+        <groupId>org.commonjava.maven</groupId>
+        <artifactId>maven-model-jdom-support</artifactId>
+        <version>3.0.x-1.2</version>
+    </dependency>
+    <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
       <version>4.10</version>
@@ -262,6 +272,27 @@
       </plugins>
     </pluginManagement>
     <plugins>
+        <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-shade-plugin</artifactId>
+            <version>2.2</version>
+            <executions>
+                <execution>
+                    <phase>package</phase>
+                    <goals>
+                        <goal>shade</goal>
+                    </goals>
+                    <configuration>
+                        <artifactSet>
+                            <includes>
+                                <include>org.jdom:jdom</include>
+                                <include>org.commonjava.maven:maven-model-jdom-support</include>
+                            </includes>
+                        </artifactSet>
+                    </configuration>
+                </execution>
+            </executions>
+        </plugin>
       <plugin>
         <groupId>org.codehaus.plexus</groupId>
         <artifactId>plexus-component-metadata</artifactId>
@@ -271,11 +302,11 @@
   <profiles>
     <profile>
       <id>run-its</id>
-      
+
       <properties>
         <localRepositoryUrl>${project.build.directory}/local-repo</localRepositoryUrl>
       </properties>
-      
+
       <dependencies>
         <dependency>
           <groupId>org.apache.maven</groupId>
@@ -286,7 +317,7 @@
           <scope>test</scope>
         </dependency>
       </dependencies>
-      
+
       <build>
         <testResources>
           <testResource>

@@ -25,8 +25,8 @@ import org.apache.maven.model.ModelBase;
 import org.apache.maven.model.Parent;
 import org.apache.maven.model.Profile;
 import org.apache.maven.model.io.ModelWriter;
+import org.apache.maven.model.io.jdom.MavenJDOMWriter;
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
-import org.apache.maven.model.io.xpp3.MavenXpp3Writer;
 import org.apache.maven.project.MavenProject;
 import org.codehaus.plexus.component.annotations.Component;
 import org.codehaus.plexus.component.annotations.Requirement;
@@ -41,6 +41,11 @@ import org.codehaus.plexus.util.IOUtil;
 import org.codehaus.plexus.util.ReaderFactory;
 import org.codehaus.plexus.util.WriterFactory;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
+import org.jdom.Document;
+import org.jdom.JDOMException;
+import org.jdom.input.SAXBuilder;
+import org.jdom.output.Format;
+import org.jdom.output.Format.TextMode;
 
 @Component( role = VersioningModifier.class )
 public class VersioningModifier
@@ -118,7 +123,7 @@ public class VersioningModifier
             return false;
         }
 
-        // logger.info( "Looking for applicable versioning changes in: " + gav( model ) );
+        logger.info( "Looking for applicable versioning changes in: " + gav( model ) );
 
         String g = model.getGroupId();
         String v = model.getVersion();
@@ -154,7 +159,7 @@ public class VersioningModifier
             if ( newVersion != null && model.getVersion() != null )
             {
                 model.setVersion( newVersion );
-                // logger.info( "Changed main version in " + gav( model ) );
+                logger.info("Changed main version in " + gav(model));
                 changed = true;
             }
         }
@@ -191,7 +196,7 @@ public class VersioningModifier
                     if ( newVersion != null )
                     {
                         d.setVersion( newVersion );
-                        // logger.info( "Changed managed: " + d + " in " + base );
+                        logger.info( "Changed managed: " + d + " in " + base );
                         changed = true;
                     }
                 }
@@ -206,7 +211,7 @@ public class VersioningModifier
                     if ( newVersion != null && d.getVersion() != null )
                     {
                         d.setVersion( newVersion );
-                        // logger.info( "Changed: " + d + " in " + base );
+                        logger.info( "Changed: " + d + " in " + base );
                         changed = true;
                     }
                 }
@@ -222,7 +227,7 @@ public class VersioningModifier
     }
 
     public void rewriteChangedPOMs( final List<MavenProject> projects )
-        throws IOException, XmlPullParserException, InterpolationException
+        throws IOException, XmlPullParserException, InterpolationException, JDOMException
     {
         final VersioningSession session = VersioningSession.getInstance();
         final Set<String> changed = session.getChangedGAVs();
@@ -251,7 +256,8 @@ public class VersioningModifier
 
                     logger.info( "Rewriting: " + project.getId() + "\n       to POM: " + pom );
 
-                    final MavenXpp3Writer writer = new MavenXpp3Writer();
+                    final SAXBuilder builder = new SAXBuilder();
+                    Document doc = builder.build( pom );
 
                     Reader pomReader = null;
                     Model model;
@@ -265,13 +271,27 @@ public class VersioningModifier
                         IOUtil.close( pomReader );
                     }
 
+                    String encoding = model.getModelEncoding();
+                    if ( encoding == null )
+                    {
+                        encoding = "UTF-8";
+                    }
+
+                    final Format format = Format.getRawFormat()
+                                        .setEncoding( encoding )
+                                        .setTextMode( TextMode.PRESERVE )
+                                        .setLineSeparator( System.getProperty( "line.separator" ) )
+                                        .setOmitDeclaration( false )
+                                        .setOmitEncoding( false )
+                                        .setExpandEmptyElements( true );
+
                     applyVersioningChanges( model, changes );
 
                     Writer pomWriter = null;
                     try
                     {
-                        pomWriter = WriterFactory.newXmlWriter( pom );
-                        writer.write( pomWriter, model );
+                        pomWriter = WriterFactory.newWriter(pom, encoding);
+                        new MavenJDOMWriter().write( model, doc, pomWriter, format );
                     }
                     finally
                     {

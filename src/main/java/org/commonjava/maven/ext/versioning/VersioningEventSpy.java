@@ -15,6 +15,7 @@ import org.apache.maven.project.ProjectBuildingException;
 import org.codehaus.plexus.component.annotations.Component;
 import org.codehaus.plexus.component.annotations.Requirement;
 import org.codehaus.plexus.logging.Logger;
+import org.jdom.JDOMException;
 
 @Component( role = EventSpy.class, hint = "versioning" )
 public class VersioningEventSpy
@@ -111,6 +112,10 @@ public class VersioningEventSpy
             throw new Error( "Versioning modification failed during project pre-scanning phase: " + e.getMessage(), e );
         }
         catch ( final IOException e )
+        {
+            throw new Error( "Versioning modification failed during POM rewriting phase: " + e.getMessage(), e );
+        }
+        catch ( final JDOMException e )
         {
             throw new Error( "Versioning modification failed during POM rewriting phase: " + e.getMessage(), e );
         }
