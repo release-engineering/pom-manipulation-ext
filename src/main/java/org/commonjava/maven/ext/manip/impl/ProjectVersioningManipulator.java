@@ -118,46 +118,17 @@ public class ProjectVersioningManipulator
         }
 
         final Map<String, Model> manipulatedModels = session.getManipulatedModels();
-        final Set<String> changed = session.getChangedGAs();
 
         boolean changes = false;
         for ( final MavenProject project : projects )
         {
             final String ga = ga( project );
-            if ( changed.contains( ga ) )
-            {
-                logger.info( "Applying changes to: " + ga );
-                final Model model = manipulatedModels.get( ga );
-                changes = applyVersioningChanges( model, state, session ) || changes;
-            }
-            else
-            {
-                logger.info( "No changes for: " + ga );
-            }
+            logger.info( "Applying changes to: " + ga );
+            final Model model = manipulatedModels.get( ga );
+            changes = applyVersioningChanges( model, state, session ) || changes;
         }
 
         return changes;
-    }
-
-    /**
-     * Apply any project versioning changes accumulated in the {@link VersioningState} instance associated with the {@link ManipulationSession} to
-     * the given maven {@link Model} instance, just after it's read from disk.
-     * 
-     * TODO: If we write the changes to disk on session init, it's unclear why we also need to modify them as they're read from disk during the
-     * main build sequence.
-     */
-    @Override
-    public boolean applyChanges( final Model model, final ManipulationSession session )
-        throws ManipulationException
-    {
-        final VersioningState state = session.getState( VersioningState.class );
-
-        if ( !session.isEnabled() || state == null || !state.isEnabled() )
-        {
-            return false;
-        }
-
-        return applyVersioningChanges( model, state, session );
     }
 
     /**
@@ -177,6 +148,11 @@ public class ProjectVersioningManipulator
 
         final Map<String, String> versionsByGAV = state.getVersioningChanges();
         if ( versionsByGAV == null || versionsByGAV.isEmpty() )
+        {
+            return false;
+        }
+
+        if ( model == null )
         {
             return false;
         }

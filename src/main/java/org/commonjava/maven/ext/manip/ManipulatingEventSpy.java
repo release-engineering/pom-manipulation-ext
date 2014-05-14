@@ -69,16 +69,12 @@ public class ManipulatingEventSpy
                         final MavenExecutionRequest req = session.getRequest();
 
                         manipulationManager.scan( req.getPom(), session );
-                        break;
-                    }
-                    case SessionStarted:
-                    {
+
                         //                        logger.info( "Rewriting projects with manipulation changes:\n\n  " + join( session.getVersioningChanges()
                         //                                                                                                          .entrySet()
                         //                                                                                                          .iterator(), "\n  " ) + "\n\n" );
 
-                        final List<MavenProject> projects = ee.getSession()
-                                                              .getProjects();
+                        final List<MavenProject> projects = session.getProjectInstances();
 
                         for ( final MavenProject project : projects )
                         {
@@ -90,6 +86,10 @@ public class ManipulatingEventSpy
 
                         break;
                     }
+                    //                    case SessionStarted:
+                    //                    {
+                    //                        break;
+                    //                    }
                     //                    default:
                     //                    {
                     //                        logger.info( "ExecutionEvent TYPE: " + ee.getType() );

@@ -2,7 +2,6 @@ package org.commonjava.maven.ext.manip.impl;
 
 import java.util.List;
 
-import org.apache.maven.model.Model;
 import org.apache.maven.project.MavenProject;
 import org.commonjava.maven.ext.manip.ManipulationException;
 import org.commonjava.maven.ext.manip.state.ManipulationSession;
@@ -26,9 +25,6 @@ public interface Manipulator
         throws ManipulationException;
 
     void scan( final List<MavenProject> projects, ManipulationSession session )
-        throws ManipulationException;
-
-    boolean applyChanges( Model model, ManipulationSession session )
         throws ManipulationException;
 
     boolean applyChanges( List<MavenProject> projects, ManipulationSession session )

@@ -2,6 +2,7 @@ package org.commonjava.maven.ext.manip.state;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
@@ -9,6 +10,7 @@ import java.util.Set;
 import org.apache.maven.execution.MavenExecutionRequest;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.model.Model;
+import org.apache.maven.project.MavenProject;
 import org.apache.maven.project.ProjectBuildingRequest;
 import org.codehaus.plexus.component.annotations.Component;
 import org.codehaus.plexus.component.annotations.Requirement;
@@ -98,6 +100,8 @@ public class ManipulationSession
 
     private Map<String, Model> rawModels;
 
+    private List<MavenProject> projects;
+
     public Set<String> getChangedGAs()
     {
         return changedGAs;
@@ -122,6 +126,16 @@ public class ManipulationSession
     {
         return mavenSession == null ? new Properties() : mavenSession.getRequest()
                                                                      .getUserProperties();
+    }
+
+    public void setProjectInstances( final List<MavenProject> projects )
+    {
+        this.projects = projects;
+    }
+
+    public List<MavenProject> getProjectInstances()
+    {
+        return projects;
     }
 
 }

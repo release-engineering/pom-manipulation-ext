@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.maven.execution.MavenSession;
-import org.apache.maven.model.Model;
 import org.apache.maven.project.DefaultProjectBuildingRequest;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.project.ProjectBuilder;
@@ -19,7 +18,6 @@ import org.codehaus.plexus.component.annotations.Component;
 import org.codehaus.plexus.component.annotations.Requirement;
 import org.codehaus.plexus.logging.Logger;
 import org.commonjava.maven.ext.manip.impl.Manipulator;
-import org.commonjava.maven.ext.manip.in.ManipulatingModelProcessor;
 import org.commonjava.maven.ext.manip.out.PomModifier;
 import org.commonjava.maven.ext.manip.state.ManipulationSession;
 
@@ -50,6 +48,7 @@ public class ManipulationManager
         throws ManipulationException
     {
         final List<MavenProject> projects = buildProjects( pom, session );
+        session.setProjectInstances( projects );
 
         for ( final Map.Entry<String, Manipulator> entry : manipulators.entrySet() )
         {
@@ -97,25 +96,6 @@ public class ManipulationManager
         }
 
         return projects;
-    }
-
-    /**
-     * Callback for use with {@link ManipulatingModelProcessor} to apply scanned changes as the projects are read from disk. This is useful for 
-     * AFTER the manipulations are done, when the Maven bootstrap reads the projects from disk.
-     * 
-     * TODO: It's not clear why we need this if we're writing changes back to disk before the main Maven build re-reads them.
-     */
-    public boolean applyManipulations( final Model model, final ManipulationSession session )
-        throws ManipulationException
-    {
-        boolean changed = false;
-        for ( final Map.Entry<String, Manipulator> entry : manipulators.entrySet() )
-        {
-            changed = entry.getValue()
-                           .applyChanges( model, session ) || changed;
-        }
-
-        return changed;
     }
 
     /**

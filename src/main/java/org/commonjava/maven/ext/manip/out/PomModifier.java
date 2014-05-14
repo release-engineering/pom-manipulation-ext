@@ -50,47 +50,44 @@ public final class PomModifier
     public static void readModelsForManipulation( final List<MavenProject> projects, final ManipulationSession session )
         throws ManipulationException
     {
-        final Set<String> changed = session.getChangedGAs();
-
         final Map<String, Model> rawModels = new HashMap<String, Model>();
         for ( final MavenProject project : projects )
         {
             final String ga = ga( project );
-            if ( changed.contains( ga ) )
+            final File pom = project.getFile();
+
+            // this happens with integration tests!
+            //            if ( pom.getName()
+            //                    .equals( "interpolated-pom.xml" ) )
+            //            {
+            //                final File dir = pom.getParentFile();
+            //                pom = dir == null ? new File( "pom.xml" ) : new File( dir, "pom.xml" );
+            //            }
+
+            Logger.getLogger( PomModifier.class.getName() )
+                  .info( "Reading raw model for: " + project.getId() + "\n       to POM: " + pom );
+
+            Reader pomReader = null;
+            Model model;
+            try
             {
-                File pom = project.getFile();
-                if ( pom.getName()
-                        .equals( "interpolated-pom.xml" ) )
-                {
-                    final File dir = pom.getParentFile();
-                    pom = dir == null ? new File( "pom.xml" ) : new File( dir, "pom.xml" );
-                }
-
-                Logger.getLogger( PomModifier.class.getName() )
-                      .info( "Reading raw model for: " + project.getId() + "\n       to POM: " + pom );
-
-                Reader pomReader = null;
-                Model model;
-                try
-                {
-                    pomReader = ReaderFactory.newXmlReader( pom );
-                    model = new MavenXpp3Reader().read( pomReader );
-                }
-                catch ( final IOException e )
-                {
-                    throw new ManipulationException( "Failed to read POM: %s. Reason: %s", e, pom, e.getMessage() );
-                }
-                catch ( final XmlPullParserException e )
-                {
-                    throw new ManipulationException( "Failed to parse POM: %s. Reason: %s", e, pom, e.getMessage() );
-                }
-                finally
-                {
-                    IOUtil.close( pomReader );
-                }
-
-                rawModels.put( ga, model );
+                pomReader = ReaderFactory.newXmlReader( pom );
+                model = new MavenXpp3Reader().read( pomReader );
             }
+            catch ( final IOException e )
+            {
+                throw new ManipulationException( "Failed to read POM: %s. Reason: %s", e, pom, e.getMessage() );
+            }
+            catch ( final XmlPullParserException e )
+            {
+                throw new ManipulationException( "Failed to parse POM: %s. Reason: %s", e, pom, e.getMessage() );
+            }
+            finally
+            {
+                IOUtil.close( pomReader );
+            }
+
+            rawModels.put( ga, model );
         }
 
         session.setManipulatedModels( rawModels );
@@ -128,55 +125,21 @@ public final class PomModifier
                 {
                     logger.info( String.format( "%s modified! Rewriting.", project ) );
                     File pom = project.getFile();
+
+                    final Model model = modifiedModels.get( ga );
+                    logger.info( "Rewriting: " + model.toString() + " in place of: " + project.getId() + "\n       to POM: " + pom );
+
+                    write( pom, model );
+
+                    // this happens with integration tests!
+                    // This is a total hack, but the alternative seems to be adding complexity through a custom model processor.
                     if ( pom.getName()
                             .equals( "interpolated-pom.xml" ) )
                     {
                         final File dir = pom.getParentFile();
                         pom = dir == null ? new File( "pom.xml" ) : new File( dir, "pom.xml" );
-                    }
 
-                    logger.info( "Rewriting: " + project.getId() + "\n       to POM: " + pom );
-
-                    Writer pomWriter = null;
-                    try
-                    {
-                        final SAXBuilder builder = new SAXBuilder();
-                        final Document doc = builder.build( pom );
-
-                        final Model model = modifiedModels.get( ga );
-
-                        String encoding = model.getModelEncoding();
-                        if ( encoding == null )
-                        {
-                            encoding = "UTF-8";
-                        }
-
-                        final Format format = Format.getRawFormat()
-                                                    .setEncoding( encoding )
-                                                    .setTextMode( TextMode.PRESERVE )
-                                                    .setLineSeparator( System.getProperty( "line.separator" ) )
-                                                    .setOmitDeclaration( false )
-                                                    .setOmitEncoding( false )
-                                                    .setExpandEmptyElements( true );
-
-                        pomWriter = WriterFactory.newWriter( pom, encoding );
-                        new MavenJDOMWriter().write( model, doc, pomWriter, format );
-
-                        pomWriter.flush();
-
-                        logger.info( "Wrote: " + pom );
-                    }
-                    catch ( final IOException e )
-                    {
-                        throw new ManipulationException( "Failed to read POM for rewrite: %s. Reason: %s", e, pom, e.getMessage() );
-                    }
-                    catch ( final JDOMException e )
-                    {
-                        throw new ManipulationException( "Failed to parse POM for rewrite: %s. Reason: %s", e, pom, e.getMessage() );
-                    }
-                    finally
-                    {
-                        IOUtil.close( pomWriter );
+                        write( pom, model );
                     }
 
                     pw.println( project.getId() );
@@ -191,6 +154,49 @@ public final class PomModifier
         {
             IOUtil.close( pw );
         }
+    }
+
+    private static void write( final File pom, final Model model )
+        throws ManipulationException
+    {
+        Writer pomWriter = null;
+        try
+        {
+            final SAXBuilder builder = new SAXBuilder();
+            final Document doc = builder.build( pom );
+
+            String encoding = model.getModelEncoding();
+            if ( encoding == null )
+            {
+                encoding = "UTF-8";
+            }
+
+            final Format format = Format.getRawFormat()
+                                        .setEncoding( encoding )
+                                        .setTextMode( TextMode.PRESERVE )
+                                        .setLineSeparator( System.getProperty( "line.separator" ) )
+                                        .setOmitDeclaration( false )
+                                        .setOmitEncoding( false )
+                                        .setExpandEmptyElements( true );
+
+            pomWriter = WriterFactory.newWriter( pom, encoding );
+            new MavenJDOMWriter().write( model, doc, pomWriter, format );
+
+            pomWriter.flush();
+        }
+        catch ( final IOException e )
+        {
+            throw new ManipulationException( "Failed to read POM for rewrite: %s. Reason: %s", e, pom, e.getMessage() );
+        }
+        catch ( final JDOMException e )
+        {
+            throw new ManipulationException( "Failed to parse POM for rewrite: %s. Reason: %s", e, pom, e.getMessage() );
+        }
+        finally
+        {
+            IOUtil.close( pomWriter );
+        }
+
     }
 
     private static File getMarkerFile( final ManipulationSession session )

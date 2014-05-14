@@ -171,7 +171,7 @@
                 <mavenHome>${it.maven.home}</mavenHome>
                 <!-- mavenExecutable>mvnDebug</mavenExecutable -->
                 <pomIncludes>
-                  <!-- pomInclude>simple-numeric/pom.xml</pomInclude -->
+                  <!-- pomInclude>parent-child-inherit/pom.xml</pomInclude -->
                   <pomInclude>*/pom.xml</pomInclude>
                 </pomIncludes>
                 <projectsDirectory>${project.build.directory}/it</projectsDirectory>
