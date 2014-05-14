@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.maven.model.Model;
+import org.apache.maven.model.building.DefaultModelProcessor;
 import org.apache.maven.model.building.ModelProcessor;
 import org.apache.maven.model.io.ModelParseException;
 import org.apache.maven.model.io.ModelReader;
@@ -19,6 +20,13 @@ import org.codehaus.plexus.component.annotations.Requirement;
 import org.codehaus.plexus.interpolation.InterpolationException;
 import org.codehaus.plexus.logging.Logger;
 
+/**
+ * {@link ModelProcessor} implementation to override {@link DefaultModelProcessor} and inject versioning modifications.
+ * This is a hook implementation used from within Maven's core. It will not be referenced directly in this project, 
+ * BUT THAT DOES NOT MEAN IT'S NOT USED.
+ * 
+ * @author jdcasey
+ */
 @Component( role = ModelProcessor.class )
 public class VersioningModelProcessor
     implements ModelProcessor

@@ -9,6 +9,13 @@ import java.util.Set;
 import org.apache.maven.execution.MavenExecutionRequest;
 import org.sonatype.aether.RepositorySystemSession;
 
+/**
+ * Repository for configuration from command-line parameters, components that help resolve POMs as needed, and version changes that have been computed.
+ * This is basically a clearing house for state required by the different hooks and bootstrap components of the versioning extension.
+
+ * @author jdcasey
+ *
+ */
 public class VersioningSession
 {
 
@@ -47,7 +54,8 @@ public class VersioningSession
 
     public VersioningSession()
     {
-        System.out.println("[INFO] Maven-Versioning-Extension " + getClass().getPackage().getImplementationVersion());
+        System.out.println( "[INFO] Maven-Versioning-Extension " + getClass().getPackage()
+                                                                             .getImplementationVersion() );
     }
 
     public void setRequest( final MavenExecutionRequest request )
