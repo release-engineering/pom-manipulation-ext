@@ -106,7 +106,7 @@ public final class PomModifier
         final Set<String> changed = session.getChangedGAs();
         final Map<String, Model> modifiedModels = session.getManipulatedModels();
 
-        final File marker = session.getMarkerFile();
+        final File marker = getMarkerFile( session );
         PrintWriter pw = null;
         try
         {
@@ -181,6 +181,31 @@ public final class PomModifier
         {
             IOUtil.close( pw );
         }
+    }
+
+    private static File getMarkerFile( final ManipulationSession session )
+    {
+        final File pom = session.getRequest()
+                                .getPom();
+
+        File markerFile;
+        if ( pom != null )
+        {
+            File dir = pom.getParentFile();
+            if ( dir == null )
+            {
+                dir = pom.getAbsoluteFile()
+                         .getParentFile();
+            }
+
+            markerFile = new File( dir, "target/manipulation.log" );
+        }
+        else
+        {
+            markerFile = new File( "target/manipulation.log" );
+        }
+
+        return markerFile;
     }
 
 }

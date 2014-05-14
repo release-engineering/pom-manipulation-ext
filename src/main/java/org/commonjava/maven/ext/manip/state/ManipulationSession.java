@@ -1,6 +1,5 @@
 package org.commonjava.maven.ext.manip.state;
 
-import java.io.File;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -30,8 +29,6 @@ public class ManipulationSession
 
     public static final String MANIPULATIONS_DISABLED_PROP = "manipulation.disable";
 
-    private File markerFile;
-
     @Requirement( role = Manipulator.class )
     private Map<String, Manipulator> manipulators;
 
@@ -42,11 +39,6 @@ public class ManipulationSession
     {
         System.out.println( "[INFO] Maven-Manipulation-Extension " + getClass().getPackage()
                                                                                .getImplementationVersion() );
-    }
-
-    public File getMarkerFile()
-    {
-        return markerFile;
     }
 
     /**
@@ -100,25 +92,6 @@ public class ManipulationSession
     public void setMavenSession( final MavenSession mavenSession )
     {
         this.mavenSession = mavenSession;
-
-        final File pom = mavenSession.getRequest()
-                                     .getPom();
-
-        if ( pom != null )
-        {
-            File dir = pom.getParentFile();
-            if ( dir == null )
-            {
-                dir = pom.getAbsoluteFile()
-                         .getParentFile();
-            }
-
-            markerFile = new File( dir, "target/manipulation.log" );
-        }
-        else
-        {
-            markerFile = new File( "target/manipulation.log" );
-        }
     }
 
     private final Set<String> changedGAs = new HashSet<String>();
