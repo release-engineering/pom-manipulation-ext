@@ -81,8 +81,9 @@ public class ProjectVersioningManipulator
         }
 
         logger.info( "Version Manipulator: Calculating the necessary versioning changes." );
-        final Map<String, String> versionsByGA = calculator.calculateVersioningChanges( projects, session );
-        state.setVersioningChanges( versionsByGA );
+        final Map<String, String> versionsByGAV = calculator.calculateVersioningChanges( projects, session );
+
+        state.setVersioningChanges( versionsByGAV );
     }
 
     /**
@@ -106,27 +107,36 @@ public class ProjectVersioningManipulator
      * a task which is handled by the {@link ManipulationManager}.
      */
     @Override
-    public void applyChanges( final List<MavenProject> projects, final ManipulationSession session )
+    public boolean applyChanges( final List<MavenProject> projects, final ManipulationSession session )
         throws ManipulationException
     {
         final VersioningState state = session.getState( VersioningState.class );
 
         if ( !session.isEnabled() || state == null || !state.isEnabled() )
         {
-            return;
+            return false;
         }
 
         final Map<String, Model> manipulatedModels = session.getManipulatedModels();
         final Set<String> changed = session.getChangedGAs();
+
+        boolean changes = false;
         for ( final MavenProject project : projects )
         {
             final String ga = ga( project );
             if ( changed.contains( ga ) )
             {
+                logger.info( "Applying changes to: " + ga );
                 final Model model = manipulatedModels.get( ga );
-                applyVersioningChanges( model, state, session );
+                changes = applyVersioningChanges( model, state, session ) || changes;
+            }
+            else
+            {
+                logger.info( "No changes for: " + ga );
             }
         }
+
+        return changes;
     }
 
     /**
@@ -192,6 +202,7 @@ public class ProjectVersioningManipulator
         if ( parent != null && parent.getVersion() != null )
         {
             final String parentGAV = gav( parent.getGroupId(), parent.getArtifactId(), parent.getVersion() );
+            logger.info( "Looking for parent: " + parentGAV );
             if ( versionsByGAV.containsKey( parentGAV ) )
             {
                 final String newVersion = versionsByGAV.get( parentGAV );
@@ -204,6 +215,7 @@ public class ProjectVersioningManipulator
         if ( model.getVersion() != null )
         {
             final String newVersion = versionsByGAV.get( gav );
+            logger.info( "Looking for new version: " + gav + " (found: " + newVersion + ")" );
             if ( newVersion != null && model.getVersion() != null )
             {
                 model.setVersion( newVersion );

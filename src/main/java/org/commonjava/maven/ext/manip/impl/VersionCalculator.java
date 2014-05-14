@@ -75,7 +75,7 @@ public class VersionCalculator
     public Map<String, String> calculateVersioningChanges( final Collection<MavenProject> projects, final ManipulationSession session )
         throws ManipulationException
     {
-        final Map<String, String> versionsByGA = new HashMap<String, String>();
+        final Map<String, String> versionsByGAV = new HashMap<String, String>();
 
         for ( final MavenProject project : projects )
         {
@@ -84,11 +84,13 @@ public class VersionCalculator
 
             if ( !modifiedVersion.equals( originalVersion ) )
             {
-                versionsByGA.put( gav( project ), modifiedVersion );
+                final String gav = gav( project );
+                logger.info( String.format( "%s has updated version: %s. Marking for rewrite.", gav, modifiedVersion ) );
+                versionsByGAV.put( gav, modifiedVersion );
             }
         }
 
-        return versionsByGA;
+        return versionsByGAV;
     }
 
     /**

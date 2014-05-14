@@ -169,7 +169,9 @@
                 <!-- <cloneProjectsTo>${project.build.directory}/it</cloneProjectsTo> -->
                 <localRepositoryPath>${localRepositoryUrl}</localRepositoryPath>
                 <mavenHome>${it.maven.home}</mavenHome>
+                <!-- mavenExecutable>mvnDebug</mavenExecutable -->
                 <pomIncludes>
+                  <!-- pomInclude>simple-numeric/pom.xml</pomInclude -->
                   <pomInclude>*/pom.xml</pomInclude>
                 </pomIncludes>
                 <projectsDirectory>${project.build.directory}/it</projectsDirectory>

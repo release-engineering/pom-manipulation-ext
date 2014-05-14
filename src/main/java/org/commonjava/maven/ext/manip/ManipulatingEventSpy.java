@@ -48,23 +48,23 @@ public class ManipulatingEventSpy
             {
                 final ExecutionEvent ee = (ExecutionEvent) event;
 
-                if ( ee.getSession() != null )
-                {
-                    manipulationManager.init( ee.getSession(), session );
-                }
-
-                if ( !session.isEnabled() )
-                {
-                    logger.info( "Manipulation engine disabled." );
-                    super.onEvent( event );
-                    return;
-                }
-
                 final ExecutionEvent.Type type = ee.getType();
                 switch ( type )
                 {
                     case ProjectDiscoveryStarted:
                     {
+                        if ( ee.getSession() != null )
+                        {
+                            manipulationManager.init( ee.getSession(), session );
+                        }
+
+                        if ( !session.isEnabled() )
+                        {
+                            logger.info( "Manipulation engine disabled." );
+                            super.onEvent( event );
+                            return;
+                        }
+
                         logger.info( "Pre-scanning projects to calculate versioning changes..." );
                         final MavenExecutionRequest req = session.getRequest();
 

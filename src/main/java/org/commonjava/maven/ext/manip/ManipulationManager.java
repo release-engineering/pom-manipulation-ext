@@ -17,6 +17,7 @@ import org.apache.maven.project.ProjectBuildingRequest;
 import org.apache.maven.project.ProjectBuildingResult;
 import org.codehaus.plexus.component.annotations.Component;
 import org.codehaus.plexus.component.annotations.Requirement;
+import org.codehaus.plexus.logging.Logger;
 import org.commonjava.maven.ext.manip.impl.Manipulator;
 import org.commonjava.maven.ext.manip.in.ManipulatingModelProcessor;
 import org.commonjava.maven.ext.manip.out.PomModifier;
@@ -32,6 +33,9 @@ import org.commonjava.maven.ext.manip.state.ManipulationSession;
 @Component( role = ManipulationManager.class )
 public class ManipulationManager
 {
+
+    @Requirement
+    protected Logger logger;
 
     @Requirement
     private ProjectBuilder projectBuilder;
@@ -127,13 +131,22 @@ public class ManipulationManager
     {
         PomModifier.readModelsForManipulation( projects, session );
 
+        boolean changed = false;
         for ( final Map.Entry<String, Manipulator> entry : manipulators.entrySet() )
         {
-            entry.getValue()
-                 .applyChanges( projects, session );
+            changed = entry.getValue()
+                           .applyChanges( projects, session ) || changed;
         }
 
-        PomModifier.rewriteChangedPOMs( projects, session );
+        if ( changed )
+        {
+            logger.info( "REWRITE CHANGED: " + projects );
+            PomModifier.rewriteChangedPOMs( projects, session );
+        }
+        else
+        {
+            logger.info( "NO CHANGES." );
+        }
     }
 
     /**

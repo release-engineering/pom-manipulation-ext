@@ -31,7 +31,7 @@ public interface Manipulator
     boolean applyChanges( Model model, ManipulationSession session )
         throws ManipulationException;
 
-    void applyChanges( List<MavenProject> projects, ManipulationSession session )
+    boolean applyChanges( List<MavenProject> projects, ManipulationSession session )
         throws ManipulationException;
 
 }

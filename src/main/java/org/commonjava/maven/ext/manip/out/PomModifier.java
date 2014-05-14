@@ -103,6 +103,8 @@ public final class PomModifier
     public static void rewriteChangedPOMs( final List<MavenProject> projects, final ManipulationSession session )
         throws ManipulationException
     {
+        final Logger logger = Logger.getLogger( PomModifier.class.getName() );
+
         final Set<String> changed = session.getChangedGAs();
         final Map<String, Model> modifiedModels = session.getManipulatedModels();
 
@@ -118,8 +120,13 @@ public final class PomModifier
             for ( final MavenProject project : projects )
             {
                 final String ga = ga( project );
-                if ( changed.contains( ga ) )
+                if ( !changed.contains( ga ) )
                 {
+                    logger.info( String.format( "%s has not changed. Not rewriting.", project ) );
+                }
+                else
+                {
+                    logger.info( String.format( "%s modified! Rewriting.", project ) );
                     File pom = project.getFile();
                     if ( pom.getName()
                             .equals( "interpolated-pom.xml" ) )
@@ -128,8 +135,7 @@ public final class PomModifier
                         pom = dir == null ? new File( "pom.xml" ) : new File( dir, "pom.xml" );
                     }
 
-                    Logger.getLogger( PomModifier.class.getName() )
-                          .info( "Rewriting: " + project.getId() + "\n       to POM: " + pom );
+                    logger.info( "Rewriting: " + project.getId() + "\n       to POM: " + pom );
 
                     Writer pomWriter = null;
                     try
@@ -155,6 +161,10 @@ public final class PomModifier
 
                         pomWriter = WriterFactory.newWriter( pom, encoding );
                         new MavenJDOMWriter().write( model, doc, pomWriter, format );
+
+                        pomWriter.flush();
+
+                        logger.info( "Wrote: " + pom );
                     }
                     catch ( final IOException e )
                     {
