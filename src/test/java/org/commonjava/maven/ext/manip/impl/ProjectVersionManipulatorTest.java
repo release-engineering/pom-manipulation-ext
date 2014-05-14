@@ -1,14 +1,16 @@
-package org.commonjava.maven.ext.versioning;
+package org.commonjava.maven.ext.manip.impl;
 
-import static org.commonjava.maven.ext.versioning.IdUtils.gav;
+import static org.commonjava.maven.ext.manip.IdUtils.gav;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.junit.Assert.assertThat;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -18,12 +20,18 @@ import org.apache.maven.model.DependencyManagement;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Parent;
 import org.apache.maven.model.Profile;
-import org.apache.maven.model.io.DefaultModelWriter;
 import org.apache.maven.project.MavenProject;
+import org.codehaus.plexus.logging.Logger;
 import org.codehaus.plexus.logging.console.ConsoleLogger;
+import org.commonjava.maven.ext.manip.ManipulationException;
+import org.commonjava.maven.ext.manip.fixture.StubRepositorySystem;
+import org.commonjava.maven.ext.manip.impl.ProjectVersioningManipulator;
+import org.commonjava.maven.ext.manip.impl.VersionCalculator;
+import org.commonjava.maven.ext.manip.state.ManipulationSession;
+import org.commonjava.maven.ext.manip.state.VersioningState;
 import org.junit.Test;
 
-public class VersioningModifierTest
+public class ProjectVersionManipulatorTest
 {
 
     @Test
@@ -46,8 +54,7 @@ public class VersioningModifierTest
         final MavenProject project = new MavenProject( eff );
         project.setOriginalModel( orig );
 
-        final Set<MavenProject> changes =
-            newVersioningModifier().applyVersioningChanges( Collections.singleton( project ), versionsByGA );
+        final Set<MavenProject> changes = newVersioningModifier().applyVersioningChanges( Collections.singleton( project ), versionsByGA );
 
         assertThat( changes.size(), equalTo( 1 ) );
         assertThat( orig.getVersion(), equalTo( mv ) );
@@ -581,9 +588,53 @@ public class VersioningModifierTest
         }
     }
 
-    private VersioningModifier newVersioningModifier()
+    private TestVersioningModifier newVersioningModifier()
     {
-        return new VersioningModifier( new DefaultModelWriter(), new ConsoleLogger() );
+        return new TestVersioningModifier( new ManipulationSession() );
+    }
+
+    public static final class TestVersioningModifier
+        extends ProjectVersioningManipulator
+    {
+        private static final Logger logger = new ConsoleLogger( Logger.LEVEL_DEBUG, "test" );
+
+        private final ManipulationSession session;
+
+        public TestVersioningModifier( final ManipulationSession session )
+        {
+            super( new VersionCalculator( new StubRepositorySystem(), logger ), logger );
+            this.session = session;
+        }
+
+        public Set<MavenProject> applyVersioningChanges( final Collection<MavenProject> projects, final Map<String, String> versionsByGAV )
+            throws ManipulationException
+        {
+            final VersioningState state = new VersioningState( session.getUserProperties() );
+            state.setVersioningChanges( versionsByGAV );
+
+            final Set<MavenProject> changed = new HashSet<MavenProject>();
+            for ( final MavenProject project : projects )
+            {
+                if ( applyVersioningChanges( project.getOriginalModel(), state, session ) )
+                {
+                    final String v = versionsByGAV.get( gav( project ) );
+                    logger.info( project.getName() + " (" + gav( project ) + "): VERSION MODIFIED\n    New version: " + v );
+
+                    // this is a bigger model, so only do this if the originalModel was modded.
+                    applyVersioningChanges( project.getModel(), state, session );
+                    changed.add( project );
+
+                    if ( v != null )
+                    {
+                        // belt and suspenders...be double sure this gets set everywhere.
+                        project.setVersion( v );
+                    }
+                }
+            }
+
+            return changed;
+        }
+
     }
 
 }

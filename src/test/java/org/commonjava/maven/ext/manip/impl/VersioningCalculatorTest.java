@@ -1,4 +1,4 @@
-package org.commonjava.maven.ext.versioning;
+package org.commonjava.maven.ext.manip.impl;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertThat;
@@ -17,15 +17,25 @@ import org.apache.maven.artifact.repository.metadata.Metadata;
 import org.apache.maven.artifact.repository.metadata.Versioning;
 import org.apache.maven.artifact.repository.metadata.io.xpp3.MetadataXpp3Writer;
 import org.apache.maven.execution.DefaultMavenExecutionRequest;
+import org.apache.maven.execution.DefaultMavenExecutionResult;
 import org.apache.maven.execution.MavenExecutionRequest;
+import org.apache.maven.execution.MavenSession;
+import org.codehaus.plexus.DefaultPlexusContainer;
+import org.codehaus.plexus.PlexusContainer;
 import org.codehaus.plexus.logging.Logger;
 import org.codehaus.plexus.logging.console.ConsoleLogger;
 import org.codehaus.plexus.util.IOUtil;
-import org.commonjava.maven.ext.versioning.fixture.StubRepositorySystem;
+import org.commonjava.maven.ext.manip.ManipulationException;
+import org.commonjava.maven.ext.manip.fixture.StubRepositorySystem;
+import org.commonjava.maven.ext.manip.impl.VersionCalculator;
+import org.commonjava.maven.ext.manip.state.ManipulationSession;
+import org.commonjava.maven.ext.manip.state.VersioningState;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
+import org.sonatype.aether.RepositorySystem;
+import org.sonatype.aether.util.DefaultRepositorySystemSession;
 
 public class VersioningCalculatorTest
 {
@@ -37,23 +47,24 @@ public class VersioningCalculatorTest
     @Rule
     public TemporaryFolder temp = new TemporaryFolder();
 
-    private VersionCalculator modder;
+    private TestVersionCalculator modder;
 
     private StubRepositorySystem repoSystem;
+
+    private ManipulationSession session;
 
     @Before
     public void before()
     {
         repoSystem = new StubRepositorySystem();
-        final ConsoleLogger logger = new ConsoleLogger( Logger.LEVEL_DEBUG, "test" );
 
-        modder = new VersionCalculator( repoSystem, logger );
+        modder = new TestVersionCalculator( repoSystem );
     }
 
     public void initFailsWithoutSuffixProperty()
         throws Exception
     {
-        final VersioningSession session = setupSession( new Properties() );
+        final VersioningState session = setupSession( new Properties() );
         assertThat( session.isEnabled(), equalTo( false ) );
     }
 
@@ -64,7 +75,7 @@ public class VersioningCalculatorTest
         final Properties props = new Properties();
 
         final String s = "foo";
-        props.setProperty( VersioningSession.VERSION_SUFFIX_SYSPROP, s );
+        props.setProperty( VersioningState.VERSION_SUFFIX_SYSPROP, s );
         setupSession( props );
 
         final String v = "1.2";
@@ -83,7 +94,7 @@ public class VersioningCalculatorTest
         final Properties props = new Properties();
 
         final String s = "foo";
-        props.setProperty( VersioningSession.VERSION_SUFFIX_SYSPROP, s );
+        props.setProperty( VersioningState.VERSION_SUFFIX_SYSPROP, s );
         setupSession( props );
 
         final String v = "1.2";
@@ -99,7 +110,7 @@ public class VersioningCalculatorTest
         final Properties props = new Properties();
 
         final String s = "foo";
-        props.setProperty( VersioningSession.VERSION_SUFFIX_SYSPROP, s );
+        props.setProperty( VersioningState.VERSION_SUFFIX_SYSPROP, s );
         setupSession( props );
 
         final String v = "1.2.GA";
@@ -115,7 +126,7 @@ public class VersioningCalculatorTest
         final Properties props = new Properties();
 
         final String s = "foo-1";
-        props.setProperty( VersioningSession.VERSION_SUFFIX_SYSPROP, s );
+        props.setProperty( VersioningState.VERSION_SUFFIX_SYSPROP, s );
         setupSession( props );
 
         final String v = "1.2-SP4";
@@ -131,7 +142,7 @@ public class VersioningCalculatorTest
         final Properties props = new Properties();
 
         final String s = "foo-1";
-        props.setProperty( VersioningSession.VERSION_SUFFIX_SYSPROP, s );
+        props.setProperty( VersioningState.VERSION_SUFFIX_SYSPROP, s );
         setupSession( props );
 
         final String v = "1.2";
@@ -147,7 +158,7 @@ public class VersioningCalculatorTest
         final Properties props = new Properties();
 
         final String s = "foo-1";
-        props.setProperty( VersioningSession.INCREMENT_SERIAL_SUFFIX_SYSPROP, s );
+        props.setProperty( VersioningState.INCREMENT_SERIAL_SUFFIX_SYSPROP, s );
         setupSession( props );
 
         final String v = "1.2.GA-foo";
@@ -163,7 +174,7 @@ public class VersioningCalculatorTest
         final Properties props = new Properties();
 
         final String s = "foo";
-        props.setProperty( VersioningSession.INCREMENT_SERIAL_SUFFIX_SYSPROP, s );
+        props.setProperty( VersioningState.INCREMENT_SERIAL_SUFFIX_SYSPROP, s );
         setupSession( props );
 
         final String originalVersion = "1.0.0.Final";
@@ -180,7 +191,7 @@ public class VersioningCalculatorTest
         final Properties props = new Properties();
 
         final String s = "foo-1";
-        props.setProperty( VersioningSession.INCREMENT_SERIAL_SUFFIX_SYSPROP, s );
+        props.setProperty( VersioningState.INCREMENT_SERIAL_SUFFIX_SYSPROP, s );
         setupSession( props );
 
         final String v = "1.2.GA-jdcasey";
@@ -196,7 +207,7 @@ public class VersioningCalculatorTest
         final Properties props = new Properties();
 
         final String s = "foo-1";
-        props.setProperty( VersioningSession.VERSION_SUFFIX_SYSPROP, s );
+        props.setProperty( VersioningState.VERSION_SUFFIX_SYSPROP, s );
         setupSession( props );
 
         final String v = "1.2.GA";
@@ -212,7 +223,7 @@ public class VersioningCalculatorTest
         final Properties props = new Properties();
 
         final String s = "foo-2";
-        props.setProperty( VersioningSession.VERSION_SUFFIX_SYSPROP, s );
+        props.setProperty( VersioningState.VERSION_SUFFIX_SYSPROP, s );
         setupSession( props );
 
         final String v = "1.2";
@@ -229,7 +240,7 @@ public class VersioningCalculatorTest
         final Properties props = new Properties();
 
         final String s = "foo-2";
-        props.setProperty( VersioningSession.VERSION_SUFFIX_SYSPROP, s );
+        props.setProperty( VersioningState.VERSION_SUFFIX_SYSPROP, s );
         setupSession( props );
 
         final String v = "1.2.GA";
@@ -246,8 +257,8 @@ public class VersioningCalculatorTest
         final Properties props = new Properties();
 
         final String s = "foo-2";
-        props.setProperty( VersioningSession.VERSION_SUFFIX_SYSPROP, s );
-        props.setProperty( VersioningSession.VERSION_SUFFIX_SNAPSHOT_SYSPROP, "true" );
+        props.setProperty( VersioningState.VERSION_SUFFIX_SYSPROP, s );
+        props.setProperty( VersioningState.VERSION_SUFFIX_SNAPSHOT_SYSPROP, "true" );
         setupSession( props );
 
         final String v = "1.2.GA";
@@ -264,8 +275,8 @@ public class VersioningCalculatorTest
         final Properties props = new Properties();
 
         final String s = "foo-2";
-        props.setProperty( VersioningSession.VERSION_SUFFIX_SYSPROP, s );
-        props.setProperty( VersioningSession.VERSION_SUFFIX_SNAPSHOT_SYSPROP, "true" );
+        props.setProperty( VersioningState.VERSION_SUFFIX_SYSPROP, s );
+        props.setProperty( VersioningState.VERSION_SUFFIX_SNAPSHOT_SYSPROP, "true" );
         setupSession( props );
 
         final String v = "1.2.GA";
@@ -283,7 +294,7 @@ public class VersioningCalculatorTest
         final Properties props = new Properties();
 
         final String s = "foo";
-        props.setProperty( VersioningSession.INCREMENT_SERIAL_SUFFIX_SYSPROP, s );
+        props.setProperty( VersioningState.INCREMENT_SERIAL_SUFFIX_SYSPROP, s );
         setupSession( props );
 
         final String originalVersion = "1.0.0.Final-foo-SNAPSHOT";
@@ -299,7 +310,7 @@ public class VersioningCalculatorTest
     {
         final Properties props = new Properties();
 
-        props.setProperty( VersioningSession.INCREMENT_SERIAL_SUFFIX_SYSPROP, "foo-0" );
+        props.setProperty( VersioningState.INCREMENT_SERIAL_SUFFIX_SYSPROP, "foo-0" );
         setupSession( props );
 
         final String v = "1.2.GA";
@@ -318,7 +329,7 @@ public class VersioningCalculatorTest
 
         final Properties props = new Properties();
 
-        props.setProperty( VersioningSession.INCREMENT_SERIAL_SUFFIX_SYSPROP, "foo-0" );
+        props.setProperty( VersioningState.INCREMENT_SERIAL_SUFFIX_SYSPROP, "foo-0" );
         setupSession( props );
 
         final String v = "1.2.GA";
@@ -337,7 +348,7 @@ public class VersioningCalculatorTest
 
         final Properties props = new Properties();
 
-        props.setProperty( VersioningSession.INCREMENT_SERIAL_SUFFIX_SYSPROP, "redhat-0" );
+        props.setProperty( VersioningState.INCREMENT_SERIAL_SUFFIX_SYSPROP, "redhat-0" );
         setupSession( props );
 
         final String v = "0.0.7";
@@ -374,10 +385,11 @@ public class VersioningCalculatorTest
     private String calculate( final String version )
         throws Exception
     {
-        return modder.calculate( GROUP_ID, ARTIFACT_ID, version );
+        return modder.calculate( GROUP_ID, ARTIFACT_ID, version, session );
     }
 
-    private VersioningSession setupSession( final Properties properties )
+    private VersioningState setupSession( final Properties properties )
+        throws Exception
     {
         final ArtifactRepository ar =
             new MavenArtifactRepository( "test", "http://repo.maven.apache.org/maven2", new DefaultRepositoryLayout(),
@@ -386,11 +398,35 @@ public class VersioningCalculatorTest
         final MavenExecutionRequest req = new DefaultMavenExecutionRequest().setUserProperties( properties )
                                                                             .setRemoteRepositories( Arrays.asList( ar ) );
 
-        final VersioningSession session = VersioningSession.getInstance();
+        final PlexusContainer container = new DefaultPlexusContainer();
+        final DefaultRepositorySystemSession rss = new DefaultRepositorySystemSession();
 
-        session.setRequest( req );
+        final MavenSession mavenSession = new MavenSession( container, rss, req, new DefaultMavenExecutionResult() );
 
-        return session;
+        session = new ManipulationSession();
+        session.setMavenSession( mavenSession );
+
+        final VersioningState state = new VersioningState( properties );
+        session.setState( state );
+
+        return state;
+    }
+
+    public static final class TestVersionCalculator
+        extends VersionCalculator
+    {
+        public TestVersionCalculator( final RepositorySystem repoSystem )
+        {
+            super( repoSystem, new ConsoleLogger( Logger.LEVEL_DEBUG, "test" ) );
+        }
+
+        @Override
+        public String calculate( final String groupId, final String artifactId, final String originalVersion, final ManipulationSession session )
+            throws ManipulationException
+        {
+            return super.calculate( groupId, artifactId, originalVersion, session );
+        }
+
     }
 
 }

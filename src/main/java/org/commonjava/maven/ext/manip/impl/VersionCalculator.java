@@ -1,6 +1,6 @@
-package org.commonjava.maven.ext.versioning;
+package org.commonjava.maven.ext.manip.impl;
 
-import static org.commonjava.maven.ext.versioning.IdUtils.gav;
+import static org.commonjava.maven.ext.manip.IdUtils.gav;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -25,6 +25,9 @@ import org.codehaus.plexus.component.annotations.Requirement;
 import org.codehaus.plexus.logging.Logger;
 import org.codehaus.plexus.util.IOUtil;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
+import org.commonjava.maven.ext.manip.ManipulationException;
+import org.commonjava.maven.ext.manip.state.ManipulationSession;
+import org.commonjava.maven.ext.manip.state.VersioningState;
 import org.sonatype.aether.RepositorySystem;
 import org.sonatype.aether.metadata.Metadata;
 import org.sonatype.aether.metadata.Metadata.Nature;
@@ -33,6 +36,15 @@ import org.sonatype.aether.resolution.MetadataRequest;
 import org.sonatype.aether.resolution.MetadataResult;
 import org.sonatype.aether.util.metadata.DefaultMetadata;
 
+/**
+ * Component that calculates project version modifications, based on configuration stored in {@link VersioningState}. Snapshots may/may not be 
+ * preserved, and either a static or incremental (calculated) version qualifier may / may not be incorporated in the version. The calculator
+ * strives for OSGi compatibility, so the use of '.' and '-' qualifier separators will vary accordingly.
+ * 
+ * See: http://www.aqute.biz/Bnd/Versioning for an explanation of OSGi versioning.
+ * 
+ * @author jdcasey
+ */
 @Component( role = VersionCalculator.class )
 public class VersionCalculator
 {
@@ -42,30 +54,33 @@ public class VersionCalculator
     private static final String SNAPSHOT_SUFFIX = "-SNAPSHOT";
 
     @Requirement
-    private RepositorySystem repositorySystem;
-
-    @Requirement
     private Logger logger;
 
-    public VersionCalculator()
+    @Requirement
+    protected RepositorySystem repositorySystem;
+
+    protected VersionCalculator()
     {
     }
 
     public VersionCalculator( final RepositorySystem repositorySystem, final Logger logger )
     {
-        this.repositorySystem = repositorySystem;
         this.logger = logger;
+        this.repositorySystem = repositorySystem;
     }
 
-    public Map<String, String> calculateVersioningChanges( final Collection<MavenProject> projects )
-        throws VersionModifierException
+    /**
+     * Calculate any project version changes for the given set of projects, and return them in a Map keyed by project GA.
+     */
+    public Map<String, String> calculateVersioningChanges( final Collection<MavenProject> projects, final ManipulationSession session )
+        throws ManipulationException
     {
         final Map<String, String> versionsByGA = new HashMap<String, String>();
 
         for ( final MavenProject project : projects )
         {
             final String originalVersion = project.getVersion();
-            final String modifiedVersion = calculate( project.getGroupId(), project.getArtifactId(), originalVersion );
+            final String modifiedVersion = calculate( project.getGroupId(), project.getArtifactId(), originalVersion, session );
 
             if ( !modifiedVersion.equals( originalVersion ) )
             {
@@ -76,8 +91,12 @@ public class VersionCalculator
         return versionsByGA;
     }
 
-    public String calculate( final String groupId, final String artifactId, final String originalVersion )
-        throws VersionModifierException
+    /**
+     * Calculate the version modification for a given GAV.
+     */
+    // FIXME: Loooong method
+    protected String calculate( final String groupId, final String artifactId, final String originalVersion, final ManipulationSession session )
+        throws ManipulationException
     {
         String result = originalVersion;
 
@@ -90,9 +109,9 @@ public class VersionCalculator
             result = result.substring( 0, result.length() - SNAPSHOT_SUFFIX.length() );
         }
 
-        final VersioningSession session = VersioningSession.getInstance();
-        final String incrementalSerialSuffix = session.getIncrementalSerialSuffix();
-        final String suffix = session.getSuffix();
+        final VersioningState state = session.getState( VersioningState.class );
+        final String incrementalSerialSuffix = state.getIncrementalSerialSuffix();
+        final String suffix = state.getSuffix();
 
         logger.debug( "Got the following version suffixes:\n  Static: " + suffix + "\nIncremental: " + incrementalSerialSuffix );
 
@@ -221,7 +240,7 @@ public class VersionCalculator
         result += sep + useSuffix;
 
         // tack -SNAPSHOT back on if necessary...
-        if ( session.preserveSnapshot() && snapshot )
+        if ( state.preserveSnapshot() && snapshot )
         {
             result += SNAPSHOT_SUFFIX;
         }
@@ -229,8 +248,11 @@ public class VersionCalculator
         return result;
     }
 
-    private Set<String> getMetadataVersions( final String groupId, final String artifactId, final VersioningSession session )
-        throws VersionModifierException
+    /**
+     * Accumulate all available versions for a given GAV from all available repositories.
+     */
+    private Set<String> getMetadataVersions( final String groupId, final String artifactId, final ManipulationSession session )
+        throws ManipulationException
     {
         logger.debug( "Reading available versions from repository metadata for: " + groupId + ":" + artifactId );
 
@@ -248,9 +270,12 @@ public class VersionCalculator
         return versions;
     }
 
+    /**
+     * Read available versions for a given GAV from its repository metadata, and accumulate the versions in the given {@link Set}.
+     */
     private void resolveMetadata( final String groupId, final String artifactId, final RemoteRepository remote, final Set<String> versions,
-                                  final VersioningSession session )
-        throws VersionModifierException
+                                  final ManipulationSession session )
+        throws ManipulationException
     {
         final MetadataRequest req =
             new MetadataRequest( new DefaultMetadata( groupId, artifactId, "maven-metadata.xml", Nature.RELEASE_OR_SNAPSHOT ), remote,
@@ -317,13 +342,13 @@ public class VersionCalculator
                 }
                 catch ( final IOException e )
                 {
-                    throw new VersionModifierException( "Cannot read metadata from: %s to determine last version-suffix serial number. Error: %s", e,
-                                                        mdFile, e.getMessage() );
+                    throw new ManipulationException( "Cannot read metadata from: %s to determine last version-suffix serial number. Error: %s", e,
+                                                     mdFile, e.getMessage() );
                 }
                 catch ( final XmlPullParserException e )
                 {
-                    throw new VersionModifierException( "Cannot parse metadata from: %s to determine last version-suffix serial number. Error: %s",
-                                                        e, mdFile, e.getMessage() );
+                    throw new ManipulationException( "Cannot parse metadata from: %s to determine last version-suffix serial number. Error: %s", e,
+                                                     mdFile, e.getMessage() );
                 }
                 finally
                 {

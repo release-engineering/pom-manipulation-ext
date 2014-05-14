@@ -1,4 +1,4 @@
-package org.commonjava.maven.ext.versioning.fixture;
+package org.commonjava.maven.ext.manip.fixture;
 
 import java.io.File;
 import java.util.ArrayList;

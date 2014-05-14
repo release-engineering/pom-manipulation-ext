@@ -1,8 +1,8 @@
-package org.commonjava.maven.ext.versioning;
+package org.commonjava.maven.ext.manip;
 
 import java.text.MessageFormat;
 
-public class VersionModifierException
+public class ManipulationException
     extends Exception
 {
 
@@ -12,7 +12,7 @@ public class VersionModifierException
 
     private String formattedMessage;
 
-    public VersionModifierException( final String messageFormat, final Throwable cause, final Object... params )
+    public ManipulationException( final String messageFormat, final Throwable cause, final Object... params )
     {
         super( messageFormat, cause );
         this.params = params;

@@ -1,8 +1,5 @@
-package org.commonjava.maven.ext.versioning;
+package org.commonjava.maven.ext.manip;
 
-import static org.codehaus.plexus.util.StringUtils.join;
-
-import java.io.IOException;
 import java.util.List;
 
 import org.apache.maven.eventspy.AbstractEventSpy;
@@ -11,14 +8,17 @@ import org.apache.maven.execution.ExecutionEvent;
 import org.apache.maven.execution.ExecutionEvent.Type;
 import org.apache.maven.execution.MavenExecutionRequest;
 import org.apache.maven.project.MavenProject;
-import org.apache.maven.project.ProjectBuildingException;
 import org.codehaus.plexus.component.annotations.Component;
 import org.codehaus.plexus.component.annotations.Requirement;
 import org.codehaus.plexus.logging.Logger;
-import org.jdom.JDOMException;
+import org.commonjava.maven.ext.manip.state.ManipulationSession;
 
+/**
+ * Implements hooks necessary to apply modifications in the Maven bootstrap, before the build starts.
+ * @author jdcasey
+ */
 @Component( role = EventSpy.class, hint = "versioning" )
-public class VersioningEventSpy
+public class ManipulatingEventSpy
     extends AbstractEventSpy
 {
 
@@ -26,10 +26,11 @@ public class VersioningEventSpy
     private Logger logger;
 
     @Requirement
-    private ProjectVersioningScanner scanner;
+    private ManipulationManager manipulationManager;
 
+    // FIXME: This was a classic getInstance() singleton...injection MAY not work here.
     @Requirement
-    private VersioningModifier modder;
+    private ManipulationSession session;
 
     @SuppressWarnings( "incomplete-switch" )
     @Override
@@ -38,26 +39,25 @@ public class VersioningEventSpy
     {
         try
         {
-            if ( event instanceof MavenExecutionRequest )
-            {
-                final VersioningSession session = VersioningSession.getInstance();
-                session.setRequest( (MavenExecutionRequest) event );
-            }
+            //            if ( event instanceof MavenExecutionRequest )
+            //            {
+            //                session.setRequest( (MavenExecutionRequest) event );
+            //            }
 
             if ( event instanceof ExecutionEvent )
             {
-                final VersioningSession session = VersioningSession.getInstance();
-                if ( !session.isEnabled() )
-                {
-                    return;
-                }
-
                 final ExecutionEvent ee = (ExecutionEvent) event;
 
                 if ( ee.getSession() != null )
                 {
-                    session.setRepositorySystemSession( ee.getSession()
-                                                          .getRepositorySession() );
+                    manipulationManager.init( ee.getSession(), session );
+                }
+
+                if ( !session.isEnabled() )
+                {
+                    logger.info( "Manipulation engine disabled." );
+                    super.onEvent( event );
+                    return;
                 }
 
                 final ExecutionEvent.Type type = ee.getType();
@@ -68,17 +68,14 @@ public class VersioningEventSpy
                         logger.info( "Pre-scanning projects to calculate versioning changes..." );
                         final MavenExecutionRequest req = session.getRequest();
 
-                        session.setVersioningChanges( scanner.scanVersioningChanges( req.getPom(), ee.getSession(),
-                                                                                     req.getProjectBuildingRequest(),
-                                                                                     req.isRecursive() ) );
+                        manipulationManager.scan( req.getPom(), session );
                         break;
                     }
                     case SessionStarted:
                     {
-                        logger.info( "Rewriting projects with versioning changes:\n\n  "
-                            + join( session.getVersioningChanges()
-                                           .entrySet()
-                                           .iterator(), "\n  " ) + "\n\n" );
+                        //                        logger.info( "Rewriting projects with manipulation changes:\n\n  " + join( session.getVersioningChanges()
+                        //                                                                                                          .entrySet()
+                        //                                                                                                          .iterator(), "\n  " ) + "\n\n" );
 
                         final List<MavenProject> projects = ee.getSession()
                                                               .getProjects();
@@ -89,7 +86,7 @@ public class VersioningEventSpy
                                                                                .getPomFile() + ")" );
                         }
 
-                        modder.rewriteChangedPOMs( projects );
+                        manipulationManager.applyManipulations( projects, session );
 
                         break;
                     }
@@ -103,21 +100,9 @@ public class VersioningEventSpy
                 }
             }
         }
-        catch ( final VersionModifierException e )
+        catch ( final ManipulationException e )
         {
             throw new Error( "Versioning modification failed during project pre-scanning phase: " + e.getMessage(), e );
-        }
-        catch ( final ProjectBuildingException e )
-        {
-            throw new Error( "Versioning modification failed during project pre-scanning phase: " + e.getMessage(), e );
-        }
-        catch ( final IOException e )
-        {
-            throw new Error( "Versioning modification failed during POM rewriting phase: " + e.getMessage(), e );
-        }
-        catch ( final JDOMException e )
-        {
-            throw new Error( "Versioning modification failed during POM rewriting phase: " + e.getMessage(), e );
         }
 
         super.onEvent( event );

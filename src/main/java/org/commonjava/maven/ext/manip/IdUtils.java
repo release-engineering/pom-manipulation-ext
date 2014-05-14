@@ -1,9 +1,14 @@
-package org.commonjava.maven.ext.versioning;
+package org.commonjava.maven.ext.manip;
 
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Parent;
 import org.apache.maven.project.MavenProject;
 
+/**
+ * Convenience utilities for converting {@link Model} and {@link MavenProject} instances to GA / GAV strings.
+ * 
+ * @author jdcasey
+ */
 public final class IdUtils
 {
 
