@@ -67,6 +67,7 @@ public class VersioningModelProcessor
         final VersioningSession session = VersioningSession.getInstance();
         if ( !session.isEnabled() )
         {
+            logger.debug( "[VERSION-EXT] " + model.toString() + ": Versioning session disabled. Skipping modification." );
             return;
         }
 
@@ -75,7 +76,12 @@ public class VersioningModelProcessor
         {
             if ( modder.applyVersioningChanges( model, session.getVersioningChanges() ) )
             {
+                logger.debug( "[VERSION-EXT] " + model.toString() + ": Version modified." );
                 changed.add( ga( model ) );
+            }
+            else
+            {
+                logger.debug( "[VERSION-EXT] " + model.toString() + ": No version modifications. Skipping modification." );
             }
         }
         catch ( final InterpolationException e )
