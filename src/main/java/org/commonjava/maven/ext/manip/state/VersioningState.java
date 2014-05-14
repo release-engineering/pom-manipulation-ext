@@ -2,6 +2,7 @@ package org.commonjava.maven.ext.manip.state;
 
 import java.util.Map;
 import java.util.Properties;
+import java.util.logging.Logger;
 
 import org.commonjava.maven.ext.manip.impl.ProjectVersioningManipulator;
 
@@ -32,6 +33,9 @@ public class VersioningState
         suffix = userProps.getProperty( VERSION_SUFFIX_SYSPROP );
         incrementSerialSuffix = userProps.getProperty( INCREMENT_SERIAL_SUFFIX_SYSPROP );
         preserveSnapshot = Boolean.parseBoolean( userProps.getProperty( VERSION_SUFFIX_SNAPSHOT_SYSPROP ) );
+
+        Logger.getLogger( getClass().getName() )
+              .info( String.format( "Suffix: %s\nIncremental suffix: %s\nPreserve snapshot: %s", suffix, incrementSerialSuffix, preserveSnapshot ) );
     }
 
     public void setVersioningChanges( final Map<String, String> versioningChanges )

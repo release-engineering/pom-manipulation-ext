@@ -58,7 +58,7 @@ public class ManipulationSession
      */
     public boolean isEnabled()
     {
-        return Boolean.valueOf( getUserProperties().getProperty( MANIPULATIONS_DISABLED_PROP, "false" ) );
+        return !Boolean.valueOf( getUserProperties().getProperty( MANIPULATIONS_DISABLED_PROP, "false" ) );
     }
 
     public MavenExecutionRequest getRequest()
@@ -100,6 +100,25 @@ public class ManipulationSession
     public void setMavenSession( final MavenSession mavenSession )
     {
         this.mavenSession = mavenSession;
+
+        final File pom = mavenSession.getRequest()
+                                     .getPom();
+
+        if ( pom != null )
+        {
+            File dir = pom.getParentFile();
+            if ( dir == null )
+            {
+                dir = pom.getAbsoluteFile()
+                         .getParentFile();
+            }
+
+            markerFile = new File( dir, "target/manipulation.log" );
+        }
+        else
+        {
+            markerFile = new File( "target/manipulation.log" );
+        }
     }
 
     private final Set<String> changedGAs = new HashSet<String>();
