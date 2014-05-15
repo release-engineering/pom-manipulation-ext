@@ -4,6 +4,7 @@ import static org.commonjava.maven.ext.manip.IdUtils.ga;
 import static org.commonjava.maven.ext.manip.IdUtils.gav;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -107,28 +108,31 @@ public class ProjectVersioningManipulator
      * a task which is handled by the {@link ManipulationManager}.
      */
     @Override
-    public boolean applyChanges( final List<MavenProject> projects, final ManipulationSession session )
+    public Set<MavenProject> applyChanges( final List<MavenProject> projects, final ManipulationSession session )
         throws ManipulationException
     {
         final VersioningState state = session.getState( VersioningState.class );
 
         if ( !session.isEnabled() || state == null || !state.isEnabled() )
         {
-            return false;
+            return Collections.emptySet();
         }
 
         final Map<String, Model> manipulatedModels = session.getManipulatedModels();
+        final Set<MavenProject> changed = new HashSet<MavenProject>();
 
-        boolean changes = false;
         for ( final MavenProject project : projects )
         {
             final String ga = ga( project );
             logger.info( "Applying changes to: " + ga );
             final Model model = manipulatedModels.get( ga );
-            changes = applyVersioningChanges( model, state, session ) || changes;
+            if ( applyVersioningChanges( model, state, session ) )
+            {
+                changed.add( project );
+            }
         }
 
-        return changes;
+        return changed;
     }
 
     /**

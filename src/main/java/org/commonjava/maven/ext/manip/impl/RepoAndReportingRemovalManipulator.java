@@ -3,9 +3,11 @@ package org.commonjava.maven.ext.manip.impl;
 import static org.commonjava.maven.ext.manip.IdUtils.ga;
 
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Repository;
@@ -66,41 +68,43 @@ public class RepoAndReportingRemovalManipulator
      * discovered/read by the main Maven build initialization.
      */
     @Override
-    public boolean applyChanges( final List<MavenProject> projects, final ManipulationSession session )
+    public Set<MavenProject> applyChanges( final List<MavenProject> projects, final ManipulationSession session )
         throws ManipulationException
     {
         final State state = session.getState( RepoReportingState.class );
         if ( !session.isEnabled() || !state.isEnabled() )
         {
             logger.info( "Version Manipulator: Nothing to do!" );
-            return false;
+            return Collections.emptySet();
         }
 
         final Map<String, Model> manipulatedModels = session.getManipulatedModels();
+        final Set<MavenProject> changed = new HashSet<MavenProject>();
 
-        boolean changed = false;
         for ( final MavenProject project : projects )
         {
             final String ga = ga( project );
             logger.info( "Applying changes to: " + ga );
             final Model model = manipulatedModels.get( ga );
 
-            if ( model.getRepositories() != null && !model.getRepositories().isEmpty() )
+            if ( model.getRepositories() != null && !model.getRepositories()
+                                                          .isEmpty() )
             {
-                model.setRepositories( Collections.<Repository>emptyList() );
-                changed = true;
+                model.setRepositories( Collections.<Repository> emptyList() );
+                changed.add( project );
             }
 
-            if ( model.getPluginRepositories() != null && !model.getPluginRepositories().isEmpty() )
+            if ( model.getPluginRepositories() != null && !model.getPluginRepositories()
+                                                                .isEmpty() )
             {
-                model.setPluginRepositories( Collections.<Repository>emptyList() );
-                changed = true;
+                model.setPluginRepositories( Collections.<Repository> emptyList() );
+                changed.add( project );
             }
 
             if ( model.getReporting() != null )
             {
                 model.setReporting( null );
-                changed = true;
+                changed.add( project );
             }
         }
 

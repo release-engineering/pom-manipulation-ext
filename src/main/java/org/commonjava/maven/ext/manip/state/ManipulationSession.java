@@ -35,7 +35,7 @@ public class ManipulationSession
     @Requirement
     private Logger logger;
 
-    private final Map<Class<?>, Object> states = new HashMap<Class<?>, Object>();
+    private final Map<Class<?>, State> states = new HashMap<Class<?>, State>();
 
     private MavenSession mavenSession;
 
@@ -67,12 +67,12 @@ public class ManipulationSession
         return mavenSession == null ? null : mavenSession.getRepositorySession();
     }
 
-    public void setState( final Object state )
+    public void setState( final State state )
     {
         states.put( state.getClass(), state );
     }
 
-    public <T> T getState( final Class<T> stateType )
+    public <T extends State> T getState( final Class<T> stateType )
     {
         return stateType.cast( states.get( stateType ) );
     }

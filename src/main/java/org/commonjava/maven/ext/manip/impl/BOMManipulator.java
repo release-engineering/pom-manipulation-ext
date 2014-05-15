@@ -2,10 +2,13 @@ package org.commonjava.maven.ext.manip.impl;
 
 import static org.commonjava.maven.ext.manip.IdUtils.ga;
 
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Plugin;
@@ -31,7 +34,10 @@ public class BOMManipulator
     @Requirement
     protected Logger logger;
 
-    private enum RemoteType { PROPERTY, PLUGIN };
+    private enum RemoteType
+    {
+        PROPERTY, PLUGIN
+    };
 
     protected BOMManipulator()
     {
@@ -69,7 +75,7 @@ public class BOMManipulator
      * discovered/read by the main Maven build initialization.
      */
     @Override
-    public boolean applyChanges( final List<MavenProject> projects, final ManipulationSession session )
+    public Set<MavenProject> applyChanges( final List<MavenProject> projects, final ManipulationSession session )
         throws ManipulationException
     {
         final BOMState state = session.getState( BOMState.class );
@@ -77,39 +83,41 @@ public class BOMManipulator
         if ( !session.isEnabled() || !state.isEnabled() )
         {
             logger.info( "Version Manipulator: Nothing to do!" );
-            return false;
+            return Collections.emptySet();
         }
 
         final Map<String, Model> manipulatedModels = session.getManipulatedModels();
-        Map<String,String> propertyOverride = loadRemoteOverrides( RemoteType.PROPERTY, state.getRemotePropertyMgmt() );
-        Map<String,String> pluginOverride = loadRemoteOverrides( RemoteType.PLUGIN, state.getRemotePluginMgmt() );
-
-        boolean changed = false;
+        final Map<String, String> propertyOverride = loadRemoteOverrides( RemoteType.PROPERTY, state.getRemotePropertyMgmt() );
+        final Map<String, String> pluginOverride = loadRemoteOverrides( RemoteType.PLUGIN, state.getRemotePluginMgmt() );
+        final Set<MavenProject> changed = new HashSet<MavenProject>();
 
         for ( final MavenProject project : projects )
         {
-            if (propertyOverride.size() > 0 && project.isExecutionRoot())
+            if ( propertyOverride.size() > 0 && project.isExecutionRoot() )
             {
                 final String ga = ga( project );
                 logger.info( "Applying property changes to: " + ga );
                 final Model model = manipulatedModels.get( ga );
 
-                model.getProperties().putAll( propertyOverride );
-                changed = true;
+                model.getProperties()
+                     .putAll( propertyOverride );
+                changed.add( project );
             }
-            if (pluginOverride.size() > 0 && project.isExecutionRoot())
+            if ( pluginOverride.size() > 0 && project.isExecutionRoot() )
             {
                 final String ga = ga( project );
                 logger.info( "Applying plugin changes to: " + ga );
                 final Model model = manipulatedModels.get( ga );
 
                 // If the model doesn't have any plugin management set by default, create one for it
-                PluginManagement pluginManagement = model.getBuild().getPluginManagement();
+                PluginManagement pluginManagement = model.getBuild()
+                                                         .getPluginManagement();
 
                 if ( pluginManagement == null )
                 {
                     pluginManagement = new PluginManagement();
-                    model.getBuild().setPluginManagement( pluginManagement );
+                    model.getBuild()
+                         .setPluginManagement( pluginManagement );
                     logger.info( "Created new Plugin Management for model" );
                 }
 
@@ -117,10 +125,11 @@ public class BOMManipulator
                 applyOverrides( pluginManagement.getPlugins(), pluginOverride );
 
                 // Override plugin versions
-                List<Plugin> projectPlugins = model.getBuild().getPlugins();
+                final List<Plugin> projectPlugins = model.getBuild()
+                                                         .getPlugins();
                 applyOverrides( projectPlugins, pluginOverride );
 
-                changed = true;
+                changed.add( project );
             }
         }
 
@@ -133,38 +142,41 @@ public class BOMManipulator
      * @return Map between the GA of the plugin and the version of the plugin. If the system property is not set,
      *         returns an empty map.
      */
-    private Map<String,String> loadRemoteOverrides(RemoteType rt, String remoteMgmt) throws ManipulationException
+    private Map<String, String> loadRemoteOverrides( final RemoteType rt, final String remoteMgmt )
+        throws ManipulationException
     {
-        Map<String,String> overrides = new HashMap<String,String>();
+        final Map<String, String> overrides = new HashMap<String, String>();
 
-        if ( remoteMgmt == null || remoteMgmt.length() == 0)
+        if ( remoteMgmt == null || remoteMgmt.length() == 0 )
         {
             return overrides;
         }
 
-        String[] remoteMgmtPomGAVs = remoteMgmt.split( "," );
+        final String[] remoteMgmtPomGAVs = remoteMgmt.split( "," );
 
         // Iterate in reverse order so that the first GAV in the list overwrites the last
         for ( int i = ( remoteMgmtPomGAVs.length - 1 ); i > -1; --i )
         {
-            String nextGAV = remoteMgmtPomGAVs[i];
+            final String nextGAV = remoteMgmtPomGAVs[i];
 
             if ( !IdUtils.validGav( nextGAV ) )
             {
                 logger.warn( "Skipping invalid remote management GAV: " + nextGAV );
                 continue;
             }
-            switch (rt)
+            switch ( rt )
             {
                 case PROPERTY:
-                    overrides.putAll( EffectiveModelBuilder.getInstance().getRemotePropertyMappingOverrides( nextGAV ) );
+                    overrides.putAll( EffectiveModelBuilder.getInstance()
+                                                           .getRemotePropertyMappingOverrides( nextGAV ) );
                     break;
                 case PLUGIN:
-                    overrides.putAll( EffectiveModelBuilder.getInstance().getRemotePluginVersionOverrides( nextGAV ) );
+                    overrides.putAll( EffectiveModelBuilder.getInstance()
+                                                           .getRemotePluginVersionOverrides( nextGAV ) );
                     break;
             }
         }
-        logger.info( "### remote override loaded" + overrides);
+        logger.info( "### remote override loaded" + overrides );
 
         return overrides;
     }
@@ -175,14 +187,14 @@ public class BOMManipulator
      * @param plugins The list of plugins to modify
      * @param pluginVersionOverrides The list of version overrides to apply to the plugins
      */
-    private void applyOverrides( List<Plugin> plugins, Map<String, String> pluginVersionOverrides )
+    private void applyOverrides( final List<Plugin> plugins, final Map<String, String> pluginVersionOverrides )
     {
-        for ( Plugin plugin : plugins )
+        for ( final Plugin plugin : plugins )
         {
-            String groupIdArtifactId = plugin.getGroupId() + BOMState.GAV_SEPERATOR + plugin.getArtifactId();
+            final String groupIdArtifactId = plugin.getGroupId() + BOMState.GAV_SEPERATOR + plugin.getArtifactId();
             if ( pluginVersionOverrides.containsKey( groupIdArtifactId ) )
             {
-                String overrideVersion = pluginVersionOverrides.get( groupIdArtifactId );
+                final String overrideVersion = pluginVersionOverrides.get( groupIdArtifactId );
                 plugin.setVersion( overrideVersion );
                 logger.info( "Altered plugin: " + groupIdArtifactId + "=" + overrideVersion );
             }

@@ -4,8 +4,10 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.project.DefaultProjectBuildingRequest;
@@ -106,27 +108,34 @@ public class ManipulationManager
      *   <li>rewrite any POMs that were changed</li>
      * </ul>
      */
-    public void applyManipulations( final List<MavenProject> projects, final ManipulationSession session )
+    public Set<MavenProject> applyManipulations( final List<MavenProject> projects, final ManipulationSession session )
         throws ManipulationException
     {
         PomModifier.readModelsForManipulation( projects, session );
 
-        boolean changed = false;
+        final Set<MavenProject> changed = new HashSet<MavenProject>();
         for ( final Map.Entry<String, Manipulator> entry : manipulators.entrySet() )
         {
-            changed = entry.getValue()
-                           .applyChanges( projects, session ) || changed;
+            final Set<MavenProject> mChanged = entry.getValue()
+                                                    .applyChanges( projects, session );
+
+            if ( mChanged != null )
+            {
+                changed.addAll( mChanged );
+            }
         }
 
-        if ( changed )
+        if ( !changed.isEmpty() )
         {
             logger.info( "REWRITE CHANGED: " + projects );
-            PomModifier.rewriteChangedPOMs( projects, session );
+            PomModifier.rewritePOMs( changed, session );
         }
         else
         {
             logger.info( "NO CHANGES." );
         }
+
+        return changed;
     }
 
     /**

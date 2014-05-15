@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Reader;
 import java.io.Writer;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -96,7 +97,7 @@ public final class PomModifier
      * For any project listed as changed (tracked by GA in the session), write the modified model out to disk. Uses JDOM {@link ModelWriter}
      * ({@MavenJDOMWriter}) to preserve as much formatting as possible.
      */
-    public static void rewriteChangedPOMs( final List<MavenProject> projects, final ManipulationSession session )
+    public static void rewritePOMs( final Collection<MavenProject> projects, final ManipulationSession session )
         throws ManipulationException
     {
         final Logger logger = Logger.getLogger( PomModifier.class.getName() );
@@ -126,7 +127,7 @@ public final class PomModifier
                 // this happens with integration tests!
                 // This is a total hack, but the alternative seems to be adding complexity through a custom model processor.
                 if ( pom.getName()
-                                .equals( "interpolated-pom.xml" ) )
+                        .equals( "interpolated-pom.xml" ) )
                 {
                     final File dir = pom.getParentFile();
                     pom = dir == null ? new File( "pom.xml" ) : new File( dir, "pom.xml" );
