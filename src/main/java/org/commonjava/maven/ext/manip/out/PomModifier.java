@@ -11,7 +11,6 @@ import java.io.Writer;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.logging.Logger;
 
 import org.apache.maven.model.Model;
@@ -33,7 +32,7 @@ import org.jdom.output.Format.TextMode;
 
 /**
  * Utility class used to read raw models for POMs, and rewrite any project POMs that were changed.
- * 
+ *
  * @author jdcasey
  */
 public final class PomModifier
@@ -44,7 +43,7 @@ public final class PomModifier
     }
 
     /**
-     * Read {@link Model} instances by parsing the POM directly. This is useful to escape some post-processing that happens when the 
+     * Read {@link Model} instances by parsing the POM directly. This is useful to escape some post-processing that happens when the
      * {@link MavenProject#getOriginalModel()} instance is set.
      */
     public static void readModelsForManipulation( final List<MavenProject> projects, final ManipulationSession session )
@@ -94,7 +93,7 @@ public final class PomModifier
     }
 
     /**
-     * For any project listed as changed (tracked by GA in the session), write the modified model out to disk. Uses JDOM {@link ModelWriter} 
+     * For any project listed as changed (tracked by GA in the session), write the modified model out to disk. Uses JDOM {@link ModelWriter}
      * ({@MavenJDOMWriter}) to preserve as much formatting as possible.
      */
     public static void rewriteChangedPOMs( final List<MavenProject> projects, final ManipulationSession session )
@@ -102,7 +101,6 @@ public final class PomModifier
     {
         final Logger logger = Logger.getLogger( PomModifier.class.getName() );
 
-        final Set<String> changed = session.getChangedGAs();
         final Map<String, Model> modifiedModels = session.getManipulatedModels();
 
         final File marker = getMarkerFile( session );
@@ -117,33 +115,26 @@ public final class PomModifier
             for ( final MavenProject project : projects )
             {
                 final String ga = ga( project );
-                if ( !changed.contains( ga ) )
-                {
-                    logger.info( String.format( "%s has not changed. Not rewriting.", project ) );
-                }
-                else
-                {
-                    logger.info( String.format( "%s modified! Rewriting.", project ) );
-                    File pom = project.getFile();
+                logger.info( String.format( "%s modified! Rewriting.", project ) );
+                File pom = project.getFile();
 
-                    final Model model = modifiedModels.get( ga );
-                    logger.info( "Rewriting: " + model.toString() + " in place of: " + project.getId() + "\n       to POM: " + pom );
+                final Model model = modifiedModels.get( ga );
+                logger.info( "Rewriting: " + model.toString() + " in place of: " + project.getId() + "\n       to POM: " + pom );
+
+                write( pom, model );
+
+                // this happens with integration tests!
+                // This is a total hack, but the alternative seems to be adding complexity through a custom model processor.
+                if ( pom.getName()
+                                .equals( "interpolated-pom.xml" ) )
+                {
+                    final File dir = pom.getParentFile();
+                    pom = dir == null ? new File( "pom.xml" ) : new File( dir, "pom.xml" );
 
                     write( pom, model );
-
-                    // this happens with integration tests!
-                    // This is a total hack, but the alternative seems to be adding complexity through a custom model processor.
-                    if ( pom.getName()
-                            .equals( "interpolated-pom.xml" ) )
-                    {
-                        final File dir = pom.getParentFile();
-                        pom = dir == null ? new File( "pom.xml" ) : new File( dir, "pom.xml" );
-
-                        write( pom, model );
-                    }
-
-                    pw.println( project.getId() );
                 }
+
+                pw.println( project.getId() );
             }
         }
         catch ( final IOException e )
