@@ -18,6 +18,12 @@ public class ManipulationException
         this.params = params;
     }
 
+    public ManipulationException( String string )
+    {
+        super (string);
+        params = null;
+    }
+
     @Override
     public synchronized String getMessage()
     {
