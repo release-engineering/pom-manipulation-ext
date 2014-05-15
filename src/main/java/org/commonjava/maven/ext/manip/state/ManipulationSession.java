@@ -96,16 +96,9 @@ public class ManipulationSession
         this.mavenSession = mavenSession;
     }
 
-    private final Set<String> changedGAs = new HashSet<String>();
-
     private Map<String, Model> rawModels;
 
     private List<MavenProject> projects;
-
-    public Set<String> getChangedGAs()
-    {
-        return changedGAs;
-    }
 
     public void setManipulatedModels( final Map<String, Model> rawModels )
     {
@@ -115,11 +108,6 @@ public class ManipulationSession
     public Map<String, Model> getManipulatedModels()
     {
         return rawModels;
-    }
-
-    public void addChangedGA( final String ga )
-    {
-        changedGAs.add( ga );
     }
 
     public Properties getUserProperties()

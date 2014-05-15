@@ -34,13 +34,13 @@ import org.commonjava.maven.ext.manip.state.ManipulationSession;
 import org.commonjava.maven.ext.manip.state.VersioningState;
 
 /**
- * {@link Manipulator} implementation that can modify a project's version with either static or calculated, incremental version qualifier. Snapshot 
- * versions can be configured to be preserved, though they are truncated to release versions by default. Configuration and accumulated version 
+ * {@link Manipulator} implementation that can modify a project's version with either static or calculated, incremental version qualifier. Snapshot
+ * versions can be configured to be preserved, though they are truncated to release versions by default. Configuration and accumulated version
  * changes are stored in a {@link VersioningState} instance, which is in turn stored in the {@link ManipulationSession}.
- * 
+ *
  * This class orchestrates {@link VersionCalculator} scanning/calculation, along with application of the calculated changes at the end of the
  * manipulation process.
- * 
+ *
  * @author jdcasey
  */
 @Component( role = Manipulator.class, hint = "project-versioning" )
@@ -100,9 +100,9 @@ public class ProjectVersioningManipulator
 
     /**
      * Apply any project versioning changes accumulated in the {@link VersioningState} instance associated with the {@link ManipulationSession} to
-     * the list of {@link MavenProject}'s given. This happens near the end of the Maven session-bootstrapping sequence, before the projects are 
+     * the list of {@link MavenProject}'s given. This happens near the end of the Maven session-bootstrapping sequence, before the projects are
      * discovered/read by the main Maven build initialization.
-     * 
+     *
      * This method depends on {@link PomModifier#readModelsForManipulation(List, ManipulationSession)} output stored in the {@link ManipulationSession},
      * a task which is handled by the {@link ManipulationManager}.
      */
@@ -134,10 +134,10 @@ public class ProjectVersioningManipulator
     /**
      * Apply any project versioning changes applicable for the given {@link Model}, using accumulated version-change information stored in the
      * {@link VersioningState} instance, and produced during the {@link ProjectVersioningManipulator#scan(List, ManipulationSession)} invocation.
-     * 
+     *
      * These changes include the main POM version, but may also include the parent declaration and dependencies, if they reference other POMs in the
      * current build.
-     * 
+     *
      * If the project is modified, then it is marked as changed in the {@link ManipulationSession}, which triggers the associated POM to be rewritten.
      */
     // TODO: Loooong method
@@ -261,7 +261,6 @@ public class ProjectVersioningManipulator
         if ( changed )
         {
             logger.info( "Applied versioning changes to: " + gav( model ) );
-            session.addChangedGA( ga( model ) );
         }
 
         return changed;

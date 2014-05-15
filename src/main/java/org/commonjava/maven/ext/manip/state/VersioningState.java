@@ -7,10 +7,10 @@ import org.commonjava.maven.ext.manip.impl.ProjectVersioningManipulator;
 
 /**
  * Captures configuration and changes relating to the projects' versions. Used by {@link ProjectVersioningManipulator}.
- * 
+ *
  * @author jdcasey
  */
-public class VersioningState
+public class VersioningState implements State
 {
 
     public static final String VERSION_SUFFIX_SYSPROP = "version.suffix";
@@ -61,10 +61,12 @@ public class VersioningState
 
     /**
      * Enabled ONLY if either version.incremental.suffix or version.suffix is provided in the user properties / CLI -D options.
-     * 
+     *
      * @see #VERSION_SUFFIX_SYSPROP
      * @see #INCREMENT_SERIAL_SUFFIX_SYSPROP
+     * @see org.commonjava.maven.ext.manip.state.State#isEnabled()
      */
+    @Override
     public boolean isEnabled()
     {
         return incrementSerialSuffix != null || suffix != null;
