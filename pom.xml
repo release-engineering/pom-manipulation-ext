@@ -2,12 +2,12 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.commonjava.maven.ext</groupId>
-  <artifactId>versioning-extension</artifactId>
+  <artifactId>pom-manipulation-ext</artifactId>
   <version>0.7-EXP-SNAPSHOT</version>
-  <name>Versioning Extension for Maven</name>
-  <url>http://github.com/jdcasey/versioning-extension</url>
+  <name>POM Manipulation Extension for Maven</name>
+  <url>http://github.com/jdcasey/pom-manipulation-ext</url>
   <description>
-    lib/ext-style extension for Apache Maven that allows manipulation of a version suffix.
+    lib/ext-style extension for Apache Maven that allows pre-processing of Maven pom.xml's.
   </description>
   <licenses>
     <license>
@@ -23,9 +23,9 @@
     </developer>
   </developers>
   <scm>
-    <connection>scm:git:http://jdcasey@github.com/jdcasey/maven-versioning-extension.git</connection>
-    <developerConnection>scm:git:git@github.com:jdcasey/maven-versioning-extension.git</developerConnection>
-    <url>http://github.com/jdcasey/maven-versioning-extension</url>
+    <connection>scm:git:http://jdcasey@github.com/jdcasey/pom-manipulation-ext.git</connection>
+    <developerConnection>scm:git:git@github.com:jdcasey/pom-manipulation-ext.git</developerConnection>
+    <url>http://github.com/jdcasey/pom-manipulation-ext</url>
   </scm>
   <distributionManagement>
     <repository>
