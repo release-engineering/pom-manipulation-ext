@@ -7,11 +7,16 @@ import org.apache.maven.eventspy.EventSpy;
 import org.apache.maven.execution.ExecutionEvent;
 import org.apache.maven.execution.ExecutionEvent.Type;
 import org.apache.maven.execution.MavenExecutionRequest;
+import org.apache.maven.model.building.ModelBuilder;
 import org.apache.maven.project.MavenProject;
+import org.codehaus.plexus.PlexusContainerException;
 import org.codehaus.plexus.component.annotations.Component;
 import org.codehaus.plexus.component.annotations.Requirement;
+import org.codehaus.plexus.component.repository.exception.ComponentLookupException;
 import org.codehaus.plexus.logging.Logger;
+import org.commonjava.maven.ext.manip.resolver.EffectiveModelBuilder;
 import org.commonjava.maven.ext.manip.state.ManipulationSession;
+import org.sonatype.aether.impl.ArtifactResolver;
 
 /**
  * Implements hooks necessary to apply modifications in the Maven bootstrap, before the build starts.
@@ -27,6 +32,12 @@ public class ManipulatingEventSpy
 
     @Requirement
     private ManipulationManager manipulationManager;
+
+    @Requirement
+    private ArtifactResolver resolver;
+
+    @Requirement
+    private ModelBuilder modelBuilder;
 
     // FIXME: This was a classic getInstance() singleton...injection MAY not work here.
     @Requirement
@@ -65,7 +76,21 @@ public class ManipulatingEventSpy
                             return;
                         }
 
-                        logger.info( "Pre-scanning projects to calculate versioning changes..." );
+                        try
+                        {
+                            EffectiveModelBuilder.init( logger, ee.getSession(), resolver, modelBuilder );
+                        }
+                        catch ( ComponentLookupException e )
+                        {
+                            logger.error( "EffectiveModelBuilder init could not look up plexus component: " + e );
+                        }
+                        catch ( PlexusContainerException e )
+                        {
+                            logger.error( "EffectiveModelBuilder init produced a plexus container error: " + e );
+                        }
+
+                        logger.info( "Pre-scanning projects to calculate changes..." );
+
                         final MavenExecutionRequest req = session.getRequest();
 
                         manipulationManager.scan( req.getPom(), session );
@@ -78,7 +103,7 @@ public class ManipulatingEventSpy
 
                         for ( final MavenProject project : projects )
                         {
-                            logger.info( "Got " + project + " (POM: " + project.getOriginalModel()
+                            logger.debug( "Got " + project + " (POM: " + project.getOriginalModel()
                                                                                .getPomFile() + ")" );
                         }
 
@@ -102,7 +127,7 @@ public class ManipulatingEventSpy
         }
         catch ( final ManipulationException e )
         {
-            throw new Error( "Versioning modification failed during project pre-scanning phase: " + e.getMessage(), e );
+            throw new Error( "Modification failed during project pre-scanning phase: " + e.getMessage(), e );
         }
 
         super.onEvent( event );

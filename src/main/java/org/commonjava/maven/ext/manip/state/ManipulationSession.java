@@ -1,11 +1,9 @@
 package org.commonjava.maven.ext.manip.state;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.Set;
 
 import org.apache.maven.execution.MavenExecutionRequest;
 import org.apache.maven.execution.MavenSession;
@@ -19,10 +17,10 @@ import org.commonjava.maven.ext.manip.impl.Manipulator;
 import org.sonatype.aether.RepositorySystemSession;
 
 /**
- * Repository for components that help manipulate POMs as needed, and state related to each {@link Manipulator} 
- * (which contains configuration and changes to be applied). This is basically a clearing house for state required by the different parts of the 
+ * Repository for components that help manipulate POMs as needed, and state related to each {@link Manipulator}
+ * (which contains configuration and changes to be applied). This is basically a clearing house for state required by the different parts of the
  * manipulator extension.
- * 
+ *
  * @author jdcasey
  */
 @Component( role = ManipulationSession.class, instantiationStrategy = "singleton" )
@@ -37,6 +35,10 @@ public class ManipulationSession
     @Requirement
     private Logger logger;
 
+    private final Map<Class<?>, Object> states = new HashMap<Class<?>, Object>();
+
+    private MavenSession mavenSession;
+
     public ManipulationSession()
     {
         System.out.println( "[INFO] Maven-Manipulation-Extension " + getClass().getPackage()
@@ -44,9 +46,9 @@ public class ManipulationSession
     }
 
     /**
-     * True (enabled) by default, this is the master kill switch for all manipulations. Manipulator implementations MAY also be enabled/disabled 
+     * True (enabled) by default, this is the master kill switch for all manipulations. Manipulator implementations MAY also be enabled/disabled
      * individually.
-     * 
+     *
      * @see #MANIPULATIONS_DISABLED_PROP
      * @see VersioningState#isEnabled()
      */
@@ -64,10 +66,6 @@ public class ManipulationSession
     {
         return mavenSession == null ? null : mavenSession.getRepositorySession();
     }
-
-    private final Map<Class<?>, Object> states = new HashMap<Class<?>, Object>();
-
-    private MavenSession mavenSession;
 
     public void setState( final Object state )
     {
