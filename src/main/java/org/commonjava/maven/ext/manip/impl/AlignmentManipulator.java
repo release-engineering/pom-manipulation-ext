@@ -11,11 +11,7 @@ import java.util.Properties;
 import java.util.Set;
 
 import org.apache.maven.model.Model;
-import org.apache.maven.model.Plugin;
-import org.apache.maven.model.PluginManagement;
 import org.apache.maven.project.MavenProject;
-import org.codehaus.plexus.component.annotations.Component;
-import org.codehaus.plexus.component.annotations.Requirement;
 import org.codehaus.plexus.logging.Logger;
 import org.commonjava.maven.ext.manip.IdUtils;
 import org.commonjava.maven.ext.manip.ManipulationException;
@@ -24,28 +20,26 @@ import org.commonjava.maven.ext.manip.state.BOMState;
 import org.commonjava.maven.ext.manip.state.ManipulationSession;
 
 /**
- * {@link Manipulator} implementation that can alter property and dependency management sections in a project's pom file.
+ * {@link Manipulator} base implementation used by the property, dependency and plugin manipulators.
  * Configuration is stored in a {@link BOMState} instance, which is in turn stored in the {@link ManipulationSession}.
  */
-@Component( role = Manipulator.class, hint = "bom-manipulator" )
-public class BOMManipulator
+public abstract class AlignmentManipulator
     implements Manipulator
 {
-    @Requirement
-    protected Logger logger;
-
-    private enum RemoteType
+    protected enum RemoteType
     {
-        PROPERTY, PLUGIN
+        PROPERTY, PLUGIN, DEPENDENCY
     };
 
-    protected BOMManipulator()
+    protected Logger baseLogger;
+
+    protected AlignmentManipulator()
     {
     }
 
-    public BOMManipulator( final Logger logger )
+    public AlignmentManipulator( final Logger logger )
     {
-        this.logger = logger;
+        this.baseLogger = logger;
     }
 
     /**
@@ -60,7 +54,7 @@ public class BOMManipulator
     /**
      * Initialize the {@link BOMState} state holder in the {@link ManipulationSession}. This state holder detects
      * version-change configuration from the Maven user properties (-D properties from the CLI) and makes it available for
-     * later invocations of {@link BOMManipulator#scan(List, ManipulationSession)} and the apply* methods.
+     * later invocations of {@link AlignmentManipulator#scan(List, ManipulationSession)} and the apply* methods.
      */
     @Override
     public void init( final ManipulationSession session )
@@ -82,52 +76,22 @@ public class BOMManipulator
 
         if ( !session.isEnabled() || !state.isEnabled() )
         {
-            logger.info( "Version Manipulator: Nothing to do!" );
+            baseLogger.debug( "Version Manipulator: Nothing to do!" );
             return Collections.emptySet();
         }
 
         final Map<String, Model> manipulatedModels = session.getManipulatedModels();
-        final Map<String, String> propertyOverride = loadRemoteOverrides( RemoteType.PROPERTY, state.getRemotePropertyMgmt() );
-        final Map<String, String> pluginOverride = loadRemoteOverrides( RemoteType.PLUGIN, state.getRemotePluginMgmt() );
+        final Map<String, String> overrides = loadRemoteBOM(state);
         final Set<MavenProject> changed = new HashSet<MavenProject>();
 
         for ( final MavenProject project : projects )
         {
-            if ( propertyOverride.size() > 0 && project.isExecutionRoot() )
+            final String ga = ga( project );
+            final Model model = manipulatedModels.get( ga );
+
+            if (overrides.size() > 0)
             {
-                final String ga = ga( project );
-                logger.info( "Applying property changes to: " + ga );
-                final Model model = manipulatedModels.get( ga );
-
-                model.getProperties()
-                     .putAll( propertyOverride );
-                changed.add( project );
-            }
-            if ( pluginOverride.size() > 0 && project.isExecutionRoot() )
-            {
-                final String ga = ga( project );
-                logger.info( "Applying plugin changes to: " + ga );
-                final Model model = manipulatedModels.get( ga );
-
-                // If the model doesn't have any plugin management set by default, create one for it
-                PluginManagement pluginManagement = model.getBuild()
-                                                         .getPluginManagement();
-
-                if ( pluginManagement == null )
-                {
-                    pluginManagement = new PluginManagement();
-                    model.getBuild()
-                         .setPluginManagement( pluginManagement );
-                    logger.info( "Created new Plugin Management for model" );
-                }
-
-                // Override plugin management versions
-                applyOverrides( pluginManagement.getPlugins(), pluginOverride );
-
-                // Override plugin versions
-                final List<Plugin> projectPlugins = model.getBuild()
-                                                         .getPlugins();
-                applyOverrides( projectPlugins, pluginOverride );
+                apply (session, project, model, overrides);
 
                 changed.add( project );
             }
@@ -142,7 +106,7 @@ public class BOMManipulator
      * @return Map between the GA of the plugin and the version of the plugin. If the system property is not set,
      *         returns an empty map.
      */
-    private Map<String, String> loadRemoteOverrides( final RemoteType rt, final String remoteMgmt )
+    protected Map<String, String> loadRemoteOverrides( final RemoteType rt, final String remoteMgmt )
         throws ManipulationException
     {
         final Map<String, String> overrides = new HashMap<String, String>();
@@ -161,7 +125,7 @@ public class BOMManipulator
 
             if ( !IdUtils.validGav( nextGAV ) )
             {
-                logger.warn( "Skipping invalid remote management GAV: " + nextGAV );
+                baseLogger.warn( "Skipping invalid remote management GAV: " + nextGAV );
                 continue;
             }
             switch ( rt )
@@ -174,30 +138,35 @@ public class BOMManipulator
                     overrides.putAll( EffectiveModelBuilder.getInstance()
                                                            .getRemotePluginVersionOverrides( nextGAV ) );
                     break;
+                case DEPENDENCY:
+                    overrides.putAll( EffectiveModelBuilder.getInstance().getRemoteDependencyVersionOverrides( nextGAV ) );
+                    break;
+
             }
         }
-        logger.info( "### remote override loaded" + overrides );
 
         return overrides;
     }
 
+
     /**
-     * Set the versions of any plugins which match the contents of the list of plugin overrides
-     *
-     * @param plugins The list of plugins to modify
-     * @param pluginVersionOverrides The list of version overrides to apply to the plugins
+     * Abstract method to be implemented by subclasses. Returns the remote bom.
+     * @param state
+     * @param session TODO
+     * @param project TODO
+     * @param model
+     * @param override
+     * @throws ManipulationException
      */
-    private void applyOverrides( final List<Plugin> plugins, final Map<String, String> pluginVersionOverrides )
-    {
-        for ( final Plugin plugin : plugins )
-        {
-            final String groupIdArtifactId = plugin.getGroupId() + BOMState.GAV_SEPERATOR + plugin.getArtifactId();
-            if ( pluginVersionOverrides.containsKey( groupIdArtifactId ) )
-            {
-                final String overrideVersion = pluginVersionOverrides.get( groupIdArtifactId );
-                plugin.setVersion( overrideVersion );
-                logger.info( "Altered plugin: " + groupIdArtifactId + "=" + overrideVersion );
-            }
-        }
-    }
+    protected abstract Map<String, String> loadRemoteBOM (BOMState state) throws ManipulationException;
+
+    /**
+     * Abstract method to be implemented by subclasses. Performs the actual injection on the pom file.
+     * @param session TODO
+     * @param project TODO
+     * @param model
+     * @param override
+     * @throws ManipulationException TODO
+     */
+    protected abstract void apply (ManipulationSession session, MavenProject project, Model model, Map<String, String> override) throws ManipulationException;
 }
