@@ -149,7 +149,9 @@ public class ManipulationManager
 
         for ( final Map.Entry<String, Manipulator> entry : manipulators.entrySet() )
         {
-            logger.debug( "Initialising manipulator " + entry.getValue().getClass().toString() );
+            logger.debug( "Initialising manipulator " + entry.getKey() + " (" + entry.getValue()
+                                                                                     .getClass()
+                                                                                     .getSimpleName() + ")" );
             entry.getValue()
                  .init( session );
         }
