@@ -77,7 +77,7 @@ public class ProjectVersioningManipulator
         final VersioningState state = session.getState( VersioningState.class );
         if ( !session.isEnabled() || !state.isEnabled() )
         {
-            logger.info( "Version Manipulator: Nothing to do!" );
+            logger.debug( "Version Manipulator: Nothing to do!" );
             return;
         }
 

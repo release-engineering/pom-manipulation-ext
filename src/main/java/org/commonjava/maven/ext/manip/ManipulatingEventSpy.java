@@ -89,15 +89,9 @@ public class ManipulatingEventSpy
                             logger.error( "EffectiveModelBuilder init produced a plexus container error: " + e );
                         }
 
-                        logger.info( "Pre-scanning projects to calculate changes..." );
-
                         final MavenExecutionRequest req = session.getRequest();
 
                         manipulationManager.scan( req.getPom(), session );
-
-                        //                        logger.info( "Rewriting projects with manipulation changes:\n\n  " + join( session.getVersioningChanges()
-                        //                                                                                                          .entrySet()
-                        //                                                                                                          .iterator(), "\n  " ) + "\n\n" );
 
                         final List<MavenProject> projects = session.getProjectInstances();
 
@@ -117,7 +111,7 @@ public class ManipulatingEventSpy
                     //                    }
                     //                    default:
                     //                    {
-                    //                        logger.info( "ExecutionEvent TYPE: " + ee.getType() );
+                    //                        baseLogger.info( "ExecutionEvent TYPE: " + ee.getType() );
                     //                    }
                 }
                 if ( ee.getType() == Type.ProjectDiscoveryStarted )

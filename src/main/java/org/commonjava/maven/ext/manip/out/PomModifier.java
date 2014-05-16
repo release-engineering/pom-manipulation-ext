@@ -12,13 +12,13 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Logger;
 
 import org.apache.maven.model.Model;
 import org.apache.maven.model.io.ModelWriter;
 import org.apache.maven.model.io.jdom.MavenJDOMWriter;
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 import org.apache.maven.project.MavenProject;
+import org.codehaus.plexus.logging.Logger;
 import org.codehaus.plexus.util.IOUtil;
 import org.codehaus.plexus.util.ReaderFactory;
 import org.codehaus.plexus.util.WriterFactory;
@@ -46,8 +46,9 @@ public final class PomModifier
     /**
      * Read {@link Model} instances by parsing the POM directly. This is useful to escape some post-processing that happens when the
      * {@link MavenProject#getOriginalModel()} instance is set.
+     * @param logger
      */
-    public static void readModelsForManipulation( final List<MavenProject> projects, final ManipulationSession session )
+    public static void readModelsForManipulation( Logger logger, final List<MavenProject> projects, final ManipulationSession session )
         throws ManipulationException
     {
         final Map<String, Model> rawModels = new HashMap<String, Model>();
@@ -64,8 +65,7 @@ public final class PomModifier
             //                pom = dir == null ? new File( "pom.xml" ) : new File( dir, "pom.xml" );
             //            }
 
-            Logger.getLogger( PomModifier.class.getName() )
-                  .info( "Reading raw model for: " + project.getId() + "\n       to POM: " + pom );
+            logger.debug( "Reading raw model for: " + project.getId() + "\n       to POM: " + pom );
 
             Reader pomReader = null;
             Model model;
@@ -96,12 +96,11 @@ public final class PomModifier
     /**
      * For any project listed as changed (tracked by GA in the session), write the modified model out to disk. Uses JDOM {@link ModelWriter}
      * ({@MavenJDOMWriter}) to preserve as much formatting as possible.
+     * @param logger
      */
-    public static void rewritePOMs( final Collection<MavenProject> projects, final ManipulationSession session )
+    public static void rewritePOMs( Logger logger, final Collection<MavenProject> projects, final ManipulationSession session )
         throws ManipulationException
     {
-        final Logger logger = Logger.getLogger( PomModifier.class.getName() );
-
         final Map<String, Model> modifiedModels = session.getManipulatedModels();
 
         final File marker = getMarkerFile( session );

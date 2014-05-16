@@ -74,7 +74,7 @@ public class RepoAndReportingRemovalManipulator
         final State state = session.getState( RepoReportingState.class );
         if ( !session.isEnabled() || !state.isEnabled() )
         {
-            logger.info( "Version Manipulator: Nothing to do!" );
+            logger.debug( "Version Manipulator: Nothing to do!" );
             return Collections.emptySet();
         }
 

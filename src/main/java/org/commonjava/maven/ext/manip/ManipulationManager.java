@@ -24,10 +24,10 @@ import org.commonjava.maven.ext.manip.out.PomModifier;
 import org.commonjava.maven.ext.manip.state.ManipulationSession;
 
 /**
- * Coordinates manipulation of the POMs in a build, by providing methods to read the project set from files ahead of the build proper (using 
- * {@link ProjectBuilder}), then other methods to coordinate all potential {@link Manipulator} implementations (along with the {@link PomModifier} 
+ * Coordinates manipulation of the POMs in a build, by providing methods to read the project set from files ahead of the build proper (using
+ * {@link ProjectBuilder}), then other methods to coordinate all potential {@link Manipulator} implementations (along with the {@link PomModifier}
  * raw-model reader/rewriter).
- * 
+ *
  * @author jdcasey
  */
 @Component( role = ManipulationManager.class )
@@ -111,7 +111,7 @@ public class ManipulationManager
     public Set<MavenProject> applyManipulations( final List<MavenProject> projects, final ManipulationSession session )
         throws ManipulationException
     {
-        PomModifier.readModelsForManipulation( projects, session );
+        PomModifier.readModelsForManipulation( logger, projects, session );
 
         final Set<MavenProject> changed = new HashSet<MavenProject>();
         for ( final Map.Entry<String, Manipulator> entry : manipulators.entrySet() )
@@ -128,7 +128,7 @@ public class ManipulationManager
         if ( !changed.isEmpty() )
         {
             logger.info( "REWRITE CHANGED: " + projects );
-            PomModifier.rewritePOMs( changed, session );
+            PomModifier.rewritePOMs( logger, changed, session );
         }
         else
         {
@@ -149,6 +149,7 @@ public class ManipulationManager
 
         for ( final Map.Entry<String, Manipulator> entry : manipulators.entrySet() )
         {
+            logger.debug( "Initialising manipulator " + entry.getValue().getClass().toString() );
             entry.getValue()
                  .init( session );
         }
