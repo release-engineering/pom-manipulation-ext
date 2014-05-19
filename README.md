@@ -3,6 +3,8 @@
 A Maven extension which provides a series of POM pre-processors. The extension should
 be installed in `$M2_HOME/lib/ext`. When it is activated it will write a log file `target/manipulations.log`.
 
+This extension combines many of the functionality of [VMan](https://github.com/jdcasey/pom-version-manipulator), [Maven Versioning Extension](https://github.com/jdcasey/maven-versioning-extension) and [Maven Dependency Management Extension](https://github.com/jboss/maven-dependency-management-extension).
+
 ## Global disable flag
 
 To disable the entire extension, you can set:
@@ -43,3 +45,7 @@ The extension can detect snapshot versions and either preserve the snapshot or r
     mvn install -Dversion.suffix.snapshot=true
 
 This means that the SNAPSHOT suffix will be kept.
+
+## Repository And Reporting Removal
+
+If the property **repo-reporting-removal** is set to true then reporting and repository sections will be removed from the POM files.
