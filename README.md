@@ -43,3 +43,7 @@ The extension can detect snapshot versions and either preserve the snapshot or r
     mvn install -Dversion.suffix.snapshot=true
 
 This means that the SNAPSHOT suffix will be kept.
+
+## Repository And Reporting Removal
+
+If the property **repo-reporting-removal** is set to true then reporting and repository sections will be removed from the POM files.
