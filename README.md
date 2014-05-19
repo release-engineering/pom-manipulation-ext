@@ -3,6 +3,8 @@
 A Maven extension which provides a series of POM pre-processors. The extension should
 be installed in `$M2_HOME/lib/ext`. When it is activated it will write a log file `target/manipulations.log`.
 
+This extension combines many of the functionality of [VMan](https://github.com/jdcasey/pom-version-manipulator), [Maven Versioning Extension](https://github.com/jdcasey/maven-versioning-extension) and [Maven Dependency Management Extension](https://github.com/jboss/maven-dependency-management-extension).
+
 ## Global disable flag
 
 To disable the entire extension, you can set:
