@@ -1,4 +1,4 @@
-package org.commonjava.maven.ext.manip.out;
+package org.commonjava.maven.ext.manip.io;
 
 import static org.commonjava.maven.ext.manip.IdUtils.ga;
 
@@ -18,6 +18,8 @@ import org.apache.maven.model.io.ModelWriter;
 import org.apache.maven.model.io.jdom.MavenJDOMWriter;
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 import org.apache.maven.project.MavenProject;
+import org.codehaus.plexus.component.annotations.Component;
+import org.codehaus.plexus.component.annotations.Requirement;
 import org.codehaus.plexus.logging.Logger;
 import org.codehaus.plexus.util.IOUtil;
 import org.codehaus.plexus.util.ReaderFactory;
@@ -36,19 +38,22 @@ import org.jdom.output.Format.TextMode;
  *
  * @author jdcasey
  */
-public final class PomModifier
+@Component( role = PomIO.class )
+public class PomIO
 {
 
-    private PomModifier()
+    @Requirement
+    protected Logger logger;
+
+    protected PomIO()
     {
     }
 
     /**
      * Read {@link Model} instances by parsing the POM directly. This is useful to escape some post-processing that happens when the
      * {@link MavenProject#getOriginalModel()} instance is set.
-     * @param logger
      */
-    public static void readModelsForManipulation( Logger logger, final List<MavenProject> projects, final ManipulationSession session )
+    public void readModelsForManipulation( final List<MavenProject> projects, final ManipulationSession session )
         throws ManipulationException
     {
         final Map<String, Model> rawModels = new HashMap<String, Model>();
@@ -98,7 +103,7 @@ public final class PomModifier
      * ({@MavenJDOMWriter}) to preserve as much formatting as possible.
      * @param logger
      */
-    public static void rewritePOMs( Logger logger, final Collection<MavenProject> projects, final ManipulationSession session )
+    public void rewritePOMs( final Collection<MavenProject> projects, final ManipulationSession session )
         throws ManipulationException
     {
         final Map<String, Model> modifiedModels = session.getManipulatedModels();

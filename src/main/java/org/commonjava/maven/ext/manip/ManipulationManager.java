@@ -20,12 +20,12 @@ import org.codehaus.plexus.component.annotations.Component;
 import org.codehaus.plexus.component.annotations.Requirement;
 import org.codehaus.plexus.logging.Logger;
 import org.commonjava.maven.ext.manip.impl.Manipulator;
-import org.commonjava.maven.ext.manip.out.PomModifier;
+import org.commonjava.maven.ext.manip.io.PomIO;
 import org.commonjava.maven.ext.manip.state.ManipulationSession;
 
 /**
  * Coordinates manipulation of the POMs in a build, by providing methods to read the project set from files ahead of the build proper (using
- * {@link ProjectBuilder}), then other methods to coordinate all potential {@link Manipulator} implementations (along with the {@link PomModifier}
+ * {@link ProjectBuilder}), then other methods to coordinate all potential {@link Manipulator} implementations (along with the {@link PomIO}
  * raw-model reader/rewriter).
  *
  * @author jdcasey
@@ -39,6 +39,9 @@ public class ManipulationManager
 
     @Requirement
     private ProjectBuilder projectBuilder;
+
+    @Requirement
+    private PomIO pomIO;
 
     @Requirement( role = Manipulator.class )
     private Map<String, Manipulator> manipulators;
@@ -111,7 +114,7 @@ public class ManipulationManager
     public Set<MavenProject> applyManipulations( final List<MavenProject> projects, final ManipulationSession session )
         throws ManipulationException
     {
-        PomModifier.readModelsForManipulation( logger, projects, session );
+        pomIO.readModelsForManipulation( projects, session );
 
         final Set<MavenProject> changed = new HashSet<MavenProject>();
         for ( final Map.Entry<String, Manipulator> entry : manipulators.entrySet() )
@@ -128,7 +131,7 @@ public class ManipulationManager
         if ( !changed.isEmpty() )
         {
             logger.info( "REWRITE CHANGED: " + projects );
-            PomModifier.rewritePOMs( logger, changed, session );
+            pomIO.rewritePOMs( changed, session );
         }
         else
         {
