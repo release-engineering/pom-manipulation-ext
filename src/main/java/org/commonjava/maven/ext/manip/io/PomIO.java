@@ -1,17 +1,19 @@
 package org.commonjava.maven.ext.manip.io;
 
-import static org.commonjava.maven.ext.manip.IdUtils.ga;
+import static org.commonjava.maven.ext.manip.util.IdUtils.ga;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintWriter;
-import java.io.Reader;
 import java.io.Writer;
-import java.util.Collection;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.maven.model.Model;
 import org.apache.maven.model.io.ModelWriter;
@@ -22,11 +24,12 @@ import org.codehaus.plexus.component.annotations.Component;
 import org.codehaus.plexus.component.annotations.Requirement;
 import org.codehaus.plexus.logging.Logger;
 import org.codehaus.plexus.util.IOUtil;
-import org.codehaus.plexus.util.ReaderFactory;
 import org.codehaus.plexus.util.WriterFactory;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 import org.commonjava.maven.ext.manip.ManipulationException;
+import org.commonjava.maven.ext.manip.model.Project;
 import org.commonjava.maven.ext.manip.state.ManipulationSession;
+import org.commonjava.maven.ext.manip.util.PomPeek;
 import org.jdom.Document;
 import org.jdom.JDOMException;
 import org.jdom.input.SAXBuilder;
@@ -91,7 +94,9 @@ public class PomIO
                 {
                     in.close();
                 }
-                catch (IOException e) {}
+                catch ( final IOException e )
+                {
+                }
             }
 
             if ( raw == null )
@@ -99,8 +104,8 @@ public class PomIO
                 continue;
             }
 
-            Project project = new Project( pom, raw );
-            project.setTopPOM (peek.isTopPOM ());
+            final Project project = new Project( pom, raw );
+            project.setTopPOM( peek.isTopPOM() );
 
             rawModels.put( ga( project ), raw );
             projects.add( project );
@@ -110,13 +115,12 @@ public class PomIO
         return projects;
     }
 
-
     /**
      * For any project listed as changed (tracked by GA in the session), write the modified model out to disk. Uses JDOM {@link ModelWriter}
      * ({@MavenJDOMWriter}) to preserve as much formatting as possible.
      * @param logger
      */
-    public void rewritePOMs( final Set<Project> projects, final ManipulationSession session )
+    public void rewritePOMs( final Set<Project> changed, final ManipulationSession session )
         throws ManipulationException
     {
         final Map<String, Model> modifiedModels = session.getManipulatedModels();
@@ -130,11 +134,11 @@ public class PomIO
 
             pw = new PrintWriter( new FileWriter( marker ) );
 
-            for ( final Project project : projects )
+            for ( final Project project : changed )
             {
                 final String ga = ga( project );
                 logger.info( String.format( "%s modified! Rewriting.", project ) );
-                File pom = project.getFile();
+                File pom = project.getPom();
 
                 final Model model = modifiedModels.get( ga );
                 logger.info( "Rewriting: " + model.toString() + " in place of: " + project.getId() + "\n       to POM: " + pom );

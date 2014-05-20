@@ -51,13 +51,14 @@ public class ManipulationManager
         throws ManipulationException
     {
         final List<PomPeek> peeked = peekAtPomHierarchy( pom, session );
-        final List<Project> projects = PomModifier.readModelsForManipulation( logger, peeked, session );
+        final List<Project> projects = pomIO.readModelsForManipulation( peeked, session );
 
         session.setProjects( projects );
 
         for ( final Map.Entry<String, Manipulator> entry : manipulators.entrySet() )
         {
-            entry.getValue().scan( projects, session );
+            entry.getValue()
+                 .scan( projects, session );
         }
     }
 
@@ -76,7 +77,7 @@ public class ManipulationManager
         for ( final Map.Entry<String, Manipulator> entry : manipulators.entrySet() )
         {
             final Set<Project> mChanged = entry.getValue()
-                                                    .applyChanges( projects, session );
+                                               .applyChanges( projects, session );
 
             if ( mChanged != null )
             {
@@ -116,7 +117,6 @@ public class ManipulationManager
         }
     }
 
-
     private List<PomPeek> peekAtPomHierarchy( final File topPom, final ManipulationSession session )
         throws ManipulationException
     {
@@ -128,7 +128,7 @@ public class ManipulationManager
             pendingPoms.add( topPom.getCanonicalFile() );
 
             final String topDir = topPom.getParentFile()
-                            .getCanonicalPath();
+                                        .getCanonicalPath();
 
             final Set<File> seen = new HashSet<File>();
 
@@ -163,8 +163,8 @@ public class ManipulationManager
 
                         parent = parent.getCanonicalFile();
                         if ( parent.getParentFile()
-                                        .getCanonicalPath()
-                                        .startsWith( topDir ) && parent.exists() && !seen.contains( parent ) && !pendingPoms.contains( parent ) )
+                                   .getCanonicalPath()
+                                   .startsWith( topDir ) && parent.exists() && !seen.contains( parent ) && !pendingPoms.contains( parent ) )
                         {
                             topLevelParent = parent;
                             logger.debug( "Possible top level parent " + parent );
@@ -191,8 +191,8 @@ public class ManipulationManager
                             logger.debug( "Looking for module POM: " + modPom );
 
                             if ( modPom.getParentFile()
-                                            .getCanonicalPath()
-                                            .startsWith( topDir ) && modPom.exists() && !seen.contains( modPom ) && !pendingPoms.contains( modPom ) )
+                                       .getCanonicalPath()
+                                       .startsWith( topDir ) && modPom.exists() && !seen.contains( modPom ) && !pendingPoms.contains( modPom ) )
                             {
                                 pendingPoms.addLast( modPom );
                             }
@@ -209,18 +209,19 @@ public class ManipulationManager
                 }
             }
 
-            for ( PomPeek p : peeked)
+            for ( final PomPeek p : peeked )
             {
-                if (p.getPom().equals( topLevelParent ))
+                if ( p.getPom()
+                      .equals( topLevelParent ) )
                 {
-                    logger.debug ("Setting top level parent to " + p.getPom() + " :: " + p.getKey());
-                    p.setTopPOM (true);
+                    logger.debug( "Setting top level parent to " + p.getPom() + " :: " + p.getKey() );
+                    p.setTopPOM( true );
                 }
             }
         }
-        catch ( IOException e )
+        catch ( final IOException e )
         {
-            throw new ManipulationException ("Problem peeking at POMs.", e);
+            throw new ManipulationException( "Problem peeking at POMs.", e );
         }
 
         return peeked;
