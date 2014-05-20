@@ -1,8 +1,8 @@
 package org.commonjava.maven.ext.manip.impl;
 
 
-import static org.commonjava.maven.ext.manip.IdUtils.ga;
 import static org.commonjava.maven.ext.manip.state.BOMState.GAV_SEPERATOR;
+import static org.commonjava.maven.ext.manip.util.IdUtils.ga;
 
 import java.util.HashMap;
 import java.util.List;
@@ -12,11 +12,11 @@ import java.util.Properties;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.DependencyManagement;
 import org.apache.maven.model.Model;
-import org.apache.maven.project.MavenProject;
 import org.codehaus.plexus.component.annotations.Component;
 import org.codehaus.plexus.component.annotations.Requirement;
 import org.codehaus.plexus.logging.Logger;
 import org.commonjava.maven.ext.manip.ManipulationException;
+import org.commonjava.maven.ext.manip.model.Project;
 import org.commonjava.maven.ext.manip.state.BOMState;
 import org.commonjava.maven.ext.manip.state.ManipulationSession;
 
@@ -56,7 +56,7 @@ public class DependencyManipulator
     }
 
     @Override
-    protected void apply (ManipulationSession session, MavenProject project, Model model, Map<String, String> override) throws ManipulationException
+    protected void apply (ManipulationSession session, Project project, Model model, Map<String, String> override) throws ManipulationException
     {
         // TODO: Should plugin override apply to all projects?
         final String projectGA = ga( project );
@@ -69,10 +69,16 @@ public class DependencyManipulator
 
         override = applyModuleVersionOverrides( projectGA, override );
 
-        if (project.isExecutionRoot())
+        if (project.isTopPOM())
         {
             // Add/override a property to the build for each override
             addVersionOverrideProperties( override, model.getProperties() );
+
+            // Handle the situation where the top level parent refers to a prior build that is in the BOM.
+            if ( project.getParent() != null && override.containsKey( ga ( project.getParent() )  ))
+            {
+                model.getParent().setVersion( override.get( ga ( project.getParent() ) ) );
+            }
         }
 
         // If the model doesn't have any Dependency Management set by default, create one for it

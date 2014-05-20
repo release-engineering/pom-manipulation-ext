@@ -1,6 +1,6 @@
 package org.commonjava.maven.ext.manip.impl;
 
-import static org.commonjava.maven.ext.manip.IdUtils.ga;
+import static org.commonjava.maven.ext.manip.util.IdUtils.ga;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -13,11 +13,12 @@ import java.util.Set;
 import org.apache.maven.model.Model;
 import org.apache.maven.project.MavenProject;
 import org.codehaus.plexus.logging.Logger;
-import org.commonjava.maven.ext.manip.IdUtils;
 import org.commonjava.maven.ext.manip.ManipulationException;
+import org.commonjava.maven.ext.manip.model.Project;
 import org.commonjava.maven.ext.manip.resolver.EffectiveModelBuilder;
 import org.commonjava.maven.ext.manip.state.BOMState;
 import org.commonjava.maven.ext.manip.state.ManipulationSession;
+import org.commonjava.maven.ext.manip.util.IdUtils;
 
 /**
  * {@link Manipulator} base implementation used by the property, dependency and plugin manipulators.
@@ -46,7 +47,7 @@ public abstract class AlignmentManipulator
      * No prescanning required for BOM manipulation.
      */
     @Override
-    public void scan( final List<MavenProject> projects, final ManipulationSession session )
+    public void scan( final List<Project> projects, final ManipulationSession session )
         throws ManipulationException
     {
     }
@@ -69,22 +70,22 @@ public abstract class AlignmentManipulator
      * discovered/read by the main Maven build initialization.
      */
     @Override
-    public Set<MavenProject> applyChanges( final List<MavenProject> projects, final ManipulationSession session )
+    public Set<Project> applyChanges( final List<Project> projects, final ManipulationSession session )
         throws ManipulationException
     {
         final BOMState state = session.getState( BOMState.class );
 
         if ( !session.isEnabled() || !state.isEnabled() )
         {
-            baseLogger.debug( "Version Manipulator: Nothing to do!" );
+            baseLogger.debug( "Alignment Manipulator: Nothing to do!" );
             return Collections.emptySet();
         }
 
         final Map<String, Model> manipulatedModels = session.getManipulatedModels();
         final Map<String, String> overrides = loadRemoteBOM(state);
-        final Set<MavenProject> changed = new HashSet<MavenProject>();
+        final Set<Project> changed = new HashSet<Project>();
 
-        for ( final MavenProject project : projects )
+        for ( final Project project : projects )
         {
             final String ga = ga( project );
             final Model model = manipulatedModels.get( ga );
@@ -168,5 +169,5 @@ public abstract class AlignmentManipulator
      * @param override
      * @throws ManipulationException TODO
      */
-    protected abstract void apply (ManipulationSession session, MavenProject project, Model model, Map<String, String> override) throws ManipulationException;
+    protected abstract void apply (ManipulationSession session, Project project, Model model, Map<String, String> override) throws ManipulationException;
 }

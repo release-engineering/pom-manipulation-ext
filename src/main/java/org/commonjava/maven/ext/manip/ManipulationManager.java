@@ -1,27 +1,25 @@
 package org.commonjava.maven.ext.manip;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import org.apache.maven.execution.MavenSession;
-import org.apache.maven.project.DefaultProjectBuildingRequest;
-import org.apache.maven.project.MavenProject;
 import org.apache.maven.project.ProjectBuilder;
-import org.apache.maven.project.ProjectBuildingException;
-import org.apache.maven.project.ProjectBuildingRequest;
-import org.apache.maven.project.ProjectBuildingResult;
 import org.codehaus.plexus.component.annotations.Component;
 import org.codehaus.plexus.component.annotations.Requirement;
 import org.codehaus.plexus.logging.Logger;
 import org.commonjava.maven.ext.manip.impl.Manipulator;
 import org.commonjava.maven.ext.manip.io.PomIO;
+import org.commonjava.maven.ext.manip.model.FullProjectKey;
+import org.commonjava.maven.ext.manip.model.Project;
 import org.commonjava.maven.ext.manip.state.ManipulationSession;
+import org.commonjava.maven.ext.manip.util.PomPeek;
 
 /**
  * Coordinates manipulation of the POMs in a build, by providing methods to read the project set from files ahead of the build proper (using
@@ -52,55 +50,15 @@ public class ManipulationManager
     public void scan( final File pom, final ManipulationSession session )
         throws ManipulationException
     {
-        final List<MavenProject> projects = buildProjects( pom, session );
-        session.setProjectInstances( projects );
+        final List<PomPeek> peeked = peekAtPomHierarchy( pom, session );
+        final List<Project> projects = PomModifier.readModelsForManipulation( logger, peeked, session );
+
+        session.setProjects( projects );
 
         for ( final Map.Entry<String, Manipulator> entry : manipulators.entrySet() )
         {
-            entry.getValue()
-                 .scan( projects, session );
+            entry.getValue().scan( projects, session );
         }
-    }
-
-    /**
-     * Uses {@link ProjectBuilder} with a custom {@link ProjectBuildingRequest} to read the unmodified {@link MavenProject} instances from disk.
-     */
-    protected List<MavenProject> buildProjects( final File rootPom, final ManipulationSession session )
-        throws ManipulationException
-    {
-        final ProjectBuildingRequest pbr = session.getProjectBuildingRequest();
-        final boolean recurse = session.isRecursive();
-
-        final DefaultProjectBuildingRequest wrapper = new DefaultProjectBuildingRequest( pbr );
-        wrapper.setRepositorySession( session.getRepositorySystemSession() );
-
-        final List<MavenProject> projects = new ArrayList<MavenProject>();
-
-        // We have no POM file.
-        if ( rootPom == null )
-        {
-            return Collections.emptyList();
-        }
-        else
-        {
-            final List<File> files = Arrays.asList( rootPom );
-            List<ProjectBuildingResult> results;
-            try
-            {
-                results = projectBuilder.build( files, recurse, wrapper );
-            }
-            catch ( final ProjectBuildingException e )
-            {
-                throw new ManipulationException( "Failed to build MavenProject instances: %s", e, e.getMessage() );
-            }
-
-            for ( final ProjectBuildingResult result : results )
-            {
-                projects.add( result.getProject() );
-            }
-        }
-
-        return projects;
     }
 
     /**
@@ -111,15 +69,13 @@ public class ManipulationManager
      *   <li>rewrite any POMs that were changed</li>
      * </ul>
      */
-    public Set<MavenProject> applyManipulations( final List<MavenProject> projects, final ManipulationSession session )
+    public Set<Project> applyManipulations( final List<Project> projects, final ManipulationSession session )
         throws ManipulationException
     {
-        pomIO.readModelsForManipulation( projects, session );
-
-        final Set<MavenProject> changed = new HashSet<MavenProject>();
+        final Set<Project> changed = new HashSet<Project>();
         for ( final Map.Entry<String, Manipulator> entry : manipulators.entrySet() )
         {
-            final Set<MavenProject> mChanged = entry.getValue()
+            final Set<Project> mChanged = entry.getValue()
                                                     .applyChanges( projects, session );
 
             if ( mChanged != null )
@@ -130,12 +86,12 @@ public class ManipulationManager
 
         if ( !changed.isEmpty() )
         {
-            logger.info( "REWRITE CHANGED: " + projects );
+            logger.info( "Maven-Manipulation-Extension: Rewrite changed: " + projects );
             pomIO.rewritePOMs( changed, session );
         }
         else
         {
-            logger.info( "NO CHANGES." );
+            logger.info( "Maven-Manipulation-Extension: No changes." );
         }
 
         return changed;
@@ -160,4 +116,113 @@ public class ManipulationManager
         }
     }
 
+
+    private List<PomPeek> peekAtPomHierarchy( final File topPom, final ManipulationSession session )
+        throws ManipulationException
+    {
+        final List<PomPeek> peeked = new ArrayList<PomPeek>();
+
+        try
+        {
+            final LinkedList<File> pendingPoms = new LinkedList<File>();
+            pendingPoms.add( topPom.getCanonicalFile() );
+
+            final String topDir = topPom.getParentFile()
+                            .getCanonicalPath();
+
+            final Set<File> seen = new HashSet<File>();
+
+            File topLevelParent = topPom;
+
+            while ( !pendingPoms.isEmpty() )
+            {
+                final File pom = pendingPoms.removeFirst();
+                seen.add( pom );
+
+                logger.debug( "PEEK: " + pom );
+
+                final PomPeek peek = new PomPeek( pom );
+                final FullProjectKey key = peek.getKey();
+                if ( key != null )
+                {
+                    peeked.add( peek );
+
+                    final File dir = pom.getParentFile();
+
+                    final String relPath = peek.getParentRelativePath();
+                    if ( relPath != null )
+                    {
+                        logger.debug( "Found parent relativePath: " + relPath + " in pom: " + pom );
+                        File parent = new File( dir, relPath );
+                        if ( parent.isDirectory() )
+                        {
+                            parent = new File( parent, "pom.xml" );
+                        }
+
+                        logger.debug( "Looking for parent POM: " + parent );
+
+                        parent = parent.getCanonicalFile();
+                        if ( parent.getParentFile()
+                                        .getCanonicalPath()
+                                        .startsWith( topDir ) && parent.exists() && !seen.contains( parent ) && !pendingPoms.contains( parent ) )
+                        {
+                            topLevelParent = parent;
+                            logger.debug( "Possible top level parent " + parent );
+                            pendingPoms.add( parent );
+                        }
+                        else
+                        {
+                            logger.debug( "Skipping reference to non-existent parent relativePath: '" + relPath + "' in: " + pom );
+                        }
+                    }
+
+                    final Set<String> modules = peek.getModules();
+                    if ( modules != null && !modules.isEmpty() )
+                    {
+                        for ( final String module : modules )
+                        {
+                            logger.debug( "Found module: " + module + " in pom: " + pom );
+                            File modPom = new File( dir, module );
+                            if ( modPom.isDirectory() )
+                            {
+                                modPom = new File( modPom, "pom.xml" );
+                            }
+
+                            logger.debug( "Looking for module POM: " + modPom );
+
+                            if ( modPom.getParentFile()
+                                            .getCanonicalPath()
+                                            .startsWith( topDir ) && modPom.exists() && !seen.contains( modPom ) && !pendingPoms.contains( modPom ) )
+                            {
+                                pendingPoms.addLast( modPom );
+                            }
+                            else
+                            {
+                                logger.debug( "Skipping reference to non-existent module: '" + module + "' in: " + pom );
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    logger.debug( "Skipping " + pom + " as its a template file." );
+                }
+            }
+
+            for ( PomPeek p : peeked)
+            {
+                if (p.getPom().equals( topLevelParent ))
+                {
+                    logger.debug ("Setting top level parent to " + p.getPom() + " :: " + p.getKey());
+                    p.setTopPOM (true);
+                }
+            }
+        }
+        catch ( IOException e )
+        {
+            throw new ManipulationException ("Problem peeking at POMs.", e);
+        }
+
+        return peeked;
+    }
 }

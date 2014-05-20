@@ -1,15 +1,15 @@
 package org.commonjava.maven.ext.manip.impl;
 
-import static org.commonjava.maven.ext.manip.IdUtils.ga;
+import static org.commonjava.maven.ext.manip.util.IdUtils.ga;
 
 import java.util.Map;
 
 import org.apache.maven.model.Model;
-import org.apache.maven.project.MavenProject;
 import org.codehaus.plexus.component.annotations.Component;
 import org.codehaus.plexus.component.annotations.Requirement;
 import org.codehaus.plexus.logging.Logger;
 import org.commonjava.maven.ext.manip.ManipulationException;
+import org.commonjava.maven.ext.manip.model.Project;
 import org.commonjava.maven.ext.manip.state.BOMState;
 import org.commonjava.maven.ext.manip.state.ManipulationSession;
 
@@ -52,10 +52,10 @@ public class PropertyManipulator
     }
 
     @Override
-    protected void apply (ManipulationSession session, MavenProject project, Model model, Map<String, String> override) throws ManipulationException
+    protected void apply (ManipulationSession session, Project project, Model model, Map<String, String> override) throws ManipulationException
     {
         // Only inject the new properties at the top level.
-        if ( ! project.isExecutionRoot())
+        if ( ! project.isTopPOM())
         {
             return;
         }

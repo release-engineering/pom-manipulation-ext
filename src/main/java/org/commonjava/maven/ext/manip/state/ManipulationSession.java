@@ -8,12 +8,12 @@ import java.util.Properties;
 import org.apache.maven.execution.MavenExecutionRequest;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.model.Model;
-import org.apache.maven.project.MavenProject;
 import org.apache.maven.project.ProjectBuildingRequest;
 import org.codehaus.plexus.component.annotations.Component;
 import org.codehaus.plexus.component.annotations.Requirement;
 import org.codehaus.plexus.logging.Logger;
 import org.commonjava.maven.ext.manip.impl.Manipulator;
+import org.commonjava.maven.ext.manip.model.Project;
 import org.sonatype.aether.RepositorySystemSession;
 
 /**
@@ -94,9 +94,15 @@ public class ManipulationSession
         this.mavenSession = mavenSession;
     }
 
+    /**
+     * Map of Group:Artifact to Model
+     */
     private Map<String, Model> rawModels;
 
-    private List<MavenProject> projects;
+    /**
+     * List of <code>Project</code> instances.
+     */
+    private List<Project> projects;
 
     public void setManipulatedModels( final Map<String, Model> rawModels )
     {
@@ -114,12 +120,12 @@ public class ManipulationSession
                                                                      .getUserProperties();
     }
 
-    public void setProjectInstances( final List<MavenProject> projects )
+    public void setProjects( final List<Project> projects )
     {
         this.projects = projects;
     }
 
-    public List<MavenProject> getProjectInstances()
+    public List<Project> getProjects()
     {
         return projects;
     }

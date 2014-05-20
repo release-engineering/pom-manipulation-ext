@@ -1,6 +1,6 @@
 package org.commonjava.maven.ext.manip.impl;
 
-import static org.commonjava.maven.ext.manip.IdUtils.gav;
+import static org.commonjava.maven.ext.manip.util.IdUtils.gav;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -19,13 +19,13 @@ import org.apache.maven.RepositoryUtils;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.artifact.repository.metadata.Versioning;
 import org.apache.maven.artifact.repository.metadata.io.xpp3.MetadataXpp3Reader;
-import org.apache.maven.project.MavenProject;
 import org.codehaus.plexus.component.annotations.Component;
 import org.codehaus.plexus.component.annotations.Requirement;
 import org.codehaus.plexus.logging.Logger;
 import org.codehaus.plexus.util.IOUtil;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 import org.commonjava.maven.ext.manip.ManipulationException;
+import org.commonjava.maven.ext.manip.model.Project;
 import org.commonjava.maven.ext.manip.state.ManipulationSession;
 import org.commonjava.maven.ext.manip.state.VersioningState;
 import org.sonatype.aether.RepositorySystem;
@@ -37,12 +37,12 @@ import org.sonatype.aether.resolution.MetadataResult;
 import org.sonatype.aether.util.metadata.DefaultMetadata;
 
 /**
- * Component that calculates project version modifications, based on configuration stored in {@link VersioningState}. Snapshots may/may not be 
+ * Component that calculates project version modifications, based on configuration stored in {@link VersioningState}. Snapshots may/may not be
  * preserved, and either a static or incremental (calculated) version qualifier may / may not be incorporated in the version. The calculator
  * strives for OSGi compatibility, so the use of '.' and '-' qualifier separators will vary accordingly.
- * 
+ *
  * See: http://www.aqute.biz/Bnd/Versioning for an explanation of OSGi versioning.
- * 
+ *
  * @author jdcasey
  */
 @Component( role = VersionCalculator.class )
@@ -72,12 +72,12 @@ public class VersionCalculator
     /**
      * Calculate any project version changes for the given set of projects, and return them in a Map keyed by project GA.
      */
-    public Map<String, String> calculateVersioningChanges( final Collection<MavenProject> projects, final ManipulationSession session )
+    public Map<String, String> calculateVersioningChanges( final Collection<Project> projects, final ManipulationSession session )
         throws ManipulationException
     {
         final Map<String, String> versionsByGAV = new HashMap<String, String>();
 
-        for ( final MavenProject project : projects )
+        for ( final Project project : projects )
         {
             final String originalVersion = project.getVersion();
             final String modifiedVersion = calculate( project.getGroupId(), project.getArtifactId(), originalVersion, session );
