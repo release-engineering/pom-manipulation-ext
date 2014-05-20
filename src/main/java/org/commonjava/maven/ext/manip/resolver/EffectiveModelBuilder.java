@@ -1,3 +1,13 @@
+/*******************************************************************************
+ * Copyright (c) 2014 Red Hat, Inc..
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the GNU Public License v3.0
+ * which accompanies this distribution, and is available at
+ * http://www.gnu.org/licenses/gpl.html
+ * 
+ * Contributors:
+ *     Red Hat, Inc. - initial API and implementation
+ ******************************************************************************/
 /**
  * Copyright (C) 2013 Red Hat, Inc.
  *
@@ -109,7 +119,8 @@ public class EffectiveModelBuilder
         instance.session = session;
         instance.resolver = resolver;
         instance.modelBuilder = modelBuilder;
-        initRepositories( session.getRequest().getRemoteRepositories() );
+        initRepositories( session.getRequest()
+                                 .getRemoteRepositories() );
     }
 
     /**
@@ -123,7 +134,8 @@ public class EffectiveModelBuilder
         {
             // Set default repository list to include Maven central
             String remoteRepoUrl = "http://repo.maven.apache.org/maven2";
-            instance.getRepositories().add( new RemoteRepository( "central", "default", remoteRepoUrl ) );
+            instance.getRepositories()
+                    .add( new RemoteRepository( "central", "default", remoteRepoUrl ) );
         }
         for ( ArtifactRepository artifactRepository : repositories )
         {
@@ -142,7 +154,7 @@ public class EffectiveModelBuilder
     }
 
     public Map<String, String> getRemoteDependencyVersionOverrides( String gav )
- 		throws ManipulationException
+        throws ManipulationException
     {
         logger.debug( "Resolving dependency management GAV: " + gav );
 
@@ -182,7 +194,6 @@ public class EffectiveModelBuilder
         }
     }
 
-
     @SuppressWarnings( { "unchecked", "rawtypes" } )
     public Map<String, String> getRemotePropertyMappingOverrides( String gav )
         throws ManipulationException
@@ -199,17 +210,17 @@ public class EffectiveModelBuilder
 
             Properties versionOverrides = effectiveModel.getProperties();
 
-            logger.debug( "Returning override of " + versionOverrides);
+            logger.debug( "Returning override of " + versionOverrides );
 
-            return new HashMap<String, String>((Map) versionOverrides);
+            return new HashMap<String, String>( (Map) versionOverrides );
         }
         catch ( ArtifactResolutionException e )
         {
-            throw new ManipulationException ("Unable to resolve artifact", e);
+            throw new ManipulationException( "Unable to resolve artifact", e );
         }
         catch ( ModelBuildingException e )
         {
-            throw new ManipulationException ("Unable to resolve artifact", e);
+            throw new ManipulationException( "Unable to resolve artifact", e );
         }
     }
 
@@ -226,7 +237,9 @@ public class EffectiveModelBuilder
 
             Model effectiveModel = buildModel( artifact.getFile(), modelResolver );
 
-            List<Plugin> plugins = effectiveModel.getBuild().getPluginManagement().getPlugins();
+            List<Plugin> plugins = effectiveModel.getBuild()
+                                                 .getPluginManagement()
+                                                 .getPlugins();
 
             Map<String, String> versionOverrides = new HashMap<String, String>();
 
@@ -240,11 +253,11 @@ public class EffectiveModelBuilder
         }
         catch ( ArtifactResolutionException e )
         {
-            throw new ManipulationException ("Unable to resolve artifact", e);
+            throw new ManipulationException( "Unable to resolve artifact", e );
         }
         catch ( ModelBuildingException e )
         {
-            throw new ManipulationException ("Unable to resolve artifact", e);
+            throw new ManipulationException( "Unable to resolve artifact", e );
         }
     }
 

@@ -1,3 +1,13 @@
+/*******************************************************************************
+ * Copyright (c) 2014 Red Hat, Inc..
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the GNU Public License v3.0
+ * which accompanies this distribution, and is available at
+ * http://www.gnu.org/licenses/gpl.html
+ * 
+ * Contributors:
+ *     Red Hat, Inc. - initial API and implementation
+ ******************************************************************************/
 package org.commonjava.maven.ext.manip.state;
 
 import java.util.Properties;
@@ -8,7 +18,8 @@ import org.commonjava.maven.ext.manip.impl.RepoAndReportingRemovalManipulator;
  * Captures configuration relating to removing reporting/repositories from the POMs. Used by {@link RepoAndReportingRemovalManipulator}.
  *
  */
-public class RepoReportingState implements State
+public class RepoReportingState
+    implements State
 {
     /**
      * Suffix to enable this modder

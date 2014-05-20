@@ -1,5 +1,14 @@
+/*******************************************************************************
+ * Copyright (c) 2014 Red Hat, Inc..
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the GNU Public License v3.0
+ * which accompanies this distribution, and is available at
+ * http://www.gnu.org/licenses/gpl.html
+ * 
+ * Contributors:
+ *     Red Hat, Inc. - initial API and implementation
+ ******************************************************************************/
 package org.commonjava.maven.ext.manip.impl;
-
 
 import static org.commonjava.maven.ext.manip.state.BOMState.GAV_SEPERATOR;
 import static org.commonjava.maven.ext.manip.util.IdUtils.ga;
@@ -37,47 +46,50 @@ public class DependencyManipulator
 
     public DependencyManipulator( final Logger logger )
     {
-        super (logger);
+        super( logger );
         this.logger = logger;
     }
 
     @Override
     public void init( final ManipulationSession session )
     {
-        super.init ( session );
+        super.init( session );
         super.baseLogger = this.logger;
     }
 
     @Override
-    protected Map<String, String> loadRemoteBOM (BOMState state)
+    protected Map<String, String> loadRemoteBOM( BOMState state )
         throws ManipulationException
     {
         return loadRemoteOverrides( RemoteType.DEPENDENCY, state.getRemoteDepMgmt() );
     }
 
     @Override
-    protected void apply (ManipulationSession session, Project project, Model model, Map<String, String> override) throws ManipulationException
+    protected void apply( ManipulationSession session, Project project, Model model, Map<String, String> override )
+        throws ManipulationException
     {
         // TODO: Should plugin override apply to all projects?
         final String projectGA = ga( project );
 
         logger.info( "Applying dependency changes to: " + projectGA );
 
-        override.putAll( BOMState.getPropertiesByPrefix( session.getUserProperties(), BOMState.DEPENDENCY_EXCLUSION_PREFIX ) );
+        override.putAll( BOMState.getPropertiesByPrefix( session.getUserProperties(),
+                                                         BOMState.DEPENDENCY_EXCLUSION_PREFIX ) );
 
         override = removeReactorGAs( session, override );
 
         override = applyModuleVersionOverrides( projectGA, override );
 
-        if (project.isTopPOM())
+        if ( project.isTopPOM() )
         {
             // Add/override a property to the build for each override
             addVersionOverrideProperties( override, model.getProperties() );
 
             // Handle the situation where the top level parent refers to a prior build that is in the BOM.
-            if ( project.getParent() != null && override.containsKey( ga ( project.getParent() )  ))
+            if ( project.getParent() != null && override.containsKey( ga( project.getParent() ) ) )
             {
-                model.getParent().setVersion( override.get( ga ( project.getParent() ) ) );
+                model.getParent()
+                     .setVersion( override.get( ga( project.getParent() ) ) );
             }
         }
 
@@ -107,9 +119,10 @@ public class DependencyManipulator
                 String artifactVersion = nonMatchingVersionOverrides.get( groupIdArtifactId );
                 newDependency.setVersion( artifactVersion );
 
-                dependencyManagement.getDependencies().add( newDependency );
-                logger.debug( "New entry added to <DependencyManagement/> - " + groupIdArtifactId + ":" +
-                                        artifactVersion );
+                dependencyManagement.getDependencies()
+                                    .add( newDependency );
+                logger.debug( "New entry added to <DependencyManagement/> - " + groupIdArtifactId + ":"
+                    + artifactVersion );
             }
         }
         else
@@ -121,8 +134,6 @@ public class DependencyManipulator
         List<Dependency> projectDependencies = model.getDependencies();
         applyOverrides( projectDependencies, override );
     }
-
-
 
     /**
      * Apply a set of version overrides to a list of dependencies. Return a set of the overrides which were not applied.
@@ -146,15 +157,14 @@ public class DependencyManipulator
                 String oldVersion = dependency.getVersion();
                 String overrideVersion = overrides.get( groupIdArtifactId );
 
-                if (overrideVersion == null || overrideVersion.length() == 0)
+                if ( overrideVersion == null || overrideVersion.length() == 0 )
                 {
-                    logger.warn("Unable to align to an empty version for " + groupIdArtifactId + "; ignoring");
+                    logger.warn( "Unable to align to an empty version for " + groupIdArtifactId + "; ignoring" );
                 }
                 else
                 {
                     dependency.setVersion( overrideVersion );
-                    logger.debug( "Altered dependency " + groupIdArtifactId + " " + oldVersion + "->" +
-                                        overrideVersion );
+                    logger.debug( "Altered dependency " + groupIdArtifactId + " " + oldVersion + "->" + overrideVersion );
                     unmatchedVersionOverrides.remove( groupIdArtifactId );
                 }
             }
@@ -162,8 +172,6 @@ public class DependencyManipulator
 
         return unmatchedVersionOverrides;
     }
-
-
 
     /**
      * Remove version overrides which refer to projects in the current reactor.
@@ -177,14 +185,14 @@ public class DependencyManipulator
     private Map<String, String> removeReactorGAs( ManipulationSession session, Map<String, String> versionOverrides )
     {
         Map<String, String> reducedVersionOverrides = new HashMap<String, String>( versionOverrides );
-        for ( Model model : session.getManipulatedModels().values() )
+        for ( Model model : session.getManipulatedModels()
+                                   .values() )
         {
-            String reactorGA = ga(model);
+            String reactorGA = ga( model );
             reducedVersionOverrides.remove( reactorGA );
         }
         return reducedVersionOverrides;
     }
-
 
     /**
      * Remove module overrides which do not apply to the current module. Searches the full list of version overrides
@@ -195,7 +203,8 @@ public class DependencyManipulator
      * @return The map of global and module specific overrides which apply to the given module
      * @throws ManipulationException
      */
-    private Map<String, String> applyModuleVersionOverrides( String projectGA, Map<String, String> versionOverrides ) throws ManipulationException
+    private Map<String, String> applyModuleVersionOverrides( String projectGA, Map<String, String> versionOverrides )
+        throws ManipulationException
     {
         Map<String, String> moduleVersionOverrides = new HashMap<String, String>( versionOverrides );
         for ( String currentKey : versionOverrides.keySet() )
@@ -204,22 +213,21 @@ public class DependencyManipulator
             {
                 moduleVersionOverrides.remove( currentKey );
                 String[] artifactAndModule = currentKey.split( "@" );
-                if ( artifactAndModule.length != 2)
+                if ( artifactAndModule.length != 2 )
                 {
-                    throw new ManipulationException ("Invalid format for exclusion key " + currentKey);
+                    throw new ManipulationException( "Invalid format for exclusion key " + currentKey );
                 }
                 String artifactGA = artifactAndModule[0];
                 String moduleGA = artifactAndModule[1];
-                if ( moduleGA.equals( projectGA ) || moduleGA.equals( "*" ))
+                if ( moduleGA.equals( projectGA ) || moduleGA.equals( "*" ) )
                 {
-                    moduleVersionOverrides.remove(artifactGA);
-                    logger.debug("Ignoring module dependency override for " + moduleGA);
+                    moduleVersionOverrides.remove( artifactGA );
+                    logger.debug( "Ignoring module dependency override for " + moduleGA );
                 }
             }
         }
         return moduleVersionOverrides;
     }
-
 
     /***
      * Add properties to the build which match the version overrides.
@@ -231,13 +239,12 @@ public class DependencyManipulator
         String gaSeparator = getGASeparator();
         String propSuffix = getVersionPropertySuffix();
 
-        for (String currentGA : overrides.keySet() )
+        for ( String currentGA : overrides.keySet() )
         {
             String versionPropName = propPrefix + currentGA.replace( ":", gaSeparator ) + propSuffix;
             props.setProperty( versionPropName, overrides.get( currentGA ) );
         }
     }
-
 
     /**
      * Get the prefix that should be used for version property names
@@ -245,7 +252,7 @@ public class DependencyManipulator
      */
     private String getVersionPropertyPrefix()
     {
-        return System.getProperty( "versionPropertyPrefix", "version.");
+        return System.getProperty( "versionPropertyPrefix", "version." );
     }
 
     /**
@@ -263,7 +270,7 @@ public class DependencyManipulator
      */
     private String getVersionPropertySuffix()
     {
-        return System.getProperty( "versionPropertySuffix", "");
+        return System.getProperty( "versionPropertySuffix", "" );
     }
 
     /**
@@ -274,7 +281,8 @@ public class DependencyManipulator
      */
     private boolean overrideTransitive()
     {
-        String overrideTransitive = System.getProperties().getProperty( "overrideTransitive", "true" );
+        String overrideTransitive = System.getProperties()
+                                          .getProperty( "overrideTransitive", "true" );
         return overrideTransitive.equals( "true" );
     }
 }

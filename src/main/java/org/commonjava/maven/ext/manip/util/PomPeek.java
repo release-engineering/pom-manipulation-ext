@@ -1,3 +1,13 @@
+/*******************************************************************************
+ * Copyright (c) 2014 Red Hat, Inc..
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the GNU Public License v3.0
+ * which accompanies this distribution, and is available at
+ * http://www.gnu.org/licenses/gpl.html
+ * 
+ * Contributors:
+ *     Red Hat, Inc. - initial API and implementation
+ ******************************************************************************/
 package org.commonjava.maven.ext.manip.util;
 
 import static javax.xml.stream.XMLStreamConstants.END_ELEMENT;
@@ -91,8 +101,8 @@ public class PomPeek
 
         if ( !createCoordinateInfo() )
         {
-            logger.warn( "Could not peek at POM coordinate for: " + pom +
-                "This POM will NOT be available as an ancestor to other models during effective-model building." );
+            logger.warn( "Could not peek at POM coordinate for: " + pom
+                + "This POM will NOT be available as an ancestor to other models during effective-model building." );
         }
     }
 
@@ -172,21 +182,18 @@ public class PomPeek
         }
         catch ( final IOException e )
         {
-            logger.warn( "Failed to peek at POM coordinate for: " + pom + " Reason: "+ e.getMessage() +
-                         "\nThis POM will NOT be available as an ancestor to other models during effective-model building.",
-                         e);
+            logger.warn( "Failed to peek at POM coordinate for: " + pom + " Reason: " + e.getMessage()
+                + "\nThis POM will NOT be available as an ancestor to other models during effective-model building.", e );
         }
         catch ( final XMLStreamException e )
         {
-            logger.warn( "Failed to peek at POM coordinate for: " + pom + " Reason: "+ e.getMessage() +
-                         "\nThis POM will NOT be available as an ancestor to other models during effective-model building.",
-                         e);
+            logger.warn( "Failed to peek at POM coordinate for: " + pom + " Reason: " + e.getMessage()
+                + "\nThis POM will NOT be available as an ancestor to other models during effective-model building.", e );
         }
         catch ( final FactoryConfigurationError e )
         {
-            logger.warn( "Failed to peek at POM coordinate for: " + pom + " Reason: "+ e.getMessage() +
-                         "\nThis POM will NOT be available as an ancestor to other models during effective-model building.",
-                         e);
+            logger.warn( "Failed to peek at POM coordinate for: " + pom + " Reason: " + e.getMessage()
+                + "\nThis POM will NOT be available as an ancestor to other models during effective-model building.", e );
         }
         finally
         {
@@ -205,7 +212,9 @@ public class PomPeek
             {
                 reader.close();
             }
-            catch (IOException ioe) {}
+            catch ( IOException ioe )
+            {
+            }
         }
     }
 

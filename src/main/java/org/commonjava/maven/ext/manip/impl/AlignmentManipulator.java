@@ -1,3 +1,13 @@
+/*******************************************************************************
+ * Copyright (c) 2014 Red Hat, Inc..
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the GNU Public License v3.0
+ * which accompanies this distribution, and is available at
+ * http://www.gnu.org/licenses/gpl.html
+ * 
+ * Contributors:
+ *     Red Hat, Inc. - initial API and implementation
+ ******************************************************************************/
 package org.commonjava.maven.ext.manip.impl;
 
 import static org.commonjava.maven.ext.manip.util.IdUtils.ga;
@@ -82,7 +92,7 @@ public abstract class AlignmentManipulator
         }
 
         final Map<String, Model> manipulatedModels = session.getManipulatedModels();
-        final Map<String, String> overrides = loadRemoteBOM(state);
+        final Map<String, String> overrides = loadRemoteBOM( state );
         final Set<Project> changed = new HashSet<Project>();
 
         for ( final Project project : projects )
@@ -90,9 +100,9 @@ public abstract class AlignmentManipulator
             final String ga = ga( project );
             final Model model = manipulatedModels.get( ga );
 
-            if (overrides.size() > 0)
+            if ( overrides.size() > 0 )
             {
-                apply (session, project, model, overrides);
+                apply( session, project, model, overrides );
 
                 changed.add( project );
             }
@@ -140,7 +150,8 @@ public abstract class AlignmentManipulator
                                                            .getRemotePluginVersionOverrides( nextGAV ) );
                     break;
                 case DEPENDENCY:
-                    overrides.putAll( EffectiveModelBuilder.getInstance().getRemoteDependencyVersionOverrides( nextGAV ) );
+                    overrides.putAll( EffectiveModelBuilder.getInstance()
+                                                           .getRemoteDependencyVersionOverrides( nextGAV ) );
                     break;
 
             }
@@ -148,7 +159,6 @@ public abstract class AlignmentManipulator
 
         return overrides;
     }
-
 
     /**
      * Abstract method to be implemented by subclasses. Returns the remote bom.
@@ -159,7 +169,8 @@ public abstract class AlignmentManipulator
      * @param override
      * @throws ManipulationException
      */
-    protected abstract Map<String, String> loadRemoteBOM (BOMState state) throws ManipulationException;
+    protected abstract Map<String, String> loadRemoteBOM( BOMState state )
+        throws ManipulationException;
 
     /**
      * Abstract method to be implemented by subclasses. Performs the actual injection on the pom file.
@@ -169,5 +180,7 @@ public abstract class AlignmentManipulator
      * @param override
      * @throws ManipulationException TODO
      */
-    protected abstract void apply (ManipulationSession session, Project project, Model model, Map<String, String> override) throws ManipulationException;
+    protected abstract void apply( ManipulationSession session, Project project, Model model,
+                                   Map<String, String> override )
+        throws ManipulationException;
 }

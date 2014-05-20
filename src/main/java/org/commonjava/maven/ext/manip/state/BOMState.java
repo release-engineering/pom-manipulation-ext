@@ -1,3 +1,13 @@
+/*******************************************************************************
+ * Copyright (c) 2014 Red Hat, Inc..
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the GNU Public License v3.0
+ * which accompanies this distribution, and is available at
+ * http://www.gnu.org/licenses/gpl.html
+ * 
+ * Contributors:
+ *     Red Hat, Inc. - initial API and implementation
+ ******************************************************************************/
 package org.commonjava.maven.ext.manip.state;
 
 import java.util.HashMap;
@@ -10,7 +20,8 @@ import org.commonjava.maven.ext.manip.impl.RepoAndReportingRemovalManipulator;
  * Captures configuration relating to removing reporting/repositories from the POMs. Used by {@link RepoAndReportingRemovalManipulator}.
  *
  */
-public class BOMState implements State
+public class BOMState
+    implements State
 {
     /**
      * The character used to separate groupId:arifactId:version
@@ -67,22 +78,21 @@ public class BOMState implements State
     @Override
     public boolean isEnabled()
     {
-        return (pluginMgmt != null && pluginMgmt.length() > 0) ||
-                (propertyMgmt != null && propertyMgmt.length() > 0) ||
-                (depMgmt != null && depMgmt.length() > 0) ;
+        return ( pluginMgmt != null && pluginMgmt.length() > 0 )
+            || ( propertyMgmt != null && propertyMgmt.length() > 0 ) || ( depMgmt != null && depMgmt.length() > 0 );
     }
 
-    public String getRemotePluginMgmt ()
+    public String getRemotePluginMgmt()
     {
         return pluginMgmt;
     }
 
-    public String getRemotePropertyMgmt ()
+    public String getRemotePropertyMgmt()
     {
         return propertyMgmt;
     }
 
-    public String getRemoteDepMgmt ()
+    public String getRemoteDepMgmt()
     {
         return depMgmt;
     }

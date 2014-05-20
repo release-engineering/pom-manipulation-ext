@@ -1,3 +1,13 @@
+/*******************************************************************************
+ * Copyright (c) 2014 Red Hat, Inc..
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the GNU Public License v3.0
+ * which accompanies this distribution, and is available at
+ * http://www.gnu.org/licenses/gpl.html
+ * 
+ * Contributors:
+ *     Red Hat, Inc. - initial API and implementation
+ ******************************************************************************/
 package org.commonjava.maven.ext.manip.impl;
 
 import static org.commonjava.maven.ext.manip.util.IdUtils.gav;
@@ -54,7 +64,8 @@ public class ProjectVersionManipulatorTest
         final MavenProject project = new MavenProject( eff );
         project.setOriginalModel( orig );
 
-        final Set<MavenProject> changes = newVersioningModifier().applyVersioningChanges( Collections.singleton( project ), versionsByGA );
+        final Set<MavenProject> changes =
+            newVersioningModifier().applyVersioningChanges( Collections.singleton( project ), versionsByGA );
 
         assertThat( changes.size(), equalTo( 1 ) );
         assertThat( orig.getVersion(), equalTo( mv ) );
@@ -606,7 +617,8 @@ public class ProjectVersionManipulatorTest
             this.session = session;
         }
 
-        public Set<MavenProject> applyVersioningChanges( final Collection<MavenProject> projects, final Map<String, String> versionsByGAV )
+        public Set<MavenProject> applyVersioningChanges( final Collection<MavenProject> projects,
+                                                         final Map<String, String> versionsByGAV )
             throws ManipulationException
         {
             final VersioningState state = new VersioningState( session.getUserProperties() );
@@ -618,7 +630,8 @@ public class ProjectVersionManipulatorTest
                 if ( applyVersioningChanges( project.getOriginalModel(), state, session ) )
                 {
                     final String v = versionsByGAV.get( gav( project ) );
-                    logger.info( project.getName() + " (" + gav( project ) + "): VERSION MODIFIED\n    New version: " + v );
+                    logger.info( project.getName() + " (" + gav( project ) + "): VERSION MODIFIED\n    New version: "
+                        + v );
 
                     // this is a bigger model, so only do this if the originalModel was modded.
                     applyVersioningChanges( project.getModel(), state, session );

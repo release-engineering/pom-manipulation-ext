@@ -1,3 +1,13 @@
+/*******************************************************************************
+ * Copyright (c) 2014 Red Hat, Inc..
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the GNU Public License v3.0
+ * which accompanies this distribution, and is available at
+ * http://www.gnu.org/licenses/gpl.html
+ * 
+ * Contributors:
+ *     Red Hat, Inc. - initial API and implementation
+ ******************************************************************************/
 package org.commonjava.maven.ext.manip.util;
 
 import java.util.regex.Matcher;
@@ -20,12 +30,11 @@ public final class IdUtils
      */
     public static final Pattern gavPattern = Pattern.compile( "\\s*([\\w\\-_.]+):([\\w\\-_.]+):(\\d[\\w\\-_.]+)\\s*" );
 
-
     private IdUtils()
     {
     }
 
-    public static boolean validGav(String gav)
+    public static boolean validGav( String gav )
     {
         Matcher matcher = gavPattern.matcher( gav );
         return matcher.matches();

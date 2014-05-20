@@ -1,3 +1,13 @@
+/*******************************************************************************
+ * Copyright (c) 2014 Red Hat, Inc..
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the GNU Public License v3.0
+ * which accompanies this distribution, and is available at
+ * http://www.gnu.org/licenses/gpl.html
+ * 
+ * Contributors:
+ *     Red Hat, Inc. - initial API and implementation
+ ******************************************************************************/
 package org.commonjava.maven.ext.manip.impl;
 
 import static org.commonjava.maven.ext.manip.util.IdUtils.gav;
@@ -72,7 +82,8 @@ public class VersionCalculator
     /**
      * Calculate any project version changes for the given set of projects, and return them in a Map keyed by project GA.
      */
-    public Map<String, String> calculateVersioningChanges( final Collection<Project> projects, final ManipulationSession session )
+    public Map<String, String> calculateVersioningChanges( final Collection<Project> projects,
+                                                           final ManipulationSession session )
         throws ManipulationException
     {
         final Map<String, String> versionsByGAV = new HashMap<String, String>();
@@ -80,7 +91,8 @@ public class VersionCalculator
         for ( final Project project : projects )
         {
             final String originalVersion = project.getVersion();
-            final String modifiedVersion = calculate( project.getGroupId(), project.getArtifactId(), originalVersion, session );
+            final String modifiedVersion =
+                calculate( project.getGroupId(), project.getArtifactId(), originalVersion, session );
 
             if ( !modifiedVersion.equals( originalVersion ) )
             {
@@ -97,7 +109,8 @@ public class VersionCalculator
      * Calculate the version modification for a given GAV.
      */
     // FIXME: Loooong method
-    protected String calculate( final String groupId, final String artifactId, final String originalVersion, final ManipulationSession session )
+    protected String calculate( final String groupId, final String artifactId, final String originalVersion,
+                                final ManipulationSession session )
         throws ManipulationException
     {
         String result = originalVersion;
@@ -115,7 +128,8 @@ public class VersionCalculator
         final String incrementalSerialSuffix = state.getIncrementalSerialSuffix();
         final String suffix = state.getSuffix();
 
-        logger.debug( "Got the following version suffixes:\n  Static: " + suffix + "\nIncremental: " + incrementalSerialSuffix );
+        logger.debug( "Got the following version suffixes:\n  Static: " + suffix + "\nIncremental: "
+            + incrementalSerialSuffix );
 
         final String suff = suffix != null ? suffix : incrementalSerialSuffix;
 
@@ -170,15 +184,16 @@ public class VersionCalculator
                         // Need room for at least a character in the base-version, plus a separator like '-'
                         if ( baseIdx < 2 )
                         {
-                            logger.debug( "Ignoring invalid version: '" + version + "' (seems to be naked version suffix with no base)." );
+                            logger.debug( "Ignoring invalid version: '" + version
+                                + "' (seems to be naked version suffix with no base)." );
                             continue;
                         }
 
                         final String base = version.substring( 0, baseIdx - 1 );
                         if ( !result.equals( base ) )
                         {
-                            logger.debug( "Ignoring irrelevant version: '" + version + "' ('" + base + "' doesn't match on base-version: '" + result
-                                + "')." );
+                            logger.debug( "Ignoring irrelevant version: '" + version + "' ('" + base
+                                + "' doesn't match on base-version: '" + result + "')." );
                             continue;
                         }
 
@@ -253,7 +268,8 @@ public class VersionCalculator
     /**
      * Accumulate all available versions for a given GAV from all available repositories.
      */
-    private Set<String> getMetadataVersions( final String groupId, final String artifactId, final ManipulationSession session )
+    private Set<String> getMetadataVersions( final String groupId, final String artifactId,
+                                             final ManipulationSession session )
         throws ManipulationException
     {
         logger.debug( "Reading available versions from repository metadata for: " + groupId + ":" + artifactId );
@@ -275,20 +291,21 @@ public class VersionCalculator
     /**
      * Read available versions for a given GAV from its repository metadata, and accumulate the versions in the given {@link Set}.
      */
-    private void resolveMetadata( final String groupId, final String artifactId, final RemoteRepository remote, final Set<String> versions,
-                                  final ManipulationSession session )
+    private void resolveMetadata( final String groupId, final String artifactId, final RemoteRepository remote,
+                                  final Set<String> versions, final ManipulationSession session )
         throws ManipulationException
     {
         final MetadataRequest req =
-            new MetadataRequest( new DefaultMetadata( groupId, artifactId, "maven-metadata.xml", Nature.RELEASE_OR_SNAPSHOT ), remote,
-                                 "version-calculator" );
+            new MetadataRequest( new DefaultMetadata( groupId, artifactId, "maven-metadata.xml",
+                                                      Nature.RELEASE_OR_SNAPSHOT ), remote, "version-calculator" );
 
         req.setDeleteLocalCopyIfMissing( true );
 
         final List<MetadataRequest> reqs = new ArrayList<MetadataRequest>();
         reqs.add( req );
 
-        final List<MetadataResult> mdResults = repositorySystem.resolveMetadata( session.getRepositorySystemSession(), reqs );
+        final List<MetadataResult> mdResults =
+            repositorySystem.resolveMetadata( session.getRepositorySystemSession(), reqs );
 
         if ( mdResults != null )
         {
@@ -305,7 +322,8 @@ public class VersionCalculator
 
                 if ( metadata == null )
                 {
-                    logger.error( "Cannot find metadata instance associated with MetadataResult: " + mdResult + ". Skipping..." );
+                    logger.error( "Cannot find metadata instance associated with MetadataResult: " + mdResult
+                        + ". Skipping..." );
                     continue;
                 }
 
@@ -317,11 +335,13 @@ public class VersionCalculator
                     {
                         if ( logger.isDebugEnabled() )
                         {
-                            logger.error( "Failed to resolve metadata: " + metadata + ". Error: " + exception.getMessage(), exception );
+                            logger.error( "Failed to resolve metadata: " + metadata + ". Error: "
+                                              + exception.getMessage(), exception );
                         }
                         else
                         {
-                            logger.error( "Failed to resolve metadata: " + metadata + ". Error: " + exception.getMessage() );
+                            logger.error( "Failed to resolve metadata: " + metadata + ". Error: "
+                                + exception.getMessage() );
                         }
                     }
 
@@ -344,13 +364,15 @@ public class VersionCalculator
                 }
                 catch ( final IOException e )
                 {
-                    throw new ManipulationException( "Cannot read metadata from: %s to determine last version-suffix serial number. Error: %s", e,
-                                                     mdFile, e.getMessage() );
+                    throw new ManipulationException(
+                                                     "Cannot read metadata from: %s to determine last version-suffix serial number. Error: %s",
+                                                     e, mdFile, e.getMessage() );
                 }
                 catch ( final XmlPullParserException e )
                 {
-                    throw new ManipulationException( "Cannot parse metadata from: %s to determine last version-suffix serial number. Error: %s", e,
-                                                     mdFile, e.getMessage() );
+                    throw new ManipulationException(
+                                                     "Cannot parse metadata from: %s to determine last version-suffix serial number. Error: %s",
+                                                     e, mdFile, e.getMessage() );
                 }
                 finally
                 {

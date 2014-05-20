@@ -1,3 +1,13 @@
+/*******************************************************************************
+ * Copyright (c) 2014 Red Hat, Inc..
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the GNU Public License v3.0
+ * which accompanies this distribution, and is available at
+ * http://www.gnu.org/licenses/gpl.html
+ * 
+ * Contributors:
+ *     Red Hat, Inc. - initial API and implementation
+ ******************************************************************************/
 package org.commonjava.maven.ext.manip;
 
 import java.io.File;
@@ -164,7 +174,8 @@ public class ManipulationManager
                         parent = parent.getCanonicalFile();
                         if ( parent.getParentFile()
                                    .getCanonicalPath()
-                                   .startsWith( topDir ) && parent.exists() && !seen.contains( parent ) && !pendingPoms.contains( parent ) )
+                                   .startsWith( topDir ) && parent.exists() && !seen.contains( parent )
+                            && !pendingPoms.contains( parent ) )
                         {
                             topLevelParent = parent;
                             logger.debug( "Possible top level parent " + parent );
@@ -172,7 +183,8 @@ public class ManipulationManager
                         }
                         else
                         {
-                            logger.debug( "Skipping reference to non-existent parent relativePath: '" + relPath + "' in: " + pom );
+                            logger.debug( "Skipping reference to non-existent parent relativePath: '" + relPath
+                                + "' in: " + pom );
                         }
                     }
 
@@ -192,7 +204,8 @@ public class ManipulationManager
 
                             if ( modPom.getParentFile()
                                        .getCanonicalPath()
-                                       .startsWith( topDir ) && modPom.exists() && !seen.contains( modPom ) && !pendingPoms.contains( modPom ) )
+                                       .startsWith( topDir ) && modPom.exists() && !seen.contains( modPom )
+                                && !pendingPoms.contains( modPom ) )
                             {
                                 pendingPoms.addLast( modPom );
                             }
