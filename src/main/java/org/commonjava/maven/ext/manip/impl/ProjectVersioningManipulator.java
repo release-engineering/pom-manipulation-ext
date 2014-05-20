@@ -1,7 +1,7 @@
 package org.commonjava.maven.ext.manip.impl;
 
-import static org.commonjava.maven.ext.manip.IdUtils.ga;
-import static org.commonjava.maven.ext.manip.IdUtils.gav;
+import static org.commonjava.maven.ext.manip.util.IdUtils.ga;
+import static org.commonjava.maven.ext.manip.util.IdUtils.gav;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -18,7 +18,6 @@ import org.apache.maven.model.Model;
 import org.apache.maven.model.ModelBase;
 import org.apache.maven.model.Parent;
 import org.apache.maven.model.Profile;
-import org.apache.maven.project.MavenProject;
 import org.codehaus.plexus.component.annotations.Component;
 import org.codehaus.plexus.component.annotations.Requirement;
 import org.codehaus.plexus.interpolation.InterpolationException;
@@ -31,6 +30,7 @@ import org.codehaus.plexus.logging.Logger;
 import org.commonjava.maven.ext.manip.ManipulationException;
 import org.commonjava.maven.ext.manip.ManipulationManager;
 import org.commonjava.maven.ext.manip.io.PomIO;
+import org.commonjava.maven.ext.manip.model.Project;
 import org.commonjava.maven.ext.manip.state.ManipulationSession;
 import org.commonjava.maven.ext.manip.state.VersioningState;
 
@@ -71,7 +71,7 @@ public class ProjectVersioningManipulator
      * method.
      */
     @Override
-    public void scan( final List<MavenProject> projects, final ManipulationSession session )
+    public void scan( final List<Project> projects, final ManipulationSession session )
         throws ManipulationException
     {
         final VersioningState state = session.getState( VersioningState.class );
@@ -101,14 +101,14 @@ public class ProjectVersioningManipulator
 
     /**
      * Apply any project versioning changes accumulated in the {@link VersioningState} instance associated with the {@link ManipulationSession} to
-     * the list of {@link MavenProject}'s given. This happens near the end of the Maven session-bootstrapping sequence, before the projects are
+     * the list of {@link Project}'s given. This happens near the end of the Maven session-bootstrapping sequence, before the projects are
      * discovered/read by the main Maven build initialization.
      *
      * This method depends on {@link PomIO#readModelsForManipulation(List, ManipulationSession)} output stored in the {@link ManipulationSession},
      * a task which is handled by the {@link ManipulationManager}.
      */
     @Override
-    public Set<MavenProject> applyChanges( final List<MavenProject> projects, final ManipulationSession session )
+    public Set<Project> applyChanges( final List<Project> projects, final ManipulationSession session )
         throws ManipulationException
     {
         final VersioningState state = session.getState( VersioningState.class );
@@ -119,9 +119,9 @@ public class ProjectVersioningManipulator
         }
 
         final Map<String, Model> manipulatedModels = session.getManipulatedModels();
-        final Set<MavenProject> changed = new HashSet<MavenProject>();
+        final Set<Project> changed = new HashSet<Project>();
 
-        for ( final MavenProject project : projects )
+        for ( final Project project : projects )
         {
             final String ga = ga( project );
             logger.info( "Applying changes to: " + ga );

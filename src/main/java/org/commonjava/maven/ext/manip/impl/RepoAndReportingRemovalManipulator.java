@@ -1,6 +1,6 @@
 package org.commonjava.maven.ext.manip.impl;
 
-import static org.commonjava.maven.ext.manip.IdUtils.ga;
+import static org.commonjava.maven.ext.manip.util.IdUtils.ga;
 
 import java.util.Collections;
 import java.util.HashSet;
@@ -16,6 +16,7 @@ import org.codehaus.plexus.component.annotations.Component;
 import org.codehaus.plexus.component.annotations.Requirement;
 import org.codehaus.plexus.logging.Logger;
 import org.commonjava.maven.ext.manip.ManipulationException;
+import org.commonjava.maven.ext.manip.model.Project;
 import org.commonjava.maven.ext.manip.state.ManipulationSession;
 import org.commonjava.maven.ext.manip.state.RepoReportingState;
 import org.commonjava.maven.ext.manip.state.State;
@@ -45,7 +46,7 @@ public class RepoAndReportingRemovalManipulator
      * No prescanning required for Repository and Reporting Removal.
      */
     @Override
-    public void scan( final List<MavenProject> projects, final ManipulationSession session )
+    public void scan( final List<Project> projects, final ManipulationSession session )
         throws ManipulationException
     {
     }
@@ -68,7 +69,7 @@ public class RepoAndReportingRemovalManipulator
      * discovered/read by the main Maven build initialization.
      */
     @Override
-    public Set<MavenProject> applyChanges( final List<MavenProject> projects, final ManipulationSession session )
+    public Set<Project> applyChanges( final List<Project> projects, final ManipulationSession session )
         throws ManipulationException
     {
         final State state = session.getState( RepoReportingState.class );
@@ -79,9 +80,9 @@ public class RepoAndReportingRemovalManipulator
         }
 
         final Map<String, Model> manipulatedModels = session.getManipulatedModels();
-        final Set<MavenProject> changed = new HashSet<MavenProject>();
+        final Set<Project> changed = new HashSet<Project>();
 
-        for ( final MavenProject project : projects )
+        for ( final Project project : projects )
         {
             final String ga = ga( project );
             logger.info( "Applying changes to: " + ga );

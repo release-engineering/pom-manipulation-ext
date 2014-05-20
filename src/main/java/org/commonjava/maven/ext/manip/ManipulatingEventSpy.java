@@ -8,12 +8,12 @@ import org.apache.maven.execution.ExecutionEvent;
 import org.apache.maven.execution.ExecutionEvent.Type;
 import org.apache.maven.execution.MavenExecutionRequest;
 import org.apache.maven.model.building.ModelBuilder;
-import org.apache.maven.project.MavenProject;
 import org.codehaus.plexus.PlexusContainerException;
 import org.codehaus.plexus.component.annotations.Component;
 import org.codehaus.plexus.component.annotations.Requirement;
 import org.codehaus.plexus.component.repository.exception.ComponentLookupException;
 import org.codehaus.plexus.logging.Logger;
+import org.commonjava.maven.ext.manip.model.Project;
 import org.commonjava.maven.ext.manip.resolver.EffectiveModelBuilder;
 import org.commonjava.maven.ext.manip.state.ManipulationSession;
 import org.sonatype.aether.impl.ArtifactResolver;
@@ -26,7 +26,6 @@ import org.sonatype.aether.impl.ArtifactResolver;
 public class ManipulatingEventSpy
     extends AbstractEventSpy
 {
-
     @Requirement
     private Logger logger;
 
@@ -93,12 +92,11 @@ public class ManipulatingEventSpy
 
                         manipulationManager.scan( req.getPom(), session );
 
-                        final List<MavenProject> projects = session.getProjectInstances();
+                        final List<Project> projects = session.getProjects();
 
-                        for ( final MavenProject project : projects )
+                        for ( final Project project : projects )
                         {
-                            logger.debug( "Got " + project + " (POM: " + project.getOriginalModel()
-                                                                               .getPomFile() + ")" );
+                            logger.debug( "Got " + project + " (POM: " + project.getPom() + ")" );
                         }
 
                         manipulationManager.applyManipulations( projects, session );
@@ -121,6 +119,7 @@ public class ManipulatingEventSpy
         }
         catch ( final ManipulationException e )
         {
+            logger.error( "Extension failure", e );
             throw new Error( "Modification failed during project pre-scanning phase: " + e.getMessage(), e );
         }
 

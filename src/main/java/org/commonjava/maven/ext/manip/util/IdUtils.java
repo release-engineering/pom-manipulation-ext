@@ -1,4 +1,4 @@
-package org.commonjava.maven.ext.manip;
+package org.commonjava.maven.ext.manip.util;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -6,6 +6,7 @@ import java.util.regex.Pattern;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Parent;
 import org.apache.maven.project.MavenProject;
+import org.commonjava.maven.ext.manip.model.Project;
 
 /**
  * Convenience utilities for converting {@link Model} and {@link MavenProject} instances to GA / GAV strings.
@@ -31,6 +32,11 @@ public final class IdUtils
     }
 
     public static String gav( final MavenProject project )
+    {
+        return String.format( "%s:%s:%s", project.getGroupId(), project.getArtifactId(), project.getVersion() );
+    }
+
+    public static String gav( final Project project )
     {
         return String.format( "%s:%s:%s", project.getGroupId(), project.getArtifactId(), project.getVersion() );
     }
@@ -74,6 +80,16 @@ public final class IdUtils
     }
 
     public static String ga( final MavenProject project )
+    {
+        return ga( project.getGroupId(), project.getArtifactId() );
+    }
+
+    public static String ga( final Project project )
+    {
+        return ga( project.getGroupId(), project.getArtifactId() );
+    }
+
+    public static String ga( final Parent project )
     {
         return ga( project.getGroupId(), project.getArtifactId() );
     }

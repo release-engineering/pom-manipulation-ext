@@ -1,6 +1,6 @@
 package org.commonjava.maven.ext.manip.impl;
 
-import static org.commonjava.maven.ext.manip.IdUtils.gav;
+import static org.commonjava.maven.ext.manip.util.IdUtils.gav;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;

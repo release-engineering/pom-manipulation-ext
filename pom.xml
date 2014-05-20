@@ -15,6 +15,7 @@
       <distribution>repo</distribution>
     </license>
   </licenses>
+
   <developers>
     <developer>
       <id>jdcasey</id>
@@ -22,11 +23,13 @@
       <email>jdcasey@commonjava.org</email>
     </developer>
   </developers>
+
   <scm>
     <connection>scm:git:http://jdcasey@github.com/jdcasey/pom-manipulation-ext.git</connection>
     <developerConnection>scm:git:git@github.com:jdcasey/pom-manipulation-ext.git</developerConnection>
     <url>http://github.com/jdcasey/pom-manipulation-ext</url>
   </scm>
+
   <distributionManagement>
     <repository>
       <id>sonatype-nexus-staging</id>
@@ -34,11 +37,14 @@
       <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
     </repository>
   </distributionManagement>
+
   <properties>
     <mavenVersion>3.0.4</mavenVersion>
     <it.maven.home>${project.build.directory}/apache-maven-${mavenVersion}</it.maven.home>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
+
+
   <dependencies>
     <dependency>
       <groupId>org.apache.maven</groupId>
@@ -52,6 +58,12 @@
       <version>1.5.5</version>
       <scope>provided</scope>
     </dependency>
+
+    <dependency>
+        <groupId>commons-lang</groupId>
+        <artifactId>commons-lang</artifactId>
+        <version>2.5</version>
+    </dependency>
     <dependency>
         <groupId>org.jdom</groupId>
         <artifactId>jdom</artifactId>
@@ -62,6 +74,7 @@
         <artifactId>maven-model-jdom-support</artifactId>
         <version>3.0.x-1.2</version>
     </dependency>
+
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
@@ -69,6 +82,7 @@
       <scope>test</scope>
     </dependency>
   </dependencies>
+
   <build>
     <testResources>
       <testResource>
@@ -171,8 +185,8 @@
                 <mavenHome>${it.maven.home}</mavenHome>
                 <!-- mavenExecutable>mvnDebug</mavenExecutable -->
                 <pomIncludes>
-                  <!-- pomInclude>parent-child-inherit/pom.xml</pomInclude -->
-                  <pomInclude>*/pom.xml</pomInclude>
+                    <!-- <pomInclude>repo-removal/pom.xml</pomInclude> -->
+                    <pomInclude>*/pom.xml</pomInclude>
                 </pomIncludes>
                 <projectsDirectory>${project.build.directory}/it</projectsDirectory>
                 <postBuildHookScript>verify</postBuildHookScript>
@@ -220,6 +234,7 @@
         </plugin>
       </plugins>
     </pluginManagement>
+
     <plugins>
         <plugin>
             <groupId>org.apache.maven.plugins</groupId>
@@ -236,6 +251,7 @@
                             <includes>
                                 <include>org.jdom:jdom</include>
                                 <include>org.commonjava.maven:maven-model-jdom-support</include>
+                                <include>commons-lang:commons-lang</include>
                             </includes>
                         </artifactSet>
                     </configuration>
@@ -248,6 +264,8 @@
       </plugin>
     </plugins>
   </build>
+
+
   <profiles>
     <profile>
       <id>run-its</id>
