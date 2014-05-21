@@ -205,6 +205,7 @@ public class PomIO
             {
                 encoding = "UTF-8";
             }
+            final String modifiedBy = "[Comment: <!-- Modified by POM Manipulation Extension for Maven";
 
             final Format format = Format.getRawFormat()
                             .setEncoding( encoding )
@@ -223,21 +224,22 @@ public class PomIO
             // Only add the modified by to the top level pom.
             if (project.isTopPOM())
             {
-                final Iterator<?> it = doc.getRootElement()
-                                .getContent( new ContentFilter( ContentFilter.COMMENT ) )
+                @SuppressWarnings( "unchecked" )
+                final Iterator<Comment> it = doc.getContent(new ContentFilter( ContentFilter.COMMENT ) )
                                 .iterator();
                 while ( it.hasNext() )
                 {
-                    final Comment c = (Comment) it.next();
-                    if ( c.toString()
-                                    .startsWith( "[Comment: <!-- Modified by POM Manipulation Extension for Maven" ) )
+                    final Comment c = it.next();
+
+                    //final Comment c = (Comment) it.next();
+                    if ( c.toString().startsWith( modifiedBy ) )
                     {
                         it.remove();
+
+                        break;
                     }
                 }
-                doc.getRootElement().addContent
-                    ( new Comment( " Modified by POM Manipulation Extension for Maven " + getManifestInformation() ) );
-                doc.getRootElement().addContent( "\n" );
+                doc.addContent( new Comment( " Modified by POM Manipulation Extension for Maven " + getManifestInformation()  ) );
             }
             final List<?> rootComments = doc.getContent ( new ContentFilter( ContentFilter.COMMENT ) );
 
@@ -246,6 +248,11 @@ public class PomIO
                 @Override
                 protected void printComment(Writer out, Comment comment)
                                 throws IOException {
+                    if (comment.toString().startsWith( modifiedBy ))
+                    {
+                        out.write(getFormat().getLineSeparator());
+                    }
+
                     super.printComment (out, comment);
 
                     // If root level comments exist and is the current Comment object
@@ -302,7 +309,7 @@ public class PomIO
         return markerFile;
     }
 
-    private String getManifestInformation ()
+    private String getManifestInformation () throws ManipulationException
     {
         String result = "";
         try
@@ -323,10 +330,9 @@ public class PomIO
                 }
             }
         }
-        catch (java.io.IOException e)
+        catch (IOException e)
         {
-            System.err.println ("Error retrieving information from manifest");
-            e.printStackTrace ();
+            throw new ManipulationException("Error retrieving information from manifest", e);
         }
 
         return result;
