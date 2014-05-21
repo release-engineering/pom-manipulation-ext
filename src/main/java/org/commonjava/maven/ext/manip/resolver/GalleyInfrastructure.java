@@ -1,13 +1,17 @@
 package org.commonjava.maven.ext.manip.resolver;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import org.apache.commons.io.FileUtils;
 import org.codehaus.plexus.component.annotations.Component;
+import org.codehaus.plexus.component.annotations.Requirement;
 import org.commonjava.maven.ext.manip.ManipulationException;
 import org.commonjava.maven.ext.manip.state.ManipulationSession;
 import org.commonjava.maven.galley.TransferManager;
@@ -50,6 +54,13 @@ import org.commonjava.maven.galley.spi.transport.TransportManager;
 import org.commonjava.maven.galley.transport.TransportManagerImpl;
 import org.commonjava.maven.galley.transport.htcli.HttpClientTransport;
 import org.commonjava.maven.galley.transport.htcli.HttpImpl;
+import org.slf4j.LoggerFactory;
+
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.LoggerContext;
+import ch.qos.logback.classic.joran.JoranConfigurator;
+import ch.qos.logback.core.joran.spi.JoranException;
 
 /**
  * Manager component responsible for setting up and managing the Galley API instances used to resolve POMs and metadata.
@@ -60,6 +71,10 @@ import org.commonjava.maven.galley.transport.htcli.HttpImpl;
 public class GalleyInfrastructure
     implements ExtensionInfrastructure
 {
+
+    @Requirement
+    private org.codehaus.plexus.logging.Logger testLogger;
+
     private MavenPomReader pomReader;
 
     private LocationExpander locationExpander;
@@ -101,6 +116,8 @@ public class GalleyInfrastructure
                        final Transport customTransport, File cacheDir )
         throws ManipulationException
     {
+        configureLogging( session );
+
         try
         {
             final List<Location> custom =
@@ -165,6 +182,49 @@ public class GalleyInfrastructure
             new MavenPomReader( xml, locationExpander, artifactManager, xpaths, pluginDefaults, pluginImplications );
 
         metadataReader = new MavenMetadataReader( xml, locationExpander, metadataManager, xpaths );
+    }
+
+    private void configureLogging( final ManipulationSession session )
+    {
+        final String userHome = System.getProperty( "user.home" );
+        final File logConf = new File( userHome, ".m2/logback.xml" );
+
+        try
+        {
+            if ( logConf != null && logConf.exists() )
+            {
+                final String logProps = FileUtils.readFileToString( logConf );
+
+                final JoranConfigurator fig = new JoranConfigurator();
+                final LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
+
+                final List<Logger> loggerList = context.getLoggerList();
+                if ( loggerList != null )
+                {
+                    for ( final Logger logger : loggerList )
+                    {
+                        logger.detachAndStopAllAppenders();
+                    }
+                }
+
+                fig.setContext( context );
+                fig.doConfigure( new ByteArrayInputStream( logProps.getBytes() ) );
+            }
+        }
+        catch ( final IOException e )
+        {
+            testLogger.debug( "Cannot read logback config file: " + logConf, e );
+        }
+        catch ( final JoranException e )
+        {
+            testLogger.debug( "Cannot parse logback config file: " + logConf, e );
+        }
+
+        if ( testLogger == null || testLogger.isDebugEnabled() )
+        {
+            final Logger root = (Logger) LoggerFactory.getLogger( org.slf4j.Logger.ROOT_LOGGER_NAME );
+            root.setLevel( Level.DEBUG );
+        }
     }
 
     public MavenMetadataReader getMetadataReader()
