@@ -26,13 +26,12 @@
 package org.commonjava.maven.ext.manip.resolver;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
-import org.apache.maven.artifact.repository.ArtifactRepository;
+import org.apache.maven.RepositoryUtils;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Plugin;
 import org.apache.maven.model.building.DefaultModelBuildingRequest;
@@ -73,38 +72,7 @@ public class ModelOverridesResolver
     private ModelBuilder modelBuilder;
 
     /**
-     * Repositories for downloading remote poms
-     */
-    private List<RemoteRepository> repositories;
-
-    /**
-     * Get list of remote repositories from which to download artifacts
-     *
-     * @return list of repositories
-     */
-    private List<RemoteRepository> getRepositories()
-    {
-        if ( repositories == null )
-        {
-            repositories = new ArrayList<RemoteRepository>();
-        }
-
-        return repositories;
-    }
-
-    /**
-     * Set the list of remote repositories from which to download dependency management poms.
-     *
-     * @param repository
-     */
-    public void addRepository( final ArtifactRepository repository )
-    {
-        final RemoteRepository remoteRepo = new RemoteRepository( repository.getId(), "default", repository.getUrl() );
-        getRepositories().add( remoteRepo );
-    }
-
-    /**
-     * Private constructor for singleton
+     * Protected constructor for component instantiation/injection
      */
     protected ModelOverridesResolver()
     {
@@ -273,7 +241,9 @@ public class ModelOverridesResolver
     {
         final ArtifactRequest request = new ArtifactRequest();
         request.setArtifact( artifact );
-        request.setRepositories( getRepositories() );
+
+        final List<RemoteRepository> remotes = RepositoryUtils.toRepos( session.getRemoteRepositories() );
+        request.setRepositories( remotes );
 
         final RepositorySystemSession repositorySession = session.getRepositorySystemSession();
         final ArtifactResult result = resolver.resolveArtifact( repositorySession, request );
@@ -283,8 +253,11 @@ public class ModelOverridesResolver
     private ModelResolver newModelResolver( final ManipulationSession session )
     {
         final RemoteRepositoryManager repoMgr = new DefaultRemoteRepositoryManager();
+
+        final List<RemoteRepository> remotes = RepositoryUtils.toRepos( session.getRemoteRepositories() );
+
         final ModelResolver modelResolver =
-            new BasicModelResolver( session.getRepositorySystemSession(), resolver, repoMgr, getRepositories() );
+            new BasicModelResolver( session.getRepositorySystemSession(), resolver, repoMgr, remotes );
 
         return modelResolver;
     }

@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.execution.MavenExecutionRequest;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.model.Model;
@@ -138,6 +139,12 @@ public class ManipulationSession
     public List<Project> getProjects()
     {
         return projects;
+    }
+
+    public List<ArtifactRepository> getRemoteRepositories()
+    {
+        return mavenSession == null ? null : mavenSession.getRequest()
+                                                         .getRemoteRepositories();
     }
 
 }
