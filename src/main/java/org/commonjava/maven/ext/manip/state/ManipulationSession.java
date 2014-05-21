@@ -10,6 +10,7 @@
  ******************************************************************************/
 package org.commonjava.maven.ext.manip.state;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -145,6 +146,29 @@ public class ManipulationSession
     {
         return mavenSession == null ? null : mavenSession.getRequest()
                                                          .getRemoteRepositories();
+    }
+
+    public File getTargetDir()
+    {
+        if ( mavenSession == null )
+        {
+            return new File( "target" );
+        }
+
+        final File pom = mavenSession.getRequest()
+                                     .getPom();
+        if ( pom == null )
+        {
+            return new File( "target" );
+        }
+
+        return new File( pom.getParentFile(), "target" );
+    }
+
+    public ArtifactRepository getLocalRepository()
+    {
+        return mavenSession == null ? null : mavenSession.getRequest()
+                                                         .getLocalRepository();
     }
 
 }

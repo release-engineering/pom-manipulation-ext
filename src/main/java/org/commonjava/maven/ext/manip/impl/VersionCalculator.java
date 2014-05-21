@@ -12,9 +12,6 @@ package org.commonjava.maven.ext.manip.impl;
 
 import static org.commonjava.maven.ext.manip.util.IdUtils.gav;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -25,26 +22,18 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.maven.RepositoryUtils;
-import org.apache.maven.artifact.repository.ArtifactRepository;
-import org.apache.maven.artifact.repository.metadata.Versioning;
-import org.apache.maven.artifact.repository.metadata.io.xpp3.MetadataXpp3Reader;
 import org.codehaus.plexus.component.annotations.Component;
 import org.codehaus.plexus.component.annotations.Requirement;
 import org.codehaus.plexus.logging.Logger;
-import org.codehaus.plexus.util.IOUtil;
-import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
+import org.commonjava.maven.atlas.ident.ref.ProjectRef;
 import org.commonjava.maven.ext.manip.ManipulationException;
 import org.commonjava.maven.ext.manip.model.Project;
+import org.commonjava.maven.ext.manip.resolver.PomReaderWrapper;
 import org.commonjava.maven.ext.manip.state.ManipulationSession;
 import org.commonjava.maven.ext.manip.state.VersioningState;
+import org.commonjava.maven.galley.maven.GalleyMavenException;
+import org.commonjava.maven.galley.maven.model.view.MavenMetadataView;
 import org.sonatype.aether.RepositorySystem;
-import org.sonatype.aether.metadata.Metadata;
-import org.sonatype.aether.metadata.Metadata.Nature;
-import org.sonatype.aether.repository.RemoteRepository;
-import org.sonatype.aether.resolution.MetadataRequest;
-import org.sonatype.aether.resolution.MetadataResult;
-import org.sonatype.aether.util.metadata.DefaultMetadata;
 
 /**
  * Component that calculates project version modifications, based on configuration stored in {@link VersioningState}. Snapshots may/may not be
@@ -68,6 +57,9 @@ public class VersionCalculator
 
     @Requirement
     protected RepositorySystem repositorySystem;
+
+    @Requirement
+    protected PomReaderWrapper readerWrapper;
 
     protected VersionCalculator()
     {
@@ -268,119 +260,25 @@ public class VersionCalculator
     /**
      * Accumulate all available versions for a given GAV from all available repositories.
      */
-    // FIXME: Switch to galley APIs
     private Set<String> getMetadataVersions( final String groupId, final String artifactId,
                                              final ManipulationSession session )
         throws ManipulationException
     {
         logger.debug( "Reading available versions from repository metadata for: " + groupId + ":" + artifactId );
 
-        final Set<String> versions = new HashSet<String>();
-        final List<ArtifactRepository> remoteRepositories = session.getRequest()
-                                                                   .getRemoteRepositories();
-        for ( final ArtifactRepository repo : remoteRepositories )
+        try
         {
-            final RemoteRepository remote = RepositoryUtils.toRepo( repo );
+            final MavenMetadataView metadataView =
+                readerWrapper.readMetadataView( new ProjectRef( groupId, artifactId ) );
 
-            logger.debug( "Checking: " + remote.getUrl() );
-            resolveMetadata( groupId, artifactId, remote, versions, session );
+            final List<String> versions =
+                metadataView.resolveXPathExpressionToAggregatedList( "/metadata/versioning/versions/version", true, -1 );
+
+            return new HashSet<String>( versions );
         }
-
-        return versions;
-    }
-
-    /**
-     * Read available versions for a given GAV from its repository metadata, and accumulate the versions in the given {@link Set}.
-     */
-    private void resolveMetadata( final String groupId, final String artifactId, final RemoteRepository remote,
-                                  final Set<String> versions, final ManipulationSession session )
-        throws ManipulationException
-    {
-        final MetadataRequest req =
-            new MetadataRequest( new DefaultMetadata( groupId, artifactId, "maven-metadata.xml",
-                                                      Nature.RELEASE_OR_SNAPSHOT ), remote, "version-calculator" );
-
-        req.setDeleteLocalCopyIfMissing( true );
-
-        final List<MetadataRequest> reqs = new ArrayList<MetadataRequest>();
-        reqs.add( req );
-
-        final List<MetadataResult> mdResults =
-            repositorySystem.resolveMetadata( session.getRepositorySystemSession(), reqs );
-
-        if ( mdResults != null )
+        catch ( final GalleyMavenException e )
         {
-            File mdFile = null;
-            final MetadataXpp3Reader mdReader = new MetadataXpp3Reader();
-            for ( final MetadataResult mdResult : mdResults )
-            {
-                Metadata metadata = mdResult.getMetadata();
-                if ( metadata == null )
-                {
-                    metadata = mdResult.getRequest()
-                                       .getMetadata();
-                }
-
-                if ( metadata == null )
-                {
-                    logger.error( "Cannot find metadata instance associated with MetadataResult: " + mdResult
-                        + ". Skipping..." );
-                    continue;
-                }
-
-                mdFile = metadata.getFile();
-                if ( mdFile == null )
-                {
-                    final Exception exception = mdResult.getException();
-                    if ( exception != null )
-                    {
-                        if ( logger.isDebugEnabled() )
-                        {
-                            logger.error( "Failed to resolve metadata: " + metadata + ". Error: "
-                                              + exception.getMessage(), exception );
-                        }
-                        else
-                        {
-                            logger.error( "Failed to resolve metadata: " + metadata + ". Error: "
-                                + exception.getMessage() );
-                        }
-                    }
-
-                    continue;
-                }
-
-                logger.debug( "Reading: " + mdFile );
-                FileInputStream stream = null;
-                try
-                {
-                    stream = new FileInputStream( mdFile );
-                    final org.apache.maven.artifact.repository.metadata.Metadata md = mdReader.read( stream );
-                    final Versioning versioning = md.getVersioning();
-
-                    if ( versioning != null )
-                    {
-                        logger.debug( "Got versions: " + versioning.getVersions() );
-                        versions.addAll( versioning.getVersions() );
-                    }
-                }
-                catch ( final IOException e )
-                {
-                    throw new ManipulationException(
-                                                     "Cannot read metadata from: %s to determine last version-suffix serial number. Error: %s",
-                                                     e, mdFile, e.getMessage() );
-                }
-                catch ( final XmlPullParserException e )
-                {
-                    throw new ManipulationException(
-                                                     "Cannot parse metadata from: %s to determine last version-suffix serial number. Error: %s",
-                                                     e, mdFile, e.getMessage() );
-                }
-                finally
-                {
-                    IOUtil.close( stream );
-                }
-            }
+            throw new ManipulationException( "Failed to resolve metadata for: %s:%s.", e, groupId, artifactId );
         }
     }
-
 }

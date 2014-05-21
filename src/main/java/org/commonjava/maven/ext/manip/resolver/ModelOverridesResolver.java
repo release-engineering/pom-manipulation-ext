@@ -25,36 +25,23 @@
  */
 package org.commonjava.maven.ext.manip.resolver;
 
-import java.io.File;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 
-import org.apache.maven.RepositoryUtils;
-import org.apache.maven.model.Model;
-import org.apache.maven.model.Plugin;
-import org.apache.maven.model.building.DefaultModelBuildingRequest;
 import org.apache.maven.model.building.ModelBuilder;
-import org.apache.maven.model.building.ModelBuildingException;
-import org.apache.maven.model.building.ModelBuildingRequest;
-import org.apache.maven.model.building.ModelBuildingResult;
-import org.apache.maven.model.resolution.ModelResolver;
 import org.codehaus.plexus.component.annotations.Component;
 import org.codehaus.plexus.component.annotations.Requirement;
 import org.codehaus.plexus.logging.Logger;
+import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.ext.manip.ManipulationException;
 import org.commonjava.maven.ext.manip.state.ManipulationSession;
-import org.sonatype.aether.RepositorySystemSession;
-import org.sonatype.aether.artifact.Artifact;
+import org.commonjava.maven.galley.maven.GalleyMavenException;
+import org.commonjava.maven.galley.maven.model.view.DependencyView;
+import org.commonjava.maven.galley.maven.model.view.MavenPomView;
+import org.commonjava.maven.galley.maven.model.view.PluginView;
 import org.sonatype.aether.impl.ArtifactResolver;
-import org.sonatype.aether.impl.RemoteRepositoryManager;
-import org.sonatype.aether.impl.internal.DefaultRemoteRepositoryManager;
-import org.sonatype.aether.repository.RemoteRepository;
-import org.sonatype.aether.resolution.ArtifactRequest;
-import org.sonatype.aether.resolution.ArtifactResolutionException;
-import org.sonatype.aether.resolution.ArtifactResult;
-import org.sonatype.aether.util.artifact.DefaultArtifact;
+import org.w3c.dom.Node;
 
 /**
  * Class to resolve artifact descriptors (pom files) from a maven repository
@@ -71,6 +58,9 @@ public class ModelOverridesResolver
     @Requirement
     private ModelBuilder modelBuilder;
 
+    @Requirement
+    private PomReaderWrapper pomReader;
+
     /**
      * Protected constructor for component instantiation/injection
      */
@@ -84,70 +74,66 @@ public class ModelOverridesResolver
     {
         logger.debug( "Resolving dependency management GAV: " + gav );
 
+        final Map<String, String> versionOverrides = new HashMap<String, String>();
         try
         {
-            final Map<String, String> versionOverrides = new HashMap<String, String>();
-            final Artifact artifact = resolvePom( gav, session );
+            final MavenPomView pomView = pomReader.readPomView( ProjectVersionRef.parse( gav ) );
 
-            final ModelResolver modelResolver = this.newModelResolver( session );
-
-            final Model effectiveModel = buildModel( artifact.getFile(), modelResolver );
-            logger.debug( "Built model for project: " + effectiveModel.getName() );
-
-            if ( effectiveModel.getDependencyManagement() == null )
+            // TODO: active profiles!
+            final List<DependencyView> deps = pomView.getAllManagedDependencies();
+            if ( deps == null || deps.isEmpty() )
             {
                 throw new ManipulationException(
                                                  "Attempting to align to a BOM that does not have a dependencyManagement section" );
             }
 
-            for ( final org.apache.maven.model.Dependency dep : effectiveModel.getDependencyManagement()
-                                                                              .getDependencies() )
+            for ( final DependencyView dep : deps )
             {
-                final String groupIdArtifactId = dep.getGroupId() + ":" + dep.getArtifactId();
-                versionOverrides.put( groupIdArtifactId, dep.getVersion() );
-                logger.debug( "Added version override for: " + groupIdArtifactId + ":" + dep.getVersion() );
+                versionOverrides.put( dep.asProjectRef()
+                                         .toString(), dep.getVersion() );
+                logger.debug( "Added version override for: " + dep.asProjectRef()
+                                                                  .toString() + ":" + dep.getVersion() );
             }
+        }
+        catch ( final GalleyMavenException e )
+        {
+            throw new ManipulationException( "Unable to resolve: %s", e, gav );
+        }
 
-            return versionOverrides;
-        }
-        catch ( final ArtifactResolutionException e )
-        {
-            throw new ManipulationException( "Unable to resolve artifact", e );
-        }
-        catch ( final ModelBuildingException e )
-        {
-            throw new ManipulationException( "Unable to resolve artifact", e );
-        }
+        return versionOverrides;
     }
 
-    @SuppressWarnings( { "unchecked", "rawtypes" } )
     public Map<String, String> getRemotePropertyMappingOverrides( final String gav, final ManipulationSession session )
         throws ManipulationException
     {
         logger.debug( "Resolving remote property mapping POM: " + gav );
 
+        final Map<String, String> versionOverrides = new HashMap<String, String>();
         try
         {
-            final Artifact artifact = resolvePom( gav, session );
+            final MavenPomView pomView = pomReader.readPomView( ProjectVersionRef.parse( gav ) );
 
-            final ModelResolver modelResolver = this.newModelResolver( session );
+            // TODO: active profiles!
+            // TODO: Provide method for retrieving property map from pomView, instead of using this low-level api.
+            final List<Node> properties = pomView.resolveXPathToAggregatedNodeList( "//properties", true, -1 );
 
-            final Model effectiveModel = buildModel( artifact.getFile(), modelResolver );
-
-            final Properties versionOverrides = effectiveModel.getProperties();
-
-            logger.debug( "Returning override of " + versionOverrides );
-
-            return new HashMap<String, String>( (Map) versionOverrides );
+            for ( final Node prop : properties )
+            {
+                // TODO: cleanup of text?
+                versionOverrides.put( prop.getNodeName(), prop.getTextContent()
+                                                              .trim() );
+            }
         }
-        catch ( final ArtifactResolutionException e )
+        catch ( final GalleyMavenException e )
         {
-            throw new ManipulationException( "Unable to resolve artifact", e );
+            throw new ManipulationException( "Unable to resolve: %s", e, gav );
         }
-        catch ( final ModelBuildingException e )
+        finally
         {
-            throw new ManipulationException( "Unable to resolve artifact", e );
         }
+
+        logger.debug( "Returning override of " + versionOverrides );
+        return versionOverrides;
     }
 
     public Map<String, String> getRemotePluginVersionOverrides( final String gav, final ManipulationSession session )
@@ -155,110 +141,34 @@ public class ModelOverridesResolver
     {
         logger.debug( "Resolving remote plugin management POM: " + gav );
 
+        final Map<String, String> versionOverrides = new HashMap<String, String>();
         try
         {
-            final Artifact artifact = resolvePom( gav, session );
+            final MavenPomView pomView = pomReader.readPomView( ProjectVersionRef.parse( gav ) );
 
-            final ModelResolver modelResolver = this.newModelResolver( session );
-
-            final Model effectiveModel = buildModel( artifact.getFile(), modelResolver );
-
-            final List<Plugin> plugins = effectiveModel.getBuild()
-                                                       .getPluginManagement()
-                                                       .getPlugins();
-
-            final Map<String, String> versionOverrides = new HashMap<String, String>();
-
-            for ( final Plugin plugin : plugins )
+            // TODO: active profiles!
+            final List<PluginView> plugins = pomView.getAllManagedBuildPlugins();
+            if ( plugins == null || plugins.isEmpty() )
             {
-                final String groupIdArtifactId = plugin.getGroupId() + ":" + plugin.getArtifactId();
-                versionOverrides.put( groupIdArtifactId, plugin.getVersion() );
+                throw new ManipulationException(
+                                                 "Attempting to align to a BOM that does not have a pluginManagement section" );
             }
 
-            return versionOverrides;
+            for ( final PluginView plugin : plugins )
+            {
+                versionOverrides.put( plugin.asProjectRef()
+                                            .toString(), plugin.getVersion() );
+
+                logger.debug( "Added version override for: " + plugin.asProjectRef()
+                                                                     .toString() + ":" + plugin.getVersion() );
+            }
         }
-        catch ( final ArtifactResolutionException e )
+        catch ( final GalleyMavenException e )
         {
-            throw new ManipulationException( "Unable to resolve artifact", e );
+            throw new ManipulationException( "Unable to resolve: %s", e, gav );
         }
-        catch ( final ModelBuildingException e )
-        {
-            throw new ManipulationException( "Unable to resolve artifact", e );
-        }
+
+        return versionOverrides;
     }
 
-    /**
-     * Build the effective model for the given pom file
-     *
-     * @param pomFile
-     * @return effective pom model
-     * @throws ModelBuildingException
-     */
-    private Model buildModel( final File pomFile, final ModelResolver modelResolver )
-        throws ModelBuildingException
-    {
-        final ModelBuildingRequest request = new DefaultModelBuildingRequest();
-        request.setPomFile( pomFile );
-        request.setModelResolver( modelResolver );
-        request.setValidationLevel( ModelBuildingRequest.VALIDATION_LEVEL_MAVEN_3_0 );
-        request.setTwoPhaseBuilding( false ); // Resolve the complete model in one step
-        request.setSystemProperties( System.getProperties() );
-        final ModelBuildingResult result = modelBuilder.build( request );
-        return result.getEffectiveModel();
-    }
-
-    /**
-     * Resolve the pom file for a given GAV
-     *
-     * @param gav must be in the format groupId:artifactId:version
-     * @return The resolved pom artifact
-     * @throws ArtifactResolutionException
-     */
-    private Artifact resolvePom( final String gav, final ManipulationSession session )
-        throws ArtifactResolutionException
-    {
-        final String[] gavParts = gav.split( ":" );
-        final String groupId = gavParts[0];
-        final String artifactId = gavParts[1];
-        final String version = gavParts[2];
-        final String extension = "pom";
-
-        Artifact artifact = new DefaultArtifact( groupId, artifactId, extension, version );
-        artifact = resolveArtifact( artifact, session );
-
-        return artifact;
-    }
-
-    /**
-     * Resolve artifact from the remote repository
-     *
-     * @param artifact
-     * @return
-     * @throws ArtifactResolutionException
-     */
-    private Artifact resolveArtifact( final Artifact artifact, final ManipulationSession session )
-        throws ArtifactResolutionException
-    {
-        final ArtifactRequest request = new ArtifactRequest();
-        request.setArtifact( artifact );
-
-        final List<RemoteRepository> remotes = RepositoryUtils.toRepos( session.getRemoteRepositories() );
-        request.setRepositories( remotes );
-
-        final RepositorySystemSession repositorySession = session.getRepositorySystemSession();
-        final ArtifactResult result = resolver.resolveArtifact( repositorySession, request );
-        return result.getArtifact();
-    }
-
-    private ModelResolver newModelResolver( final ManipulationSession session )
-    {
-        final RemoteRepositoryManager repoMgr = new DefaultRemoteRepositoryManager();
-
-        final List<RemoteRepository> remotes = RepositoryUtils.toRepos( session.getRemoteRepositories() );
-
-        final ModelResolver modelResolver =
-            new BasicModelResolver( session.getRepositorySystemSession(), resolver, repoMgr, remotes );
-
-        return modelResolver;
-    }
 }

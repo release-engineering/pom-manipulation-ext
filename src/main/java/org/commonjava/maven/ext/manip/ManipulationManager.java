@@ -28,6 +28,7 @@ import org.commonjava.maven.ext.manip.impl.Manipulator;
 import org.commonjava.maven.ext.manip.io.PomIO;
 import org.commonjava.maven.ext.manip.model.FullProjectKey;
 import org.commonjava.maven.ext.manip.model.Project;
+import org.commonjava.maven.ext.manip.resolver.ExtensionInfrastructure;
 import org.commonjava.maven.ext.manip.state.ManipulationSession;
 import org.commonjava.maven.ext.manip.util.PomPeek;
 
@@ -53,6 +54,9 @@ public class ManipulationManager
 
     @Requirement( role = Manipulator.class )
     private Map<String, Manipulator> manipulators;
+
+    @Requirement( role = ExtensionInfrastructure.class )
+    private Map<String, ExtensionInfrastructure> infrastructure;
 
     /**
      * Scan the projects implied by the given POM file for modifications, and save the state in the session for later rewriting to apply it.
@@ -116,6 +120,11 @@ public class ManipulationManager
         throws ManipulationException
     {
         session.setMavenSession( mavenSession );
+
+        for ( final ExtensionInfrastructure infra : infrastructure.values() )
+        {
+            infra.init( session );
+        }
 
         for ( final Map.Entry<String, Manipulator> entry : manipulators.entrySet() )
         {
