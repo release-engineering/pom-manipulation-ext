@@ -16,7 +16,6 @@ import java.util.Map;
 
 import org.apache.maven.model.Model;
 import org.codehaus.plexus.component.annotations.Component;
-import org.codehaus.plexus.component.annotations.Requirement;
 import org.codehaus.plexus.logging.Logger;
 import org.commonjava.maven.ext.manip.ManipulationException;
 import org.commonjava.maven.ext.manip.model.Project;
@@ -32,9 +31,6 @@ public class PropertyManipulator
     extends AlignmentManipulator
 {
 
-    @Requirement
-    protected Logger logger;
-
     protected PropertyManipulator()
     {
     }
@@ -42,25 +38,24 @@ public class PropertyManipulator
     public PropertyManipulator( final Logger logger )
     {
         super( logger );
-        this.logger = logger;
     }
 
     @Override
     public void init( final ManipulationSession session )
     {
         super.init( session );
-        super.baseLogger = this.logger;
     }
 
     @Override
-    protected Map<String, String> loadRemoteBOM( BOMState state )
+    protected Map<String, String> loadRemoteBOM( final BOMState state, final ManipulationSession session )
         throws ManipulationException
     {
-        return loadRemoteOverrides( RemoteType.PROPERTY, state.getRemotePropertyMgmt() );
+        return loadRemoteOverrides( RemoteType.PROPERTY, state.getRemotePropertyMgmt(), session );
     }
 
     @Override
-    protected void apply( ManipulationSession session, Project project, Model model, Map<String, String> override )
+    protected void apply( final ManipulationSession session, final Project project, final Model model,
+                          final Map<String, String> override )
         throws ManipulationException
     {
         // Only inject the new properties at the top level.

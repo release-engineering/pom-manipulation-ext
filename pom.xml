@@ -50,6 +50,7 @@
 
   <properties>
     <mavenVersion>3.0.4</mavenVersion>
+    <galleyVersion>0.4.2</galleyVersion>
     <it.maven.home>${project.build.directory}/apache-maven-${mavenVersion}</it.maven.home>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
@@ -67,6 +68,27 @@
       <artifactId>plexus-component-annotations</artifactId>
       <version>1.5.5</version>
       <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.commonjava.maven.galley</groupId>
+      <artifactId>galley-core</artifactId>
+      <version>${galleyVersion}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.commonjava.maven.galley</groupId>
+      <artifactId>galley-transport-httpclient</artifactId>
+      <version>${galleyVersion}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.commonjava.maven.galley</groupId>
+      <artifactId>galley-transport-filearc</artifactId>
+      <version>${galleyVersion}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.commonjava.maven.galley</groupId>
+      <artifactId>galley-maven</artifactId>
+      <version>${galleyVersion}</version>
     </dependency>
 
     <dependency>
@@ -293,7 +315,7 @@
                         <artifactSet>
                             <includes>
                                 <include>org.jdom:jdom</include>
-                                <include>org.commonjava.maven:maven-model-jdom-support</include>
+                                <include>org.commonjava.*:*</include>
                                 <include>commons-lang:commons-lang</include>
                             </includes>
                         </artifactSet>

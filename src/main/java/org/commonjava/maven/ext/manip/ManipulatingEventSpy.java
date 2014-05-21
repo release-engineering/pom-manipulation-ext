@@ -18,13 +18,10 @@ import org.apache.maven.execution.ExecutionEvent;
 import org.apache.maven.execution.ExecutionEvent.Type;
 import org.apache.maven.execution.MavenExecutionRequest;
 import org.apache.maven.model.building.ModelBuilder;
-import org.codehaus.plexus.PlexusContainerException;
 import org.codehaus.plexus.component.annotations.Component;
 import org.codehaus.plexus.component.annotations.Requirement;
-import org.codehaus.plexus.component.repository.exception.ComponentLookupException;
 import org.codehaus.plexus.logging.Logger;
 import org.commonjava.maven.ext.manip.model.Project;
-import org.commonjava.maven.ext.manip.resolver.EffectiveModelBuilder;
 import org.commonjava.maven.ext.manip.state.ManipulationSession;
 import org.sonatype.aether.impl.ArtifactResolver;
 
@@ -83,19 +80,6 @@ public class ManipulatingEventSpy
                             logger.info( "Manipulation engine disabled." );
                             super.onEvent( event );
                             return;
-                        }
-
-                        try
-                        {
-                            EffectiveModelBuilder.init( logger, ee.getSession(), resolver, modelBuilder );
-                        }
-                        catch ( ComponentLookupException e )
-                        {
-                            logger.error( "EffectiveModelBuilder init could not look up plexus component: " + e );
-                        }
-                        catch ( PlexusContainerException e )
-                        {
-                            logger.error( "EffectiveModelBuilder init produced a plexus container error: " + e );
                         }
 
                         final MavenExecutionRequest req = session.getRequest();

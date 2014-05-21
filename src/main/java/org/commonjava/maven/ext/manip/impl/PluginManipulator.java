@@ -21,7 +21,6 @@ import org.apache.maven.model.Model;
 import org.apache.maven.model.Plugin;
 import org.apache.maven.model.PluginManagement;
 import org.codehaus.plexus.component.annotations.Component;
-import org.codehaus.plexus.component.annotations.Requirement;
 import org.codehaus.plexus.logging.Logger;
 import org.commonjava.maven.ext.manip.ManipulationException;
 import org.commonjava.maven.ext.manip.model.Project;
@@ -36,9 +35,6 @@ import org.commonjava.maven.ext.manip.state.ManipulationSession;
 public class PluginManipulator
     extends AlignmentManipulator
 {
-    @Requirement
-    protected Logger logger;
-
     protected PluginManipulator()
     {
     }
@@ -46,31 +42,30 @@ public class PluginManipulator
     public PluginManipulator( final Logger logger )
     {
         super( logger );
-        this.logger = logger;
     }
 
     @Override
     public void init( final ManipulationSession session )
     {
         super.init( session );
-        super.baseLogger = this.logger;
     }
 
     @Override
-    protected Map<String, String> loadRemoteBOM( BOMState state )
+    protected Map<String, String> loadRemoteBOM( final BOMState state, final ManipulationSession session )
         throws ManipulationException
     {
-        return loadRemoteOverrides( RemoteType.PLUGIN, state.getRemotePluginMgmt() );
+        return loadRemoteOverrides( RemoteType.PLUGIN, state.getRemotePluginMgmt(), session );
     }
 
     @Override
-    protected void apply( ManipulationSession session, Project project, Model model, Map<String, String> override )
+    protected void apply( final ManipulationSession session, final Project project, final Model model,
+                          final Map<String, String> override )
         throws ManipulationException
     {
         // TODO: Should plugin override apply to all projects?
         logger.info( "Applying plugin changes to: " + ga( project ) );
 
-        if (project.isTopPOM())
+        if ( project.isTopPOM() )
         {
             // If the model doesn't have any plugin management set by default, create one for it
             Build build = model.getBuild();
@@ -82,12 +77,14 @@ public class PluginManipulator
                 logger.info( "Created new Build for model " + model.getId() );
             }
 
-            PluginManagement pluginManagement = model.getBuild().getPluginManagement();
+            PluginManagement pluginManagement = model.getBuild()
+                                                     .getPluginManagement();
 
             if ( pluginManagement == null )
             {
                 pluginManagement = new PluginManagement();
-                model.getBuild().setPluginManagement( pluginManagement );
+                model.getBuild()
+                     .setPluginManagement( pluginManagement );
                 logger.info( "Created new Plugin Management for model " + model.getId() );
             }
 
@@ -95,11 +92,11 @@ public class PluginManipulator
             applyOverrides( pluginManagement.getPlugins(), override );
         }
 
-        if ( model.getBuild() != null)
+        if ( model.getBuild() != null )
         {
             // Override plugin versions
             final List<Plugin> projectPlugins = model.getBuild()
-                                                 .getPlugins();
+                                                     .getPlugins();
             applyOverrides( projectPlugins, override );
         }
 
@@ -113,7 +110,7 @@ public class PluginManipulator
      */
     protected void applyOverrides( final List<Plugin> plugins, final Map<String, String> pluginVersionOverrides )
     {
-        for ( final Plugin plugin : (plugins == null ? Collections.<Plugin>emptyList() : plugins))
+        for ( final Plugin plugin : ( plugins == null ? Collections.<Plugin> emptyList() : plugins ) )
         {
             final String groupIdArtifactId = plugin.getGroupId() + BOMState.GAV_SEPERATOR + plugin.getArtifactId();
             if ( pluginVersionOverrides.containsKey( groupIdArtifactId ) )

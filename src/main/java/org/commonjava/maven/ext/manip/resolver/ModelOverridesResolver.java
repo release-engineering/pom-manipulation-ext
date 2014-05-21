@@ -33,7 +33,6 @@ import java.util.Map;
 import java.util.Properties;
 
 import org.apache.maven.artifact.repository.ArtifactRepository;
-import org.apache.maven.execution.MavenSession;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Plugin;
 import org.apache.maven.model.building.DefaultModelBuildingRequest;
@@ -42,10 +41,11 @@ import org.apache.maven.model.building.ModelBuildingException;
 import org.apache.maven.model.building.ModelBuildingRequest;
 import org.apache.maven.model.building.ModelBuildingResult;
 import org.apache.maven.model.resolution.ModelResolver;
-import org.codehaus.plexus.PlexusContainerException;
-import org.codehaus.plexus.component.repository.exception.ComponentLookupException;
+import org.codehaus.plexus.component.annotations.Component;
+import org.codehaus.plexus.component.annotations.Requirement;
 import org.codehaus.plexus.logging.Logger;
 import org.commonjava.maven.ext.manip.ManipulationException;
+import org.commonjava.maven.ext.manip.state.ManipulationSession;
 import org.sonatype.aether.RepositorySystemSession;
 import org.sonatype.aether.artifact.Artifact;
 import org.sonatype.aether.impl.ArtifactResolver;
@@ -60,16 +60,16 @@ import org.sonatype.aether.util.artifact.DefaultArtifact;
 /**
  * Class to resolve artifact descriptors (pom files) from a maven repository
  */
-public class EffectiveModelBuilder
+@Component( role = ModelOverridesResolver.class )
+public class ModelOverridesResolver
 {
-    private static EffectiveModelBuilder instance;
-
+    @Requirement
     private Logger logger;
 
-    private MavenSession session;
-
+    @Requirement
     private ArtifactResolver resolver;
 
+    @Requirement
     private ModelBuilder modelBuilder;
 
     /**
@@ -97,75 +97,33 @@ public class EffectiveModelBuilder
      *
      * @param repository
      */
-    public void addRepository( ArtifactRepository repository )
+    public void addRepository( final ArtifactRepository repository )
     {
-        RemoteRepository remoteRepo = new RemoteRepository( repository.getId(), "default", repository.getUrl() );
+        final RemoteRepository remoteRepo = new RemoteRepository( repository.getId(), "default", repository.getUrl() );
         getRepositories().add( remoteRepo );
     }
 
     /**
      * Private constructor for singleton
      */
-    private EffectiveModelBuilder()
+    protected ModelOverridesResolver()
     {
 
     }
 
-    public static void init( Logger logger, MavenSession session, ArtifactResolver resolver, ModelBuilder modelBuilder )
-        throws ComponentLookupException, PlexusContainerException
-    {
-        instance = new EffectiveModelBuilder();
-        instance.logger = logger;
-        instance.session = session;
-        instance.resolver = resolver;
-        instance.modelBuilder = modelBuilder;
-        initRepositories( session.getRequest()
-                                 .getRemoteRepositories() );
-    }
-
-    /**
-     * Initialize the set of repositories from which to download remote artifacts
-     *
-     * @param repositories
-     */
-    private static void initRepositories( List<ArtifactRepository> repositories )
-    {
-        if ( repositories == null || repositories.size() == 0 )
-        {
-            // Set default repository list to include Maven central
-            String remoteRepoUrl = "http://repo.maven.apache.org/maven2";
-            instance.getRepositories()
-                    .add( new RemoteRepository( "central", "default", remoteRepoUrl ) );
-        }
-        for ( ArtifactRepository artifactRepository : repositories )
-        {
-            instance.addRepository( artifactRepository );
-        }
-    }
-
-    /**
-     * Return the instance. Will return "null" until init() has been called.
-     *
-     * @return the initialized instance or null if it hasn't been initialized yet
-     */
-    public static EffectiveModelBuilder getInstance()
-    {
-        return instance;
-    }
-
-    public Map<String, String> getRemoteDependencyVersionOverrides( String gav )
+    public Map<String, String> getRemoteDependencyVersionOverrides( final String gav, final ManipulationSession session )
         throws ManipulationException
     {
         logger.debug( "Resolving dependency management GAV: " + gav );
 
         try
         {
-            Map<String, String> versionOverrides = new HashMap<String, String>();
-            Artifact artifact = resolvePom( gav );
+            final Map<String, String> versionOverrides = new HashMap<String, String>();
+            final Artifact artifact = resolvePom( gav, session );
 
-            ModelResolver modelResolver = this.newModelResolver();
+            final ModelResolver modelResolver = this.newModelResolver( session );
 
-            Model effectiveModel = buildModel( artifact.getFile(), modelResolver );
+            final Model effectiveModel = buildModel( artifact.getFile(), modelResolver );
             logger.debug( "Built model for project: " + effectiveModel.getName() );
 
             if ( effectiveModel.getDependencyManagement() == null )
@@ -174,88 +132,88 @@ public class EffectiveModelBuilder
                                                  "Attempting to align to a BOM that does not have a dependencyManagement section" );
             }
 
-            for ( org.apache.maven.model.Dependency dep : effectiveModel.getDependencyManagement()
-                                                                        .getDependencies() )
+            for ( final org.apache.maven.model.Dependency dep : effectiveModel.getDependencyManagement()
+                                                                              .getDependencies() )
             {
-                String groupIdArtifactId = dep.getGroupId() + ":" + dep.getArtifactId();
+                final String groupIdArtifactId = dep.getGroupId() + ":" + dep.getArtifactId();
                 versionOverrides.put( groupIdArtifactId, dep.getVersion() );
                 logger.debug( "Added version override for: " + groupIdArtifactId + ":" + dep.getVersion() );
             }
 
             return versionOverrides;
         }
-        catch ( ArtifactResolutionException e )
+        catch ( final ArtifactResolutionException e )
         {
             throw new ManipulationException( "Unable to resolve artifact", e );
         }
-        catch ( ModelBuildingException e )
+        catch ( final ModelBuildingException e )
         {
             throw new ManipulationException( "Unable to resolve artifact", e );
         }
     }
 
     @SuppressWarnings( { "unchecked", "rawtypes" } )
-    public Map<String, String> getRemotePropertyMappingOverrides( String gav )
+    public Map<String, String> getRemotePropertyMappingOverrides( final String gav, final ManipulationSession session )
         throws ManipulationException
     {
         logger.debug( "Resolving remote property mapping POM: " + gav );
 
         try
         {
-            Artifact artifact = resolvePom( gav );
+            final Artifact artifact = resolvePom( gav, session );
 
-            ModelResolver modelResolver = this.newModelResolver();
+            final ModelResolver modelResolver = this.newModelResolver( session );
 
-            Model effectiveModel = buildModel( artifact.getFile(), modelResolver );
+            final Model effectiveModel = buildModel( artifact.getFile(), modelResolver );
 
-            Properties versionOverrides = effectiveModel.getProperties();
+            final Properties versionOverrides = effectiveModel.getProperties();
 
             logger.debug( "Returning override of " + versionOverrides );
 
             return new HashMap<String, String>( (Map) versionOverrides );
         }
-        catch ( ArtifactResolutionException e )
+        catch ( final ArtifactResolutionException e )
         {
             throw new ManipulationException( "Unable to resolve artifact", e );
         }
-        catch ( ModelBuildingException e )
+        catch ( final ModelBuildingException e )
         {
             throw new ManipulationException( "Unable to resolve artifact", e );
         }
     }
 
-    public Map<String, String> getRemotePluginVersionOverrides( String gav )
+    public Map<String, String> getRemotePluginVersionOverrides( final String gav, final ManipulationSession session )
         throws ManipulationException
     {
         logger.debug( "Resolving remote plugin management POM: " + gav );
 
         try
         {
-            Artifact artifact = resolvePom( gav );
+            final Artifact artifact = resolvePom( gav, session );
 
-            ModelResolver modelResolver = this.newModelResolver();
+            final ModelResolver modelResolver = this.newModelResolver( session );
 
-            Model effectiveModel = buildModel( artifact.getFile(), modelResolver );
+            final Model effectiveModel = buildModel( artifact.getFile(), modelResolver );
 
-            List<Plugin> plugins = effectiveModel.getBuild()
-                                                 .getPluginManagement()
-                                                 .getPlugins();
+            final List<Plugin> plugins = effectiveModel.getBuild()
+                                                       .getPluginManagement()
+                                                       .getPlugins();
 
-            Map<String, String> versionOverrides = new HashMap<String, String>();
+            final Map<String, String> versionOverrides = new HashMap<String, String>();
 
-            for ( Plugin plugin : plugins )
+            for ( final Plugin plugin : plugins )
             {
-                String groupIdArtifactId = plugin.getGroupId() + ":" + plugin.getArtifactId();
+                final String groupIdArtifactId = plugin.getGroupId() + ":" + plugin.getArtifactId();
                 versionOverrides.put( groupIdArtifactId, plugin.getVersion() );
             }
 
             return versionOverrides;
         }
-        catch ( ArtifactResolutionException e )
+        catch ( final ArtifactResolutionException e )
         {
             throw new ManipulationException( "Unable to resolve artifact", e );
         }
-        catch ( ModelBuildingException e )
+        catch ( final ModelBuildingException e )
         {
             throw new ManipulationException( "Unable to resolve artifact", e );
         }
@@ -268,16 +226,16 @@ public class EffectiveModelBuilder
      * @return effective pom model
      * @throws ModelBuildingException
      */
-    private Model buildModel( File pomFile, ModelResolver modelResolver )
+    private Model buildModel( final File pomFile, final ModelResolver modelResolver )
         throws ModelBuildingException
     {
-        ModelBuildingRequest request = new DefaultModelBuildingRequest();
+        final ModelBuildingRequest request = new DefaultModelBuildingRequest();
         request.setPomFile( pomFile );
         request.setModelResolver( modelResolver );
         request.setValidationLevel( ModelBuildingRequest.VALIDATION_LEVEL_MAVEN_3_0 );
         request.setTwoPhaseBuilding( false ); // Resolve the complete model in one step
         request.setSystemProperties( System.getProperties() );
-        ModelBuildingResult result = modelBuilder.build( request );
+        final ModelBuildingResult result = modelBuilder.build( request );
         return result.getEffectiveModel();
     }
 
@@ -288,17 +246,17 @@ public class EffectiveModelBuilder
      * @return The resolved pom artifact
      * @throws ArtifactResolutionException
      */
-    private Artifact resolvePom( String gav )
+    private Artifact resolvePom( final String gav, final ManipulationSession session )
         throws ArtifactResolutionException
     {
-        String[] gavParts = gav.split( ":" );
-        String groupId = gavParts[0];
-        String artifactId = gavParts[1];
-        String version = gavParts[2];
-        String extension = "pom";
+        final String[] gavParts = gav.split( ":" );
+        final String groupId = gavParts[0];
+        final String artifactId = gavParts[1];
+        final String version = gavParts[2];
+        final String extension = "pom";
 
         Artifact artifact = new DefaultArtifact( groupId, artifactId, extension, version );
-        artifact = resolveArtifact( artifact );
+        artifact = resolveArtifact( artifact, session );
 
         return artifact;
     }
@@ -310,23 +268,23 @@ public class EffectiveModelBuilder
      * @return
      * @throws ArtifactResolutionException
      */
-    private Artifact resolveArtifact( Artifact artifact )
+    private Artifact resolveArtifact( final Artifact artifact, final ManipulationSession session )
         throws ArtifactResolutionException
     {
-        ArtifactRequest request = new ArtifactRequest();
+        final ArtifactRequest request = new ArtifactRequest();
         request.setArtifact( artifact );
         request.setRepositories( getRepositories() );
 
-        RepositorySystemSession repositorySession = session.getRepositorySession();
-        ArtifactResult result = resolver.resolveArtifact( repositorySession, request );
+        final RepositorySystemSession repositorySession = session.getRepositorySystemSession();
+        final ArtifactResult result = resolver.resolveArtifact( repositorySession, request );
         return result.getArtifact();
     }
 
-    private ModelResolver newModelResolver()
+    private ModelResolver newModelResolver( final ManipulationSession session )
     {
-        RemoteRepositoryManager repoMgr = new DefaultRemoteRepositoryManager();
-        ModelResolver modelResolver =
-            new BasicModelResolver( session.getRepositorySession(), resolver, repoMgr, getRepositories() );
+        final RemoteRepositoryManager repoMgr = new DefaultRemoteRepositoryManager();
+        final ModelResolver modelResolver =
+            new BasicModelResolver( session.getRepositorySystemSession(), resolver, repoMgr, getRepositories() );
 
         return modelResolver;
     }

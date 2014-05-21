@@ -268,6 +268,7 @@ public class VersionCalculator
     /**
      * Accumulate all available versions for a given GAV from all available repositories.
      */
+    // FIXME: Switch to galley APIs
     private Set<String> getMetadataVersions( final String groupId, final String artifactId,
                                              final ManipulationSession session )
         throws ManipulationException

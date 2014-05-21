@@ -22,7 +22,6 @@ import org.apache.maven.model.Dependency;
 import org.apache.maven.model.DependencyManagement;
 import org.apache.maven.model.Model;
 import org.codehaus.plexus.component.annotations.Component;
-import org.codehaus.plexus.component.annotations.Requirement;
 import org.codehaus.plexus.logging.Logger;
 import org.commonjava.maven.ext.manip.ManipulationException;
 import org.commonjava.maven.ext.manip.model.Project;
@@ -38,9 +37,6 @@ import org.commonjava.maven.ext.manip.state.ManipulationSession;
 public class DependencyManipulator
     extends AlignmentManipulator
 {
-    @Requirement
-    protected Logger logger;
-
     protected DependencyManipulator()
     {
     }
@@ -48,25 +44,24 @@ public class DependencyManipulator
     public DependencyManipulator( final Logger logger )
     {
         super( logger );
-        this.logger = logger;
     }
 
     @Override
     public void init( final ManipulationSession session )
     {
         super.init( session );
-        super.baseLogger = this.logger;
     }
 
     @Override
-    protected Map<String, String> loadRemoteBOM( BOMState state )
+    protected Map<String, String> loadRemoteBOM( final BOMState state, final ManipulationSession session )
         throws ManipulationException
     {
-        return loadRemoteOverrides( RemoteType.DEPENDENCY, state.getRemoteDepMgmt() );
+        return loadRemoteOverrides( RemoteType.DEPENDENCY, state.getRemoteDepMgmt(), session );
     }
 
     @Override
-    protected void apply( ManipulationSession session, Project project, Model model, Map<String, String> override )
+    protected void apply( final ManipulationSession session, final Project project, final Model model,
+                          Map<String, String> override )
         throws ManipulationException
     {
         // TODO: Should plugin override apply to all projects?
@@ -103,27 +98,27 @@ public class DependencyManipulator
             }
 
             // Apply overrides to project dependency management
-            List<Dependency> dependencies = dependencyManagement.getDependencies();
-            Map<String, String> nonMatchingVersionOverrides = applyOverrides( dependencies, override );
+            final List<Dependency> dependencies = dependencyManagement.getDependencies();
+            final Map<String, String> nonMatchingVersionOverrides = applyOverrides( dependencies, override );
 
             if ( overrideTransitive() )
             {
                 // Add dependencies to Dependency Management which did not match any existing dependency
-                for ( String groupIdArtifactId : nonMatchingVersionOverrides.keySet() )
+                for ( final String groupIdArtifactId : nonMatchingVersionOverrides.keySet() )
                 {
-                    String[] groupIdArtifactIdParts = groupIdArtifactId.split( ":" );
+                    final String[] groupIdArtifactIdParts = groupIdArtifactId.split( ":" );
 
-                    Dependency newDependency = new Dependency();
+                    final Dependency newDependency = new Dependency();
                     newDependency.setGroupId( groupIdArtifactIdParts[0] );
                     newDependency.setArtifactId( groupIdArtifactIdParts[1] );
 
-                    String artifactVersion = nonMatchingVersionOverrides.get( groupIdArtifactId );
+                    final String artifactVersion = nonMatchingVersionOverrides.get( groupIdArtifactId );
                     newDependency.setVersion( artifactVersion );
 
                     dependencyManagement.getDependencies()
-                                        .add(0, newDependency );
+                                        .add( 0, newDependency );
                     logger.debug( "New entry added to <DependencyManagement/> - " + groupIdArtifactId + ":"
-                                  + artifactVersion );
+                        + artifactVersion );
                 }
             }
             else
@@ -133,7 +128,7 @@ public class DependencyManipulator
         }
 
         // Apply overrides to project direct dependencies
-        List<Dependency> projectDependencies = model.getDependencies();
+        final List<Dependency> projectDependencies = model.getDependencies();
         applyOverrides( projectDependencies, override );
     }
 
@@ -144,28 +139,28 @@ public class DependencyManipulator
      * @param overrides The map of dependency version overrides
      * @return The map of overrides that were not matched in the dependencies
      */
-    private Map<String, String> applyOverrides( List<Dependency> dependencies, Map<String, String> overrides )
+    private Map<String, String> applyOverrides( final List<Dependency> dependencies, final Map<String, String> overrides )
     {
         // Duplicate the override map so unused overrides can be easily recorded
-        Map<String, String> unmatchedVersionOverrides = new HashMap<String, String>();
+        final Map<String, String> unmatchedVersionOverrides = new HashMap<String, String>();
         unmatchedVersionOverrides.putAll( overrides );
 
-        if (dependencies == null)
+        if ( dependencies == null )
         {
             return unmatchedVersionOverrides;
         }
 
         // Apply matching overrides to dependencies
-        for ( Dependency dependency : dependencies )
+        for ( final Dependency dependency : dependencies )
         {
-            String groupIdArtifactId = dependency.getGroupId() + GAV_SEPERATOR + dependency.getArtifactId();
+            final String groupIdArtifactId = dependency.getGroupId() + GAV_SEPERATOR + dependency.getArtifactId();
             if ( overrides.containsKey( groupIdArtifactId ) )
             {
-                String oldVersion = dependency.getVersion();
-                String overrideVersion = overrides.get( groupIdArtifactId );
+                final String oldVersion = dependency.getVersion();
+                final String overrideVersion = overrides.get( groupIdArtifactId );
 
-                if ( overrideVersion == null || overrideVersion.length() == 0 || oldVersion == null ||
-                                oldVersion.length() == 0)
+                if ( overrideVersion == null || overrideVersion.length() == 0 || oldVersion == null
+                    || oldVersion.length() == 0 )
                 {
                     logger.warn( "Unable to align to an empty version for " + groupIdArtifactId + "; ignoring" );
                 }
@@ -190,13 +185,14 @@ public class DependencyManipulator
      * @param versionOverrides
      * @return A new Map with the reactor GAs removed.
      */
-    private Map<String, String> removeReactorGAs( ManipulationSession session, Map<String, String> versionOverrides )
+    private Map<String, String> removeReactorGAs( final ManipulationSession session,
+                                                  final Map<String, String> versionOverrides )
     {
-        Map<String, String> reducedVersionOverrides = new HashMap<String, String>( versionOverrides );
-        for ( Model model : session.getManipulatedModels()
-                                   .values() )
+        final Map<String, String> reducedVersionOverrides = new HashMap<String, String>( versionOverrides );
+        for ( final Model model : session.getManipulatedModels()
+                                         .values() )
         {
-            String reactorGA = ga( model );
+            final String reactorGA = ga( model );
             reducedVersionOverrides.remove( reactorGA );
         }
         return reducedVersionOverrides;
@@ -211,29 +207,31 @@ public class DependencyManipulator
      * @return The map of global and module specific overrides which apply to the given module
      * @throws ManipulationException
      */
-    private Map<String, String> applyModuleVersionOverrides( String projectGA, Map<String, String> versionOverrides )
+    private Map<String, String> applyModuleVersionOverrides( final String projectGA,
+                                                             final Map<String, String> versionOverrides )
         throws ManipulationException
     {
-        Map<String, String> moduleVersionOverrides = new HashMap<String, String>( versionOverrides );
-        for ( String currentKey : versionOverrides.keySet() )
+        final Map<String, String> moduleVersionOverrides = new HashMap<String, String>( versionOverrides );
+        for ( final String currentKey : versionOverrides.keySet() )
         {
             if ( currentKey.contains( "@" ) )
             {
                 moduleVersionOverrides.remove( currentKey );
-                String[] artifactAndModule = currentKey.split( "@" );
+                final String[] artifactAndModule = currentKey.split( "@" );
                 if ( artifactAndModule.length != 2 )
                 {
                     throw new ManipulationException( "Invalid format for exclusion key " + currentKey );
                 }
-                String artifactGA = artifactAndModule[0];
-                String moduleGA = artifactAndModule[1];
+                final String artifactGA = artifactAndModule[0];
+                final String moduleGA = artifactAndModule[1];
                 if ( moduleGA.equals( projectGA ) || moduleGA.equals( "*" ) )
                 {
-                    if ( versionOverrides.get( currentKey) != null && versionOverrides.get( currentKey).length() > 0)
+                    if ( versionOverrides.get( currentKey ) != null && versionOverrides.get( currentKey )
+                                                                                       .length() > 0 )
                     {
                         moduleVersionOverrides.put( artifactGA, versionOverrides.get( currentKey ) );
-                        logger.debug( "Overriding module dependency for " + moduleGA  +
-                                      " with " + artifactGA + ':' + versionOverrides.get( currentKey ));
+                        logger.debug( "Overriding module dependency for " + moduleGA + " with " + artifactGA + ':'
+                            + versionOverrides.get( currentKey ) );
                     }
                     else
                     {
@@ -251,12 +249,14 @@ public class DependencyManipulator
      * The property names are in the format
      * @param session
      */
-    private void addVersionOverrideProperties( ManipulationSession session, Map<String, String> overrides, Properties props )
+    private void addVersionOverrideProperties( final ManipulationSession session, final Map<String, String> overrides,
+                                               final Properties props )
     {
-        Properties properties = session.getUserProperties();
+        final Properties properties = session.getUserProperties();
         VersionPropertyFormat result = VersionPropertyFormat.VG;
 
-        switch (VersionPropertyFormat.valueOf ( properties.getProperty( "versionPropertyFormat", VersionPropertyFormat.VG.toString() )))
+        switch ( VersionPropertyFormat.valueOf( properties.getProperty( "versionPropertyFormat",
+                                                                        VersionPropertyFormat.VG.toString() ) ) )
         {
             case VG:
             {
@@ -270,11 +270,11 @@ public class DependencyManipulator
             }
         }
 
-        for ( String currentGA : overrides.keySet() )
+        for ( final String currentGA : overrides.keySet() )
         {
-            String versionPropName = "version." + (
-                            result == VersionPropertyFormat.VGA ?
-                                            currentGA.replace( ":", "." ) : currentGA.split( ":" )[0]);
+            final String versionPropName =
+                "version."
+                    + ( result == VersionPropertyFormat.VGA ? currentGA.replace( ":", "." ) : currentGA.split( ":" )[0] );
             props.setProperty( versionPropName, overrides.get( currentGA ) );
         }
     }
@@ -287,8 +287,8 @@ public class DependencyManipulator
      */
     private boolean overrideTransitive()
     {
-        String overrideTransitive = System.getProperties()
-                                          .getProperty( "overrideTransitive", "true" );
+        final String overrideTransitive = System.getProperties()
+                                                .getProperty( "overrideTransitive", "true" );
         return overrideTransitive.equals( "true" );
     }
 }

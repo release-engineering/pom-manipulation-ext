@@ -22,10 +22,11 @@ import java.util.Set;
 
 import org.apache.maven.model.Model;
 import org.apache.maven.project.MavenProject;
+import org.codehaus.plexus.component.annotations.Requirement;
 import org.codehaus.plexus.logging.Logger;
 import org.commonjava.maven.ext.manip.ManipulationException;
 import org.commonjava.maven.ext.manip.model.Project;
-import org.commonjava.maven.ext.manip.resolver.EffectiveModelBuilder;
+import org.commonjava.maven.ext.manip.resolver.ModelOverridesResolver;
 import org.commonjava.maven.ext.manip.state.BOMState;
 import org.commonjava.maven.ext.manip.state.ManipulationSession;
 import org.commonjava.maven.ext.manip.util.IdUtils;
@@ -42,7 +43,11 @@ public abstract class AlignmentManipulator
         PROPERTY, PLUGIN, DEPENDENCY
     };
 
-    protected Logger baseLogger;
+    @Requirement
+    protected Logger logger;
+
+    @Requirement
+    protected ModelOverridesResolver effectiveModelBuilder;
 
     protected AlignmentManipulator()
     {
@@ -50,7 +55,7 @@ public abstract class AlignmentManipulator
 
     public AlignmentManipulator( final Logger logger )
     {
-        this.baseLogger = logger;
+        this.logger = logger;
     }
 
     /**
@@ -87,12 +92,12 @@ public abstract class AlignmentManipulator
 
         if ( !session.isEnabled() || !state.isEnabled() )
         {
-            baseLogger.debug( "Alignment Manipulator: Nothing to do!" );
+            logger.debug( "Alignment Manipulator: Nothing to do!" );
             return Collections.emptySet();
         }
 
         final Map<String, Model> manipulatedModels = session.getManipulatedModels();
-        final Map<String, String> overrides = loadRemoteBOM( state );
+        final Map<String, String> overrides = loadRemoteBOM( state, session );
         final Set<Project> changed = new HashSet<Project>();
 
         for ( final Project project : projects )
@@ -117,7 +122,8 @@ public abstract class AlignmentManipulator
      * @return Map between the GA of the plugin and the version of the plugin. If the system property is not set,
      *         returns an empty map.
      */
-    protected Map<String, String> loadRemoteOverrides( final RemoteType rt, final String remoteMgmt )
+    protected Map<String, String> loadRemoteOverrides( final RemoteType rt, final String remoteMgmt,
+                                                       final ManipulationSession session )
         throws ManipulationException
     {
         final Map<String, String> overrides = new HashMap<String, String>();
@@ -136,22 +142,19 @@ public abstract class AlignmentManipulator
 
             if ( !IdUtils.validGav( nextGAV ) )
             {
-                baseLogger.warn( "Skipping invalid remote management GAV: " + nextGAV );
+                logger.warn( "Skipping invalid remote management GAV: " + nextGAV );
                 continue;
             }
             switch ( rt )
             {
                 case PROPERTY:
-                    overrides.putAll( EffectiveModelBuilder.getInstance()
-                                                           .getRemotePropertyMappingOverrides( nextGAV ) );
+                    overrides.putAll( effectiveModelBuilder.getRemotePropertyMappingOverrides( nextGAV, session ) );
                     break;
                 case PLUGIN:
-                    overrides.putAll( EffectiveModelBuilder.getInstance()
-                                                           .getRemotePluginVersionOverrides( nextGAV ) );
+                    overrides.putAll( effectiveModelBuilder.getRemotePluginVersionOverrides( nextGAV, session ) );
                     break;
                 case DEPENDENCY:
-                    overrides.putAll( EffectiveModelBuilder.getInstance()
-                                                           .getRemoteDependencyVersionOverrides( nextGAV ) );
+                    overrides.putAll( effectiveModelBuilder.getRemoteDependencyVersionOverrides( nextGAV, session ) );
                     break;
 
             }
@@ -169,7 +172,7 @@ public abstract class AlignmentManipulator
      * @param override
      * @throws ManipulationException
      */
-    protected abstract Map<String, String> loadRemoteBOM( BOMState state )
+    protected abstract Map<String, String> loadRemoteBOM( BOMState state, ManipulationSession session )
         throws ManipulationException;
 
     /**
