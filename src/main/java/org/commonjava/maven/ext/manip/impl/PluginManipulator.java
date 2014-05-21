@@ -4,7 +4,7 @@
  * are made available under the terms of the GNU Public License v3.0
  * which accompanies this distribution, and is available at
  * http://www.gnu.org/licenses/gpl.html
- * 
+ *
  * Contributors:
  *     Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
@@ -12,6 +12,7 @@ package org.commonjava.maven.ext.manip.impl;
 
 import static org.commonjava.maven.ext.manip.util.IdUtils.ga;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -69,34 +70,38 @@ public class PluginManipulator
         // TODO: Should plugin override apply to all projects?
         logger.info( "Applying plugin changes to: " + ga( project ) );
 
-        // If the model doesn't have any plugin management set by default, create one for it
-        Build build = model.getBuild();
-
-        if ( build == null )
+        if (project.isTopPOM())
         {
-            build = new Build();
-            model.setBuild( build );
-            logger.info( "Created new Build for model " + model.getId() );
+            // If the model doesn't have any plugin management set by default, create one for it
+            Build build = model.getBuild();
+
+            if ( build == null )
+            {
+                build = new Build();
+                model.setBuild( build );
+                logger.info( "Created new Build for model " + model.getId() );
+            }
+
+            PluginManagement pluginManagement = model.getBuild().getPluginManagement();
+
+            if ( pluginManagement == null )
+            {
+                pluginManagement = new PluginManagement();
+                model.getBuild().setPluginManagement( pluginManagement );
+                logger.info( "Created new Plugin Management for model " + model.getId() );
+            }
+
+            // Override plugin management versions
+            applyOverrides( pluginManagement.getPlugins(), override );
         }
 
-        PluginManagement pluginManagement = model.getBuild()
-                                                 .getPluginManagement();
-
-        if ( pluginManagement == null )
+        if ( model.getBuild() != null)
         {
-            pluginManagement = new PluginManagement();
-            model.getBuild()
-                 .setPluginManagement( pluginManagement );
-            logger.info( "Created new Plugin Management for model " + model.getId() );
-        }
-
-        // Override plugin management versions
-        applyOverrides( pluginManagement.getPlugins(), override );
-
-        // Override plugin versions
-        final List<Plugin> projectPlugins = model.getBuild()
+            // Override plugin versions
+            final List<Plugin> projectPlugins = model.getBuild()
                                                  .getPlugins();
-        applyOverrides( projectPlugins, override );
+            applyOverrides( projectPlugins, override );
+        }
 
     }
 
@@ -108,7 +113,7 @@ public class PluginManipulator
      */
     protected void applyOverrides( final List<Plugin> plugins, final Map<String, String> pluginVersionOverrides )
     {
-        for ( final Plugin plugin : plugins )
+        for ( final Plugin plugin : (plugins == null ? Collections.<Plugin>emptyList() : plugins))
         {
             final String groupIdArtifactId = plugin.getGroupId() + BOMState.GAV_SEPERATOR + plugin.getArtifactId();
             if ( pluginVersionOverrides.containsKey( groupIdArtifactId ) )

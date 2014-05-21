@@ -4,7 +4,7 @@
  * are made available under the terms of the GNU Public License v3.0
  * which accompanies this distribution, and is available at
  * http://www.gnu.org/licenses/gpl.html
- * 
+ *
  * Contributors:
  *     Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
@@ -27,6 +27,7 @@ import org.codehaus.plexus.logging.Logger;
 import org.commonjava.maven.ext.manip.ManipulationException;
 import org.commonjava.maven.ext.manip.model.Project;
 import org.commonjava.maven.ext.manip.state.BOMState;
+import org.commonjava.maven.ext.manip.state.BOMState.VersionPropertyFormat;
 import org.commonjava.maven.ext.manip.state.ManipulationSession;
 
 /**
@@ -83,7 +84,7 @@ public class DependencyManipulator
         if ( project.isTopPOM() )
         {
             // Add/override a property to the build for each override
-            addVersionOverrideProperties( override, model.getProperties() );
+            addVersionOverrideProperties( session, override, model.getProperties() );
 
             // Handle the situation where the top level parent refers to a prior build that is in the BOM.
             if ( project.getParent() != null && override.containsKey( ga( project.getParent() ) ) )
@@ -91,43 +92,44 @@ public class DependencyManipulator
                 model.getParent()
                      .setVersion( override.get( ga( project.getParent() ) ) );
             }
-        }
 
-        // If the model doesn't have any Dependency Management set by default, create one for it
-        DependencyManagement dependencyManagement = model.getDependencyManagement();
-        if ( dependencyManagement == null )
-        {
-            dependencyManagement = new DependencyManagement();
-            model.setDependencyManagement( dependencyManagement );
-            logger.debug( "Added <DependencyManagement/> for current project" );
-        }
-
-        // Apply overrides to project dependency management
-        List<Dependency> dependencies = dependencyManagement.getDependencies();
-        Map<String, String> nonMatchingVersionOverrides = applyOverrides( dependencies, override );
-        if ( overrideTransitive() )
-        {
-            // Add dependencies to Dependency Management which did not match any existing dependency
-            for ( String groupIdArtifactId : nonMatchingVersionOverrides.keySet() )
+            // If the model doesn't have any Dependency Management set by default, create one for it
+            DependencyManagement dependencyManagement = model.getDependencyManagement();
+            if ( dependencyManagement == null )
             {
-                String[] groupIdArtifactIdParts = groupIdArtifactId.split( ":" );
-
-                Dependency newDependency = new Dependency();
-                newDependency.setGroupId( groupIdArtifactIdParts[0] );
-                newDependency.setArtifactId( groupIdArtifactIdParts[1] );
-
-                String artifactVersion = nonMatchingVersionOverrides.get( groupIdArtifactId );
-                newDependency.setVersion( artifactVersion );
-
-                dependencyManagement.getDependencies()
-                                    .add( newDependency );
-                logger.debug( "New entry added to <DependencyManagement/> - " + groupIdArtifactId + ":"
-                    + artifactVersion );
+                dependencyManagement = new DependencyManagement();
+                model.setDependencyManagement( dependencyManagement );
+                logger.debug( "Added <DependencyManagement/> for current project" );
             }
-        }
-        else
-        {
-            logger.debug( "Non-matching dependencies ignored." );
+
+            // Apply overrides to project dependency management
+            List<Dependency> dependencies = dependencyManagement.getDependencies();
+            Map<String, String> nonMatchingVersionOverrides = applyOverrides( dependencies, override );
+
+            if ( overrideTransitive() )
+            {
+                // Add dependencies to Dependency Management which did not match any existing dependency
+                for ( String groupIdArtifactId : nonMatchingVersionOverrides.keySet() )
+                {
+                    String[] groupIdArtifactIdParts = groupIdArtifactId.split( ":" );
+
+                    Dependency newDependency = new Dependency();
+                    newDependency.setGroupId( groupIdArtifactIdParts[0] );
+                    newDependency.setArtifactId( groupIdArtifactIdParts[1] );
+
+                    String artifactVersion = nonMatchingVersionOverrides.get( groupIdArtifactId );
+                    newDependency.setVersion( artifactVersion );
+
+                    dependencyManagement.getDependencies()
+                                        .add(0, newDependency );
+                    logger.debug( "New entry added to <DependencyManagement/> - " + groupIdArtifactId + ":"
+                                  + artifactVersion );
+                }
+            }
+            else
+            {
+                logger.debug( "Non-matching dependencies ignored." );
+            }
         }
 
         // Apply overrides to project direct dependencies
@@ -148,6 +150,11 @@ public class DependencyManipulator
         Map<String, String> unmatchedVersionOverrides = new HashMap<String, String>();
         unmatchedVersionOverrides.putAll( overrides );
 
+        if (dependencies == null)
+        {
+            return unmatchedVersionOverrides;
+        }
+
         // Apply matching overrides to dependencies
         for ( Dependency dependency : dependencies )
         {
@@ -157,7 +164,8 @@ public class DependencyManipulator
                 String oldVersion = dependency.getVersion();
                 String overrideVersion = overrides.get( groupIdArtifactId );
 
-                if ( overrideVersion == null || overrideVersion.length() == 0 )
+                if ( overrideVersion == null || overrideVersion.length() == 0 || oldVersion == null ||
+                                oldVersion.length() == 0)
                 {
                     logger.warn( "Unable to align to an empty version for " + groupIdArtifactId + "; ignoring" );
                 }
@@ -221,8 +229,17 @@ public class DependencyManipulator
                 String moduleGA = artifactAndModule[1];
                 if ( moduleGA.equals( projectGA ) || moduleGA.equals( "*" ) )
                 {
-                    moduleVersionOverrides.remove( artifactGA );
-                    logger.debug( "Ignoring module dependency override for " + moduleGA );
+                    if ( versionOverrides.get( currentKey) != null && versionOverrides.get( currentKey).length() > 0)
+                    {
+                        moduleVersionOverrides.put( artifactGA, versionOverrides.get( currentKey ) );
+                        logger.debug( "Overriding module dependency for " + moduleGA  +
+                                      " with " + artifactGA + ':' + versionOverrides.get( currentKey ));
+                    }
+                    else
+                    {
+                        moduleVersionOverrides.remove( artifactGA );
+                        logger.debug( "Ignoring module dependency override for " + moduleGA );
+                    }
                 }
             }
         }
@@ -232,45 +249,34 @@ public class DependencyManipulator
     /***
      * Add properties to the build which match the version overrides.
      * The property names are in the format
+     * @param session
      */
-    private void addVersionOverrideProperties( Map<String, String> overrides, Properties props )
+    private void addVersionOverrideProperties( ManipulationSession session, Map<String, String> overrides, Properties props )
     {
-        String propPrefix = getVersionPropertyPrefix();
-        String gaSeparator = getGASeparator();
-        String propSuffix = getVersionPropertySuffix();
+        Properties properties = session.getUserProperties();
+        VersionPropertyFormat result = VersionPropertyFormat.VG;
+
+        switch (VersionPropertyFormat.valueOf ( properties.getProperty( "versionPropertyFormat", VersionPropertyFormat.VG.toString() )))
+        {
+            case VG:
+            {
+                result = VersionPropertyFormat.VG;
+                break;
+            }
+            case VGA:
+            {
+                result = VersionPropertyFormat.VGA;
+                break;
+            }
+        }
 
         for ( String currentGA : overrides.keySet() )
         {
-            String versionPropName = propPrefix + currentGA.replace( ":", gaSeparator ) + propSuffix;
+            String versionPropName = "version." + (
+                            result == VersionPropertyFormat.VGA ?
+                                            currentGA.replace( ":", "." ) : currentGA.split( ":" )[0]);
             props.setProperty( versionPropName, overrides.get( currentGA ) );
         }
-    }
-
-    /**
-     * Get the prefix that should be used for version property names
-     * @return The prefix set in the system properties or "version." by default.
-     */
-    private String getVersionPropertyPrefix()
-    {
-        return System.getProperty( "versionPropertyPrefix", "version." );
-    }
-
-    /**
-     * Get the groupId/artifactId separator
-     * @return The separator set in the system properties, or "." by default
-     */
-    private String getGASeparator()
-    {
-        return System.getProperty( "versionPropertyGASeparator", "." );
-    }
-
-    /**
-     * Get the suffix that should be used for version property names
-     * @return The suffix set in the system properties or the default empty string
-     */
-    private String getVersionPropertySuffix()
-    {
-        return System.getProperty( "versionPropertySuffix", "" );
     }
 
     /**
