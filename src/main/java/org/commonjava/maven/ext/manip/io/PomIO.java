@@ -4,7 +4,7 @@
  * are made available under the terms of the GNU Public License v3.0
  * which accompanies this distribution, and is available at
  * http://www.gnu.org/licenses/gpl.html
- * 
+ *
  * Contributors:
  *     Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
@@ -12,6 +12,8 @@ package org.commonjava.maven.ext.manip.io;
 
 import static org.commonjava.maven.ext.manip.util.IdUtils.ga;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileWriter;
@@ -19,11 +21,15 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.Writer;
+import java.net.URL;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.jar.Manifest;
 
 import org.apache.maven.model.Model;
 import org.apache.maven.model.io.ModelWriter;
@@ -36,15 +42,19 @@ import org.codehaus.plexus.logging.Logger;
 import org.codehaus.plexus.util.IOUtil;
 import org.codehaus.plexus.util.WriterFactory;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
+import org.commonjava.maven.ext.manip.ManipulatingEventSpy;
 import org.commonjava.maven.ext.manip.ManipulationException;
 import org.commonjava.maven.ext.manip.model.Project;
 import org.commonjava.maven.ext.manip.state.ManipulationSession;
 import org.commonjava.maven.ext.manip.util.PomPeek;
+import org.jdom.Comment;
 import org.jdom.Document;
 import org.jdom.JDOMException;
+import org.jdom.filter.ContentFilter;
 import org.jdom.input.SAXBuilder;
 import org.jdom.output.Format;
 import org.jdom.output.Format.TextMode;
+import org.jdom.output.XMLOutputter;
 
 /**
  * Utility class used to read raw models for POMs, and rewrite any project POMs that were changed.
@@ -154,7 +164,7 @@ public class PomIO
                 logger.info( "Rewriting: " + model.toString() + " in place of: " + project.getId()
                     + "\n       to POM: " + pom );
 
-                write( pom, model );
+                write( project, pom, model );
 
                 // this happens with integration tests!
                 // This is a total hack, but the alternative seems to be adding complexity through a custom model processor.
@@ -164,7 +174,7 @@ public class PomIO
                     final File dir = pom.getParentFile();
                     pom = dir == null ? new File( "pom.xml" ) : new File( dir, "pom.xml" );
 
-                    write( pom, model );
+                    write( project, pom, model );
                 }
 
                 pw.println( project.getId() );
@@ -181,14 +191,14 @@ public class PomIO
         }
     }
 
-    private static void write( final File pom, final Model model )
-        throws ManipulationException
+    private void write( Project project, final File pom, final Model model )
+                    throws ManipulationException
     {
         Writer pomWriter = null;
         try
         {
             final SAXBuilder builder = new SAXBuilder();
-            final Document doc = builder.build( pom );
+            Document doc = builder.build( pom );
 
             String encoding = model.getModelEncoding();
             if ( encoding == null )
@@ -197,15 +207,59 @@ public class PomIO
             }
 
             final Format format = Format.getRawFormat()
-                                        .setEncoding( encoding )
-                                        .setTextMode( TextMode.PRESERVE )
-                                        .setLineSeparator( System.getProperty( "line.separator" ) )
-                                        .setOmitDeclaration( false )
-                                        .setOmitEncoding( false )
-                                        .setExpandEmptyElements( true );
+                            .setEncoding( encoding )
+                            .setTextMode( TextMode.PRESERVE )
+                            .setLineSeparator( System.getProperty( "line.separator" ) )
+                            .setOmitDeclaration( false )
+                            .setOmitEncoding( false )
+                            .setExpandEmptyElements( true );
+
+            final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            pomWriter = WriterFactory.newWriter( baos, encoding );
+
+            new MavenJDOMWriter().write( model, doc, pomWriter, format );
+            doc = builder.build( new ByteArrayInputStream( baos.toByteArray() ) );
+
+            // Only add the modified by to the top level pom.
+            if (project.isTopPOM())
+            {
+                final Iterator<?> it = doc.getRootElement()
+                                .getContent( new ContentFilter( ContentFilter.COMMENT ) )
+                                .iterator();
+                while ( it.hasNext() )
+                {
+                    final Comment c = (Comment) it.next();
+                    if ( c.toString()
+                                    .startsWith( "[Comment: <!-- Modified by POM Manipulation Extension for Maven" ) )
+                    {
+                        it.remove();
+                    }
+                }
+                doc.getRootElement().addContent
+                    ( new Comment( " Modified by POM Manipulation Extension for Maven " + getManifestInformation() ) );
+                doc.getRootElement().addContent( "\n" );
+            }
+            final List<?> rootComments = doc.getContent ( new ContentFilter( ContentFilter.COMMENT ) );
+
+            XMLOutputter xmlo = new XMLOutputter ( format )
+            {
+                @Override
+                protected void printComment(Writer out, Comment comment)
+                                throws IOException {
+                    super.printComment (out, comment);
+
+                    // If root level comments exist and is the current Comment object
+                    // output an extra newline to tidy the output
+                    if (rootComments.contains( comment) )
+                    {
+                        out.write(System.getProperty( "line.separator" ));
+                    }
+                }
+            };
 
             pomWriter = WriterFactory.newWriter( pom, encoding );
-            new MavenJDOMWriter().write( model, doc, pomWriter, format );
+
+            xmlo.output( doc, pomWriter );
 
             pomWriter.flush();
         }
@@ -221,7 +275,6 @@ public class PomIO
         {
             IOUtil.close( pomWriter );
         }
-
     }
 
     private static File getMarkerFile( final ManipulationSession session )
@@ -249,4 +302,33 @@ public class PomIO
         return markerFile;
     }
 
+    private String getManifestInformation ()
+    {
+        String result = "";
+        try
+        {
+            Enumeration<URL> resources = ManipulatingEventSpy.class.getClassLoader().getResources("META-INF/MANIFEST.MF");
+
+            while (resources.hasMoreElements())
+            {
+                URL jarUrl = resources.nextElement ();
+
+                logger.debug( "Processing jar resource " + jarUrl );
+                if (jarUrl.getFile ().contains ("pom-manipulation-ext"))
+                {
+                    Manifest manifest = new Manifest (jarUrl.openStream());
+                    result = manifest.getMainAttributes ().getValue ("Implementation-Version");
+                    result += " ( SHA: " + manifest.getMainAttributes ().getValue ("Scm-Revision") + " ) ";
+                    break;
+                }
+            }
+        }
+        catch (java.io.IOException e)
+        {
+            System.err.println ("Error retrieving information from manifest");
+            e.printStackTrace ();
+        }
+
+        return result;
+    }
 }
