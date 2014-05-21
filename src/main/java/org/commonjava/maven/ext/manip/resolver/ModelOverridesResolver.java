@@ -59,7 +59,7 @@ public class ModelOverridesResolver
     private ModelBuilder modelBuilder;
 
     @Requirement
-    private PomReaderWrapper pomReader;
+    private GalleyReaderWrapper pomReader;
 
     /**
      * Protected constructor for component instantiation/injection

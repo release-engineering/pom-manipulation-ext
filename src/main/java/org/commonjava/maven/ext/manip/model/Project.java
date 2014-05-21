@@ -46,6 +46,8 @@ import org.apache.maven.model.Profile;
 import org.apache.maven.model.ReportPlugin;
 import org.apache.maven.model.Reporting;
 import org.apache.maven.model.building.ModelBuildingResult;
+import org.commonjava.maven.atlas.ident.ref.ProjectRef;
+import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.ext.manip.ManipulationException;
 
 /**
@@ -71,7 +73,7 @@ public class Project
      */
     private final Model model;
 
-    private FullProjectKey key;
+    private ProjectVersionRef key;
 
     /**
      * Denotes if this Project represents the top level POM of a build.
@@ -87,7 +89,7 @@ public class Project
             this.key = key;
         }
      */
-    public Project( final FullProjectKey key, final File pom, final Model model )
+    public Project( final ProjectVersionRef key, final File pom, final Model model )
         throws ManipulationException
     {
         //        this( key, pom, model, cloneModel( model ) );
@@ -99,13 +101,13 @@ public class Project
     public Project( final File pom, final Model model )
         throws ManipulationException
     {
-        this( new FullProjectKey( model ), pom, model ); //, cloneModel( model ) );
+        this( modelKey( model ), pom, model ); //, cloneModel( model ) );
     }
 
     public Project( final Model model )
         throws ManipulationException
     {
-        this( new FullProjectKey( model ), model.getPomFile(), model ); //, cloneModel( model ) );
+        this( modelKey( model ), model.getPomFile(), model ); //, cloneModel( model ) );
     }
 
     public Project( final Model raw, final ModelBuildingResult mbResult, final File pom )
@@ -116,7 +118,7 @@ public class Project
         this.model = raw;
         //        this.originalModel = cloneModel( raw );
         //        this.effectiveModel = mbResult.getEffectiveModel();
-        this.key = new FullProjectKey( raw );
+        this.key = modelKey( raw );
     }
 
     public File getPom()
@@ -129,7 +131,7 @@ public class Project
         return model;
     }
 
-    public FullProjectKey getKey()
+    public ProjectVersionRef getKey()
     {
         return key;
     }
@@ -201,7 +203,7 @@ public class Project
 
     public String getVersion()
     {
-        return key.getVersion();
+        return key.getVersionString();
     }
 
     public List<Plugin> getPlugins()
@@ -341,7 +343,7 @@ public class Project
      */
     public void updateCoord()
     {
-        key = new FullProjectKey( model );
+        key = modelKey( model );
     }
 
     /**
@@ -425,9 +427,10 @@ public class Project
     }
      */
 
-    public VersionlessProjectKey getVersionlessParentKey()
+    public ProjectRef getVersionlessParentKey()
     {
-        return getParent() != null ? new VersionlessProjectKey( getParent() ) : null;
+        final Parent parent = getParent();
+        return parent != null ? new ProjectRef( parent.getGroupId(), parent.getArtifactId() ) : null;
     }
 
     public List<Extension> getExtensions()
@@ -452,12 +455,12 @@ public class Project
         return model.getPackaging();
     }
 
-    public VersionlessProjectKey getVersionlessKey()
+    public ProjectRef getVersionlessKey()
     {
-        return new VersionlessProjectKey( key );
+        return key.asProjectRef();
     }
 
-    public void setTopPOM( boolean topPOM )
+    public void setTopPOM( final boolean topPOM )
     {
         this.topPOM = topPOM;
     }
@@ -466,4 +469,26 @@ public class Project
     {
         return topPOM;
     }
+
+    private static ProjectVersionRef modelKey( final Model model )
+    {
+        String g = model.getGroupId();
+        final String a = model.getArtifactId();
+        String v = model.getVersion();
+
+        if ( g == null || v == null )
+        {
+            final Parent p = model.getParent();
+            if ( p == null )
+            {
+                throw new IllegalStateException( "Invalid model: " + model + " Cannot find groupId and/or version!" );
+            }
+
+            g = p.getGroupId();
+            v = p.getVersion();
+        }
+
+        return new ProjectVersionRef( g, a, v );
+    }
+
 }

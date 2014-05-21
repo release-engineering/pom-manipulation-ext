@@ -13,8 +13,8 @@ package org.commonjava.maven.ext.manip.impl;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertThat;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Properties;
@@ -34,17 +34,18 @@ import org.codehaus.plexus.DefaultPlexusContainer;
 import org.codehaus.plexus.PlexusContainer;
 import org.codehaus.plexus.logging.Logger;
 import org.codehaus.plexus.logging.console.ConsoleLogger;
-import org.codehaus.plexus.util.IOUtil;
 import org.commonjava.maven.ext.manip.ManipulationException;
-import org.commonjava.maven.ext.manip.fixture.StubRepositorySystem;
-import org.commonjava.maven.ext.manip.impl.VersionCalculator;
+import org.commonjava.maven.ext.manip.fixture.StubTransport;
+import org.commonjava.maven.ext.manip.resolver.GalleyInfrastructure;
+import org.commonjava.maven.ext.manip.resolver.GalleyReaderWrapper;
+import org.commonjava.maven.ext.manip.resolver.MavenLocationExpander;
 import org.commonjava.maven.ext.manip.state.ManipulationSession;
 import org.commonjava.maven.ext.manip.state.VersioningState;
-import org.junit.Before;
+import org.commonjava.maven.galley.model.Location;
+import org.commonjava.maven.galley.spi.transport.Transport;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
-import org.sonatype.aether.RepositorySystem;
 import org.sonatype.aether.util.DefaultRepositorySystemSession;
 
 public class VersioningCalculatorTest
@@ -59,17 +60,7 @@ public class VersioningCalculatorTest
 
     private TestVersionCalculator modder;
 
-    private StubRepositorySystem repoSystem;
-
     private ManipulationSession session;
-
-    @Before
-    public void before()
-    {
-        repoSystem = new StubRepositorySystem();
-
-        modder = new TestVersionCalculator( repoSystem );
-    }
 
     public void initFailsWithoutSuffixProperty()
         throws Exception
@@ -335,12 +326,10 @@ public class VersioningCalculatorTest
     public void incrementExistingSerialSuffix_UsingRepositoryMetadata()
         throws Exception
     {
-        setMetadataVersions( "1.2.GA-foo-3", "1.2.GA-foo-2", "1.2.GA-foo-9" );
-
         final Properties props = new Properties();
 
         props.setProperty( VersioningState.INCREMENT_SERIAL_SUFFIX_SYSPROP, "foo-0" );
-        setupSession( props );
+        setupSession( props, "1.2.GA-foo-3", "1.2.GA-foo-2", "1.2.GA-foo-9" );
 
         final String v = "1.2.GA";
         final String os = "-foo-1";
@@ -354,12 +343,10 @@ public class VersioningCalculatorTest
     public void incrementExistingSerialSuffix_UsingRepositoryMetadataWithIrrelevantVersions()
         throws Exception
     {
-        setMetadataVersions( "0.0.1", "0.0.2", "0.0.3", "0.0.4", "0.0.5", "0.0.6", "0.0.7", "0.0.7.redhat-1" );
-
         final Properties props = new Properties();
 
         props.setProperty( VersioningState.INCREMENT_SERIAL_SUFFIX_SYSPROP, "redhat-0" );
-        setupSession( props );
+        setupSession( props, "0.0.1", "0.0.2", "0.0.3", "0.0.4", "0.0.5", "0.0.6", "0.0.7", "0.0.7.redhat-1" );
 
         final String v = "0.0.7";
         //        final String os = "-redhat-2";
@@ -369,7 +356,7 @@ public class VersioningCalculatorTest
         assertThat( result, equalTo( v + "." + ns ) );
     }
 
-    private void setMetadataVersions( final String... versions )
+    private byte[] setupMetadataVersions( final String... versions )
         throws IOException
     {
         final Metadata md = new Metadata();
@@ -377,19 +364,10 @@ public class VersioningCalculatorTest
         md.setVersioning( v );
         v.setVersions( Arrays.asList( versions ) );
 
-        final File mdFile = temp.newFile();
-        FileOutputStream stream = null;
-        try
-        {
-            stream = new FileOutputStream( mdFile );
-            new MetadataXpp3Writer().write( stream, md );
-        }
-        finally
-        {
-            IOUtil.close( stream );
-        }
+        final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        new MetadataXpp3Writer().write( baos, md );
 
-        repoSystem.setMetadataFile( mdFile );
+        return baos.toByteArray();
     }
 
     private String calculate( final String version )
@@ -398,7 +376,7 @@ public class VersioningCalculatorTest
         return modder.calculate( GROUP_ID, ARTIFACT_ID, version, session );
     }
 
-    private VersioningState setupSession( final Properties properties )
+    private VersioningState setupSession( final Properties properties, final String... versions )
         throws Exception
     {
         final ArtifactRepository ar =
@@ -420,15 +398,37 @@ public class VersioningCalculatorTest
         final VersioningState state = new VersioningState( properties );
         session.setState( state );
 
+        byte[] data = null;
+        if ( versions.length > 0 )
+        {
+            data = setupMetadataVersions( versions );
+        }
+
+        final Location mdLoc = MavenLocationExpander.EXPANSION_TARGET;
+        final Transport mdTrans = new StubTransport( data );
+
+        modder =
+            new TestVersionCalculator( new ManipulationSession(), mdLoc, mdTrans, temp.newFolder( "galley-cache" ) );
+
         return state;
     }
 
     public static final class TestVersionCalculator
         extends VersionCalculator
     {
-        public TestVersionCalculator( final RepositorySystem repoSystem )
+        public TestVersionCalculator( final ManipulationSession session )
+            throws ManipulationException
         {
-            super( repoSystem, new ConsoleLogger( Logger.LEVEL_DEBUG, "test" ) );
+            super( new GalleyReaderWrapper( new GalleyInfrastructure( session ) ),
+                   new ConsoleLogger( Logger.LEVEL_DEBUG, "test" ) );
+        }
+
+        public TestVersionCalculator( final ManipulationSession session, final Location mdLoc, final Transport mdTrans,
+                                      final File cacheDir )
+            throws ManipulationException
+        {
+            super( new GalleyReaderWrapper( new GalleyInfrastructure( session, mdLoc, mdTrans, cacheDir ) ),
+                   new ConsoleLogger( Logger.LEVEL_DEBUG, "test" ) );
         }
 
         @Override

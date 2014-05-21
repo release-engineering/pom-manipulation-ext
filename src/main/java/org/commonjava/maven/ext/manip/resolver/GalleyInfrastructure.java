@@ -3,6 +3,7 @@ package org.commonjava.maven.ext.manip.resolver;
 import java.io.File;
 import java.net.MalformedURLException;
 import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -44,6 +45,7 @@ import org.commonjava.maven.galley.spi.cache.CacheProvider;
 import org.commonjava.maven.galley.spi.event.FileEventManager;
 import org.commonjava.maven.galley.spi.nfc.NotFoundCache;
 import org.commonjava.maven.galley.spi.transport.LocationExpander;
+import org.commonjava.maven.galley.spi.transport.Transport;
 import org.commonjava.maven.galley.spi.transport.TransportManager;
 import org.commonjava.maven.galley.transport.TransportManagerImpl;
 import org.commonjava.maven.galley.transport.htcli.HttpClientTransport;
@@ -54,7 +56,7 @@ import org.commonjava.maven.galley.transport.htcli.HttpImpl;
  * 
  * @author jdcasey
  */
-@Component( role = GalleyInfrastructure.class )
+@Component( role = ExtensionInfrastructure.class, hint = "galley" )
 public class GalleyInfrastructure
     implements ExtensionInfrastructure
 {
@@ -70,6 +72,19 @@ public class GalleyInfrastructure
     {
     }
 
+    public GalleyInfrastructure( final ManipulationSession session )
+        throws ManipulationException
+    {
+        init( session );
+    }
+
+    public GalleyInfrastructure( final ManipulationSession session, final Location customLocation,
+                                 final Transport customTransport, final File cacheDir )
+        throws ManipulationException
+    {
+        init( session, customLocation, customTransport, cacheDir );
+    }
+
     public MavenPomReader getPomReader()
     {
         return pomReader;
@@ -79,11 +94,21 @@ public class GalleyInfrastructure
     public void init( final ManipulationSession session )
         throws ManipulationException
     {
+        init( session, null, null, null );
+    }
+
+    private void init( final ManipulationSession session, final Location customLocation,
+                       final Transport customTransport, File cacheDir )
+        throws ManipulationException
+    {
         try
         {
+            final List<Location> custom =
+                customLocation == null ? Collections.<Location> emptyList()
+                                : Collections.singletonList( customLocation );
+
             locationExpander =
-                new MavenLocationExpander( Collections.<Location> emptyList(), session.getRemoteRepositories(),
-                                           session.getLocalRepository() );
+                new MavenLocationExpander( custom, session.getRemoteRepositories(), session.getLocalRepository() );
         }
         catch ( final MalformedURLException e )
         {
@@ -93,11 +118,23 @@ public class GalleyInfrastructure
         final XMLInfrastructure xml = new XMLInfrastructure();
         final XPathManager xpaths = new XPathManager();
 
-        final TransportManager transports =
-            new TransportManagerImpl( new HttpClientTransport( new HttpImpl( new MemoryPasswordManager() ) ),
-                                      new FileTransport(), new ZipJarTransport() );
+        final TransportManager transports;
+        if ( customTransport != null )
+        {
+            transports = new TransportManagerImpl( customTransport );
+        }
+        else
+        {
+            transports =
+                new TransportManagerImpl( new HttpClientTransport( new HttpImpl( new MemoryPasswordManager() ) ),
+                                          new FileTransport(), new ZipJarTransport() );
+        }
 
-        final File cacheDir = new File( session.getTargetDir(), "manipulator-cache" );
+        if ( cacheDir == null )
+        {
+            cacheDir = new File( session.getTargetDir(), "manipulator-cache" );
+        }
+
         final FileEventManager fileEvents = new NoOpFileEventManager();
 
         final CacheProvider cache =
@@ -119,7 +156,7 @@ public class GalleyInfrastructure
 
         artifactManager = new ArtifactManagerImpl( transfers, locationExpander, types, versionResolver );
 
-        // TODO: adjust this to the current Maven runtime!
+        // TODO: auto-adjust this to the current Maven runtime!
         final MavenPluginDefaults pluginDefaults = new StandardMaven304PluginDefaults();
 
         final MavenPluginImplications pluginImplications = new StandardMavenPluginImplications( xml );

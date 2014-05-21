@@ -34,9 +34,8 @@ import org.apache.maven.project.MavenProject;
 import org.codehaus.plexus.logging.Logger;
 import org.codehaus.plexus.logging.console.ConsoleLogger;
 import org.commonjava.maven.ext.manip.ManipulationException;
-import org.commonjava.maven.ext.manip.fixture.StubRepositorySystem;
-import org.commonjava.maven.ext.manip.impl.ProjectVersioningManipulator;
-import org.commonjava.maven.ext.manip.impl.VersionCalculator;
+import org.commonjava.maven.ext.manip.resolver.GalleyInfrastructure;
+import org.commonjava.maven.ext.manip.resolver.GalleyReaderWrapper;
 import org.commonjava.maven.ext.manip.state.ManipulationSession;
 import org.commonjava.maven.ext.manip.state.VersioningState;
 import org.junit.Test;
@@ -600,6 +599,7 @@ public class ProjectVersionManipulatorTest
     }
 
     private TestVersioningModifier newVersioningModifier()
+        throws ManipulationException
     {
         return new TestVersioningModifier( new ManipulationSession() );
     }
@@ -612,8 +612,9 @@ public class ProjectVersionManipulatorTest
         private final ManipulationSession session;
 
         public TestVersioningModifier( final ManipulationSession session )
+            throws ManipulationException
         {
-            super( new VersionCalculator( new StubRepositorySystem(), logger ), logger );
+            super( new VersionCalculator( new GalleyReaderWrapper( new GalleyInfrastructure( session ) ), logger ), logger );
             this.session = session;
         }
 

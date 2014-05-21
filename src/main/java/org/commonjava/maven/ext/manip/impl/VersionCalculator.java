@@ -28,12 +28,11 @@ import org.codehaus.plexus.logging.Logger;
 import org.commonjava.maven.atlas.ident.ref.ProjectRef;
 import org.commonjava.maven.ext.manip.ManipulationException;
 import org.commonjava.maven.ext.manip.model.Project;
-import org.commonjava.maven.ext.manip.resolver.PomReaderWrapper;
+import org.commonjava.maven.ext.manip.resolver.GalleyReaderWrapper;
 import org.commonjava.maven.ext.manip.state.ManipulationSession;
 import org.commonjava.maven.ext.manip.state.VersioningState;
 import org.commonjava.maven.galley.maven.GalleyMavenException;
 import org.commonjava.maven.galley.maven.model.view.MavenMetadataView;
-import org.sonatype.aether.RepositorySystem;
 
 /**
  * Component that calculates project version modifications, based on configuration stored in {@link VersioningState}. Snapshots may/may not be
@@ -56,19 +55,16 @@ public class VersionCalculator
     private Logger logger;
 
     @Requirement
-    protected RepositorySystem repositorySystem;
-
-    @Requirement
-    protected PomReaderWrapper readerWrapper;
+    protected GalleyReaderWrapper readerWrapper;
 
     protected VersionCalculator()
     {
     }
 
-    public VersionCalculator( final RepositorySystem repositorySystem, final Logger logger )
+    public VersionCalculator( final GalleyReaderWrapper readerWrapper, final Logger logger )
     {
+        this.readerWrapper = readerWrapper;
         this.logger = logger;
-        this.repositorySystem = repositorySystem;
     }
 
     /**

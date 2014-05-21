@@ -90,6 +90,16 @@
       <artifactId>galley-maven</artifactId>
       <version>${galleyVersion}</version>
     </dependency>
+    <dependency>
+      <groupId>ch.qos.logback</groupId>
+      <artifactId>logback-core</artifactId>
+      <version>1.0.12</version>
+    </dependency>
+    <dependency>
+      <groupId>ch.qos.logback</groupId>
+      <artifactId>logback-classic</artifactId>
+      <version>1.0.12</version>
+    </dependency>
 
     <dependency>
         <groupId>commons-lang</groupId>
@@ -314,6 +324,9 @@
                     <configuration>
                         <artifactSet>
                             <includes>
+                                <include>ch.qos.logback:*</include>
+                                <include>org.slf4j:*</include>
+                                <include>org.apache.httpcomponents:*</include>
                                 <include>org.jdom:jdom</include>
                                 <include>org.commonjava.*:*</include>
                                 <include>commons-lang:commons-lang</include>

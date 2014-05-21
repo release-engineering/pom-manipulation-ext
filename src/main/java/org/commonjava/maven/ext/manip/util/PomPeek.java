@@ -32,7 +32,7 @@ import javax.xml.stream.XMLStreamReader;
 
 import org.codehaus.plexus.component.annotations.Requirement;
 import org.codehaus.plexus.logging.Logger;
-import org.commonjava.maven.ext.manip.model.FullProjectKey;
+import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 
 public class PomPeek
 {
@@ -77,7 +77,7 @@ public class PomPeek
     @Requirement
     private Logger logger;
 
-    private FullProjectKey key;
+    private ProjectVersionRef key;
 
     private final Map<String, String> elementValues = new HashMap<String, String>();
 
@@ -85,7 +85,7 @@ public class PomPeek
 
     private final File pom;
 
-    private FullProjectKey parentKey;
+    private ProjectVersionRef parentKey;
 
     private boolean modulesDone = false;
 
@@ -121,12 +121,12 @@ public class PomPeek
         return pom;
     }
 
-    public FullProjectKey getKey()
+    public ProjectVersionRef getKey()
     {
         return key;
     }
 
-    public FullProjectKey getParentKey()
+    public ProjectVersionRef getParentKey()
     {
         return parentKey;
     }
@@ -212,7 +212,7 @@ public class PomPeek
             {
                 reader.close();
             }
-            catch ( IOException ioe )
+            catch ( final IOException ioe )
             {
             }
         }
@@ -279,13 +279,13 @@ public class PomPeek
         boolean valid = false;
         if ( isValidArtifactId( a ) && isValidGroupId( g ) && isValidVersion( v ) )
         {
-            key = new FullProjectKey( g, a, v );
+            key = new ProjectVersionRef( g, a, v );
             valid = true;
         }
 
         if ( isValidArtifactId( pa ) && isValidGroupId( pg ) && isValidVersion( pv ) )
         {
-            parentKey = new FullProjectKey( pg, pa, pv );
+            parentKey = new ProjectVersionRef( pg, pa, pv );
         }
 
         return valid;
@@ -361,7 +361,7 @@ public class PomPeek
         return true;
     }
 
-    public void setTopPOM( boolean b )
+    public void setTopPOM( final boolean b )
     {
         topPOM = b;
     }

@@ -42,7 +42,7 @@ public class MavenLocationExpander
     implements LocationExpander
 {
 
-    public static final String EXPANSION_TARGET = "maven:repositories";
+    public static final Location EXPANSION_TARGET = new SimpleLocation( "maven:repositories" );
 
     public static final String LOCAL_URI = "file:maven:local-or-preresolved";
 
@@ -68,21 +68,25 @@ public class MavenLocationExpander
             locs.addAll( customLocations );
         }
 
-        for ( final ArtifactRepository repo : artifactRepositories )
+        if ( artifactRepositories != null )
         {
-            // TODO: Authentication via memory password manager.
-            final String url = repo.getUrl();
+            for ( final ArtifactRepository repo : artifactRepositories )
+            {
+                // TODO: Authentication via memory password manager.
+                final String url = repo.getUrl();
 
-            if ( url.startsWith( "file:" ) )
-            {
-                locs.add( new SimpleLocation( url ) );
-            }
-            else
-            {
-                final ArtifactRepositoryPolicy releases = repo.getReleases();
-                final ArtifactRepositoryPolicy snapshots = repo.getSnapshots();
-                locs.add( new SimpleHttpLocation( url, url, snapshots == null ? false : snapshots.isEnabled(),
-                                                  releases == null ? true : releases.isEnabled(), true, false, -1, null ) );
+                if ( url.startsWith( "file:" ) )
+                {
+                    locs.add( new SimpleLocation( url ) );
+                }
+                else
+                {
+                    final ArtifactRepositoryPolicy releases = repo.getReleases();
+                    final ArtifactRepositoryPolicy snapshots = repo.getSnapshots();
+                    locs.add( new SimpleHttpLocation( url, url, snapshots == null ? false : snapshots.isEnabled(),
+                                                      releases == null ? true : releases.isEnabled(), true, false, -1,
+                                                      null ) );
+                }
             }
         }
 

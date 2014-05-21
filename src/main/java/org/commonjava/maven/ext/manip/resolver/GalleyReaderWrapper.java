@@ -11,28 +11,36 @@ import org.commonjava.maven.galley.maven.GalleyMavenException;
 import org.commonjava.maven.galley.maven.model.view.MavenMetadataView;
 import org.commonjava.maven.galley.maven.model.view.MavenPomView;
 import org.commonjava.maven.galley.model.Location;
-import org.commonjava.maven.galley.model.SimpleLocation;
 
 /**
  * Wraps the galley-maven APIs with the plumbing necessary to resolve using the repositories defined for the maven build.
  * 
  * @author jdcasey
  */
-@Component( role = PomReaderWrapper.class )
-public class PomReaderWrapper
+@Component( role = GalleyReaderWrapper.class )
+public class GalleyReaderWrapper
 {
 
     private static final List<Location> MAVEN_REPOS = new ArrayList<Location>()
     {
         {
-            add( new SimpleLocation( "maven:repos" ) );
+            add( MavenLocationExpander.EXPANSION_TARGET );
         }
 
         private static final long serialVersionUID = 1L;
     };
 
-    @Requirement
+    @Requirement( role = ExtensionInfrastructure.class, hint = "galley" )
     private GalleyInfrastructure infra;
+
+    protected GalleyReaderWrapper()
+    {
+    }
+
+    public GalleyReaderWrapper( final GalleyInfrastructure infra )
+    {
+        this.infra = infra;
+    }
 
     public MavenPomView readPomView( final ProjectVersionRef ref )
         throws GalleyMavenException

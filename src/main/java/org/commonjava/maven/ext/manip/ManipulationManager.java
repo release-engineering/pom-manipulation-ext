@@ -24,9 +24,9 @@ import org.apache.maven.project.ProjectBuilder;
 import org.codehaus.plexus.component.annotations.Component;
 import org.codehaus.plexus.component.annotations.Requirement;
 import org.codehaus.plexus.logging.Logger;
+import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.ext.manip.impl.Manipulator;
 import org.commonjava.maven.ext.manip.io.PomIO;
-import org.commonjava.maven.ext.manip.model.FullProjectKey;
 import org.commonjava.maven.ext.manip.model.Project;
 import org.commonjava.maven.ext.manip.resolver.ExtensionInfrastructure;
 import org.commonjava.maven.ext.manip.state.ManipulationSession;
@@ -161,7 +161,7 @@ public class ManipulationManager
                 logger.debug( "PEEK: " + pom );
 
                 final PomPeek peek = new PomPeek( pom );
-                final FullProjectKey key = peek.getKey();
+                final ProjectVersionRef key = peek.getKey();
                 if ( key != null )
                 {
                     peeked.add( peek );
