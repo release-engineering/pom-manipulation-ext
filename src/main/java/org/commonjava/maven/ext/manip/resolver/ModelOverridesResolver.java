@@ -40,7 +40,6 @@ import org.commonjava.maven.galley.maven.GalleyMavenException;
 import org.commonjava.maven.galley.maven.model.view.DependencyView;
 import org.commonjava.maven.galley.maven.model.view.MavenPomView;
 import org.commonjava.maven.galley.maven.model.view.PluginView;
-import org.sonatype.aether.impl.ArtifactResolver;
 import org.w3c.dom.Node;
 
 /**
@@ -51,9 +50,6 @@ public class ModelOverridesResolver
 {
     @Requirement
     private Logger logger;
-
-    @Requirement
-    private ArtifactResolver resolver;
 
     @Requirement
     private ModelBuilder modelBuilder;

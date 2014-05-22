@@ -23,7 +23,6 @@ import org.codehaus.plexus.component.annotations.Requirement;
 import org.codehaus.plexus.logging.Logger;
 import org.commonjava.maven.ext.manip.model.Project;
 import org.commonjava.maven.ext.manip.state.ManipulationSession;
-import org.sonatype.aether.impl.ArtifactResolver;
 
 /**
  * Implements hooks necessary to apply modifications in the Maven bootstrap, before the build starts.
@@ -38,9 +37,6 @@ public class ManipulatingEventSpy
 
     @Requirement
     private ManipulationManager manipulationManager;
-
-    @Requirement
-    private ArtifactResolver resolver;
 
     @Requirement
     private ModelBuilder modelBuilder;
