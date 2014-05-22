@@ -25,6 +25,8 @@
  */
 package org.commonjava.maven.ext.manip.io;
 
+import static org.apache.commons.io.IOUtils.closeQuietly;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
@@ -108,13 +110,7 @@ public class ModelIO
         }
         finally
         {
-            try
-            {
-                in.close();
-            }
-            catch ( final IOException e )
-            {
-            }
+            closeQuietly( in );
         }
     }
 

@@ -10,6 +10,7 @@
  ******************************************************************************/
 package org.commonjava.maven.ext.manip.io;
 
+import static org.apache.commons.io.IOUtils.closeQuietly;
 import static org.commonjava.maven.ext.manip.util.IdUtils.ga;
 
 import java.io.ByteArrayInputStream;
@@ -39,7 +40,6 @@ import org.apache.maven.project.MavenProject;
 import org.codehaus.plexus.component.annotations.Component;
 import org.codehaus.plexus.component.annotations.Requirement;
 import org.codehaus.plexus.logging.Logger;
-import org.codehaus.plexus.util.IOUtil;
 import org.codehaus.plexus.util.WriterFactory;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 import org.commonjava.maven.ext.manip.ManipulatingEventSpy;
@@ -110,13 +110,7 @@ public class PomIO
             }
             finally
             {
-                try
-                {
-                    in.close();
-                }
-                catch ( final IOException e )
-                {
-                }
+                closeQuietly( in );
             }
 
             if ( raw == null )
@@ -187,12 +181,12 @@ public class PomIO
         }
         finally
         {
-            IOUtil.close( pw );
+            closeQuietly( pw );
         }
     }
 
-    private void write( Project project, final File pom, final Model model )
-                    throws ManipulationException
+    private void write( final Project project, final File pom, final Model model )
+        throws ManipulationException
     {
         Writer pomWriter = null;
         try
@@ -208,12 +202,12 @@ public class PomIO
             final String modifiedBy = "[Comment: <!-- Modified by POM Manipulation Extension for Maven";
 
             final Format format = Format.getRawFormat()
-                            .setEncoding( encoding )
-                            .setTextMode( TextMode.PRESERVE )
-                            .setLineSeparator( System.getProperty( "line.separator" ) )
-                            .setOmitDeclaration( false )
-                            .setOmitEncoding( false )
-                            .setExpandEmptyElements( true );
+                                        .setEncoding( encoding )
+                                        .setTextMode( TextMode.PRESERVE )
+                                        .setLineSeparator( System.getProperty( "line.separator" ) )
+                                        .setOmitDeclaration( false )
+                                        .setOmitEncoding( false )
+                                        .setExpandEmptyElements( true );
 
             final ByteArrayOutputStream baos = new ByteArrayOutputStream();
             pomWriter = WriterFactory.newWriter( baos, encoding );
@@ -222,44 +216,48 @@ public class PomIO
             doc = builder.build( new ByteArrayInputStream( baos.toByteArray() ) );
 
             // Only add the modified by to the top level pom.
-            if (project.isTopPOM())
+            if ( project.isTopPOM() )
             {
                 @SuppressWarnings( "unchecked" )
-                final Iterator<Comment> it = doc.getContent(new ContentFilter( ContentFilter.COMMENT ) )
-                                .iterator();
+                final Iterator<Comment> it = doc.getContent( new ContentFilter( ContentFilter.COMMENT ) )
+                                                .iterator();
                 while ( it.hasNext() )
                 {
                     final Comment c = it.next();
 
                     //final Comment c = (Comment) it.next();
-                    if ( c.toString().startsWith( modifiedBy ) )
+                    if ( c.toString()
+                          .startsWith( modifiedBy ) )
                     {
                         it.remove();
 
                         break;
                     }
                 }
-                doc.addContent( new Comment( " Modified by POM Manipulation Extension for Maven " + getManifestInformation()  ) );
+                doc.addContent( new Comment( " Modified by POM Manipulation Extension for Maven "
+                    + getManifestInformation() ) );
             }
-            final List<?> rootComments = doc.getContent ( new ContentFilter( ContentFilter.COMMENT ) );
+            final List<?> rootComments = doc.getContent( new ContentFilter( ContentFilter.COMMENT ) );
 
-            XMLOutputter xmlo = new XMLOutputter ( format )
+            final XMLOutputter xmlo = new XMLOutputter( format )
             {
                 @Override
-                protected void printComment(Writer out, Comment comment)
-                                throws IOException {
-                    if (comment.toString().startsWith( modifiedBy ))
+                protected void printComment( final Writer out, final Comment comment )
+                    throws IOException
+                {
+                    if ( comment.toString()
+                                .startsWith( modifiedBy ) )
                     {
-                        out.write(getFormat().getLineSeparator());
+                        out.write( getFormat().getLineSeparator() );
                     }
 
-                    super.printComment (out, comment);
+                    super.printComment( out, comment );
 
                     // If root level comments exist and is the current Comment object
                     // output an extra newline to tidy the output
-                    if (rootComments.contains( comment) )
+                    if ( rootComments.contains( comment ) )
                     {
-                        out.write(System.getProperty( "line.separator" ));
+                        out.write( System.getProperty( "line.separator" ) );
                     }
                 }
             };
@@ -280,7 +278,7 @@ public class PomIO
         }
         finally
         {
-            IOUtil.close( pomWriter );
+            closeQuietly( pomWriter );
         }
     }
 
@@ -309,30 +307,35 @@ public class PomIO
         return markerFile;
     }
 
-    private String getManifestInformation () throws ManipulationException
+    private String getManifestInformation()
+        throws ManipulationException
     {
         String result = "";
         try
         {
-            Enumeration<URL> resources = ManipulatingEventSpy.class.getClassLoader().getResources("META-INF/MANIFEST.MF");
+            final Enumeration<URL> resources = ManipulatingEventSpy.class.getClassLoader()
+                                                                         .getResources( "META-INF/MANIFEST.MF" );
 
-            while (resources.hasMoreElements())
+            while ( resources.hasMoreElements() )
             {
-                URL jarUrl = resources.nextElement ();
+                final URL jarUrl = resources.nextElement();
 
                 logger.debug( "Processing jar resource " + jarUrl );
-                if (jarUrl.getFile ().contains ("pom-manipulation-ext"))
+                if ( jarUrl.getFile()
+                           .contains( "pom-manipulation-ext" ) )
                 {
-                    Manifest manifest = new Manifest (jarUrl.openStream());
-                    result = manifest.getMainAttributes ().getValue ("Implementation-Version");
-                    result += " ( SHA: " + manifest.getMainAttributes ().getValue ("Scm-Revision") + " ) ";
+                    final Manifest manifest = new Manifest( jarUrl.openStream() );
+                    result = manifest.getMainAttributes()
+                                     .getValue( "Implementation-Version" );
+                    result += " ( SHA: " + manifest.getMainAttributes()
+                                                   .getValue( "Scm-Revision" ) + " ) ";
                     break;
                 }
             }
         }
-        catch (IOException e)
+        catch ( final IOException e )
         {
-            throw new ManipulationException("Error retrieving information from manifest", e);
+            throw new ManipulationException( "Error retrieving information from manifest", e );
         }
 
         return result;

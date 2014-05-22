@@ -12,6 +12,7 @@ package org.commonjava.maven.ext.manip.util;
 
 import static javax.xml.stream.XMLStreamConstants.END_ELEMENT;
 import static javax.xml.stream.XMLStreamConstants.START_ELEMENT;
+import static org.apache.commons.io.IOUtils.closeQuietly;
 import static org.apache.commons.lang.StringUtils.isEmpty;
 import static org.apache.commons.lang.StringUtils.join;
 
@@ -205,16 +206,14 @@ public class PomPeek
                 }
                 catch ( final XMLStreamException e )
                 {
+                    logger.warn( "Failed to close XMLStreamReader: " + e.getMessage(), e );
+                }
+                finally
+                {
                 }
             }
 
-            try
-            {
-                reader.close();
-            }
-            catch ( final IOException ioe )
-            {
-            }
+            closeQuietly( reader );
         }
     }
 
