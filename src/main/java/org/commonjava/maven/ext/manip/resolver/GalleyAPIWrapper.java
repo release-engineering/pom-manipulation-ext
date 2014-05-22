@@ -5,20 +5,23 @@ import java.util.List;
 
 import org.codehaus.plexus.component.annotations.Component;
 import org.codehaus.plexus.component.annotations.Requirement;
+import org.commonjava.maven.atlas.ident.ref.ArtifactRef;
 import org.commonjava.maven.atlas.ident.ref.ProjectRef;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
+import org.commonjava.maven.galley.TransferException;
 import org.commonjava.maven.galley.maven.GalleyMavenException;
 import org.commonjava.maven.galley.maven.model.view.MavenMetadataView;
 import org.commonjava.maven.galley.maven.model.view.MavenPomView;
 import org.commonjava.maven.galley.model.Location;
+import org.commonjava.maven.galley.model.Transfer;
 
 /**
  * Wraps the galley-maven APIs with the plumbing necessary to resolve using the repositories defined for the maven build.
  * 
  * @author jdcasey
  */
-@Component( role = GalleyReaderWrapper.class )
-public class GalleyReaderWrapper
+@Component( role = GalleyAPIWrapper.class )
+public class GalleyAPIWrapper
 {
 
     private static final List<Location> MAVEN_REPOS = new ArrayList<Location>()
@@ -33,11 +36,11 @@ public class GalleyReaderWrapper
     @Requirement( role = ExtensionInfrastructure.class, hint = "galley" )
     private GalleyInfrastructure infra;
 
-    protected GalleyReaderWrapper()
+    protected GalleyAPIWrapper()
     {
     }
 
-    public GalleyReaderWrapper( final GalleyInfrastructure infra )
+    public GalleyAPIWrapper( final GalleyInfrastructure infra )
     {
         this.infra = infra;
     }
@@ -54,6 +57,13 @@ public class GalleyReaderWrapper
     {
         return infra.getMetadataReader()
                     .getMetadata( ref, MAVEN_REPOS );
+    }
+
+    public Transfer resolveArtifact( final ArtifactRef asPomArtifact )
+        throws TransferException
+    {
+        return infra.getArtifactManager()
+                    .retrieveFirst( MAVEN_REPOS, asPomArtifact );
     }
 
 }

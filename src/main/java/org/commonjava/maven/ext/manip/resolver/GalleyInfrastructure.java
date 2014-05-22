@@ -238,4 +238,9 @@ public class GalleyInfrastructure
     {
         return metadataReader;
     }
+
+    public ArtifactManager getArtifactManager()
+    {
+        return artifactManager;
+    }
 }

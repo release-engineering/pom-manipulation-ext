@@ -23,30 +23,42 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.commonjava.maven.ext.manip.resolver;
+package org.commonjava.maven.ext.manip.io;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.maven.model.Model;
+import org.apache.maven.model.building.DefaultModelBuildingRequest;
 import org.apache.maven.model.building.ModelBuilder;
+import org.apache.maven.model.building.ModelBuildingException;
+import org.apache.maven.model.building.ModelBuildingRequest;
+import org.apache.maven.model.building.ModelBuildingResult;
+import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 import org.codehaus.plexus.component.annotations.Component;
 import org.codehaus.plexus.component.annotations.Requirement;
 import org.codehaus.plexus.logging.Logger;
+import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.ext.manip.ManipulationException;
+import org.commonjava.maven.ext.manip.resolver.GalleyAPIWrapper;
 import org.commonjava.maven.ext.manip.state.ManipulationSession;
+import org.commonjava.maven.galley.TransferException;
 import org.commonjava.maven.galley.maven.GalleyMavenException;
 import org.commonjava.maven.galley.maven.model.view.DependencyView;
 import org.commonjava.maven.galley.maven.model.view.MavenPomView;
 import org.commonjava.maven.galley.maven.model.view.PluginView;
+import org.commonjava.maven.galley.model.Transfer;
 import org.w3c.dom.Node;
 
 /**
  * Class to resolve artifact descriptors (pom files) from a maven repository
  */
-@Component( role = ModelOverridesResolver.class )
-public class ModelOverridesResolver
+@Component( role = ModelIO.class )
+public class ModelIO
 {
     @Requirement
     private Logger logger;
@@ -55,14 +67,76 @@ public class ModelOverridesResolver
     private ModelBuilder modelBuilder;
 
     @Requirement
-    private GalleyReaderWrapper pomReader;
+    private GalleyAPIWrapper galleyWrapper;
 
     /**
      * Protected constructor for component instantiation/injection
      */
-    protected ModelOverridesResolver()
+    protected ModelIO()
     {
 
+    }
+
+    public Model resolveRawModel( final String gav )
+        throws ManipulationException
+    {
+        final ProjectVersionRef ref = ProjectVersionRef.parse( gav );
+
+        Transfer transfer;
+        try
+        {
+            transfer = galleyWrapper.resolveArtifact( ref.asPomArtifact() );
+        }
+        catch ( final TransferException e )
+        {
+            throw new ManipulationException( "Failed to resolve POM: %s.\n--> %s", e, ref, e.getMessage() );
+        }
+
+        InputStream in = null;
+        try
+        {
+            in = transfer.openInputStream();
+            return new MavenXpp3Reader().read( in );
+        }
+        catch ( final IOException e )
+        {
+            throw new ManipulationException( "Failed to build model for POM: %s.\n--> %s", e, ref, e.getMessage() );
+        }
+        catch ( final XmlPullParserException e )
+        {
+            throw new ManipulationException( "Failed to build model for POM: %s.\n--> %s", e, ref, e.getMessage() );
+        }
+        finally
+        {
+            try
+            {
+                in.close();
+            }
+            catch ( final IOException e )
+            {
+            }
+        }
+    }
+
+    public Model readEffectiveModel( final String gav )
+        throws ManipulationException
+    {
+        final DefaultModelBuildingRequest mbr = new DefaultModelBuildingRequest();
+        mbr.setModelResolver( new GalleyModelResolver( galleyWrapper ) );
+        mbr.setValidationLevel( ModelBuildingRequest.VALIDATION_LEVEL_MINIMAL );
+
+        try
+        {
+            final ModelBuildingResult result = modelBuilder.build( mbr );
+
+            // TODO: Report warnings...
+
+            return result.getEffectiveModel();
+        }
+        catch ( final ModelBuildingException e )
+        {
+            throw new ManipulationException( "Failed to build effective Model for: %s.\n--> %s", e, gav, e.getMessage() );
+        }
     }
 
     public Map<String, String> getRemoteDependencyVersionOverrides( final String gav, final ManipulationSession session )
@@ -73,7 +147,7 @@ public class ModelOverridesResolver
         final Map<String, String> versionOverrides = new HashMap<String, String>();
         try
         {
-            final MavenPomView pomView = pomReader.readPomView( ProjectVersionRef.parse( gav ) );
+            final MavenPomView pomView = galleyWrapper.readPomView( ProjectVersionRef.parse( gav ) );
 
             // TODO: active profiles!
             final List<DependencyView> deps = pomView.getAllManagedDependencies();
@@ -107,7 +181,7 @@ public class ModelOverridesResolver
         final Map<String, String> versionOverrides = new HashMap<String, String>();
         try
         {
-            final MavenPomView pomView = pomReader.readPomView( ProjectVersionRef.parse( gav ) );
+            final MavenPomView pomView = galleyWrapper.readPomView( ProjectVersionRef.parse( gav ) );
 
             // TODO: active profiles!
             // TODO: Provide method for retrieving property map from pomView, instead of using this low-level api.
@@ -140,7 +214,7 @@ public class ModelOverridesResolver
         final Map<String, String> versionOverrides = new HashMap<String, String>();
         try
         {
-            final MavenPomView pomView = pomReader.readPomView( ProjectVersionRef.parse( gav ) );
+            final MavenPomView pomView = galleyWrapper.readPomView( ProjectVersionRef.parse( gav ) );
 
             // TODO: active profiles!
             final List<PluginView> plugins = pomView.getAllManagedBuildPlugins();

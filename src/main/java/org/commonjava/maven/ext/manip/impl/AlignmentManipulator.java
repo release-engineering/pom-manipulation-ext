@@ -25,8 +25,8 @@ import org.apache.maven.project.MavenProject;
 import org.codehaus.plexus.component.annotations.Requirement;
 import org.codehaus.plexus.logging.Logger;
 import org.commonjava.maven.ext.manip.ManipulationException;
+import org.commonjava.maven.ext.manip.io.ModelIO;
 import org.commonjava.maven.ext.manip.model.Project;
-import org.commonjava.maven.ext.manip.resolver.ModelOverridesResolver;
 import org.commonjava.maven.ext.manip.state.BOMState;
 import org.commonjava.maven.ext.manip.state.ManipulationSession;
 import org.commonjava.maven.ext.manip.util.IdUtils;
@@ -47,7 +47,7 @@ public abstract class AlignmentManipulator
     protected Logger logger;
 
     @Requirement
-    protected ModelOverridesResolver effectiveModelBuilder;
+    protected ModelIO effectiveModelBuilder;
 
     protected AlignmentManipulator()
     {

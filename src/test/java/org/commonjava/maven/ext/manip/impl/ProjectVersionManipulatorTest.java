@@ -35,7 +35,7 @@ import org.codehaus.plexus.logging.Logger;
 import org.codehaus.plexus.logging.console.ConsoleLogger;
 import org.commonjava.maven.ext.manip.ManipulationException;
 import org.commonjava.maven.ext.manip.resolver.GalleyInfrastructure;
-import org.commonjava.maven.ext.manip.resolver.GalleyReaderWrapper;
+import org.commonjava.maven.ext.manip.resolver.GalleyAPIWrapper;
 import org.commonjava.maven.ext.manip.state.ManipulationSession;
 import org.commonjava.maven.ext.manip.state.VersioningState;
 import org.junit.Test;
@@ -614,7 +614,7 @@ public class ProjectVersionManipulatorTest
         public TestVersioningModifier( final ManipulationSession session )
             throws ManipulationException
         {
-            super( new VersionCalculator( new GalleyReaderWrapper( new GalleyInfrastructure( session ) ), logger ), logger );
+            super( new VersionCalculator( new GalleyAPIWrapper( new GalleyInfrastructure( session ) ), logger ), logger );
             this.session = session;
         }
 

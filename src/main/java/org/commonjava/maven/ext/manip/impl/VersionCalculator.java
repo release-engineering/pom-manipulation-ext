@@ -28,7 +28,7 @@ import org.codehaus.plexus.logging.Logger;
 import org.commonjava.maven.atlas.ident.ref.ProjectRef;
 import org.commonjava.maven.ext.manip.ManipulationException;
 import org.commonjava.maven.ext.manip.model.Project;
-import org.commonjava.maven.ext.manip.resolver.GalleyReaderWrapper;
+import org.commonjava.maven.ext.manip.resolver.GalleyAPIWrapper;
 import org.commonjava.maven.ext.manip.state.ManipulationSession;
 import org.commonjava.maven.ext.manip.state.VersioningState;
 import org.commonjava.maven.galley.maven.GalleyMavenException;
@@ -55,13 +55,13 @@ public class VersionCalculator
     private Logger logger;
 
     @Requirement
-    protected GalleyReaderWrapper readerWrapper;
+    protected GalleyAPIWrapper readerWrapper;
 
     protected VersionCalculator()
     {
     }
 
-    public VersionCalculator( final GalleyReaderWrapper readerWrapper, final Logger logger )
+    public VersionCalculator( final GalleyAPIWrapper readerWrapper, final Logger logger )
     {
         this.readerWrapper = readerWrapper;
         this.logger = logger;

@@ -37,7 +37,7 @@ import org.codehaus.plexus.logging.console.ConsoleLogger;
 import org.commonjava.maven.ext.manip.ManipulationException;
 import org.commonjava.maven.ext.manip.fixture.StubTransport;
 import org.commonjava.maven.ext.manip.resolver.GalleyInfrastructure;
-import org.commonjava.maven.ext.manip.resolver.GalleyReaderWrapper;
+import org.commonjava.maven.ext.manip.resolver.GalleyAPIWrapper;
 import org.commonjava.maven.ext.manip.resolver.MavenLocationExpander;
 import org.commonjava.maven.ext.manip.state.ManipulationSession;
 import org.commonjava.maven.ext.manip.state.VersioningState;
@@ -417,7 +417,7 @@ public class VersioningCalculatorTest
         public TestVersionCalculator( final ManipulationSession session )
             throws ManipulationException
         {
-            super( new GalleyReaderWrapper( new GalleyInfrastructure( session ) ),
+            super( new GalleyAPIWrapper( new GalleyInfrastructure( session ) ),
                    new ConsoleLogger( Logger.LEVEL_DEBUG, "test" ) );
         }
 
@@ -425,7 +425,7 @@ public class VersioningCalculatorTest
                                       final File cacheDir )
             throws ManipulationException
         {
-            super( new GalleyReaderWrapper( new GalleyInfrastructure( session, mdLoc, mdTrans, cacheDir ) ),
+            super( new GalleyAPIWrapper( new GalleyInfrastructure( session, mdLoc, mdTrans, cacheDir ) ),
                    new ConsoleLogger( Logger.LEVEL_DEBUG, "test" ) );
         }
 
