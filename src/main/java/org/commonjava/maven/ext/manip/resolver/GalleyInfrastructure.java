@@ -189,6 +189,7 @@ public class GalleyInfrastructure
         final String userHome = System.getProperty( "user.home" );
         final File logConf = new File( userHome, ".m2/logback.xml" );
 
+        boolean loggingConfigured = false;
         try
         {
             if ( logConf != null && logConf.exists() )
@@ -209,6 +210,7 @@ public class GalleyInfrastructure
 
                 fig.setContext( context );
                 fig.doConfigure( new ByteArrayInputStream( logProps.getBytes() ) );
+                loggingConfigured = true;
             }
         }
         catch ( final IOException e )
@@ -224,6 +226,11 @@ public class GalleyInfrastructure
         {
             final Logger root = (Logger) LoggerFactory.getLogger( org.slf4j.Logger.ROOT_LOGGER_NAME );
             root.setLevel( Level.DEBUG );
+        }
+        else if ( !loggingConfigured )
+        {
+            final Logger root = (Logger) LoggerFactory.getLogger( org.slf4j.Logger.ROOT_LOGGER_NAME );
+            root.setLevel( Level.INFO );
         }
     }
 

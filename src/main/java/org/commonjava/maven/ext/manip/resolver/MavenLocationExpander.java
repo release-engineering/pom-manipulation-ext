@@ -20,6 +20,7 @@ import java.util.Set;
 
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.artifact.repository.ArtifactRepositoryPolicy;
+import org.commonjava.maven.atlas.ident.util.JoinString;
 import org.commonjava.maven.galley.TransferException;
 import org.commonjava.maven.galley.model.ConcreteResource;
 import org.commonjava.maven.galley.model.Location;
@@ -43,8 +44,6 @@ public class MavenLocationExpander
 {
 
     public static final Location EXPANSION_TARGET = new SimpleLocation( "maven:repositories" );
-
-    public static final String LOCAL_URI = "file:maven:local-or-preresolved";
 
     private final List<Location> locations;
 
@@ -90,6 +89,7 @@ public class MavenLocationExpander
             }
         }
 
+        logger.debug( "Configured to use Maven locations:\n  {}", new JoinString( "\n  ", locs ) );
         this.locations = new ArrayList<Location>( locs );
     }
 
@@ -100,17 +100,10 @@ public class MavenLocationExpander
         final List<Location> result = new ArrayList<Location>();
         for ( final Location loc : locations )
         {
-            logger.info( "Expanding: {}", loc );
-            if ( EXPANSION_TARGET.equals( loc.getUri() ) )
-            {
-                result.addAll( this.locations );
-            }
-            else
-            {
-                result.add( loc );
-            }
+            expandSingle( loc, result );
         }
 
+        logger.debug( "Expanded to:\n {}", new JoinString( "\n  ", result ) );
         return result;
     }
 
@@ -121,17 +114,10 @@ public class MavenLocationExpander
         final List<Location> result = new ArrayList<Location>();
         for ( final Location loc : locations )
         {
-            logger.info( "Expanding: {}", loc );
-            if ( EXPANSION_TARGET.equals( loc.getUri() ) )
-            {
-                result.addAll( this.locations );
-            }
-            else
-            {
-                result.add( loc );
-            }
+            expandSingle( loc, result );
         }
 
+        logger.debug( "Expanded to:\n {}", new JoinString( "\n  ", result ) );
         return result;
     }
 
@@ -143,33 +129,33 @@ public class MavenLocationExpander
         if ( resource instanceof ConcreteResource )
         {
             final Location loc = ( (ConcreteResource) resource ).getLocation();
-            logger.info( "Expanding: {}", loc );
-            if ( EXPANSION_TARGET.equals( loc.getUri() ) )
-            {
-                result.addAll( this.locations );
-            }
-            else
-            {
-                result.add( loc );
-            }
+            expandSingle( loc, result );
         }
         else
         {
             for ( final Location loc : ( (VirtualResource) resource ).getLocations() )
             {
-                logger.info( "Expanding: {}", loc );
-                if ( EXPANSION_TARGET.equals( loc.getUri() ) )
-                {
-                    result.addAll( this.locations );
-                }
-                else
-                {
-                    result.add( loc );
-                }
+                expandSingle( loc, result );
             }
         }
 
+        logger.debug( "Expanded to:\n {}", new JoinString( "\n  ", result ) );
         return new VirtualResource( result, resource.getPath() );
+    }
+
+    private void expandSingle( final Location loc, final List<Location> result )
+    {
+        logger.debug( "Expanding: {}", loc );
+        if ( EXPANSION_TARGET.equals( loc ) )
+        {
+            logger.debug( "Expanding..." );
+            result.addAll( this.locations );
+        }
+        else
+        {
+            logger.debug( "No expansion available." );
+            result.add( loc );
+        }
     }
 
 }

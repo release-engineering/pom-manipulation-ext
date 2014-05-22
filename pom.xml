@@ -261,8 +261,9 @@
                 <setupIncludes>
                     <setupInclude>setup/*/pom.xml</setupInclude>
                   </setupIncludes>
-                <!-- <mavenExecutable>mvnDebug</mavenExecutable> -->
+                <!-- mavenExecutable>mvnDebug</mavenExecutable -->
                 <pomIncludes>
+                    <!-- pomInclude>remote-dependency-management-basic/pom.xml</pomInclude -->
                     <pomInclude>*/pom.xml</pomInclude>
                 </pomIncludes>
                 <projectsDirectory>${project.build.directory}/it</projectsDirectory>
@@ -332,6 +333,9 @@
                                 <include>org.jdom:jdom</include>
                                 <include>org.commonjava.*:*</include>
                                 <include>commons-lang:commons-lang</include>
+                                <include>commons-io:commons-io</include>
+                                <include>commons-codec:commons-codec</include>
+                                <include>org.codehaus.plexus:plexus-interpolation</include>
                             </includes>
                         </artifactSet>
                     </configuration>

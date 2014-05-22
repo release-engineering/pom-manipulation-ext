@@ -46,7 +46,6 @@ import org.commonjava.maven.galley.spi.transport.Transport;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
-import org.sonatype.aether.util.DefaultRepositorySystemSession;
 
 public class VersioningCalculatorTest
 {
@@ -388,9 +387,8 @@ public class VersioningCalculatorTest
                                               .setRemoteRepositories( Arrays.asList( ar ) );
 
         final PlexusContainer container = new DefaultPlexusContainer();
-        final DefaultRepositorySystemSession rss = new DefaultRepositorySystemSession();
 
-        final MavenSession mavenSession = new MavenSession( container, rss, req, new DefaultMavenExecutionResult() );
+        final MavenSession mavenSession = new MavenSession( container, null, req, new DefaultMavenExecutionResult() );
 
         session = new ManipulationSession();
         session.setMavenSession( mavenSession );

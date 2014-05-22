@@ -26,7 +26,6 @@ import org.codehaus.plexus.component.annotations.Requirement;
 import org.codehaus.plexus.logging.Logger;
 import org.commonjava.maven.ext.manip.impl.Manipulator;
 import org.commonjava.maven.ext.manip.model.Project;
-import org.sonatype.aether.RepositorySystemSession;
 
 /**
  * Repository for components that help manipulate POMs as needed, and state related to each {@link Manipulator}
@@ -72,11 +71,6 @@ public class ManipulationSession
     public MavenExecutionRequest getRequest()
     {
         return mavenSession == null ? null : mavenSession.getRequest();
-    }
-
-    public RepositorySystemSession getRepositorySystemSession()
-    {
-        return mavenSession == null ? null : mavenSession.getRepositorySession();
     }
 
     public void setState( final State state )
