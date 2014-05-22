@@ -23,6 +23,9 @@ import org.codehaus.plexus.component.annotations.Requirement;
 import org.codehaus.plexus.logging.Logger;
 import org.commonjava.maven.ext.manip.model.Project;
 import org.commonjava.maven.ext.manip.state.ManipulationSession;
+import org.slf4j.LoggerFactory;
+
+import ch.qos.logback.classic.Level;
 
 /**
  * Implements hooks necessary to apply modifications in the Maven bootstrap, before the build starts.
@@ -114,6 +117,18 @@ public class ManipulatingEventSpy
         }
 
         super.onEvent( event );
+    }
+
+    @Override
+    public void init( final Context context )
+        throws Exception
+    {
+        if ( logger.isDebugEnabled() )
+        {
+            final ch.qos.logback.classic.Logger root =
+                (ch.qos.logback.classic.Logger) LoggerFactory.getLogger( org.slf4j.Logger.ROOT_LOGGER_NAME );
+            root.setLevel( Level.DEBUG );
+        }
     }
 
 }

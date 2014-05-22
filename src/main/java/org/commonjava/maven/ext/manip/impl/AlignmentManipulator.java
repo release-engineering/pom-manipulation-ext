@@ -92,7 +92,7 @@ public abstract class AlignmentManipulator
 
         if ( !session.isEnabled() || !state.isEnabled() )
         {
-            logger.debug( "Alignment Manipulator: Nothing to do!" );
+            logger.debug( getClass().getSimpleName() + ": Nothing to do!" );
             return Collections.emptySet();
         }
 
