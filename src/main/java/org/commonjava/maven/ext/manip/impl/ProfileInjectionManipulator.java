@@ -101,7 +101,7 @@ public class ProfileInjectionManipulator
             if ( project.isTopPOM())
             {
                 final String ga = ga( project );
-                logger.info( "Applying changes to: " + ga );
+                logger.info( getClass().getSimpleName() + " applying changes to: " + ga );
                 final Model model = manipulatedModels.get( ga );
 
                 List<Profile> profiles = model.getProfiles();

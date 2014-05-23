@@ -54,7 +54,6 @@ import org.commonjava.maven.galley.maven.model.view.DependencyView;
 import org.commonjava.maven.galley.maven.model.view.MavenPomView;
 import org.commonjava.maven.galley.maven.model.view.PluginView;
 import org.commonjava.maven.galley.model.Transfer;
-import org.w3c.dom.Node;
 
 /**
  * Class to resolve artifact descriptors (pom files) from a maven repository
@@ -176,36 +175,19 @@ public class ModelIO
         return versionOverrides;
     }
 
+    @SuppressWarnings( { "unchecked", "rawtypes" } )
     public Map<String, String> getRemotePropertyMappingOverrides( final String gav, final ManipulationSession session )
         throws ManipulationException
     {
         logger.debug( "Resolving remote property mapping POM: " + gav );
 
         final Map<String, String> versionOverrides = new HashMap<String, String>();
-        try
-        {
-            final MavenPomView pomView = galleyWrapper.readPomView( ProjectVersionRef.parse( gav ) );
+        final Model m = resolveRawModel (gav);
 
-            // TODO: active profiles!
-            // TODO: Provide method for retrieving property map from pomView, instead of using this low-level api.
-            final List<Node> properties = pomView.resolveXPathToAggregatedNodeList( "//properties", true, -1 );
-
-            for ( final Node prop : properties )
-            {
-                // TODO: cleanup of text?
-                versionOverrides.put( prop.getNodeName(), prop.getTextContent()
-                                                              .trim() );
-            }
-        }
-        catch ( final GalleyMavenException e )
-        {
-            throw new ManipulationException( "Unable to resolve: %s", e, gav );
-        }
-        finally
-        {
-        }
+        versionOverrides.putAll( (Map)m.getProperties() );
 
         logger.debug( "Returning override of " + versionOverrides );
+
         return versionOverrides;
     }
 

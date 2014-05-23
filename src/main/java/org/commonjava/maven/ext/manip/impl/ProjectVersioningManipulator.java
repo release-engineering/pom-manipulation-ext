@@ -135,7 +135,7 @@ public class ProjectVersioningManipulator
         for ( final Project project : projects )
         {
             final String ga = ga( project );
-            logger.info( "Applying changes to: " + ga );
+            logger.info( getClass().getSimpleName() + " applying changes to: " + ga );
             final Model model = manipulatedModels.get( ga );
             if ( applyVersioningChanges( model, state, session ) )
             {

@@ -4,7 +4,7 @@
  * are made available under the terms of the GNU Public License v3.0
  * which accompanies this distribution, and is available at
  * http://www.gnu.org/licenses/gpl.html
- * 
+ *
  * Contributors:
  *     Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
@@ -63,7 +63,7 @@ public class PropertyManipulator
         {
             return;
         }
-        logger.info( "Applying property changes to: " + ga( project ) );
+        logger.info( "Applying property changes to: " + ga( project ) + " with " + override);
 
         model.getProperties()
              .putAll( override );
