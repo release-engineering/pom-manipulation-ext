@@ -11,18 +11,15 @@
 
 package test;
 
-import org.junit.Test;
+import junit.swingui.TestRunner;
 
 public class HelloWorldwithJUnit
 {
     public static void main (String [] args)
     {
         System.out.println("hello");
-    }
 
-    @Test
-    public void test()
-    {
-        // Just a dummy method to verify that we can compile again JUnit 4
+        // Just a dummy call to verify that we can compile again JUnit 3
+        new TestRunner ();
     }
 }

@@ -6,13 +6,21 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>org.commonjava.maven.ext</groupId>
-  <artifactId>depMgmt3</artifactId>
-  <version>1.0</version>
+  <artifactId>remote-dependency-management-override-null</artifactId>
+  <version>1.0-SNAPSHOT</version>
 
-  <name>Null Dependency Management POM to use with integration tests</name>
+  <name>Test override dependency version using remote BOM with no dep mgmt does not fail</name>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
+
+  <dependencies>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>3.8.2</version>
+    </dependency>
+  </dependencies>
 
 </project>

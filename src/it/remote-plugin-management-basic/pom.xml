@@ -6,14 +6,22 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>org.commonjava.maven.ext</groupId>
-  <artifactId>pluginMgmt2</artifactId>
-  <version>1.0</version>
+  <artifactId>basic-plugin-management-override</artifactId>
+  <version>1.0-SNAPSHOT</version>
 
-  <name>Plugin Management POM to use with integration tests</name>
+  <name>Test override plugin version using command line property</name>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
+
+  <dependencies>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>4.1</version>
+    </dependency>
+  </dependencies>
 
   <build>
     <pluginManagement>
@@ -21,7 +29,7 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-compiler-plugin</artifactId>
-          <version>2.1</version>
+          <version>99-bad</version>
         </plugin>
       </plugins>
     </pluginManagement>
