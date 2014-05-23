@@ -4,7 +4,7 @@
  * are made available under the terms of the GNU Public License v3.0
  * which accompanies this distribution, and is available at
  * http://www.gnu.org/licenses/gpl.html
- * 
+ *
  * Contributors:
  *     Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
@@ -79,6 +79,13 @@ public class ModelIO
 
     }
 
+    /**
+     * Read the raw model (equivalent to the pom file on disk) from a given GAV.
+     *
+     * @param gav
+     * @return
+     * @throws ManipulationException
+     */
     public Model resolveRawModel( final String gav )
         throws ManipulationException
     {

@@ -6,23 +6,23 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>org.commonjava.maven.ext</groupId>
-  <artifactId>depMgmt1</artifactId>
-  <version>1.0</version>
+  <artifactId>profile-injection-basic</artifactId>
+  <version>1.0-SNAPSHOT</version>
 
-  <name>Dependency Management POM to use with integration tests</name>
+  <name>Test override dependency version using command line property</name>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
 
-  <dependencyManagement>
-    <dependencies>
-      <dependency>
-        <groupId>junit</groupId>
-        <artifactId>junit</artifactId>
-        <version>4.1</version>
-      </dependency>
-    </dependencies>
-  </dependencyManagement>
+  <profiles>
+      <profile>
+          <id>extra-properties</id>
+
+          <properties>
+              <version.junit>3.8.2</version.junit>
+          </properties>
+      </profile>
+  </profiles>
 
 </project>

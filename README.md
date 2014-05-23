@@ -130,3 +130,11 @@ The extension may also be used to override properties prior to interpolating the
     mvn install -DpropertyManagement=org.foo:property-management:10
 
 Properties may be overridden on the command line as per normal Maven usage (i.e. -Dversion.org.foo=1.0)
+
+## Profile Injection
+
+The extension also supports generic profile injection using a remote pom file. By supplying a remote management pom e.g.
+
+    mvn install -DprofileInjection=org.foo:profile-injection:1.0
+
+The extension will, for every profile in the remote pom file, replace or add it to the local top level pom file.

@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>org.commonjava.maven.ext</groupId>
+  <artifactId>profileMgmt1</artifactId>
+  <version>1.0</version>
+
+  <name>Profile Management POM to use with integration tests</name>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  </properties>
+
+  <profiles>
+      <profile>
+          <id>extra-properties</id>
+          <properties>
+              <version.junit>4.1</version.junit>
+          </properties>
+      </profile>
+
+      <profile>
+          <id>extra-plugins</id>
+          <build>
+              <plugins>
+                  <plugin>
+                      <groupId>org.apache.maven.plugins</groupId>
+                      <artifactId>maven-jar-plugin</artifactId>
+                      <version>2.4</version>
+                  </plugin>
+              </plugins>
+          </build>
+      </profile>
+  </profiles>
+
+</project>

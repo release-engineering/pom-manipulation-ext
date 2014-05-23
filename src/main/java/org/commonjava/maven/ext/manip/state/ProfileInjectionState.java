@@ -12,37 +12,42 @@ package org.commonjava.maven.ext.manip.state;
 
 import java.util.Properties;
 
-import org.commonjava.maven.ext.manip.impl.RepoAndReportingRemovalManipulator;
+import org.commonjava.maven.ext.manip.impl.ProfileInjectionManipulator;
 
 /**
- * Captures configuration relating to removing reporting/repositories from the POMs. Used by {@link RepoAndReportingRemovalManipulator}.
- *
+ * Captures configuration relating to injection profiles from a remote POM.
+ * Used by {@link ProfileInjectionManipulator}.
  */
-public class RepoReportingState
+public class ProfileInjectionState
     implements State
 {
     /**
      * Suffix to enable this modder
      */
-    public static final String RR_SUFFIX_SYSPROP = "repo-reporting-removal";
+    public static final String PROFILE_INJECTION_PROPERTY = "profileInjection";
 
-    private final boolean removal;
+    private final String profileMgmt;
 
-    public RepoReportingState( final Properties userProps )
+    public ProfileInjectionState( final Properties userProps )
     {
-        removal = Boolean.parseBoolean( userProps.getProperty( RR_SUFFIX_SYSPROP ) );
+        profileMgmt = userProps.getProperty( PROFILE_INJECTION_PROPERTY );
     }
 
     /**
      * Enabled ONLY if repo-reporting-removal is provided in the user properties / CLI -D options.
      *
-     * @see #RR_SUFFIX_SYSPROP
+     * @see #PROFILE_INJECTION_PROPERTY
      * @see org.commonjava.maven.ext.manip.state.State#isEnabled()
      */
     @Override
     public boolean isEnabled()
     {
-        return removal == true;
+        return profileMgmt != null && profileMgmt.length() > 0;
     }
 
+
+    public String getRemoteProfileInjectionMgmt()
+    {
+        return profileMgmt;
+    }
 }
