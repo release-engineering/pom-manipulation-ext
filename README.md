@@ -6,7 +6,7 @@ This extension combines many of the features of [VMan](https://github.com/jdcase
 
 ## Installation
 
-The extension jar can be downloaded from the GitHub Releases page here (TODO) or from a Maven repository (TODO), or it can be built from source. The jar should be added to the directory `${MAVEN_HOME}/lib/ext`.  The next time Maven is started, you should see a command line message showing that the extension has been installed.
+The extension jar can be downloaded from the GitHub Releases page [here](https://github.com/jdcasey/pom-manipulation-ext/releases) or from Maven Central [here](http://central.maven.org/maven2/org/commonjava/maven/ext/pom-manipulation-ext), or it can be built from source. The jar should be added to the directory `${MAVEN_HOME}/lib/ext`. The next time Maven is started, you should see a command line message showing that the extension has been installed.
 
     [INFO] Maven-Manipulation-Extension
 
