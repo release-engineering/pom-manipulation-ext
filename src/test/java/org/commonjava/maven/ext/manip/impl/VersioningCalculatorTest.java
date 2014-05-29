@@ -30,6 +30,7 @@ import org.apache.maven.execution.DefaultMavenExecutionRequest;
 import org.apache.maven.execution.DefaultMavenExecutionResult;
 import org.apache.maven.execution.MavenExecutionRequest;
 import org.apache.maven.execution.MavenSession;
+import org.apache.maven.repository.DefaultMirrorSelector;
 import org.codehaus.plexus.DefaultPlexusContainer;
 import org.codehaus.plexus.PlexusContainer;
 import org.codehaus.plexus.logging.Logger;
@@ -427,7 +428,8 @@ public class VersioningCalculatorTest
                                       final File cacheDir )
             throws ManipulationException
         {
-            super( new GalleyAPIWrapper( new GalleyInfrastructure( session, mdLoc, mdTrans, cacheDir ) ), logger );
+            super( new GalleyAPIWrapper( new GalleyInfrastructure( session, new DefaultMirrorSelector(), mdLoc,
+                                                                   mdTrans, cacheDir ) ), logger );
         }
 
         @Override

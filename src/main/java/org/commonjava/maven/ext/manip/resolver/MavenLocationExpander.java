@@ -20,6 +20,8 @@ import java.util.Set;
 
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.artifact.repository.ArtifactRepositoryPolicy;
+import org.apache.maven.repository.MirrorSelector;
+import org.apache.maven.settings.Mirror;
 import org.commonjava.maven.atlas.ident.util.JoinString;
 import org.commonjava.maven.galley.TransferException;
 import org.commonjava.maven.galley.model.ConcreteResource;
@@ -51,15 +53,16 @@ public class MavenLocationExpander
 
     public MavenLocationExpander( final List<Location> customLocations,
                                   final List<ArtifactRepository> artifactRepositories,
-                                  final ArtifactRepository localRepository )
+                                  final ArtifactRepository localRepository, final MirrorSelector mirrorSelector,
+                                  final List<Mirror> mirrors )
         throws MalformedURLException
     {
         final Set<Location> locs = new LinkedHashSet<Location>();
 
         if ( localRepository != null )
         {
-            locs.add( new SimpleLocation( new File( localRepository.getBasedir() ).toURI()
-                                                                                  .toString() ) );
+            locs.add( new SimpleLocation( localRepository.getId(), new File( localRepository.getBasedir() ).toURI()
+                                                                                                           .toString() ) );
         }
 
         if ( customLocations != null )
@@ -72,17 +75,26 @@ public class MavenLocationExpander
             for ( final ArtifactRepository repo : artifactRepositories )
             {
                 // TODO: Authentication via memory password manager.
-                final String url = repo.getUrl();
+                String id = repo.getId();
+                String url = repo.getUrl();
 
                 if ( url.startsWith( "file:" ) )
                 {
-                    locs.add( new SimpleLocation( url ) );
+                    locs.add( new SimpleLocation( id, url ) );
                 }
                 else
                 {
+                    final Mirror mirror = mirrorSelector == null ? null : mirrorSelector.getMirror( repo, mirrors );
+                    if ( mirror != null )
+                    {
+                        id = mirror.getId();
+                        url = mirror.getUrl();
+                    }
+
                     final ArtifactRepositoryPolicy releases = repo.getReleases();
                     final ArtifactRepositoryPolicy snapshots = repo.getSnapshots();
-                    locs.add( new SimpleHttpLocation( url, url, snapshots == null ? false : snapshots.isEnabled(),
+
+                    locs.add( new SimpleHttpLocation( id, url, snapshots == null ? false : snapshots.isEnabled(),
                                                       releases == null ? true : releases.isEnabled(), true, false, -1,
                                                       null ) );
                 }

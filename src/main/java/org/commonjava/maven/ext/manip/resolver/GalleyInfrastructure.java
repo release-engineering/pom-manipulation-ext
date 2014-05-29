@@ -7,7 +7,9 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import org.apache.maven.repository.MirrorSelector;
 import org.codehaus.plexus.component.annotations.Component;
+import org.codehaus.plexus.component.annotations.Requirement;
 import org.commonjava.maven.ext.manip.ManipulationException;
 import org.commonjava.maven.ext.manip.state.ManipulationSession;
 import org.commonjava.maven.galley.TransferManager;
@@ -60,6 +62,8 @@ import org.commonjava.maven.galley.transport.htcli.HttpImpl;
 public class GalleyInfrastructure
     implements ExtensionInfrastructure
 {
+    @Requirement
+    private MirrorSelector mirrorSelector;
 
     private MavenPomReader pomReader;
 
@@ -79,10 +83,11 @@ public class GalleyInfrastructure
         init( session );
     }
 
-    public GalleyInfrastructure( final ManipulationSession session, final Location customLocation,
-                                 final Transport customTransport, final File cacheDir )
+    public GalleyInfrastructure( final ManipulationSession session, final MirrorSelector mirrorSelector,
+                                 final Location customLocation, final Transport customTransport, final File cacheDir )
         throws ManipulationException
     {
+        this.mirrorSelector = mirrorSelector;
         init( session, customLocation, customTransport, cacheDir );
     }
 
@@ -109,7 +114,8 @@ public class GalleyInfrastructure
                                 : Collections.singletonList( customLocation );
 
             locationExpander =
-                new MavenLocationExpander( custom, session.getRemoteRepositories(), session.getLocalRepository() );
+                new MavenLocationExpander( custom, session.getRemoteRepositories(), session.getLocalRepository(),
+                                           mirrorSelector, session.getMirrors() );
         }
         catch ( final MalformedURLException e )
         {
