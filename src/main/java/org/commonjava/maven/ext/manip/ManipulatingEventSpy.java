@@ -31,7 +31,7 @@ import ch.qos.logback.classic.Level;
  * Implements hooks necessary to apply modifications in the Maven bootstrap, before the build starts.
  * @author jdcasey
  */
-@Component( role = EventSpy.class, hint = "versioning" )
+@Component( role = EventSpy.class, hint = "manipulation" )
 public class ManipulatingEventSpy
     extends AbstractEventSpy
 {
@@ -113,7 +113,7 @@ public class ManipulatingEventSpy
         catch ( final ManipulationException e )
         {
             logger.error( "Extension failure", e );
-            throw new Error( "Modification failed during project pre-scanning phase: " + e.getMessage(), e );
+            session.setError( e );
         }
 
         super.onEvent( event );

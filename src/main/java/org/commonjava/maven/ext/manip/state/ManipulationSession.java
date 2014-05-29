@@ -26,6 +26,7 @@ import org.apache.maven.settings.Mirror;
 import org.codehaus.plexus.component.annotations.Component;
 import org.codehaus.plexus.component.annotations.Requirement;
 import org.codehaus.plexus.logging.Logger;
+import org.commonjava.maven.ext.manip.ManipulationException;
 import org.commonjava.maven.ext.manip.impl.Manipulator;
 import org.commonjava.maven.ext.manip.model.Project;
 
@@ -112,6 +113,8 @@ public class ManipulationSession
      */
     private List<Project> projects;
 
+    private ManipulationException error;
+
     public void setManipulatedModels( final Map<String, Model> rawModels )
     {
         this.rawModels = rawModels;
@@ -172,6 +175,16 @@ public class ManipulationSession
         return mavenSession == null || mavenSession.getSettings() == null ? Collections.<Mirror> emptyList()
                         : mavenSession.getSettings()
                                       .getMirrors();
+    }
+
+    public void setError( final ManipulationException error )
+    {
+        this.error = error;
+    }
+
+    public ManipulationException getError()
+    {
+        return error;
     }
 
 }
