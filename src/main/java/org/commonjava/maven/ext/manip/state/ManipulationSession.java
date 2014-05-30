@@ -11,7 +11,6 @@
 package org.commonjava.maven.ext.manip.state;
 
 import java.io.File;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,7 +21,7 @@ import org.apache.maven.execution.MavenExecutionRequest;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.model.Model;
 import org.apache.maven.project.ProjectBuildingRequest;
-import org.apache.maven.settings.Mirror;
+import org.apache.maven.settings.Settings;
 import org.codehaus.plexus.component.annotations.Component;
 import org.codehaus.plexus.component.annotations.Requirement;
 import org.codehaus.plexus.logging.Logger;
@@ -170,13 +169,6 @@ public class ManipulationSession
                                                          .getLocalRepository();
     }
 
-    public List<Mirror> getMirrors()
-    {
-        return mavenSession == null || mavenSession.getSettings() == null ? Collections.<Mirror> emptyList()
-                        : mavenSession.getSettings()
-                                      .getMirrors();
-    }
-
     public void setError( final ManipulationException error )
     {
         this.error = error;
@@ -185,6 +177,17 @@ public class ManipulationSession
     public ManipulationException getError()
     {
         return error;
+    }
+
+    public List<String> getActiveProfiles()
+    {
+        return mavenSession == null || mavenSession.getRequest() == null ? null : mavenSession.getRequest()
+                                                                                              .getActiveProfiles();
+    }
+
+    public Settings getSettings()
+    {
+        return mavenSession == null ? null : mavenSession.getSettings();
     }
 
 }

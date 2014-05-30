@@ -15,6 +15,9 @@ import org.apache.maven.artifact.repository.layout.ArtifactRepositoryLayout;
 import org.apache.maven.artifact.repository.layout.DefaultRepositoryLayout;
 import org.apache.maven.repository.DefaultMirrorSelector;
 import org.apache.maven.settings.Mirror;
+import org.apache.maven.settings.Profile;
+import org.apache.maven.settings.Repository;
+import org.apache.maven.settings.Settings;
 import org.commonjava.maven.galley.model.Location;
 import org.junit.Test;
 
@@ -50,10 +53,13 @@ public class MavenLocationExpanderTest
         final ArtifactRepository remote =
             new MavenArtifactRepository( "remote", "http:///repo.maven.apache.org/maven2", layout, snapshots, releases );
 
+        final Settings settings = new Settings();
+        settings.addMirror( mirror );
+
         final MavenLocationExpander ex =
             new MavenLocationExpander( Collections.<Location> emptyList(),
                                        Collections.<ArtifactRepository> singletonList( remote ), local,
-                                       new DefaultMirrorSelector(), Collections.<Mirror> singletonList( mirror ) );
+                                       new DefaultMirrorSelector(), settings, Collections.<String> emptyList() );
 
         final List<Location> result = ex.expand( MavenLocationExpander.EXPANSION_TARGET );
 
@@ -69,6 +75,60 @@ public class MavenLocationExpanderTest
 
         assertThat( loc.getName(), equalTo( mirror.getId() ) );
         assertThat( loc.getUri(), equalTo( mirror.getUrl() ) );
+    }
+
+    @Test
+    public void useActiveSettingsProfileRepos()
+        throws Exception
+    {
+        final ArtifactRepositoryLayout layout = new DefaultRepositoryLayout();
+
+        final ArtifactRepositoryPolicy snapshots =
+            new ArtifactRepositoryPolicy( true, ArtifactRepositoryPolicy.UPDATE_POLICY_DAILY,
+                                          ArtifactRepositoryPolicy.CHECKSUM_POLICY_WARN );
+
+        final ArtifactRepositoryPolicy releases =
+            new ArtifactRepositoryPolicy( true, ArtifactRepositoryPolicy.UPDATE_POLICY_NEVER,
+                                          ArtifactRepositoryPolicy.CHECKSUM_POLICY_WARN );
+
+        final File localRepo = File.createTempFile( "local.repo.", ".dir" );
+        localRepo.deleteOnExit();
+
+        final ArtifactRepository local =
+            new MavenArtifactRepository( "local", localRepo.toURI()
+                                                           .toString(), layout, snapshots, releases );
+
+        final Repository remote = new Repository();
+        remote.setId( "remote" );
+        remote.setUrl( "http:///repo.maven.apache.org/maven2" );
+
+        final Profile profile = new Profile();
+        profile.setId( "test" );
+        profile.addRepository( remote );
+
+        final Settings settings = new Settings();
+        settings.addProfile( profile );
+
+        final MavenLocationExpander ex =
+            new MavenLocationExpander( Collections.<Location> emptyList(),
+                                       Collections.<ArtifactRepository> emptyList(), local,
+                                       new DefaultMirrorSelector(), settings,
+                                       Collections.<String> singletonList( profile.getId() ) );
+
+        final List<Location> result = ex.expand( MavenLocationExpander.EXPANSION_TARGET );
+
+        assertThat( result.size(), equalTo( 2 ) );
+
+        final Iterator<Location> iterator = result.iterator();
+        Location loc = iterator.next();
+
+        assertThat( loc.getName(), equalTo( local.getId() ) );
+        assertThat( loc.getUri(), equalTo( local.getUrl() ) );
+
+        loc = iterator.next();
+
+        assertThat( loc.getName(), equalTo( remote.getId() ) );
+        assertThat( loc.getUri(), equalTo( remote.getUrl() ) );
     }
 
 }

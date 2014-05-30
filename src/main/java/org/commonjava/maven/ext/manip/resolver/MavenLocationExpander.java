@@ -16,12 +16,20 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.artifact.repository.ArtifactRepositoryPolicy;
+import org.apache.maven.artifact.repository.MavenArtifactRepository;
+import org.apache.maven.artifact.repository.layout.ArtifactRepositoryLayout;
+import org.apache.maven.artifact.repository.layout.DefaultRepositoryLayout;
 import org.apache.maven.repository.MirrorSelector;
 import org.apache.maven.settings.Mirror;
+import org.apache.maven.settings.Profile;
+import org.apache.maven.settings.Repository;
+import org.apache.maven.settings.RepositoryPolicy;
+import org.apache.maven.settings.Settings;
 import org.commonjava.maven.atlas.ident.util.JoinString;
 import org.commonjava.maven.galley.TransferException;
 import org.commonjava.maven.galley.model.ConcreteResource;
@@ -54,7 +62,7 @@ public class MavenLocationExpander
     public MavenLocationExpander( final List<Location> customLocations,
                                   final List<ArtifactRepository> artifactRepositories,
                                   final ArtifactRepository localRepository, final MirrorSelector mirrorSelector,
-                                  final List<Mirror> mirrors )
+                                  final Settings settings, final List<String> activeProfiles )
         throws MalformedURLException
     {
         final Set<Location> locs = new LinkedHashSet<Location>();
@@ -70,6 +78,18 @@ public class MavenLocationExpander
             locs.addAll( customLocations );
         }
 
+        addSettingsProfileRepositoriesTo( locs, settings, activeProfiles, mirrorSelector );
+        addRequestRepositoriesTo( locs, artifactRepositories, settings, mirrorSelector );
+
+        logger.debug( "Configured to use Maven locations:\n  {}", new JoinString( "\n  ", locs ) );
+        this.locations = new ArrayList<Location>( locs );
+    }
+
+    private void addRequestRepositoriesTo( final Set<Location> locs,
+                                           final List<ArtifactRepository> artifactRepositories,
+                                           final Settings settings, final MirrorSelector mirrorSelector )
+        throws MalformedURLException
+    {
         if ( artifactRepositories != null )
         {
             for ( final ArtifactRepository repo : artifactRepositories )
@@ -84,11 +104,15 @@ public class MavenLocationExpander
                 }
                 else
                 {
-                    final Mirror mirror = mirrorSelector == null ? null : mirrorSelector.getMirror( repo, mirrors );
-                    if ( mirror != null )
+                    final List<Mirror> mirrors = settings.getMirrors();
+                    if ( mirrors != null )
                     {
-                        id = mirror.getId();
-                        url = mirror.getUrl();
+                        final Mirror mirror = mirrorSelector == null ? null : mirrorSelector.getMirror( repo, mirrors );
+                        if ( mirror != null )
+                        {
+                            id = mirror.getId();
+                            url = mirror.getUrl();
+                        }
                     }
 
                     final ArtifactRepositoryPolicy releases = repo.getReleases();
@@ -100,9 +124,79 @@ public class MavenLocationExpander
                 }
             }
         }
+    }
 
-        logger.debug( "Configured to use Maven locations:\n  {}", new JoinString( "\n  ", locs ) );
-        this.locations = new ArrayList<Location>( locs );
+    private void addSettingsProfileRepositoriesTo( final Set<Location> locs, final Settings settings,
+                                                   final List<String> activeProfiles,
+                                                   final MirrorSelector mirrorSelector )
+        throws MalformedURLException
+    {
+        if ( settings != null )
+        {
+            final Map<String, Profile> profiles = settings.getProfilesAsMap();
+            if ( profiles != null && activeProfiles != null && !activeProfiles.isEmpty() )
+            {
+                final LinkedHashSet<String> active = new LinkedHashSet<String>( activeProfiles );
+
+                final List<String> settingsActiveProfiles = settings.getActiveProfiles();
+                if ( settingsActiveProfiles != null && !settingsActiveProfiles.isEmpty() )
+                {
+                    active.addAll( settingsActiveProfiles );
+                }
+
+                for ( final String profileId : active )
+                {
+                    final Profile profile = profiles.get( profileId );
+                    if ( profile != null )
+                    {
+                        final List<Repository> repositories = profile.getRepositories();
+                        if ( repositories != null )
+                        {
+                            final List<Mirror> mirrors = settings.getMirrors();
+                            final ArtifactRepositoryLayout layout = new DefaultRepositoryLayout();
+                            for ( final Repository repo : repositories )
+                            {
+                                String id = repo.getId();
+                                String url = repo.getUrl();
+
+                                if ( mirrors != null )
+                                {
+                                    final ArtifactRepositoryPolicy snapshots = convertPolicy( repo.getSnapshots() );
+                                    final ArtifactRepositoryPolicy releases = convertPolicy( repo.getReleases() );
+
+                                    final MavenArtifactRepository arepo =
+                                        new MavenArtifactRepository( id, url, layout, snapshots, releases );
+
+                                    final Mirror mirror =
+                                        mirrorSelector == null ? null : mirrorSelector.getMirror( arepo, mirrors );
+
+                                    if ( mirror != null )
+                                    {
+                                        id = mirror.getId();
+                                        url = mirror.getUrl();
+                                    }
+
+                                    locs.add( new SimpleHttpLocation( id, url, snapshots == null ? false
+                                                    : snapshots.isEnabled(), releases == null ? true
+                                                    : releases.isEnabled(), true, false, -1, null ) );
+                                }
+                            }
+                        }
+
+                    }
+                }
+            }
+        }
+    }
+
+    private ArtifactRepositoryPolicy convertPolicy( final RepositoryPolicy policy )
+    {
+        if ( policy == null )
+        {
+            return new ArtifactRepositoryPolicy();
+        }
+
+        return new ArtifactRepositoryPolicy( policy.isEnabled(), policy.getUpdatePolicy(), policy.getChecksumPolicy() );
     }
 
     @Override

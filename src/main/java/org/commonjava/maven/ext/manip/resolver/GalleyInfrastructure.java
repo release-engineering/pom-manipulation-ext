@@ -115,7 +115,7 @@ public class GalleyInfrastructure
 
             locationExpander =
                 new MavenLocationExpander( custom, session.getRemoteRepositories(), session.getLocalRepository(),
-                                           mirrorSelector, session.getMirrors() );
+                                           mirrorSelector, session.getSettings(), session.getActiveProfiles() );
         }
         catch ( final MalformedURLException e )
         {
