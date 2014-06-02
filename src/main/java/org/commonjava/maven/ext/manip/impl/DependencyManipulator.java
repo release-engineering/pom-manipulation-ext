@@ -126,6 +126,15 @@ public class DependencyManipulator
                 logger.debug( "Non-matching dependencies ignored." );
             }
         }
+        else
+        {
+            // If a child module has a depMgmt section we'll change that as well.
+            DependencyManagement dependencyManagement = model.getDependencyManagement();
+            if (dependencyManagement != null)
+            {
+                applyOverrides( dependencyManagement.getDependencies(), override);
+            }
+        }
 
         // Apply overrides to project direct dependencies
         final List<Dependency> projectDependencies = model.getDependencies();
