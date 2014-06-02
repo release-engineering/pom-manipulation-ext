@@ -4,7 +4,7 @@
  * are made available under the terms of the GNU Public License v3.0
  * which accompanies this distribution, and is available at
  * http://www.gnu.org/licenses/gpl.html
- * 
+ *
  * Contributors:
  *     Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
@@ -61,7 +61,6 @@ import org.commonjava.maven.ext.manip.ManipulationException;
  */
 public class Project
 {
-
     /**
      * Original POM file from which this model information was loaded.
      */
@@ -80,19 +79,9 @@ public class Project
      */
     private boolean topPOM;
 
-    /*
-        public Project( final FullProjectKey key, final File pom, final Model model, final Model originalModel )
-        {
-            this.pom = pom;
-            this.model = model;
-            this.originalModel = originalModel;
-            this.key = key;
-        }
-     */
     public Project( final ProjectVersionRef key, final File pom, final Model model )
         throws ManipulationException
     {
-        //        this( key, pom, model, cloneModel( model ) );
         this.pom = pom;
         this.model = model;
         this.key = key;
@@ -101,23 +90,20 @@ public class Project
     public Project( final File pom, final Model model )
         throws ManipulationException
     {
-        this( modelKey( model ), pom, model ); //, cloneModel( model ) );
+        this( modelKey( model ), pom, model );
     }
 
     public Project( final Model model )
         throws ManipulationException
     {
-        this( modelKey( model ), model.getPomFile(), model ); //, cloneModel( model ) );
+        this( modelKey( model ), model.getPomFile(), model );
     }
 
     public Project( final Model raw, final ModelBuildingResult mbResult, final File pom )
         throws ManipulationException
     {
         this.pom = pom;
-
         this.model = raw;
-        //        this.originalModel = cloneModel( raw );
-        //        this.effectiveModel = mbResult.getEffectiveModel();
         this.key = modelKey( raw );
     }
 
@@ -484,9 +470,17 @@ public class Project
                 throw new IllegalStateException( "Invalid model: " + model + " Cannot find groupId and/or version!" );
             }
 
-            g = p.getGroupId();
-            v = p.getVersion();
+            if ( g == null )
+            {
+                g = p.getGroupId();
+            }
+            if ( v == null )
+            {
+                v = p.getVersion();
+            }
+
         }
+
 
         return new ProjectVersionRef( g, a, v );
     }
