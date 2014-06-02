@@ -16,10 +16,15 @@ import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
 import java.net.URL;
 import java.util.Set;
 
+import org.apache.maven.model.Model;
+import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
+import org.commonjava.maven.ext.manip.model.Project;
 import org.junit.Test;
 
 
@@ -100,9 +105,27 @@ public class PomPeekTest
         assertThat( key.getVersionString(), equalTo( "2" ) );
 
     }
-    
+
+    @Test
+    public void findGAVInheritedFromParentWithGroupAndVersionOverrideAtTop() throws Exception
+    {
+        final File pom = getResourceFile( BASE + "inherited-gav-with-group-override-at-top.pom" );
+        final PomPeek peek = new PomPeek( pom );
+
+        final InputStream in = new FileInputStream( pom );
+        final Model raw = new MavenXpp3Reader().read( in );
+        final Project project = new Project( pom, raw );
+
+        assertThat( peek.getKey(), notNullValue() );
+
+        assertThat( project.getGroupId(), equalTo( "a-different-test-group" ) );
+        assertThat( project.getArtifactId(), equalTo( "inherited-gav-with-group-override-at-top" ) );
+        assertThat( project.getVersion(), equalTo( "1" ) );
+
+    }
+
     // Utility functions
-    
+
     public static File getResourceFile( final String path )
     {
         final URL resource = Thread.currentThread()
@@ -115,6 +138,6 @@ public class PomPeekTest
 
         return new File( resource.getPath() );
     }
-    
+
 
 }
