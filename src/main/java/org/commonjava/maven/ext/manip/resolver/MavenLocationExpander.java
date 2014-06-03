@@ -231,22 +231,34 @@ public class MavenLocationExpander
     public VirtualResource expand( final Resource resource )
         throws TransferException
     {
-        final List<Location> result = new ArrayList<Location>();
+        final List<ConcreteResource> result = new ArrayList<ConcreteResource>();
         if ( resource instanceof ConcreteResource )
         {
-            final Location loc = ( (ConcreteResource) resource ).getLocation();
-            expandSingle( loc, result );
+            expandSingle( (ConcreteResource) resource, result );
         }
         else
         {
-            for ( final Location loc : ( (VirtualResource) resource ).getLocations() )
+            for ( final ConcreteResource cr : ( (VirtualResource) resource ).toConcreteResources() )
             {
-                expandSingle( loc, result );
+                expandSingle( cr, result );
             }
         }
 
         logger.debug( "Expanded to:\n {}", new JoinString( "\n  ", result ) );
-        return new VirtualResource( result, resource.getPath() );
+        return new VirtualResource( result );
+    }
+
+    private void expandSingle( final ConcreteResource cr, final List<ConcreteResource> result )
+    {
+        final Location loc = cr.getLocation();
+        final List<Location> expanded = new ArrayList<Location>();
+        expandSingle( loc, expanded );
+
+        final String path = cr.getPath();
+        for ( final Location location : expanded )
+        {
+            result.add( new ConcreteResource( location, path ) );
+        }
     }
 
     private void expandSingle( final Location loc, final List<Location> result )

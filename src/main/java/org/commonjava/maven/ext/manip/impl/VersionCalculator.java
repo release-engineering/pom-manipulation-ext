@@ -268,7 +268,7 @@ public class VersionCalculator
                 readerWrapper.readMetadataView( new ProjectRef( groupId, artifactId ) );
 
             final List<String> versions =
-                metadataView.resolveXPathExpressionToAggregatedList( "/metadata/versioning/versions/version", true, -1 );
+                metadataView.resolveXPathToAggregatedStringList( "/metadata/versioning/versions/version", true, -1 );
 
             return new HashSet<String>( versions );
         }
