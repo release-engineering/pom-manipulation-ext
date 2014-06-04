@@ -108,6 +108,12 @@ public class DependencyManipulator
                 {
                     final String[] groupIdArtifactIdParts = groupIdArtifactId.split( ":" );
 
+                    if (groupIdArtifactIdParts.length != 2)
+                    {
+                        logger.error ("Invalid format for exclusion: " + groupIdArtifactId);
+                        throw new ManipulationException ("Invalid format for exclusion: " + groupIdArtifactId);
+                    }
+
                     final Dependency newDependency = new Dependency();
                     newDependency.setGroupId( groupIdArtifactIdParts[0] );
                     newDependency.setArtifactId( groupIdArtifactIdParts[1] );

@@ -6,28 +6,24 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>org.commonjava.maven.ext</groupId>
-  <artifactId>depMgmt1</artifactId>
-  <version>1.0</version>
+  <artifactId>child-module-dependency-override</artifactId>
+  <version>1.0-SNAPSHOT</version>
+  <packaging>pom</packaging>
 
-  <name>Dependency Management POM to use with integration tests</name>
-
-  <properties>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-  </properties>
+  <name>Child module for testing overriding dependency versions</name>
 
   <dependencyManagement>
     <dependencies>
       <dependency>
-        <groupId>junit</groupId>
-        <artifactId>junit</artifactId>
-        <version>4.1</version>
-      </dependency>
-      <dependency>
         <groupId>commons-lang</groupId>
         <artifactId>commons-lang</artifactId>
-        <version>2.5</version>
+        <version>1.0</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
+
+  <modules>
+    <module>child</module>
+  </modules>
 
 </project>
