@@ -7,7 +7,7 @@ import org.codehaus.plexus.component.annotations.Component;
 import org.codehaus.plexus.component.annotations.Requirement;
 import org.commonjava.maven.ext.manip.state.ManipulationSession;
 
-@Component( role = AbstractMavenLifecycleParticipant.class, hint = "mainpulation" )
+@Component( role = AbstractMavenLifecycleParticipant.class, hint = "manipulation" )
 public class ManipulatingLifeCycleParticipant
     extends AbstractMavenLifecycleParticipant
 {
@@ -16,7 +16,7 @@ public class ManipulatingLifeCycleParticipant
     private ManipulationSession session;
 
     @Override
-    public void afterSessionStart( final MavenSession mavenSession )
+    public void afterProjectsRead( final MavenSession mavenSession )
         throws MavenExecutionException
     {
         final ManipulationException error = session.getError();
@@ -25,7 +25,7 @@ public class ManipulatingLifeCycleParticipant
             throw new MavenExecutionException( "POM Manipulation failed: " + error.getMessage(), error );
         }
 
-        super.afterSessionStart( mavenSession );
+        super.afterProjectsRead( mavenSession );
     }
 
 }
