@@ -269,12 +269,9 @@
                   </setupIncludes>
                 <!-- mavenExecutable>mvnDebug</mavenExecutable -->
                 <pomIncludes>
-                    <!-- pomInclude>remote-dependency-management-basic/pom.xml</pomInclude -->
+                    <!-- <pomInclude>remote-plugin-management-invalid/pom.xml</pomInclude> -->
                     <pomInclude>*/pom.xml</pomInclude>
                 </pomIncludes>
-                <pomExcludes>
-                  <pomExclude>remote-dependency-management-null/pom.xml</pomExclude>
-                </pomExcludes>
                 <projectsDirectory>${project.build.directory}/it</projectsDirectory>
                 <postBuildHookScript>verify</postBuildHookScript>
                 <settingsFile>src/it/settings.xml</settingsFile>
