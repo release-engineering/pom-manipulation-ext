@@ -33,8 +33,6 @@ import org.apache.maven.execution.MavenSession;
 import org.apache.maven.repository.DefaultMirrorSelector;
 import org.codehaus.plexus.DefaultPlexusContainer;
 import org.codehaus.plexus.PlexusContainer;
-import org.codehaus.plexus.logging.Logger;
-import org.codehaus.plexus.logging.console.ConsoleLogger;
 import org.commonjava.maven.ext.manip.ManipulationException;
 import org.commonjava.maven.ext.manip.fixture.StubTransport;
 import org.commonjava.maven.ext.manip.resolver.GalleyAPIWrapper;
@@ -416,12 +414,10 @@ public class VersioningCalculatorTest
         extends VersionCalculator
     {
 
-        private static final Logger logger = new ConsoleLogger( Logger.LEVEL_DEBUG, "test" );
-
         public TestVersionCalculator( final ManipulationSession session )
             throws ManipulationException
         {
-            super( new GalleyAPIWrapper( new GalleyInfrastructure( session ) ), logger );
+            super( new GalleyAPIWrapper( new GalleyInfrastructure( session ) ) );
         }
 
         public TestVersionCalculator( final ManipulationSession session, final Location mdLoc, final Transport mdTrans,
@@ -429,7 +425,7 @@ public class VersioningCalculatorTest
             throws ManipulationException
         {
             super( new GalleyAPIWrapper( new GalleyInfrastructure( session, new DefaultMirrorSelector(), mdLoc,
-                                                                   mdTrans, cacheDir ) ), logger );
+                                                                   mdTrans, cacheDir ) ) );
         }
 
         @Override

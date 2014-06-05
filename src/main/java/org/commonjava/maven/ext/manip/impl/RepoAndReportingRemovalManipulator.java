@@ -23,13 +23,13 @@ import org.apache.maven.model.Model;
 import org.apache.maven.model.Repository;
 import org.apache.maven.project.MavenProject;
 import org.codehaus.plexus.component.annotations.Component;
-import org.codehaus.plexus.component.annotations.Requirement;
-import org.codehaus.plexus.logging.Logger;
 import org.commonjava.maven.ext.manip.ManipulationException;
 import org.commonjava.maven.ext.manip.model.Project;
 import org.commonjava.maven.ext.manip.state.ManipulationSession;
 import org.commonjava.maven.ext.manip.state.RepoReportingState;
 import org.commonjava.maven.ext.manip.state.State;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * {@link Manipulator} implementation that can remove Reporting and Repository sections from a project's pom file.
@@ -40,17 +40,7 @@ public class RepoAndReportingRemovalManipulator
     implements Manipulator
 {
 
-    @Requirement
-    protected Logger logger;
-
-    protected RepoAndReportingRemovalManipulator()
-    {
-    }
-
-    public RepoAndReportingRemovalManipulator( final Logger logger )
-    {
-        this.logger = logger;
-    }
+    private final Logger logger = LoggerFactory.getLogger( getClass() );
 
     /**
      * No prescanning required for Repository and Reporting Removal.

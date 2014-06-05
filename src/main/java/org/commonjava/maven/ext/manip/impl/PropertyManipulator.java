@@ -16,8 +16,8 @@ import java.util.Map;
 
 import org.apache.maven.model.Model;
 import org.codehaus.plexus.component.annotations.Component;
-import org.codehaus.plexus.logging.Logger;
 import org.commonjava.maven.ext.manip.ManipulationException;
+import org.commonjava.maven.ext.manip.io.ModelIO;
 import org.commonjava.maven.ext.manip.model.Project;
 import org.commonjava.maven.ext.manip.state.BOMState;
 import org.commonjava.maven.ext.manip.state.ManipulationSession;
@@ -35,9 +35,9 @@ public class PropertyManipulator
     {
     }
 
-    public PropertyManipulator( final Logger logger )
+    public PropertyManipulator( final ModelIO modelIO )
     {
-        super( logger );
+        super( modelIO );
     }
 
     @Override
@@ -63,7 +63,7 @@ public class PropertyManipulator
         {
             return;
         }
-        logger.info( "Applying property changes to: " + ga( project ) + " with " + override);
+        logger.info( "Applying property changes to: " + ga( project ) + " with " + override );
 
         model.getProperties()
              .putAll( override );

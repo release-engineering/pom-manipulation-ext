@@ -22,8 +22,8 @@ import org.apache.maven.model.Dependency;
 import org.apache.maven.model.DependencyManagement;
 import org.apache.maven.model.Model;
 import org.codehaus.plexus.component.annotations.Component;
-import org.codehaus.plexus.logging.Logger;
 import org.commonjava.maven.ext.manip.ManipulationException;
+import org.commonjava.maven.ext.manip.io.ModelIO;
 import org.commonjava.maven.ext.manip.model.Project;
 import org.commonjava.maven.ext.manip.state.BOMState;
 import org.commonjava.maven.ext.manip.state.BOMState.VersionPropertyFormat;
@@ -41,9 +41,9 @@ public class DependencyManipulator
     {
     }
 
-    public DependencyManipulator( final Logger logger )
+    public DependencyManipulator( final ModelIO modelIO )
     {
-        super( logger );
+        super( modelIO );
     }
 
     @Override
@@ -108,10 +108,10 @@ public class DependencyManipulator
                 {
                     final String[] groupIdArtifactIdParts = groupIdArtifactId.split( ":" );
 
-                    if (groupIdArtifactIdParts.length != 2)
+                    if ( groupIdArtifactIdParts.length != 2 )
                     {
-                        logger.error ("Invalid format for exclusion: " + groupIdArtifactId);
-                        throw new ManipulationException ("Invalid format for exclusion: " + groupIdArtifactId);
+                        logger.error( "Invalid format for exclusion: " + groupIdArtifactId );
+                        throw new ManipulationException( "Invalid format for exclusion: " + groupIdArtifactId );
                     }
 
                     final Dependency newDependency = new Dependency();
@@ -135,10 +135,10 @@ public class DependencyManipulator
         else
         {
             // If a child module has a depMgmt section we'll change that as well.
-            DependencyManagement dependencyManagement = model.getDependencyManagement();
-            if (dependencyManagement != null)
+            final DependencyManagement dependencyManagement = model.getDependencyManagement();
+            if ( dependencyManagement != null )
             {
-                applyOverrides( dependencyManagement.getDependencies(), override);
+                applyOverrides( dependencyManagement.getDependencies(), override );
             }
         }
 

@@ -24,7 +24,6 @@ import java.util.regex.Pattern;
 
 import org.codehaus.plexus.component.annotations.Component;
 import org.codehaus.plexus.component.annotations.Requirement;
-import org.codehaus.plexus.logging.Logger;
 import org.commonjava.maven.atlas.ident.ref.ProjectRef;
 import org.commonjava.maven.ext.manip.ManipulationException;
 import org.commonjava.maven.ext.manip.model.Project;
@@ -33,6 +32,8 @@ import org.commonjava.maven.ext.manip.state.ManipulationSession;
 import org.commonjava.maven.ext.manip.state.VersioningState;
 import org.commonjava.maven.galley.maven.GalleyMavenException;
 import org.commonjava.maven.galley.maven.model.view.MavenMetadataView;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Component that calculates project version modifications, based on configuration stored in {@link VersioningState}. Snapshots may/may not be
@@ -51,8 +52,7 @@ public class VersionCalculator
 
     private static final String SNAPSHOT_SUFFIX = "-SNAPSHOT";
 
-    @Requirement
-    private Logger logger;
+    private final Logger logger = LoggerFactory.getLogger( getClass() );
 
     @Requirement
     protected GalleyAPIWrapper readerWrapper;
@@ -61,10 +61,9 @@ public class VersionCalculator
     {
     }
 
-    public VersionCalculator( final GalleyAPIWrapper readerWrapper, final Logger logger )
+    public VersionCalculator( final GalleyAPIWrapper readerWrapper )
     {
         this.readerWrapper = readerWrapper;
-        this.logger = logger;
     }
 
     /**

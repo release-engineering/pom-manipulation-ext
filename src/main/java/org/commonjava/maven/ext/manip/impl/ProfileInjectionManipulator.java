@@ -24,12 +24,13 @@ import org.apache.maven.model.Model;
 import org.apache.maven.model.Profile;
 import org.codehaus.plexus.component.annotations.Component;
 import org.codehaus.plexus.component.annotations.Requirement;
-import org.codehaus.plexus.logging.Logger;
 import org.commonjava.maven.ext.manip.ManipulationException;
 import org.commonjava.maven.ext.manip.io.ModelIO;
 import org.commonjava.maven.ext.manip.model.Project;
 import org.commonjava.maven.ext.manip.state.ManipulationSession;
 import org.commonjava.maven.ext.manip.state.ProfileInjectionState;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * {@link Manipulator} implementation that can resolve a remote pom file and inject the remote pom's
@@ -40,19 +41,19 @@ import org.commonjava.maven.ext.manip.state.ProfileInjectionState;
 public class ProfileInjectionManipulator
     implements Manipulator
 {
-    @Requirement
-    protected ModelIO modelBuilder;
+
+    private final Logger logger = LoggerFactory.getLogger( getClass() );
 
     @Requirement
-    protected Logger logger;
+    protected ModelIO modelBuilder;
 
     protected ProfileInjectionManipulator()
     {
     }
 
-    public ProfileInjectionManipulator( final Logger logger )
+    public ProfileInjectionManipulator( final ModelIO modelIO )
     {
-        this.logger = logger;
+        modelBuilder = modelIO;
     }
 
     /**
@@ -98,18 +99,18 @@ public class ProfileInjectionManipulator
 
         for ( final Project project : projects )
         {
-            if ( project.isTopPOM())
+            if ( project.isTopPOM() )
             {
                 final String ga = ga( project );
                 logger.info( getClass().getSimpleName() + " applying changes to: " + ga );
                 final Model model = manipulatedModels.get( ga );
 
-                List<Profile> profiles = model.getProfiles();
+                final List<Profile> profiles = model.getProfiles();
 
-                Iterator<Profile> i = remoteProfiles.iterator();
-                while (i.hasNext())
+                final Iterator<Profile> i = remoteProfiles.iterator();
+                while ( i.hasNext() )
                 {
-                    addProfile (profiles, i.next());
+                    addProfile( profiles, i.next() );
                 }
                 changed.add( project );
             }
@@ -125,22 +126,23 @@ public class ProfileInjectionManipulator
      * @param profiles
      * @param profile
      */
-    private void addProfile (List<Profile> profiles, Profile profile)
+    private void addProfile( final List<Profile> profiles, final Profile profile )
     {
-        Iterator<Profile> i = profiles.iterator();
-        while (i.hasNext())
+        final Iterator<Profile> i = profiles.iterator();
+        while ( i.hasNext() )
         {
-            Profile p = i.next();
+            final Profile p = i.next();
 
-            if (profile.getId().equals( p.getId() ))
+            if ( profile.getId()
+                        .equals( p.getId() ) )
             {
-                logger.debug( "Removing local profile " + p);
+                logger.debug( "Removing local profile " + p );
                 i.remove();
                 break;
             }
         }
 
-        logger.debug( "Adding profile " + profile);
+        logger.debug( "Adding profile " + profile );
         profiles.add( profile );
     }
 }

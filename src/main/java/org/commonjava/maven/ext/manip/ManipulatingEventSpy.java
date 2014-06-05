@@ -20,9 +20,9 @@ import org.apache.maven.execution.MavenExecutionRequest;
 import org.apache.maven.model.building.ModelBuilder;
 import org.codehaus.plexus.component.annotations.Component;
 import org.codehaus.plexus.component.annotations.Requirement;
-import org.codehaus.plexus.logging.Logger;
 import org.commonjava.maven.ext.manip.model.Project;
 import org.commonjava.maven.ext.manip.state.ManipulationSession;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ch.qos.logback.classic.Level;
@@ -35,8 +35,8 @@ import ch.qos.logback.classic.Level;
 public class ManipulatingEventSpy
     extends AbstractEventSpy
 {
-    @Requirement
-    private Logger logger;
+
+    private final Logger logger = LoggerFactory.getLogger( getClass() );
 
     @Requirement
     private ManipulationManager manipulationManager;

@@ -42,7 +42,6 @@ import org.apache.maven.model.building.ModelBuildingResult;
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 import org.codehaus.plexus.component.annotations.Component;
 import org.codehaus.plexus.component.annotations.Requirement;
-import org.codehaus.plexus.logging.Logger;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.ext.manip.ManipulationException;
@@ -54,6 +53,8 @@ import org.commonjava.maven.galley.maven.model.view.DependencyView;
 import org.commonjava.maven.galley.maven.model.view.MavenPomView;
 import org.commonjava.maven.galley.maven.model.view.PluginView;
 import org.commonjava.maven.galley.model.Transfer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Class to resolve artifact descriptors (pom files) from a maven repository
@@ -61,8 +62,8 @@ import org.commonjava.maven.galley.model.Transfer;
 @Component( role = ModelIO.class )
 public class ModelIO
 {
-    @Requirement
-    private Logger logger;
+
+    private final Logger logger = LoggerFactory.getLogger( getClass() );
 
     @Requirement
     private ModelBuilder modelBuilder;
@@ -182,9 +183,9 @@ public class ModelIO
         logger.debug( "Resolving remote property mapping POM: " + gav );
 
         final Map<String, String> versionOverrides = new HashMap<String, String>();
-        final Model m = resolveRawModel (gav);
+        final Model m = resolveRawModel( gav );
 
-        versionOverrides.putAll( (Map)m.getProperties() );
+        versionOverrides.putAll( (Map) m.getProperties() );
 
         logger.debug( "Returning override of " + versionOverrides );
 

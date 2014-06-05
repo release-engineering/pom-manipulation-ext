@@ -21,8 +21,8 @@ import org.apache.maven.model.Model;
 import org.apache.maven.model.Plugin;
 import org.apache.maven.model.PluginManagement;
 import org.codehaus.plexus.component.annotations.Component;
-import org.codehaus.plexus.logging.Logger;
 import org.commonjava.maven.ext.manip.ManipulationException;
+import org.commonjava.maven.ext.manip.io.ModelIO;
 import org.commonjava.maven.ext.manip.model.Project;
 import org.commonjava.maven.ext.manip.state.BOMState;
 import org.commonjava.maven.ext.manip.state.ManipulationSession;
@@ -39,9 +39,9 @@ public class PluginManipulator
     {
     }
 
-    public PluginManipulator( final Logger logger )
+    public PluginManipulator( final ModelIO modelIO )
     {
-        super( logger );
+        super( modelIO );
     }
 
     @Override

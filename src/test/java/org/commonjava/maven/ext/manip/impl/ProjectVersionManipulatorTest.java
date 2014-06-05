@@ -31,14 +31,14 @@ import org.apache.maven.model.Model;
 import org.apache.maven.model.Parent;
 import org.apache.maven.model.Profile;
 import org.apache.maven.project.MavenProject;
-import org.codehaus.plexus.logging.Logger;
-import org.codehaus.plexus.logging.console.ConsoleLogger;
 import org.commonjava.maven.ext.manip.ManipulationException;
 import org.commonjava.maven.ext.manip.resolver.GalleyAPIWrapper;
 import org.commonjava.maven.ext.manip.resolver.GalleyInfrastructure;
 import org.commonjava.maven.ext.manip.state.ManipulationSession;
 import org.commonjava.maven.ext.manip.state.VersioningState;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ProjectVersionManipulatorTest
 {
@@ -607,14 +607,15 @@ public class ProjectVersionManipulatorTest
     public static final class TestVersioningModifier
         extends ProjectVersioningManipulator
     {
-        private static final Logger logger = new ConsoleLogger( Logger.LEVEL_DEBUG, "test" );
+
+        private final Logger logger = LoggerFactory.getLogger( getClass() );
 
         private final ManipulationSession session;
 
         public TestVersioningModifier( final ManipulationSession session )
             throws ManipulationException
         {
-            super( new VersionCalculator( new GalleyAPIWrapper( new GalleyInfrastructure( session ) ), logger ), logger );
+            super( new VersionCalculator( new GalleyAPIWrapper( new GalleyInfrastructure( session ) ) ) );
             this.session = session;
         }
 

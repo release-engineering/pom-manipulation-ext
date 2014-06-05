@@ -36,13 +36,14 @@ import org.codehaus.plexus.interpolation.PrefixedObjectValueSource;
 import org.codehaus.plexus.interpolation.PropertiesBasedValueSource;
 import org.codehaus.plexus.interpolation.RecursionInterceptor;
 import org.codehaus.plexus.interpolation.StringSearchInterpolator;
-import org.codehaus.plexus.logging.Logger;
 import org.commonjava.maven.ext.manip.ManipulationException;
 import org.commonjava.maven.ext.manip.ManipulationManager;
 import org.commonjava.maven.ext.manip.io.PomIO;
 import org.commonjava.maven.ext.manip.model.Project;
 import org.commonjava.maven.ext.manip.state.ManipulationSession;
 import org.commonjava.maven.ext.manip.state.VersioningState;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * {@link Manipulator} implementation that can modify a project's version with either static or calculated, incremental version qualifier. Snapshot
@@ -59,8 +60,7 @@ public class ProjectVersioningManipulator
     implements Manipulator
 {
 
-    @Requirement
-    protected Logger logger;
+    private final Logger logger = LoggerFactory.getLogger( getClass() );
 
     @Requirement
     protected VersionCalculator calculator;
@@ -69,10 +69,9 @@ public class ProjectVersioningManipulator
     {
     }
 
-    public ProjectVersioningManipulator( final VersionCalculator calculator, final Logger logger )
+    public ProjectVersioningManipulator( final VersionCalculator calculator )
     {
         this.calculator = calculator;
-        this.logger = logger;
     }
 
     /**

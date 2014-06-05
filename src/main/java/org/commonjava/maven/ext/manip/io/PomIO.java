@@ -38,8 +38,6 @@ import org.apache.maven.model.io.jdom.MavenJDOMWriter;
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 import org.apache.maven.project.MavenProject;
 import org.codehaus.plexus.component.annotations.Component;
-import org.codehaus.plexus.component.annotations.Requirement;
-import org.codehaus.plexus.logging.Logger;
 import org.codehaus.plexus.util.WriterFactory;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 import org.commonjava.maven.ext.manip.ManipulatingEventSpy;
@@ -55,6 +53,8 @@ import org.jdom.input.SAXBuilder;
 import org.jdom.output.Format;
 import org.jdom.output.Format.TextMode;
 import org.jdom.output.XMLOutputter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Utility class used to read raw models for POMs, and rewrite any project POMs that were changed.
@@ -65,8 +65,7 @@ import org.jdom.output.XMLOutputter;
 public class PomIO
 {
 
-    @Requirement
-    protected Logger logger;
+    protected final Logger logger = LoggerFactory.getLogger( getClass() );
 
     protected PomIO()
     {

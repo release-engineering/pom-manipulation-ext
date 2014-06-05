@@ -24,7 +24,6 @@ import org.apache.maven.project.ProjectBuildingRequest;
 import org.apache.maven.settings.Settings;
 import org.codehaus.plexus.component.annotations.Component;
 import org.codehaus.plexus.component.annotations.Requirement;
-import org.codehaus.plexus.logging.Logger;
 import org.commonjava.maven.ext.manip.ManipulationException;
 import org.commonjava.maven.ext.manip.impl.Manipulator;
 import org.commonjava.maven.ext.manip.model.Project;
@@ -44,9 +43,6 @@ public class ManipulationSession
 
     @Requirement( role = Manipulator.class )
     private Map<String, Manipulator> manipulators;
-
-    @Requirement
-    private Logger logger;
 
     private final Map<Class<?>, State> states = new HashMap<Class<?>, State>();
 

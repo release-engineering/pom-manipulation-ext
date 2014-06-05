@@ -23,7 +23,6 @@ import org.apache.maven.execution.MavenSession;
 import org.apache.maven.project.ProjectBuilder;
 import org.codehaus.plexus.component.annotations.Component;
 import org.codehaus.plexus.component.annotations.Requirement;
-import org.codehaus.plexus.logging.Logger;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.ext.manip.impl.Manipulator;
 import org.commonjava.maven.ext.manip.io.PomIO;
@@ -31,6 +30,8 @@ import org.commonjava.maven.ext.manip.model.Project;
 import org.commonjava.maven.ext.manip.resolver.ExtensionInfrastructure;
 import org.commonjava.maven.ext.manip.state.ManipulationSession;
 import org.commonjava.maven.ext.manip.util.PomPeek;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Coordinates manipulation of the POMs in a build, by providing methods to read the project set from files ahead of the build proper (using
@@ -43,8 +44,7 @@ import org.commonjava.maven.ext.manip.util.PomPeek;
 public class ManipulationManager
 {
 
-    @Requirement
-    protected Logger logger;
+    protected final Logger logger = LoggerFactory.getLogger( getClass() );
 
     @Requirement
     private ProjectBuilder projectBuilder;

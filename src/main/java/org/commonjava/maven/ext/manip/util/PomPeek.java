@@ -31,9 +31,9 @@ import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 
-import org.codehaus.plexus.component.annotations.Requirement;
-import org.codehaus.plexus.logging.Logger;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class PomPeek
 {
@@ -75,8 +75,7 @@ public class PomPeek
         }
     };
 
-    @Requirement
-    private Logger logger;
+    private final Logger logger = LoggerFactory.getLogger( getClass() );
 
     private ProjectVersionRef key;
 
