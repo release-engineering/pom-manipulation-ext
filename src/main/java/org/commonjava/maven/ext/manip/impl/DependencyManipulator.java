@@ -22,6 +22,8 @@ import org.apache.maven.model.Dependency;
 import org.apache.maven.model.DependencyManagement;
 import org.apache.maven.model.Model;
 import org.codehaus.plexus.component.annotations.Component;
+import org.commonjava.maven.atlas.ident.ref.ProjectRef;
+import org.commonjava.maven.atlas.ident.ref.VersionlessArtifactRef;
 import org.commonjava.maven.ext.manip.ManipulationException;
 import org.commonjava.maven.ext.manip.io.ModelIO;
 import org.commonjava.maven.ext.manip.model.Project;
@@ -53,7 +55,7 @@ public class DependencyManipulator
     }
 
     @Override
-    protected Map<String, String> loadRemoteBOM( final BOMState state, final ManipulationSession session )
+    protected Map<ProjectRef, String> loadRemoteBOM( final BOMState state, final ManipulationSession session )
         throws ManipulationException
     {
         return loadRemoteOverrides( RemoteType.DEPENDENCY, state.getRemoteDepMgmt(), session );
@@ -61,19 +63,23 @@ public class DependencyManipulator
 
     @Override
     protected void apply( final ManipulationSession session, final Project project, final Model model,
-                          Map<String, String> override )
+                          Map<ProjectRef, String> overrides )
         throws ManipulationException
     {
         // TODO: Should plugin override apply to all projects?
         final String projectGA = ga( project );
 
-        logger.info( "Applying dependency changes to: " + projectGA );
+        // Can we convert these into group:artifact for most cases bar transitive injection?
+        // Convert into a Map of GA : version
+        Map<String, String> override = new HashMap<String,String>();
+        for (final ProjectRef var : overrides.keySet())
+        {
+            override.put( var.asProjectRef().toString(), overrides.get( var) );
+        }
 
         override.putAll( BOMState.getPropertiesByPrefix( session.getUserProperties(),
                                                          BOMState.DEPENDENCY_EXCLUSION_PREFIX ) );
-
         override = removeReactorGAs( session, override );
-
         override = applyModuleVersionOverrides( projectGA, override );
 
         if ( project.isTopPOM() )
@@ -99,31 +105,39 @@ public class DependencyManipulator
 
             // Apply overrides to project dependency management
             final List<Dependency> dependencies = dependencyManagement.getDependencies();
+
             final Map<String, String> nonMatchingVersionOverrides = applyOverrides( dependencies, override );
 
             if ( overrideTransitive() )
             {
                 // Add dependencies to Dependency Management which did not match any existing dependency
-                for ( final String groupIdArtifactId : nonMatchingVersionOverrides.keySet() )
+                for ( final ProjectRef projectRef : overrides.keySet() )
                 {
-                    final String[] groupIdArtifactIdParts = groupIdArtifactId.split( ":" );
+                    VersionlessArtifactRef var = (VersionlessArtifactRef)projectRef;
 
-                    if ( groupIdArtifactIdParts.length != 2 )
+                    if ( ! nonMatchingVersionOverrides.containsKey( var.asProjectRef().toString() ))
                     {
-                        logger.error( "Invalid format for exclusion: " + groupIdArtifactId );
-                        throw new ManipulationException( "Invalid format for exclusion: " + groupIdArtifactId );
+                        // This one in the remote pom was already dealt with ; continue.
+                        continue;
                     }
 
                     final Dependency newDependency = new Dependency();
-                    newDependency.setGroupId( groupIdArtifactIdParts[0] );
-                    newDependency.setArtifactId( groupIdArtifactIdParts[1] );
+                    newDependency.setGroupId( var.getGroupId() );
+                    newDependency.setArtifactId( var.getArtifactId() );
+                    newDependency.setType( var.getType() );
+                    newDependency.setClassifier( var.getClassifier() );
+                    if (var.isOptional())
+                    {
+                        newDependency.setOptional( var.isOptional() );
+                    }
 
-                    final String artifactVersion = nonMatchingVersionOverrides.get( groupIdArtifactId );
+                    final String artifactVersion = overrides.get( projectRef );
+
                     newDependency.setVersion( artifactVersion );
 
                     dependencyManagement.getDependencies()
                                         .add( 0, newDependency );
-                    logger.debug( "New entry added to <DependencyManagement/> - " + groupIdArtifactId + ":"
+                    logger.debug( "New entry added to <DependencyManagement/> - " + projectRef + ":"
                         + artifactVersion );
                 }
             }

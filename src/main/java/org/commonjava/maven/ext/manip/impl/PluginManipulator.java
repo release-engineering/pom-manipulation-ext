@@ -21,6 +21,7 @@ import org.apache.maven.model.Model;
 import org.apache.maven.model.Plugin;
 import org.apache.maven.model.PluginManagement;
 import org.codehaus.plexus.component.annotations.Component;
+import org.commonjava.maven.atlas.ident.ref.ProjectRef;
 import org.commonjava.maven.ext.manip.ManipulationException;
 import org.commonjava.maven.ext.manip.io.ModelIO;
 import org.commonjava.maven.ext.manip.model.Project;
@@ -51,7 +52,7 @@ public class PluginManipulator
     }
 
     @Override
-    protected Map<String, String> loadRemoteBOM( final BOMState state, final ManipulationSession session )
+    protected Map<ProjectRef, String> loadRemoteBOM( final BOMState state, final ManipulationSession session )
         throws ManipulationException
     {
         return loadRemoteOverrides( RemoteType.PLUGIN, state.getRemotePluginMgmt(), session );
@@ -59,7 +60,7 @@ public class PluginManipulator
 
     @Override
     protected void apply( final ManipulationSession session, final Project project, final Model model,
-                          final Map<String, String> override )
+                          final Map<ProjectRef, String> override )
         throws ManipulationException
     {
         // TODO: Should plugin override apply to all projects?
@@ -108,11 +109,11 @@ public class PluginManipulator
      * @param plugins The list of plugins to modify
      * @param pluginVersionOverrides The list of version overrides to apply to the plugins
      */
-    protected void applyOverrides( final List<Plugin> plugins, final Map<String, String> pluginVersionOverrides )
+    protected void applyOverrides( final List<Plugin> plugins, final Map<ProjectRef, String> pluginVersionOverrides )
     {
         for ( final Plugin plugin : ( plugins == null ? Collections.<Plugin> emptyList() : plugins ) )
         {
-            final String groupIdArtifactId = plugin.getGroupId() + BOMState.GAV_SEPERATOR + plugin.getArtifactId();
+            final ProjectRef groupIdArtifactId = new ProjectRef(plugin.getGroupId(), plugin.getArtifactId());
             if ( pluginVersionOverrides.containsKey( groupIdArtifactId ) )
             {
                 final String overrideVersion = pluginVersionOverrides.get( groupIdArtifactId );

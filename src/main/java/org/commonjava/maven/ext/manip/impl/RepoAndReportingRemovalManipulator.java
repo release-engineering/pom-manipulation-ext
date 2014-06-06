@@ -21,7 +21,6 @@ import java.util.Set;
 
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Repository;
-import org.apache.maven.project.MavenProject;
 import org.codehaus.plexus.component.annotations.Component;
 import org.commonjava.maven.ext.manip.ManipulationException;
 import org.commonjava.maven.ext.manip.model.Project;
@@ -64,9 +63,7 @@ public class RepoAndReportingRemovalManipulator
     }
 
     /**
-     * Apply the reporting and repository removal changes to the list of {@link MavenProject}'s given.
-     * This happens near the end of the Maven session-bootstrapping sequence, before the projects are
-     * discovered/read by the main Maven build initialization.
+     * Apply the reporting and repository removal changes to the list of {@link Project}'s given.
      */
     @Override
     public Set<Project> applyChanges( final List<Project> projects, final ManipulationSession session )
