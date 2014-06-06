@@ -3,10 +3,16 @@ System.out.println( "Slurping POM: ${pomFile.getAbsolutePath()}" )
 
 def pom = new XmlSlurper().parse( pomFile )
 
-def junitDep = pom.dependencyManagement.dependencies.dependency.find { it.artifactId.text() == "junit" }
-assert junitDep != null
-assert junitDep.classifier.text() == "sources"
+pom.dependencyManagement.dependencies.each {
+    if (it.artifactId.text() == "junit" && it.classifier.text() != "")
+    {
+        assert it.artifactId.text() == "sources"
+    }
 
-def commonsLangDep = pom.dependencyManagement.dependencies.dependency.find { it.artifactId.text() == "commons-lang" }
-assert commonsLangDep != null
-assert commonsLangDep.classifier.text() == "sources"
+    if (it.artifactId.text() == "commons-lang" && it.classifier.text() != "")
+    {
+        assert it.artifactId.text() == "sources"
+    }
+}
+
+return true

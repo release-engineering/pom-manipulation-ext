@@ -8,21 +8,7 @@
  * Contributors:
  *     Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
-/**
- * Copyright (C) 2013 Red Hat, Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+
 package org.commonjava.maven.ext.manip.io;
 
 import static org.apache.commons.io.IOUtils.closeQuietly;
@@ -32,6 +18,7 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 
 import org.apache.maven.model.Model;
 import org.apache.maven.model.building.DefaultModelBuildingRequest;
@@ -43,6 +30,7 @@ import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 import org.codehaus.plexus.component.annotations.Component;
 import org.codehaus.plexus.component.annotations.Requirement;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
+import org.commonjava.maven.atlas.ident.ref.ProjectRef;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.ext.manip.ManipulationException;
 import org.commonjava.maven.ext.manip.resolver.GalleyAPIWrapper;
@@ -142,12 +130,12 @@ public class ModelIO
         }
     }
 
-    public Map<String, String> getRemoteDependencyVersionOverrides( final String gav, final ManipulationSession session )
+    public Map<ProjectRef, String> getRemoteDependencyVersionOverrides( final String gav, final ManipulationSession session )
         throws ManipulationException
     {
         logger.debug( "Resolving dependency management GAV: " + gav );
 
-        final Map<String, String> versionOverrides = new HashMap<String, String>();
+        final Map<ProjectRef, String> versionOverrides = new HashMap<ProjectRef, String>();
         try
         {
             final MavenPomView pomView = galleyWrapper.readPomView( ProjectVersionRef.parse( gav ) );
@@ -162,8 +150,7 @@ public class ModelIO
 
             for ( final DependencyView dep : deps )
             {
-                versionOverrides.put( dep.asProjectRef()
-                                         .toString(), dep.getVersion() );
+                versionOverrides.put( dep.asVersionlessArtifactRef(), dep.getVersion() );
                 logger.debug( "Added version override for: " + dep.asProjectRef()
                                                                   .toString() + ":" + dep.getVersion() );
             }
@@ -176,28 +163,24 @@ public class ModelIO
         return versionOverrides;
     }
 
-    @SuppressWarnings( { "unchecked", "rawtypes" } )
-    public Map<String, String> getRemotePropertyMappingOverrides( final String gav, final ManipulationSession session )
+    public Properties getRemotePropertyMappingOverrides( final String gav, final ManipulationSession session )
         throws ManipulationException
     {
         logger.debug( "Resolving remote property mapping POM: " + gav );
 
-        final Map<String, String> versionOverrides = new HashMap<String, String>();
         final Model m = resolveRawModel( gav );
 
-        versionOverrides.putAll( (Map) m.getProperties() );
+        logger.debug( "Returning override of " + m.getProperties() );
 
-        logger.debug( "Returning override of " + versionOverrides );
-
-        return versionOverrides;
+        return m.getProperties();
     }
 
-    public Map<String, String> getRemotePluginVersionOverrides( final String gav, final ManipulationSession session )
+    public Map<ProjectRef, String> getRemotePluginVersionOverrides( final String gav, final ManipulationSession session )
         throws ManipulationException
     {
         logger.debug( "Resolving remote plugin management POM: " + gav );
 
-        final Map<String, String> versionOverrides = new HashMap<String, String>();
+        final Map<ProjectRef, String> versionOverrides = new HashMap<ProjectRef, String>();
         try
         {
             final MavenPomView pomView = galleyWrapper.readPomView( ProjectVersionRef.parse( gav ) );
@@ -212,8 +195,7 @@ public class ModelIO
 
             for ( final PluginView plugin : plugins )
             {
-                versionOverrides.put( plugin.asProjectRef()
-                                            .toString(), plugin.getVersion() );
+                versionOverrides.put( plugin.asProjectRef(), plugin.getVersion() );
 
                 logger.debug( "Added version override for: " + plugin.asProjectRef()
                                                                      .toString() + ":" + plugin.getVersion() );
