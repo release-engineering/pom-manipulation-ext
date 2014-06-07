@@ -106,9 +106,9 @@ For example
 
 The extension will automatically set properties which match the version overrides.  These properties can be used, for example, in resource filtering in the build.  By default the extension supports two different formats for the properties. It is controlled by the property:
 
-    -DversionPropertyFormat=[VG|VGA]
+    -DversionPropertyFormat=[VG|VGA|NONE]
 
-Where `VG` is `version.<group>` e.g. `version.org.slf4j` and `VGA` is `version.<group>.<artifact>`. The default is `VG`.
+Where `VG` is `version.<group>` e.g. `version.org.slf4j`, `VGA` is `version.<group>.<artifact>` and `NONE` disables the injection. The default is `VG`.
 
 ## Plugin Manipulation
 

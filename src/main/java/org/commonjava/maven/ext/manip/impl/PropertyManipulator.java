@@ -25,15 +25,15 @@ import org.codehaus.plexus.component.annotations.Requirement;
 import org.commonjava.maven.ext.manip.ManipulationException;
 import org.commonjava.maven.ext.manip.io.ModelIO;
 import org.commonjava.maven.ext.manip.model.Project;
-import org.commonjava.maven.ext.manip.state.BOMState;
 import org.commonjava.maven.ext.manip.state.ManipulationSession;
+import org.commonjava.maven.ext.manip.state.PropertyState;
 import org.commonjava.maven.ext.manip.util.IdUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * {@link Manipulator} implementation that can alter property sections in a project's pom file.
- * Configuration is stored in a {@link BOMState} instance, which is in turn stored in the {@link ManipulationSession}.
+ * Configuration is stored in a {@link PropertyState} instance, which is in turn stored in the {@link ManipulationSession}.
  */
 @Component( role = Manipulator.class, hint = "property-manipulator" )
 public class PropertyManipulator
@@ -48,7 +48,7 @@ public class PropertyManipulator
     public void init( final ManipulationSession session )
     {
         final Properties userProps = session.getUserProperties();
-        session.setState( new BOMState( userProps ) );
+        session.setState( new PropertyState( userProps ) );
     }
 
     /**
@@ -61,13 +61,13 @@ public class PropertyManipulator
     }
 
     /**
-     * Apply the alignment changes to the list of {@link Project}'s given.
+     * Apply the property changes to the list of {@link Project}'s given.
      */
     @Override
     public Set<Project> applyChanges( final List<Project> projects, final ManipulationSession session )
         throws ManipulationException
     {
-        final BOMState state = session.getState( BOMState.class );
+        final PropertyState state = session.getState( PropertyState.class );
 
         if ( !session.isEnabled() || !state.isEnabled() )
         {
@@ -76,7 +76,7 @@ public class PropertyManipulator
         }
 
         final Map<String, Model> manipulatedModels = session.getManipulatedModels();
-        final Properties overrides = loadRemoteBOM( state.getRemotePropertyMgmt(), session );
+        final Properties overrides = loadRemotePOMProperties( state.getRemotePropertyMgmt(), session );
         final Set<Project> changed = new HashSet<Project>();
 
         for ( final Project project : projects )
@@ -102,7 +102,7 @@ public class PropertyManipulator
     }
 
 
-    private Properties loadRemoteBOM( final String remoteMgmt, final ManipulationSession session )
+    private Properties loadRemotePOMProperties( final String remoteMgmt, final ManipulationSession session )
         throws ManipulationException
     {
         final Properties overrides = new Properties();
