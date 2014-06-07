@@ -4,7 +4,7 @@
  * are made available under the terms of the GNU Public License v3.0
  * which accompanies this distribution, and is available at
  * http://www.gnu.org/licenses/gpl.html
- * 
+ *
  * Contributors:
  *     Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
@@ -72,6 +72,13 @@ public class ManipulatingEventSpy
                         if ( ee.getSession() != null )
                         {
                             manipulationManager.init( ee.getSession(), session );
+
+                            if (ee.getSession().getRequest().getLoggingLevel() == 0)
+                            {
+                                final ch.qos.logback.classic.Logger root =
+                                   (ch.qos.logback.classic.Logger) LoggerFactory.getLogger( org.slf4j.Logger.ROOT_LOGGER_NAME );
+                                root.setLevel( Level.DEBUG );
+                            }
                         }
 
                         if ( !session.isEnabled() )
@@ -118,17 +125,4 @@ public class ManipulatingEventSpy
 
         super.onEvent( event );
     }
-
-    @Override
-    public void init( final Context context )
-        throws Exception
-    {
-        if ( logger.isDebugEnabled() )
-        {
-            final ch.qos.logback.classic.Logger root =
-                (ch.qos.logback.classic.Logger) LoggerFactory.getLogger( org.slf4j.Logger.ROOT_LOGGER_NAME );
-            root.setLevel( Level.DEBUG );
-        }
-    }
-
 }
