@@ -2,17 +2,18 @@ def pomFile = new File( basedir, 'pom.xml' )
 System.out.println( "Slurping POM: ${pomFile.getAbsolutePath()}" )
 
 def pom = new XmlSlurper().parse( pomFile )
+def counter = 0
+def sources = 0
 
-pom.dependencyManagement.dependencies.each {
-    if (it.artifactId.text() == "junit" && it.classifier.text() != "")
-    {
-        assert it.artifactId.text() == "sources"
-    }
+pom.dependencyManagement.dependencies.childNodes().each {
+    counter++;
 
-    if (it.artifactId.text() == "commons-lang" && it.classifier.text() != "")
+    if ( it.text().contains ("sources") )
     {
-        assert it.artifactId.text() == "sources"
+        sources++
     }
 }
 
-return true
+// Checks that 4 dependencies have been injected - 2 junit and 2 commons-lang
+assert counter == 4
+assert sources == 2

@@ -17,7 +17,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Set;
 
 import org.apache.maven.model.Model;
@@ -26,15 +25,14 @@ import org.commonjava.maven.atlas.ident.ref.ProjectRef;
 import org.commonjava.maven.ext.manip.ManipulationException;
 import org.commonjava.maven.ext.manip.io.ModelIO;
 import org.commonjava.maven.ext.manip.model.Project;
-import org.commonjava.maven.ext.manip.state.BOMState;
 import org.commonjava.maven.ext.manip.state.ManipulationSession;
+import org.commonjava.maven.ext.manip.state.State;
 import org.commonjava.maven.ext.manip.util.IdUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * {@link Manipulator} base implementation used by the dependency and plugin manipulators.
- * Configuration is stored in a {@link BOMState} instance, which is in turn stored in the {@link ManipulationSession}.
  */
 public abstract class AlignmentManipulator
     implements Manipulator
@@ -68,26 +66,11 @@ public abstract class AlignmentManipulator
     }
 
     /**
-     * Initialize the {@link BOMState} state holder in the {@link ManipulationSession}. This state holder detects
-     * version-change configuration from the Maven user properties (-D properties from the CLI) and makes it available for
-     * later invocations of {@link AlignmentManipulator#scan(List, ManipulationSession)} and the apply* methods.
+     * Generic applyChanges shared between Plugin and Dependency manipulators
      */
-    @Override
-    public void init( final ManipulationSession session )
-    {
-        final Properties userProps = session.getUserProperties();
-        session.setState( new BOMState( userProps ) );
-    }
-
-    /**
-     * Apply the alignment changes to the list of {@link Project}'s given.
-     */
-    @Override
-    public Set<Project> applyChanges( final List<Project> projects, final ManipulationSession session )
+    protected Set<Project> internalApplyChanges( final State state, final List<Project> projects, final ManipulationSession session )
         throws ManipulationException
     {
-        final BOMState state = session.getState( BOMState.class );
-
         if ( !session.isEnabled() || !state.isEnabled() )
         {
             logger.debug( getClass().getSimpleName() + ": Nothing to do!" );
@@ -167,7 +150,7 @@ public abstract class AlignmentManipulator
      * @param override
      * @throws ManipulationException
      */
-    protected abstract Map<ProjectRef, String> loadRemoteBOM( BOMState state, ManipulationSession session )
+    protected abstract Map<ProjectRef, String> loadRemoteBOM( State state, ManipulationSession session )
         throws ManipulationException;
 
     /**

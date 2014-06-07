@@ -15,6 +15,8 @@ import static org.commonjava.maven.ext.manip.util.IdUtils.ga;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
 
 import org.apache.maven.model.Build;
 import org.apache.maven.model.Model;
@@ -25,12 +27,13 @@ import org.commonjava.maven.atlas.ident.ref.ProjectRef;
 import org.commonjava.maven.ext.manip.ManipulationException;
 import org.commonjava.maven.ext.manip.io.ModelIO;
 import org.commonjava.maven.ext.manip.model.Project;
-import org.commonjava.maven.ext.manip.state.BOMState;
 import org.commonjava.maven.ext.manip.state.ManipulationSession;
+import org.commonjava.maven.ext.manip.state.PluginState;
+import org.commonjava.maven.ext.manip.state.State;
 
 /**
  * {@link Manipulator} implementation that can alter plugin sections in a project's pom file.
- * Configuration is stored in a {@link BOMState} instance, which is in turn stored in the {@link ManipulationSession}.
+ * Configuration is stored in a {@link PluginState} instance, which is in turn stored in the {@link ManipulationSession}.
  */
 @Component( role = Manipulator.class, hint = "plugin-manipulator" )
 public class PluginManipulator
@@ -45,17 +48,35 @@ public class PluginManipulator
         super( modelIO );
     }
 
+    /**
+     * Initialize the {@link PluginState} state holder in the {@link ManipulationSession}. This state holder detects
+     * version-change configuration from the Maven user properties (-D properties from the CLI) and makes it available for
+     * later invocations of {@link AlignmentManipulator#scan(List, ManipulationSession)} and the apply* methods.
+     */
     @Override
     public void init( final ManipulationSession session )
     {
-        super.init( session );
+        final Properties userProps = session.getUserProperties();
+        session.setState( new PluginState( userProps ) );
+    }
+
+
+
+    /**
+     * Apply the alignment changes to the list of {@link Project}'s given.
+     */
+    @Override
+    public Set<Project> applyChanges( final List<Project> projects, final ManipulationSession session )
+        throws ManipulationException
+    {
+        return internalApplyChanges (session.getState( PluginState.class ), projects, session);
     }
 
     @Override
-    protected Map<ProjectRef, String> loadRemoteBOM( final BOMState state, final ManipulationSession session )
+    protected Map<ProjectRef, String> loadRemoteBOM( final State state, final ManipulationSession session )
         throws ManipulationException
     {
-        return loadRemoteOverrides( RemoteType.PLUGIN, state.getRemotePluginMgmt(), session );
+        return loadRemoteOverrides( RemoteType.PLUGIN, ( (PluginState) state ).getRemotePluginMgmt(), session );
     }
 
     @Override

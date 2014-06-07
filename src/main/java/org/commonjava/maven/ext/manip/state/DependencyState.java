@@ -14,13 +14,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
-import org.commonjava.maven.ext.manip.impl.RepoAndReportingRemovalManipulator;
+import org.commonjava.maven.ext.manip.impl.DependencyManipulator;
 
 /**
- * Captures configuration relating to removing reporting/repositories from the POMs. Used by {@link RepoAndReportingRemovalManipulator}.
- *
+ * Captures configuration relating to dependency alignment from the POMs. Used by {@link DependencyManipulator}.
  */
-public class BOMState
+public class DependencyState
     implements State
 {
     /**
@@ -39,46 +38,31 @@ public class BOMState
      * Two possible formats currently supported for version property output:</br>
      * <code>version.group</code></br>
      * <code>version.group.artifact</code></br>
-     * Configured by the property <code>-DversionPropertyFormat=[VG|VGA]</code>
+     * <code>none</code> (equates to off)</br>
+     * Configured by the property <code>-DversionPropertyFormat=[VG|VGA|NONE]</code>
      */
     public static enum VersionPropertyFormat
     {
         VG,
-        VGA;
-    };
-
-    /**
-     * Suffix to enable this modder. The name of the property which contains the GAV of the remote pom from
-     * which to retrieve property mapping information. <br />
-     * <code>-DpropertyManagement:org.foo:bar-property-mgmt:1.0</code>
-     */
-    private static final String PROPERTY_MANAGEMENT_POM_PROPERTY = "propertyManagement";
-
-    /**
-     * The name of the property which contains the GAV of the remote pom from which to retrieve plugin management
-     * information. <br />
-     * <code>-DpluginManagement:org.foo:bar-plugin-mgmt:1.0</code>
-     */
-    private static final String PLUGIN_MANAGEMENT_POM_PROPERTY = "pluginManagement";
+        VGA,
+        NONE;
+    }
 
     /**
      * The name of the property which contains the GAV of the remote pom from which to retrieve dependency management
      * information. <br />
      *<code>-DdependencyManagement:org.foo:bar-dep-mgmt:1.0</code>
      */
-    private static final String DEPENDENCY_MANAGEMENT_POM_PROPERTY = "dependencyManagement";
-
-    private final String pluginMgmt;
-
-    private final String propertyMgmt;
+    public static final String DEPENDENCY_MANAGEMENT_POM_PROPERTY = "dependencyManagement";
 
     private final String depMgmt;
 
-    public BOMState( final Properties userProps )
+    private final boolean overrideTransitive;
+
+    public DependencyState( final Properties userProps )
     {
-        pluginMgmt = userProps.getProperty( PLUGIN_MANAGEMENT_POM_PROPERTY );
-        propertyMgmt = userProps.getProperty( PROPERTY_MANAGEMENT_POM_PROPERTY );
         depMgmt = userProps.getProperty( DEPENDENCY_MANAGEMENT_POM_PROPERTY );
+        overrideTransitive = Boolean.valueOf( userProps.getProperty( "overrideTransitive", "true" ) );
     }
 
     /**
@@ -90,18 +74,16 @@ public class BOMState
     @Override
     public boolean isEnabled()
     {
-        return ( pluginMgmt != null && pluginMgmt.length() > 0 )
-            || ( propertyMgmt != null && propertyMgmt.length() > 0 ) || ( depMgmt != null && depMgmt.length() > 0 );
+        return ( depMgmt != null && depMgmt.length() > 0 );
     }
 
-    public String getRemotePluginMgmt()
+    /**
+     * Whether to override unmanaged transitive dependencies in the build. Has the effect of adding (or not) new entries
+     * to dependency management when no matching dependency is found in the pom. Defaults to true.
+     */
+    public boolean getOverrideTransitive()
     {
-        return pluginMgmt;
-    }
-
-    public String getRemotePropertyMgmt()
-    {
-        return propertyMgmt;
+        return overrideTransitive;
     }
 
     public String getRemoteDepMgmt()

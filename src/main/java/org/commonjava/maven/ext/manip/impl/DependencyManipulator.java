@@ -10,13 +10,14 @@
  ******************************************************************************/
 package org.commonjava.maven.ext.manip.impl;
 
-import static org.commonjava.maven.ext.manip.state.BOMState.GAV_SEPERATOR;
+import static org.commonjava.maven.ext.manip.state.DependencyState.GAV_SEPERATOR;
 import static org.commonjava.maven.ext.manip.util.IdUtils.ga;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.DependencyManagement;
@@ -27,13 +28,14 @@ import org.commonjava.maven.atlas.ident.ref.VersionlessArtifactRef;
 import org.commonjava.maven.ext.manip.ManipulationException;
 import org.commonjava.maven.ext.manip.io.ModelIO;
 import org.commonjava.maven.ext.manip.model.Project;
-import org.commonjava.maven.ext.manip.state.BOMState;
-import org.commonjava.maven.ext.manip.state.BOMState.VersionPropertyFormat;
+import org.commonjava.maven.ext.manip.state.DependencyState;
+import org.commonjava.maven.ext.manip.state.DependencyState.VersionPropertyFormat;
 import org.commonjava.maven.ext.manip.state.ManipulationSession;
+import org.commonjava.maven.ext.manip.state.State;
 
 /**
  * {@link Manipulator} implementation that can alter dependency (and dependency management) sections in a project's pom file.
- * Configuration is stored in a {@link BOMState} instance, which is in turn stored in the {@link ManipulationSession}.
+ * Configuration is stored in a {@link DependencyState} instance, which is in turn stored in the {@link ManipulationSession}.
  */
 @Component( role = Manipulator.class, hint = "bom-manipulator" )
 public class DependencyManipulator
@@ -48,28 +50,51 @@ public class DependencyManipulator
         super( modelIO );
     }
 
+    /**
+     * Initialize the {@link DependencyState} state holder in the {@link ManipulationSession}. This state holder detects
+     * version-change configuration from the Maven user properties (-D properties from the CLI) and makes it available for
+     * later invocations of {@link AlignmentManipulator#scan(List, ManipulationSession)} and the apply* methods.
+     */
     @Override
     public void init( final ManipulationSession session )
     {
-        super.init( session );
+        final Properties userProps = session.getUserProperties();
+        session.setState( new DependencyState( userProps ) );
+    }
+
+    /**
+     * Apply the alignment changes to the list of {@link Project}'s given.
+     */
+    @Override
+    public Set<Project> applyChanges( final List<Project> projects, final ManipulationSession session )
+        throws ManipulationException
+    {
+        return internalApplyChanges (session.getState( DependencyState.class ), projects, session);
     }
 
     @Override
-    protected Map<ProjectRef, String> loadRemoteBOM( final BOMState state, final ManipulationSession session )
+    protected Map<ProjectRef, String> loadRemoteBOM( final State state, final ManipulationSession session )
         throws ManipulationException
     {
-        return loadRemoteOverrides( RemoteType.DEPENDENCY, state.getRemoteDepMgmt(), session );
+        return loadRemoteOverrides( RemoteType.DEPENDENCY, ((DependencyState)state).getRemoteDepMgmt(), session );
     }
 
+    /**
+     * Applies dependency overrides to the project.
+     *
+     * The overrides ProjectRef:version map has to be converted into Group|Artifact:Version map
+     * for usage by exclusions.
+     */
     @Override
     protected void apply( final ManipulationSession session, final Project project, final Model model,
                           Map<ProjectRef, String> overrides )
         throws ManipulationException
     {
-        // TODO: Should plugin override apply to all projects?
         final String projectGA = ga( project );
 
-        // Can we convert these into group:artifact for most cases bar transitive injection?
+        // TODO: FIXME: Is it possible to avoid the secondary override map and just convert everything
+        // to projectref's as required?
+
         // Convert into a Map of GA : version
         Map<String, String> override = new HashMap<String,String>();
         for (final ProjectRef var : overrides.keySet())
@@ -77,8 +102,8 @@ public class DependencyManipulator
             override.put( var.asProjectRef().toString(), overrides.get( var) );
         }
 
-        override.putAll( BOMState.getPropertiesByPrefix( session.getUserProperties(),
-                                                         BOMState.DEPENDENCY_EXCLUSION_PREFIX ) );
+        override.putAll( DependencyState.getPropertiesByPrefix( session.getUserProperties(),
+                                                         DependencyState.DEPENDENCY_EXCLUSION_PREFIX ) );
         override = removeReactorGAs( session, override );
         override = applyModuleVersionOverrides( projectGA, override );
 
@@ -108,7 +133,7 @@ public class DependencyManipulator
 
             final Map<String, String> nonMatchingVersionOverrides = applyOverrides( dependencies, override );
 
-            if ( overrideTransitive() )
+            if ( session.getState( DependencyState.class ).getOverrideTransitive() )
             {
                 // Add dependencies to Dependency Management which did not match any existing dependency
                 for ( final ProjectRef projectRef : overrides.keySet() )
@@ -137,8 +162,7 @@ public class DependencyManipulator
 
                     dependencyManagement.getDependencies()
                                         .add( 0, newDependency );
-                    logger.debug( "New entry added to <DependencyManagement/> - " + projectRef + ":"
-                        + artifactVersion );
+                    logger.debug( "New entry added to <DependencyManagement/> - {} : {} ", projectRef, artifactVersion );
                 }
             }
             else
@@ -196,7 +220,7 @@ public class DependencyManipulator
                 else
                 {
                     dependency.setVersion( overrideVersion );
-                    logger.debug( "Altered dependency " + groupIdArtifactId + " " + oldVersion + "->" + overrideVersion );
+                    logger.debug( "Altered dependency {} {} -> {}", groupIdArtifactId, oldVersion, overrideVersion );
                     unmatchedVersionOverrides.remove( groupIdArtifactId );
                 }
             }
@@ -259,13 +283,13 @@ public class DependencyManipulator
                                                                                        .length() > 0 )
                     {
                         moduleVersionOverrides.put( artifactGA, versionOverrides.get( currentKey ) );
-                        logger.debug( "Overriding module dependency for " + moduleGA + " with " + artifactGA + ':'
-                            + versionOverrides.get( currentKey ) );
+                        logger.debug( "Overriding module dependency for {} with {} : {}",
+                                      moduleGA, artifactGA, versionOverrides.get( currentKey ) );
                     }
                     else
                     {
                         moduleVersionOverrides.remove( artifactGA );
-                        logger.debug( "Ignoring module dependency override for " + moduleGA );
+                        logger.debug( "Ignoring module dependency override for {} " + moduleGA );
                     }
                 }
             }
@@ -285,7 +309,7 @@ public class DependencyManipulator
         VersionPropertyFormat result = VersionPropertyFormat.VG;
 
         switch ( VersionPropertyFormat.valueOf( properties.getProperty( "versionPropertyFormat",
-                                                                        VersionPropertyFormat.VG.toString() ) ) )
+                                                                        VersionPropertyFormat.VG.toString() ).toUpperCase() ) )
         {
             case VG:
             {
@@ -297,6 +321,12 @@ public class DependencyManipulator
                 result = VersionPropertyFormat.VGA;
                 break;
             }
+            case NONE:
+            {
+                result = VersionPropertyFormat.NONE;
+                // Property injection disabled.
+                return;
+            }
         }
 
         for ( final String currentGA : overrides.keySet() )
@@ -306,18 +336,5 @@ public class DependencyManipulator
                     + ( result == VersionPropertyFormat.VGA ? currentGA.replace( ":", "." ) : currentGA.split( ":" )[0] );
             props.setProperty( versionPropName, overrides.get( currentGA ) );
         }
-    }
-
-    /**
-     * Whether to override unmanaged transitive dependencies in the build. Has the effect of adding (or not) new entries
-     * to dependency management when no matching dependency is found in the pom. Defaults to true.
-     *
-     * @return
-     */
-    private boolean overrideTransitive()
-    {
-        final String overrideTransitive = System.getProperties()
-                                                .getProperty( "overrideTransitive", "true" );
-        return overrideTransitive.equals( "true" );
     }
 }
