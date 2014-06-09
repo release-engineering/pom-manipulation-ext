@@ -136,13 +136,13 @@ public class ProfileInjectionManipulator
             if ( profile.getId()
                         .equals( p.getId() ) )
             {
-                logger.debug( "Removing local profile " + p );
+                logger.debug( "Removing local profile {} ", p );
                 i.remove();
                 break;
             }
         }
 
-        logger.debug( "Adding profile " + profile );
+        logger.debug( "Adding profile {}", profile );
         profiles.add( profile );
     }
 }

@@ -21,13 +21,11 @@ import java.util.Set;
 
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Repository;
-import org.apache.maven.project.MavenProject;
 import org.codehaus.plexus.component.annotations.Component;
 import org.commonjava.maven.ext.manip.ManipulationException;
 import org.commonjava.maven.ext.manip.model.Project;
 import org.commonjava.maven.ext.manip.state.ManipulationSession;
 import org.commonjava.maven.ext.manip.state.RepoReportingState;
-import org.commonjava.maven.ext.manip.state.State;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -64,15 +62,13 @@ public class RepoAndReportingRemovalManipulator
     }
 
     /**
-     * Apply the reporting and repository removal changes to the list of {@link MavenProject}'s given.
-     * This happens near the end of the Maven session-bootstrapping sequence, before the projects are
-     * discovered/read by the main Maven build initialization.
+     * Apply the reporting and repository removal changes to the list of {@link Project}'s given.
      */
     @Override
     public Set<Project> applyChanges( final List<Project> projects, final ManipulationSession session )
         throws ManipulationException
     {
-        final State state = session.getState( RepoReportingState.class );
+        final RepoReportingState state = session.getState( RepoReportingState.class );
         if ( !session.isEnabled() || !state.isEnabled() )
         {
             logger.debug( getClass().getSimpleName() + ": Nothing to do!" );

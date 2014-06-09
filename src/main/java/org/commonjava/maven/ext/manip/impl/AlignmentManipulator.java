@@ -17,31 +17,29 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Set;
 
 import org.apache.maven.model.Model;
-import org.apache.maven.project.MavenProject;
 import org.codehaus.plexus.component.annotations.Requirement;
+import org.commonjava.maven.atlas.ident.ref.ProjectRef;
 import org.commonjava.maven.ext.manip.ManipulationException;
 import org.commonjava.maven.ext.manip.io.ModelIO;
 import org.commonjava.maven.ext.manip.model.Project;
-import org.commonjava.maven.ext.manip.state.BOMState;
 import org.commonjava.maven.ext.manip.state.ManipulationSession;
+import org.commonjava.maven.ext.manip.state.State;
 import org.commonjava.maven.ext.manip.util.IdUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * {@link Manipulator} base implementation used by the property, dependency and plugin manipulators.
- * Configuration is stored in a {@link BOMState} instance, which is in turn stored in the {@link ManipulationSession}.
+ * {@link Manipulator} base implementation used by the dependency and plugin manipulators.
  */
 public abstract class AlignmentManipulator
     implements Manipulator
 {
     protected enum RemoteType
     {
-        PROPERTY, PLUGIN, DEPENDENCY
+        PLUGIN, DEPENDENCY
     };
 
     protected final Logger logger = LoggerFactory.getLogger( getClass() );
@@ -68,28 +66,11 @@ public abstract class AlignmentManipulator
     }
 
     /**
-     * Initialize the {@link BOMState} state holder in the {@link ManipulationSession}. This state holder detects
-     * version-change configuration from the Maven user properties (-D properties from the CLI) and makes it available for
-     * later invocations of {@link AlignmentManipulator#scan(List, ManipulationSession)} and the apply* methods.
+     * Generic applyChanges shared between Plugin and Dependency manipulators
      */
-    @Override
-    public void init( final ManipulationSession session )
-    {
-        final Properties userProps = session.getUserProperties();
-        session.setState( new BOMState( userProps ) );
-    }
-
-    /**
-     * Apply the reporting and repository removal changes to the list of {@link MavenProject}'s given.
-     * This happens near the end of the Maven session-bootstrapping sequence, before the projects are
-     * discovered/read by the main Maven build initialization.
-     */
-    @Override
-    public Set<Project> applyChanges( final List<Project> projects, final ManipulationSession session )
+    protected Set<Project> internalApplyChanges( final State state, final List<Project> projects, final ManipulationSession session )
         throws ManipulationException
     {
-        final BOMState state = session.getState( BOMState.class );
-
         if ( !session.isEnabled() || !state.isEnabled() )
         {
             logger.debug( getClass().getSimpleName() + ": Nothing to do!" );
@@ -97,7 +78,7 @@ public abstract class AlignmentManipulator
         }
 
         final Map<String, Model> manipulatedModels = session.getManipulatedModels();
-        final Map<String, String> overrides = loadRemoteBOM( state, session );
+        final Map<ProjectRef, String> overrides = loadRemoteBOM( state, session );
         final Set<Project> changed = new HashSet<Project>();
 
         for ( final Project project : projects )
@@ -122,11 +103,11 @@ public abstract class AlignmentManipulator
      * @return Map between the GA of the plugin and the version of the plugin. If the system property is not set,
      *         returns an empty map.
      */
-    protected Map<String, String> loadRemoteOverrides( final RemoteType rt, final String remoteMgmt,
+    protected Map<ProjectRef, String> loadRemoteOverrides( final RemoteType rt, final String remoteMgmt,
                                                        final ManipulationSession session )
         throws ManipulationException
     {
-        final Map<String, String> overrides = new HashMap<String, String>();
+        final Map<ProjectRef, String> overrides = new HashMap<ProjectRef, String>();
 
         if ( remoteMgmt == null || remoteMgmt.length() == 0 )
         {
@@ -147,9 +128,6 @@ public abstract class AlignmentManipulator
             }
             switch ( rt )
             {
-                case PROPERTY:
-                    overrides.putAll( effectiveModelBuilder.getRemotePropertyMappingOverrides( nextGAV, session ) );
-                    break;
                 case PLUGIN:
                     overrides.putAll( effectiveModelBuilder.getRemotePluginVersionOverrides( nextGAV, session ) );
                     break;
@@ -172,7 +150,7 @@ public abstract class AlignmentManipulator
      * @param override
      * @throws ManipulationException
      */
-    protected abstract Map<String, String> loadRemoteBOM( BOMState state, ManipulationSession session )
+    protected abstract Map<ProjectRef, String> loadRemoteBOM( State state, ManipulationSession session )
         throws ManipulationException;
 
     /**
@@ -184,6 +162,6 @@ public abstract class AlignmentManipulator
      * @throws ManipulationException TODO
      */
     protected abstract void apply( ManipulationSession session, Project project, Model model,
-                                   Map<String, String> override )
+                                   Map<ProjectRef, String> override )
         throws ManipulationException;
 }
