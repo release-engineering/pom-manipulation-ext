@@ -50,7 +50,8 @@
 
   <properties>
     <mavenVersion>3.0.4</mavenVersion>
-    <galleyVersion>0.5.1-SNAPSHOT</galleyVersion>
+    <galleyVersion>0.6.0</galleyVersion>
+    <atlasVersion>0.13.1</atlasVersion>
     <it.maven.home>${project.build.directory}/apache-maven-${mavenVersion}</it.maven.home>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
@@ -70,6 +71,11 @@
       <scope>provided</scope>
     </dependency>
 
+    <dependency>
+      <groupId>org.commonjava.maven.atlas</groupId>
+      <artifactId>atlas-identities</artifactId>
+      <version>${atlasVersion}</version>
+    </dependency>
     <dependency>
       <groupId>org.commonjava.maven.galley</groupId>
       <artifactId>galley-core</artifactId>
