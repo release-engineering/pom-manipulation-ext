@@ -71,14 +71,14 @@ public class ManipulatingEventSpy
                     {
                         if ( ee.getSession() != null )
                         {
-                            manipulationManager.init( ee.getSession(), session );
-
                             if (ee.getSession().getRequest().getLoggingLevel() == 0)
                             {
                                 final ch.qos.logback.classic.Logger root =
                                    (ch.qos.logback.classic.Logger) LoggerFactory.getLogger( org.slf4j.Logger.ROOT_LOGGER_NAME );
                                 root.setLevel( Level.DEBUG );
                             }
+
+                            manipulationManager.init( ee.getSession(), session );
                         }
 
                         if ( !session.isEnabled() )
