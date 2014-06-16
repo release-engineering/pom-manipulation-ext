@@ -71,10 +71,12 @@ public class ManipulatingEventSpy
                     {
                         if ( ee.getSession() != null )
                         {
-                            if (ee.getSession().getRequest().getLoggingLevel() == 0)
+                            if ( ee.getSession()
+                                   .getRequest()
+                                   .getLoggingLevel() == 0 )
                             {
                                 final ch.qos.logback.classic.Logger root =
-                                   (ch.qos.logback.classic.Logger) LoggerFactory.getLogger( org.slf4j.Logger.ROOT_LOGGER_NAME );
+                                    (ch.qos.logback.classic.Logger) LoggerFactory.getLogger( org.slf4j.Logger.ROOT_LOGGER_NAME );
                                 root.setLevel( Level.DEBUG );
                             }
 
@@ -89,6 +91,15 @@ public class ManipulatingEventSpy
                         }
 
                         final MavenExecutionRequest req = session.getRequest();
+
+                        if ( req.getPom() == null )
+                        {
+                            session.disable();
+
+                            logger.info( "No project found. Manipulation engine disabled." );
+                            super.onEvent( event );
+                            return;
+                        }
 
                         manipulationManager.scan( req.getPom(), session );
 

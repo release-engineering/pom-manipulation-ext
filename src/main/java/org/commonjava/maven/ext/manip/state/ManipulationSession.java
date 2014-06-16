@@ -48,6 +48,8 @@ public class ManipulationSession
 
     private MavenSession mavenSession;
 
+    private boolean disabled;
+
     public ManipulationSession()
     {
         System.out.println( "[INFO] Maven-Manipulation-Extension " + getClass().getPackage()
@@ -63,7 +65,12 @@ public class ManipulationSession
      */
     public boolean isEnabled()
     {
-        return !Boolean.valueOf( getUserProperties().getProperty( MANIPULATIONS_DISABLED_PROP, "false" ) );
+        return !disabled && !Boolean.valueOf( getUserProperties().getProperty( MANIPULATIONS_DISABLED_PROP, "false" ) );
+    }
+
+    public void disable()
+    {
+        this.disabled = true;
     }
 
     public MavenExecutionRequest getRequest()
