@@ -84,7 +84,10 @@ public class ManipulatingEventSpy
 
                         if ( !session.isEnabled() )
                         {
-                            logger.info( "Manipulation engine disabled." );
+                            logger.info( "Manipulation engine disabled {}",
+                                         ( session.getTopPom() == null ? ". No project found."
+                                                         : " via command-line option" ) );
+
                             super.onEvent( event );
                             return;
                         }
