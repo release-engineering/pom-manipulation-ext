@@ -48,8 +48,6 @@ public class ManipulationSession
 
     private MavenSession mavenSession;
 
-    private boolean disabled;
-
     public ManipulationSession()
     {
         System.out.println( "[INFO] Maven-Manipulation-Extension " + getClass().getPackage()
@@ -65,12 +63,8 @@ public class ManipulationSession
      */
     public boolean isEnabled()
     {
-        return !disabled && !Boolean.valueOf( getUserProperties().getProperty( MANIPULATIONS_DISABLED_PROP, "false" ) );
-    }
-
-    public void disable()
-    {
-        this.disabled = true;
+        return getTopPom() != null
+            && !Boolean.valueOf( getUserProperties().getProperty( MANIPULATIONS_DISABLED_PROP, "false" ) );
     }
 
     public MavenExecutionRequest getRequest()
@@ -131,6 +125,12 @@ public class ManipulationSession
     {
         return mavenSession == null ? new Properties() : mavenSession.getRequest()
                                                                      .getUserProperties();
+    }
+
+    public File getTopPom()
+    {
+        return mavenSession == null ? null : mavenSession.getRequest()
+                                                         .getPom();
     }
 
     public void setProjects( final List<Project> projects )

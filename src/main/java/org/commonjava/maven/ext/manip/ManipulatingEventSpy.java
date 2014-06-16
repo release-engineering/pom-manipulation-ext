@@ -16,7 +16,6 @@ import org.apache.maven.eventspy.AbstractEventSpy;
 import org.apache.maven.eventspy.EventSpy;
 import org.apache.maven.execution.ExecutionEvent;
 import org.apache.maven.execution.ExecutionEvent.Type;
-import org.apache.maven.execution.MavenExecutionRequest;
 import org.apache.maven.model.building.ModelBuilder;
 import org.codehaus.plexus.component.annotations.Component;
 import org.codehaus.plexus.component.annotations.Requirement;
@@ -90,18 +89,7 @@ public class ManipulatingEventSpy
                             return;
                         }
 
-                        final MavenExecutionRequest req = session.getRequest();
-
-                        if ( req.getPom() == null )
-                        {
-                            session.disable();
-
-                            logger.info( "No project found. Manipulation engine disabled." );
-                            super.onEvent( event );
-                            return;
-                        }
-
-                        manipulationManager.scan( req.getPom(), session );
+                        manipulationManager.scan( session.getTopPom(), session );
 
                         final List<Project> projects = session.getProjects();
 
