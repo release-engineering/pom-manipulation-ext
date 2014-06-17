@@ -331,10 +331,11 @@ public class DependencyManipulator
 
         for ( final String currentGA : overrides.keySet() )
         {
-            logger.debug( "Adding version override property for {} to {}", currentGA, overrides.get( currentGA ));
             final String versionPropName =
                 "version."
                     + ( result == VersionPropertyFormat.VGA ? currentGA.replace( ":", "." ) : currentGA.split( ":" )[0] );
+
+            logger.debug( "Adding version override property for {} of {}:{}", currentGA, versionPropName, overrides.get( currentGA ));
             props.setProperty( versionPropName, overrides.get( currentGA ) );
         }
     }
