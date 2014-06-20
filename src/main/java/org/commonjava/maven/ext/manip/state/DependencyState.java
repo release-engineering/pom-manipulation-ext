@@ -10,8 +10,6 @@
  ******************************************************************************/
 package org.commonjava.maven.ext.manip.state;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Properties;
 
 import org.commonjava.maven.ext.manip.impl.DependencyManipulator;
@@ -89,31 +87,6 @@ public class DependencyState
     public String getRemoteDepMgmt()
     {
         return depMgmt;
-    }
-
-    /**
-     * Filter System.getProperties() by accepting only properties with names that start with prefix. Trims the prefix
-     * from the property names when inserting them into the returned Map.
-     * @param properties
-     *
-     * @param prepend The String that must be at the start of the property names
-     * @return Map<String, String> map of properties with matching prepend and their values
-     */
-    public static Map<String, String> getPropertiesByPrefix( Properties properties, String prefix )
-    {
-        Map<String, String> matchedProperties = new HashMap<String, String>();
-        int prefixLength = prefix.length();
-
-        for ( String propertyName : properties.stringPropertyNames() )
-        {
-            if ( propertyName.startsWith( prefix ) )
-            {
-                String trimmedPropertyName = propertyName.substring( prefixLength );
-                matchedProperties.put( trimmedPropertyName, properties.getProperty( propertyName ) );
-            }
-        }
-
-        return matchedProperties;
     }
 
 }

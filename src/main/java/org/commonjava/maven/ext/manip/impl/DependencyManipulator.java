@@ -101,8 +101,7 @@ public class DependencyManipulator
         {
             override.put( var.asProjectRef().toString(), overrides.get( var) );
         }
-
-        override.putAll( DependencyState.getPropertiesByPrefix( session.getUserProperties(),
+        override.putAll( getPropertiesByPrefix( session.getUserProperties(),
                                                          DependencyState.DEPENDENCY_EXCLUSION_PREFIX ) );
         override = removeReactorGAs( session, override );
         override = applyModuleVersionOverrides( projectGA, override );
@@ -338,5 +337,36 @@ public class DependencyManipulator
             logger.debug( "Adding version override property for {} of {}:{}", currentGA, versionPropName, overrides.get( currentGA ));
             props.setProperty( versionPropName, overrides.get( currentGA ) );
         }
+    }
+
+    /**
+     * Filter Properties by accepting only properties with names that start with prefix. Trims the prefix
+     * from the property names when inserting them into the returned Map.
+     * @param properties
+     *
+     * @param prepend The String that must be at the start of the property names
+     * @return Map<String, String> map of properties with matching prepend and their values
+     */
+    public Map<String, String> getPropertiesByPrefix( Properties properties, String prefix )
+    {
+        Map<String, String> matchedProperties = new HashMap<String, String>();
+        int prefixLength = prefix.length();
+
+        for ( String propertyName : properties.stringPropertyNames() )
+        {
+            if ( propertyName.startsWith( prefix ) )
+            {
+                String trimmedPropertyName = propertyName.substring( prefixLength );
+                String value = properties.getProperty( propertyName );
+                if (value.equals( "true" ))
+                {
+                    logger.warn( "Work around Brew/Maven bug - removing erroneous 'true' value for {}.", trimmedPropertyName );
+                    value = "";
+                }
+                matchedProperties.put( trimmedPropertyName, value );
+            }
+        }
+
+        return matchedProperties;
     }
 }
