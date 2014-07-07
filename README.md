@@ -68,7 +68,30 @@ the versions listed in the first bom in the list will be used.
 
     mvn install -DdependencyManagement=org.foo:my-dep-pom:1.0,org.bar:my-dep-pom:2.0
 
-If transitive dependencies should not be overridden, the option "overrideTransitive" can be set to false.
+The extension will change any parent reference it finds that matches an entry in the remote BOM i.e.
+```
+      <parent>
+         <groupId>org.switchyard</groupId>
+         <artifactId>switchyard-parent</artifactId>
+         <version>2.0.0.Alpha1</version>
+```
+will change to
+```
+      <parent>
+         <groupId>org.switchyard</groupId>
+         <artifactId>switchyard-parent</artifactId>
+         <version>2.0.0.Alpha1-rebuild-1</version>
+```
+
+### Direct Dependencies
+
+By default the extension will override dependencies from the remote BOM. This may be disabled via
+
+    mvn install -DdependencyManagement=org.foo:my-dep-pom:1.0 -DoverrideDependencies=false
+
+### Direct/Transitive Dependencies
+
+By default the extension will inject all dependencies from the remote BOM. This will also override dependencies that are not directly specified in the project. If these transitive dependencies should not be overridden, the option "overrideTransitive" can be set to false.
 
     mvn install -DdependencyManagement=org.foo:my-dep-pom:1.0 -DoverrideTransitive=false
 
@@ -102,7 +125,7 @@ For example
     mvn install -DdependencyExclusion.junit:junit@*=
 
 
-### Using Dependency Properties
+### Dependency Property Injection
 
 The extension will automatically set properties which match the version overrides.  These properties can be used, for example, in resource filtering in the build.  By default the extension supports two different formats for the properties. It is controlled by the property:
 

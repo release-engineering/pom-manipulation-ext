@@ -57,10 +57,13 @@ public class DependencyState
 
     private final boolean overrideTransitive;
 
+    private final boolean overrideDependencies;
+
     public DependencyState( final Properties userProps )
     {
         depMgmt = userProps.getProperty( DEPENDENCY_MANAGEMENT_POM_PROPERTY );
         overrideTransitive = Boolean.valueOf( userProps.getProperty( "overrideTransitive", "true" ) );
+        overrideDependencies = Boolean.valueOf( userProps.getProperty( "overrideDependencies", "true" ) );
     }
 
     /**
@@ -82,6 +85,14 @@ public class DependencyState
     public boolean getOverrideTransitive()
     {
         return overrideTransitive;
+    }
+
+    /**
+     * Whether to override managed dependencies in the build. Defaults to true.
+     */
+    public boolean getOverrideDependencies()
+    {
+        return overrideDependencies;
     }
 
     public String getRemoteDepMgmt()
