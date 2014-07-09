@@ -118,70 +118,77 @@ public class DependencyManipulator
                      .setVersion( override.get( ga( project.getParent() ) ) );
             }
 
-            // If the model doesn't have any Dependency Management set by default, create one for it
-            DependencyManagement dependencyManagement = model.getDependencyManagement();
-            if ( dependencyManagement == null )
+            if ( session.getState( DependencyState.class ).getOverrideDependencies() )
             {
-                dependencyManagement = new DependencyManagement();
-                model.setDependencyManagement( dependencyManagement );
-                logger.debug( "Added <DependencyManagement/> for current project" );
-            }
-
-            // Apply overrides to project dependency management
-            final List<Dependency> dependencies = dependencyManagement.getDependencies();
-
-            final Map<String, String> nonMatchingVersionOverrides = applyOverrides( dependencies, override );
-
-            if ( session.getState( DependencyState.class ).getOverrideTransitive() )
-            {
-                // Add dependencies to Dependency Management which did not match any existing dependency
-                for ( final ProjectRef projectRef : overrides.keySet() )
+                // If the model doesn't have any Dependency Management set by default, create one for it
+                DependencyManagement dependencyManagement = model.getDependencyManagement();
+                if ( dependencyManagement == null )
                 {
-                    VersionlessArtifactRef var = (VersionlessArtifactRef)projectRef;
-
-                    if ( ! nonMatchingVersionOverrides.containsKey( var.asProjectRef().toString() ))
-                    {
-                        // This one in the remote pom was already dealt with ; continue.
-                        continue;
-                    }
-
-                    final Dependency newDependency = new Dependency();
-                    newDependency.setGroupId( var.getGroupId() );
-                    newDependency.setArtifactId( var.getArtifactId() );
-                    newDependency.setType( var.getType() );
-                    newDependency.setClassifier( var.getClassifier() );
-                    if (var.isOptional())
-                    {
-                        newDependency.setOptional( var.isOptional() );
-                    }
-
-                    final String artifactVersion = overrides.get( projectRef );
-
-                    newDependency.setVersion( artifactVersion );
-
-                    dependencyManagement.getDependencies()
-                                        .add( 0, newDependency );
-                    logger.debug( "New entry added to <DependencyManagement/> - {} : {} ", projectRef, artifactVersion );
+                    dependencyManagement = new DependencyManagement();
+                    model.setDependencyManagement( dependencyManagement );
+                    logger.debug( "Added <DependencyManagement/> for current project" );
                 }
-            }
-            else
-            {
-                logger.debug( "Non-matching dependencies ignored." );
+
+                // Apply overrides to project dependency management
+                final List<Dependency> dependencies = dependencyManagement.getDependencies();
+
+                final Map<String, String> nonMatchingVersionOverrides = applyOverrides( dependencies, override );
+
+                if ( session.getState( DependencyState.class ).getOverrideTransitive() )
+                {
+                    // Add dependencies to Dependency Management which did not match any existing dependency
+                    for ( final ProjectRef projectRef : overrides.keySet() )
+                    {
+                        VersionlessArtifactRef var = (VersionlessArtifactRef)projectRef;
+
+                        if ( ! nonMatchingVersionOverrides.containsKey( var.asProjectRef().toString() ))
+                        {
+                            // This one in the remote pom was already dealt with ; continue.
+                            continue;
+                        }
+
+                        final Dependency newDependency = new Dependency();
+                        newDependency.setGroupId( var.getGroupId() );
+                        newDependency.setArtifactId( var.getArtifactId() );
+                        newDependency.setType( var.getType() );
+                        newDependency.setClassifier( var.getClassifier() );
+                        if (var.isOptional())
+                        {
+                            newDependency.setOptional( var.isOptional() );
+                        }
+
+                        final String artifactVersion = overrides.get( projectRef );
+
+                        newDependency.setVersion( artifactVersion );
+
+                        dependencyManagement.getDependencies()
+                        .add( 0, newDependency );
+                        logger.debug( "New entry added to <DependencyManagement/> - {} : {} ", projectRef, artifactVersion );
+                    }
+                }
+                else
+                {
+                    logger.debug( "Non-matching dependencies ignored." );
+                }
             }
         }
         else
         {
             // If a child module has a depMgmt section we'll change that as well.
             final DependencyManagement dependencyManagement = model.getDependencyManagement();
-            if ( dependencyManagement != null )
+            if ( session.getState( DependencyState.class ).getOverrideDependencies() &&
+                            dependencyManagement != null )
             {
                 applyOverrides( dependencyManagement.getDependencies(), override );
             }
         }
 
-        // Apply overrides to project direct dependencies
-        final List<Dependency> projectDependencies = model.getDependencies();
-        applyOverrides( projectDependencies, override );
+        if (session.getState( DependencyState.class ).getOverrideDependencies() )
+        {
+            // Apply overrides to project direct dependencies
+            final List<Dependency> projectDependencies = model.getDependencies();
+            applyOverrides( projectDependencies, override );
+        }
     }
 
     /**
