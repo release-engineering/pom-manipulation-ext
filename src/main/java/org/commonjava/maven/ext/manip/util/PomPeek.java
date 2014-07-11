@@ -4,7 +4,7 @@
  * are made available under the terms of the GNU Public License v3.0
  * which accompanies this distribution, and is available at
  * http://www.gnu.org/licenses/gpl.html
- * 
+ *
  * Contributors:
  *     Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
@@ -359,6 +359,12 @@ public class PomPeek
         return true;
     }
 
+
+    /**
+     * Represents either the top level pom in a project or a standalone pom i.e. a child
+     * module that does not inherit the parent.
+     * @param b
+     */
     public void setTopPOM( final boolean b )
     {
         topPOM = b;

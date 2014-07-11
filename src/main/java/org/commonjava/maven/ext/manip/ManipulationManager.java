@@ -232,12 +232,28 @@ public class ManipulationManager
                 }
             }
 
+            HashSet<ProjectVersionRef> projectrefs = new HashSet<ProjectVersionRef>();
+
             for ( final PomPeek p : peeked )
             {
+                projectrefs.add( p.getKey() );
+
                 if ( p.getPom()
                       .equals( topLevelParent ) )
                 {
                     logger.debug( "Setting top level parent to " + p.getPom() + " :: " + p.getKey() );
+                    p.setTopPOM( true );
+                }
+            }
+
+            logger.debug( "Searching pom list " + projectrefs.toString() + " for standalone poms..." );
+
+            for ( final PomPeek p : peeked )
+            {
+                if ( p.getParentKey() == null ||
+                     ! seenThisParent (projectrefs, p.getParentKey()))
+                {
+                    logger.warn ("Found a standalone pom " + p.getPom() + " :: " + p.getKey() );
                     p.setTopPOM( true );
                 }
             }
@@ -248,5 +264,25 @@ public class ManipulationManager
         }
 
         return peeked;
+    }
+
+    /**
+     * Search the list of project references to establish if this parent reference exists in them. This
+     * determines whether the module is inheriting something inside the project or an external reference.
+
+     * @param projectrefs
+     * @param parentKey
+     * @return
+     */
+    private boolean seenThisParent( HashSet<ProjectVersionRef> projectrefs, ProjectVersionRef parentKey )
+    {
+        for (ProjectVersionRef p : projectrefs)
+        {
+            if ( p.versionlessEquals( parentKey ))
+            {
+                return true;
+            }
+        }
+        return false;
     }
 }
