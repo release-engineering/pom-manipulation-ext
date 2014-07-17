@@ -12,6 +12,7 @@ package org.commonjava.maven.ext.manip.impl;
 
 import static org.commonjava.maven.ext.manip.state.DependencyState.GAV_SEPERATOR;
 import static org.commonjava.maven.ext.manip.util.IdUtils.ga;
+import static org.commonjava.maven.ext.manip.util.PropertiesUtils.getPropertiesByPrefix;
 
 import java.util.HashMap;
 import java.util.List;
@@ -87,7 +88,7 @@ public class DependencyManipulator
      */
     @Override
     protected void apply( final ManipulationSession session, final Project project, final Model model,
-                          Map<ProjectRef, String> overrides )
+                          final Map<ProjectRef, String> overrides )
         throws ManipulationException
     {
         final String projectGA = ga( project );
@@ -139,7 +140,7 @@ public class DependencyManipulator
                     // Add dependencies to Dependency Management which did not match any existing dependency
                     for ( final ProjectRef projectRef : overrides.keySet() )
                     {
-                        VersionlessArtifactRef var = (VersionlessArtifactRef)projectRef;
+                        final VersionlessArtifactRef var = (VersionlessArtifactRef)projectRef;
 
                         if ( ! nonMatchingVersionOverrides.containsKey( var.asProjectRef().toString() ))
                         {
@@ -346,34 +347,4 @@ public class DependencyManipulator
         }
     }
 
-    /**
-     * Filter Properties by accepting only properties with names that start with prefix. Trims the prefix
-     * from the property names when inserting them into the returned Map.
-     * @param properties
-     *
-     * @param prepend The String that must be at the start of the property names
-     * @return Map<String, String> map of properties with matching prepend and their values
-     */
-    public Map<String, String> getPropertiesByPrefix( Properties properties, String prefix )
-    {
-        Map<String, String> matchedProperties = new HashMap<String, String>();
-        int prefixLength = prefix.length();
-
-        for ( String propertyName : properties.stringPropertyNames() )
-        {
-            if ( propertyName.startsWith( prefix ) )
-            {
-                String trimmedPropertyName = propertyName.substring( prefixLength );
-                String value = properties.getProperty( propertyName );
-                if (value.equals( "true" ))
-                {
-                    logger.warn( "Work around Brew/Maven bug - removing erroneous 'true' value for {}.", trimmedPropertyName );
-                    value = "";
-                }
-                matchedProperties.put( trimmedPropertyName, value );
-            }
-        }
-
-        return matchedProperties;
-    }
 }

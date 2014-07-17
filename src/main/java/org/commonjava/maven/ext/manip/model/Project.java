@@ -31,6 +31,7 @@ package org.commonjava.maven.ext.manip.model;
 import java.io.File;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.maven.model.Build;
 import org.apache.maven.model.BuildBase;
@@ -215,6 +216,33 @@ public class Project
         return result;
     }
 
+    public Map<String, Plugin> getPluginMap()
+    {
+        return getPluginMap( model );
+    }
+
+    public Map<String, Plugin> getPluginMap( final ModelBase base )
+    {
+        if ( base instanceof Model )
+        {
+            final Build build = ( (Model) base ).getBuild();
+            if ( build == null )
+            {
+                return Collections.<String, Plugin> emptyMap();
+            }
+
+            final Map<String, Plugin> result = build.getPluginsAsMap();
+            if ( result == null )
+            {
+                return Collections.<String, Plugin> emptyMap();
+            }
+
+            return result;
+        }
+
+        return Collections.<String, Plugin> emptyMap();
+    }
+
     public Build getBuild()
     {
         return (Build) getBuild( model );
@@ -266,6 +294,39 @@ public class Project
         }
 
         return Collections.emptyList();
+    }
+
+    public Map<String, Plugin> getManagedPluginMap()
+    {
+        return getManagedPluginMap( model );
+    }
+
+    public Map<String, Plugin> getManagedPluginMap( final ModelBase base )
+    {
+        if ( base instanceof Model )
+        {
+            final Build build = ( (Model) base ).getBuild();
+            if ( build == null )
+            {
+                return Collections.<String, Plugin> emptyMap();
+            }
+
+            final PluginManagement pm = build.getPluginManagement();
+            if ( pm == null )
+            {
+                return Collections.<String, Plugin> emptyMap();
+            }
+
+            final Map<String, Plugin> result = pm.getPluginsAsMap();
+            if ( result == null )
+            {
+                return Collections.<String, Plugin> emptyMap();
+            }
+
+            return result;
+        }
+
+        return Collections.<String, Plugin> emptyMap();
     }
 
     public List<ReportPlugin> getReportPlugins()

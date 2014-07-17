@@ -1,6 +1,8 @@
 package org.commonjava.maven.ext.manip.resolver;
 
+import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.codehaus.plexus.component.annotations.Component;
@@ -10,10 +12,15 @@ import org.commonjava.maven.atlas.ident.ref.ProjectRef;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.galley.TransferException;
 import org.commonjava.maven.galley.maven.GalleyMavenException;
+import org.commonjava.maven.galley.maven.model.view.DocRef;
 import org.commonjava.maven.galley.maven.model.view.MavenMetadataView;
 import org.commonjava.maven.galley.maven.model.view.MavenPomView;
+import org.commonjava.maven.galley.maven.model.view.MavenXmlView;
+import org.commonjava.maven.galley.maven.parse.GalleyMavenXMLException;
 import org.commonjava.maven.galley.model.Location;
 import org.commonjava.maven.galley.model.Transfer;
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
 
 /**
  * Wraps the galley-maven APIs with the plumbing necessary to resolve using the repositories defined for the maven build.
@@ -45,6 +52,23 @@ public class GalleyAPIWrapper
         this.infra = infra;
     }
 
+    public Document parseXml( final String xml )
+        throws GalleyMavenXMLException
+    {
+        return infra.getXml()
+                    .parseDocument( xml, new ByteArrayInputStream( xml.getBytes() ) );
+    }
+
+    public MavenXmlView<ProjectRef> parseXmlView( final String xml )
+        throws GalleyMavenXMLException
+    {
+        final Document document = infra.getXml()
+                                       .parseDocument( xml, new ByteArrayInputStream( xml.getBytes() ) );
+
+        final DocRef<ProjectRef> ref = new DocRef<ProjectRef>( new ProjectRef( "unknown", "unknown" ), xml, document );
+        return new MavenXmlView<ProjectRef>( Collections.singletonList( ref ), infra.getXPath(), infra.getXml() );
+    }
+
     public MavenPomView readPomView( final ProjectVersionRef ref )
         throws GalleyMavenException
     {
@@ -64,6 +88,12 @@ public class GalleyAPIWrapper
     {
         return infra.getArtifactManager()
                     .retrieveFirst( MAVEN_REPOS, asPomArtifact );
+    }
+
+    public String toXML( final Node config, final boolean includeXmlDeclaration )
+    {
+        return infra.getXml()
+                    .toXML( config, includeXmlDeclaration );
     }
 
 }

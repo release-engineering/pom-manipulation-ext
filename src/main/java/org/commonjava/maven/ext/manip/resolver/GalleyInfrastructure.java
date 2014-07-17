@@ -73,6 +73,10 @@ public class GalleyInfrastructure
 
     private MavenMetadataReader metadataReader;
 
+    private XMLInfrastructure xml;
+
+    private XPathManager xpaths;
+
     protected GalleyInfrastructure()
     {
     }
@@ -122,8 +126,8 @@ public class GalleyInfrastructure
             throw new ManipulationException( "Failed to setup Maven-specific LocationExpander: %s", e, e.getMessage() );
         }
 
-        final XMLInfrastructure xml = new XMLInfrastructure();
-        final XPathManager xpaths = new XPathManager();
+        xml = new XMLInfrastructure();
+        xpaths = new XPathManager();
 
         final TransportManager transports;
         if ( customTransport != null )
@@ -174,6 +178,11 @@ public class GalleyInfrastructure
         metadataReader = new MavenMetadataReader( xml, locationExpander, metadataManager, xpaths );
     }
 
+    public XMLInfrastructure getXml()
+    {
+        return xml;
+    }
+
     public MavenMetadataReader getMetadataReader()
     {
         return metadataReader;
@@ -182,5 +191,10 @@ public class GalleyInfrastructure
     public ArtifactManager getArtifactManager()
     {
         return artifactManager;
+    }
+
+    public XPathManager getXPath()
+    {
+        return xpaths;
     }
 }

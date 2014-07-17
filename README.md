@@ -161,3 +161,19 @@ The extension also supports generic profile injection using a remote pom file. B
     mvn install -DprofileInjection=org.foo:profile-injection:1.0
 
 The extension will, for every profile in the remote pom file, replace or add it to the local top level pom file.
+
+## Install / Deploy Skip-Flag Alignment
+
+By default, this extension will disable the skip flag on the install and deploy plugins. This is useful for build environments that compare the results of install with those from deploy as a validation step. More generally, suppressing installation or deployment tends to be an aesthetic decision that can have subtle functional consequences. It's usually not really worth the hassle.
+
+This feature does support four modes for alignment, controlled via the **enforce-skip** command-line property:
+
+1. **none** - don't do any alignment
+2. **on** - (aliased to **true**) enforce that the skip flag is **enabled**, suppressing install and deploy functions of the build (useful mainly for module-specific overrides. See below)
+3. **off** - (aliased to **false**) (*default*) enforce that the skip flag is **disabled** and that install/deploy functions will execute normally
+4. **detect** - detect the flag state of the install plugin in the main pom (not in profiles), and adjust *any* other install- or deploy-plugin references to the skip flag to be consistent.
+
+Additionally, the feature supports per-module overrides, which can be specified as:
+
+    -DenforceSkip.org.group.id:artifact-id=(none|on|true|off|false|detect)
+
