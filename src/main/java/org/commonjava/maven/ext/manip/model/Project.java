@@ -223,24 +223,28 @@ public class Project
 
     public Map<String, Plugin> getPluginMap( final ModelBase base )
     {
+        final BuildBase build;
         if ( base instanceof Model )
         {
-            final Build build = ( (Model) base ).getBuild();
-            if ( build == null )
-            {
-                return Collections.<String, Plugin> emptyMap();
-            }
-
-            final Map<String, Plugin> result = build.getPluginsAsMap();
-            if ( result == null )
-            {
-                return Collections.<String, Plugin> emptyMap();
-            }
-
-            return result;
+            build = ( (Model) base ).getBuild();
+        }
+        else
+        {
+            build = ( (Profile) base ).getBuild();
         }
 
-        return Collections.<String, Plugin> emptyMap();
+        if ( build == null )
+        {
+            return Collections.<String, Plugin> emptyMap();
+        }
+
+        final Map<String, Plugin> result = build.getPluginsAsMap();
+        if ( result == null )
+        {
+            return Collections.<String, Plugin> emptyMap();
+        }
+
+        return result;
     }
 
     public Build getBuild()
@@ -270,30 +274,34 @@ public class Project
 
     public List<Plugin> getManagedPlugins( final ModelBase base )
     {
+        BuildBase build;
         if ( base instanceof Model )
         {
-            final Build build = ( (Model) base ).getBuild();
-            if ( build == null )
-            {
-                return Collections.emptyList();
-            }
-
-            final PluginManagement pm = build.getPluginManagement();
-            if ( pm == null )
-            {
-                return Collections.emptyList();
-            }
-
-            final List<Plugin> result = pm.getPlugins();
-            if ( result == null )
-            {
-                return Collections.emptyList();
-            }
-
-            return result;
+            build = ( (Model) base ).getBuild();
+        }
+        else
+        {
+            build = ( (Profile) base ).getBuild();
         }
 
-        return Collections.emptyList();
+        if ( build == null )
+        {
+            return Collections.emptyList();
+        }
+
+        final PluginManagement pm = build.getPluginManagement();
+        if ( pm == null )
+        {
+            return Collections.emptyList();
+        }
+
+        final List<Plugin> result = pm.getPlugins();
+        if ( result == null )
+        {
+            return Collections.emptyList();
+        }
+
+        return result;
     }
 
     public Map<String, Plugin> getManagedPluginMap()

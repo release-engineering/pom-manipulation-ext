@@ -31,8 +31,10 @@ import org.apache.maven.execution.DefaultMavenExecutionResult;
 import org.apache.maven.execution.MavenExecutionRequest;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.model.Build;
+import org.apache.maven.model.BuildBase;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Plugin;
+import org.apache.maven.model.Profile;
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 import org.codehaus.plexus.DefaultPlexusContainer;
 import org.codehaus.plexus.PlexusContainer;
@@ -173,6 +175,16 @@ public class DistributionEnforcingManipulatorTest
         assertSkip( model, null, false, true, Boolean.FALSE );
     }
 
+    @Test
+    public void projectDeploySkipTurnedOff_InProfile_ModeIsOff_ParsedPom()
+        throws Exception
+    {
+        final Model model = parseModelResource( "profile-deploy-skip.pom" );
+
+        applyTest( off, model, model );
+        assertSkip( model, "test", false, true, Boolean.FALSE );
+    }
+
     private void initTest( final EnforcingMode mode, final boolean enabled )
         throws Exception
     {
@@ -216,7 +228,26 @@ public class DistributionEnforcingManipulatorTest
     private void assertSkip( final Model model, final String profileId, final boolean managed, final boolean deploy,
                              final boolean state )
     {
-        final Build build = model.getBuild();
+        BuildBase build = null;
+        if ( profileId != null )
+        {
+            final List<Profile> profiles = model.getProfiles();
+            if ( profiles != null )
+            {
+                for ( final Profile profile : profiles )
+                {
+                    if ( profileId.equals( profile.getId() ) )
+                    {
+                        build = profile.getBuild();
+                    }
+                }
+            }
+        }
+        else
+        {
+            build = model.getBuild();
+        }
+
         assertThat( build, notNullValue() );
 
         final Plugin plugin =
