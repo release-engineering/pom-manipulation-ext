@@ -50,8 +50,8 @@
 
   <properties>
     <mavenVersion>3.0.4</mavenVersion>
-    <galleyVersion>0.6.4-SNAPSHOT</galleyVersion>
-    <atlasVersion>0.13.1</atlasVersion>
+    <galleyVersion>0.6.4</galleyVersion>
+    <atlasVersion>0.13.3</atlasVersion>
     <it.maven.home>${project.build.directory}/apache-maven-${mavenVersion}</it.maven.home>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
