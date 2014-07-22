@@ -28,6 +28,7 @@ import org.commonjava.maven.ext.manip.ManipulationException;
 import org.commonjava.maven.ext.manip.model.Project;
 import org.commonjava.maven.ext.manip.resolver.GalleyAPIWrapper;
 import org.commonjava.maven.ext.manip.state.DistributionEnforcingState;
+import org.commonjava.maven.ext.manip.state.EnforcingMode;
 import org.commonjava.maven.ext.manip.state.ManipulationSession;
 import org.commonjava.maven.galley.maven.parse.GalleyMavenXMLException;
 import org.slf4j.Logger;
@@ -131,7 +132,7 @@ public class DistributionEnforcingManipulator
      * <code>-DdistroExclusion.g:a=&lt;mode&gt;</code>.
      * 
      * @see DistributionEnforcingState
-     * @see DistributionEnforcingState.EnforcingMode
+     * @see EnforcingMode
      */
     @Override
     public Set<Project> applyChanges( final List<Project> projects, final ManipulationSession session )
@@ -154,15 +155,15 @@ public class DistributionEnforcingManipulator
         {
             final String ga = ga( project );
 
-            DistributionEnforcingState.EnforcingMode mode = state.getEnforcingMode();
+            EnforcingMode mode = state.getEnforcingMode();
 
             final String override = excluded.get( ga );
             if ( override != null )
             {
-                mode = DistributionEnforcingState.EnforcingMode.getMode( override );
+                mode = EnforcingMode.getMode( override );
             }
 
-            if ( mode == DistributionEnforcingState.EnforcingMode.none )
+            if ( mode == EnforcingMode.none )
             {
                 logger.info( "Install/Deploy skip-flag enforcement is disabled for: {}.", ga );
                 continue;
