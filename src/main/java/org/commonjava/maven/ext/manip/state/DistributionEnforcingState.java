@@ -29,11 +29,11 @@ public class DistributionEnforcingState
      * Propery prefix used to exclude certain projects in the current build (specified as g:a) from install/deploy plugin skip-flag enforcement.
      */
     public static final String PROJECT_EXCLUSION_PREFIX = "enforceSkip.";
-    
+
     public enum EnforcingMode{
         /**
-         * Enforce that the skip flag be <b>ENABLED</b>, disabling install and deployment. 
-         * This is normally used in conjunction with {@link DistributionEnforcingState#PROJECT_EXCLUSION_PREFIX} 
+         * Enforce that the skip flag be <b>ENABLED</b>, disabling install and deployment.
+         * This is normally used in conjunction with {@link DistributionEnforcingState#PROJECT_EXCLUSION_PREFIX}
          * to customize enforcement for a single project within a larger build.
          */
         on
@@ -69,7 +69,7 @@ public class DistributionEnforcingState
         },
         /**
          * Disable skip-flag enforcement.
-         * This is normally used in conjunction with {@link DistributionEnforcingState#PROJECT_EXCLUSION_PREFIX} 
+         * This is normally used in conjunction with {@link DistributionEnforcingState#PROJECT_EXCLUSION_PREFIX}
          * to disable enforcement for a single project within a larger build.
          */
         none
@@ -86,20 +86,19 @@ public class DistributionEnforcingState
             if ( value == null || value.trim()
                                        .length() < 1 )
             {
-                return off;
+                return none;
             }
 
             if ( Boolean.parseBoolean( value ) )
             {
                 return on;
             }
+            else if ( value.equalsIgnoreCase( "false" ) )
+            {
+                return off;
+            }
 
             EnforcingMode m = valueOf( value );
-
-            if ( m == null && value.equalsIgnoreCase( "false" ) )
-            {
-                m = off;
-            }
 
             return m == null ? none : m;
         }
@@ -114,7 +113,7 @@ public class DistributionEnforcingState
         final String value = userProps.getProperty( ENFORCE_SYSPROP );
         this.mode = EnforcingMode.getMode( value );
     }
-    
+
     public EnforcingMode getEnforcingMode()
     {
         return mode;

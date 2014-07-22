@@ -57,7 +57,7 @@ public class DistributionEnforcingManipulatorTest
     public void stateIsEnabledWhenModeIsUnspecified()
         throws Exception
     {
-        initTest( null, true );
+        initTest( null, false );
     }
 
     @Test

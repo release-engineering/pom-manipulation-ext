@@ -253,7 +253,7 @@ public class ManipulationManager
                 if ( p.getParentKey() == null ||
                      ! seenThisParent (projectrefs, p.getParentKey()))
                 {
-                    logger.warn ("Found a standalone pom " + p.getPom() + " :: " + p.getKey() );
+                    logger.debug ("Found a standalone pom " + p.getPom() + " :: " + p.getKey() );
                     p.setTopPOM( true );
                 }
             }
