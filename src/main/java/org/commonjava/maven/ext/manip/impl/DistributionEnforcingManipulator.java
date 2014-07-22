@@ -141,7 +141,7 @@ public class DistributionEnforcingManipulator
         final DistributionEnforcingState state = session.getState( DistributionEnforcingState.class );
         if ( state == null || !state.isEnabled() )
         {
-            logger.info( "Distribution skip-flag enforcement is disabled." );
+            logger.debug( "Distribution skip-flag enforcement is disabled." );
             return Collections.emptySet();
         }
 

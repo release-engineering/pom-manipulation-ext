@@ -232,7 +232,7 @@ public class ManipulationManager
                 }
             }
 
-            HashSet<ProjectVersionRef> projectrefs = new HashSet<ProjectVersionRef>();
+            final HashSet<ProjectVersionRef> projectrefs = new HashSet<ProjectVersionRef>();
 
             for ( final PomPeek p : peeked )
             {
@@ -253,7 +253,7 @@ public class ManipulationManager
                 if ( p.getParentKey() == null ||
                      ! seenThisParent (projectrefs, p.getParentKey()))
                 {
-                    logger.warn ("Found a standalone pom " + p.getPom() + " :: " + p.getKey() );
+                    logger.debug( "Found a standalone pom " + p.getPom() + " :: " + p.getKey() );
                     p.setTopPOM( true );
                 }
             }
@@ -274,9 +274,9 @@ public class ManipulationManager
      * @param parentKey
      * @return
      */
-    private boolean seenThisParent( HashSet<ProjectVersionRef> projectrefs, ProjectVersionRef parentKey )
+    private boolean seenThisParent( final HashSet<ProjectVersionRef> projectrefs, final ProjectVersionRef parentKey )
     {
-        for (ProjectVersionRef p : projectrefs)
+        for (final ProjectVersionRef p : projectrefs)
         {
             if ( p.versionlessEquals( parentKey ))
             {

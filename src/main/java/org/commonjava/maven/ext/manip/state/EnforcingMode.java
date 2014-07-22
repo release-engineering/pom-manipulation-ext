@@ -57,7 +57,7 @@ public enum EnforcingMode
         if ( value == null || value.trim()
                                    .length() < 1 )
         {
-            return off;
+            return none;
         }
 
         if ( Boolean.parseBoolean( value ) )
@@ -65,7 +65,12 @@ public enum EnforcingMode
             return on;
         }
 
-        EnforcingMode m = null;
+        if ( value.equalsIgnoreCase( "false" ) )
+        {
+            return off;
+        }
+
+        EnforcingMode m = none;
 
         final EnforcingMode[] values = values();
         for ( final EnforcingMode mode : values )
@@ -77,12 +82,7 @@ public enum EnforcingMode
             }
         }
 
-        if ( m == null && value.equalsIgnoreCase( "false" ) )
-        {
-            m = off;
-        }
-
-        return m == null ? none : m;
+        return m;
     }
 
     public abstract Boolean defaultModificationValue();
