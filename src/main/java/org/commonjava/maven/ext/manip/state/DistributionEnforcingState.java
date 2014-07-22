@@ -94,7 +94,17 @@ public class DistributionEnforcingState
                 return on;
             }
 
-            EnforcingMode m = valueOf( value );
+            EnforcingMode m = null;
+
+            final EnforcingMode[] values = values();
+            for ( final EnforcingMode mode : values )
+            {
+                if ( value.equalsIgnoreCase( mode.name() ) )
+                {
+                    m = mode;
+                    break;
+                }
+            }
 
             if ( m == null && value.equalsIgnoreCase( "false" ) )
             {
