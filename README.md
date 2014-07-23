@@ -162,6 +162,8 @@ The extension also supports generic profile injection using a remote pom file. B
 
 The extension will, for every profile in the remote pom file, replace or add it to the local top level pom file.
 
+**Note: for existing profiles that have activeByDefault profile activation that will get replaced so they are not accidentally disabled due to the semantics of activeByDefault.**
+
 ## Install / Deploy Skip-Flag Alignment
 
 By default, this extension will disable the skip flag on the install and deploy plugins. This is useful for build environments that compare the results of install with those from deploy as a validation step. More generally, suppressing installation or deployment tends to be an aesthetic decision that can have subtle functional consequences. It's usually not really worth the hassle.
@@ -176,4 +178,3 @@ This feature does support four modes for alignment, controlled via the **enforce
 Additionally, the feature supports per-module overrides, which can be specified as:
 
     -DenforceSkip.org.group.id:artifact-id=(none|on|true|off|false|detect)
-
