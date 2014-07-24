@@ -162,7 +162,7 @@ The extension also supports generic profile injection using a remote pom file. B
 
 The extension will, for every profile in the remote pom file, replace or add it to the local top level pom file.
 
-**Note: for existing profiles that have activeByDefault profile activation that will get replaced so they are not accidentally disabled due to the semantics of activeByDefault.**
+**Note:** for existing profiles in the modified pom that have activeByDefault profile activation, that will get replaced so that the profiles are not accidentally disabled due to the semantics of activeByDefault.
 
 ## Install / Deploy Skip-Flag Alignment
 

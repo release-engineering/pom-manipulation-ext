@@ -140,7 +140,7 @@ public class ProfileInjectionManipulator
             {
                 logger.debug( "Removing local profile {} ", p );
                 i.remove();
-                break;
+                // Don't break out of the loop so we can check for active profiles
             }
 
             // If we have injected profiles and one of the current profiles is using
