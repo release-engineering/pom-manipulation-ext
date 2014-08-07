@@ -150,9 +150,12 @@ public class ModelIO
 
             for ( final DependencyView dep : deps )
             {
-                versionOverrides.put( dep.asVersionlessArtifactRef(), dep.getVersion() );
-                logger.debug( "Added version override for: " + dep.asProjectRef()
-                                                                  .toString() + ":" + dep.getVersion() );
+                if ( !versionOverrides.containsKey( dep.asVersionlessArtifactRef() ) )
+                {
+                    versionOverrides.put( dep.asVersionlessArtifactRef(), dep.getVersion() );
+                    logger.debug( "Added version override for: " + dep.asProjectRef()
+                                                                      .toString() + ":" + dep.getVersion() );
+                }
             }
         }
         catch ( final GalleyMavenException e )
