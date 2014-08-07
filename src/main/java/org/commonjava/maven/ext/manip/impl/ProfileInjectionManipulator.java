@@ -20,6 +20,8 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
+import org.apache.maven.model.Activation;
+import org.apache.maven.model.ActivationProperty;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Profile;
 import org.codehaus.plexus.component.annotations.Component;
@@ -138,7 +140,22 @@ public class ProfileInjectionManipulator
             {
                 logger.debug( "Removing local profile {} ", p );
                 i.remove();
-                break;
+                // Don't break out of the loop so we can check for active profiles
+            }
+
+            // If we have injected profiles and one of the current profiles is using
+            // activeByDefault it will get mistakingly deactivated due to the semantics
+            // of activeByDefault. Therefore replace the activation.
+            if (p.getActivation() != null && p.getActivation().isActiveByDefault())
+            {
+                logger.warn( "Profile {} is activeByDefault", p );
+
+                Activation replacement = new Activation();
+                ActivationProperty replacementProp = new ActivationProperty();
+                replacementProp.setName( "!disableProfileActivation" );
+                replacement.setProperty( replacementProp );
+
+                p.setActivation( replacement );
             }
         }
 
