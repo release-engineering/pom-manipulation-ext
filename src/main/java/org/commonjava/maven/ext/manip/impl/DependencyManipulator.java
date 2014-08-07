@@ -42,6 +42,7 @@ import org.commonjava.maven.ext.manip.state.State;
 public class DependencyManipulator
     extends AlignmentManipulator
 {
+
     protected DependencyManipulator()
     {
     }
@@ -272,31 +273,81 @@ public class DependencyManipulator
         throws ManipulationException
     {
         final Map<String, String> moduleVersionOverrides = new HashMap<String, String>( versionOverrides );
-        for ( final String currentKey : versionOverrides.keySet() )
+
+        // These modes correspond to two different kinds of passes over the available override properties:
+        // 1. Module-specific: Don't process wildcard overrides here, allow module-specific settings to take precedence.
+        // 2. Wildcards: Add these IFF there is no corresponding module-specific override.
+        final boolean wildcardMode[] = { false, true };
+        for ( int i = 0; i < wildcardMode.length; i++ )
         {
-            if ( currentKey.contains( "@" ) )
+            for ( final String currentKey : versionOverrides.keySet() )
             {
-                moduleVersionOverrides.remove( currentKey );
-                final String[] artifactAndModule = currentKey.split( "@" );
-                if ( artifactAndModule.length != 2 )
+                if ( !currentKey.contains( "@" ) )
                 {
-                    throw new ManipulationException( "Invalid format for exclusion key " + currentKey );
+                    continue;
                 }
-                final String artifactGA = artifactAndModule[0];
-                final String moduleGA = artifactAndModule[1];
-                if ( moduleGA.equals( projectGA ) || moduleGA.equals( "*" ) )
+
+                moduleVersionOverrides.remove( currentKey );
+
+                final String currentValue = versionOverrides.get( currentKey );
+                final boolean isWildcard = currentKey.endsWith( "@*" );
+
+                // process module-specific overrides (first)
+                if ( !wildcardMode[i] )
                 {
-                    if ( versionOverrides.get( currentKey ) != null && versionOverrides.get( currentKey )
-                                                                                       .length() > 0 )
+                    // skip wildcard overrides in this mode
+                    if ( isWildcard )
                     {
-                        moduleVersionOverrides.put( artifactGA, versionOverrides.get( currentKey ) );
+                        continue;
+                    }
+
+                    final String[] artifactAndModule = currentKey.split( "@" );
+                    if ( artifactAndModule.length != 2 )
+                    {
+                        throw new ManipulationException( "Invalid format for exclusion key " + currentKey );
+                    }
+                    final String artifactGA = artifactAndModule[0];
+                    final String moduleGA = artifactAndModule[1];
+                    if ( moduleGA.equals( projectGA ) )
+                    {
+                        if ( currentValue != null && currentValue.length() > 0 )
+                        {
+                            moduleVersionOverrides.put( artifactGA, currentValue );
+                            logger.debug( "Overriding module dependency for {} with {} : {}", moduleGA, artifactGA,
+                                          currentValue );
+                        }
+                        else
+                        {
+                            moduleVersionOverrides.remove( artifactGA );
+                            logger.debug( "Ignoring module dependency override for {} " + moduleGA );
+                        }
+                    }
+                }
+                // process wildcard overrides (second)
+                else
+                {
+                    // skip module-specific overrides in this mode
+                    if ( !isWildcard )
+                    {
+                        continue;
+                    }
+
+                    final String artifactGA = currentKey.substring( 0, currentKey.length() - 2 );
+                    if ( moduleVersionOverrides.containsKey( artifactGA ) )
+                    {
+                        continue;
+                    }
+
+                    if ( currentValue != null && currentValue.length() > 0 )
+                    {
+                        moduleVersionOverrides.put( artifactGA, currentValue );
                         logger.debug( "Overriding module dependency for {} with {} : {}",
-                                      moduleGA, artifactGA, versionOverrides.get( currentKey ) );
+ projectGA, artifactGA,
+                                      currentValue );
                     }
                     else
                     {
                         moduleVersionOverrides.remove( artifactGA );
-                        logger.debug( "Ignoring module dependency override for {} " + moduleGA );
                     }
                 }
             }
