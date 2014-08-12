@@ -10,11 +10,13 @@
  ******************************************************************************/
 package org.commonjava.maven.ext.manip.impl;
 
+import static org.apache.commons.lang.StringUtils.join;
 import static org.commonjava.maven.ext.manip.state.DependencyState.GAV_SEPERATOR;
 import static org.commonjava.maven.ext.manip.util.IdUtils.ga;
 import static org.commonjava.maven.ext.manip.util.PropertiesUtils.getPropertiesByPrefix;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -98,26 +100,30 @@ public class DependencyManipulator
         // to projectref's as required?
 
         // Convert into a Map of GA : version
-        Map<String, String> override = new HashMap<String,String>();
+        Map<String, String> moduleOverrides = new HashMap<String, String>();
         for (final ProjectRef var : overrides.keySet())
         {
-            override.put( var.asProjectRef().toString(), overrides.get( var) );
+            moduleOverrides.put( var.asProjectRef()
+                                    .toString(), overrides.get( var ) );
         }
-        override.putAll( getPropertiesByPrefix( session.getUserProperties(),
+
+        logger.debug( "Adding in dependency-exclusion properties..." );
+        moduleOverrides.putAll( getPropertiesByPrefix( session.getUserProperties(),
                                                          DependencyState.DEPENDENCY_EXCLUSION_PREFIX ) );
-        override = removeReactorGAs( session, override );
-        override = applyModuleVersionOverrides( projectGA, override );
+
+        moduleOverrides = removeReactorGAs( session, moduleOverrides );
+        moduleOverrides = applyModuleVersionOverrides( projectGA, moduleOverrides );
 
         if ( project.isTopPOM() )
         {
             // Add/override a property to the build for each override
-            addVersionOverrideProperties( session, override, model.getProperties() );
+            addVersionOverrideProperties( session, moduleOverrides, model.getProperties() );
 
             // Handle the situation where the top level parent refers to a prior build that is in the BOM.
-            if ( project.getParent() != null && override.containsKey( ga( project.getParent() ) ) )
+            if ( project.getParent() != null && moduleOverrides.containsKey( ga( project.getParent() ) ) )
             {
                 model.getParent()
-                     .setVersion( override.get( ga( project.getParent() ) ) );
+                     .setVersion( moduleOverrides.get( ga( project.getParent() ) ) );
             }
 
             if ( session.getState( DependencyState.class ).getOverrideDependencies() )
@@ -134,7 +140,10 @@ public class DependencyManipulator
                 // Apply overrides to project dependency management
                 final List<Dependency> dependencies = dependencyManagement.getDependencies();
 
-                final Map<String, String> nonMatchingVersionOverrides = applyOverrides( dependencies, override );
+                logger.debug( "Applying overrides to managed dependencies for Top-pom: {}\n{}", projectGA,
+                              moduleOverrides );
+
+                final Map<String, String> nonMatchingVersionOverrides = applyOverrides( dependencies, moduleOverrides );
 
                 if ( session.getState( DependencyState.class ).getOverrideTransitive() )
                 {
@@ -159,7 +168,8 @@ public class DependencyManipulator
                             newDependency.setOptional( var.isOptional() );
                         }
 
-                        final String artifactVersion = overrides.get( projectRef );
+                        final String artifactVersion = moduleOverrides.get( var.asProjectRef()
+                                                                               .toString() );
 
                         newDependency.setVersion( artifactVersion );
 
@@ -173,6 +183,11 @@ public class DependencyManipulator
                     logger.debug( "Non-matching dependencies ignored." );
                 }
             }
+            else
+            {
+                logger.debug( "NOT applying overrides to managed dependencies for Top-pom: {}\n{}", projectGA,
+                              moduleOverrides );
+            }
         }
         else
         {
@@ -181,15 +196,25 @@ public class DependencyManipulator
             if ( session.getState( DependencyState.class ).getOverrideDependencies() &&
                             dependencyManagement != null )
             {
-                applyOverrides( dependencyManagement.getDependencies(), override );
+                logger.debug( "Applying overrides to managed dependencies for: {}\n{}", projectGA, moduleOverrides );
+                applyOverrides( dependencyManagement.getDependencies(), moduleOverrides );
+            }
+            else
+            {
+                logger.debug( "NOT applying overrides to managed dependencies for: {}\n{}", projectGA, moduleOverrides );
             }
         }
 
         if (session.getState( DependencyState.class ).getOverrideDependencies() )
         {
+            logger.debug( "Applying overrides to concrete dependencies for: {}\n{}", projectGA, moduleOverrides );
             // Apply overrides to project direct dependencies
             final List<Dependency> projectDependencies = model.getDependencies();
-            applyOverrides( projectDependencies, override );
+            applyOverrides( projectDependencies, moduleOverrides );
+        }
+        else
+        {
+            logger.debug( "NOT applying overrides to concrete dependencies for: {}\n{}", projectGA, moduleOverrides );
         }
     }
 
@@ -272,7 +297,13 @@ public class DependencyManipulator
                                                              final Map<String, String> versionOverrides )
         throws ManipulationException
     {
-        final Map<String, String> moduleVersionOverrides = new HashMap<String, String>( versionOverrides );
+        final Map<String, String> others = new HashMap<String, String>( versionOverrides );
+
+        logger.debug( "Calculating module-specific version overrides. Starting with:\n  {}",
+                      join( versionOverrides.entrySet(), "\n  " ) );
+
+        final Map<String, String> moduleVersionOverrides = new HashMap<String, String>();
+        final Set<String> seen = new HashSet<String>();
 
         // These modes correspond to two different kinds of passes over the available override properties:
         // 1. Module-specific: Don't process wildcard overrides here, allow module-specific settings to take precedence.
@@ -280,17 +311,21 @@ public class DependencyManipulator
         final boolean wildcardMode[] = { false, true };
         for ( int i = 0; i < wildcardMode.length; i++ )
         {
-            for ( final String currentKey : versionOverrides.keySet() )
+            for ( final String currentKey : others.keySet() )
             {
+                logger.debug( "Processing key for override: {}", currentKey );
+
                 if ( !currentKey.contains( "@" ) )
                 {
+                    logger.debug( "Not an override. Skip." );
                     continue;
                 }
 
-                moduleVersionOverrides.remove( currentKey );
+                seen.add( currentKey );
 
                 final String currentValue = versionOverrides.get( currentKey );
                 final boolean isWildcard = currentKey.endsWith( "@*" );
+                logger.debug( "Is wildcard? {}", isWildcard );
 
                 // process module-specific overrides (first)
                 if ( !wildcardMode[i] )
@@ -298,6 +333,7 @@ public class DependencyManipulator
                     // skip wildcard overrides in this mode
                     if ( isWildcard )
                     {
+                        logger.debug( "Not currently in wildcard mode. Skip." );
                         continue;
                     }
 
@@ -308,6 +344,10 @@ public class DependencyManipulator
                     }
                     final String artifactGA = artifactAndModule[0];
                     final String moduleGA = artifactAndModule[1];
+
+                    logger.debug( "For artifact override: {}, comparing parsed module: {} to current project: {}",
+                                  artifactGA, moduleGA, projectGA );
+
                     if ( moduleGA.equals( projectGA ) )
                     {
                         if ( currentValue != null && currentValue.length() > 0 )
@@ -318,7 +358,7 @@ public class DependencyManipulator
                         }
                         else
                         {
-                            moduleVersionOverrides.remove( artifactGA );
+                            others.remove( artifactGA );
                             logger.debug( "Ignoring module dependency override for {} " + moduleGA );
                         }
                     }
@@ -329,29 +369,50 @@ public class DependencyManipulator
                     // skip module-specific overrides in this mode
                     if ( !isWildcard )
                     {
+                        logger.debug( "Currently in wildcard mode. Skip." );
                         continue;
                     }
 
                     final String artifactGA = currentKey.substring( 0, currentKey.length() - 2 );
+                    logger.debug( "For artifact override: {}, checking if current overrides already contain a module-specific version.",
+                                  artifactGA );
+
                     if ( moduleVersionOverrides.containsKey( artifactGA ) )
                     {
+                        logger.debug( "For artifact override: {}, current overrides already contain a module-specific version. Skip.",
+                                      artifactGA );
                         continue;
                     }
 
                     if ( currentValue != null && currentValue.length() > 0 )
                     {
                         moduleVersionOverrides.put( artifactGA, currentValue );
-                        logger.debug( "Overriding module dependency for {} with {} : {}",
- projectGA, artifactGA,
+                        logger.debug( "Overriding module dependency for {} with {} : {}", projectGA, artifactGA,
                                       currentValue );
                     }
                     else
                     {
-                        moduleVersionOverrides.remove( artifactGA );
+                        others.remove( artifactGA );
+                        logger.debug( "Ignoring module dependency override for {} " + projectGA );
                     }
                 }
             }
         }
+
+        for ( final Map.Entry<String, String> entry : others.entrySet() )
+        {
+            final String key = entry.getKey();
+            if ( !seen.contains( key ) && !moduleVersionOverrides.containsKey( key ) )
+            {
+                final String value = entry.getValue();
+                logger.debug( "back-filling with override from original map: '{}' = '{}'", key, value );
+
+                moduleVersionOverrides.put( key, value );
+            }
+        }
+
+        logger.debug( "Returning module-specific overrides:\n{}", join( moduleVersionOverrides.entrySet(), "\n  " ) );
+
         return moduleVersionOverrides;
     }
 
