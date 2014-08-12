@@ -6,7 +6,7 @@ System.out.println(pom.properties);
 
 def failed = false
 pom.properties.each {
-    if ( it.text().contains ("4.1") || it.text().contains ("2.5") )
+    if ( it.text().contains ("2.5") )
     {
         failed = true
     }

@@ -116,9 +116,6 @@ public class DependencyManipulator
 
         if ( project.isTopPOM() )
         {
-            // Add/override a property to the build for each override
-            addVersionOverrideProperties( session, moduleOverrides, model.getProperties() );
-
             // Handle the situation where the top level parent refers to a prior build that is in the BOM.
             if ( project.getParent() != null && moduleOverrides.containsKey( ga( project.getParent() ) ) )
             {
@@ -140,10 +137,16 @@ public class DependencyManipulator
                 // Apply overrides to project dependency management
                 final List<Dependency> dependencies = dependencyManagement.getDependencies();
 
+
                 logger.debug( "Applying overrides to managed dependencies for Top-pom: {}\n{}", projectGA,
                               moduleOverrides );
 
                 final Map<String, String> nonMatchingVersionOverrides = applyOverrides( dependencies, moduleOverrides );
+                final Map<String, String> matchedOverrides = new HashMap<String, String>(moduleOverrides);
+                matchedOverrides.keySet().removeAll( nonMatchingVersionOverrides.keySet() );
+
+                // Add/override a property to the build for each override
+                addVersionOverrideProperties( session, matchedOverrides, model.getProperties() );
 
                 if ( session.getState( DependencyState.class ).getOverrideTransitive() )
                 {
@@ -176,6 +179,9 @@ public class DependencyManipulator
                         dependencyManagement.getDependencies()
                         .add( 0, newDependency );
                         logger.debug( "New entry added to <DependencyManagement/> - {} : {} ", projectRef, artifactVersion );
+
+                        // Add/override a property to the build for each override
+                        addVersionOverrideProperties( session, nonMatchingVersionOverrides, model.getProperties() );
                     }
                 }
                 else

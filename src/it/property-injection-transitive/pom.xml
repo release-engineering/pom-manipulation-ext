@@ -9,7 +9,7 @@
   <artifactId>basic-dependency-override</artifactId>
   <version>1.0-SNAPSHOT</version>
 
-  <name>Test disabling property injection</name>
+  <name>Test property injection with disable transitives</name>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
