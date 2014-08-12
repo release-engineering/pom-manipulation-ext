@@ -294,16 +294,16 @@ public class DependencyManipulator
      * @throws ManipulationException
      */
     private Map<String, String> applyModuleVersionOverrides( final String projectGA,
-                                                             final Map<String, String> versionOverrides )
+                                                             final Map<String, String> originalOverrides )
         throws ManipulationException
     {
-        final Map<String, String> others = new HashMap<String, String>( versionOverrides );
+        final Map<String, String> remainingOverrides = new HashMap<String, String>( originalOverrides );
 
         logger.debug( "Calculating module-specific version overrides. Starting with:\n  {}",
-                      join( versionOverrides.entrySet(), "\n  " ) );
+                      join( remainingOverrides.entrySet(), "\n  " ) );
 
         final Map<String, String> moduleVersionOverrides = new HashMap<String, String>();
-        final Set<String> seen = new HashSet<String>();
+        final Set<String> processedKeys = new HashSet<String>();
 
         // These modes correspond to two different kinds of passes over the available override properties:
         // 1. Module-specific: Don't process wildcard overrides here, allow module-specific settings to take precedence.
@@ -311,7 +311,7 @@ public class DependencyManipulator
         final boolean wildcardMode[] = { false, true };
         for ( int i = 0; i < wildcardMode.length; i++ )
         {
-            for ( final String currentKey : others.keySet() )
+            for ( final String currentKey : remainingOverrides.keySet() )
             {
                 logger.debug( "Processing key for override: {}", currentKey );
 
@@ -321,9 +321,10 @@ public class DependencyManipulator
                     continue;
                 }
 
-                seen.add( currentKey );
+                // add to list of processed keys to prevent it from being transferred over at the end, from the remainingKeys map.
+                processedKeys.add( currentKey );
 
-                final String currentValue = versionOverrides.get( currentKey );
+                final String currentValue = remainingOverrides.get( currentKey );
                 final boolean isWildcard = currentKey.endsWith( "@*" );
                 logger.debug( "Is wildcard? {}", isWildcard );
 
@@ -358,7 +359,8 @@ public class DependencyManipulator
                         }
                         else
                         {
-                            others.remove( artifactGA );
+                            //remove from remaining, since it's set to an empty value to disable override from the BOM
+                            remainingOverrides.remove( artifactGA );
                             logger.debug( "Ignoring module dependency override for {} " + moduleGA );
                         }
                     }
@@ -392,17 +394,19 @@ public class DependencyManipulator
                     }
                     else
                     {
-                        others.remove( artifactGA );
+                        //remove from remaining, since it's set to an empty value to disable override from the BOM
+                        remainingOverrides.remove( artifactGA );
                         logger.debug( "Ignoring module dependency override for {} " + projectGA );
                     }
                 }
             }
         }
 
-        for ( final Map.Entry<String, String> entry : others.entrySet() )
+        // now, go back and fill in any overrides coming from BOMs that weren't overridden or otherwise processed (eg. irrelevant module-specific overrides)
+        for ( final Map.Entry<String, String> entry : remainingOverrides.entrySet() )
         {
             final String key = entry.getKey();
-            if ( !seen.contains( key ) && !moduleVersionOverrides.containsKey( key ) )
+            if ( !processedKeys.contains( key ) && !moduleVersionOverrides.containsKey( key ) )
             {
                 final String value = entry.getValue();
                 logger.debug( "back-filling with override from original map: '{}' = '{}'", key, value );
