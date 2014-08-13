@@ -317,7 +317,7 @@ public class DependencyManipulator
         final boolean wildcardMode[] = { false, true };
         for ( int i = 0; i < wildcardMode.length; i++ )
         {
-            for ( final String currentKey : remainingOverrides.keySet() )
+            for ( final String currentKey : new HashSet<String>(remainingOverrides.keySet()))
             {
                 logger.debug( "Processing key for override: {}", currentKey );
 
