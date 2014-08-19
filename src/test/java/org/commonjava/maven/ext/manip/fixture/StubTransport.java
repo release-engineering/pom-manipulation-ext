@@ -4,6 +4,7 @@ import static org.apache.commons.io.IOUtils.closeQuietly;
 
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Map;
 
 import org.commonjava.maven.ext.manip.resolver.MavenLocationExpander;
 import org.commonjava.maven.galley.TransferException;
@@ -21,11 +22,11 @@ public class StubTransport
     implements Transport
 {
 
-    private final byte[] data;
+    private final Map<String, byte[]> dataMap;
 
-    public StubTransport( final byte[] data )
+    public StubTransport( final Map<String, byte[]> dataMap )
     {
-        this.data = data;
+        this.dataMap = dataMap;
     }
 
     @Override
@@ -33,12 +34,15 @@ public class StubTransport
                                           final int timeoutSeconds )
         throws TransferException
     {
+        System.out.println( "Creating download for: " + resource.getPath() );
         return new DownloadJob()
         {
             @Override
             public Transfer call()
                 throws Exception
             {
+                final byte[] data = dataMap.get( resource.getPath() );
+
                 if ( data == null )
                 {
                     return null;

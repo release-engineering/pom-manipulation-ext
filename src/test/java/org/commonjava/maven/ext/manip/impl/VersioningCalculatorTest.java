@@ -10,6 +10,7 @@
  ******************************************************************************/
 package org.commonjava.maven.ext.manip.impl;
 
+import static org.commonjava.maven.ext.manip.util.IdUtils.gav;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertThat;
 
@@ -17,6 +18,9 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 
 import org.apache.maven.artifact.repository.ArtifactRepository;
@@ -30,15 +34,19 @@ import org.apache.maven.execution.DefaultMavenExecutionRequest;
 import org.apache.maven.execution.DefaultMavenExecutionResult;
 import org.apache.maven.execution.MavenExecutionRequest;
 import org.apache.maven.execution.MavenSession;
+import org.apache.maven.model.Model;
 import org.apache.maven.repository.DefaultMirrorSelector;
 import org.codehaus.plexus.DefaultPlexusContainer;
 import org.codehaus.plexus.PlexusContainer;
+import org.commonjava.maven.atlas.ident.ref.ProjectRef;
 import org.commonjava.maven.ext.manip.ManipulationException;
 import org.commonjava.maven.ext.manip.fixture.StubTransport;
+import org.commonjava.maven.ext.manip.model.Project;
 import org.commonjava.maven.ext.manip.resolver.GalleyAPIWrapper;
 import org.commonjava.maven.ext.manip.resolver.GalleyInfrastructure;
 import org.commonjava.maven.ext.manip.resolver.MavenLocationExpander;
 import org.commonjava.maven.ext.manip.state.ManipulationSession;
+import org.commonjava.maven.ext.manip.state.VersionCalculation;
 import org.commonjava.maven.ext.manip.state.VersioningState;
 import org.commonjava.maven.galley.model.Location;
 import org.commonjava.maven.galley.spi.transport.Transport;
@@ -338,6 +346,77 @@ public class VersioningCalculatorTest
     }
 
     @Test
+    public void incrementExistingSerialSuffix_TwoProjects_UsingRepositoryMetadata_AvailableOnlyForOne()
+        throws Exception
+    {
+        final String v = "1.2.GA";
+        final String os = "-foo-1";
+        final String ns = "foo-10";
+
+        final Model m1 = new Model();
+        m1.setGroupId( GROUP_ID );
+        m1.setArtifactId( ARTIFACT_ID );
+        m1.setVersion( v + os );
+        final Project p1 = new Project( m1 );
+
+        final String a2 = ARTIFACT_ID + "-dep";
+        final Model m2 = new Model();
+        m2.setGroupId( GROUP_ID );
+        m2.setArtifactId( a2 );
+        m2.setVersion( v + os );
+        final Project p2 = new Project( m2 );
+
+        final Properties props = new Properties();
+
+        props.setProperty( VersioningState.INCREMENT_SERIAL_SUFFIX_SYSPROP, "foo-0" );
+        setupSession( props, "1.2.GA-foo-3", "1.2.GA-foo-2", "1.2.GA-foo-9" );
+
+        final Map<String, String> result = modder.calculateVersioningChanges( Arrays.asList( p1, p2 ), session );
+
+        assertThat( result.get( gav( GROUP_ID, ARTIFACT_ID, v + os ) ), equalTo( v + "-" + ns ) );
+        assertThat( result.get( gav( GROUP_ID, a2, v + os ) ), equalTo( v + "-" + ns ) );
+    }
+
+    @Test
+    public void incrementExistingSerialSuffix_TwoProjects_UsingRepositoryMetadata_DifferentAvailableIncrements()
+        throws Exception
+    {
+        final String v = "1.2.GA";
+        final String os = "-foo-1";
+        final String ns = "foo-10";
+
+        final Model m1 = new Model();
+        m1.setGroupId( GROUP_ID );
+        m1.setArtifactId( ARTIFACT_ID );
+        m1.setVersion( v + os );
+        final Project p1 = new Project( m1 );
+
+        final String a2 = ARTIFACT_ID + "-dep";
+        final Model m2 = new Model();
+        m2.setGroupId( GROUP_ID );
+        m2.setArtifactId( a2 );
+        m2.setVersion( v + os );
+        final Project p2 = new Project( m2 );
+
+        final Properties props = new Properties();
+
+        props.setProperty( VersioningState.INCREMENT_SERIAL_SUFFIX_SYSPROP, "foo-0" );
+        final Map<ProjectRef, String[]> versionMap = new HashMap<ProjectRef, String[]>();
+
+        versionMap.put( new ProjectRef( p1.getGroupId(), p1.getArtifactId() ), new String[] { "1.2.GA-foo-3",
+            "1.2.GA-foo-2", "1.2.GA-foo-9" } );
+        versionMap.put( new ProjectRef( p2.getGroupId(), p2.getArtifactId() ), new String[] { "1.2.GA-foo-3",
+            "1.2.GA-foo-2" } );
+
+        setupSession( props, versionMap );
+
+        final Map<String, String> result = modder.calculateVersioningChanges( Arrays.asList( p1, p2 ), session );
+
+        assertThat( result.get( gav( GROUP_ID, ARTIFACT_ID, v + os ) ), equalTo( v + "-" + ns ) );
+        assertThat( result.get( gav( GROUP_ID, a2, v + os ) ), equalTo( v + "-" + ns ) );
+    }
+
+    @Test
     public void incrementExistingSerialSuffix_UsingRepositoryMetadataWithIrrelevantVersions()
         throws Exception
     {
@@ -371,10 +450,17 @@ public class VersioningCalculatorTest
     private String calculate( final String version )
         throws Exception
     {
-        return modder.calculate( GROUP_ID, ARTIFACT_ID, version, session );
+        return modder.calculate( GROUP_ID, ARTIFACT_ID, version, session )
+                     .renderVersion();
     }
 
     private VersioningState setupSession( final Properties properties, final String... versions )
+        throws Exception
+    {
+        return setupSession( properties, Collections.singletonMap( new ProjectRef( GROUP_ID, ARTIFACT_ID ), versions ) );
+    }
+
+    private VersioningState setupSession( final Properties properties, final Map<ProjectRef, String[]> versionMap )
         throws Exception
     {
         final ArtifactRepository ar =
@@ -395,19 +481,30 @@ public class VersioningCalculatorTest
         final VersioningState state = new VersioningState( properties );
         session.setState( state );
 
-        byte[] data = null;
-        if ( versions.length > 0 )
+        final Map<String, byte[]> dataMap = new HashMap<String, byte[]>();
+        if ( versionMap != null && !versionMap.isEmpty() )
         {
-            data = setupMetadataVersions( versions );
+            for ( final Map.Entry<ProjectRef, String[]> entry : versionMap.entrySet() )
+            {
+                final String path = toMetadataPath( entry.getKey() );
+                final byte[] data = setupMetadataVersions( entry.getValue() );
+                dataMap.put( path, data );
+            }
         }
 
         final Location mdLoc = MavenLocationExpander.EXPANSION_TARGET;
-        final Transport mdTrans = new StubTransport( data );
+        final Transport mdTrans = new StubTransport( dataMap );
 
         modder =
             new TestVersionCalculator( new ManipulationSession(), mdLoc, mdTrans, temp.newFolder( "galley-cache" ) );
 
         return state;
+    }
+
+    private String toMetadataPath( final ProjectRef key )
+    {
+        return String.format( "%s/%s/maven-metadata.xml", key.getGroupId()
+                                                             .replace( '.', '/' ), key.getArtifactId() );
     }
 
     public static final class TestVersionCalculator
@@ -429,8 +526,8 @@ public class VersioningCalculatorTest
         }
 
         @Override
-        public String calculate( final String groupId, final String artifactId, final String originalVersion,
-                                 final ManipulationSession session )
+        public VersionCalculation calculate( final String groupId, final String artifactId,
+                                             final String originalVersion, final ManipulationSession session )
             throws ManipulationException
         {
             return super.calculate( groupId, artifactId, originalVersion, session );

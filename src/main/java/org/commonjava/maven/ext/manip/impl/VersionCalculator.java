@@ -29,6 +29,7 @@ import org.commonjava.maven.ext.manip.ManipulationException;
 import org.commonjava.maven.ext.manip.model.Project;
 import org.commonjava.maven.ext.manip.resolver.GalleyAPIWrapper;
 import org.commonjava.maven.ext.manip.state.ManipulationSession;
+import org.commonjava.maven.ext.manip.state.VersionCalculation;
 import org.commonjava.maven.ext.manip.state.VersioningState;
 import org.commonjava.maven.galley.maven.GalleyMavenException;
 import org.commonjava.maven.galley.maven.model.view.MavenMetadataView;
@@ -50,7 +51,7 @@ public class VersionCalculator
 
     private static final String SERIAL_SUFFIX_PATTERN = "([^-.]+)(?:([-.])(\\d+))?$";
 
-    private static final String SNAPSHOT_SUFFIX = "-SNAPSHOT";
+    public static final String SNAPSHOT_SUFFIX = "-SNAPSHOT";
 
     private final Logger logger = LoggerFactory.getLogger( getClass() );
 
@@ -73,42 +74,67 @@ public class VersionCalculator
                                                            final ManipulationSession session )
         throws ManipulationException
     {
-        final Map<String, String> versionsByGAV = new HashMap<String, String>();
-
+        final Map<String, VersionCalculation> calculationsByGA = new HashMap<String, VersionCalculation>();
+        boolean incremental = false;
         for ( final Project project : projects )
         {
             final String originalVersion = project.getVersion();
-            final String modifiedVersion =
+
+            final VersionCalculation modifiedVersion =
                 calculate( project.getGroupId(), project.getArtifactId(), originalVersion, session );
 
-            if ( !modifiedVersion.equals( originalVersion ) )
+            if ( modifiedVersion.hasCalculation() )
             {
-                final String gav = gav( project );
-                logger.info( String.format( "%s has updated version: %s. Marking for rewrite.", gav, modifiedVersion ) );
-                versionsByGAV.put( gav, modifiedVersion );
+                incremental = incremental || modifiedVersion.isIncremental();
+                calculationsByGA.put( gav( project ), modifiedVersion );
             }
         }
 
-        return versionsByGAV;
+        if ( incremental )
+        {
+            int maxQualifier = 1;
+            for ( final VersionCalculation calc : calculationsByGA.values() )
+            {
+                final int i = calc.getIncrementalQualifier();
+                maxQualifier = maxQualifier > i ? maxQualifier : i;
+            }
+
+            for ( final VersionCalculation calc : calculationsByGA.values() )
+            {
+                calc.setIncrementalQualifier( maxQualifier );
+            }
+        }
+
+        final Map<String, String> versionsByGA = new HashMap<String, String>();
+        for ( final Map.Entry<String, VersionCalculation> entry : calculationsByGA.entrySet() )
+        {
+            final String modifiedVersion = entry.getValue()
+                                                .renderVersion();
+            logger.debug( entry.getKey() + " has updated version: {}. Marking for rewrite.", modifiedVersion );
+            versionsByGA.put( entry.getKey(), modifiedVersion );
+        }
+
+        return versionsByGA;
     }
 
     /**
      * Calculate the version modification for a given GAV.
      */
     // FIXME: Loooong method
-    protected String calculate( final String groupId, final String artifactId, final String originalVersion,
+    protected VersionCalculation calculate( final String groupId, final String artifactId,
+                                            final String originalVersion,
                                 final ManipulationSession session )
         throws ManipulationException
     {
-        String result = originalVersion;
+        String baseVersion = originalVersion;
 
         boolean snapshot = false;
         // If we're building a snapshot, make sure the resulting version ends
         // in "-SNAPSHOT"
-        if ( result.endsWith( SNAPSHOT_SUFFIX ) )
+        if ( baseVersion.endsWith( SNAPSHOT_SUFFIX ) )
         {
             snapshot = true;
-            result = result.substring( 0, result.length() - SNAPSHOT_SUFFIX.length() );
+            baseVersion = baseVersion.substring( 0, baseVersion.length() - SNAPSHOT_SUFFIX.length() );
         }
 
         final VersioningState state = session.getState( VersioningState.class );
@@ -124,7 +150,7 @@ public class VersionCalculator
         final Pattern serialSuffixPattern = Pattern.compile( SERIAL_SUFFIX_PATTERN );
         final Matcher suffixMatcher = serialSuffixPattern.matcher( suff );
 
-        String useSuffix = suff;
+        final VersionCalculation vc = new VersionCalculation( originalVersion, baseVersion );
         if ( suffixMatcher.matches() )
         {
             // the "redhat" in "redhat-1"
@@ -135,13 +161,14 @@ public class VersionCalculator
                 sep = "-";
             }
 
-            final int idx = result.indexOf( suffixBase );
+            final int idx = baseVersion.indexOf( suffixBase );
 
             if ( idx > 1 )
             {
                 // trim the old suffix off.
-                result = result.substring( 0, idx - 1 );
-                logger.debug( "Trimmed version (without pre-existing suffix): " + result );
+                baseVersion = baseVersion.substring( 0, idx - 1 );
+                vc.setBaseVersion( baseVersion );
+                logger.debug( "Trimmed version (without pre-existing suffix): " + baseVersion );
             }
 
             // If we're using serial suffixes (-redhat-N) and the flag is set
@@ -151,6 +178,8 @@ public class VersionCalculator
             if ( suff.equals( incrementalSerialSuffix ) )
             {
                 logger.debug( "Resolving suffixes already found in metadata to determine increment base." );
+
+                vc.setVersionSuffix( suffixBase );
 
                 final List<String> versionCandidates = new ArrayList<String>();
                 versionCandidates.add( originalVersion );
@@ -177,10 +206,10 @@ public class VersionCalculator
                         }
 
                         final String base = version.substring( 0, baseIdx - 1 );
-                        if ( !result.equals( base ) )
+                        if ( !baseVersion.equals( base ) )
                         {
                             logger.debug( "Ignoring irrelevant version: '" + version + "' ('" + base
-                                + "' doesn't match on base-version: '" + result + "')." );
+                                + "' doesn't match on base-version: '" + baseVersion + "')." );
                             continue;
                         }
 
@@ -199,30 +228,21 @@ public class VersionCalculator
                     }
                 }
 
-                useSuffix = suffixBase + sep + ( maxSerial + 1 );
+
+                vc.setSuffixSeparator( sep );
+                vc.setIncrementalQualifier( maxSerial + 1 );
             }
-
-            // Now, pare back the trimmed version base to remove non-alphanums
-            // like '.' and '-' so we have more control over them...
-            int trim = 0;
-
-            // calculate the trim size
-            for ( int i = result.length() - 1; i > 0 && !Character.isLetterOrDigit( result.charAt( i ) ); i-- )
+            else
             {
-                trim++;
-            }
-
-            // perform the actual trim to get back to an alphanumeric ending.
-            if ( trim > 0 )
-            {
-                result = result.substring( 0, result.length() - trim );
+                vc.setVersionSuffix( suff );
             }
         }
         // If we're not using a serial suffix, and the version already ends
         // with the chosen suffix, there's nothing to do!
         else if ( originalVersion.endsWith( suffix ) )
         {
-            return originalVersion;
+            vc.clear();
+            return vc;
         }
 
         // assume the version is of the form 1.2.3.GA, where appending the
@@ -233,23 +253,20 @@ public class VersionCalculator
         // now, check the above assumption...
         // if the version is of the form: 1.2.3, then we need to append the
         // suffix as a final version part using '.'
-        logger.info( "Partial result: " + result );
-        if ( result.matches( ".+[-.]\\d+" ) )
+        logger.info( "Partial result: " + baseVersion );
+        if ( baseVersion.matches( ".+[-.]\\d+" ) )
         {
             sep = ".";
         }
 
+        vc.setBaseVersionSeparator( sep );
+
         // TODO OSGi fixup for versions like 1.2.GA or 1.2 (too few parts)
 
-        result += sep + useSuffix;
-
         // tack -SNAPSHOT back on if necessary...
-        if ( state.preserveSnapshot() && snapshot )
-        {
-            result += SNAPSHOT_SUFFIX;
-        }
+        vc.setSnapshot( state.preserveSnapshot() && snapshot );
 
-        return result;
+        return vc;
     }
 
     /**
