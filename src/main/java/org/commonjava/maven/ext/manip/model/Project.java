@@ -53,10 +53,9 @@ import org.commonjava.maven.ext.manip.ManipulationException;
 
 /**
  * Provides a convenient way of passing around related information about a Maven
- * project without passing multiple parameters. The models in this class
- * represent two basic concepts: a model that is being modified by VMan, and
- * other forms of that model used for comparison. Also stored is the key and
- * original POM file related to these models.
+ * project without passing multiple parameters. The model in this class
+ * represents the model that is being modified by the extension. Also stored is
+ * the key and original POM file related to these models.
  *
  * @author jdcasey
  */
@@ -68,7 +67,7 @@ public class Project
     private final File pom;
 
     /**
-     * Model undergoing modification during VMan execution. This model is what
+     * Model undergoing modification during execution. This model is what
      * will eventually be written back to disk.
      */
     private final Model model;
@@ -443,44 +442,6 @@ public class Project
             reporting.flushReportPluginMap();
         }
     }
-
-    /**
-     * Set the effective model related to this project, which has inheritance
-     * and profile/BOM injection applied.
-     *
-     * @see EffectiveModelBuilder#loadEffectiveModel(Project, com.redhat.rcm.version.mgr.session.VersionManagerSession)
-    public void setEffectiveModel( final Model effModel )
-    {
-        this.effectiveModel = effModel;
-    }
-     */
-
-    /**
-     * FOR REFERENCE ONLY.
-     *
-     * If set, return the effective {@link Model} instance.
-     *
-     * This model has had interpolation, inheritance, and profile/BOM
-     * injection calculated.
-     *
-     * @see EffectiveModelBuilder#loadEffectiveModel(Project, com.redhat.rcm.version.mgr.session.VersionManagerSession)
-    public Model getEffectiveModel()
-    {
-        return effectiveModel;
-    }
-     */
-
-    /**
-     * FOR REFERENCE ONLY.
-     *
-     * Return the original {@link Model} instance AS IT WAS PARSED FROM THE POM.
-     * This is the RAW POM, without interpolation, inheritance, or profile
-     * injection calculated.
-    public Model getOriginalModel()
-    {
-        return originalModel;
-    }
-     */
 
     public ProjectRef getVersionlessParentKey()
     {

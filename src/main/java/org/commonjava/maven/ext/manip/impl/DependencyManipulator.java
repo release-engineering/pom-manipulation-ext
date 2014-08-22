@@ -44,6 +44,10 @@ import org.commonjava.maven.ext.manip.state.State;
 public class DependencyManipulator
     extends AlignmentManipulator
 {
+    /**
+     * Used to store mappings of old property -> new version.
+     */
+    private HashMap<String, String> versionPropertyUpdateMap = new HashMap<String, String>();
 
     protected DependencyManipulator()
     {
@@ -73,7 +77,24 @@ public class DependencyManipulator
     public Set<Project> applyChanges( final List<Project> projects, final ManipulationSession session )
         throws ManipulationException
     {
-        return internalApplyChanges (session.getState( DependencyState.class ), projects, session);
+        Set<Project> result = internalApplyChanges (session.getState( DependencyState.class ), projects, session);
+
+        // If we've changed something now update any old properties with the new values.
+        if (result.size() > 0)
+        {
+            for (final Project p : result)
+            {
+                for (String key : versionPropertyUpdateMap.keySet())
+                {
+                    if ( p.getModel().getProperties().containsKey (key) )
+                    {
+                        logger.debug( "Updating property {} with {} ", key, versionPropertyUpdateMap.get( key ) );
+                        p.getModel().getProperties().setProperty( key, versionPropertyUpdateMap.get( key ) );
+                    }
+                }
+            }
+        }
+        return result;
     }
 
     @Override
@@ -138,10 +159,10 @@ public class DependencyManipulator
                 final List<Dependency> dependencies = dependencyManagement.getDependencies();
 
 
-                logger.debug( "Applying overrides to managed dependencies for Top-pom: {}\n{}", projectGA,
+                logger.debug( "Applying overrides to managed dependencies for top-pom: {}\n{}", projectGA,
                               moduleOverrides );
 
-                final Map<String, String> nonMatchingVersionOverrides = applyOverrides( dependencies, moduleOverrides );
+                final Map<String, String> nonMatchingVersionOverrides = applyOverrides( session, dependencies, moduleOverrides );
                 final Map<String, String> matchedOverrides = new HashMap<String, String>(moduleOverrides);
                 matchedOverrides.keySet().removeAll( nonMatchingVersionOverrides.keySet() );
 
@@ -173,11 +194,9 @@ public class DependencyManipulator
 
                         final String artifactVersion = moduleOverrides.get( var.asProjectRef()
                                                                                .toString() );
-
                         newDependency.setVersion( artifactVersion );
 
-                        dependencyManagement.getDependencies()
-                        .add( 0, newDependency );
+                        dependencyManagement.getDependencies().add( 0, newDependency );
                         logger.debug( "New entry added to <DependencyManagement/> - {} : {} ", projectRef, artifactVersion );
 
                         // Add/override a property to the build for each override
@@ -203,7 +222,7 @@ public class DependencyManipulator
                             dependencyManagement != null )
             {
                 logger.debug( "Applying overrides to managed dependencies for: {}\n{}", projectGA, moduleOverrides );
-                applyOverrides( dependencyManagement.getDependencies(), moduleOverrides );
+                applyOverrides( session, dependencyManagement.getDependencies(), moduleOverrides );
             }
             else
             {
@@ -216,7 +235,7 @@ public class DependencyManipulator
             logger.debug( "Applying overrides to concrete dependencies for: {}\n{}", projectGA, moduleOverrides );
             // Apply overrides to project direct dependencies
             final List<Dependency> projectDependencies = model.getDependencies();
-            applyOverrides( projectDependencies, moduleOverrides );
+            applyOverrides( session, projectDependencies, moduleOverrides );
         }
         else
         {
@@ -226,12 +245,14 @@ public class DependencyManipulator
 
     /**
      * Apply a set of version overrides to a list of dependencies. Return a set of the overrides which were not applied.
+     * @param session
      *
      * @param dependencies The list of dependencies
      * @param overrides The map of dependency version overrides
      * @return The map of overrides that were not matched in the dependencies
+     * @throws ManipulationException
      */
-    private Map<String, String> applyOverrides( final List<Dependency> dependencies, final Map<String, String> overrides )
+    private Map<String, String> applyOverrides( ManipulationSession session, final List<Dependency> dependencies, final Map<String, String> overrides ) throws ManipulationException
     {
         // Duplicate the override map so unused overrides can be easily recorded
         final Map<String, String> unmatchedVersionOverrides = new HashMap<String, String>();
@@ -258,8 +279,29 @@ public class DependencyManipulator
                 }
                 else
                 {
-                    dependency.setVersion( overrideVersion );
-                    logger.debug( "Altered dependency {} {} -> {}", groupIdArtifactId, oldVersion, overrideVersion );
+                    // Handle the situation where we are updating a dependency that has an existing property - in this
+                    // case we want to update the property instead.
+                    // TODO: Handle the scenario where the version might be ${....}${....}
+                    if (oldVersion.startsWith( "${" ) )
+                    {
+                        int endIndex = oldVersion.indexOf( '}');
+                        String oldProperty = oldVersion.substring( 2, endIndex);
+
+                        if (endIndex != oldVersion.length() - 1)
+                        {
+                            throw new ManipulationException
+                                ("NYI : handling for versions (" + oldVersion + ") with multiple embedded properties is NYI. ");
+                        }
+                        logger.debug ("Original version was a property mapping; caching new value for update {} -> {}",
+                                     oldProperty, overrideVersion);
+
+                        versionPropertyUpdateMap.put( oldVersion.substring( 2, oldVersion.length() -1 ), overrideVersion );
+                    }
+                    else
+                    {
+                        logger.debug( "Altered dependency {} {} -> {}", groupIdArtifactId, oldVersion, overrideVersion );
+                        dependency.setVersion( overrideVersion );
+                    }
                     unmatchedVersionOverrides.remove( groupIdArtifactId );
                 }
             }
@@ -426,6 +468,7 @@ public class DependencyManipulator
         return moduleVersionOverrides;
     }
 
+
     /***
      * Add properties to the build which match the version overrides.
      * The property names are in the format
@@ -438,7 +481,7 @@ public class DependencyManipulator
         VersionPropertyFormat result = VersionPropertyFormat.VG;
 
         switch ( VersionPropertyFormat.valueOf( properties.getProperty( "versionPropertyFormat",
-                                                                        VersionPropertyFormat.VG.toString() ).toUpperCase() ) )
+                                                                        VersionPropertyFormat.NONE.toString() ).toUpperCase() ) )
         {
             case VG:
             {

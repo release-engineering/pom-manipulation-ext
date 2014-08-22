@@ -1,3 +1,4 @@
+
 # POM Manipulation Extension for Apache Maven
 
 A Maven extension which provides a series of POM pre-processors. When it is activated it will write a log file `target/manipulation.log`.
@@ -83,6 +84,10 @@ will change to
          <version>2.0.0.Alpha1-rebuild-1</version>
 ```
 
+
+:large_blue_circle: Note that for existing dependencies that reference a property the tool will attempt to locate
+this property to update the version within the property.
+
 ### Direct Dependencies
 
 By default the extension will override dependencies from the remote BOM. This may be disabled via
@@ -127,11 +132,14 @@ For example
 
 ### Dependency Property Injection
 
+:warning: *This functionality is now deprecated ; if it is not required it may be removed in a future release.*
+
 The extension will automatically set properties which match the version overrides.  These properties can be used, for example, in resource filtering in the build.  By default the extension supports two different formats for the properties. It is controlled by the property:
 
     -DversionPropertyFormat=[VG|VGA|NONE]
 
-Where `VG` is `version.<group>` e.g. `version.org.slf4j`, `VGA` is `version.<group>.<artifact>` and `NONE` disables the injection. The default is `VG`.
+Where `VG` is `version.<group>` e.g. `version.org.slf4j`, `VGA` is `version.<group>.<artifact>` and `NONE` disables the injection. The default is `NONE`.
+
 
 ## Plugin Manipulation
 
