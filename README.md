@@ -85,8 +85,9 @@ will change to
 ```
 
 
-:large_blue_circle: Note that for existing dependencies that reference a property the tool will attempt to locate
-this property to update the version within the property.
+:large_blue_circle: Note that for existing dependencies that reference a property the tool will update
+this property with the new version. If the property can't be found (e.g. it was inherited), a new one will
+be injected at the top level.
 
 ### Direct Dependencies
 

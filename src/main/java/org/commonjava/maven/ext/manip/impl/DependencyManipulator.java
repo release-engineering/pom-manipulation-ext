@@ -49,6 +49,7 @@ public class DependencyManipulator
      */
     private HashMap<String, String> versionPropertyUpdateMap = new HashMap<String, String>();
 
+
     protected DependencyManipulator()
     {
     }
@@ -82,14 +83,33 @@ public class DependencyManipulator
         // If we've changed something now update any old properties with the new values.
         if (result.size() > 0)
         {
-            for (final Project p : result)
+            for (String key : versionPropertyUpdateMap.keySet())
             {
-                for (String key : versionPropertyUpdateMap.keySet())
+                boolean found = false;
+
+                for (final Project p : result)
                 {
                     if ( p.getModel().getProperties().containsKey (key) )
                     {
-                        logger.debug( "Updating property {} with {} ", key, versionPropertyUpdateMap.get( key ) );
+                        logger.info( "Updating property {} with {} ", key, versionPropertyUpdateMap.get( key ) );
                         p.getModel().getProperties().setProperty( key, versionPropertyUpdateMap.get( key ) );
+                        found = true;
+                    }
+                }
+
+                if ( found == false )
+                {
+                    // Problem in this scenerio is that we know we have a property update map but we have not found a
+                    // property to update. Its possible this property has been inherited from a parent. Override in the
+                    // top pom for safety.
+                    logger.info( "Unable to find a property for {} to update", key );
+                    for (final Project p : result)
+                    {
+                        if ( p.isTopPOM() )
+                        {
+                            logger.info( "Adding property {} with {} ", key, versionPropertyUpdateMap.get( key ) );
+                            p.getModel().getProperties().setProperty( key, versionPropertyUpdateMap.get( key ) );
+                        }
                     }
                 }
             }
@@ -115,6 +135,9 @@ public class DependencyManipulator
                           final Map<ProjectRef, String> overrides )
         throws ManipulationException
     {
+        // Map of GA : explicit version from dependency-exclusion overrides.
+        Map<String, String> explicitOverrides = new HashMap<String, String>();
+
         final String projectGA = ga( project );
 
         // TODO: FIXME: Is it possible to avoid the secondary override map and just convert everything
@@ -133,7 +156,7 @@ public class DependencyManipulator
                                                          DependencyState.DEPENDENCY_EXCLUSION_PREFIX ) );
 
         moduleOverrides = removeReactorGAs( session, moduleOverrides );
-        moduleOverrides = applyModuleVersionOverrides( projectGA, moduleOverrides );
+        moduleOverrides = applyModuleVersionOverrides( projectGA, moduleOverrides, explicitOverrides );
 
         if ( project.isTopPOM() )
         {
@@ -165,6 +188,8 @@ public class DependencyManipulator
                 final Map<String, String> nonMatchingVersionOverrides = applyOverrides( session, dependencies, moduleOverrides );
                 final Map<String, String> matchedOverrides = new HashMap<String, String>(moduleOverrides);
                 matchedOverrides.keySet().removeAll( nonMatchingVersionOverrides.keySet() );
+
+                applyExplicitOverrides (explicitOverrides, dependencies);
 
                 // Add/override a property to the build for each override
                 addVersionOverrideProperties( session, matchedOverrides, model.getProperties() );
@@ -223,6 +248,7 @@ public class DependencyManipulator
             {
                 logger.debug( "Applying overrides to managed dependencies for: {}\n{}", projectGA, moduleOverrides );
                 applyOverrides( session, dependencyManagement.getDependencies(), moduleOverrides );
+                applyExplicitOverrides (explicitOverrides, dependencyManagement.getDependencies());
             }
             else
             {
@@ -236,10 +262,45 @@ public class DependencyManipulator
             // Apply overrides to project direct dependencies
             final List<Dependency> projectDependencies = model.getDependencies();
             applyOverrides( session, projectDependencies, moduleOverrides );
+            applyExplicitOverrides (explicitOverrides, projectDependencies);
         }
         else
         {
             logger.debug( "NOT applying overrides to concrete dependencies for: {}\n{}", projectGA, moduleOverrides );
+        }
+    }
+
+    /**
+     * Apply explicit overrides to a set of dependencies from a project. The explicit overrides come from
+     * dependencyExclusion. However they have to be separated out from standard overrides so we can easily
+     * ignore any property references (and overwrite them).
+     *
+     * @param explicitOverrides
+     * @param dependencies
+     */
+    private void applyExplicitOverrides( Map<String, String> explicitOverrides, List<Dependency> dependencies )
+    {
+        // Apply matching overrides to dependencies
+        for ( final Dependency dependency : dependencies )
+        {
+            final String groupIdArtifactId = dependency.getGroupId() + GAV_SEPERATOR + dependency.getArtifactId();
+
+            if ( explicitOverrides.containsKey( groupIdArtifactId ) )
+            {
+                final String overrideVersion = explicitOverrides.get( groupIdArtifactId );
+                final String oldVersion = dependency.getVersion();
+
+                if ( overrideVersion == null || overrideVersion.length() == 0 || oldVersion == null
+                    || oldVersion.length() == 0 )
+                {
+                    logger.warn( "Unable to force align to an empty version for " + groupIdArtifactId + "; ignoring" );
+                }
+                else
+                {
+                    logger.debug( "Force aligning {} to {}.", groupIdArtifactId, overrideVersion );
+                    dependency.setVersion( overrideVersion );
+                }
+            }
         }
     }
 
@@ -336,13 +397,14 @@ public class DependencyManipulator
      * Remove module overrides which do not apply to the current module. Searches the full list of version overrides
      * for any keys which contain the '@' symbol.  Removes these from the version overrides list, and add them back
      * without the '@' symbol only if they apply to the current module.
+     * @param explicitOverrides2
      *
      * @param versionOverides The full list of version overrides, both global and module specific
      * @return The map of global and module specific overrides which apply to the given module
      * @throws ManipulationException
      */
     private Map<String, String> applyModuleVersionOverrides( final String projectGA,
-                                                             final Map<String, String> originalOverrides )
+                                                             final Map<String, String> originalOverrides, Map<String, String> explicitOverrides )
         throws ManipulationException
     {
         final Map<String, String> remainingOverrides = new HashMap<String, String>( originalOverrides );
@@ -355,7 +417,7 @@ public class DependencyManipulator
 
         // These modes correspond to two different kinds of passes over the available override properties:
         // 1. Module-specific: Don't process wildcard overrides here, allow module-specific settings to take precedence.
-        // 2. Wildcards: Add these IFF there is no corresponding module-specific override.
+        // 2. Wildcards: Add these IF there is no corresponding module-specific override.
         final boolean wildcardMode[] = { false, true };
         for ( int i = 0; i < wildcardMode.length; i++ )
         {
@@ -401,7 +463,7 @@ public class DependencyManipulator
                     {
                         if ( currentValue != null && currentValue.length() > 0 )
                         {
-                            moduleVersionOverrides.put( artifactGA, currentValue );
+                            explicitOverrides.put( artifactGA, currentValue );
                             logger.debug( "Overriding module dependency for {} with {} : {}", moduleGA, artifactGA,
                                           currentValue );
                         }
@@ -427,7 +489,7 @@ public class DependencyManipulator
                     logger.debug( "For artifact override: {}, checking if current overrides already contain a module-specific version.",
                                   artifactGA );
 
-                    if ( moduleVersionOverrides.containsKey( artifactGA ) )
+                    if ( explicitOverrides.containsKey( artifactGA ) )
                     {
                         logger.debug( "For artifact override: {}, current overrides already contain a module-specific version. Skip.",
                                       artifactGA );
@@ -436,9 +498,9 @@ public class DependencyManipulator
 
                     if ( currentValue != null && currentValue.length() > 0 )
                     {
-                        moduleVersionOverrides.put( artifactGA, currentValue );
                         logger.debug( "Overriding module dependency for {} with {} : {}", projectGA, artifactGA,
                                       currentValue );
+                        explicitOverrides.put( artifactGA, currentValue );
                     }
                     else
                     {
