@@ -34,7 +34,7 @@ public class ProjectSourcesInjectingState
      */
     public ProjectSourcesInjectingState( final Properties userProperties )
     {
-        enabled = !Boolean.valueOf( userProperties.getProperty( PROJECT_SOURCES_SKIP_PROPERTY, "false" ) );
+        enabled = !Boolean.parseBoolean( userProperties.getProperty( PROJECT_SOURCES_SKIP_PROPERTY, "false" ) );
         pluginVersion = userProperties.getProperty( PROJECT_SOURCES_PLUGIN_VERSION_PROPERTY, DEFAULT_PLUGIN_VERSION );
     }
 

@@ -187,3 +187,18 @@ This feature does support four modes for alignment, controlled via the **enforce
 Additionally, the feature supports per-module overrides, which can be specified as:
 
     -DenforceSkip.org.group.id:artifact-id=(none|on|true|off|false|detect)
+
+## Project-Sources Plugin Injection
+
+The extension will inject an execution of [project-sources-maven-plugin](https://github.com/jdcasey/project-sources-maven-plugin) by default (as of the unreleased 0.6 version). This will result in an archive being created containing all project sources **after** this extension has made any modifications to the pom.xml's. The archive will only be created in the execution-root project, and will be attached for installation and deployment using the `project-sources` classifier.
+
+To skip injection of this plugin, you can use:
+
+    mvn install -Dproject.src.skip=true
+
+If unspecified, a default version of the plugin will be injected (currently, version 0.2). To gain more control over this injection, you can specify the plugin version like this:
+
+    mvn install -Dproject.src.version=x.y
+
+
+
