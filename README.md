@@ -87,7 +87,7 @@ will change to
 
 :large_blue_circle: Note that for existing dependencies that reference a property the tool will update
 this property with the new version. If the property can't be found (e.g. it was inherited), a new one will
-be injected at the top level.
+be injected at the top level. This update of the property's value **may** implicitly align other dependencies using the same property that were not explicitly requested to be aligned.
 
 ### Direct Dependencies
 
@@ -109,7 +109,7 @@ However, there are certain cases where it is useful to use different versions of
 
     mvn install -DdependencyExclusion.[groupId]:[artifactId]@[moduleGroupId]:[moduleArtifactId]=[version]
 
-For example to apply a dependency override only to module B of project foo.
+For example to apply an explicit dependency override only to module B of project foo.
 
     mvn install -DdependencyExclusion.junit:junit@org.foo:moduleB=4.10
 
@@ -145,6 +145,8 @@ If, instead, the build should fail when strict-mode checks are violated, add the
     mvn install -DstrictAlignment=true -DstrictViolationFails=true
 
 This will cause the build to fail with a ManipulationException, and prevent the extension from rewriting any POM files.
+
+:large_blue_circle: Note that for dependency exclusions they will not work if the dependency uses a version property that has been changed by another dependency modification. Explicit version override will overwrite the property value though.
 
 ### Dependency Property Injection
 
