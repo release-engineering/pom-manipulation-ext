@@ -130,6 +130,21 @@ For example
 
     mvn install -DdependencyExclusion.junit:junit@*=
 
+### Strict-Mode Version Alignment
+
+When aligning dependency versions to some shared standard, it's possible to introduce incompatibilities that stem from too large of a version change. For instance, while it might be safe to revise a dependency's version from 1.5 to 1.5.1, it may not be safe to revise it to 2.0, or even 1.6.
+
+In cases where this is a concern, and for dependencies whose versions are aligned via a BOM (not via explicit overrides, as explained above), strict-mode version alignment checks can be enabled using:
+
+    mvn install -DstrictAlignment=true
+
+This will detect cases where the adjusted version doesn't start with the old version (i.e. 1.0 -> 1.0.1), and report the mismatch as a warning in the build's console output.
+
+If, instead, the build should fail when strict-mode checks are violated, add the `strictViolationFails=true` property:
+
+    mvn install -DstrictAlignment=true -DstrictViolationFails=true
+
+This will cause the build to fail with a ManipulationException, and prevent the extension from rewriting any POM files.
 
 ### Dependency Property Injection
 
@@ -196,7 +211,7 @@ To skip injection of this plugin, you can use:
 
     mvn install -Dproject.src.skip=true
 
-If unspecified, a default version of the plugin will be injected (currently, version 0.2). To gain more control over this injection, you can specify the plugin version like this:
+If unspecified, a default version of the plugin will be injected (currently, version 0.3). To gain more control over this injection, you can specify the plugin version like this:
 
     mvn install -Dproject.src.version=x.y
 

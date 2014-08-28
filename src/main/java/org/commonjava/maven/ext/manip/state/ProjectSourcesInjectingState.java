@@ -23,7 +23,7 @@ public class ProjectSourcesInjectingState
     public static final String PROJECT_SOURCES_PLUGIN_VERSION_PROPERTY = "project.src.version";
 
     /** The default plugin version to use in case no alternative version is specified on the command line. */
-    public static final String DEFAULT_PLUGIN_VERSION = "0.2";
+    public static final String DEFAULT_PLUGIN_VERSION = "0.3";
 
     private final boolean enabled;
 

@@ -11,7 +11,6 @@
 package org.commonjava.maven.ext.manip.impl;
 
 import static org.apache.commons.lang.StringUtils.join;
-import static org.commonjava.maven.ext.manip.state.DependencyState.GAV_SEPERATOR;
 import static org.commonjava.maven.ext.manip.util.IdUtils.ga;
 import static org.commonjava.maven.ext.manip.util.PropertiesUtils.getPropertiesByPrefix;
 
@@ -44,11 +43,6 @@ import org.commonjava.maven.ext.manip.state.State;
 public class DependencyManipulator
     extends AlignmentManipulator
 {
-    /**
-     * Used to store mappings of old property -> new version.
-     */
-    private HashMap<String, String> versionPropertyUpdateMap = new HashMap<String, String>();
-
 
     protected DependencyManipulator()
     {
@@ -78,12 +72,15 @@ public class DependencyManipulator
     public Set<Project> applyChanges( final List<Project> projects, final ManipulationSession session )
         throws ManipulationException
     {
-        Set<Project> result = internalApplyChanges (session.getState( DependencyState.class ), projects, session);
+        final DependencyState state = session.getState( DependencyState.class );
+        final Set<Project> result = internalApplyChanges( state, projects, session );
+
+        final Map<String, String> versionPropertyUpdateMap = state.getVersionPropertyUpdateMap();
 
         // If we've changed something now update any old properties with the new values.
         if (result.size() > 0)
         {
-            for (String key : versionPropertyUpdateMap.keySet())
+            for (final String key : versionPropertyUpdateMap.keySet())
             {
                 boolean found = false;
 
@@ -136,7 +133,7 @@ public class DependencyManipulator
         throws ManipulationException
     {
         // Map of GA : explicit version from dependency-exclusion overrides.
-        Map<String, String> explicitOverrides = new HashMap<String, String>();
+        final Map<String, String> explicitOverrides = new HashMap<String, String>();
 
         final String projectGA = ga( project );
 
@@ -185,11 +182,14 @@ public class DependencyManipulator
                 logger.debug( "Applying overrides to managed dependencies for top-pom: {}\n{}", projectGA,
                               moduleOverrides );
 
-                final Map<String, String> nonMatchingVersionOverrides = applyOverrides( session, dependencies, moduleOverrides );
+                applyExplicitOverrides( explicitOverrides, dependencies );
+
+                final Map<String, String> nonMatchingVersionOverrides =
+                    applyOverrides( session, project, dependencies, moduleOverrides );
+
                 final Map<String, String> matchedOverrides = new HashMap<String, String>(moduleOverrides);
                 matchedOverrides.keySet().removeAll( nonMatchingVersionOverrides.keySet() );
 
-                applyExplicitOverrides (explicitOverrides, dependencies);
 
                 // Add/override a property to the build for each override
                 addVersionOverrideProperties( session, matchedOverrides, model.getProperties() );
@@ -247,8 +247,8 @@ public class DependencyManipulator
                             dependencyManagement != null )
             {
                 logger.debug( "Applying overrides to managed dependencies for: {}\n{}", projectGA, moduleOverrides );
-                applyOverrides( session, dependencyManagement.getDependencies(), moduleOverrides );
-                applyExplicitOverrides (explicitOverrides, dependencyManagement.getDependencies());
+                applyExplicitOverrides( explicitOverrides, dependencyManagement.getDependencies() );
+                applyOverrides( session, project, dependencyManagement.getDependencies(), moduleOverrides );
             }
             else
             {
@@ -261,8 +261,8 @@ public class DependencyManipulator
             logger.debug( "Applying overrides to concrete dependencies for: {}\n{}", projectGA, moduleOverrides );
             // Apply overrides to project direct dependencies
             final List<Dependency> projectDependencies = model.getDependencies();
-            applyOverrides( session, projectDependencies, moduleOverrides );
-            applyExplicitOverrides (explicitOverrides, projectDependencies);
+            applyExplicitOverrides( explicitOverrides, projectDependencies );
+            applyOverrides( session, project, projectDependencies, moduleOverrides );
         }
         else
         {
@@ -278,12 +278,12 @@ public class DependencyManipulator
      * @param explicitOverrides
      * @param dependencies
      */
-    private void applyExplicitOverrides( Map<String, String> explicitOverrides, List<Dependency> dependencies )
+    private void applyExplicitOverrides( final Map<String, String> explicitOverrides, final List<Dependency> dependencies )
     {
         // Apply matching overrides to dependencies
         for ( final Dependency dependency : dependencies )
         {
-            final String groupIdArtifactId = dependency.getGroupId() + GAV_SEPERATOR + dependency.getArtifactId();
+            final String groupIdArtifactId = ga( dependency.getGroupId(), dependency.getArtifactId() );
 
             if ( explicitOverrides.containsKey( groupIdArtifactId ) )
             {
@@ -313,7 +313,9 @@ public class DependencyManipulator
      * @return The map of overrides that were not matched in the dependencies
      * @throws ManipulationException
      */
-    private Map<String, String> applyOverrides( ManipulationSession session, final List<Dependency> dependencies, final Map<String, String> overrides ) throws ManipulationException
+    private Map<String, String> applyOverrides( final ManipulationSession session, final Project project,
+                                                final List<Dependency> dependencies, final Map<String, String> overrides )
+        throws ManipulationException
     {
         // Duplicate the override map so unused overrides can be easily recorded
         final Map<String, String> unmatchedVersionOverrides = new HashMap<String, String>();
@@ -324,10 +326,14 @@ public class DependencyManipulator
             return unmatchedVersionOverrides;
         }
 
+        final DependencyState state = session.getState( DependencyState.class );
+        final Map<String, String> versionPropertyUpdateMap = state.getVersionPropertyUpdateMap();
+        final boolean strict = state.getStrict();
+
         // Apply matching overrides to dependencies
         for ( final Dependency dependency : dependencies )
         {
-            final String groupIdArtifactId = dependency.getGroupId() + GAV_SEPERATOR + dependency.getArtifactId();
+            final String groupIdArtifactId = ga( dependency.getGroupId(), dependency.getArtifactId() );
             if ( overrides.containsKey( groupIdArtifactId ) )
             {
                 final String oldVersion = dependency.getVersion();
@@ -345,8 +351,8 @@ public class DependencyManipulator
                     // TODO: Handle the scenario where the version might be ${....}${....}
                     if (oldVersion.startsWith( "${" ) )
                     {
-                        int endIndex = oldVersion.indexOf( '}');
-                        String oldProperty = oldVersion.substring( 2, endIndex);
+                        final int endIndex = oldVersion.indexOf( '}');
+                        final String oldProperty = oldVersion.substring( 2, endIndex);
 
                         if (endIndex != oldVersion.length() - 1)
                         {
@@ -356,10 +362,50 @@ public class DependencyManipulator
                         logger.debug ("Original version was a property mapping; caching new value for update {} -> {}",
                                      oldProperty, overrideVersion);
 
-                        versionPropertyUpdateMap.put( oldVersion.substring( 2, oldVersion.length() -1 ), overrideVersion );
+                        final String oldVersionProp = oldVersion.substring( 2, oldVersion.length() - 1 );
+                        if ( strict )
+                        {
+                            final String oldValue = project.getModel()
+                                                           .getProperties()
+                                                           .getProperty( oldVersionProp );
+                            if ( oldValue != null && !overrideVersion.startsWith( oldValue ) )
+                            {
+                                if ( state.getFailOnStrictViolation() )
+                                {
+                                    throw new ManipulationException(
+                                                                     "Replacement: {} of original version: {} in dependency: {} violates the strict version-alignment rule!",
+                                                                     overrideVersion, oldValue, groupIdArtifactId );
+                                }
+                                else
+                                {
+                                    logger.warn( "Replacement: {} of original version: {} in dependency: {} violates the strict version-alignment rule!",
+                                                 overrideVersion, oldValue, groupIdArtifactId );
+                                }
+                            }
+                        }
+
+                        versionPropertyUpdateMap.put( oldVersionProp, overrideVersion );
                     }
                     else
                     {
+                        if ( strict )
+                        {
+                            if ( !overrideVersion.startsWith( oldVersion ) )
+                            {
+                                if ( state.getFailOnStrictViolation() )
+                                {
+                                    throw new ManipulationException(
+                                                                     "Replacement: {} of original version: {} in dependency: {} violates the strict version-alignment rule!",
+                                                                     overrideVersion, oldVersion, groupIdArtifactId );
+                                }
+                                else
+                                {
+                                    logger.warn( "Replacement: {} of original version: {} in dependency: {} violates the strict version-alignment rule!",
+                                                 overrideVersion, oldVersion, groupIdArtifactId );
+                                }
+                            }
+                        }
+
                         logger.debug( "Altered dependency {} {} -> {}", groupIdArtifactId, oldVersion, overrideVersion );
                         dependency.setVersion( overrideVersion );
                     }
@@ -404,7 +450,7 @@ public class DependencyManipulator
      * @throws ManipulationException
      */
     private Map<String, String> applyModuleVersionOverrides( final String projectGA,
-                                                             final Map<String, String> originalOverrides, Map<String, String> explicitOverrides )
+                                                             final Map<String, String> originalOverrides, final Map<String, String> explicitOverrides )
         throws ManipulationException
     {
         final Map<String, String> remainingOverrides = new HashMap<String, String>( originalOverrides );

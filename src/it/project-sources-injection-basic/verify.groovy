@@ -11,5 +11,5 @@ pom.build.plugins.children().each{
     }
 }
 
-// using the default version, which should be 0.2
-assert plugin.version == '0.2'
+// using the default version, which should be 0.3
+assert plugin.version == '0.3'

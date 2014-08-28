@@ -10,6 +10,7 @@
  ******************************************************************************/
 package org.commonjava.maven.ext.manip.state;
 
+import java.util.HashMap;
 import java.util.Properties;
 
 import org.commonjava.maven.ext.manip.impl.DependencyManipulator;
@@ -21,16 +22,23 @@ public class DependencyState
     implements State
 {
     /**
-     * The character used to separate groupId:arifactId:version
-     */
-    public static final String GAV_SEPERATOR = ":";
-
-    /**
      * The String that needs to be prepended a system property to make it a dependencyExclusion.
      * For example to exclude junit alignment for the GAV (org.groupId:artifactId)<br/>
      * <code>-DdependencyExclusion.junit:junit@org.groupId:artifactId</code>
      */
     public static final String DEPENDENCY_EXCLUSION_PREFIX = "dependencyExclusion.";
+
+    /**
+     * Enables strict checking of non-exclusion dependency versions before aligning to the given BOM dependencies.
+     * For example, <code>1.1</code> will match <code>1.1-rebuild-1</code> in strict mode, but <code>1.2</code> will not.
+     */
+    public static final String STRICT_DEPENDENCIES = "strictAlignment";
+
+    /**
+     * When false, strict version-alignment violations will be reported in the warning log-level, but WILL NOT FAIL THE BUILD. When true, the build
+     * will fail if such a violation is detected. Default value is false.
+     */
+    public static final String STRICT_VIOLATION_FAILS = "strictViolationFails";
 
     /**
      * Two possible formats currently supported for version property output:</br>
@@ -59,11 +67,23 @@ public class DependencyState
 
     private final boolean overrideDependencies;
 
+    private final boolean strict;
+
+    private final boolean failOnStrictViolation;
+
+    /**
+     * Used to store mappings of old property -> new version.
+     */
+    private final HashMap<String, String> versionPropertyUpdateMap = new HashMap<String, String>();
+
+
     public DependencyState( final Properties userProps )
     {
         depMgmt = userProps.getProperty( DEPENDENCY_MANAGEMENT_POM_PROPERTY );
         overrideTransitive = Boolean.valueOf( userProps.getProperty( "overrideTransitive", "true" ) );
         overrideDependencies = Boolean.valueOf( userProps.getProperty( "overrideDependencies", "true" ) );
+        strict = Boolean.valueOf( userProps.getProperty( STRICT_DEPENDENCIES, "false" ) );
+        failOnStrictViolation = Boolean.valueOf( userProps.getProperty( STRICT_VIOLATION_FAILS, "false" ) );
     }
 
     /**
@@ -98,6 +118,21 @@ public class DependencyState
     public String getRemoteDepMgmt()
     {
         return depMgmt;
+    }
+
+    public boolean getStrict()
+    {
+        return strict;
+    }
+
+    public HashMap<String, String> getVersionPropertyUpdateMap()
+    {
+        return versionPropertyUpdateMap;
+    }
+
+    public boolean getFailOnStrictViolation()
+    {
+        return failOnStrictViolation;
     }
 
 }

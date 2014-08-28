@@ -28,10 +28,10 @@ public class ManipulationException
         this.params = params;
     }
 
-    public ManipulationException( final String string )
+    public ManipulationException( final String string, final String... params )
     {
         super( string );
-        params = null;
+        this.params = params;
     }
 
     @Override
@@ -49,7 +49,7 @@ public class ManipulationException
                 final String original = format;
                 try
                 {
-                    formattedMessage = String.format( format, params );
+                    formattedMessage = String.format( format.replaceAll( "\\{\\}", "%s" ), params );
                 }
                 catch ( final Error e )
                 {
