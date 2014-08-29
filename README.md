@@ -5,6 +5,29 @@ A Maven extension which provides a series of POM pre-processors. When it is acti
 
 This extension combines many of the features of [VMan](https://github.com/jdcasey/pom-version-manipulator), [Maven Versioning Extension](https://github.com/jdcasey/maven-versioning-extension) and [Maven Dependency Management Extension](https://github.com/jboss/maven-dependency-management-extension).
 
+## Contents
+
+- [Installation](#installation)
+    - [Global disable flag](#global-disable-flag)
+- [Version manipulation](#version-manipulation)
+    - [Automatic version increment](#automatic-version-increment)
+    - [Manual version suffix](#manual-version-suffix)
+    - [Snapshot Detection](#snapshot-detection)
+- [Repository And Reporting Removal](#repository-and-reporting-removal)
+- [Dependency Manipulation](#dependency-manipulation)
+    - [Direct Dependencies](#direct-dependencies)
+    - [Direct/Transitive Dependencies](#directtransitive-dependencies)
+    - [Exclusions and Per Module Overrides](#exclusions-and-per-module-overrides)
+    - [Strict-Mode Version Alignment](#strictmode-version-alignment)
+    - [Dependency Property Injection](#dependency-property-injection)
+- [Plugin Manipulation](#plugin-manipulation)
+- [Property Override](#property-override)
+- [Profile Injection](#profile-injection)
+- [Install and Deploy Skip Flag Alignment](#install-and-deploy-skip-flag-alignment)
+- [Project Sources Plugin Injection](#project-sources-plugin-injection)
+
+<!-- end toc -->
+
 ## Installation
 
 The extension jar can be downloaded from the GitHub Releases page [here](https://github.com/jdcasey/pom-manipulation-ext/releases) or from Maven Central [here](http://central.maven.org/maven2/org/commonjava/maven/ext/pom-manipulation-ext), or it can be built from source. The jar should be added to the directory `${MAVEN_HOME}/lib/ext`. The next time Maven is started, you should see a command line message showing that the extension has been installed.
@@ -190,7 +213,7 @@ The extension will, for every profile in the remote pom file, replace or add it 
 
 **Note:** for existing profiles in the modified pom that have activeByDefault profile activation, that will get replaced so that the profiles are not accidentally disabled due to the semantics of activeByDefault.
 
-## Install / Deploy Skip-Flag Alignment
+## Install and Deploy Skip Flag Alignment
 
 By default, this extension will disable the skip flag on the install and deploy plugins. This is useful for build environments that compare the results of install with those from deploy as a validation step. More generally, suppressing installation or deployment tends to be an aesthetic decision that can have subtle functional consequences. It's usually not really worth the hassle.
 
@@ -205,7 +228,7 @@ Additionally, the feature supports per-module overrides, which can be specified 
 
     -DenforceSkip.org.group.id:artifact-id=(none|on|true|off|false|detect)
 
-## Project-Sources Plugin Injection
+## Project Sources Plugin Injection
 
 The extension will inject an execution of [project-sources-maven-plugin](https://github.com/jdcasey/project-sources-maven-plugin) by default (as of the unreleased 0.6 version). This will result in an archive being created containing all project sources **after** this extension has made any modifications to the pom.xml's. The archive will only be created in the execution-root project, and will be attached for installation and deployment using the `project-sources` classifier.
 
@@ -216,6 +239,3 @@ To skip injection of this plugin, you can use:
 If unspecified, a default version of the plugin will be injected (currently, version 0.3). To gain more control over this injection, you can specify the plugin version like this:
 
     mvn install -Dproject.src.version=x.y
-
-
-
