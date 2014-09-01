@@ -160,6 +160,8 @@ public class DependencyManipulator
             // Handle the situation where the top level parent refers to a prior build that is in the BOM.
             if ( project.getParent() != null && moduleOverrides.containsKey( ga( project.getParent() ) ) )
             {
+                logger.debug( " Modifying parent reference from {} to {}",
+                              model.getParent().getVersion(), moduleOverrides.get( ga( project.getParent() ) ));
                 model.getParent()
                      .setVersion( moduleOverrides.get( ga( project.getParent() ) ) );
             }
