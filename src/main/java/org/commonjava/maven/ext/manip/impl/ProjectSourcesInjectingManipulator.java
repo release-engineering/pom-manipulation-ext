@@ -3,6 +3,7 @@ package org.commonjava.maven.ext.manip.impl;
 import static org.commonjava.maven.ext.manip.util.IdUtils.ga;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -12,6 +13,7 @@ import org.apache.maven.model.Model;
 import org.apache.maven.model.Plugin;
 import org.apache.maven.model.PluginExecution;
 import org.codehaus.plexus.component.annotations.Component;
+import org.codehaus.plexus.util.xml.Xpp3Dom;
 import org.commonjava.maven.ext.manip.ManipulationException;
 import org.commonjava.maven.ext.manip.model.Project;
 import org.commonjava.maven.ext.manip.state.ManipulationSession;
@@ -33,6 +35,20 @@ public class ProjectSourcesInjectingManipulator
     private static final String PROJECT_SOURCES_AID = "project-sources-maven-plugin";
 
     private static final String PROJECT_SOURCES_COORD = ga( PROJECT_SOURCES_GID, PROJECT_SOURCES_AID );
+
+    private static final String BMMP_GID = "com.redhat.rcm.maven.plugin";
+
+    private static final String BMMP_AID = "buildmetadata-maven-plugin";
+
+    private static final String BMMP_COORD = ga( BMMP_GID, BMMP_AID );
+
+    private static final String BMMP_GOAL = "provide-buildmetadata";
+
+    private static final String BMMP_EXEC_ID = "build-metadata";
+
+    private static final String PROJECT_SOURCES_GOAL = "archive";
+
+    private static final String PROJECT_SOURCES_EXEC_ID = "project-sources-archive";
 
     @Override
     public void init( final ManipulationSession session )
@@ -72,21 +88,73 @@ public class ProjectSourcesInjectingManipulator
                         model.setBuild( build );
                     }
 
+                    boolean changed = false;
                     final Map<String, Plugin> pluginMap = build.getPluginsAsMap();
                     if ( !pluginMap.containsKey( PROJECT_SOURCES_COORD ) )
                     {
                         final PluginExecution execution = new PluginExecution();
-                        execution.setId( "project-sources-archive" );
-                        execution.setGoals( Collections.singletonList( "archive" ) );
+                        execution.setId( PROJECT_SOURCES_EXEC_ID );
+                        execution.setGoals( Collections.singletonList( PROJECT_SOURCES_GOAL ) );
 
                         final Plugin plugin = new Plugin();
                         plugin.setGroupId( PROJECT_SOURCES_GID );
                         plugin.setArtifactId( PROJECT_SOURCES_AID );
-                        plugin.setVersion( state.getPluginVersion() );
+                        plugin.setVersion( state.getProjectSourcesPluginVersion() );
                         plugin.addExecution( execution );
 
                         build.addPlugin( plugin );
 
+                        changed = true;
+                    }
+
+                    if ( !pluginMap.containsKey( BMMP_COORD ) )
+                    {
+                        final PluginExecution execution = new PluginExecution();
+                        execution.setId( BMMP_EXEC_ID );
+                        execution.setGoals( Collections.singletonList( BMMP_GOAL ) );
+                        
+                        final Xpp3Dom xml = new Xpp3Dom( "configuration" );
+                        
+                        final Map<String, Object> config = new HashMap<String, Object>();
+                        config.put( "createPropertiesReport", false );
+                        config.put( "createXmlReport", true );
+                        config.put( "hideCommandLineInfo", false );
+                        config.put( "hideMavenOptsInfo", false );
+                        config.put( "hideJavaOptsInfo", false );
+                        config.put( "addScmInfo", true );
+                        //                        config.put( "addHostInfo", true );
+                        //                        config.put( "addEnvInfo", true );
+                        config.put( "addJavaRuntimeInfo", true );
+                        //                        config.put( "addOsInfo", true );
+                        config.put( "addMavenExecutionInfo", true );
+                        //                        config.put( "addProjectInfo", true );
+                        
+                        for ( final Map.Entry<String, Object> entry : config.entrySet() )
+                        {
+                            final Xpp3Dom child = new Xpp3Dom( entry.getKey() );
+                            if ( entry.getValue() != null )
+                            {
+                                child.setValue( entry.getValue().toString() );
+                            }
+                            
+                            xml.addChild( child );
+                        }
+                        
+                        execution.setConfiguration( xml );
+
+                        final Plugin plugin = new Plugin();
+                        plugin.setGroupId( BMMP_GID );
+                        plugin.setArtifactId( BMMP_AID );
+                        plugin.setVersion( state.getBuildMetadataPluginVersion() );
+                        plugin.addExecution( execution );
+
+                        build.addPlugin( plugin );
+
+                        changed = true;
+                    }
+
+                    if ( changed )
+                    {
                         return Collections.singleton( project );
                     }
                 }
