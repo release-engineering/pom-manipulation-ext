@@ -10,8 +10,6 @@
  ******************************************************************************/
 package org.commonjava.maven.ext.manip.impl;
 
-import static org.commonjava.maven.ext.manip.util.IdUtils.ga;
-
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -77,14 +75,12 @@ public abstract class AlignmentManipulator
             return Collections.emptySet();
         }
 
-        final Map<String, Model> manipulatedModels = session.getManipulatedModels();
         final Map<ProjectRef, String> overrides = loadRemoteBOM( state, session );
         final Set<Project> changed = new HashSet<Project>();
 
         for ( final Project project : projects )
         {
-            final String ga = ga( project );
-            final Model model = manipulatedModels.get( ga );
+            final Model model = project.getModel();
 
             if ( overrides.size() > 0 )
             {

@@ -4,7 +4,7 @@
  * are made available under the terms of the GNU Public License v3.0
  * which accompanies this distribution, and is available at
  * http://www.gnu.org/licenses/gpl.html
- * 
+ *
  * Contributors:
  *     Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
@@ -19,7 +19,6 @@ import java.util.Properties;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.execution.MavenExecutionRequest;
 import org.apache.maven.execution.MavenSession;
-import org.apache.maven.model.Model;
 import org.apache.maven.project.ProjectBuildingRequest;
 import org.apache.maven.settings.Settings;
 import org.codehaus.plexus.component.annotations.Component;
@@ -47,6 +46,13 @@ public class ManipulationSession
     private final Map<Class<?>, State> states = new HashMap<Class<?>, State>();
 
     private MavenSession mavenSession;
+
+    /**
+     * List of <code>Project</code> instances.
+     */
+    private List<Project> projects;
+
+    private ManipulationException error;
 
     public ManipulationSession()
     {
@@ -97,28 +103,6 @@ public class ManipulationSession
     public void setMavenSession( final MavenSession mavenSession )
     {
         this.mavenSession = mavenSession;
-    }
-
-    /**
-     * Map of Group:Artifact to Model
-     */
-    private Map<String, Model> rawModels;
-
-    /**
-     * List of <code>Project</code> instances.
-     */
-    private List<Project> projects;
-
-    private ManipulationException error;
-
-    public void setManipulatedModels( final Map<String, Model> rawModels )
-    {
-        this.rawModels = rawModels;
-    }
-
-    public Map<String, Model> getManipulatedModels()
-    {
-        return rawModels;
     }
 
     public Properties getUserProperties()

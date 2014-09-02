@@ -11,7 +11,6 @@
 package org.commonjava.maven.ext.manip.io;
 
 import static org.apache.commons.io.IOUtils.closeQuietly;
-import static org.commonjava.maven.ext.manip.util.IdUtils.ga;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -25,10 +24,8 @@ import java.io.Writer;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Enumeration;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.jar.Manifest;
 
@@ -79,7 +76,6 @@ public class PomIO
         throws ManipulationException
     {
         final List<Project> projects = new ArrayList<Project>();
-        final Map<String, Model> rawModels = new HashMap<String, Model>();
 
         for ( final PomPeek peek : peeked )
         {
@@ -120,10 +116,8 @@ public class PomIO
             final Project project = new Project( pom, raw );
             project.setTopPOM( peek.isTopPOM() );
 
-            rawModels.put( ga( project ), raw );
             projects.add( project );
         }
-        session.setManipulatedModels( rawModels );
 
         return projects;
     }
@@ -136,8 +130,6 @@ public class PomIO
     public void rewritePOMs( final Set<Project> changed, final ManipulationSession session )
         throws ManipulationException
     {
-        final Map<String, Model> modifiedModels = session.getManipulatedModels();
-
         final File marker = getMarkerFile( session );
         PrintWriter pw = null;
         try
@@ -149,11 +141,10 @@ public class PomIO
 
             for ( final Project project : changed )
             {
-                final String ga = ga( project );
                 logger.info( String.format( "%s modified! Rewriting.", project ) );
                 File pom = project.getPom();
 
-                final Model model = modifiedModels.get( ga );
+                final Model model = project.getModel();
                 logger.info( "Rewriting: " + model.toString() + " in place of: " + project.getId()
                     + "\n       to POM: " + pom );
 
