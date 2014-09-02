@@ -432,10 +432,9 @@ public class DependencyManipulator
                                                   final Map<String, String> versionOverrides )
     {
         final Map<String, String> reducedVersionOverrides = new HashMap<String, String>( versionOverrides );
-        for ( final Model model : session.getManipulatedModels()
-                                         .values() )
+        for ( final Project project : session.getProjects())
         {
-            final String reactorGA = ga( model );
+            final String reactorGA = ga( project.getModel() );
             reducedVersionOverrides.remove( reactorGA );
         }
         return reducedVersionOverrides;

@@ -128,14 +128,13 @@ public class ProjectVersioningManipulator
             return Collections.emptySet();
         }
 
-        final Map<String, Model> manipulatedModels = session.getManipulatedModels();
         final Set<Project> changed = new HashSet<Project>();
 
         for ( final Project project : projects )
         {
             final String ga = ga( project );
             logger.info( getClass().getSimpleName() + " applying changes to: " + ga );
-            final Model model = manipulatedModels.get( ga );
+            final Model model = project.getModel();
             if ( applyVersioningChanges( model, state, session ) )
             {
                 changed.add( project );

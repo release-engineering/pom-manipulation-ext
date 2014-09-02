@@ -16,7 +16,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
@@ -93,7 +92,6 @@ public class ProfileInjectionManipulator
             return Collections.emptySet();
         }
 
-        final Map<String, Model> manipulatedModels = session.getManipulatedModels();
         final Set<Project> changed = new HashSet<Project>();
 
         final Model remoteModel = modelBuilder.resolveRawModel( state.getRemoteProfileInjectionMgmt() );
@@ -105,8 +103,7 @@ public class ProfileInjectionManipulator
             {
                 final String ga = ga( project );
                 logger.info( getClass().getSimpleName() + " applying changes to: " + ga );
-                final Model model = manipulatedModels.get( ga );
-
+                final Model model = project.getModel();
                 final List<Profile> profiles = model.getProfiles();
 
                 final Iterator<Profile> i = remoteProfiles.iterator();
