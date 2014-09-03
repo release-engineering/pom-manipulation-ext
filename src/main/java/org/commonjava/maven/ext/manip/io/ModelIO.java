@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.Properties;
 
@@ -193,8 +194,11 @@ public class ModelIO
                                                  "Attempting to align to a BOM that does not have a pluginManagement section" );
             }
 
-            for ( final PluginView plugin : plugins )
+            // Iterate in reverse order so that plugins inherited from the closest parent win.
+            ListIterator<PluginView> prt = plugins.listIterator( plugins.size() );
+            while (prt.hasPrevious())
             {
+                PluginView plugin = prt.previous();
                 versionOverrides.put( plugin.asProjectRef(), plugin.getVersion() );
 
                 logger.debug( "Added version override for: " + plugin.asProjectRef()
