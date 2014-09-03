@@ -122,7 +122,7 @@ public class ProjectSourcesInjectingManipulator
                         final Xpp3Dom xml = new Xpp3Dom( "configuration" );
                         
                         final Map<String, Object> config = new HashMap<String, Object>();
-                        config.put( "createPropertiesReport", false );
+                        config.put( "createPropertiesReport", true );
                         config.put( "createXmlReport", false );
                         config.put( "hideCommandLineInfo", false );
                         config.put( "hideMavenOptsInfo", false );
@@ -131,7 +131,11 @@ public class ProjectSourcesInjectingManipulator
                         config.put( "propertiesOutputFile", "${basedir}/build.properties" );
                         config.put( "addJavaRuntimeInfo", true );
                         config.put( "addMavenExecutionInfo", true );
-                        
+                        config.put( "addLocallyModifiedTagToFullVersion", false );
+                        config.put( "addToGeneratedSources", false );
+                        config.put( "validateCheckout", false );
+                        config.put( "forceNewProperties", true );
+
                         for ( final Map.Entry<String, Object> entry : config.entrySet() )
                         {
                             final Xpp3Dom child = new Xpp3Dom( entry.getKey() );
