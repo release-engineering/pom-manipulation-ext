@@ -6,10 +6,15 @@ def pom = new XmlSlurper().parse( pomFile )
 def plugin = null
 pom.build.plugins.children().each{
     if (it.artifactId == "project-sources-maven-plugin" ){
-        plugin = it
-        return true
+        assert it.version == '0.3'
+    }
+    else if (it.artifactId == 'build-metadata-maven-plugin'){
+        assert it.version == '1.3.1'
     }
 }
 
-// using the default version, which should be 0.3
-assert plugin.version == '0.3'
+assert new File( basedir, 'build.properties' ).exists()
+assert new File( basedir, 'target/project-sources-injection-basic-1-project-sources.tar.gz').exists()
+
+return true
+

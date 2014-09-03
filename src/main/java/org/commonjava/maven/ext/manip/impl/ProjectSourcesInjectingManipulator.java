@@ -50,6 +50,10 @@ public class ProjectSourcesInjectingManipulator
 
     private static final String PROJECT_SOURCES_EXEC_ID = "project-sources-archive";
 
+    private static final String VALIDATE_PHASE = "validate";
+
+    private static final String INITIALIZE_PHASE = "initialize";
+
     @Override
     public void init( final ManipulationSession session )
         throws ManipulationException
@@ -94,6 +98,7 @@ public class ProjectSourcesInjectingManipulator
                     {
                         final PluginExecution execution = new PluginExecution();
                         execution.setId( PROJECT_SOURCES_EXEC_ID );
+                        execution.setPhase( INITIALIZE_PHASE );
                         execution.setGoals( Collections.singletonList( PROJECT_SOURCES_GOAL ) );
 
                         final Plugin plugin = new Plugin();
@@ -111,23 +116,21 @@ public class ProjectSourcesInjectingManipulator
                     {
                         final PluginExecution execution = new PluginExecution();
                         execution.setId( BMMP_EXEC_ID );
+                        execution.setPhase( VALIDATE_PHASE );
                         execution.setGoals( Collections.singletonList( BMMP_GOAL ) );
                         
                         final Xpp3Dom xml = new Xpp3Dom( "configuration" );
                         
                         final Map<String, Object> config = new HashMap<String, Object>();
                         config.put( "createPropertiesReport", false );
-                        config.put( "createXmlReport", true );
+                        config.put( "createXmlReport", false );
                         config.put( "hideCommandLineInfo", false );
                         config.put( "hideMavenOptsInfo", false );
                         config.put( "hideJavaOptsInfo", false );
-                        config.put( "addScmInfo", true );
-                        //                        config.put( "addHostInfo", true );
-                        //                        config.put( "addEnvInfo", true );
+                        config.put( "activateOutputFileMapping", false );
+                        config.put( "propertiesOutputFile", "${basedir}/build.properties" );
                         config.put( "addJavaRuntimeInfo", true );
-                        //                        config.put( "addOsInfo", true );
                         config.put( "addMavenExecutionInfo", true );
-                        //                        config.put( "addProjectInfo", true );
                         
                         for ( final Map.Entry<String, Object> entry : config.entrySet() )
                         {

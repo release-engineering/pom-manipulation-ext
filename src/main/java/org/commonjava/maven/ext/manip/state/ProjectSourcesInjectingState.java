@@ -19,6 +19,9 @@ public class ProjectSourcesInjectingState
     /** Set this property to true using <code>-Dproject.src.skip=true</code> in order to turn off injection of the project-sources plugin. */
     public static final String PROJECT_SOURCES_SKIP_PROPERTY = "project.src.skip";
 
+    /** Set this property to true using <code>-Dproject.src.skip=true</code> in order to turn off injection of the project-sources plugin. */
+    public static final String BMMP_SKIP_PROPERTY = "project.meta.skip";
+
     /** Set this property to control the version of the project-sources plugin to be injected. */
     public static final String PROJECT_SOURCES_PLUGIN_VERSION_PROPERTY = "project.src.version";
 
@@ -32,6 +35,8 @@ public class ProjectSourcesInjectingState
 
     private final boolean enabled;
 
+    private final boolean metadataEnabled;
+
     private final String projectSrcPluginVersion;
 
     private final String bmmpVersion;
@@ -42,6 +47,8 @@ public class ProjectSourcesInjectingState
     public ProjectSourcesInjectingState( final Properties userProperties )
     {
         enabled = !Boolean.parseBoolean( userProperties.getProperty( PROJECT_SOURCES_SKIP_PROPERTY, "false" ) );
+        metadataEnabled = !Boolean.parseBoolean( userProperties.getProperty( BMMP_SKIP_PROPERTY, "false" ) );
+
         projectSrcPluginVersion =
             userProperties.getProperty( PROJECT_SOURCES_PLUGIN_VERSION_PROPERTY, DEFAULT_PROJECT_SOURCES_PLUGIN_VERSION );
         bmmpVersion = userProperties.getProperty( BMMP_VERSION_PROPERTY, DEFAULT_BMMP_VERSION );
@@ -54,6 +61,14 @@ public class ProjectSourcesInjectingState
     public boolean isEnabled()
     {
         return enabled;
+    }
+
+    /**
+     * @see ProjectSourcesInjectingState#BMMP_SKIP_PROPERTY
+     */
+    public boolean isBuildMetadataPluginEnabled()
+    {
+        return metadataEnabled;
     }
 
     /**
