@@ -15,7 +15,6 @@ import static org.commonjava.maven.ext.manip.util.IdUtils.ga;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
@@ -75,14 +74,12 @@ public class PropertyManipulator
             return Collections.emptySet();
         }
 
-        final Map<String, Model> manipulatedModels = session.getManipulatedModels();
         final Properties overrides = loadRemotePOMProperties( state.getRemotePropertyMgmt(), session );
         final Set<Project> changed = new HashSet<Project>();
 
         for ( final Project project : projects )
         {
-            final String ga = ga( project );
-            final Model model = manipulatedModels.get( ga );
+            final Model model = project.getModel();
 
             if ( overrides.size() > 0 )
             {

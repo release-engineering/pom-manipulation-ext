@@ -160,6 +160,8 @@ public class DependencyManipulator
             // Handle the situation where the top level parent refers to a prior build that is in the BOM.
             if ( project.getParent() != null && moduleOverrides.containsKey( ga( project.getParent() ) ) )
             {
+                logger.debug( " Modifying parent reference from {} to {}",
+                              model.getParent().getVersion(), moduleOverrides.get( ga( project.getParent() ) ));
                 model.getParent()
                      .setVersion( moduleOverrides.get( ga( project.getParent() ) ) );
             }
@@ -430,10 +432,9 @@ public class DependencyManipulator
                                                   final Map<String, String> versionOverrides )
     {
         final Map<String, String> reducedVersionOverrides = new HashMap<String, String>( versionOverrides );
-        for ( final Model model : session.getManipulatedModels()
-                                         .values() )
+        for ( final Project project : session.getProjects())
         {
-            final String reactorGA = ga( model );
+            final String reactorGA = ga( project.getModel() );
             reducedVersionOverrides.remove( reactorGA );
         }
         return reducedVersionOverrides;

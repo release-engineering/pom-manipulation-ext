@@ -274,8 +274,6 @@ public class DistributionEnforcingManipulatorTest
         final List<Project> projects = new ArrayList<Project>();
         projects.add( project );
 
-        session.setManipulatedModels( Collections.singletonMap( ga( model ), model ) );
-
         final Set<Project> changed = manipulator.applyChanges( projects, session );
 
         if ( expectChanged != null )
@@ -301,8 +299,6 @@ public class DistributionEnforcingManipulatorTest
             projects.add( project );
             manipulatedModels.put( ga( model ), model );
         }
-
-        session.setManipulatedModels( manipulatedModels );
 
         final Set<Project> changed = manipulator.applyChanges( projects, session );
 

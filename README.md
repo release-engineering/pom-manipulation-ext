@@ -118,6 +118,8 @@ By default the extension will override dependencies from the remote BOM. This ma
 
     mvn install -DdependencyManagement=org.foo:my-dep-pom:1.0 -DoverrideDependencies=false
 
+Note that this will still alter any external parent references.
+
 ### Direct/Transitive Dependencies
 
 By default the extension will inject all dependencies from the remote BOM. This will also override dependencies that are not directly specified in the project. If these transitive dependencies should not be overridden, the option "overrideTransitive" can be set to false.

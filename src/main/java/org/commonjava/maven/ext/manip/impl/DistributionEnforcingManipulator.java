@@ -42,31 +42,31 @@ import org.w3c.dom.NodeList;
  * <ul>
  * <li><code>-Denforce-skip=(on|true)</code> forces them to be set to <code>true</code> (install/deploy will NOT happen)</li>
  * <li><code>-Denforce-skip=(off|false)</code> forces them to be set to <code>false</code> (install/deploy will happen)</li>
- * <li><code>-Denforce-skip=detect</code> forces the deploy- and install-plugin's skip option to be aligned with that of the first detected install 
+ * <li><code>-Denforce-skip=detect</code> forces the deploy- and install-plugin's skip option to be aligned with that of the first detected install
  *     plugin</li>
  * <li><code>-Denforce-skip=none</code> disables enforcement.</li>
  * </ul>
- * 
+ *
  * <br/>
- * 
- * <b>NOTE:</b> When using the <code>detect</code> mode, only the install-plugin configurations in the main pom (<b>not</b> those in profiles) will 
- * be considered for detection. Of these, only parameters in the plugin-wide configuration OR the <code>default-install</code> execution 
+ *
+ * <b>NOTE:</b> When using the <code>detect</code> mode, only the install-plugin configurations in the main pom (<b>not</b> those in profiles) will
+ * be considered for detection. Of these, only parameters in the plugin-wide configuration OR the <code>default-install</code> execution
  * configuration will be considered. If no matching skip-flag configuration is detected, the default mode of <code>on</code> will be used.
- * 
+ *
  * <br/>
- * 
+ *
  * Likewise, it's possible to set the enforcement mode DIFFERENTLY for a single project, using:
  * <br/>
- * 
+ *
  * <pre>
  * <code>-DenforceSkip.org.group.id:artifact-id=(on|true|off|false|detect|none)</code>
  * </pre>
- * 
+ *
  * <br/>
- * 
- * This is for systems that compare the installed artifacts against the 
+ *
+ * This is for systems that compare the installed artifacts against the
  * deployed artifacts as part of a post-build validation process.
- * 
+ *
  * @author jdcasey
  */
 @Component( role = Manipulator.class, hint = "enforce-skip" )
@@ -119,18 +119,18 @@ public class DistributionEnforcingManipulator
     /**
      * For each project in the current build set, enforce the value of the plugin-wide skip flag and that of the 'default-deploy' execution, if they
      * exist. There are three possible modes for enforcement:
-     * 
+     *
      * <ul>
      *   <li><b>on</b> - Ensure install and deploy skip is <b>disabled</b>, and that these functions will happen during the build.</li>
      *   <li><b>off</b> - Ensure install and deploy skip is <b>enabled</b>, and that neither of these functions will happen during the build.</li>
-     *   <li><b>detect</b> - Detect the proper flag value from the install plugin's <code>skip</code> flag (either in the plugin-wide config or the 
-     *       <code>default-install</code> execution, if it's specified in the main POM, not a profile). If not present, disable the skip flag. 
+     *   <li><b>detect</b> - Detect the proper flag value from the install plugin's <code>skip</code> flag (either in the plugin-wide config or the
+     *       <code>default-install</code> execution, if it's specified in the main POM, not a profile). If not present, disable the skip flag.
      *       Enforce consistency with this value install/deploy.</li>
      * </ul>
-     * 
-     * <b>NOTE:</b> It's possible to specify an enforcement mode that's unique to a single project, using a command-line parameter of: 
+     *
+     * <b>NOTE:</b> It's possible to specify an enforcement mode that's unique to a single project, using a command-line parameter of:
      * <code>-DdistroExclusion.g:a=&lt;mode&gt;</code>.
-     * 
+     *
      * @see DistributionEnforcingState
      * @see EnforcingMode
      */
@@ -148,7 +148,6 @@ public class DistributionEnforcingManipulator
         final Map<String, String> excluded =
             getPropertiesByPrefix( session.getUserProperties(), DistributionEnforcingState.PROJECT_EXCLUSION_PREFIX );
 
-        final Map<String, Model> manipulatedModels = session.getManipulatedModels();
         final Set<Project> changed = new HashSet<Project>();
 
         for ( final Project project : projects )
@@ -171,7 +170,7 @@ public class DistributionEnforcingManipulator
 
             logger.info( getClass().getSimpleName() + " applying skip-flag enforment mode of: " + mode + " to: " + ga );
 
-            final Model model = manipulatedModels.get( ga );
+            final Model model = project.getModel();
 
             // this is 3-value logic, where skip == on == true, don't-skip == off == false, and (detect from install) == detect == null
             Boolean baseSkipSetting = mode.defaultModificationValue();
@@ -195,9 +194,9 @@ public class DistributionEnforcingManipulator
      * For every mention of a <code>skip</code> parameter in either the install or deploy plugins, enforce a particular value that's passed in. If the
      * passed-in value is <code>null</code> AND the detectFlagValue parameter is true, then look for an install-plugin configuration (in either the
      * plugin-wide config or that of the default-install execution ONLY) that contains the <code>skip</code> flag, and use that as the enforced value.
-     * 
+     *
      * If detection is enabled and no install-plugin is found, set the value to false (don't skip install or deploy).
-     * 
+     *
      * Return the detected value, if detection is enabled.
      */
     private Boolean enforceSkipFlag( final ModelBase base, Boolean baseSkipSetting, final Project project,
@@ -312,7 +311,7 @@ public class DistributionEnforcingManipulator
     }
 
     /**
-     * Go through the plugin / plugin-execution configurations and find references to the <code>skip</code> parameter for the given Maven plugin 
+     * Go through the plugin / plugin-execution configurations and find references to the <code>skip</code> parameter for the given Maven plugin
      * (specified by artifactId), both in managed and concrete plugin declarations (where available).
      */
     private List<SkipReference> findSkipRefs( final ModelBase base, final String pluginArtifactId, final Project project )
@@ -334,7 +333,7 @@ public class DistributionEnforcingManipulator
     }
 
     /**
-     * Go through the plugin / plugin-execution configurations and find references to the <code>skip</code> parameter for the given Maven plugin 
+     * Go through the plugin / plugin-execution configurations and find references to the <code>skip</code> parameter for the given Maven plugin
      * instance.
      */
     private List<SkipReference> findSkipRefs( final Plugin plugin, final Project project )
@@ -397,7 +396,7 @@ public class DistributionEnforcingManipulator
     }
 
     /**
-     * store the tuple {container, node} where container is the plugin or plugin execution and node is the skip configuration parameter. 
+     * store the tuple {container, node} where container is the plugin or plugin execution and node is the skip configuration parameter.
      * This allows modification of the Model or extraction of the flag value (if we're trying to detect the install plugin's skip flag state).
      */
     private static final class SkipReference
