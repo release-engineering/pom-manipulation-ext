@@ -162,6 +162,7 @@ public class ProjectSourcesInjectingManipulator
                         plugin.setArtifactId( BMMP_AID );
                         plugin.setVersion( state.getBuildMetadataPluginVersion() );
                         plugin.addExecution( execution );
+                        plugin.setInherited( false );
 
                         build.addPlugin( plugin );
 
