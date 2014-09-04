@@ -11,8 +11,8 @@
 package org.commonjava.maven.ext.manip.impl;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -103,7 +103,7 @@ public abstract class AlignmentManipulator
                                                        final ManipulationSession session )
         throws ManipulationException
     {
-        final Map<ProjectRef, String> overrides = new HashMap<ProjectRef, String>();
+        final Map<ProjectRef, String> overrides = new LinkedHashMap<ProjectRef, String>();
 
         if ( remoteMgmt == null || remoteMgmt.length() == 0 )
         {
@@ -154,7 +154,7 @@ public abstract class AlignmentManipulator
      * @param session TODO
      * @param project TODO
      * @param model
-     * @param override
+     * @param overrideloadRemoteBOM( state, session )
      * @throws ManipulationException TODO
      */
     protected abstract void apply( ManipulationSession session, Project project, Model model,

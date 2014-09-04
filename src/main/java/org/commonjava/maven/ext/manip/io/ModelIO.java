@@ -16,6 +16,7 @@ import static org.apache.commons.io.IOUtils.closeQuietly;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
@@ -136,7 +137,7 @@ public class ModelIO
     {
         logger.debug( "Resolving dependency management GAV: " + gav );
 
-        final Map<ProjectRef, String> versionOverrides = new HashMap<ProjectRef, String>();
+        final Map<ProjectRef, String> versionOverrides = new LinkedHashMap<ProjectRef, String>();
         try
         {
             final MavenPomView pomView = galleyWrapper.readPomView( ProjectVersionRef.parse( gav ) );
