@@ -87,8 +87,6 @@ public class PomPeek
 
     private ProjectVersionRef parentKey;
 
-    private boolean modulesDone = false;
-
     /**
      * Denotes if this represents the top level peeked POM.
      */
@@ -160,12 +158,6 @@ public class PomPeek
                     }
                     case END_ELEMENT:
                     {
-                        final String elem = xml.getLocalName();
-                        if ( MODULES_ELEM.equals( elem ) )
-                        {
-                            modulesDone = true;
-                        }
-
                         path.pop();
                         break;
                     }
@@ -226,7 +218,7 @@ public class PomPeek
             }
         }
 
-        if ( "pom".equals( elementValues.get( PKG ) ) && !modulesDone )
+        if ( "pom".equals( elementValues.get( PKG ) ) )
         {
             return false;
         }
