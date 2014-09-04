@@ -14,8 +14,9 @@ import static org.apache.commons.lang.StringUtils.join;
 import static org.commonjava.maven.ext.manip.util.IdUtils.ga;
 import static org.commonjava.maven.ext.manip.util.PropertiesUtils.getPropertiesByPrefix;
 
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -159,7 +160,7 @@ public class DependencyManipulator
         throws ManipulationException
     {
         // Map of GA : explicit version from dependency-exclusion overrides.
-        final Map<String, String> explicitOverrides = new HashMap<String, String>();
+        final Map<String, String> explicitOverrides = new LinkedHashMap<String, String>();
 
         final String projectGA = ga( project );
 
@@ -167,7 +168,7 @@ public class DependencyManipulator
         // to projectref's as required?
 
         // Convert into a Map of GA : version
-        Map<String, String> moduleOverrides = new HashMap<String, String>();
+        Map<String, String> moduleOverrides = new LinkedHashMap<String, String>();
         for (final ProjectRef var : overrides.keySet())
         {
             moduleOverrides.put( var.asProjectRef()
@@ -215,7 +216,7 @@ public class DependencyManipulator
                 final Map<String, String> nonMatchingVersionOverrides =
                     applyOverrides( session, project, dependencies, moduleOverrides );
 
-                final Map<String, String> matchedOverrides = new HashMap<String, String>(moduleOverrides);
+                final Map<String, String> matchedOverrides = new LinkedHashMap<String, String>(moduleOverrides);
                 matchedOverrides.keySet().removeAll( nonMatchingVersionOverrides.keySet() );
 
 
@@ -224,6 +225,8 @@ public class DependencyManipulator
 
                 if ( session.getState( DependencyState.class ).getOverrideTransitive() )
                 {
+                    final List<Dependency> extraDeps = new ArrayList<Dependency>();
+
                     // Add dependencies to Dependency Management which did not match any existing dependency
                     for ( final ProjectRef projectRef : overrides.keySet() )
                     {
@@ -249,12 +252,14 @@ public class DependencyManipulator
                                                                                .toString() );
                         newDependency.setVersion( artifactVersion );
 
-                        dependencyManagement.getDependencies().add( 0, newDependency );
+                        extraDeps.add (newDependency);
                         logger.debug( "New entry added to <DependencyManagement/> - {} : {} ", projectRef, artifactVersion );
 
                         // Add/override a property to the build for each override
                         addVersionOverrideProperties( session, nonMatchingVersionOverrides, model.getProperties() );
                     }
+
+                    dependencyManagement.getDependencies().addAll( 0, extraDeps );
                 }
                 else
                 {
@@ -346,7 +351,7 @@ public class DependencyManipulator
         throws ManipulationException
     {
         // Duplicate the override map so unused overrides can be easily recorded
-        final Map<String, String> unmatchedVersionOverrides = new HashMap<String, String>();
+        final Map<String, String> unmatchedVersionOverrides = new LinkedHashMap<String, String>();
         unmatchedVersionOverrides.putAll( overrides );
 
         if ( dependencies == null )
@@ -436,7 +441,7 @@ public class DependencyManipulator
     private Map<String, String> removeReactorGAs( final ManipulationSession session,
                                                   final Map<String, String> versionOverrides )
     {
-        final Map<String, String> reducedVersionOverrides = new HashMap<String, String>( versionOverrides );
+        final Map<String, String> reducedVersionOverrides = new LinkedHashMap<String, String>( versionOverrides );
         for ( final Project project : session.getProjects())
         {
             final String reactorGA = ga( project.getModel() );
@@ -459,12 +464,12 @@ public class DependencyManipulator
                                                              final Map<String, String> originalOverrides, final Map<String, String> explicitOverrides )
         throws ManipulationException
     {
-        final Map<String, String> remainingOverrides = new HashMap<String, String>( originalOverrides );
+        final Map<String, String> remainingOverrides = new LinkedHashMap<String, String>( originalOverrides );
 
         logger.debug( "Calculating module-specific version overrides. Starting with:\n  {}",
                       join( remainingOverrides.entrySet(), "\n  " ) );
 
-        final Map<String, String> moduleVersionOverrides = new HashMap<String, String>();
+        final Map<String, String> moduleVersionOverrides = new LinkedHashMap<String, String>();
         final Set<String> processedKeys = new HashSet<String>();
 
         // These modes correspond to two different kinds of passes over the available override properties:
