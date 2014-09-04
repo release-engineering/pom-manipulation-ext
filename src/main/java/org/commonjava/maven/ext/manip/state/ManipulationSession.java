@@ -12,6 +12,7 @@ package org.commonjava.maven.ext.manip.state;
 
 import java.io.File;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -175,6 +176,33 @@ public class ManipulationSession
     public Settings getSettings()
     {
         return mavenSession == null ? null : mavenSession.getSettings();
+    }
+
+
+    /**
+     * Checks all known states to determine whether any are enabled. Will ignore any states within
+     * the supplied list.
+     * @param <T>
+     * @param ignoreList
+     * @return
+     */
+    public <T extends State> boolean anyStateEnabled( List<Class<T>> ignoreList )
+    {
+        boolean result = false;
+
+        Iterator<Class<?>> i = states.keySet().iterator();
+
+        while (i.hasNext())
+        {
+            Class<?> c = i.next();
+
+            if ( ! ignoreList.contains( c )  && states.get(c).isEnabled() )
+            {
+                result = true;
+                break;
+            }
+        }
+        return result;
     }
 
 }

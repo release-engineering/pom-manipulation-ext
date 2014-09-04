@@ -82,7 +82,9 @@ public class ProjectSourcesInjectingManipulator
     {
         final ProjectSourcesInjectingState state = session.getState( ProjectSourcesInjectingState.class );
 
-        if ( state != null && state.isEnabled() )
+        // This manipulator will only run if its enabled *and* at least one other manipulator is enabled.
+        if ( state.isEnabled() &&
+             session.anyStateEnabled(Collections.singletonList( ProjectSourcesInjectingState.class ) ) )
         {
             for ( final Project project : projects )
             {

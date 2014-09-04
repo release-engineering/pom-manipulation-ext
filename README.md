@@ -234,7 +234,9 @@ Additionally, the feature supports per-module overrides, which can be specified 
 
 ## Project Sources Plugin Injection
 
-The extension will inject an execution of [project-sources-maven-plugin](https://github.com/jdcasey/project-sources-maven-plugin) by default (as of the unreleased 0.6 version). This will result in an archive being created containing all project sources **after** this extension has made any modifications to the pom.xml's. The archive will only be created in the execution-root project, and will be attached for installation and deployment using the `project-sources` classifier.
+The extension will inject an execution of [project-sources-maven-plugin](https://github.com/jdcasey/project-sources-maven-plugin) and [build-metadata-plugin](https://github.com/sbadakhc/buildmetadata-maven-plugin) by default. This will result in an archive being created containing all project sources **after** this extension has made any modifications to the pom.xml's. The archive will only be created in the execution-root project, and will be attached for installation and deployment using the `project-sources` classifier. The metadata plugin will create a build.properties file containing information (e.g. the command line) on the invoked project. This will also be included in the archive tar.
+
+**Note**: this manipulator will only be active by default if one or more other manipulators have been activated.
 
 To skip injection of this plugin, you can use:
 
