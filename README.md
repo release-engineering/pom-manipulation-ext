@@ -7,6 +7,8 @@ This extension combines many of the features of [VMan](https://github.com/jdcase
 
 ## Contents
 
+[//]: # (To regenerate the contents use "https://gist.github.com/ttscoff/c56fa651974ae6d86eee#file-github_toc-rb 4 README.md README.md")
+
 - [Installation](#installation)
     - [Global disable flag](#global-disable-flag)
 - [Version manipulation](#version-manipulation)
@@ -18,7 +20,7 @@ This extension combines many of the features of [VMan](https://github.com/jdcase
     - [Direct Dependencies](#direct-dependencies)
     - [Direct/Transitive Dependencies](#directtransitive-dependencies)
     - [Exclusions and Per Module Overrides](#exclusions-and-per-module-overrides)
-    - [Strict-Mode Version Alignment](#strictmode-version-alignment)
+    - [Strict Mode Version Alignment](#strict-mode-version-alignment)
     - [Dependency Property Injection](#dependency-property-injection)
 - [Plugin Manipulation](#plugin-manipulation)
 - [Property Override](#property-override)
@@ -155,7 +157,7 @@ For example
 
     mvn install -DdependencyExclusion.junit:junit@*=
 
-### Strict-Mode Version Alignment
+### Strict Mode Version Alignment
 
 When aligning dependency versions to some shared standard, it's possible to introduce incompatibilities that stem from too large of a version change. For instance, while it might be safe to revise a dependency's version from 1.5 to 1.5.1, it may not be safe to revise it to 2.0, or even 1.6.
 
@@ -163,7 +165,7 @@ In cases where this is a concern, and for dependencies whose versions are aligne
 
     mvn install -DstrictAlignment=true
 
-This will detect cases where the adjusted version doesn't start with the old version (i.e. 1.0 -> 1.0.1), and report the mismatch as a warning in the build's console output.
+This will detect cases where the adjusted version doesn't start with the old version (i.e. 1.0 -> 1.0.1), **not** do the alignment and report the mismatch as a warning in the build's console output.
 
 If, instead, the build should fail when strict-mode checks are violated, add the `strictViolationFails=true` property:
 

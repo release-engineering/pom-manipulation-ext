@@ -74,6 +74,7 @@ public class DependencyManipulator
     {
         final DependencyState state = session.getState( DependencyState.class );
         final Set<Project> result = internalApplyChanges( state, projects, session );
+        final boolean strict = state.getStrict();
 
         final Map<String, String> versionPropertyUpdateMap = state.getVersionPropertyUpdateMap();
 
@@ -89,8 +90,33 @@ public class DependencyManipulator
                     if ( p.getModel().getProperties().containsKey (key) )
                     {
                         logger.info( "Updating property {} with {} ", key, versionPropertyUpdateMap.get( key ) );
-                        p.getModel().getProperties().setProperty( key, versionPropertyUpdateMap.get( key ) );
+                        final String oldValue = p.getModel().getProperties().getProperty( key );
+                        final String overrideVersion = versionPropertyUpdateMap.get( key );
+
                         found = true;
+
+                        if ( strict )
+                        {
+                            if ( oldValue != null && !overrideVersion.startsWith( oldValue ) )
+                            {
+                                if ( state.getFailOnStrictViolation() )
+                                {
+                                    throw new ManipulationException(
+                                                                     "Replacement: {} of original version: {} in property: {} violates the strict version-alignment rule!",
+                                                                     overrideVersion, oldValue, key );
+                                }
+                                else
+                                {
+                                    logger.warn( "Replacement: {} of original version: {} in property: {} violates the strict version-alignment rule!",
+                                                 overrideVersion, oldValue, key );
+                                    // Ignore the dependency override. As found has been set to true it won't inject
+                                    // a new property either.
+                                    continue;
+                                }
+                            }
+                        }
+
+                        p.getModel().getProperties().setProperty( key, versionPropertyUpdateMap.get( key ) );
                     }
                 }
 
@@ -365,51 +391,30 @@ public class DependencyManipulator
                                      oldProperty, overrideVersion);
 
                         final String oldVersionProp = oldVersion.substring( 2, oldVersion.length() - 1 );
-                        if ( strict )
-                        {
-                            final String oldValue = project.getModel()
-                                                           .getProperties()
-                                                           .getProperty( oldVersionProp );
-                            if ( oldValue != null && !overrideVersion.startsWith( oldValue ) )
-                            {
-                                if ( state.getFailOnStrictViolation() )
-                                {
-                                    throw new ManipulationException(
-                                                                     "Replacement: {} of original version: {} in dependency: {} violates the strict version-alignment rule!",
-                                                                     overrideVersion, oldValue, groupIdArtifactId );
-                                }
-                                else
-                                {
-                                    logger.warn( "Replacement: {} of original version: {} in dependency: {} violates the strict version-alignment rule!",
-                                                 overrideVersion, oldValue, groupIdArtifactId );
-                                }
-                            }
-                        }
 
                         versionPropertyUpdateMap.put( oldVersionProp, overrideVersion );
                     }
                     else
                     {
-                        if ( strict )
+                        if ( strict && !overrideVersion.startsWith( oldVersion ) )
                         {
-                            if ( !overrideVersion.startsWith( oldVersion ) )
+                            if ( state.getFailOnStrictViolation() )
                             {
-                                if ( state.getFailOnStrictViolation() )
-                                {
-                                    throw new ManipulationException(
-                                                                     "Replacement: {} of original version: {} in dependency: {} violates the strict version-alignment rule!",
-                                                                     overrideVersion, oldVersion, groupIdArtifactId );
-                                }
-                                else
-                                {
-                                    logger.warn( "Replacement: {} of original version: {} in dependency: {} violates the strict version-alignment rule!",
-                                                 overrideVersion, oldVersion, groupIdArtifactId );
-                                }
+                                throw new ManipulationException(
+                                                                "Replacement: {} of original version: {} in dependency: {} violates the strict version-alignment rule!",
+                                                                overrideVersion, oldVersion, groupIdArtifactId );
+                            }
+                            else
+                            {
+                                logger.warn( "Replacement: {} of original version: {} in dependency: {} violates the strict version-alignment rule!",
+                                             overrideVersion, oldVersion, groupIdArtifactId );
                             }
                         }
-
-                        logger.debug( "Altered dependency {} {} -> {}", groupIdArtifactId, oldVersion, overrideVersion );
-                        dependency.setVersion( overrideVersion );
+                        else
+                        {
+                            logger.debug( "Altered dependency {} {} -> {}", groupIdArtifactId, oldVersion, overrideVersion );
+                            dependency.setVersion( overrideVersion );
+                        }
                     }
                     unmatchedVersionOverrides.remove( groupIdArtifactId );
                 }
