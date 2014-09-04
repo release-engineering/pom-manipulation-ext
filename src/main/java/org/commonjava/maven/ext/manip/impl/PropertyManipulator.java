@@ -15,18 +15,19 @@ import static org.commonjava.maven.ext.manip.util.IdUtils.ga;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Properties;
 import java.util.Set;
 
 import org.apache.maven.model.Model;
 import org.codehaus.plexus.component.annotations.Component;
 import org.codehaus.plexus.component.annotations.Requirement;
+import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.ext.manip.ManipulationException;
 import org.commonjava.maven.ext.manip.io.ModelIO;
 import org.commonjava.maven.ext.manip.model.Project;
 import org.commonjava.maven.ext.manip.state.ManipulationSession;
 import org.commonjava.maven.ext.manip.state.PropertyState;
-import org.commonjava.maven.ext.manip.util.IdUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -99,31 +100,23 @@ public class PropertyManipulator
     }
 
 
-    private Properties loadRemotePOMProperties( final String remoteMgmt, final ManipulationSession session )
+    private Properties loadRemotePOMProperties( final List<ProjectVersionRef> remoteMgmt,
+                                                final ManipulationSession session )
         throws ManipulationException
     {
         final Properties overrides = new Properties();
 
-        if ( remoteMgmt == null || remoteMgmt.length() == 0 )
+        if ( remoteMgmt == null || remoteMgmt.isEmpty() )
         {
             return overrides;
         }
 
-        final String[] remoteMgmtPomGAVs = remoteMgmt.split( "," );
-
         // Iterate in reverse order so that the first GAV in the list overwrites the last
-        for ( int i = ( remoteMgmtPomGAVs.length - 1 ); i > -1; --i )
+        final ListIterator<ProjectVersionRef> listIterator = remoteMgmt.listIterator( remoteMgmt.size() );
+        while ( listIterator.hasPrevious() )
         {
-            final String nextGAV = remoteMgmtPomGAVs[i];
-
-            if ( !IdUtils.validGav( nextGAV ) )
-            {
-                logger.warn( "Skipping invalid remote management GAV: " + nextGAV );
-                continue;
-            }
-
-            overrides.putAll( effectiveModelBuilder.getRemotePropertyMappingOverrides( nextGAV, session ) );
-
+            final ProjectVersionRef ref = listIterator.previous();
+            overrides.putAll( effectiveModelBuilder.getRemotePropertyMappingOverrides( ref, session ) );
         }
 
         return overrides;

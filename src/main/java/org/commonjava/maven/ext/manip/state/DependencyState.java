@@ -11,9 +11,12 @@
 package org.commonjava.maven.ext.manip.state;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Properties;
 
+import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.ext.manip.impl.DependencyManipulator;
+import org.commonjava.maven.ext.manip.util.IdUtils;
 
 /**
  * Captures configuration relating to dependency alignment from the POMs. Used by {@link DependencyManipulator}.
@@ -61,7 +64,7 @@ public class DependencyState
      */
     public static final String DEPENDENCY_MANAGEMENT_POM_PROPERTY = "dependencyManagement";
 
-    private final String depMgmt;
+    private final List<ProjectVersionRef> depMgmt;
 
     private final boolean overrideTransitive;
 
@@ -79,15 +82,16 @@ public class DependencyState
 
     public DependencyState( final Properties userProps )
     {
-        depMgmt = userProps.getProperty( DEPENDENCY_MANAGEMENT_POM_PROPERTY );
         overrideTransitive = Boolean.valueOf( userProps.getProperty( "overrideTransitive", "true" ) );
         overrideDependencies = Boolean.valueOf( userProps.getProperty( "overrideDependencies", "true" ) );
         strict = Boolean.valueOf( userProps.getProperty( STRICT_DEPENDENCIES, "false" ) );
         failOnStrictViolation = Boolean.valueOf( userProps.getProperty( STRICT_VIOLATION_FAILS, "false" ) );
+
+        depMgmt = IdUtils.parseGAVs( userProps.getProperty( DEPENDENCY_MANAGEMENT_POM_PROPERTY ) );
     }
 
     /**
-     * Enabled ONLY if repo-reporting-removal is provided in the user properties / CLI -D options.
+     * Enabled ONLY if propertyManagement is provided in the user properties / CLI -D options.
      *
      * @see #ENFORCE_SYSPROP
      * @see org.commonjava.maven.ext.manip.state.State#isEnabled()
@@ -95,7 +99,7 @@ public class DependencyState
     @Override
     public boolean isEnabled()
     {
-        return ( depMgmt != null && depMgmt.length() > 0 );
+        return depMgmt != null && !depMgmt.isEmpty();
     }
 
     /**
@@ -115,7 +119,7 @@ public class DependencyState
         return overrideDependencies;
     }
 
-    public String getRemoteDepMgmt()
+    public List<ProjectVersionRef> getRemoteDepMgmt()
     {
         return depMgmt;
     }

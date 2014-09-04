@@ -12,7 +12,11 @@ package org.commonjava.maven.ext.manip.state;
 
 import java.util.Properties;
 
+import org.commonjava.maven.atlas.ident.ref.InvalidRefException;
+import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.ext.manip.impl.ProfileInjectionManipulator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Captures configuration relating to injection profiles from a remote POM.
@@ -21,16 +25,33 @@ import org.commonjava.maven.ext.manip.impl.ProfileInjectionManipulator;
 public class ProfileInjectionState
     implements State
 {
+
+    private final Logger logger = LoggerFactory.getLogger( getClass() );
+
     /**
      * Suffix to enable this modder
      */
     public static final String PROFILE_INJECTION_PROPERTY = "profileInjection";
 
-    private final String profileMgmt;
+    private final ProjectVersionRef profileMgmt;
 
     public ProfileInjectionState( final Properties userProps )
     {
-        profileMgmt = userProps.getProperty( PROFILE_INJECTION_PROPERTY );
+        final String gav = userProps.getProperty( PROFILE_INJECTION_PROPERTY );
+        ProjectVersionRef ref = null;
+        if ( gav != null )
+        {
+            try
+            {
+                ref = ProjectVersionRef.parse( gav );
+            }
+            catch ( final InvalidRefException e )
+            {
+                logger.warn( "Skipping profile injection! Got invalid profileInjection GAV: {}", gav );
+            }
+        }
+
+        profileMgmt = ref;
     }
 
     /**
@@ -42,11 +63,11 @@ public class ProfileInjectionState
     @Override
     public boolean isEnabled()
     {
-        return profileMgmt != null && profileMgmt.length() > 0;
+        return profileMgmt != null;
     }
 
 
-    public String getRemoteProfileInjectionMgmt()
+    public ProjectVersionRef getRemoteProfileInjectionMgmt()
     {
         return profileMgmt;
     }

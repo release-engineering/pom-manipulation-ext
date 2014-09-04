@@ -10,13 +10,19 @@
  ******************************************************************************/
 package org.commonjava.maven.ext.manip.util;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Parent;
 import org.apache.maven.project.MavenProject;
+import org.commonjava.maven.atlas.ident.ref.InvalidRefException;
+import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.ext.manip.model.Project;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Convenience utilities for converting {@link Model} and {@link MavenProject} instances to GA / GAV strings.
@@ -25,6 +31,8 @@ import org.commonjava.maven.ext.manip.model.Project;
  */
 public final class IdUtils
 {
+    private static final Logger LOGGER = LoggerFactory.getLogger( IdUtils.class );
+
     /**
      * Regex pattern for parsing a Maven GAV
      */
@@ -34,9 +42,40 @@ public final class IdUtils
     {
     }
 
-    public static boolean validGav( String gav )
+    /**
+     * Splits the value on ',', then wraps each value in {@link ProjectVersionRef#parse(String)} and prints a warning / skips in the event of a 
+     * parsing error. Returns null if the input value is null.
+     */
+    public static List<ProjectVersionRef> parseGAVs( final String value )
     {
-        Matcher matcher = gavPattern.matcher( gav );
+        if ( value == null )
+        {
+            return null;
+        }
+        else
+        {
+            final String[] gavs = value.split( "," );
+            final List<ProjectVersionRef> refs = new ArrayList<ProjectVersionRef>();
+            for ( final String gav : gavs )
+            {
+                try
+                {
+                    final ProjectVersionRef ref = ProjectVersionRef.parse( gav );
+                    refs.add( ref );
+                }
+                catch ( final InvalidRefException e )
+                {
+                    LOGGER.warn( "Skipping invalid remote management GAV: " + gav );
+                }
+            }
+
+            return refs;
+        }
+    }
+
+    public static boolean validGav( final String gav )
+    {
+        final Matcher matcher = gavPattern.matcher( gav );
         return matcher.matches();
     }
 
@@ -112,4 +151,5 @@ public final class IdUtils
     {
         return String.format( "%s:%s:%s", g, a, v );
     }
+
 }

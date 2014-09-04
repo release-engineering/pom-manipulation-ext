@@ -10,9 +10,12 @@
  ******************************************************************************/
 package org.commonjava.maven.ext.manip.state;
 
+import java.util.List;
 import java.util.Properties;
 
+import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.ext.manip.impl.PluginManipulator;
+import org.commonjava.maven.ext.manip.util.IdUtils;
 
 /**
  * Captures configuration relating to plugin alignment from the POMs. Used by {@link PluginManipulator}.
@@ -28,15 +31,15 @@ public class PluginState
      */
     private static final String PLUGIN_MANAGEMENT_POM_PROPERTY = "pluginManagement";
 
-    private final String pluginMgmt;
+    private final List<ProjectVersionRef> pluginMgmt;
 
     public PluginState( final Properties userProps )
     {
-        pluginMgmt = userProps.getProperty( PLUGIN_MANAGEMENT_POM_PROPERTY );
+        pluginMgmt = IdUtils.parseGAVs( userProps.getProperty( PLUGIN_MANAGEMENT_POM_PROPERTY ) );
     }
 
     /**
-     * Enabled ONLY if repo-reporting-removal is provided in the user properties / CLI -D options.
+     * Enabled ONLY if propertyManagement is provided in the user properties / CLI -D options.
      *
      * @see #ENFORCE_SYSPROP
      * @see org.commonjava.maven.ext.manip.state.State#isEnabled()
@@ -44,10 +47,10 @@ public class PluginState
     @Override
     public boolean isEnabled()
     {
-        return ( pluginMgmt != null && pluginMgmt.length() > 0 );
+        return pluginMgmt != null && !pluginMgmt.isEmpty();
     }
 
-    public String getRemotePluginMgmt()
+    public List<ProjectVersionRef> getRemotePluginMgmt()
     {
         return pluginMgmt;
     }

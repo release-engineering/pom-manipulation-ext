@@ -23,11 +23,7 @@ import java.util.Map;
 import java.util.Properties;
 
 import org.apache.maven.model.Model;
-import org.apache.maven.model.building.DefaultModelBuildingRequest;
 import org.apache.maven.model.building.ModelBuilder;
-import org.apache.maven.model.building.ModelBuildingException;
-import org.apache.maven.model.building.ModelBuildingRequest;
-import org.apache.maven.model.building.ModelBuildingResult;
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 import org.codehaus.plexus.component.annotations.Component;
 import org.codehaus.plexus.component.annotations.Requirement;
@@ -71,16 +67,10 @@ public class ModelIO
 
     /**
      * Read the raw model (equivalent to the pom file on disk) from a given GAV.
-     *
-     * @param gav
-     * @return
-     * @throws ManipulationException
      */
-    public Model resolveRawModel( final String gav )
+    public Model resolveRawModel( final ProjectVersionRef ref )
         throws ManipulationException
     {
-        final ProjectVersionRef ref = ProjectVersionRef.parse( gav );
-
         Transfer transfer;
         try
         {
@@ -111,36 +101,16 @@ public class ModelIO
         }
     }
 
-    public Model readEffectiveModel( final String gav )
+    public Map<ProjectRef, String> getRemoteDependencyVersionOverrides( final ProjectVersionRef ref,
+                                                                        final ManipulationSession session )
         throws ManipulationException
     {
-        final DefaultModelBuildingRequest mbr = new DefaultModelBuildingRequest();
-        mbr.setModelResolver( new GalleyModelResolver( galleyWrapper ) );
-        mbr.setValidationLevel( ModelBuildingRequest.VALIDATION_LEVEL_MINIMAL );
-
-        try
-        {
-            final ModelBuildingResult result = modelBuilder.build( mbr );
-
-            // TODO: Report warnings...
-
-            return result.getEffectiveModel();
-        }
-        catch ( final ModelBuildingException e )
-        {
-            throw new ManipulationException( "Failed to build effective Model for: %s.\n--> %s", e, gav, e.getMessage() );
-        }
-    }
-
-    public Map<ProjectRef, String> getRemoteDependencyVersionOverrides( final String gav, final ManipulationSession session )
-        throws ManipulationException
-    {
-        logger.debug( "Resolving dependency management GAV: " + gav );
+        logger.debug( "Resolving dependency management GAV: " + ref );
 
         final Map<ProjectRef, String> versionOverrides = new LinkedHashMap<ProjectRef, String>();
         try
         {
-            final MavenPomView pomView = galleyWrapper.readPomView( ProjectVersionRef.parse( gav ) );
+            final MavenPomView pomView = galleyWrapper.readPomView( ref );
 
             // TODO: active profiles!
             final List<DependencyView> deps = pomView.getAllManagedDependencies();
@@ -159,33 +129,34 @@ public class ModelIO
         }
         catch ( final GalleyMavenException e )
         {
-            throw new ManipulationException( "Unable to resolve: %s", e, gav );
+            throw new ManipulationException( "Unable to resolve: %s", e, ref );
         }
 
         return versionOverrides;
     }
 
-    public Properties getRemotePropertyMappingOverrides( final String gav, final ManipulationSession session )
+    public Properties getRemotePropertyMappingOverrides( final ProjectVersionRef ref, final ManipulationSession session )
         throws ManipulationException
     {
-        logger.debug( "Resolving remote property mapping POM: " + gav );
+        logger.debug( "Resolving remote property mapping POM: " + ref );
 
-        final Model m = resolveRawModel( gav );
+        final Model m = resolveRawModel( ref );
 
         logger.debug( "Returning override of " + m.getProperties() );
 
         return m.getProperties();
     }
 
-    public Map<ProjectRef, String> getRemotePluginVersionOverrides( final String gav, final ManipulationSession session )
+    public Map<ProjectRef, String> getRemotePluginVersionOverrides( final ProjectVersionRef ref,
+                                                                    final ManipulationSession session )
         throws ManipulationException
     {
-        logger.debug( "Resolving remote plugin management POM: " + gav );
+        logger.debug( "Resolving remote plugin management POM: " + ref );
 
         final Map<ProjectRef, String> versionOverrides = new HashMap<ProjectRef, String>();
         try
         {
-            final MavenPomView pomView = galleyWrapper.readPomView( ProjectVersionRef.parse( gav ) );
+            final MavenPomView pomView = galleyWrapper.readPomView( ref );
 
             // TODO: active profiles!
             final List<PluginView> plugins = pomView.getAllManagedBuildPlugins();
@@ -196,10 +167,10 @@ public class ModelIO
             }
 
             // Iterate in reverse order so that plugins inherited from the closest parent win.
-            ListIterator<PluginView> prt = plugins.listIterator( plugins.size() );
+            final ListIterator<PluginView> prt = plugins.listIterator( plugins.size() );
             while (prt.hasPrevious())
             {
-                PluginView plugin = prt.previous();
+                final PluginView plugin = prt.previous();
                 versionOverrides.put( plugin.asProjectRef(), plugin.getVersion() );
 
                 logger.debug( "Added version override for: " + plugin.asProjectRef()
@@ -208,7 +179,7 @@ public class ModelIO
         }
         catch ( final GalleyMavenException e )
         {
-            throw new ManipulationException( "Unable to resolve: %s", e, gav );
+            throw new ManipulationException( "Unable to resolve: %s", e, ref );
         }
 
         return versionOverrides;

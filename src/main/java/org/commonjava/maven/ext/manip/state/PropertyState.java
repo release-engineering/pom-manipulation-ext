@@ -10,10 +10,13 @@
  ******************************************************************************/
 package org.commonjava.maven.ext.manip.state;
 
+import java.util.List;
 import java.util.Properties;
 
+import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.ext.manip.impl.AlignmentManipulator;
 import org.commonjava.maven.ext.manip.impl.PropertyManipulator;
+import org.commonjava.maven.ext.manip.util.IdUtils;
 
 /**
  * Captures configuration relating to property injection from the POMs. Used by {@link PropertyManipulator}
@@ -23,6 +26,7 @@ import org.commonjava.maven.ext.manip.impl.PropertyManipulator;
 public class PropertyState
     implements State
 {
+
     /**
      * Suffix to enable this modder. The name of the property which contains the GAV of the remote pom from
      * which to retrieve property mapping information. <br />
@@ -30,11 +34,11 @@ public class PropertyState
      */
     public static final String PROPERTY_MANAGEMENT_POM_PROPERTY = "propertyManagement";
 
-    private final String propertyMgmt;
+    private final List<ProjectVersionRef> propertyMgmt;
 
     public PropertyState( final Properties userProps )
     {
-        propertyMgmt = userProps.getProperty( PROPERTY_MANAGEMENT_POM_PROPERTY );
+        propertyMgmt = IdUtils.parseGAVs( userProps.getProperty( PROPERTY_MANAGEMENT_POM_PROPERTY ) );
     }
 
     /**
@@ -46,10 +50,10 @@ public class PropertyState
     @Override
     public boolean isEnabled()
     {
-        return ( propertyMgmt != null && propertyMgmt.length() > 0 );
+        return propertyMgmt != null && !propertyMgmt.isEmpty();
     }
 
-    public String getRemotePropertyMgmt()
+    public List<ProjectVersionRef> getRemotePropertyMgmt()
     {
         return propertyMgmt;
     }
