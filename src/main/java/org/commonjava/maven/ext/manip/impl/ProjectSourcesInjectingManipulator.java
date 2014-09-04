@@ -18,6 +18,8 @@ import org.commonjava.maven.ext.manip.ManipulationException;
 import org.commonjava.maven.ext.manip.model.Project;
 import org.commonjava.maven.ext.manip.state.ManipulationSession;
 import org.commonjava.maven.ext.manip.state.ProjectSourcesInjectingState;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Simple manipulator that detects the presence of the <a href="https://github.com/jdcasey/project-sources-maven-plugin">project-sources-maven-plugin</a>,
@@ -54,6 +56,8 @@ public class ProjectSourcesInjectingManipulator
 
     private static final String INITIALIZE_PHASE = "initialize";
 
+    private final Logger logger = LoggerFactory.getLogger( getClass() );
+
     @Override
     public void init( final ManipulationSession session )
         throws ManipulationException
@@ -68,7 +72,7 @@ public class ProjectSourcesInjectingManipulator
     }
 
     /**
-     * If enabled, grab the topmost POM in the current build (topmost in terms of inheritance, not necessarily directory structure). Check for the 
+     * If enabled, grab the execution root pom (which will be the topmost POM in terms of directory structure). Check for the
      * presence of the project-sources-maven-plugin in the base build (/project/build/plugins/). Inject a new plugin execution for creating project
      * sources if this plugin has not already been declared in the base build section.
      */
@@ -82,8 +86,10 @@ public class ProjectSourcesInjectingManipulator
         {
             for ( final Project project : projects )
             {
-                if ( project.isTopPOM() )
+                if ( project.getPom().equals( session.getTopPom() ))
                 {
+                    logger.info( "Examining {} to apply sources/metadata plugins.", project );
+
                     final Model model = project.getModel();
                     Build build = model.getBuild();
                     if ( build == null )
@@ -118,9 +124,9 @@ public class ProjectSourcesInjectingManipulator
                         execution.setId( BMMP_EXEC_ID );
                         execution.setPhase( VALIDATE_PHASE );
                         execution.setGoals( Collections.singletonList( BMMP_GOAL ) );
-                        
+
                         final Xpp3Dom xml = new Xpp3Dom( "configuration" );
-                        
+
                         final Map<String, Object> config = new HashMap<String, Object>();
                         config.put( "createPropertiesReport", true );
                         config.put( "createXmlReport", false );
@@ -143,10 +149,10 @@ public class ProjectSourcesInjectingManipulator
                             {
                                 child.setValue( entry.getValue().toString() );
                             }
-                            
+
                             xml.addChild( child );
                         }
-                        
+
                         execution.setConfiguration( xml );
 
                         final Plugin plugin = new Plugin();
