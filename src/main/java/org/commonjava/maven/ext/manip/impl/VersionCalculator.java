@@ -244,6 +244,10 @@ public class VersionCalculator
             vc.clear();
             return vc;
         }
+        else
+        {
+            vc.setVersionSuffix( suffix );
+        }
 
         // assume the version is of the form 1.2.3.GA, where appending the
         // suffix requires a '-' to concatenate the string of the final version

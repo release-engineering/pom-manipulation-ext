@@ -111,6 +111,22 @@ public class VersioningCalculatorTest
     }
 
     @Test
+    public void applyNonSerialSuffix_NumericVersionTail_CompoundQualifier()
+        throws Exception
+    {
+        final Properties props = new Properties();
+
+        final String s = "foo-bar";
+        props.setProperty( VersioningState.VERSION_SUFFIX_SYSPROP, s );
+        setupSession( props );
+
+        final String v = "1.2";
+
+        final String result = calculate( v );
+        assertThat( result, equalTo( v + "." + s ) );
+    }
+
+    @Test
     public void applyNonSerialSuffix_NonNumericVersionTail()
         throws Exception
     {
@@ -149,6 +165,22 @@ public class VersioningCalculatorTest
         final Properties props = new Properties();
 
         final String s = "foo-1";
+        props.setProperty( VersioningState.VERSION_SUFFIX_SYSPROP, s );
+        setupSession( props );
+
+        final String v = "1.2";
+
+        final String result = calculate( v );
+        assertThat( result, equalTo( v + "." + s ) );
+    }
+
+    @Test
+    public void applySerialSuffix_NumericVersionTail_CompoundQualifier()
+        throws Exception
+    {
+        final Properties props = new Properties();
+
+        final String s = "foo-bar-1";
         props.setProperty( VersioningState.VERSION_SUFFIX_SYSPROP, s );
         setupSession( props );
 
