@@ -49,7 +49,7 @@ import org.slf4j.LoggerFactory;
 public class VersionCalculator
 {
 
-    private static final String SERIAL_SUFFIX_PATTERN = "([^-.]+)(?:([-.])(\\d+))?$";
+    private static final String SERIAL_SUFFIX_PATTERN = "(.+)([-.])(\\d+)$";
 
     public static final String SNAPSHOT_SUFFIX = "-SNAPSHOT";
 
@@ -122,8 +122,7 @@ public class VersionCalculator
      */
     // FIXME: Loooong method
     protected VersionCalculation calculate( final String groupId, final String artifactId,
-                                            final String originalVersion,
-                                final ManipulationSession session )
+                                            final String originalVersion, final ManipulationSession session )
         throws ManipulationException
     {
         String baseVersion = originalVersion;
@@ -138,132 +137,23 @@ public class VersionCalculator
         }
 
         final VersioningState state = session.getState( VersioningState.class );
-        final String incrementalSerialSuffix = state.getIncrementalSerialSuffix();
-        final String suffix = state.getSuffix();
+        final String incrementalSuffix = state.getIncrementalSerialSuffix();
+        final String staticSuffix = state.getSuffix();
 
-        logger.debug( "Got the following version suffixes:\n  Static: " + suffix + "\nIncremental: "
-            + incrementalSerialSuffix );
-
-        final String suff = suffix != null ? suffix : incrementalSerialSuffix;
-
-        logger.debug( "Using suffix: " + suff );
-        final Pattern serialSuffixPattern = Pattern.compile( SERIAL_SUFFIX_PATTERN );
-        final Matcher suffixMatcher = serialSuffixPattern.matcher( suff );
+        logger.debug( "Got the following version suffixes:\n  Static: " + staticSuffix + "\nIncremental: "
+            + incrementalSuffix );
 
         final VersionCalculation vc = new VersionCalculation( originalVersion, baseVersion );
-        if ( suffixMatcher.matches() )
+        if ( incrementalSuffix != null )
         {
-            // the "redhat" in "redhat-1"
-            final String suffixBase = suffixMatcher.group( 1 );
-            String sep = suffixMatcher.group( 2 );
-            if ( sep == null )
-            {
-                sep = "-";
-            }
-
-            final int idx = baseVersion.indexOf( suffixBase );
-
-            if ( idx > 1 )
-            {
-                // trim the old suffix off.
-                baseVersion = baseVersion.substring( 0, idx - 1 );
-                vc.setBaseVersion( baseVersion );
-                logger.debug( "Trimmed version (without pre-existing suffix): " + baseVersion );
-            }
-
-            // If we're using serial suffixes (-redhat-N) and the flag is set
-            // to increment the existing suffix, read available versions from the
-            // existing POM, plus the repository metadata, and find the highest
-            // serial number to increment...then increment it.
-            if ( suff.equals( incrementalSerialSuffix ) )
-            {
-                logger.debug( "Resolving suffixes already found in metadata to determine increment base." );
-
-                vc.setVersionSuffix( suffixBase );
-
-                final List<String> versionCandidates = new ArrayList<String>();
-                versionCandidates.add( originalVersion );
-                versionCandidates.addAll( getMetadataVersions( groupId, artifactId, session ) );
-
-                int maxSerial = 0;
-
-                for ( final String version : versionCandidates )
-                {
-                    final Matcher candidateSuffixMatcher = serialSuffixPattern.matcher( version );
-
-                    if ( candidateSuffixMatcher.find() )
-                    {
-                        final String wholeSuffix = candidateSuffixMatcher.group();
-                        logger.debug( "Group 0 of serial-suffix matcher is: '" + wholeSuffix + "'" );
-                        final int baseIdx = version.indexOf( wholeSuffix );
-
-                        // Need room for at least a character in the base-version, plus a separator like '-'
-                        if ( baseIdx < 2 )
-                        {
-                            logger.debug( "Ignoring invalid version: '" + version
-                                + "' (seems to be naked version suffix with no base)." );
-                            continue;
-                        }
-
-                        final String base = version.substring( 0, baseIdx - 1 );
-                        if ( !baseVersion.equals( base ) )
-                        {
-                            logger.debug( "Ignoring irrelevant version: '" + version + "' ('" + base
-                                + "' doesn't match on base-version: '" + baseVersion + "')." );
-                            continue;
-                        }
-
-                        // grab the old serial number.
-                        final String serialStr = candidateSuffixMatcher.group( 3 );
-                        logger.debug( "Group 3 of serial-suffix matcher is: '" + serialStr + "'" );
-                        final int serial = serialStr == null ? 0 : Integer.parseInt( serialStr );
-                        if ( serial > maxSerial )
-                        {
-                            logger.debug( "new max serial number: " + serial + " (previous was: " + maxSerial + ")" );
-                            maxSerial = serial;
-
-                            // don't assume we're using '-' as suffix-base-to-serial-number separator...
-                            sep = candidateSuffixMatcher.group( 2 );
-                        }
-                    }
-                }
-
-
-                vc.setSuffixSeparator( sep );
-                vc.setIncrementalQualifier( maxSerial + 1 );
-            }
-            else
-            {
-                vc.setVersionSuffix( suff );
-            }
+                calculateIncremental( vc, baseVersion, snapshot, incrementalSuffix, groupId, artifactId,
+                                      originalVersion, state, session );
         }
-        // If we're not using a serial suffix, and the version already ends
-        // with the chosen suffix, there's nothing to do!
-        else if ( originalVersion.endsWith( suffix ) )
+        else if ( staticSuffix != null )
         {
-            vc.clear();
-            return vc;
+                calculateStatic( vc, baseVersion, snapshot, staticSuffix, groupId, artifactId, originalVersion, state,
+                                 session );
         }
-        else
-        {
-            vc.setVersionSuffix( suffix );
-        }
-
-        // assume the version is of the form 1.2.3.GA, where appending the
-        // suffix requires a '-' to concatenate the string of the final version
-        // part in OSGi.
-        String sep = "-";
-
-        // now, check the above assumption...
-        // if the version is of the form: 1.2.3, then we need to append the
-        // suffix as a final version part using '.'
-        logger.info( "Partial result: " + baseVersion );
-        if ( baseVersion.matches( ".+[-.]\\d+" ) )
-        {
-            sep = ".";
-        }
-
-        vc.setBaseVersionSeparator( sep );
 
         // TODO OSGi fixup for versions like 1.2.GA or 1.2 (too few parts)
 
@@ -271,6 +161,143 @@ public class VersionCalculator
         vc.setSnapshot( state.preserveSnapshot() && snapshot );
 
         return vc;
+    }
+
+    private void calculateStatic( final VersionCalculation vc, final String baseVersion,
+                                                final boolean snapshot, final String suffix, final String groupId,
+                                                final String artifactId, final String originalVersion,
+                                                final VersioningState state, final ManipulationSession session )
+    {
+        final Pattern serialSuffixPattern = Pattern.compile( SERIAL_SUFFIX_PATTERN );
+        final Matcher suffixMatcher = serialSuffixPattern.matcher( suffix );
+
+        String suffixBase = suffix;
+        String sep = "-";
+
+        if ( suffixMatcher.matches() )
+        {
+            logger.debug( "Treating suffix {} as serial.", suffix );
+
+            // the "redhat" in "redhat-1"
+            suffixBase = suffixMatcher.group( 1 );
+            sep = suffixMatcher.group( 2 );
+            if ( sep == null )
+            {
+                sep = "-";
+            }
+        }
+
+        trimBaseVersion( vc, baseVersion, suffixBase );
+
+        vc.setVersionSuffix( suffix );
+    }
+
+    private String trimBaseVersion( final VersionCalculation vc, String baseVersion, final String suffixBase )
+    {
+        final int idx = baseVersion.indexOf( suffixBase );
+
+        if ( idx > 1 )
+        {
+            // trim the old suffix off.
+            final char baseSep = baseVersion.charAt( idx - 1 );
+            baseVersion = baseVersion.substring( 0, idx - 1 );
+            vc.setBaseVersionSeparator( Character.toString( baseSep ) );
+            vc.setBaseVersion( baseVersion );
+            logger.debug( "Trimmed version (without pre-existing suffix): " + baseVersion
+                + " with base-version separator: " + baseSep );
+        }
+
+        if ( baseVersion.matches( ".+[-.]\\d+" ) )
+        {
+            vc.setBaseVersionSeparator( "." );
+        }
+        
+        return baseVersion;
+    }
+
+    private void calculateIncremental( final VersionCalculation vc, String baseVersion,
+                                                     final boolean snapshot, final String incrementalSerialSuffix,
+                                                     final String groupId, final String artifactId,
+                                                     final String originalVersion, final VersioningState state,
+                                                     final ManipulationSession session )
+        throws ManipulationException
+    {
+        logger.debug( "Using incremental suffix: " + incrementalSerialSuffix );
+
+        String suffixBase = incrementalSerialSuffix;
+        String sep = "-";
+
+        final Matcher suffixMatcher = Pattern.compile( SERIAL_SUFFIX_PATTERN )
+                                             .matcher( incrementalSerialSuffix );
+        if ( suffixMatcher.matches() )
+        {
+            logger.debug( "Treating suffix {} as serial.", incrementalSerialSuffix );
+
+            // the "redhat" in "redhat-1"
+            suffixBase = suffixMatcher.group( 1 );
+            sep = suffixMatcher.group( 2 );
+            if ( sep == null )
+            {
+                sep = "-";
+            }
+        }
+
+        baseVersion = trimBaseVersion( vc, baseVersion, suffixBase );
+
+        logger.debug( "Resolving suffixes already found in metadata to determine increment base." );
+
+        vc.setVersionSuffix( suffixBase );
+
+        final List<String> versionCandidates = new ArrayList<String>();
+        versionCandidates.add( originalVersion );
+        versionCandidates.addAll( getMetadataVersions( groupId, artifactId, session ) );
+
+        int maxSerial = 0;
+
+        final String candidatePatternStr = suffixBase + sep + "(\\d+)$";
+        logger.debug( "Using pattern: '{}' to find compatible versions from metadata.", candidatePatternStr );
+        final Pattern candidateSuffixPattern = Pattern.compile( candidatePatternStr );
+        for ( final String version : versionCandidates )
+        {
+            final Matcher candidateSuffixMatcher = candidateSuffixPattern.matcher( version );
+
+            if ( candidateSuffixMatcher.find() )
+            {
+                final String wholeSuffix = candidateSuffixMatcher.group();
+                logger.debug( "Group 0 of serial-suffix matcher is: '" + wholeSuffix + "'" );
+                final int baseIdx = version.indexOf( wholeSuffix );
+
+                // Need room for at least a character in the base-version, plus a separator like '-'
+                if ( baseIdx < 2 )
+                {
+                    logger.debug( "Ignoring invalid version: '" + version
+                        + "' (seems to be naked version suffix with no base)." );
+                    continue;
+                }
+
+                final String base = version.substring( 0, baseIdx - 1 );
+                logger.debug( "Candidate version base is: '{}'", base );
+                if ( !baseVersion.equals( base ) )
+                {
+                    logger.debug( "Ignoring irrelevant version: '" + version + "' ('" + base
+                        + "' doesn't match on base-version: '" + baseVersion + "')." );
+                    continue;
+                }
+
+                // grab the old serial number.
+                final String serialStr = candidateSuffixMatcher.group( 1 );
+                logger.debug( "Group 1 of serial-suffix matcher is: '" + serialStr + "'" );
+                final int serial = serialStr == null ? 0 : Integer.parseInt( serialStr );
+                if ( serial > maxSerial )
+                {
+                    logger.debug( "new max serial number: " + serial + " (previous was: " + maxSerial + ")" );
+                    maxSerial = serial;
+                }
+            }
+
+            vc.setSuffixSeparator( sep );
+            vc.setIncrementalQualifier( maxSerial + 1 );
+        }
     }
 
     /**

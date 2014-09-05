@@ -361,6 +361,23 @@ public class VersioningCalculatorTest
     }
 
     @Test
+    public void incrementExistingSerialSuffix_CompoundQualifier()
+        throws Exception
+    {
+        final Properties props = new Properties();
+
+        props.setProperty( VersioningState.INCREMENT_SERIAL_SUFFIX_SYSPROP, "foo-bar-0" );
+        setupSession( props, "1.2.GA-foo-bar-1", "1.2.GA-foo-bar-2" );
+
+        final String v = "1.2.GA";
+        final String os = "-foo-bar-1";
+        final String ns = "foo-bar-3";
+
+        final String result = calculate( v + os );
+        assertThat( result, equalTo( v + "-" + ns ) );
+    }
+
+    @Test
     public void incrementExistingSerialSuffix_UsingRepositoryMetadata()
         throws Exception
     {
