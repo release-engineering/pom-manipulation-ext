@@ -129,7 +129,7 @@ public class DependencyManipulator
                     logger.info( "Unable to find a property for {} to update", key );
                     for (final Project p : result)
                     {
-                        if ( p.isTopPOM() )
+                        if ( p.isInheritanceRoot() )
                         {
                             logger.info( "Adding property {} with {} ", key, versionPropertyUpdateMap.get( key ) );
                             p.getModel().getProperties().setProperty( key, versionPropertyUpdateMap.get( key ) );
@@ -182,7 +182,7 @@ public class DependencyManipulator
         moduleOverrides = removeReactorGAs( session, moduleOverrides );
         moduleOverrides = applyModuleVersionOverrides( projectGA, moduleOverrides, explicitOverrides );
 
-        if ( project.isTopPOM() )
+        if ( project.isInheritanceRoot() )
         {
             // Handle the situation where the top level parent refers to a prior build that is in the BOM.
             if ( project.getParent() != null && moduleOverrides.containsKey( ga( project.getParent() ) ) )

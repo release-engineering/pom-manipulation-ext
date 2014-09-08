@@ -57,8 +57,6 @@ public class PomPeek
 
     private static final String MODULE_ELEM = "module";
 
-    private static final String MODULES_ELEM = "modules";
-
     private static final Map<String, String> CAPTURED_PATHS = new HashMap<String, String>()
     {
         private static final long serialVersionUID = 1L;
@@ -90,7 +88,7 @@ public class PomPeek
     /**
      * Denotes if this represents the top level peeked POM.
      */
-    private boolean topPOM = false;
+    private boolean inheritanceRoot = false;
 
     public PomPeek( final File pom )
     {
@@ -357,13 +355,13 @@ public class PomPeek
      * module that does not inherit the parent.
      * @param b
      */
-    public void setTopPOM( final boolean b )
+    public void setInheritanceRoot( final boolean b )
     {
-        topPOM = b;
+        inheritanceRoot = b;
     }
 
-    public boolean isTopPOM()
+    public boolean isInheritanceRoot()
     {
-        return topPOM;
+        return inheritanceRoot;
     }
 }

@@ -88,7 +88,7 @@ public class ProjectSourcesInjectingManipulator
         {
             for ( final Project project : projects )
             {
-                if ( project.getPom().equals( session.getTopPom() ))
+                if ( project.getPom().equals( session.getExecutionRoot() ))
                 {
                     logger.info( "Examining {} to apply sources/metadata plugins.", project );
 

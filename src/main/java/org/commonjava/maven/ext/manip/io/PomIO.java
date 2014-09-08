@@ -114,7 +114,7 @@ public class PomIO
             }
 
             final Project project = new Project( pom, raw );
-            project.setTopPOM( peek.isTopPOM() );
+            project.setInheritanceRoot( peek.isInheritanceRoot() );
 
             projects.add( project );
         }
@@ -206,7 +206,7 @@ public class PomIO
             doc = builder.build( new ByteArrayInputStream( baos.toByteArray() ) );
 
             // Only add the modified by to the top level pom.
-            if ( project.isTopPOM() )
+            if ( project.isInheritanceRoot() )
             {
                 @SuppressWarnings( "unchecked" )
                 final Iterator<Comment> it = doc.getContent( new ContentFilter( ContentFilter.COMMENT ) )

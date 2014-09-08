@@ -85,7 +85,7 @@ public class PropertyManipulator
             if ( overrides.size() > 0 )
             {
                 // Only inject the new properties at the top level.
-                if ( project.isTopPOM() )
+                if ( project.isInheritanceRoot() )
                 {
                     logger.info( "Applying property changes to: " + ga( project ) + " with " + overrides );
 

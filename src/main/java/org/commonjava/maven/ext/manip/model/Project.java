@@ -77,7 +77,7 @@ public class Project
     /**
      * Denotes if this Project represents the top level POM of a build.
      */
-    private boolean topPOM;
+    private boolean inheritanceRoot;
 
     public Project( final ProjectVersionRef key, final File pom, final Model model )
         throws ManipulationException
@@ -476,14 +476,14 @@ public class Project
         return key.asProjectRef();
     }
 
-    public void setTopPOM( final boolean topPOM )
+    public void setInheritanceRoot( final boolean inheritanceRoot )
     {
-        this.topPOM = topPOM;
+        this.inheritanceRoot = inheritanceRoot;
     }
 
-    public boolean isTopPOM()
+    public boolean isInheritanceRoot()
     {
-        return topPOM;
+        return inheritanceRoot;
     }
 
     private static ProjectVersionRef modelKey( final Model model )

@@ -99,7 +99,7 @@ public class ProfileInjectionManipulator
 
         for ( final Project project : projects )
         {
-            if ( project.isTopPOM() )
+            if ( project.isInheritanceRoot() )
             {
                 final String ga = ga( project );
                 logger.info( getClass().getSimpleName() + " applying changes to: " + ga );

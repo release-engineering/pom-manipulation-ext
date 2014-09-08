@@ -87,7 +87,7 @@ public class PluginManipulator
         // TODO: Should plugin override apply to all projects?
         logger.info( "Applying plugin changes to: " + ga( project ) );
 
-        if ( project.isTopPOM() )
+        if ( project.isInheritanceRoot() )
         {
             // If the model doesn't have any plugin management set by default, create one for it
             Build build = model.getBuild();

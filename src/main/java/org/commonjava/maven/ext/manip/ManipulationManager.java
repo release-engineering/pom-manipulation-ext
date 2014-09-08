@@ -242,7 +242,7 @@ public class ManipulationManager
                       .equals( topLevelParent ) )
                 {
                     logger.debug( "Setting top level parent to " + p.getPom() + " :: " + p.getKey() );
-                    p.setTopPOM( true );
+                    p.setInheritanceRoot( true );
                 }
             }
 
@@ -254,7 +254,7 @@ public class ManipulationManager
                      ! seenThisParent (projectrefs, p.getParentKey()))
                 {
                     logger.debug( "Found a standalone pom " + p.getPom() + " :: " + p.getKey() );
-                    p.setTopPOM( true );
+                    p.setInheritanceRoot( true );
                 }
             }
         }

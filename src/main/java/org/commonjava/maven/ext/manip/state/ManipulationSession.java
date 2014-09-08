@@ -70,7 +70,7 @@ public class ManipulationSession
      */
     public boolean isEnabled()
     {
-        return getTopPom() != null
+        return getExecutionRoot() != null
             && !Boolean.valueOf( getUserProperties().getProperty( MANIPULATIONS_DISABLED_PROP, "false" ) );
     }
 
@@ -112,7 +112,7 @@ public class ManipulationSession
                                                                      .getUserProperties();
     }
 
-    public File getTopPom()
+    public File getExecutionRoot()
     {
         return mavenSession == null ? null : mavenSession.getRequest()
                                                          .getPom();
