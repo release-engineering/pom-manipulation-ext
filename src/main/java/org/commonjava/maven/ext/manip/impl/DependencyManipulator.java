@@ -211,14 +211,13 @@ public class DependencyManipulator
                 logger.debug( "Applying overrides to managed dependencies for top-pom: {}\n{}", projectGA,
                               moduleOverrides );
 
-                applyExplicitOverrides( explicitOverrides, dependencies );
-
                 final Map<String, String> nonMatchingVersionOverrides =
                     applyOverrides( session, project, dependencies, moduleOverrides );
 
                 final Map<String, String> matchedOverrides = new LinkedHashMap<String, String>(moduleOverrides);
                 matchedOverrides.keySet().removeAll( nonMatchingVersionOverrides.keySet() );
 
+                applyExplicitOverrides( explicitOverrides, dependencies );
 
                 // Add/override a property to the build for each override
                 addVersionOverrideProperties( session, matchedOverrides, model.getProperties() );
@@ -280,8 +279,8 @@ public class DependencyManipulator
                             dependencyManagement != null )
             {
                 logger.debug( "Applying overrides to managed dependencies for: {}\n{}", projectGA, moduleOverrides );
-                applyExplicitOverrides( explicitOverrides, dependencyManagement.getDependencies() );
                 applyOverrides( session, project, dependencyManagement.getDependencies(), moduleOverrides );
+                applyExplicitOverrides( explicitOverrides, dependencyManagement.getDependencies() );
             }
             else
             {
@@ -294,8 +293,8 @@ public class DependencyManipulator
             logger.debug( "Applying overrides to concrete dependencies for: {}\n{}", projectGA, moduleOverrides );
             // Apply overrides to project direct dependencies
             final List<Dependency> projectDependencies = model.getDependencies();
-            applyExplicitOverrides( explicitOverrides, projectDependencies );
             applyOverrides( session, project, projectDependencies, moduleOverrides );
+            applyExplicitOverrides( explicitOverrides, projectDependencies );
         }
         else
         {
