@@ -6,7 +6,7 @@ import org.commonjava.maven.ext.manip.impl.ProjectSourcesInjectingManipulator;
 
 /**
  * Captures configuration parameters for use with {@link ProjectSourcesInjectingManipulator}. This state implementation captures two properties:
- * 
+ *
  * <ul>
  *   <li><b>project.src.skip</b> - If true, don't try to inject the project-sources-maven-plugin.</li>
  *   <li><b>project.src.version</b> - The version of the project-sources-maven-plugin to be injected.</li>
@@ -31,7 +31,7 @@ public class ProjectSourcesInjectingState
     /** Set this property to control the version of the build-metadata plugin to be injected. */
     public static final String BMMP_VERSION_PROPERTY = "project.meta.version";
 
-    public static final String DEFAULT_BMMP_VERSION = "1.3.1";
+    public static final String DEFAULT_BMMP_VERSION = "1.3.5-RC1";
 
     private final boolean enabled;
 
