@@ -143,6 +143,7 @@ public class ProjectSourcesInjectingManipulator
                         config.put( "addToGeneratedSources", false );
                         config.put( "validateCheckout", false );
                         config.put( "forceNewProperties", true );
+                        config.put( "skipModules", true );
 
                         for ( final Map.Entry<String, Object> entry : config.entrySet() )
                         {
