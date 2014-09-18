@@ -35,6 +35,8 @@ public class ManipulatingEventSpy
     extends AbstractEventSpy
 {
 
+    private static final String REQUIRE_EXTENSION = "manipulation.required";
+
     private final Logger logger = LoggerFactory.getLogger( getClass() );
 
     @Requirement
@@ -43,15 +45,15 @@ public class ManipulatingEventSpy
     @Requirement
     private ModelBuilder modelBuilder;
 
-    // FIXME: This was a classic getInstance() singleton...injection MAY not work here.
     @Requirement
     private ManipulationSession session;
 
-    @SuppressWarnings( "incomplete-switch" )
     @Override
     public void onEvent( final Object event )
         throws Exception
     {
+        boolean required = false;
+
         try
         {
             //            if ( event instanceof MavenExecutionRequest )
@@ -63,66 +65,62 @@ public class ManipulatingEventSpy
             {
                 final ExecutionEvent ee = (ExecutionEvent) event;
 
+                required = Boolean.parseBoolean( ee.getSession()
+                                                   .getRequest()
+                                                   .getUserProperties()
+                                                   .getProperty( REQUIRE_EXTENSION, "false" ) );
+
                 final ExecutionEvent.Type type = ee.getType();
-                switch ( type )
+                if ( type == Type.ProjectDiscoveryStarted )
                 {
-                    case ProjectDiscoveryStarted:
+                    if ( ee.getSession() != null )
                     {
-                        if ( ee.getSession() != null )
+                        if ( ee.getSession()
+                               .getRequest()
+                               .getLoggingLevel() == 0 )
                         {
-                            if ( ee.getSession()
-                                   .getRequest()
-                                   .getLoggingLevel() == 0 )
-                            {
-                                final ch.qos.logback.classic.Logger root =
-                                    (ch.qos.logback.classic.Logger) LoggerFactory.getLogger( org.slf4j.Logger.ROOT_LOGGER_NAME );
-                                root.setLevel( Level.DEBUG );
-                            }
-
-                            manipulationManager.init( ee.getSession(), session );
+                            final ch.qos.logback.classic.Logger root =
+                                (ch.qos.logback.classic.Logger) LoggerFactory.getLogger( org.slf4j.Logger.ROOT_LOGGER_NAME );
+                            root.setLevel( Level.DEBUG );
                         }
 
-                        if ( !session.isEnabled() )
-                        {
-                            logger.info( "Manipulation engine disabled{}",
-                                         ( session.getExecutionRoot() == null ? ". No project found."
-                                                         : " via command-line option" ) );
-
-                            super.onEvent( event );
-                            return;
-                        }
-
-                        manipulationManager.scan( session.getExecutionRoot(), session );
-
-                        final List<Project> projects = session.getProjects();
-
-                        for ( final Project project : projects )
-                        {
-                            logger.debug( "Got " + project + " (POM: " + project.getPom() + ")" );
-                        }
-
-                        manipulationManager.applyManipulations( projects, session );
-
-                        break;
+                        manipulationManager.init( ee.getSession(), session );
                     }
-                    //                    case SessionStarted:
-                    //                    {
-                    //                        break;
-                    //                    }
-                    //                    default:
-                    //                    {
-                    //                        baseLogger.info( "ExecutionEvent TYPE: " + ee.getType() );
-                    //                    }
-                }
-                if ( ee.getType() == Type.ProjectDiscoveryStarted )
-                {
+
+                    if ( !session.isEnabled() )
+                    {
+                        logger.info( "Manipulation engine disabled{}",
+                                     ( session.getExecutionRoot() == null ? ". No project found."
+                                                     : " via command-line option" ) );
+
+                        super.onEvent( event );
+                        return;
+                    }
+
+                    manipulationManager.scan( session.getExecutionRoot(), session );
+
+                    final List<Project> projects = session.getProjects();
+
+                    for ( final Project project : projects )
+                    {
+                        logger.debug( "Got " + project + " (POM: " + project.getPom() + ")" );
+                    }
+
+                    manipulationManager.applyManipulations( projects, session );
                 }
             }
         }
         catch ( final ManipulationException e )
         {
             logger.error( "Extension failure", e );
-            session.setError( e );
+            if ( required )
+            {
+                throw e;
+            }
+            else
+            {
+                session.setError( e );
+            }
         }
 
         super.onEvent( event );

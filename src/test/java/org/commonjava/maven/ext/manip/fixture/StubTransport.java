@@ -82,13 +82,6 @@ public class StubTransport
     }
 
     @Override
-    public ListingJob createListingJob( final ConcreteResource arg0, final int arg1 )
-        throws TransferException
-    {
-        throw new TransferException( "Not implemented in this stub!" );
-    }
-
-    @Override
     public PublishJob createPublishJob( final ConcreteResource arg0, final InputStream arg1, final long arg2,
                                         final int arg3 )
         throws TransferException
@@ -108,6 +101,13 @@ public class StubTransport
     public boolean handles( final Location loc )
     {
         return loc.equals( MavenLocationExpander.EXPANSION_TARGET );
+    }
+
+    @Override
+    public ListingJob createListingJob( final ConcreteResource resource, final Transfer target, final int timeoutSeconds )
+        throws TransferException
+    {
+        throw new TransferException( "Not implemented in this stub!" );
     }
 
 }

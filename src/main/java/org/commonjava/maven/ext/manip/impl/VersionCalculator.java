@@ -32,7 +32,7 @@ import org.commonjava.maven.ext.manip.state.ManipulationSession;
 import org.commonjava.maven.ext.manip.state.VersionCalculation;
 import org.commonjava.maven.ext.manip.state.VersioningState;
 import org.commonjava.maven.galley.maven.GalleyMavenException;
-import org.commonjava.maven.galley.maven.model.view.MavenMetadataView;
+import org.commonjava.maven.galley.maven.model.view.meta.MavenMetadataView;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
