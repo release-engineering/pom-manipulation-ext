@@ -13,7 +13,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.commonjava.maven.ext</groupId>
   <artifactId>pom-manipulation-ext</artifactId>
-  <version>0.7.3-SNAPSHOT</version>
+  <version>0.7.3</version>
   <name>POM Manipulation Extension for Maven</name>
   <url>http://github.com/jdcasey/pom-manipulation-ext</url>
   <description>
@@ -50,8 +50,8 @@
 
   <properties>
     <mavenVersion>3.0.4</mavenVersion>
-    <galleyVersion>0.6.5</galleyVersion>
-    <atlasVersion>0.13.4</atlasVersion>
+    <galleyVersion>0.6.8</galleyVersion>
+    <atlasVersion>0.13.6</atlasVersion>
     <it.maven.home>${project.build.directory}/apache-maven-${mavenVersion}</it.maven.home>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
