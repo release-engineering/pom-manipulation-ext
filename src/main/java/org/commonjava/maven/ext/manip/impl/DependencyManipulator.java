@@ -161,6 +161,8 @@ public class DependencyManipulator
     {
         // Map of GA : explicit version from dependency-exclusion overrides.
         final Map<String, String> explicitOverrides = new LinkedHashMap<String, String>();
+        final DependencyState state = session.getState( DependencyState.class );
+        final Map<String, String> versionPropertyUpdateMap = state.getVersionPropertyUpdateMap();
 
         final String projectGA = ga( project );
 
@@ -217,7 +219,7 @@ public class DependencyManipulator
                 final Map<String, String> matchedOverrides = new LinkedHashMap<String, String>(moduleOverrides);
                 matchedOverrides.keySet().removeAll( nonMatchingVersionOverrides.keySet() );
 
-                applyExplicitOverrides( explicitOverrides, dependencies );
+                applyExplicitOverrides( versionPropertyUpdateMap, explicitOverrides, dependencies );
 
                 // Add/override a property to the build for each override
                 addVersionOverrideProperties( session, matchedOverrides, model.getProperties() );
@@ -280,7 +282,7 @@ public class DependencyManipulator
             {
                 logger.debug( "Applying overrides to managed dependencies for: {}\n{}", projectGA, moduleOverrides );
                 applyOverrides( session, project, dependencyManagement.getDependencies(), moduleOverrides );
-                applyExplicitOverrides( explicitOverrides, dependencyManagement.getDependencies() );
+                applyExplicitOverrides( versionPropertyUpdateMap, explicitOverrides, dependencyManagement.getDependencies() );
             }
             else
             {
@@ -294,7 +296,7 @@ public class DependencyManipulator
             // Apply overrides to project direct dependencies
             final List<Dependency> projectDependencies = model.getDependencies();
             applyOverrides( session, project, projectDependencies, moduleOverrides );
-            applyExplicitOverrides( explicitOverrides, projectDependencies );
+            applyExplicitOverrides( versionPropertyUpdateMap, explicitOverrides, projectDependencies );
         }
         else
         {
@@ -309,8 +311,9 @@ public class DependencyManipulator
      *
      * @param explicitOverrides
      * @param dependencies
+     * @throws ManipulationException
      */
-    private void applyExplicitOverrides( final Map<String, String> explicitOverrides, final List<Dependency> dependencies )
+    private void applyExplicitOverrides( final Map<String, String> versionPropertyUpdateMap, final Map<String, String> explicitOverrides, final List<Dependency> dependencies ) throws ManipulationException
     {
         // Apply matching overrides to dependencies
         for ( final Dependency dependency : dependencies )
@@ -325,12 +328,40 @@ public class DependencyManipulator
                 if ( overrideVersion == null || overrideVersion.length() == 0 || oldVersion == null
                     || oldVersion.length() == 0 )
                 {
-                    logger.warn( "Unable to force align to an empty version for " + groupIdArtifactId + "; ignoring" );
+                    if (oldVersion == null || oldVersion.length() == 0 )
+                    {
+                        logger.warn( "Unable to force align as no existing version field to update for " + groupIdArtifactId + "; ignoring" );
+                    }
+                    else
+                    {
+                        logger.warn( "Unable to force align as override version is empty for " + groupIdArtifactId + "; ignoring" );
+                    }
                 }
                 else
                 {
                     logger.debug( "Force aligning {} to {}.", groupIdArtifactId, overrideVersion );
-                    dependency.setVersion( overrideVersion );
+
+                    if (oldVersion.startsWith( "${" ) )
+                    {
+                        final int endIndex = oldVersion.indexOf( '}');
+                        final String oldProperty = oldVersion.substring( 2, endIndex);
+
+                        if (endIndex != oldVersion.length() - 1)
+                        {
+                            throw new ManipulationException
+                            ("NYI : handling for versions (" + oldVersion + ") with multiple embedded properties is NYI. ");
+                        }
+                        logger.debug ("Original version was a property mapping; caching new fixed value for update {} -> {}",
+                                      oldProperty, overrideVersion);
+
+                        final String oldVersionProp = oldVersion.substring( 2, oldVersion.length() - 1 );
+
+                        versionPropertyUpdateMap.put( oldVersionProp, overrideVersion );
+                    }
+                    else
+                    {
+                        dependency.setVersion( overrideVersion );
+                    }
                 }
             }
         }
