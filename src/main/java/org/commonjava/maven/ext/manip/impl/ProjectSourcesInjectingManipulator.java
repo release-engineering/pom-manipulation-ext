@@ -143,7 +143,6 @@ public class ProjectSourcesInjectingManipulator
                         config.put( "addToGeneratedSources", false );
                         config.put( "validateCheckout", false );
                         config.put( "forceNewProperties", true );
-                        config.put( "skipModules", true );
 
                         for ( final Map.Entry<String, Object> entry : config.entrySet() )
                         {
@@ -163,6 +162,7 @@ public class ProjectSourcesInjectingManipulator
                         plugin.setArtifactId( BMMP_AID );
                         plugin.setVersion( state.getBuildMetadataPluginVersion() );
                         plugin.addExecution( execution );
+                        plugin.setInherited( false );
 
                         build.addPlugin( plugin );
 
