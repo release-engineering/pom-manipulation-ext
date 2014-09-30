@@ -134,8 +134,7 @@ public class ProjectVersioningManipulator
         {
             final String ga = ga( project );
             logger.info( getClass().getSimpleName() + " applying changes to: " + ga );
-            final Model model = project.getModel();
-            if ( applyVersioningChanges( model, state, session ) )
+            if ( applyVersioningChanges( project, state, session ) )
             {
                 changed.add( project );
             }
@@ -154,13 +153,15 @@ public class ProjectVersioningManipulator
      * If the project is modified, then it is marked as changed in the {@link ManipulationSession}, which triggers the associated POM to be rewritten.
      */
     // TODO: Loooong method
-    protected boolean applyVersioningChanges( final Model model, final VersioningState state,
+    protected boolean applyVersioningChanges( final Project project, final VersioningState state,
                                               final ManipulationSession session )
         throws ManipulationException
     {
         boolean changed = false;
 
+        final Model model = project.getModel();
         final Map<String, String> versionsByGAV = state.getVersioningChanges();
+
         if ( versionsByGAV == null || versionsByGAV.isEmpty() )
         {
             return false;
@@ -210,6 +211,20 @@ public class ProjectVersioningManipulator
             {
                 model.setVersion( newVersion );
                 logger.info( "Changed main version in " + gav( model ) );
+                changed = true;
+            }
+        }
+        // If we are at the inheritance root and there is no explicit version instead
+        // inheriting the version from the parent BUT the parent is not in this project
+        // force inject the new version.
+        else if ( changed == false && model.getVersion() == null && project.isInheritanceRoot())
+        {
+            final String newVersion = versionsByGAV.get( gav );
+            logger.info( "Looking to force inject new version for : " + gav + " (found: " + newVersion + ")" );
+            if (newVersion != null)
+            {
+                model.setVersion( newVersion );
+                logger.info( "Force inject main version in " + gav( model ) );
                 changed = true;
             }
         }

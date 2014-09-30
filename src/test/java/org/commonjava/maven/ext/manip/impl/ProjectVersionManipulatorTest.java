@@ -4,7 +4,7 @@
  * are made available under the terms of the GNU Public License v3.0
  * which accompanies this distribution, and is available at
  * http://www.gnu.org/licenses/gpl.html
- * 
+ *
  * Contributors:
  *     Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
@@ -32,6 +32,7 @@ import org.apache.maven.model.Parent;
 import org.apache.maven.model.Profile;
 import org.apache.maven.project.MavenProject;
 import org.commonjava.maven.ext.manip.ManipulationException;
+import org.commonjava.maven.ext.manip.model.Project;
 import org.commonjava.maven.ext.manip.resolver.GalleyAPIWrapper;
 import org.commonjava.maven.ext.manip.resolver.GalleyInfrastructure;
 import org.commonjava.maven.ext.manip.state.ManipulationSession;
@@ -629,14 +630,14 @@ public class ProjectVersionManipulatorTest
             final Set<MavenProject> changed = new HashSet<MavenProject>();
             for ( final MavenProject project : projects )
             {
-                if ( applyVersioningChanges( project.getOriginalModel(), state, session ) )
+                if ( applyVersioningChanges( new Project (project.getOriginalModel()), state, session ) )
                 {
                     final String v = versionsByGAV.get( gav( project ) );
                     logger.info( project.getName() + " (" + gav( project ) + "): VERSION MODIFIED\n    New version: "
                         + v );
 
                     // this is a bigger model, so only do this if the originalModel was modded.
-                    applyVersioningChanges( project.getModel(), state, session );
+                    applyVersioningChanges( new Project (project.getModel()), state, session );
                     changed.add( project );
 
                     if ( v != null )
