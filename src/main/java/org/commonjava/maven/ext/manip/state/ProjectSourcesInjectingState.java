@@ -31,7 +31,7 @@ public class ProjectSourcesInjectingState
     /** Set this property to control the version of the build-metadata plugin to be injected. */
     public static final String BMMP_VERSION_PROPERTY = "project.meta.version";
 
-    public static final String DEFAULT_BMMP_VERSION = "1.3.5-RC1";
+    public static final String DEFAULT_BMMP_VERSION = "1.5.0";
 
     private final boolean enabled;
 
