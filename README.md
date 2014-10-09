@@ -205,7 +205,7 @@ The extension may also be used to override properties prior to interpolating the
 
     mvn install -DpropertyManagement=org.foo:property-management:10
 
-Properties may be overridden on the command line as per normal Maven usage (i.e. -Dversion.org.foo=1.0)
+This will inject the properties at the inheritance root(s). It will also, for every injected property, find any matching property in the project and overwrite its value.
 
 ## Profile Injection
 

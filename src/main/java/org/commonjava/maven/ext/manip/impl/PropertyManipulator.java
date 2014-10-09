@@ -14,6 +14,7 @@ import static org.commonjava.maven.ext.manip.util.IdUtils.ga;
 
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Properties;
@@ -92,6 +93,26 @@ public class PropertyManipulator
                     model.getProperties().putAll( overrides );
 
                     changed.add( project );
+                }
+                else
+                {
+                    // For any matching property that exists in the current project overwrite that value.
+                    @SuppressWarnings( { "unchecked", "rawtypes" } )
+                    Set<String> keyClone = new HashSet(model.getProperties().keySet());
+                    keyClone.retainAll( overrides.keySet() );
+
+                    if ( keyClone.size() > 0 )
+                    {
+                        Iterator<String> keys = keyClone.iterator();
+                        while (keys.hasNext())
+                        {
+                            String matchingKey = keys.next();
+                            logger.info( "Overwriting property (" + matchingKey + " in: " + ga( project ) + " with value " + overrides.get( matchingKey ) );
+                            model.getProperties().put( matchingKey, overrides.get( matchingKey ) );
+
+                            changed.add( project );
+                        }
+                    }
                 }
             }
         }
