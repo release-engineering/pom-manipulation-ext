@@ -10,6 +10,8 @@
  ******************************************************************************/
 package org.commonjava.maven.ext.manip;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.List;
 
 import org.apache.maven.eventspy.AbstractEventSpy;
@@ -34,6 +36,7 @@ import ch.qos.logback.classic.Level;
 public class ManipulatingEventSpy
     extends AbstractEventSpy
 {
+    private static final String MARKER_FILE = "target" + File.separatorChar + "mme-marker.txt";
 
     private static final String REQUIRE_EXTENSION = "manipulation.required";
 
@@ -56,12 +59,7 @@ public class ManipulatingEventSpy
 
         try
         {
-            //            if ( event instanceof MavenExecutionRequest )
-            //            {
-            //                session.setRequest( (MavenExecutionRequest) event );
-            //            }
-
-            if ( event instanceof ExecutionEvent )
+             if ( event instanceof ExecutionEvent )
             {
                 final ExecutionEvent ee = (ExecutionEvent) event;
 
@@ -96,6 +94,13 @@ public class ManipulatingEventSpy
                         super.onEvent( event );
                         return;
                     }
+                    else if ( new File ( session.getExecutionRoot().getParentFile(), MARKER_FILE).exists() )
+                    {
+                        logger.info( "Skipping manipulation as previous execution found." );
+
+                        super.onEvent( event );
+                        return;
+                    }
 
                     manipulationManager.scan( session.getExecutionRoot(), session );
 
@@ -106,7 +111,18 @@ public class ManipulatingEventSpy
                         logger.debug( "Got " + project + " (POM: " + project.getPom() + ")" );
                     }
 
-                    manipulationManager.applyManipulations( projects, session );
+                    // Create a marker file if we made some changes to prevent duplicate runs.
+                    if ( ! manipulationManager.applyManipulations( projects, session ).isEmpty() )
+                    {
+                        try
+                        {
+                            new File (session.getExecutionRoot().getParentFile(), MARKER_FILE).createNewFile();
+                        }
+                        catch ( IOException e )
+                        {
+                            logger.error( "Unable to create marker file", e );
+                        }
+                    }
                 }
             }
         }
