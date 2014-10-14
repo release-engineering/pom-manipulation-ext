@@ -144,15 +144,15 @@ public class VersionCalculator
             + incrementalSuffix );
 
         final VersionCalculation vc = new VersionCalculation( originalVersion, baseVersion );
-        if ( incrementalSuffix != null )
+        if ( staticSuffix != null )
         {
-                calculateIncremental( vc, baseVersion, snapshot, incrementalSuffix, groupId, artifactId,
-                                      originalVersion, state, session );
+            calculateStatic( vc, baseVersion, snapshot, staticSuffix, groupId, artifactId, originalVersion, state,
+                             session );
         }
-        else if ( staticSuffix != null )
+        else if ( incrementalSuffix != null )
         {
-                calculateStatic( vc, baseVersion, snapshot, staticSuffix, groupId, artifactId, originalVersion, state,
-                                 session );
+            calculateIncremental( vc, baseVersion, snapshot, incrementalSuffix, groupId, artifactId, originalVersion,
+                                  state, session );
         }
 
         // TODO OSGi fixup for versions like 1.2.GA or 1.2 (too few parts)
