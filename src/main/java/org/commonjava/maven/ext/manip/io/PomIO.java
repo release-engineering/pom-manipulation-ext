@@ -16,10 +16,8 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.PrintWriter;
 import java.io.Writer;
 import java.net.URL;
 import java.util.ArrayList;
@@ -130,48 +128,27 @@ public class PomIO
     public void rewritePOMs( final Set<Project> changed, final ManipulationSession session )
         throws ManipulationException
     {
-        final File marker = getMarkerFile( session );
-        PrintWriter pw = null;
-        try
+        for ( final Project project : changed )
         {
-            marker.getParentFile()
-                  .mkdirs();
+            logger.info( String.format( "%s modified! Rewriting.", project ) );
+            File pom = project.getPom();
 
-            pw = new PrintWriter( new FileWriter( marker ) );
+            final Model model = project.getModel();
+            logger.info( "Rewriting: " + model.toString() + " in place of: " + project.getId()
+                         + "\n       to POM: " + pom );
 
-            for ( final Project project : changed )
+            write( project, pom, model );
+
+            // this happens with integration tests!
+            // This is a total hack, but the alternative seems to be adding complexity through a custom model processor.
+            if ( pom.getName()
+                            .equals( "interpolated-pom.xml" ) )
             {
-                logger.info( String.format( "%s modified! Rewriting.", project ) );
-                File pom = project.getPom();
-
-                final Model model = project.getModel();
-                logger.info( "Rewriting: " + model.toString() + " in place of: " + project.getId()
-                    + "\n       to POM: " + pom );
+                final File dir = pom.getParentFile();
+                pom = dir == null ? new File( "pom.xml" ) : new File( dir, "pom.xml" );
 
                 write( project, pom, model );
-
-                // this happens with integration tests!
-                // This is a total hack, but the alternative seems to be adding complexity through a custom model processor.
-                if ( pom.getName()
-                        .equals( "interpolated-pom.xml" ) )
-                {
-                    final File dir = pom.getParentFile();
-                    pom = dir == null ? new File( "pom.xml" ) : new File( dir, "pom.xml" );
-
-                    write( project, pom, model );
-                }
-
-                pw.println( project.getId() );
             }
-        }
-        catch ( final IOException e )
-        {
-            throw new ManipulationException( "Failed to open output log file: %s. Reason: %s", e, marker,
-                                             e.getMessage() );
-        }
-        finally
-        {
-            closeQuietly( pw );
         }
     }
 
@@ -270,31 +247,6 @@ public class PomIO
         {
             closeQuietly( pomWriter );
         }
-    }
-
-    private static File getMarkerFile( final ManipulationSession session )
-    {
-        final File pom = session.getRequest()
-                                .getPom();
-
-        File markerFile;
-        if ( pom != null )
-        {
-            File dir = pom.getParentFile();
-            if ( dir == null )
-            {
-                dir = pom.getAbsoluteFile()
-                         .getParentFile();
-            }
-
-            markerFile = new File( dir, "target/manipulation.log" );
-        }
-        else
-        {
-            markerFile = new File( "target/manipulation.log" );
-        }
-
-        return markerFile;
     }
 
     private String getManifestInformation()

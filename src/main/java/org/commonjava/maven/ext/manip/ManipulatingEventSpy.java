@@ -36,7 +36,9 @@ import ch.qos.logback.classic.Level;
 public class ManipulatingEventSpy
     extends AbstractEventSpy
 {
-    private static final String MARKER_FILE = "target" + File.separatorChar + "mme-marker.txt";
+    private static final String MARKER_PATH = "target";
+
+    private static final String MARKER_FILE =  MARKER_PATH + File.separatorChar + "pom-manip-ext-marker.txt";
 
     private static final String REQUIRE_EXTENSION = "manipulation.required";
 
@@ -116,11 +118,12 @@ public class ManipulatingEventSpy
                     {
                         try
                         {
+                            new File (session.getExecutionRoot().getParentFile(), MARKER_PATH).mkdirs();
                             new File (session.getExecutionRoot().getParentFile(), MARKER_FILE).createNewFile();
                         }
                         catch ( IOException e )
                         {
-                            logger.error( "Unable to create marker file", e );
+                            throw new ManipulationException ("Marker file creation failed", e);
                         }
                     }
                 }
