@@ -352,6 +352,12 @@
                                 <include>org.codehaus.plexus:plexus-interpolation</include>
                             </includes>
                         </artifactSet>
+                        <relocations>
+                            <relocation>
+                                <pattern>org.slf4j</pattern>
+                                <shadedPattern>org.commonjava.slf4j</shadedPattern>
+                            </relocation>
+                        </relocations>
                     </configuration>
                 </execution>
             </executions>
