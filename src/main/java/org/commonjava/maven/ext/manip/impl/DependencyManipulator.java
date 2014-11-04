@@ -15,9 +15,11 @@ import static org.commonjava.maven.ext.manip.util.IdUtils.ga;
 import static org.commonjava.maven.ext.manip.util.PropertiesUtils.getPropertiesByPrefix;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
@@ -26,7 +28,9 @@ import org.apache.maven.model.Dependency;
 import org.apache.maven.model.DependencyManagement;
 import org.apache.maven.model.Model;
 import org.codehaus.plexus.component.annotations.Component;
+import org.codehaus.plexus.component.annotations.Requirement;
 import org.commonjava.maven.atlas.ident.ref.ProjectRef;
+import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.atlas.ident.ref.VersionlessArtifactRef;
 import org.commonjava.maven.ext.manip.ManipulationException;
 import org.commonjava.maven.ext.manip.io.ModelIO;
@@ -35,6 +39,8 @@ import org.commonjava.maven.ext.manip.state.DependencyState;
 import org.commonjava.maven.ext.manip.state.DependencyState.VersionPropertyFormat;
 import org.commonjava.maven.ext.manip.state.ManipulationSession;
 import org.commonjava.maven.ext.manip.state.State;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * {@link Manipulator} implementation that can alter dependency (and dependency management) sections in a project's pom file.
@@ -42,17 +48,13 @@ import org.commonjava.maven.ext.manip.state.State;
  */
 @Component( role = Manipulator.class, hint = "bom-manipulator" )
 public class DependencyManipulator
-    extends AlignmentManipulator
+    implements Manipulator
 {
+    protected final Logger logger = LoggerFactory.getLogger( getClass() );
 
-    protected DependencyManipulator()
-    {
-    }
+    @Requirement
+    protected ModelIO effectiveModelBuilder;
 
-    public DependencyManipulator( final ModelIO modelIO )
-    {
-        super( modelIO );
-    }
 
     /**
      * Initialize the {@link DependencyState} state holder in the {@link ManipulationSession}. This state holder detects
@@ -67,6 +69,15 @@ public class DependencyManipulator
     }
 
     /**
+     * No prescanning required for BOM manipulation.
+     */
+    @Override
+    public void scan( final List<Project> projects, final ManipulationSession session )
+        throws ManipulationException
+    {
+    }
+
+    /**
      * Apply the alignment changes to the list of {@link Project}'s given.
      */
     @Override
@@ -74,10 +85,30 @@ public class DependencyManipulator
         throws ManipulationException
     {
         final DependencyState state = session.getState( DependencyState.class );
-        final Set<Project> result = internalApplyChanges( state, projects, session );
-        final boolean strict = state.getStrict();
 
+        if ( !session.isEnabled() || !state.isEnabled() )
+        {
+            logger.debug( getClass().getSimpleName() + ": Nothing to do!" );
+            return Collections.emptySet();
+        }
+
+        final Set<Project> result = new HashSet<Project>();
+        final boolean strict = state.getStrict();
         final Map<String, String> versionPropertyUpdateMap = state.getVersionPropertyUpdateMap();
+
+        final Map<ProjectRef, String> overrides = loadRemoteBOM( state, session );
+
+        for ( final Project project : projects )
+        {
+            final Model model = project.getModel();
+
+            if ( overrides.size() > 0 )
+            {
+                apply( session, project, model, overrides );
+
+                result.add( project );
+            }
+        }
 
         // If we've changed something now update any old properties with the new values.
         if (result.size() > 0)
@@ -141,11 +172,26 @@ public class DependencyManipulator
         return result;
     }
 
-    @Override
-    protected Map<ProjectRef, String> loadRemoteBOM( final State state, final ManipulationSession session )
+    private Map<ProjectRef, String> loadRemoteBOM( final State state, final ManipulationSession session )
         throws ManipulationException
     {
-        return loadRemoteOverrides( RemoteType.DEPENDENCY, ((DependencyState)state).getRemoteDepMgmt(), session );
+        final Map<ProjectRef, String> overrides = new LinkedHashMap<ProjectRef, String>();
+        final List<ProjectVersionRef> gavs = ((DependencyState)state).getRemoteDepMgmt();
+
+        if ( gavs == null || gavs.isEmpty() )
+        {
+            return overrides;
+        }
+
+        final ListIterator<ProjectVersionRef> iter = gavs.listIterator( gavs.size() );
+        // Iterate in reverse order so that the first GAV in the list overwrites the last
+        while ( iter.hasPrevious() )
+        {
+            final ProjectVersionRef ref = iter.previous();
+            overrides.putAll( effectiveModelBuilder.getRemoteDependencyVersionOverrides( ref, session ) );
+        }
+
+        return overrides;
     }
 
     /**
@@ -154,8 +200,7 @@ public class DependencyManipulator
      * The overrides ProjectRef:version map has to be converted into Group|Artifact:Version map
      * for usage by exclusions.
      */
-    @Override
-    protected void apply( final ManipulationSession session, final Project project, final Model model,
+    private void apply( final ManipulationSession session, final Project project, final Model model,
                           final Map<ProjectRef, String> overrides )
         throws ManipulationException
     {

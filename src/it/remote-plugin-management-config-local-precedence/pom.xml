@@ -6,13 +6,17 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>org.commonjava.maven.ext</groupId>
-  <artifactId>basic-plugin-management-override</artifactId>
+  <artifactId>remote-plugin-management-config-local-precedence</artifactId>
   <version>1.0-SNAPSHOT</version>
 
-  <name>Test override plugin version using command line property</name>
+  <name>Test override plugin version and config using command line property</name>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+    <!-- Enforce 1.6 compaatibility -->
+    <maven.compiler.target>1.6</maven.compiler.target>
+    <maven.compiler.source>1.6</maven.compiler.source>
   </properties>
 
   <dependencies>
@@ -30,18 +34,17 @@
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-compiler-plugin</artifactId>
           <version>99-bad</version>
+          <configuration>
+              <debug>false</debug>
+              <showDeprecation>true</showDeprecation>
+              <showWarnings>true</showWarnings>
+              <testSource>${maven.compiler.source}</testSource>
+              <testTarget>${maven.compiler.source}</testTarget>
+          </configuration>
         </plugin>
       </plugins>
     </pluginManagement>
 
-
-    <plugins>
-        <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-compiler-plugin</artifactId>
-            <version>1000-bad</version>
-        </plugin>
-    </plugins>
   </build>
 
 </project>

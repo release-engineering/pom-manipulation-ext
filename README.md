@@ -188,16 +188,20 @@ Where `VG` is `version.<group>` e.g. `version.org.slf4j`, `VGA` is `version.<gro
 
 ## Plugin Manipulation
 
-The extension can also override plugin versions using a similar pattern to dependencies. A remote plugin management pom can be specified.
+The extension can also align plugin versions and configuration using a similar pattern to dependencies. A remote plugin management pom can be specified.
 
     mvn install -DpluginManagement=org.jboss:jboss-parent:10
 
-This will apply all &lt;pluginManagement/&gt; versions from the remote pom, to the local pom.
-Multiple remote plugin management poms can be specified on the command line using a comma separated
+This will apply all &lt;pluginManagement/&gt; versions and configuratoin from the remote pom, to the local pom. Multiple remote plugin management poms can be specified on the command line using a comma separated
 list of GAVs.  The first pom specified will be given the highest priority if conflicts occur.
 
     mvn install -DpluginManagement=org.company:pluginMgrA:1.0,org.company:pluginMgrB:2.0
 
+If there is an existing local configuration then it will be merged with the remote. The following configuration controls the precedence
+
+    -DpluginManagementPrecedence=[LOCAL|REMOTE]
+
+Default is `REMOTE` which means the remote configuration takes precedence over local.
 
 ## Property Override
 
@@ -238,10 +242,12 @@ The extension will inject an execution of [project-sources-maven-plugin](https:/
 
 **Note**: this manipulator will only be active by default if one or more other manipulators have been activated.
 
-To skip injection of this plugin, you can use:
+To skip injection of the sources and metadata plugins, you can use:
 
     mvn install -Dproject.src.skip=true
+    mvn install -Dproject.meta.skip=true
 
-If unspecified, a default version of the plugin will be injected (currently, version 0.3). To gain more control over this injection, you can specify the plugin version like this:
+If unspecified, default versions of the project sources and metadata plugins will be injected (currently, version 0.3 and 1.5.0 respectively). To gain more control over this injection, you can specify the versions for project sources and metadata plugins like this:
 
     mvn install -Dproject.src.version=x.y
+    mvn install -Dproject.meta.version=x.y

@@ -13,7 +13,12 @@ package org.commonjava.maven.ext.manip.impl;
 import static org.commonjava.maven.ext.manip.util.IdUtils.ga;
 
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
@@ -23,13 +28,20 @@ import org.apache.maven.model.Model;
 import org.apache.maven.model.Plugin;
 import org.apache.maven.model.PluginManagement;
 import org.codehaus.plexus.component.annotations.Component;
+import org.codehaus.plexus.component.annotations.Requirement;
+import org.codehaus.plexus.util.xml.Xpp3Dom;
+import org.codehaus.plexus.util.xml.Xpp3DomUtils;
 import org.commonjava.maven.atlas.ident.ref.ProjectRef;
+import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.ext.manip.ManipulationException;
 import org.commonjava.maven.ext.manip.io.ModelIO;
 import org.commonjava.maven.ext.manip.model.Project;
 import org.commonjava.maven.ext.manip.state.ManipulationSession;
 import org.commonjava.maven.ext.manip.state.PluginState;
+import org.commonjava.maven.ext.manip.state.PluginState.Precedence;
 import org.commonjava.maven.ext.manip.state.State;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * {@link Manipulator} implementation that can alter plugin sections in a project's pom file.
@@ -37,16 +49,14 @@ import org.commonjava.maven.ext.manip.state.State;
  */
 @Component( role = Manipulator.class, hint = "plugin-manipulator" )
 public class PluginManipulator
-    extends AlignmentManipulator
+    implements Manipulator
 {
-    protected PluginManipulator()
-    {
-    }
+    private final Logger logger = LoggerFactory.getLogger( getClass() );
 
-    public PluginManipulator( final ModelIO modelIO )
-    {
-        super( modelIO );
-    }
+    @Requirement
+    protected ModelIO effectiveModelBuilder;
+
+    private Precedence configPrecedence = Precedence.REMOTE;
 
     /**
      * Initialize the {@link PluginState} state holder in the {@link ManipulationSession}. This state holder detects
@@ -58,9 +68,31 @@ public class PluginManipulator
     {
         final Properties userProps = session.getUserProperties();
         session.setState( new PluginState( userProps ) );
+
+        switch ( Precedence.valueOf( userProps.getProperty( "pluginManagementPrecedence",
+                                                                        Precedence.REMOTE.toString() ).toUpperCase() ) )
+        {
+            case REMOTE:
+            {
+                configPrecedence = Precedence.REMOTE;
+                break;
+            }
+            case LOCAL:
+            {
+                configPrecedence = Precedence.LOCAL;
+                break;
+            }
+        }
     }
 
-
+    /**
+     * No prescanning required for BOM manipulation.
+     */
+    @Override
+    public void scan( final List<Project> projects, final ManipulationSession session )
+        throws ManipulationException
+    {
+    }
 
     /**
      * Apply the alignment changes to the list of {@link Project}'s given.
@@ -69,19 +101,59 @@ public class PluginManipulator
     public Set<Project> applyChanges( final List<Project> projects, final ManipulationSession session )
         throws ManipulationException
     {
-        return internalApplyChanges (session.getState( PluginState.class ), projects, session);
+        State state = session.getState( PluginState.class );
+
+        if ( !session.isEnabled() || !state.isEnabled() )
+        {
+            logger.debug( getClass().getSimpleName() + ": Nothing to do!" );
+            return Collections.emptySet();
+        }
+
+        final Set<Project> changed = new HashSet<Project>();
+
+        final Map<ProjectRef, Plugin> overrides = loadRemoteBOM( state, session );
+
+        for ( final Project project : projects )
+        {
+            final Model model = project.getModel();
+
+            if ( overrides.size() > 0 )
+            {
+                apply( session, project, model, overrides );
+
+                changed.add( project );
+            }
+        }
+
+        return changed;
     }
 
-    @Override
-    protected Map<ProjectRef, String> loadRemoteBOM( final State state, final ManipulationSession session )
+
+    protected Map<ProjectRef, Plugin> loadRemoteBOM( final State state, final ManipulationSession session )
         throws ManipulationException
     {
-        return loadRemoteOverrides( RemoteType.PLUGIN, ( (PluginState) state ).getRemotePluginMgmt(), session );
+        final Map<ProjectRef, Plugin> overrides = new LinkedHashMap<ProjectRef, Plugin>();
+        final List<ProjectVersionRef> gavs = ( (PluginState) state ).getRemotePluginMgmt();
+
+        if ( gavs == null || gavs.isEmpty() )
+        {
+            return overrides;
+        }
+
+        final ListIterator<ProjectVersionRef> iter = gavs.listIterator( gavs.size() );
+        // Iterate in reverse order so that the first GAV in the list overwrites the last
+        while ( iter.hasPrevious() )
+        {
+            final ProjectVersionRef ref = iter.previous();
+
+            overrides.putAll( effectiveModelBuilder.getRemotePluginVersionOverrides( ref, session ) );
+        }
+
+        return overrides;
     }
 
-    @Override
     protected void apply( final ManipulationSession session, final Project project, final Model model,
-                          final Map<ProjectRef, String> override )
+                          final Map<ProjectRef, Plugin> override )
         throws ManipulationException
     {
         // TODO: Should plugin override apply to all projects?
@@ -111,7 +183,7 @@ public class PluginManipulator
             }
 
             // Override plugin management versions
-            applyOverrides( pluginManagement.getPlugins(), override );
+            applyOverrides( true, pluginManagement.getPlugins(), override );
         }
 
         if ( model.getBuild() != null )
@@ -119,27 +191,68 @@ public class PluginManipulator
             // Override plugin versions
             final List<Plugin> projectPlugins = model.getBuild()
                                                      .getPlugins();
-            applyOverrides( projectPlugins, override );
+
+            // Wipe out versions in the plugins so explicitly specified plugin versions now
+            // use the pluginManagement block.
+            Map<ProjectRef, Plugin> pluginsWithoutVersions = new HashMap<ProjectRef, Plugin> ();
+            Iterator<ProjectRef> pwv = override.keySet().iterator();
+            while (pwv.hasNext())
+            {
+                pluginsWithoutVersions.put (pwv.next(), new Plugin ());
+            }
+
+            applyOverrides( false, projectPlugins, pluginsWithoutVersions );
         }
 
     }
 
     /**
      * Set the versions of any plugins which match the contents of the list of plugin overrides
+     * @param inheritanceRoot
      *
      * @param plugins The list of plugins to modify
      * @param pluginVersionOverrides The list of version overrides to apply to the plugins
+     * @throws ManipulationException
      */
-    protected void applyOverrides( final List<Plugin> plugins, final Map<ProjectRef, String> pluginVersionOverrides )
+    protected void applyOverrides( boolean inheritanceRoot, final List<Plugin> plugins, final Map<ProjectRef, Plugin> pluginVersionOverrides ) throws ManipulationException
     {
         for ( final Plugin plugin : ( plugins == null ? Collections.<Plugin> emptyList() : plugins ) )
         {
             final ProjectRef groupIdArtifactId = new ProjectRef(plugin.getGroupId(), plugin.getArtifactId());
             if ( pluginVersionOverrides.containsKey( groupIdArtifactId ) )
             {
-                final String overrideVersion = pluginVersionOverrides.get( groupIdArtifactId );
-                plugin.setVersion( overrideVersion );
-                logger.info( "Altered plugin: " + groupIdArtifactId + "=" + overrideVersion );
+                final Plugin override = pluginVersionOverrides.get( groupIdArtifactId );
+
+                if (inheritanceRoot && plugin.getConfiguration() == null)
+                {
+                    plugin.setConfiguration( override.getConfiguration() );
+                    logger.debug( "Altered plugin configuration: " + groupIdArtifactId + "=" + override.getConfiguration());
+                }
+                else if (inheritanceRoot && plugin.getConfiguration() != null)
+                {
+                    logger.debug( "Existing plugin configuration: " + plugin.getConfiguration());
+
+                    if ( ! (plugin.getConfiguration() instanceof Xpp3Dom) || ! (override.getConfiguration() instanceof Xpp3Dom))
+                    {
+                        throw new ManipulationException ("Incorrect DOM type " + plugin.getConfiguration().getClass().getName() +
+                                                         " and" + override.getConfiguration().getClass().getName());
+                    }
+
+                    if ( configPrecedence == Precedence.REMOTE)
+                    {
+                        plugin.setConfiguration ( Xpp3DomUtils.mergeXpp3Dom
+                           ((Xpp3Dom)override.getConfiguration(), (Xpp3Dom)plugin.getConfiguration() ) );
+                    }
+                    else if ( configPrecedence == Precedence.LOCAL )
+                    {
+                        plugin.setConfiguration ( Xpp3DomUtils.mergeXpp3Dom
+                           ((Xpp3Dom)plugin.getConfiguration(), (Xpp3Dom)override.getConfiguration() ) );
+                    }
+                    logger.debug( "Altered plugin configuration: " + groupIdArtifactId + "=" + plugin.getConfiguration());
+                }
+
+                plugin.setVersion( override.getVersion() );
+                logger.info( "Altered plugin version: " + groupIdArtifactId + "=" + override.getVersion());
             }
         }
     }

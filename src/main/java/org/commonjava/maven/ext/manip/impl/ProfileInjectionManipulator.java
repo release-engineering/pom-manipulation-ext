@@ -42,20 +42,10 @@ import org.slf4j.LoggerFactory;
 public class ProfileInjectionManipulator
     implements Manipulator
 {
-
     private final Logger logger = LoggerFactory.getLogger( getClass() );
 
     @Requirement
     protected ModelIO modelBuilder;
-
-    protected ProfileInjectionManipulator()
-    {
-    }
-
-    public ProfileInjectionManipulator( final ModelIO modelIO )
-    {
-        modelBuilder = modelIO;
-    }
 
     /**
      * No prescanning required for Profile injection.
