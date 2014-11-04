@@ -28,6 +28,7 @@ import org.apache.maven.model.building.ModelBuilder;
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 import org.codehaus.plexus.component.annotations.Component;
 import org.codehaus.plexus.component.annotations.Requirement;
+import org.codehaus.plexus.util.xml.Xpp3Dom;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 import org.commonjava.maven.atlas.ident.ref.ProjectRef;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
@@ -170,11 +171,19 @@ public class ModelIO
                 if ( p.getVersion().startsWith( "${" ))
                 {
                     // Property reference to something in the remote pom. Resolve and inline it now.
-                    logger.debug( "Replacing plugin override version " + p.getVersion());
-                    p.setVersion( m.getProperties().getProperty
-                                  ( p.getVersion().substring( 2, p.getVersion().length() - 1 ) ) );
+                    String newVersion = resolveProperty (m.getProperties(), p.getVersion() );
+                    logger.debug( "Replacing plugin override version " + p.getVersion() +
+                                  " with " + newVersion);
+                    p.setVersion( newVersion );
                 }
                 versionOverrides.put( pr, p );
+
+                // If we have a configuration block, as per with plugin versions ensure we
+                // resolve any properties.
+                if (p.getConfiguration() != null)
+                {
+                    processChildren (m, (Xpp3Dom)p.getConfiguration());
+                }
 
                 logger.debug( "Added plugin override for: " + pr.toString() + ":" + p.getVersion() +
                               " with configuration\n" + p.getConfiguration());
@@ -187,5 +196,56 @@ public class ModelIO
         }
 
         return versionOverrides;
+    }
+
+
+    /**
+     * Recursively process the DOM elements to inline any property values from the model.
+     * @param model
+     * @param parent
+     */
+    private void processChildren (Model model, Xpp3Dom parent)
+    {
+        for ( int i = 0 ; i < parent.getChildCount() ; i++)
+        {
+            Xpp3Dom child =  parent.getChild(i);
+
+            if ( child.getChildCount() > 0)
+            {
+                processChildren (model, child);
+            }
+            if ( child.getValue() != null && child.getValue().startsWith( "${" ))
+            {
+                String replacement = resolveProperty (model.getProperties(), child.getValue() );
+
+                logger.debug( "Replacing child value " + child.getValue() + " with " + replacement );
+                child.setValue( replacement );
+            }
+
+        }
+    }
+
+
+    /**
+     * Recursively resolve a property value.
+     * @param p
+     * @param key
+     * @return the value of the key
+     */
+    private String resolveProperty (Properties p, String key)
+    {
+        String result = "";
+        String child = key.substring( 2, key.length() - 1 );
+
+        if ( p.containsKey( child ) )
+        {
+            result = p.getProperty( child );
+
+            if ( result.startsWith( "${" ) )
+            {
+                result = resolveProperty (p, result);
+            }
+        }
+        return result;
     }
 }
