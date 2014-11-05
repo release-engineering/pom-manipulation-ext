@@ -1,7 +1,7 @@
 
 # POM Manipulation Extension for Apache Maven
 
-A Maven extension which provides a series of POM pre-processors. When it is activated it will write a log file `target/manipulation.log`.
+A Maven extension which provides a series of POM pre-processors.
 
 This extension combines many of the features of [VMan](https://github.com/jdcasey/pom-version-manipulator), [Maven Versioning Extension](https://github.com/jdcasey/maven-versioning-extension) and [Maven Dependency Management Extension](https://github.com/jboss/maven-dependency-management-extension).
 
@@ -46,6 +46,18 @@ To disable the entire extension, you can set:
 
 
 ## Version manipulation
+
+If version manipulation is enabled the extension will also attempt to format the version to be OSGi compliant. For example if the versions are:
+
+    1.3
+    1.3-GA
+    1.3.0-GA
+
+it will change to
+
+    1.3.0
+    1.3.0.GA
+    1.3.0.GA
 
 The following version-related configuration is available:
 
