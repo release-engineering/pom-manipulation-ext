@@ -192,43 +192,45 @@ public class PluginManipulator
             final List<Plugin> projectPlugins = model.getBuild()
                                                      .getPlugins();
 
-            // Wipe out versions in the plugins so explicitly specified plugin versions now
-            // use the pluginManagement block.
-            Map<ProjectRef, Plugin> pluginsWithoutVersions = new HashMap<ProjectRef, Plugin> ();
-            Iterator<ProjectRef> pwv = override.keySet().iterator();
-            while (pwv.hasNext())
-            {
-                pluginsWithoutVersions.put (pwv.next(), new Plugin ());
-            }
-
-            applyOverrides( false, projectPlugins, pluginsWithoutVersions );
+            // We can't wipe out the versions as we can't guarantee that the plugins are listed
+            // in the top level pluginManagement block.
+            applyOverrides( false, projectPlugins, override );
         }
 
     }
 
     /**
      * Set the versions of any plugins which match the contents of the list of plugin overrides
-     * @param inheritanceRoot
      *
+     * @param pluginMgmt Denote whether we are modifying the pluginMgmt block
      * @param plugins The list of plugins to modify
      * @param pluginVersionOverrides The list of version overrides to apply to the plugins
      * @throws ManipulationException
      */
-    protected void applyOverrides( boolean inheritanceRoot, final List<Plugin> plugins, final Map<ProjectRef, Plugin> pluginVersionOverrides ) throws ManipulationException
+    protected void applyOverrides( boolean pluginMgmt, final List<Plugin> plugins,
+                                   final Map<ProjectRef, Plugin> pluginVersionOverrides ) throws ManipulationException
     {
-        for ( final Plugin plugin : ( plugins == null ? Collections.<Plugin> emptyList() : plugins ) )
+        if ( plugins == null)
         {
-            final ProjectRef groupIdArtifactId = new ProjectRef(plugin.getGroupId(), plugin.getArtifactId());
-            if ( pluginVersionOverrides.containsKey( groupIdArtifactId ) )
-            {
-                final Plugin override = pluginVersionOverrides.get( groupIdArtifactId );
+            throw new ManipulationException ("Original plugins should not be null");
+        }
 
-                if (inheritanceRoot && plugin.getConfiguration() == null)
+        for ( final Plugin override : pluginVersionOverrides.values())
+        {
+            final int index = plugins.indexOf( override );
+            logger.debug( "plugin override" + override + " and index " + index);
+
+            if ( index != -1 )
+            {
+                final ProjectRef groupIdArtifactId = new ProjectRef(override.getGroupId(), override.getArtifactId());
+                final Plugin plugin = plugins.get( index );
+
+                if (pluginMgmt && plugin.getConfiguration() == null)
                 {
                     plugin.setConfiguration( override.getConfiguration() );
-                    logger.debug( "Altered plugin configuration: " + groupIdArtifactId + "=" + override.getConfiguration());
+                    logger.debug( "Altered plugin configuration: " + groupIdArtifactId + "=" + plugin.getConfiguration());
                 }
-                else if (inheritanceRoot && plugin.getConfiguration() != null)
+                else if (pluginMgmt && plugin.getConfiguration() != null)
                 {
                     logger.debug( "Existing plugin configuration: " + plugin.getConfiguration());
 
@@ -251,8 +253,21 @@ public class PluginManipulator
                     logger.debug( "Altered plugin configuration: " + groupIdArtifactId + "=" + plugin.getConfiguration());
                 }
 
-                plugin.setVersion( override.getVersion() );
-                logger.info( "Altered plugin version: " + groupIdArtifactId + "=" + override.getVersion());
+                // Always force the version in a pluginMgmt block or set the version if there is an existing
+                // one in build/plugins section.
+                if ( pluginMgmt || plugin.getVersion() != null )
+                {
+                    plugin.setVersion( override.getVersion() );
+                    logger.info( "Altered plugin version: " + groupIdArtifactId + "=" + override.getVersion());
+                }
+
+            }
+            // If the plugin doesn't exist but has a configuration section in the remote inject it so we
+            // get the correct config.
+            else if ( pluginMgmt && override.getConfiguration() != null )
+            {
+                plugins.add( override );
+                logger.info( "Added plugin version: " + override.getKey() + "=" + override.getVersion());
             }
         }
     }
