@@ -71,6 +71,11 @@ public class VersionCalculator
 
     /**
      * Calculate any project version changes for the given set of projects, and return them in a Map keyed by project GA.
+
+     * @param projects
+     * @param session
+     * @return Map<String, String>
+     * @throws ManipulationException
      */
     public Map<String, String> calculateVersioningChanges( final Collection<Project> projects,
                                                            final ManipulationSession session )
@@ -121,16 +126,28 @@ public class VersionCalculator
 
     /**
      * Calculate the version modification for a given GAV.
+     *
+     * @param groupId
+     * @param artifactId
+     * @param version
+     * @param session
+     * @return VersionCalculation
+     * @throws ManipulationException
      */
     protected VersionCalculation calculate( final String groupId, final String artifactId,
                                             final String version, final ManipulationSession session )
         throws ManipulationException
     {
+        final VersioningState state = session.getState( VersioningState.class );
+
         String originalVersion = version;
 
-        // OSGi fixup for versions like 1.2.GA or 1.2 (too few parts)
-        // and 1.2-GA or 1.2.0-GA (wrong separator).
-        originalVersion = calculateOSGiBase (originalVersion);
+        if ( state.osgi() )
+        {
+            // OSGi fixup for versions like 1.2.GA or 1.2 (too few parts)
+            // and 1.2-GA or 1.2.0-GA (wrong separator).
+            originalVersion = calculateOSGiBase (originalVersion);
+        }
         String baseVersion = originalVersion;
 
         boolean snapshot = false;
@@ -142,7 +159,6 @@ public class VersionCalculator
             baseVersion = baseVersion.substring( 0, baseVersion.length() - SNAPSHOT_SUFFIX.length() );
         }
 
-        final VersioningState state = session.getState( VersioningState.class );
         final String incrementalSuffix = state.getIncrementalSerialSuffix();
         final String staticSuffix = state.getSuffix();
 

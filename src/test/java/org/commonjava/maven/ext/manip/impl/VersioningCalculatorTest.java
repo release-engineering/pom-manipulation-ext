@@ -147,6 +147,23 @@ public class VersioningCalculatorTest
         }
     }
 
+    @Test
+    public void applyNonSerialSuffix_NonNumericVersionTail_WithOSGiDisabled()
+        throws Exception
+    {
+        final Properties props = new Properties();
+
+        final String s = "foo";
+        props.setProperty( VersioningState.VERSION_SUFFIX_SYSPROP, s );
+        props.setProperty( VersioningState.VERSION_OSGI_SYSPROP, "false" );
+        setupSession( props );
+
+        final String v = "1.2.GA";
+
+        final String result = calculate( v );
+        assertThat( result, equalTo( v + "-" + s ) );
+    }
+
 
     @Test
     public void indempotency()
