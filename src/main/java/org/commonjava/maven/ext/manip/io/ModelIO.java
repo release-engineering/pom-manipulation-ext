@@ -16,17 +16,19 @@ import static org.apache.commons.io.IOUtils.closeQuietly;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.Map;
 import java.util.Properties;
 
 import org.apache.maven.model.Model;
+import org.apache.maven.model.Plugin;
 import org.apache.maven.model.building.ModelBuilder;
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 import org.codehaus.plexus.component.annotations.Component;
 import org.codehaus.plexus.component.annotations.Requirement;
+import org.codehaus.plexus.util.xml.Xpp3Dom;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 import org.commonjava.maven.atlas.ident.ref.ProjectRef;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
@@ -37,7 +39,6 @@ import org.commonjava.maven.galley.TransferException;
 import org.commonjava.maven.galley.maven.GalleyMavenException;
 import org.commonjava.maven.galley.maven.model.view.DependencyView;
 import org.commonjava.maven.galley.maven.model.view.MavenPomView;
-import org.commonjava.maven.galley.maven.model.view.PluginView;
 import org.commonjava.maven.galley.model.Transfer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -147,42 +148,104 @@ public class ModelIO
         return m.getProperties();
     }
 
-    public Map<ProjectRef, String> getRemotePluginVersionOverrides( final ProjectVersionRef ref,
+    public Map<ProjectRef, Plugin> getRemotePluginVersionOverrides( final ProjectVersionRef ref,
                                                                     final ManipulationSession session )
         throws ManipulationException
     {
         logger.debug( "Resolving remote plugin management POM: " + ref );
 
-        final Map<ProjectRef, String> versionOverrides = new HashMap<ProjectRef, String>();
-        try
+        final Model m = resolveRawModel ( ref );
+        final Map<ProjectRef, Plugin> versionOverrides = new HashMap<ProjectRef, Plugin>();
+
+        if ( m.getBuild() != null && m.getBuild().getPluginManagement() != null)
         {
-            final MavenPomView pomView = galleyWrapper.readPomView( ref );
+            logger.debug( "Returning override of " + m.getBuild().getPluginManagement().getPlugins());
 
-            // TODO: active profiles!
-            final List<PluginView> plugins = pomView.getAllManagedBuildPlugins();
-            if ( plugins == null || plugins.isEmpty() )
+            Iterator<Plugin> plit = m.getBuild().getPluginManagement().getPlugins().iterator();
+
+            while (plit.hasNext())
             {
-                throw new ManipulationException(
-                                                 "Attempting to align to a BOM that does not have a pluginManagement section" );
-            }
+                Plugin p = plit.next();
+                ProjectRef pr = new ProjectRef (p.getGroupId(), p.getArtifactId());
 
-            // Iterate in reverse order so that plugins inherited from the closest parent win.
-            final ListIterator<PluginView> prt = plugins.listIterator( plugins.size() );
-            while (prt.hasPrevious())
-            {
-                final PluginView plugin = prt.previous();
-                versionOverrides.put( plugin.asProjectRef(), plugin.getVersion() );
+                if ( p.getVersion().startsWith( "${" ))
+                {
+                    // Property reference to something in the remote pom. Resolve and inline it now.
+                    String newVersion = resolveProperty (m.getProperties(), p.getVersion() );
+                    logger.debug( "Replacing plugin override version " + p.getVersion() +
+                                  " with " + newVersion);
+                    p.setVersion( newVersion );
+                }
+                versionOverrides.put( pr, p );
 
-                logger.debug( "Added version override for: " + plugin.asProjectRef()
-                                                                     .toString() + ":" + plugin.getVersion() );
+                // If we have a configuration block, as per with plugin versions ensure we
+                // resolve any properties.
+                if (p.getConfiguration() != null)
+                {
+                    processChildren (m, (Xpp3Dom)p.getConfiguration());
+                }
+
+                logger.debug( "Added plugin override for: " + pr.toString() + ":" + p.getVersion() +
+                              " with configuration\n" + p.getConfiguration());
             }
         }
-        catch ( final GalleyMavenException e )
+        else
         {
-            throw new ManipulationException( "Unable to resolve: %s", e, ref );
+            throw new ManipulationException(
+                            "Attempting to align to a BOM that does not have a pluginManagement section" );
         }
 
         return versionOverrides;
     }
 
+
+    /**
+     * Recursively process the DOM elements to inline any property values from the model.
+     * @param model
+     * @param parent
+     */
+    private void processChildren (Model model, Xpp3Dom parent)
+    {
+        for ( int i = 0 ; i < parent.getChildCount() ; i++)
+        {
+            Xpp3Dom child =  parent.getChild(i);
+
+            if ( child.getChildCount() > 0)
+            {
+                processChildren (model, child);
+            }
+            if ( child.getValue() != null && child.getValue().startsWith( "${" ))
+            {
+                String replacement = resolveProperty (model.getProperties(), child.getValue() );
+
+                logger.debug( "Replacing child value " + child.getValue() + " with " + replacement );
+                child.setValue( replacement );
+            }
+
+        }
+    }
+
+
+    /**
+     * Recursively resolve a property value.
+     * @param p
+     * @param key
+     * @return the value of the key
+     */
+    private String resolveProperty (Properties p, String key)
+    {
+        String result = "";
+        String child = key.substring( 2, key.length() - 1 );
+
+        if ( p.containsKey( child ) )
+        {
+            result = p.getProperty( child );
+
+            if ( result.startsWith( "${" ) )
+            {
+                result = resolveProperty (p, result);
+            }
+        }
+        return result;
+    }
 }

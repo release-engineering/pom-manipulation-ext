@@ -14,13 +14,11 @@ import java.util.List;
 import java.util.Properties;
 
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
-import org.commonjava.maven.ext.manip.impl.AlignmentManipulator;
 import org.commonjava.maven.ext.manip.impl.PropertyManipulator;
 import org.commonjava.maven.ext.manip.util.IdUtils;
 
 /**
- * Captures configuration relating to property injection from the POMs. Used by {@link PropertyManipulator}
- * and {@link AlignmentManipulator}s.
+ * Captures configuration relating to property injection from the POMs. Used by {@link PropertyManipulator}.
  *
  */
 public class PropertyState

@@ -9,9 +9,12 @@ assert plugin.version.text() == "3.1"
 
 def message = 0
 pomFile.eachLine {
-   if (it.contains( "<debug>true</debug>")) {
+   if (it.contains( "<debug>false</debug>")) {
+      message++
+   }
+   if (it.contains( "<source>1.6</source>")) {
       message++
    }
 }
 
-assert message == 1
+assert message == 2

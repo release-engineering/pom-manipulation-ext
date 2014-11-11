@@ -7,11 +7,18 @@ def plugin = pom.build.pluginManagement.plugins.plugin.find { it.artifactId.text
 assert plugin != null
 assert plugin.version.text() == "3.1"
 
+plugin = pom.build.plugins.plugin.find { it.artifactId.text() == "maven-compiler-plugin" }
+assert plugin != null
+assert plugin.version.text() == "3.1"
+
 def message = 0
 pomFile.eachLine {
    if (it.contains( "<debug>true</debug>")) {
       message++
    }
+   if (it.contains( "maven-compiler-plugin")) {
+      message++
+   }
 }
 
-assert message == 1
+assert message == 3

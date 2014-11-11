@@ -31,6 +31,18 @@ public class PluginState
      */
     private static final String PLUGIN_MANAGEMENT_POM_PROPERTY = "pluginManagement";
 
+    /**
+     * Two possible methods currently supported configuration merging precedence:</br>
+     * <code>REMOTE</code> (default)</br>
+     * <code>LOCAL</code></br>
+     * Configured by the property <code>-DpluginManagementPrecedence=[REMOTE|LOCAL]</code>
+     */
+    public static enum Precedence
+    {
+        REMOTE,
+        LOCAL;
+    }
+
     private final List<ProjectVersionRef> pluginMgmt;
 
     public PluginState( final Properties userProps )
