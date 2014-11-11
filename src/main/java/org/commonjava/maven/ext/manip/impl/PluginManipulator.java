@@ -13,9 +13,7 @@ package org.commonjava.maven.ext.manip.impl;
 import static org.commonjava.maven.ext.manip.util.IdUtils.ga;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.ListIterator;
