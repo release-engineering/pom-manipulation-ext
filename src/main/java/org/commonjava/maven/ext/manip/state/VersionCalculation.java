@@ -1,9 +1,13 @@
 package org.commonjava.maven.ext.manip.state;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import org.commonjava.maven.ext.manip.impl.VersionCalculator;
 
 public class VersionCalculation
 {
+    private static final String PROPERTY = "^\\$\\{(.*)\\}$";
 
     private final String originalVersion;
 
@@ -42,20 +46,27 @@ public class VersionCalculation
 
     private String trimBaseVersion( final String baseVersion )
     {
-        // Now, pare back the trimmed version base to remove non-alphanums
-        // like '.' and '-' so we have more control over them...
-        int trim = 0;
+        Pattern pattern = Pattern.compile(PROPERTY);
+        Matcher match = pattern.matcher(baseVersion);
 
-        // calculate the trim size
-        for ( int i = baseVersion.length() - 1; i > 0 && !Character.isLetterOrDigit( baseVersion.charAt( i ) ); i-- )
+        // Don't trim the version if its actually a property
+        if ( ! match.matches() )
         {
-            trim++;
-        }
+            // Now, pare back the trimmed version base to remove non-alphanums
+            // like '.' and '-' so we have more control over them...
+            int trim = 0;
 
-        // perform the actual trim to get back to an alphanumeric ending.
-        if ( trim > 0 )
-        {
-            return baseVersion.substring( 0, baseVersion.length() - trim );
+            // calculate the trim size
+            for ( int i = baseVersion.length() - 1; i > 0 && !Character.isLetterOrDigit( baseVersion.charAt( i ) ); i-- )
+            {
+                trim++;
+            }
+
+            // perform the actual trim to get back to an alphanumeric ending.
+            if ( trim > 0 )
+            {
+                return baseVersion.substring( 0, baseVersion.length() - trim );
+            }
         }
 
         return baseVersion;
