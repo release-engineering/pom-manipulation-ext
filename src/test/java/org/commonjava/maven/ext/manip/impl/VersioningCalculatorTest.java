@@ -554,6 +554,22 @@ public class VersioningCalculatorTest
     }
 
     @Test
+    public void incrementExistingSerialSuffix_withOsgiVersionChangeExistingVersionsMicro()
+        throws Exception
+    {
+        final Properties props = new Properties();
+
+        props.setProperty( VersioningState.INCREMENT_SERIAL_SUFFIX_SYSPROP, "foo" );
+        setupSession( props, "1.2-foo-1", "1.2.foo-2" );
+
+        final String v = "1.2";
+        final String ns = "foo-3";
+
+        final String result = calculate( v );
+        assertThat( result, equalTo( v + ".0." + ns ) );
+    }
+
+    @Test
     public void incrementExistingSerialSuffix_TwoProjects_UsingRepositoryMetadata_AvailableOnlyForOne()
         throws Exception
     {
