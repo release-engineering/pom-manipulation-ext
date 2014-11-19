@@ -92,6 +92,7 @@ public class VersioningCalculatorTest
     }
 
 
+    @Test
     public void osgi_fixups()
         throws Exception
     {
@@ -102,15 +103,19 @@ public class VersioningCalculatorTest
         setupSession( props );
 
         String data[][] = new String[][] {
+            {"1", "1.0.0"},
             {"6.2.0-SNAPSHOT", "6.2.0"},
             {"3.6.0.1", "3.6.0.1"},
             {"1.21", "1.21.0"},
             {"1.21.0", "1.21.0"},
             {"1.21-GA", "1.21.0.GA"},
+            {"1.21-GA-GA", "1.21.0.GA-GA"},
             {"1.21.0.GA", "1.21.0.GA"},
             {"1.21.GA", "1.21.0.GA"},
             {"1.21.GA_FINAL", "1.21.0.GA_FINAL"},
-            {"1.21.0-GA", "1.21.0.GA"} };
+            {"1.21.GA_ALPHA123", "1.21.0.GA_ALPHA123"},
+            {"1.21.0-GA", "1.21.0.GA"}
+            };
 
         for ( String[] v : data )
         {
@@ -145,7 +150,7 @@ public class VersioningCalculatorTest
         setupSession( props );
 
         String data[][] = new String[][] {
-            {"1-GA", "1-GA"},
+            {"GA-1-GA", "GA-1-GA"},
             {"1.0.0.0.0-GA", "1.0.0.0.0-GA"}  };
 
         for ( String[] v : data )

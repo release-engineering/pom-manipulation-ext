@@ -48,8 +48,16 @@ import org.slf4j.LoggerFactory;
 @Component( role = VersionCalculator.class )
 public class VersionCalculator
 {
-    private static final String OSGI_MATCHER = "(\\d+\\.\\d+\\.\\d+)([\\.|-][\\p{Alnum}|-|_]+)?";
-    private static final String OSGI_INV_MATCHER = "(\\d+\\.\\d+)([\\.|-][\\p{Alnum}|-|_]+)?";
+    /**
+     * Used to find versions of the format 1.1.1 <separator> <suffix>.
+     * If the separator is not of the correct format (a '.') it should correct it.
+     */
+    private static final String VERSION_MATCHER = "(\\d+\\.\\d+\\.\\d+)([\\.|-][\\p{Alnum}|-|_]+)?";
+    /**
+     * Used to determine if this is a version type we can handle i.e.
+     * <numeric>.<numeric> <separator> <suffix>
+     */
+    private static final String VERSION_INV_MATCHER = "(\\d+)(\\.\\d+)?([\\.|-][\\p{Alnum}|\\-|_]+)?";
 
     private static final String SERIAL_SUFFIX_PATTERN = "(.+)([-.])(\\d+)$";
 
@@ -195,12 +203,12 @@ public class VersionCalculator
     {
         StringBuffer result = new StringBuffer ();
 
-        Pattern pattern = Pattern.compile(OSGI_MATCHER);
+        Pattern pattern = Pattern.compile(VERSION_MATCHER);
         Matcher match = pattern.matcher(version);
 
         if ( ! match.matches () )
         {
-            match.usePattern (Pattern.compile (OSGI_INV_MATCHER));
+            match.usePattern (Pattern.compile (VERSION_INV_MATCHER));
             if ( ! match.matches() )
             {
                 // Just fallback - we don't know how to handle this.
@@ -209,8 +217,15 @@ public class VersionCalculator
             }
 
             result.append (match.group (1));
+            if (match.group (2) != null)
+            {
+                result.append( match.group(2) );
+            }
+            else
+            {
+                result.append (".0");
+            }
             result.append (".0");
-
             if (match.group (match.groupCount ()) != null)
             {
                 if (match.group (match.groupCount ()).equals( "-SNAPSHOT" ))
