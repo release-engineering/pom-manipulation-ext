@@ -103,6 +103,7 @@ public class VersioningCalculatorTest
         setupSession( props );
 
         String data[][] = new String[][] {
+            {"1", "1.0.0"},
             {"6.2.0-SNAPSHOT", "6.2.0"},
             {"3.6.0.1", "3.6.0.1"},
             {"1.21", "1.21.0"},
@@ -149,7 +150,7 @@ public class VersioningCalculatorTest
         setupSession( props );
 
         String data[][] = new String[][] {
-            {"1-GA", "1-GA"},
+            {"GA-1-GA", "GA-1-GA"},
             {"1.0.0.0.0-GA", "1.0.0.0.0-GA"}  };
 
         for ( String[] v : data )

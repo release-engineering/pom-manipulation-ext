@@ -57,7 +57,7 @@ public class VersionCalculator
      * Used to determine if this is a version type we can handle i.e.
      * <numeric>.<numeric> <separator> <suffix>
      */
-    private static final String VERSION_INV_MATCHER = "(\\d+\\.\\d+)([\\.|-][\\p{Alnum}|\\-|_]+)?";
+    private static final String VERSION_INV_MATCHER = "(\\d+)(\\.\\d+)?([\\.|-][\\p{Alnum}|\\-|_]+)?";
 
     private static final String SERIAL_SUFFIX_PATTERN = "(.+)([-.])(\\d+)$";
 
@@ -217,8 +217,15 @@ public class VersionCalculator
             }
 
             result.append (match.group (1));
+            if (match.group (2) != null)
+            {
+                result.append( match.group(2) );
+            }
+            else
+            {
+                result.append (".0");
+            }
             result.append (".0");
-
             if (match.group (match.groupCount ()) != null)
             {
                 if (match.group (match.groupCount ()).equals( "-SNAPSHOT" ))

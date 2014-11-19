@@ -84,12 +84,14 @@ This means that the SNAPSHOT suffix will be kept.
 
 If version manipulation is enabled the extension will also attempt to format the version to be OSGi compliant. For example if the versions are:
 
+    1
     1.3
     1.3-GA
     1.3.0-GA
 
 it will change to
 
+    1.0.0
     1.3.0
     1.3.0.GA
     1.3.0.GA
