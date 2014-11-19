@@ -156,6 +156,7 @@ public class PluginManipulator
                           final Map<ProjectRef, Plugin> override )
         throws ManipulationException
     {
+        // TODO: Should plugin override apply to all projects?
         logger.info( "Applying plugin changes to: " + ga( project ) );
 
         if ( project.isInheritanceRoot() )

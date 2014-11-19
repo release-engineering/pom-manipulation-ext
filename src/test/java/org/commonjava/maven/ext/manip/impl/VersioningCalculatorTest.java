@@ -4,7 +4,7 @@
  * are made available under the terms of the GNU Public License v3.0
  * which accompanies this distribution, and is available at
  * http://www.gnu.org/licenses/gpl.html
- *
+ * 
  * Contributors:
  *     Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
@@ -76,96 +76,6 @@ public class VersioningCalculatorTest
     }
 
     @Test
-    public void osgi_fixups()
-        throws Exception
-    {
-        final Properties props = new Properties();
-
-        final String s = "foo";
-        props.setProperty( VersioningState.VERSION_SUFFIX_SYSPROP, s );
-        setupSession( props );
-
-        String data[][] = new String[][] {
-            {"6.2.0-SNAPSHOT", "6.2.0"},
-            {"3.6.0.1", "3.6.0.1"},
-            {"1.21", "1.21.0"},
-            {"1.21.0", "1.21.0"},
-            {"1.21-GA", "1.21.0.GA"},
-            {"1.21.0.GA", "1.21.0.GA"},
-            {"1.21.GA", "1.21.0.GA"},
-            {"1.21.GA_FINAL", "1.21.0.GA_FINAL"},
-            {"1.21.0-GA", "1.21.0.GA"} };
-
-        for ( String[] v : data )
-        {
-            final String result = calculate( v[0] );
-
-            // If expected result contains a qualifier append a '-' instead of '.'
-            if ( v[1].contains( "GA" ))
-            {
-                assertThat( result, equalTo( v[1] + "-" + s ) );
-            }
-            else
-            {
-                assertThat( result, equalTo( v[1] + "." + s ) );
-            }
-        }
-    }
-
-    @Test
-    /**
-     * Not every version form know to man is converted...but we should try to
-     * safely handle unknown forms.
-     *
-     * @throws Exception
-     */
-    public void osgi_fallback()
-        throws Exception
-    {
-        final Properties props = new Properties();
-
-        final String s = "foo";
-        props.setProperty( VersioningState.VERSION_SUFFIX_SYSPROP, s );
-        setupSession( props );
-
-        String data[][] = new String[][] {
-            {"1-GA", "1-GA"},
-            {"1.0.0.0.0-GA", "1.0.0.0.0-GA"}  };
-
-        for ( String[] v : data )
-        {
-            final String result = calculate( v[0] );
-
-            if ( v[1].contains( "GA" ))
-            {
-                assertThat( result, equalTo( v[1] + "-" + s ) );
-            }
-            else
-            {
-                assertThat( result, equalTo( v[1] + "." + s ) );
-            }
-        }
-    }
-
-    @Test
-    public void applyNonSerialSuffix_NonNumericVersionTail_WithOSGiDisabled()
-        throws Exception
-    {
-        final Properties props = new Properties();
-
-        final String s = "foo";
-        props.setProperty( VersioningState.VERSION_SUFFIX_SYSPROP, s );
-        props.setProperty( VersioningState.VERSION_OSGI_SYSPROP, "false" );
-        setupSession( props );
-
-        final String v = "1.2.GA";
-
-        final String result = calculate( v );
-        assertThat( result, equalTo( v + "-" + s ) );
-    }
-
-
-    @Test
     public void indempotency()
         throws Exception
     {
@@ -175,7 +85,7 @@ public class VersioningCalculatorTest
         props.setProperty( VersioningState.VERSION_SUFFIX_SYSPROP, s );
         setupSession( props );
 
-        final String v = "1.2.0";
+        final String v = "1.2";
 
         String result = calculate( v );
         assertThat( result, equalTo( v + "." + s ) );
@@ -194,7 +104,7 @@ public class VersioningCalculatorTest
         props.setProperty( VersioningState.VERSION_SUFFIX_SYSPROP, s );
         setupSession( props );
 
-        final String v = "1.2.0";
+        final String v = "1.2";
 
         final String result = calculate( v );
         assertThat( result, equalTo( v + "." + s ) );
@@ -210,7 +120,7 @@ public class VersioningCalculatorTest
         props.setProperty( VersioningState.VERSION_SUFFIX_SYSPROP, s );
         setupSession( props );
 
-        final String v = "1.2.0";
+        final String v = "1.2";
 
         final String result = calculate( v );
         assertThat( result, equalTo( v + "." + s ) );
@@ -226,7 +136,7 @@ public class VersioningCalculatorTest
         props.setProperty( VersioningState.VERSION_SUFFIX_SYSPROP, s );
         setupSession( props );
 
-        final String v = "1.2.0.GA";
+        final String v = "1.2.GA";
 
         final String result = calculate( v );
         assertThat( result, equalTo( v + "-" + s ) );
@@ -242,7 +152,7 @@ public class VersioningCalculatorTest
         props.setProperty( VersioningState.VERSION_SUFFIX_SYSPROP, s );
         setupSession( props );
 
-        final String v = "1.2.0.SP4";
+        final String v = "1.2-SP4";
 
         final String result = calculate( v );
         assertThat( result, equalTo( v + "-" + s ) );
@@ -258,27 +168,10 @@ public class VersioningCalculatorTest
         props.setProperty( VersioningState.VERSION_SUFFIX_SYSPROP, s );
         setupSession( props );
 
-        final String v = "1.2.0";
+        final String v = "1.2";
 
         final String result = calculate( v );
         assertThat( result, equalTo( v + "." + s ) );
-    }
-
-    @Test
-    public void applySerialSuffix_NumericVersionTail_Snapshot()
-        throws Exception
-    {
-        final Properties props = new Properties();
-
-        final String s = "ER2-rht-1";
-        props.setProperty( VersioningState.VERSION_SUFFIX_SYSPROP, s );
-        setupSession( props );
-
-        final String v = "6.2.0-SNAPSHOT";
-        final String vr = "6.2.0";
-
-        final String result = calculate( v );
-        assertThat( result, equalTo( vr + "." + s ) );
     }
 
     @Test
@@ -291,7 +184,7 @@ public class VersioningCalculatorTest
         props.setProperty( VersioningState.VERSION_SUFFIX_SYSPROP, s );
         setupSession( props );
 
-        final String v = "1.2.0";
+        final String v = "1.2";
 
         final String result = calculate( v );
         assertThat( result, equalTo( v + "." + s ) );
@@ -307,7 +200,7 @@ public class VersioningCalculatorTest
         props.setProperty( VersioningState.INCREMENT_SERIAL_SUFFIX_SYSPROP, s );
         setupSession( props );
 
-        final String v = "1.2.0.GA-foo";
+        final String v = "1.2.GA-foo";
 
         final String result = calculate( v );
         assertThat( result, equalTo( v + "-1" ) );
@@ -340,7 +233,7 @@ public class VersioningCalculatorTest
         props.setProperty( VersioningState.INCREMENT_SERIAL_SUFFIX_SYSPROP, s );
         setupSession( props );
 
-        final String v = "1.2.0.GA-jdcasey";
+        final String v = "1.2.GA-jdcasey";
 
         final String result = calculate( v );
         assertThat( result, equalTo( v + "-" + s ) );
@@ -356,7 +249,7 @@ public class VersioningCalculatorTest
         props.setProperty( VersioningState.VERSION_SUFFIX_SYSPROP, s );
         setupSession( props );
 
-        final String v = "1.2.0.GA";
+        final String v = "1.2.GA";
 
         final String result = calculate( v );
         assertThat( result, equalTo( v + "-" + s ) );
@@ -372,7 +265,7 @@ public class VersioningCalculatorTest
         props.setProperty( VersioningState.VERSION_SUFFIX_SYSPROP, s );
         setupSession( props );
 
-        final String v = "1.2.0";
+        final String v = "1.2";
         final String os = ".foo-1";
 
         final String result = calculate( v + os );
@@ -389,7 +282,7 @@ public class VersioningCalculatorTest
         props.setProperty( VersioningState.VERSION_SUFFIX_SYSPROP, s );
         setupSession( props );
 
-        final String v = "1.2.0.GA";
+        final String v = "1.2.GA";
         final String os = "-foo-1";
 
         final String result = calculate( v + os );
@@ -407,30 +300,11 @@ public class VersioningCalculatorTest
         props.setProperty( VersioningState.VERSION_SUFFIX_SNAPSHOT_SYSPROP, "true" );
         setupSession( props );
 
-        final String v = "1.2.0.GA";
+        final String v = "1.2.GA";
         final String sn = "-SNAPSHOT";
 
         final String result = calculate( v + sn );
         assertThat( result, equalTo( v + "-" + s + sn ) );
-    }
-
-    @Test
-    public void applySuffixBeforeSNAPSHOT_OSGI()
-        throws Exception
-    {
-        final Properties props = new Properties();
-
-        final String s = "foo-2";
-        props.setProperty( VersioningState.VERSION_SUFFIX_SYSPROP, s );
-        props.setProperty( VersioningState.VERSION_SUFFIX_SNAPSHOT_SYSPROP, "true" );
-        setupSession( props );
-
-        final String v = "1.2";
-        final String sn = "-SNAPSHOT";
-
-        final String result = calculate( v + sn );
-
-        assertThat( result, equalTo( v + ".0." + s + sn ) );
     }
 
     @Test
@@ -444,7 +318,7 @@ public class VersioningCalculatorTest
         props.setProperty( VersioningState.VERSION_SUFFIX_SNAPSHOT_SYSPROP, "true" );
         setupSession( props );
 
-        final String v = "1.2.0.GA";
+        final String v = "1.2.GA";
         final String sn = "-SNAPSHOT";
         final String os = "-foo-1";
 
@@ -478,29 +352,12 @@ public class VersioningCalculatorTest
         props.setProperty( VersioningState.INCREMENT_SERIAL_SUFFIX_SYSPROP, "foo-0" );
         setupSession( props );
 
-        final String v = "1.2.0.GA";
+        final String v = "1.2.GA";
         final String os = "-foo-1";
         final String ns = "foo-2";
 
         final String result = calculate( v + os );
         assertThat( result, equalTo( v + "-" + ns ) );
-    }
-
-    @Test
-    public void incrementExistingSerialSuffix2()
-        throws Exception
-    {
-        final Properties props = new Properties();
-
-        props.setProperty( VersioningState.INCREMENT_SERIAL_SUFFIX_SYSPROP, "foo-0" );
-        setupSession( props );
-
-        final String v = "1.2.0";
-        final String os = ".foo-1";
-        final String ns = "foo-2";
-
-        final String result = calculate( v + os );
-        assertThat( result, equalTo( v + "." + ns ) );
     }
 
     @Test
@@ -510,9 +367,9 @@ public class VersioningCalculatorTest
         final Properties props = new Properties();
 
         props.setProperty( VersioningState.INCREMENT_SERIAL_SUFFIX_SYSPROP, "foo-bar-0" );
-        setupSession( props, "1.2.0.GA-foo-bar-1", "1.2.0.GA-foo-bar-2" );
+        setupSession( props, "1.2.GA-foo-bar-1", "1.2.GA-foo-bar-2" );
 
-        final String v = "1.2.0.GA";
+        final String v = "1.2.GA";
         final String os = "-foo-bar-1";
         final String ns = "foo-bar-3";
 
@@ -527,9 +384,9 @@ public class VersioningCalculatorTest
         final Properties props = new Properties();
 
         props.setProperty( VersioningState.INCREMENT_SERIAL_SUFFIX_SYSPROP, "foo-0" );
-        setupSession( props, "1.2.0.GA-foo-3", "1.2.0.GA-foo-2", "1.2.0.GA-foo-9" );
+        setupSession( props, "1.2.GA-foo-3", "1.2.GA-foo-2", "1.2.GA-foo-9" );
 
-        final String v = "1.2.0.GA";
+        final String v = "1.2.GA";
         final String os = "-foo-1";
         final String ns = "foo-10";
 
@@ -541,7 +398,7 @@ public class VersioningCalculatorTest
     public void incrementExistingSerialSuffix_TwoProjects_UsingRepositoryMetadata_AvailableOnlyForOne()
         throws Exception
     {
-        final String v = "1.2.0.GA";
+        final String v = "1.2.GA";
         final String os = "-foo-1";
         final String ns = "foo-10";
 
@@ -561,7 +418,7 @@ public class VersioningCalculatorTest
         final Properties props = new Properties();
 
         props.setProperty( VersioningState.INCREMENT_SERIAL_SUFFIX_SYSPROP, "foo-0" );
-        setupSession( props, "1.2.0.GA-foo-3", "1.2.0.GA-foo-2", "1.2.0.GA-foo-9" );
+        setupSession( props, "1.2.GA-foo-3", "1.2.GA-foo-2", "1.2.GA-foo-9" );
 
         final Map<String, String> result = modder.calculateVersioningChanges( Arrays.asList( p1, p2 ), session );
 
@@ -573,7 +430,7 @@ public class VersioningCalculatorTest
     public void incrementExistingSerialSuffix_TwoProjects_UsingRepositoryMetadata_DifferentAvailableIncrements()
         throws Exception
     {
-        final String v = "1.2.0.GA";
+        final String v = "1.2.GA";
         final String os = "-foo-1";
         final String ns = "foo-10";
 
@@ -595,10 +452,10 @@ public class VersioningCalculatorTest
         props.setProperty( VersioningState.INCREMENT_SERIAL_SUFFIX_SYSPROP, "foo-0" );
         final Map<ProjectRef, String[]> versionMap = new HashMap<ProjectRef, String[]>();
 
-        versionMap.put( new ProjectRef( p1.getGroupId(), p1.getArtifactId() ), new String[] { "1.2.0.GA-foo-3",
-            "1.2.0.GA-foo-2", "1.2.0.GA-foo-9" } );
-        versionMap.put( new ProjectRef( p2.getGroupId(), p2.getArtifactId() ), new String[] { "1.2.0.GA-foo-3",
-            "1.2.0.GA-foo-2" } );
+        versionMap.put( new ProjectRef( p1.getGroupId(), p1.getArtifactId() ), new String[] { "1.2.GA-foo-3",
+            "1.2.GA-foo-2", "1.2.GA-foo-9" } );
+        versionMap.put( new ProjectRef( p2.getGroupId(), p2.getArtifactId() ), new String[] { "1.2.GA-foo-3",
+            "1.2.GA-foo-2" } );
 
         setupSession( props, versionMap );
 

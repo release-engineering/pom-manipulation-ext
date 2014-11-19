@@ -4,7 +4,7 @@
  * are made available under the terms of the GNU Public License v3.0
  * which accompanies this distribution, and is available at
  * http://www.gnu.org/licenses/gpl.html
- *
+ * 
  * Contributors:
  *     Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
@@ -30,8 +30,6 @@ public class VersioningState
 
     public static final String VERSION_SUFFIX_SNAPSHOT_SYSPROP = "version.suffix.snapshot";
 
-    public static final String VERSION_OSGI_SYSPROP = "version.osgi";
-
     private Map<String, String> versioningChanges;
 
     private final String suffix;
@@ -40,14 +38,11 @@ public class VersioningState
 
     private final boolean preserveSnapshot;
 
-    private final boolean osgi;
-
     public VersioningState( final Properties userProps )
     {
         suffix = userProps.getProperty( VERSION_SUFFIX_SYSPROP );
         incrementSerialSuffix = userProps.getProperty( INCREMENT_SERIAL_SUFFIX_SYSPROP );
         preserveSnapshot = Boolean.parseBoolean( userProps.getProperty( VERSION_SUFFIX_SNAPSHOT_SYSPROP ) );
-        osgi = Boolean.parseBoolean( userProps.getProperty( VERSION_OSGI_SYSPROP, "true" ) );
     }
 
     public void setVersioningChanges( final Map<String, String> versioningChanges )
@@ -73,15 +68,6 @@ public class VersioningState
     public boolean preserveSnapshot()
     {
         return preserveSnapshot;
-    }
-
-    /**
-     * True if we should make the versions OSGi compliant
-     * @return
-     */
-    public boolean osgi()
-    {
-        return osgi;
     }
 
     /**

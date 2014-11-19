@@ -4,7 +4,7 @@
  * are made available under the terms of the GNU Public License v3.0
  * which accompanies this distribution, and is available at
  * http://www.gnu.org/licenses/gpl.html
- *
+ * 
  * Contributors:
  *     Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
@@ -48,8 +48,6 @@ import org.slf4j.LoggerFactory;
 @Component( role = VersionCalculator.class )
 public class VersionCalculator
 {
-    private static final String OSGI_MATCHER = "(\\d+\\.\\d+\\.\\d+)([\\.|-][\\p{Alnum}|-|_]+)?";
-    private static final String OSGI_INV_MATCHER = "(\\d+\\.\\d+)([\\.|-][\\p{Alnum}|-|_]+)?";
 
     private static final String SERIAL_SUFFIX_PATTERN = "(.+)([-.])(\\d+)$";
 
@@ -71,11 +69,6 @@ public class VersionCalculator
 
     /**
      * Calculate any project version changes for the given set of projects, and return them in a Map keyed by project GA.
-
-     * @param projects
-     * @param session
-     * @return Map<String, String>
-     * @throws ManipulationException
      */
     public Map<String, String> calculateVersioningChanges( final Collection<Project> projects,
                                                            final ManipulationSession session )
@@ -126,28 +119,12 @@ public class VersionCalculator
 
     /**
      * Calculate the version modification for a given GAV.
-     *
-     * @param groupId
-     * @param artifactId
-     * @param version
-     * @param session
-     * @return VersionCalculation
-     * @throws ManipulationException
      */
+    // FIXME: Loooong method
     protected VersionCalculation calculate( final String groupId, final String artifactId,
-                                            final String version, final ManipulationSession session )
+                                            final String originalVersion, final ManipulationSession session )
         throws ManipulationException
     {
-        final VersioningState state = session.getState( VersioningState.class );
-
-        String originalVersion = version;
-
-        if ( state.osgi() )
-        {
-            // OSGi fixup for versions like 1.2.GA or 1.2 (too few parts)
-            // and 1.2-GA or 1.2.0-GA (wrong separator).
-            originalVersion = calculateOSGiBase (originalVersion);
-        }
         String baseVersion = originalVersion;
 
         boolean snapshot = false;
@@ -159,12 +136,11 @@ public class VersionCalculator
             baseVersion = baseVersion.substring( 0, baseVersion.length() - SNAPSHOT_SUFFIX.length() );
         }
 
+        final VersioningState state = session.getState( VersioningState.class );
         final String incrementalSuffix = state.getIncrementalSerialSuffix();
         final String staticSuffix = state.getSuffix();
 
-        logger.debug( "Got the following versions:\n  Original version: " + originalVersion + "\n  Base version: "
-                        + baseVersion );
-        logger.debug( "Got the following version suffixes:\n  Static: " + staticSuffix + "\n  Incremental: "
+        logger.debug( "Got the following version suffixes:\n  Static: " + staticSuffix + "\nIncremental: "
             + incrementalSuffix );
 
         final VersionCalculation vc = new VersionCalculation( originalVersion, baseVersion );
@@ -179,71 +155,12 @@ public class VersionCalculator
                                   state, session );
         }
 
+        // TODO OSGi fixup for versions like 1.2.GA or 1.2 (too few parts)
+
         // tack -SNAPSHOT back on if necessary...
         vc.setSnapshot( state.preserveSnapshot() && snapshot );
 
         return vc;
-    }
-
-    /**
-     * Check that the version is OSGi compliant and adjust it if possible
-     * if not.
-     * @param version
-     * @return
-     */
-    private String calculateOSGiBase( String version )
-    {
-        StringBuffer result = new StringBuffer ();
-
-        Pattern pattern = Pattern.compile(OSGI_MATCHER);
-        Matcher match = pattern.matcher(version);
-
-        if ( ! match.matches () )
-        {
-            match.usePattern (Pattern.compile (OSGI_INV_MATCHER));
-            if ( ! match.matches() )
-            {
-                // Just fallback - we don't know how to handle this.
-                logger.warn( "Unknown format " + version + "; unable to format to OSGi versioning");
-                return version;
-            }
-
-            result.append (match.group (1));
-            result.append (".0");
-
-            if (match.group (match.groupCount ()) != null)
-            {
-                if (match.group (match.groupCount ()).equals( "-SNAPSHOT" ))
-                {
-                    result.append (match.group (match.groupCount ()));
-                }
-                else
-                {
-                    result.append ("." + match.group (match.groupCount ()).substring (1));
-                }
-            }
-        }
-        else
-        {
-            result.append (match.group (1));
-
-            if (match.group (match.groupCount ()) != null)
-            {
-                if (match.group (match.groupCount ()).equals( "-SNAPSHOT" ))
-                {
-                    result.append (match.group (match.groupCount ()));
-                }
-                else
-                {
-                    result.append ("." + match.group (match.groupCount ()).substring (1));
-                }
-            }
-
-        }
-        logger.debug( "Matched group " + match.group( 1 ) + " and " + match.group (match.groupCount ())
-                      + " and modified baseVersion is " + result);
-
-        return result.toString();
     }
 
     private void calculateStatic( final VersionCalculation vc, final String baseVersion,
@@ -294,7 +211,7 @@ public class VersionCalculator
         {
             vc.setBaseVersionSeparator( "." );
         }
-
+        
         return baseVersion;
     }
 

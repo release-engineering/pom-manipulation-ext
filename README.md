@@ -1,7 +1,7 @@
 
 # POM Manipulation Extension for Apache Maven
 
-A Maven extension which provides a series of POM pre-processors.
+A Maven extension which provides a series of POM pre-processors. When it is activated it will write a log file `target/manipulation.log`.
 
 This extension combines many of the features of [VMan](https://github.com/jdcasey/pom-version-manipulator), [Maven Versioning Extension](https://github.com/jdcasey/maven-versioning-extension) and [Maven Dependency Management Extension](https://github.com/jboss/maven-dependency-management-extension).
 
@@ -15,7 +15,6 @@ This extension combines many of the features of [VMan](https://github.com/jdcase
     - [Automatic version increment](#automatic-version-increment)
     - [Manual version suffix](#manual-version-suffix)
     - [Snapshot Detection](#snapshot-detection)
-    - [OSGi Compliance](#osgi-compliance)
 - [Repository And Reporting Removal](#repository-and-reporting-removal)
 - [Dependency Manipulation](#dependency-manipulation)
     - [Direct Dependencies](#direct-dependencies)
@@ -79,22 +78,6 @@ The extension can detect snapshot versions and either preserve the snapshot or r
     mvn install -Dversion.suffix.snapshot=true
 
 This means that the SNAPSHOT suffix will be kept.
-
-### OSGi Compliance
-
-If version manipulation is enabled the extension will also attempt to format the version to be OSGi compliant. For example if the versions are:
-
-    1.3
-    1.3-GA
-    1.3.0-GA
-
-it will change to
-
-    1.3.0
-    1.3.0.GA
-    1.3.0.GA
-
-This is controlled by the property **version.osgi**. The default is true (i.e. make the versions OSGi compliant).
 
 ## Repository And Reporting Removal
 

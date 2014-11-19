@@ -157,7 +157,6 @@ public class ModelIO
         final Model m = resolveRawModel ( ref );
         final Map<ProjectRef, Plugin> versionOverrides = new HashMap<ProjectRef, Plugin>();
 
-        // TODO: active profiles!
         if ( m.getBuild() != null && m.getBuild().getPluginManagement() != null)
         {
             logger.debug( "Returning override of " + m.getBuild().getPluginManagement().getPlugins());
