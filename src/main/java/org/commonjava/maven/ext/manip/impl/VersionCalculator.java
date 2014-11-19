@@ -360,7 +360,9 @@ public class VersionCalculator
 
                 final String base = version.substring( 0, baseIdx - 1 );
                 logger.debug( "Candidate version base is: '{}'", base );
-                if ( !baseVersion.equals( base ) )
+                String trimmedBaseVersion = trimVersionZeros( baseVersion );
+                String trimmedBase = trimVersionZeros( base );
+                if ( !trimmedBaseVersion.equals( trimmedBase ) )
                 {
                     logger.debug( "Ignoring irrelevant version: '" + version + "' ('" + base
                         + "' doesn't match on base-version: '" + baseVersion + "')." );
@@ -381,6 +383,24 @@ public class VersionCalculator
             vc.setSuffixSeparator( sep );
             vc.setIncrementalQualifier( maxSerial + 1 );
         }
+    }
+
+    /**
+     * Remove irrelevant zeros from a version string.
+     * This is useful when trying to match two version strings where one has zeros
+     * in the minor and/or micro fields, for example 1.2.0 and 1.2.
+     * 
+     * @param version
+     * @return
+     */
+    public static String trimVersionZeros(String version) 
+    {
+        String newVersion = version ;
+        while ( newVersion.endsWith( ".0" ) )
+        {
+            newVersion = newVersion.substring( 0, newVersion.lastIndexOf( ".0" ) );
+        }
+        return newVersion.toString();
     }
 
     /**
