@@ -76,6 +76,22 @@ public class VersioningCalculatorTest
     }
 
     @Test
+    public void applyNonSerialSuffix_NonNumericVersionTail_WithProperty()
+        throws Exception
+    {
+        final Properties props = new Properties();
+
+        final String s = "foo";
+        props.setProperty( VersioningState.VERSION_SUFFIX_SYSPROP, s );
+        setupSession( props );
+
+        final String v = "${property}";
+
+        final String result = calculate( v );
+        assertThat( result, equalTo( v + "-" + s ) );
+    }
+
+
     public void osgi_fixups()
         throws Exception
     {
@@ -624,6 +640,24 @@ public class VersioningCalculatorTest
         final String result = calculate( v );
         assertThat( result, equalTo( v + "." + ns ) );
     }
+
+     @Test
+    public void incrementExistingSerialSuffix_Property()
+        throws Exception
+    {
+        final Properties props = new Properties();
+
+        props.setProperty( VersioningState.INCREMENT_SERIAL_SUFFIX_SYSPROP, "foo-0" );
+        setupSession( props );
+
+        final String v = "${property}";
+        final String os = "-foo-1";
+        final String ns = "foo-2";
+
+        final String result = calculate( v + os );
+        assertThat( result, equalTo( v + "-" + ns ) );
+    }
+
 
     private byte[] setupMetadataVersions( final String... versions )
         throws IOException
