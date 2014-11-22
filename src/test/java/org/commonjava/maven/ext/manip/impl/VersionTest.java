@@ -163,6 +163,18 @@ public class VersionTest
         version = new Version("1.2.1.Final-jboss-8");
         version.appendQualifierSuffix( "jboss" );
         assertThat( version.getOSGiVersionString(), equalTo( "1.2.1.Final-jboss-8" ) );
+
+        version = new Version("1.2.1.Final");
+        version.appendQualifierSuffix( "jboss-1" );
+        assertThat( version.getOSGiVersionString(), equalTo( "1.2.1.Final-jboss-1" ) );
+
+        version = new Version("1.2-GA");
+        version.appendQualifierSuffix( "jboss-2" );
+        assertThat( version.getOSGiVersionString(), equalTo( "1.2.0.GA-jboss-2" ) );
+
+        version = new Version("1.2-jboss");
+        version.appendQualifierSuffix( "jboss-2" );
+        assertThat( version.getOSGiVersionString(), equalTo( "1.2.0.jboss-2" ) );
     }
 
     @Test

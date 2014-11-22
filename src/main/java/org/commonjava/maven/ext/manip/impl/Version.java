@@ -45,11 +45,18 @@ public class Version
      */
     private final String originalVersion;
 
+    /**
+     * The original unmodified version qualifier.  Will be null if no qualifier is included.
+     */
     private String originalQualifier;
 
     /**
-     * Has the qualifier suffix or build number been changed from the original
-     * version string
+     * The current qualifier, after any modifications such as suffix or build number changes
+     * have been made.
+     */
+    private String qualifier;
+    /**
+     * Has the qualifier suffix or build number been changed from the original version string
      */
     private boolean qualifierChanged;
 
@@ -79,7 +86,6 @@ public class Version
      */
     private final void parseVersion( String version )
     {
-
         List<String> versionParts = new ArrayList<String>();
 
         String remainingVersionString = version;
@@ -131,10 +137,10 @@ public class Version
 
     private void parseQualifier()
     {
-        if (hasQualifier())
+        if ( hasQualifier() )
         {
             List<String> qualifierParts = new ArrayList<String>();
-            for ( int i=3; i<versionParts.size(); ++i )
+            for ( int i = 3; i < versionParts.size(); ++i )
             {
                 qualifierParts.add( versionParts.get( i ) );
             }
@@ -149,7 +155,7 @@ public class Version
                 qualifierBase = removeLastDelimiters( qualifierBase );
                 qualifierParts.remove( qualifierParts.size() - 1 );
             }
-            
+
             // Try to extract the qualifier suffix
             if ( qualifierParts.size() > 0 )
             {
@@ -162,6 +168,7 @@ public class Version
                 }
             }
         }
+        updateQualifier();
     }
 
     /**
@@ -297,36 +304,55 @@ public class Version
     }
 
     /**
+     * Update the qualifier by combining the qualifierBase, qualifierSuffix, and build number
+     * 
+     * @return
+     */
+    private void updateQualifier()
+    {
+        if ( !this.qualifierChanged )
+        {
+            qualifier = originalQualifier;
+            return;
+        }
+        StringBuilder updatedQualifier = new StringBuilder();
+        if ( !isEmpty( getQualifierBase() ) )
+        {
+            updatedQualifier.append( getQualifierBase() );
+            if ( !isEmpty( getQualifierSuffix() ) || !isEmpty( getBuildNumber() ) )
+            {
+                updatedQualifier.append( '-' );
+            }
+        }
+
+        if ( !isEmpty( getQualifierSuffix() ) )
+        {
+            updatedQualifier.append( getQualifierSuffix() );
+            if ( !isEmpty( getBuildNumber() ) )
+            {
+                updatedQualifier.append( '-' );
+            }
+        }
+
+        if ( !isEmpty( getBuildNumber() ) )
+        {
+            updatedQualifier.append( getBuildNumber() );
+        }
+        qualifier = updatedQualifier.toString();
+    }
+
+    /**
      * Generate the qualifier by combining the qualifierBase, qualifierSuffix, and build number
+     * 
      * @return
      */
     public String getQualifier()
     {
-        if ( !this.qualifierChanged )
+        if ( qualifier != null )
         {
-            return originalQualifier;
+            return qualifier;
         }
-        StringBuilder qualifier = new StringBuilder();
-        if ( !isEmpty(getQualifierBase())){
-            qualifier.append( getQualifierBase() );
-            if ( !isEmpty(getQualifierSuffix()) || !isEmpty(getBuildNumber()) )
-            {
-                qualifier.append( '-' );
-            }
-        }
-        
-        if ( !isEmpty(getQualifierSuffix())){
-            qualifier.append( getQualifierSuffix() );
-            if ( !isEmpty(getBuildNumber()) )
-            {
-                qualifier.append( '-' );
-            }
-        }
-        
-        if ( !isEmpty(getBuildNumber())){
-            qualifier.append( getBuildNumber() );
-        }
-        return qualifier.toString();
+        return originalQualifier;
     }
 
     public String getQualifierBase()
@@ -386,7 +412,6 @@ public class Version
 
     public String getBuildNumber()
     {
-
         return buildNumber;
     }
 
@@ -411,10 +436,11 @@ public class Version
     }
 
     /**
-     * Appends a qualifier suffix to the current version
-     * If the suffix matches the existing one, does nothing
+     * Appends a qualifier suffix to the current version If the suffix matches the existing one, does nothing
      * 
-     * @param suffix
+     * @param suffix The qualifier suffix to append. This can be a simple string like "foo", or it can optionally
+     *            include a build number, for example "foo-1", which will automatically be set as the build number for
+     *            this version.
      */
     public void appendQualifierSuffix( String suffix )
     {
@@ -424,14 +450,28 @@ public class Version
         }
         suffix = removeNextDelimiters( suffix );
 
-        if (!suffix.equals( qualifierSuffix ))
+        StringBuilder newBuildNumber = new StringBuilder();
+        while ( isNumeric( suffix.substring( suffix.length() - 1 ) ) )
+        {
+            newBuildNumber.insert( 0, suffix.substring( suffix.length() - 1 ) );
+            suffix = suffix.substring( 0, suffix.length() - 1 );
+        }
+
+        suffix = this.removeLastDelimiters( suffix );
+
+        if ( !suffix.equals( qualifierSuffix ) )
         {
             qualifierSuffix = suffix;
             qualifierChanged = true;
             qualifierBase = originalQualifier;
             buildNumber = null;
         }
-
+        if ( newBuildNumber.length() > 0 )
+        {
+            qualifierChanged = true;
+            buildNumber = newBuildNumber.toString();
+        }
+        updateQualifier();
     }
 
     /**
@@ -456,10 +496,11 @@ public class Version
             return;
         }
 
-        if ( this.buildNumber==null || !this.buildNumber.equals(buildNumber) )
+        if ( this.buildNumber == null || !this.buildNumber.equals( buildNumber ) )
         {
             this.buildNumber = buildNumber;
             qualifierChanged = true;
+            updateQualifier();
         }
     }
 }
