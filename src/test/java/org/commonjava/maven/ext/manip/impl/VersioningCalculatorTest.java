@@ -151,7 +151,7 @@ public class VersioningCalculatorTest
 
         String data[][] = new String[][] {
             {"GA-1-GA", "GA-1-GA"},
-            {"1.0.0.0.0-GA", "1.0.0.0.0-GA"}  };
+            {"1.0.0.0.0-GA", "1.0.0.0-0-GA"}  };
 
         for ( String[] v : data )
         {

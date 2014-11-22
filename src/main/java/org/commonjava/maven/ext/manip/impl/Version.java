@@ -68,6 +68,14 @@ public class Version
 
     private final Logger logger = LoggerFactory.getLogger( getClass() );
 
+    /**
+     * Represents whether the major, minor, micro versions are valid integers.
+     * This will be false if the version string uses a property string like "${myVersion}-build-1"
+     * or if the version string starts with alpha chars like "GA-1-Beta".  In these cases
+     * we can't parse the major, minor, micro versions, so we just leave the string intact.
+     */
+    private boolean numericVersion = true;
+
     public Version( String version )
     {
         originalVersion = version;
@@ -96,6 +104,14 @@ public class Version
         if ( versionStringDelimiters.contains( version.charAt( 0 ) ) )
         {
             versionParts.add( "0" );
+        }
+
+        // Check if we have a valid numeric version string, or something non-sensical 
+        // like "foo" or "${myprop}"
+        remainingVersionString = removeNextDelimiters( remainingVersionString );
+        if ( !isNumeric( Character.toString( version.charAt( 0 ) ) ) )
+        {
+            this.numericVersion = false;
         }
 
         while ( !isEmpty( remainingVersionString ) )
@@ -342,6 +358,17 @@ public class Version
     }
 
     /**
+     * Get the original version string that was used to create this 
+     * version object.
+     * 
+     * @return the original version string
+     */
+    public String getOriginalVersion()
+    {
+        return originalVersion;
+    }
+
+    /**
      * Generate the qualifier by combining the qualifierBase, qualifierSuffix, and build number
      * 
      * @return
@@ -370,25 +397,64 @@ public class Version
         {
             return originalVersion;
         }
-        StringBuilder osgiVersion = new StringBuilder( getMajorVersion() );
 
-        if ( !isEmpty( getMinorVersion() ) )
+        StringBuilder osgiVersion = new StringBuilder();
+        if ( numericVersion )
         {
-            osgiVersion.append( OSGI_VERSION_DELIMITER );
-            osgiVersion.append( getMinorVersion() );
-        }
-        if ( !isEmpty( getMicroVersion() ) )
-        {
-            osgiVersion.append( OSGI_VERSION_DELIMITER );
-            osgiVersion.append( getMicroVersion() );
+            osgiVersion.append( getMajorVersion() );
+
+            if ( !isEmpty( getMinorVersion() ) )
+            {
+                osgiVersion.append( OSGI_VERSION_DELIMITER );
+                osgiVersion.append( getMinorVersion() );
+            }
+            if ( !isEmpty( getMicroVersion() ) )
+            {
+                osgiVersion.append( OSGI_VERSION_DELIMITER );
+                osgiVersion.append( getMicroVersion() );
+            }
         }
         if ( !isEmpty( getQualifier() ) )
         {
-            osgiVersion.append( OSGI_VERSION_DELIMITER );
+            if ( numericVersion )
+            {
+                osgiVersion.append( OSGI_VERSION_DELIMITER );
+            }
             osgiVersion.append( getOSGiQualifier() );
         }
         return osgiVersion.toString();
 
+    }
+
+    /**
+     * Get a three part OSGi version with an optional qualifier.
+     * This method will force the version string to contain
+     * a major, minor, and micro version.  So "1.2" will become "1.2.0".
+     * 
+     * @return
+     */
+    public String getOSGiVersionStringMaximized()
+    {
+        StringBuilder osgiVerMaxed = new StringBuilder();
+
+        if ( numericVersion )
+        {
+            osgiVerMaxed.append( getMajorVersion() );
+            osgiVerMaxed.append( OSGI_VERSION_DELIMITER );
+            osgiVerMaxed.append( getMinorVersion() );
+            osgiVerMaxed.append( OSGI_VERSION_DELIMITER );
+            osgiVerMaxed.append( getMicroVersion() );
+        }
+        if ( this.hasQualifier() )
+        {
+            if ( numericVersion )
+            {
+                osgiVerMaxed.append( OSGI_VERSION_DELIMITER );
+            }
+            osgiVerMaxed.append( getOSGiQualifier() );
+        }
+
+        return osgiVerMaxed.toString();
     }
 
     /**

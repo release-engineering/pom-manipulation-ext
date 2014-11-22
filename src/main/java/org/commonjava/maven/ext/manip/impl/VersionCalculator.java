@@ -48,17 +48,6 @@ import org.slf4j.LoggerFactory;
 @Component( role = VersionCalculator.class )
 public class VersionCalculator
 {
-    /**
-     * Used to find versions of the format 1.1.1 <separator> <suffix>.
-     * If the separator is not of the correct format (a '.') it should correct it.
-     */
-    private static final String VERSION_MATCHER = "(\\d+\\.\\d+\\.\\d+)([\\.|-][\\p{Alnum}|-|_]+)?";
-    /**
-     * Used to determine if this is a version type we can handle i.e.
-     * <numeric>.<numeric> <separator> <suffix>
-     */
-    private static final String VERSION_INV_MATCHER = "(\\d+)(\\.\\d+)?([\\.|-][\\p{Alnum}|\\-|_]+)?";
-
     private static final String SERIAL_SUFFIX_PATTERN = "(.+)([-.])(\\d+)$";
 
     public static final String SNAPSHOT_SUFFIX = "-SNAPSHOT";
@@ -150,18 +139,19 @@ public class VersionCalculator
 
         String originalVersion = version;
 
+        Version versionObj = new Version( version );
         if ( state.osgi() )
         {
             // OSGi fixup for versions like 1.2.GA or 1.2 (too few parts)
             // and 1.2-GA or 1.2.0-GA (wrong separator).
-            originalVersion = calculateOSGiBase (originalVersion);
+            originalVersion = versionObj.getOSGiVersionStringMaximized();
         }
         String baseVersion = originalVersion;
 
         boolean snapshot = false;
         // If we're building a snapshot, make sure the resulting version ends
         // in "-SNAPSHOT"
-        if ( baseVersion.endsWith( SNAPSHOT_SUFFIX ) )
+        if ( versionObj.isSnapshot() )
         {
             snapshot = true;
             baseVersion = baseVersion.substring( 0, baseVersion.length() - SNAPSHOT_SUFFIX.length() );
@@ -191,74 +181,6 @@ public class VersionCalculator
         vc.setSnapshot( state.preserveSnapshot() && snapshot );
 
         return vc;
-    }
-
-    /**
-     * Check that the version is OSGi compliant and adjust it if possible
-     * if not.
-     * @param version
-     * @return
-     */
-    private String calculateOSGiBase( String version )
-    {
-        StringBuffer result = new StringBuffer ();
-
-        Pattern pattern = Pattern.compile(VERSION_MATCHER);
-        Matcher match = pattern.matcher(version);
-
-        if ( ! match.matches () )
-        {
-            match.usePattern (Pattern.compile (VERSION_INV_MATCHER));
-            if ( ! match.matches() )
-            {
-                // Just fallback - we don't know how to handle this.
-                logger.warn( "Unknown format " + version + "; unable to format to OSGi versioning");
-                return version;
-            }
-
-            result.append (match.group (1));
-            if (match.group (2) != null)
-            {
-                result.append( match.group(2) );
-            }
-            else
-            {
-                result.append (".0");
-            }
-            result.append (".0");
-            if (match.group (match.groupCount ()) != null)
-            {
-                if (match.group (match.groupCount ()).equals( "-SNAPSHOT" ))
-                {
-                    result.append (match.group (match.groupCount ()));
-                }
-                else
-                {
-                    result.append ("." + match.group (match.groupCount ()).substring (1));
-                }
-            }
-        }
-        else
-        {
-            result.append (match.group (1));
-
-            if (match.group (match.groupCount ()) != null)
-            {
-                if (match.group (match.groupCount ()).equals( "-SNAPSHOT" ))
-                {
-                    result.append (match.group (match.groupCount ()));
-                }
-                else
-                {
-                    result.append ("." + match.group (match.groupCount ()).substring (1));
-                }
-            }
-
-        }
-        logger.debug( "Matched group " + match.group( 1 ) + " and " + match.group (match.groupCount ())
-                      + " and modified baseVersion is " + result);
-
-        return result.toString();
     }
 
     private void calculateStatic( final VersionCalculation vc, final String baseVersion,
