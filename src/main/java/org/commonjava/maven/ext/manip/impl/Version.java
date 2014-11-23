@@ -73,6 +73,9 @@ public class Version
 
     private String qualifierSuffix;
 
+    /**
+     * Numeric string at the end of the qualifier
+     */
     private String buildNumber;
 
     private final Logger logger = LoggerFactory.getLogger( getClass() );
@@ -571,13 +574,13 @@ public class Version
     }
 
     /**
-     * Appends a qualifier suffix to the current version If the suffix matches the existing one, does nothing
+     * Sets the qualifier suffix to the current version. If the suffix matches the existing one, does nothing
      * 
      * @param suffix The qualifier suffix to append. This can be a simple string like "foo", or it can optionally
      *            include a build number, for example "foo-1", which will automatically be set as the build number for
      *            this version.
      */
-    public void appendQualifierSuffix( String suffix )
+    public void setQualifierSuffix( String suffix )
     {
         if ( suffix == null )
         {
