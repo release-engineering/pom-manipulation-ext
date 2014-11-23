@@ -22,7 +22,7 @@ import org.slf4j.LoggerFactory;
  * Component that reads a version string and makes various modifications to it such as converting to a valid OSGi
  * version string and/or incrementing a version suffix. See: http://www.aqute.biz/Bnd/Versioning for an explanation of
  * OSGi versioning. Parses versions into the following format:
- * &lt;major&gt;.&lt;minor&gt;.&lt;micro&gt;.&lt;qualifier&gt;-&lt;suffix&gt;-&lt;buildnumber&gt;
+ * &lt;major&gt;.&lt;minor&gt;.&lt;micro&gt;.&lt;qualifierBase&gt;-&lt;suffix&gt;-&lt;buildnumber&gt;
  */
 public class Version
 {
@@ -38,23 +38,32 @@ public class Version
 
     private List<Character> versionStringDelimiters = Arrays.asList( DEFAULT_DELIMITERS );
 
-    private List<String> versionParts;
-
     /**
      * The original version string before any modifications
      */
     private final String originalVersion;
 
     /**
-     * The original unmodified version qualifier.  Will be null if no qualifier is included.
+     * The original unmodified major, minor, micro portion of the version string.
+     */
+    private String originalMMM;
+
+    private String majorVersion;
+
+    private String minorVersion;
+
+    private String microVersion;
+
+    /**
+     * The original unmodified version qualifier. Will be null if no qualifier is included.
      */
     private String originalQualifier;
 
     /**
-     * The current qualifier, after any modifications such as suffix or build number changes
-     * have been made.
+     * The current qualifier, after any modifications such as suffix or build number changes have been made.
      */
     private String qualifier;
+
     /**
      * Has the qualifier suffix or build number been changed from the original version string
      */
@@ -69,10 +78,9 @@ public class Version
     private final Logger logger = LoggerFactory.getLogger( getClass() );
 
     /**
-     * Represents whether the major, minor, micro versions are valid integers.
-     * This will be false if the version string uses a property string like "${myVersion}-build-1"
-     * or if the version string starts with alpha chars like "GA-1-Beta".  In these cases
-     * we can't parse the major, minor, micro versions, so we just leave the string intact.
+     * Represents whether the major, minor, micro versions are valid integers. This will be false if the version string
+     * uses a property string like "${myVersion}-build-1" or if the version string starts with alpha chars like
+     * "GA-1-Beta". In these cases we can't parse the major, minor, micro versions, so we just leave the string intact.
      */
     private boolean numericVersion = true;
 
@@ -94,97 +102,152 @@ public class Version
      */
     private final void parseVersion( String version )
     {
-        List<String> versionParts = new ArrayList<String>();
+        int qualifierIndex = getQualifierIndex( version );
+        originalMMM = version.substring( 0, qualifierIndex );
+        originalQualifier = version.substring( qualifierIndex );
 
-        String remainingVersionString = version;
-
-        boolean foundQualifier = false;
-
-        // If the first character is a delimiter, then we put a zero as the major version
-        if ( versionStringDelimiters.contains( version.charAt( 0 ) ) )
-        {
-            versionParts.add( "0" );
-        }
-
-        // Check if we have a valid numeric version string, or something non-sensical 
-        // like "foo" or "${myprop}"
-        remainingVersionString = removeNextDelimiters( remainingVersionString );
-        if ( !isNumeric( Character.toString( version.charAt( 0 ) ) ) )
-        {
-            this.numericVersion = false;
-        }
-
-        while ( !isEmpty( remainingVersionString ) )
-        {
-            // Remove the next delimiter(s) from the version
-            remainingVersionString = removeNextDelimiters( remainingVersionString );
-            String nextVersionPart = getNextVersionPart( remainingVersionString );
-
-            // logger.debug( "version parts: " + versionParts );
-            if ( ( !foundQualifier ) && ( !isNumeric( nextVersionPart ) || versionParts.size() == 3 ) )
-            {
-                foundQualifier = true;
-                originalQualifier = removeNextDelimiters( remainingVersionString );
-
-                // Add zeros for the minor and micro versions if necessary
-                while ( versionParts.size() < 3 )
-                {
-                    versionParts.add( "0" );
-                }
-            }
-
-            remainingVersionString = remainingVersionString.substring( ( nextVersionPart.length() ) );
-            versionParts.add( nextVersionPart );
-        }
-
-        if ( !foundQualifier )
-        {
-            // If there is no qualifier, we might have a version like "1.2" and
-            // we need to add a micro version of "0".
-            while ( versionParts.size() < 3 )
-            {
-                versionParts.add( "0" );
-            }
-        }
-
-        this.versionParts = versionParts;
-        parseQualifier();
+        parseMMM( originalMMM );
+        parseQualifier( originalQualifier );
     }
 
-    private void parseQualifier()
+    /**
+     * Attempt to find where the qualifier portion of the version string begins. Will return the location of either the
+     * first non-numeric char or the character after the third delimiter.
+     * 
+     * @param version
+     * @return index of the start of the qualifier (version.length() if no qualifier was found)
+     */
+    private int getQualifierIndex( String version )
     {
-        if ( hasQualifier() )
+        final int QUALIFIER_NOT_FOUND = version.length();
+
+        int qualifierIndex = 0;
+        int delimiterCount = 0;
+        while ( qualifierIndex < version.length() )
         {
-            List<String> qualifierParts = new ArrayList<String>();
-            for ( int i = 3; i < versionParts.size(); ++i )
+            if ( versionStringDelimiters.contains( version.charAt( qualifierIndex ) ) )
             {
-                qualifierParts.add( versionParts.get( i ) );
+                ++delimiterCount;
             }
-            qualifierBase = originalQualifier;
-
-            // Try to extract the build number
-            String lastQualifierPart = qualifierParts.get( qualifierParts.size() - 1 );
-            if ( isNumeric( lastQualifierPart ) || SNAPSHOT_SUFFIX.equalsIgnoreCase( lastQualifierPart ) )
+            else if ( !isNumeric( Character.toString( version.charAt( qualifierIndex ) ) ) )
             {
-                buildNumber = lastQualifierPart;
-                qualifierBase = qualifierBase.substring( 0, qualifierBase.length() - buildNumber.length() );
-                qualifierBase = removeLastDelimiters( qualifierBase );
-                qualifierParts.remove( qualifierParts.size() - 1 );
+                return qualifierIndex;
             }
 
-            // Try to extract the qualifier suffix
-            if ( qualifierParts.size() > 0 )
+            ++qualifierIndex;
+
+            if ( delimiterCount == 3 )
             {
-                lastQualifierPart = qualifierParts.get( qualifierParts.size() - 1 );
-                if ( !isNumeric( lastQualifierPart ) )
-                {
-                    qualifierSuffix = lastQualifierPart;
-                    qualifierBase = qualifierBase.substring( 0, qualifierBase.length() - qualifierSuffix.length() );
-                    qualifierBase = removeLastDelimiters( qualifierBase );
-                }
+                return qualifierIndex;
             }
         }
-        updateQualifier();
+        return QUALIFIER_NOT_FOUND;
+
+    }
+
+    /**
+     * Parse the mmm (major, minor, micro) portions of the version string
+     * 
+     * @param mmm The numeric portion of the version string before the qualifier
+     */
+    private void parseMMM( String mmm )
+    {
+        // Default to "0" for any missing versions
+        majorVersion = "0";
+        minorVersion = "0";
+        microVersion = "0";
+
+        if ( isEmpty( mmm ) )
+        {
+            numericVersion = false;
+            return;
+        }
+
+        String remainingMMMString = mmm;
+
+        // MAJOR VERSION
+        // If the first character is a delimiter, then we put a zero as the major version
+        if ( versionStringDelimiters.contains( remainingMMMString.charAt( 0 ) ) )
+        {
+            majorVersion = "0";
+        }
+        else if ( !isNumeric( Character.toString( remainingMMMString.charAt( 0 ) ) ) )
+        {
+            // Invalid mmm, just return
+            logger.warn( "Trying to parse an invalid major, minor, micro string: " + mmm );
+            return;
+        }
+        else
+        {
+            majorVersion = getNextVersionPart( remainingMMMString );
+            remainingMMMString = remainingMMMString.substring( majorVersion.length() );
+        }
+
+        // MINOR VERSION
+        remainingMMMString = removeNextDelimiters( remainingMMMString );
+        if ( !isEmpty( remainingMMMString ) )
+        {
+            minorVersion = getNextVersionPart( remainingMMMString );
+            remainingMMMString = remainingMMMString.substring( minorVersion.length() );
+        }
+
+        // MICRO VERSION
+        remainingMMMString = removeNextDelimiters( remainingMMMString );
+        if ( !isEmpty( remainingMMMString ) )
+        {
+            microVersion = getNextVersionPart( remainingMMMString );
+            remainingMMMString = remainingMMMString.substring( microVersion.length() );
+        }
+    }
+
+    /**
+     * Parses the qualifier into the following format.
+     * 
+     * @param qualifier
+     */
+    private void parseQualifier( String qualifier )
+    {
+        if ( isEmpty( qualifier ) )
+        {
+            return;
+        }
+
+        String remainingQualString = qualifier;
+        String qualifierBase = qualifier;
+        List<String> qualifierParts = new ArrayList<String>();
+
+        // Break the qualifier into sections
+        while ( !isEmpty( remainingQualString ) )
+        {
+            remainingQualString = removeNextDelimiters( remainingQualString );
+            String nextVersionPart = getNextVersionPart( remainingQualString );
+            qualifierParts.add( nextVersionPart );
+            remainingQualString = remainingQualString.substring( ( nextVersionPart.length() ) );
+        }
+
+        // Try to extract the build number
+        String lastQualifierPart = qualifierParts.get( qualifierParts.size() - 1 );
+        if ( isNumeric( lastQualifierPart ) || SNAPSHOT_SUFFIX.equalsIgnoreCase( lastQualifierPart ) )
+        {
+            buildNumber = lastQualifierPart;
+            qualifierBase = qualifierBase.substring( 0, qualifierBase.length() - buildNumber.length() );
+            qualifierBase = removeLastDelimiters( qualifierBase );
+            qualifierParts.remove( qualifierParts.size() - 1 );
+        }
+
+        // Try to extract the qualifier suffix
+        if ( qualifierParts.size() > 0 )
+        {
+            lastQualifierPart = qualifierParts.get( qualifierParts.size() - 1 );
+            if ( !isNumeric( lastQualifierPart ) )
+            {
+                qualifierSuffix = lastQualifierPart;
+                qualifierBase = qualifierBase.substring( 0, qualifierBase.length() - qualifierSuffix.length() );
+                qualifierBase = removeLastDelimiters( qualifierBase );
+            }
+        }
+
+        this.qualifierBase = qualifierBase;
     }
 
     /**
@@ -214,8 +277,6 @@ public class Version
         {
             char nextChar = remainingVersionString.charAt( index );
             // Check if the next char matches what we're looking for
-            // logger.debug( "remaining: " + remainingVersionString + "  versionPart: " + versionPart + "  nextChar: " +
-            // nextChar );
             if ( versionStringDelimiters.contains( nextChar ) )
             {
                 break;
@@ -306,17 +367,27 @@ public class Version
 
     public String getMajorVersion()
     {
-        return versionParts.get( 0 );
+        return majorVersion;
     }
 
+    /**
+     * Assumed to be "0" if no minor version is specified in the string
+     * 
+     * @return
+     */
     public String getMinorVersion()
     {
-        return versionParts.get( 1 );
+        return minorVersion;
     }
 
+    /**
+     * Assumed to be "0" if no micro version is specified in the string
+     * 
+     * @return
+     */
     public String getMicroVersion()
     {
-        return versionParts.get( 2 );
+        return microVersion;
     }
 
     /**
@@ -358,8 +429,7 @@ public class Version
     }
 
     /**
-     * Get the original version string that was used to create this 
-     * version object.
+     * Get the original version string that was used to create this version object.
      * 
      * @return the original version string
      */
@@ -371,7 +441,7 @@ public class Version
     /**
      * Generate the qualifier by combining the qualifierBase, qualifierSuffix, and build number
      * 
-     * @return
+     * @return The qualifier part of the version string (an empty string if there is no qualifier)
      */
     public String getQualifier()
     {
@@ -427,9 +497,8 @@ public class Version
     }
 
     /**
-     * Get a three part OSGi version with an optional qualifier.
-     * This method will force the version string to contain
-     * a major, minor, and micro version.  So "1.2" will become "1.2.0".
+     * Get a three part OSGi version with an optional qualifier. This method will force the version string to contain a
+     * major, minor, and micro version. So "1.2" will become "1.2.0".
      * 
      * @return
      */

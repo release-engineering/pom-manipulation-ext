@@ -32,7 +32,7 @@ public class VersionTest
         assertThat( version.getMajorVersion(), equalTo( "1" ) );
         assertThat( version.getMinorVersion(), equalTo( "0" ) );
         assertThat( version.getMicroVersion(), equalTo( "0" ) );
-        assertThat( version.getQualifier(), equalTo( null ) );
+        assertThat( version.getQualifier(), equalTo( "" ) );
 
         version = new Version("1beta1");
         assertThat( version.getMajorVersion(), equalTo( "1" ) );
