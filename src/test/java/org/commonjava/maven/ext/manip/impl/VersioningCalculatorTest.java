@@ -46,7 +46,6 @@ import org.commonjava.maven.ext.manip.resolver.GalleyAPIWrapper;
 import org.commonjava.maven.ext.manip.resolver.GalleyInfrastructure;
 import org.commonjava.maven.ext.manip.resolver.MavenLocationExpander;
 import org.commonjava.maven.ext.manip.state.ManipulationSession;
-import org.commonjava.maven.ext.manip.state.VersionCalculation;
 import org.commonjava.maven.ext.manip.state.VersioningState;
 import org.commonjava.maven.galley.model.Location;
 import org.commonjava.maven.galley.spi.transport.Transport;
@@ -105,7 +104,6 @@ public class VersioningCalculatorTest
         String data[][] = new String[][] {
             {"1", "1.0.0"},
             {"6.2.0-SNAPSHOT", "6.2.0"},
-            {"3.6.0.1", "3.6.0.1"},
             {"1.21", "1.21.0"},
             {"1.21.0", "1.21.0"},
             {"1.21-GA", "1.21.0.GA"},
@@ -729,8 +727,15 @@ public class VersioningCalculatorTest
     private String calculate( final String version )
         throws Exception
     {
-        return modder.calculate( GROUP_ID, ARTIFACT_ID, version, session )
-                     .renderVersion();
+        Version modifiedVersion = modder.calculate( GROUP_ID, ARTIFACT_ID, version, session );
+        if ( session.getState( VersioningState.class ).osgi() )
+        {
+            return modifiedVersion.getOSGiVersionString(); 
+        }
+        else
+        {
+            return modifiedVersion.getVersionString();
+        }
     }
 
     private VersioningState setupSession( final Properties properties, final String... versions )
@@ -805,7 +810,7 @@ public class VersioningCalculatorTest
         }
 
         @Override
-        public VersionCalculation calculate( final String groupId, final String artifactId,
+        public Version calculate( final String groupId, final String artifactId,
                                              final String originalVersion, final ManipulationSession session )
             throws ManipulationException
         {
