@@ -204,6 +204,7 @@ public class ManipulationManager
                         for ( final String module : modules )
                         {
                             logger.debug( "Found module: " + module + " in pom: " + pom );
+
                             File modPom = new File( dir, module );
                             if ( modPom.isDirectory() )
                             {
@@ -212,9 +213,7 @@ public class ManipulationManager
 
                             logger.debug( "Looking for module POM: " + modPom );
 
-                            if ( modPom.getParentFile()
-                                       .getCanonicalPath()
-                                       .startsWith( topDir ) && modPom.exists() && !seen.contains( modPom )
+                            if ( modPom.exists() && !seen.contains( modPom )
                                 && !pendingPoms.contains( modPom ) )
                             {
                                 pendingPoms.addLast( modPom );
