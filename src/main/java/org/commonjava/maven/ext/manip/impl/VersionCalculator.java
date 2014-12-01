@@ -12,15 +12,12 @@ package org.commonjava.maven.ext.manip.impl;
 
 import static org.commonjava.maven.ext.manip.util.IdUtils.gav;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.codehaus.plexus.component.annotations.Component;
 import org.codehaus.plexus.component.annotations.Requirement;
@@ -29,7 +26,6 @@ import org.commonjava.maven.ext.manip.ManipulationException;
 import org.commonjava.maven.ext.manip.model.Project;
 import org.commonjava.maven.ext.manip.resolver.GalleyAPIWrapper;
 import org.commonjava.maven.ext.manip.state.ManipulationSession;
-import org.commonjava.maven.ext.manip.state.VersionCalculation;
 import org.commonjava.maven.ext.manip.state.VersioningState;
 import org.commonjava.maven.galley.maven.GalleyMavenException;
 import org.commonjava.maven.galley.maven.model.view.meta.MavenMetadataView;
@@ -37,32 +33,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Component that calculates project version modifications, based on configuration stored in {@link VersioningState}. Snapshots may/may not be
- * preserved, and either a static or incremental (calculated) version qualifier may / may not be incorporated in the version. The calculator
- * strives for OSGi compatibility, so the use of '.' and '-' qualifier separators will vary accordingly.
- *
- * See: http://www.aqute.biz/Bnd/Versioning for an explanation of OSGi versioning.
- *
+ * Component that calculates project version modifications, based on configuration stored in {@link VersioningState}.
+ * Snapshots may/may not be preserved, and either a static or incremental (calculated) version qualifier may / may not
+ * be incorporated in the version. The calculator strives for OSGi compatibility, so the use of '.' and '-' qualifier
+ * separators will vary accordingly. See: http://www.aqute.biz/Bnd/Versioning for an explanation of OSGi versioning.
+ * 
  * @author jdcasey
  */
 @Component( role = VersionCalculator.class )
 public class VersionCalculator
 {
-    /**
-     * Used to find versions of the format 1.1.1 <separator> <suffix>.
-     * If the separator is not of the correct format (a '.') it should correct it.
-     */
-    private static final String VERSION_MATCHER = "(\\d+\\.\\d+\\.\\d+)([\\.|-][\\p{Alnum}|-|_]+)?";
-    /**
-     * Used to determine if this is a version type we can handle i.e.
-     * <numeric>.<numeric> <separator> <suffix>
-     */
-    private static final String VERSION_INV_MATCHER = "(\\d+)(\\.\\d+)?([\\.|-][\\p{Alnum}|\\-|_]+)?";
-
-    private static final String SERIAL_SUFFIX_PATTERN = "(.+)([-.])(\\d+)$";
-
-    public static final String SNAPSHOT_SUFFIX = "-SNAPSHOT";
-
     private final Logger logger = LoggerFactory.getLogger( getClass() );
 
     @Requirement
@@ -78,8 +58,9 @@ public class VersionCalculator
     }
 
     /**
-     * Calculate any project version changes for the given set of projects, and return them in a Map keyed by project GA.
-
+     * Calculate any project version changes for the given set of projects, and return them in a Map keyed by project
+     * GA.
+     * 
      * @param projects
      * @param session
      * @return Map<String, String>
@@ -89,44 +70,70 @@ public class VersionCalculator
                                                            final ManipulationSession session )
         throws ManipulationException
     {
-        final Map<String, VersionCalculation> calculationsByGA = new HashMap<String, VersionCalculation>();
-        boolean incremental = false;
+        final VersioningState state = session.getState( VersioningState.class );
+        final Map<String, String> versionsByGA = new HashMap<String, String>();
+        final Map<String, Version> versionObjsByGA = new HashMap<String, Version>();
+        final Set<String> versionSet = new HashSet<String>();
+
         for ( final Project project : projects )
         {
             final String originalVersion = project.getVersion();
+            String modifiedVersionString;
 
-            final VersionCalculation modifiedVersion =
+            final Version modifiedVersion =
                 calculate( project.getGroupId(), project.getArtifactId(), originalVersion, session );
+            versionObjsByGA.put( gav( project ), modifiedVersion );
 
-            if ( modifiedVersion.hasCalculation() )
+            if ( state.osgi() )
             {
-                incremental = incremental || modifiedVersion.isIncremental();
-                calculationsByGA.put( gav( project ), modifiedVersion );
+                modifiedVersionString = modifiedVersion.getOSGiVersionString();
+            }
+            else
+            {
+                modifiedVersionString = modifiedVersion.getVersionString();
+            }
+
+            if ( modifiedVersion.hasBuildNumber() )
+            {
+                versionSet.add( modifiedVersionString );
             }
         }
 
-        if ( incremental )
+        // Have to loop through the versions a second time to make sure that the versions are in sync
+        // between projects in the reactor.
+        for ( final Project project : projects )
         {
-            int maxQualifier = 1;
-            for ( final VersionCalculation calc : calculationsByGA.values() )
+            final String originalVersion = project.getVersion();
+            String modifiedVersionString;
+
+            final Version modifiedVersion = versionObjsByGA.get( gav( project ) );
+
+            int buildNumber = modifiedVersion.findHighestMatchingBuildNumber( modifiedVersion, versionSet );
+
+            // If the buildNumber is greater than zero, it means we found a match and have to 
+            // set the build number to avoid version conflicts.
+            if ( buildNumber > 0 )
             {
-                final int i = calc.getIncrementalQualifier();
-                maxQualifier = maxQualifier > i ? maxQualifier : i;
+                modifiedVersion.setBuildNumber( Integer.toString( buildNumber ) );
             }
 
-            for ( final VersionCalculation calc : calculationsByGA.values() )
+            if ( state.osgi() )
             {
-                calc.setIncrementalQualifier( maxQualifier );
+                modifiedVersionString = modifiedVersion.getOSGiVersionString();
             }
-        }
+            else
+            {
+                modifiedVersionString = modifiedVersion.getVersionString();
+            }
 
-        final Map<String, String> versionsByGA = new HashMap<String, String>();
-        for ( final Map.Entry<String, VersionCalculation> entry : calculationsByGA.entrySet() )
-        {
-            final String modifiedVersion = entry.getValue()
-                                                .renderVersion();
-            logger.debug( entry.getKey() + " has updated version: {}. Marking for rewrite.", modifiedVersion );
-            versionsByGA.put( entry.getKey(), modifiedVersion );
+            versionSet.add( modifiedVersionString );
+            logger.debug( gav( project ) + " has updated version: {}. Marking for rewrite.", modifiedVersionString );
+
+            if ( !originalVersion.equals( modifiedVersionString ) )
+            {
+                versionsByGA.put( gav( project ), modifiedVersionString );
+            }
+
         }
 
         return versionsByGA;
@@ -134,7 +141,7 @@ public class VersionCalculator
 
     /**
      * Calculate the version modification for a given GAV.
-     *
+     * 
      * @param groupId
      * @param artifactId
      * @param version
@@ -142,280 +149,46 @@ public class VersionCalculator
      * @return VersionCalculation
      * @throws ManipulationException
      */
-    protected VersionCalculation calculate( final String groupId, final String artifactId,
-                                            final String version, final ManipulationSession session )
+    protected Version calculate( final String groupId, final String artifactId, final String version,
+                                 final ManipulationSession session )
         throws ManipulationException
     {
         final VersioningState state = session.getState( VersioningState.class );
 
-        String originalVersion = version;
-
-        if ( state.osgi() )
-        {
-            // OSGi fixup for versions like 1.2.GA or 1.2 (too few parts)
-            // and 1.2-GA or 1.2.0-GA (wrong separator).
-            originalVersion = calculateOSGiBase (originalVersion);
-        }
-        String baseVersion = originalVersion;
-
-        boolean snapshot = false;
-        // If we're building a snapshot, make sure the resulting version ends
-        // in "-SNAPSHOT"
-        if ( baseVersion.endsWith( SNAPSHOT_SUFFIX ) )
-        {
-            snapshot = true;
-            baseVersion = baseVersion.substring( 0, baseVersion.length() - SNAPSHOT_SUFFIX.length() );
-        }
-
         final String incrementalSuffix = state.getIncrementalSerialSuffix();
         final String staticSuffix = state.getSuffix();
 
-        logger.debug( "Got the following versions:\n  Original version: " + originalVersion + "\n  Base version: "
-                        + baseVersion );
-        logger.debug( "Got the following version suffixes:\n  Static: " + staticSuffix + "\n  Incremental: "
-            + incrementalSuffix );
+        logger.debug( "Got the following version:\n  Original version: " + version );
+        logger.debug( "Got the following version suffixes:\n  Static: " + staticSuffix + "\n  Incremental: " +
+            incrementalSuffix );
 
-        final VersionCalculation vc = new VersionCalculation( originalVersion, baseVersion );
+        Version versionObj = new Version( version );
+
         if ( staticSuffix != null )
         {
-            calculateStatic( vc, baseVersion, snapshot, staticSuffix, groupId, artifactId, originalVersion, state,
-                             session );
+            versionObj.appendQualifierSuffix( staticSuffix );
+            if ( !state.preserveSnapshot() )
+            {
+                versionObj.setSnapshot( false );
+            }
         }
         else if ( incrementalSuffix != null )
         {
-            calculateIncremental( vc, baseVersion, snapshot, incrementalSuffix, groupId, artifactId, originalVersion,
-                                  state, session );
-        }
+            final Set<String> versionCandidates = new HashSet<String>();
+            versionCandidates.add( versionObj.getVersionString() );
+            versionCandidates.addAll( getMetadataVersions( groupId, artifactId, session ) );
 
-        // tack -SNAPSHOT back on if necessary...
-        vc.setSnapshot( state.preserveSnapshot() && snapshot );
-
-        return vc;
-    }
-
-    /**
-     * Check that the version is OSGi compliant and adjust it if possible
-     * if not.
-     * @param version
-     * @return
-     */
-    private String calculateOSGiBase( String version )
-    {
-        StringBuffer result = new StringBuffer ();
-
-        Pattern pattern = Pattern.compile(VERSION_MATCHER);
-        Matcher match = pattern.matcher(version);
-
-        if ( ! match.matches () )
-        {
-            match.usePattern (Pattern.compile (VERSION_INV_MATCHER));
-            if ( ! match.matches() )
+            versionObj.appendQualifierSuffix( incrementalSuffix );
+            int highestBuildNum = versionObj.findHighestMatchingBuildNumber( versionObj, versionCandidates );
+            ++highestBuildNum;
+            versionObj.setBuildNumber( Integer.toString( highestBuildNum ) );
+            if ( !state.preserveSnapshot() )
             {
-                // Just fallback - we don't know how to handle this.
-                logger.warn( "Unknown format " + version + "; unable to format to OSGi versioning");
-                return version;
-            }
-
-            result.append (match.group (1));
-            if (match.group (2) != null)
-            {
-                result.append( match.group(2) );
-            }
-            else
-            {
-                result.append (".0");
-            }
-            result.append (".0");
-            if (match.group (match.groupCount ()) != null)
-            {
-                if (match.group (match.groupCount ()).equals( "-SNAPSHOT" ))
-                {
-                    result.append (match.group (match.groupCount ()));
-                }
-                else
-                {
-                    result.append ("." + match.group (match.groupCount ()).substring (1));
-                }
-            }
-        }
-        else
-        {
-            result.append (match.group (1));
-
-            if (match.group (match.groupCount ()) != null)
-            {
-                if (match.group (match.groupCount ()).equals( "-SNAPSHOT" ))
-                {
-                    result.append (match.group (match.groupCount ()));
-                }
-                else
-                {
-                    result.append ("." + match.group (match.groupCount ()).substring (1));
-                }
-            }
-
-        }
-        logger.debug( "Matched group " + match.group( 1 ) + " and " + match.group (match.groupCount ())
-                      + " and modified baseVersion is " + result);
-
-        return result.toString();
-    }
-
-    private void calculateStatic( final VersionCalculation vc, final String baseVersion,
-                                                final boolean snapshot, final String suffix, final String groupId,
-                                                final String artifactId, final String originalVersion,
-                                                final VersioningState state, final ManipulationSession session )
-    {
-        final Pattern serialSuffixPattern = Pattern.compile( SERIAL_SUFFIX_PATTERN );
-        final Matcher suffixMatcher = serialSuffixPattern.matcher( suffix );
-
-        String suffixBase = suffix;
-        String sep = "-";
-
-        if ( suffixMatcher.matches() )
-        {
-            logger.debug( "Treating suffix {} as serial.", suffix );
-
-            // the "redhat" in "redhat-1"
-            suffixBase = suffixMatcher.group( 1 );
-            sep = suffixMatcher.group( 2 );
-            if ( sep == null )
-            {
-                sep = "-";
+                versionObj.setSnapshot( false );
             }
         }
 
-        trimBaseVersion( vc, baseVersion, suffixBase );
-
-        vc.setVersionSuffix( suffix );
-    }
-
-    private String trimBaseVersion( final VersionCalculation vc, String baseVersion, final String suffixBase )
-    {
-        final int idx = baseVersion.indexOf( suffixBase );
-
-        if ( idx > 1 )
-        {
-            // trim the old suffix off.
-            final char baseSep = baseVersion.charAt( idx - 1 );
-            baseVersion = baseVersion.substring( 0, idx - 1 );
-            vc.setBaseVersionSeparator( Character.toString( baseSep ) );
-            vc.setBaseVersion( baseVersion );
-            logger.debug( "Trimmed version (without pre-existing suffix): " + baseVersion
-                + " with base-version separator: " + baseSep );
-        }
-
-        if ( baseVersion.matches( ".+[-.]\\d+" ) )
-        {
-            vc.setBaseVersionSeparator( "." );
-        }
-
-        return baseVersion;
-    }
-
-    private void calculateIncremental( final VersionCalculation vc, String baseVersion,
-                                                     final boolean snapshot, final String incrementalSerialSuffix,
-                                                     final String groupId, final String artifactId,
-                                                     final String originalVersion, final VersioningState state,
-                                                     final ManipulationSession session )
-        throws ManipulationException
-    {
-        logger.debug( "Using incremental suffix: " + incrementalSerialSuffix );
-
-        String suffixBase = incrementalSerialSuffix;
-        String sep = "-";
-
-        final Matcher suffixMatcher = Pattern.compile( SERIAL_SUFFIX_PATTERN )
-                                             .matcher( incrementalSerialSuffix );
-        if ( suffixMatcher.matches() )
-        {
-            logger.debug( "Treating suffix {} as serial.", incrementalSerialSuffix );
-
-            // the "redhat" in "redhat-1"
-            suffixBase = suffixMatcher.group( 1 );
-            sep = suffixMatcher.group( 2 );
-            if ( sep == null )
-            {
-                sep = "-";
-            }
-        }
-
-        baseVersion = trimBaseVersion( vc, baseVersion, suffixBase );
-
-        logger.debug( "Resolving suffixes already found in metadata to determine increment base." );
-
-        vc.setVersionSuffix( suffixBase );
-
-        final List<String> versionCandidates = new ArrayList<String>();
-        versionCandidates.add( originalVersion );
-        versionCandidates.addAll( getMetadataVersions( groupId, artifactId, session ) );
-
-        int maxSerial = 0;
-
-        final String candidatePatternStr = suffixBase + sep + "(\\d+)$";
-        logger.debug( "Using pattern: '{}' to find compatible versions from metadata.", candidatePatternStr );
-        final Pattern candidateSuffixPattern = Pattern.compile( candidatePatternStr );
-        for ( final String version : versionCandidates )
-        {
-            final Matcher candidateSuffixMatcher = candidateSuffixPattern.matcher( version );
-
-            if ( candidateSuffixMatcher.find() )
-            {
-                final String wholeSuffix = candidateSuffixMatcher.group();
-                logger.debug( "Group 0 of serial-suffix matcher is: '" + wholeSuffix + "'" );
-                final int baseIdx = version.indexOf( wholeSuffix );
-
-                // Need room for at least a character in the base-version, plus a separator like '-'
-                if ( baseIdx < 2 )
-                {
-                    logger.debug( "Ignoring invalid version: '" + version
-                        + "' (seems to be naked version suffix with no base)." );
-                    continue;
-                }
-
-                final String base = version.substring( 0, baseIdx - 1 );
-                logger.debug( "Candidate version base is: '{}'", base );
-                String trimmedBaseVersion = trimVersionZeros( baseVersion );
-                String trimmedBase = trimVersionZeros( base );
-                if ( !trimmedBaseVersion.equals( trimmedBase ) )
-                {
-                    logger.debug( "Ignoring irrelevant version: '" + version + "' ('" + base
-                        + "' doesn't match on base-version: '" + baseVersion + "')." );
-                    continue;
-                }
-
-                // grab the old serial number.
-                final String serialStr = candidateSuffixMatcher.group( 1 );
-                logger.debug( "Group 1 of serial-suffix matcher is: '" + serialStr + "'" );
-                final int serial = serialStr == null ? 0 : Integer.parseInt( serialStr );
-                if ( serial > maxSerial )
-                {
-                    logger.debug( "new max serial number: " + serial + " (previous was: " + maxSerial + ")" );
-                    maxSerial = serial;
-                }
-            }
-
-            vc.setSuffixSeparator( sep );
-            vc.setIncrementalQualifier( maxSerial + 1 );
-        }
-    }
-
-    /**
-     * Remove irrelevant zeros from a version string.
-     * This is useful when trying to match two version strings where one has zeros
-     * in the minor and/or micro fields, for example 1.2.0 and 1.2.
-     * 
-     * @param version
-     * @return
-     */
-    public static String trimVersionZeros(String version) 
-    {
-        String newVersion = version ;
-        while ( newVersion.endsWith( ".0" ) )
-        {
-            newVersion = newVersion.substring( 0, newVersion.lastIndexOf( ".0" ) );
-        }
-        return newVersion.toString();
+        return versionObj;
     }
 
     /**
