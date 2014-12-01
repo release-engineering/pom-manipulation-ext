@@ -542,6 +542,38 @@ public class VersioningCalculatorTest
     }
 
     @Test
+    public void incrementExistingSerialSuffix_InvalidOSGi()
+        throws Exception
+    {
+        final Properties props = new Properties();
+
+        props.setProperty( VersioningState.INCREMENT_SERIAL_SUFFIX_SYSPROP, "foo" );
+        setupSession( props, "1.2.0-GA-foo-1" );
+
+        final String origVer = "1.2.0-GA-foo-1";
+        final String updatedVer = "1.2.0.GA-foo-2";
+
+        final String result = calculate( origVer );
+        assertThat( result, equalTo( updatedVer ) );
+    }
+
+    @Test
+    public void incrementExistingSerialSuffix_InvalidOSGi_SNAPSHOT()
+        throws Exception
+    {
+        final Properties props = new Properties();
+
+        props.setProperty( VersioningState.INCREMENT_SERIAL_SUFFIX_SYSPROP, "foo" );
+        setupSession( props );
+
+        final String origVer = "4.3.3-foo-SNAPSHOT";
+        final String updatedVer = "4.3.3.foo-1";
+
+        final String result = calculate( origVer );
+        assertThat( result, equalTo( updatedVer ) );
+    }
+
+    @Test
     public void incrementExistingSerialSuffix_UsingRepositoryMetadata()
         throws Exception
     {
