@@ -645,4 +645,15 @@ public class Version
         }
         return highestBuildNum;
     }
+
+
+    public String toString()
+    {
+        StringBuffer buffer = new StringBuffer();
+        buffer.append( "Version: " );
+        buffer.append( getVersionString() );
+        buffer.append( ", OSGi Version: " );
+        buffer.append( getOSGiVersionString() );
+        return buffer.toString();
+    }
 }

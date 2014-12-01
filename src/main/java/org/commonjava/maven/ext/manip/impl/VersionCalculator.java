@@ -109,7 +109,13 @@ public class VersionCalculator
             final Version modifiedVersion = versionObjsByGA.get( gav( project ) );
 
             int buildNumber = modifiedVersion.findHighestMatchingBuildNumber( modifiedVersion, versionSet );
-            modifiedVersion.setBuildNumber( Integer.toString( buildNumber ) );
+
+            // If the buildNumber is greater than zero, it means we found a match and have to 
+            // set the build number to avoid version conflicts.
+            if ( buildNumber > 0 )
+            {
+                modifiedVersion.setBuildNumber( Integer.toString( buildNumber ) );
+            }
 
             if ( state.osgi() )
             {
@@ -121,7 +127,7 @@ public class VersionCalculator
             }
 
             versionSet.add( modifiedVersionString );
-            logger.debug( gav( project ) + " has updated version: {}. Marking for rewrite.", modifiedVersion );
+            logger.debug( gav( project ) + " has updated version: {}. Marking for rewrite.", modifiedVersionString );
 
             if ( !originalVersion.equals( modifiedVersionString ) )
             {
