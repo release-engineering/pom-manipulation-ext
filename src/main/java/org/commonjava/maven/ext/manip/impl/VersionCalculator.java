@@ -37,7 +37,7 @@ import org.slf4j.LoggerFactory;
  * Snapshots may/may not be preserved, and either a static or incremental (calculated) version qualifier may / may not
  * be incorporated in the version. The calculator strives for OSGi compatibility, so the use of '.' and '-' qualifier
  * separators will vary accordingly. See: http://www.aqute.biz/Bnd/Versioning for an explanation of OSGi versioning.
- * 
+ *
  * @author jdcasey
  */
 @Component( role = VersionCalculator.class )
@@ -60,7 +60,7 @@ public class VersionCalculator
     /**
      * Calculate any project version changes for the given set of projects, and return them in a Map keyed by project
      * GA.
-     * 
+     *
      * @param projects
      * @param session
      * @return Map<String, String>
@@ -110,7 +110,7 @@ public class VersionCalculator
 
             int buildNumber = modifiedVersion.findHighestMatchingBuildNumber( modifiedVersion, versionSet );
 
-            // If the buildNumber is greater than zero, it means we found a match and have to 
+            // If the buildNumber is greater than zero, it means we found a match and have to
             // set the build number to avoid version conflicts.
             if ( buildNumber > 0 )
             {
@@ -141,7 +141,7 @@ public class VersionCalculator
 
     /**
      * Calculate the version modification for a given GAV.
-     * 
+     *
      * @param groupId
      * @param artifactId
      * @param version
@@ -157,12 +157,23 @@ public class VersionCalculator
 
         final String incrementalSuffix = state.getIncrementalSerialSuffix();
         final String staticSuffix = state.getSuffix();
+        final String override = state.getOverride();
 
         logger.debug( "Got the following version:\n  Original version: " + version );
         logger.debug( "Got the following version suffixes:\n  Static: " + staticSuffix + "\n  Incremental: " +
             incrementalSuffix );
+        logger.debug( "Got the following override:\n  Version: " + override);
 
-        Version versionObj = new Version( version );
+        Version versionObj;
+
+        if ( override != null )
+        {
+            versionObj = new Version( override );
+        }
+        else
+        {
+            versionObj = new Version( version );
+        }
 
         if ( staticSuffix != null )
         {

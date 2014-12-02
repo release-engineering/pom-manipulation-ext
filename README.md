@@ -14,6 +14,7 @@ This extension combines many of the features of [VMan](https://github.com/jdcase
 - [Version manipulation](#version-manipulation)
     - [Automatic version increment](#automatic-version-increment)
     - [Manual version suffix](#manual-version-suffix)
+    - [Version override](#version-override)
     - [Snapshot Detection](#snapshot-detection)
     - [OSGi Compliance](#osgi-compliance)
 - [Repository And Reporting Removal](#repository-and-reporting-removal)
@@ -71,6 +72,18 @@ The version suffix to be appended to the current project can be manually selecte
     mvn install -Dversion.suffix=release-1
 
 If the current version of the project is "1.2.0.GA", the new version set during the build will be "1.2.0.GA-release-1".
+
+### Version override
+
+The version can be forcibly overridden by using the property **version.override**
+
+    mvn install -Dversion.override=6.1.0.Final
+
+If the current version of the project is "6.2.0", the new version set during the build will be "6.1.0.Final". A combination of properties may be used e.g.
+
+    mvn install -Dversion.override=6.1.0.Final -Dversion.suffix=rebuild-1
+
+Using the above example, this would result in the version being "6.1.0.Final-rebuild-1"
 
 ### Snapshot Detection
 
