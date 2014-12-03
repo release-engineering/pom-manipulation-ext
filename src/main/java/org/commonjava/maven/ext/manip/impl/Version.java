@@ -124,7 +124,7 @@ public class Version
     /**
      * Parse a version string into its component parts (major, minor, micro, qualifier). By default will split the
      * String based on ".", "-", and "_".
-     * 
+     *
      * @param version
      * @return
      */
@@ -153,7 +153,7 @@ public class Version
     /**
      * Attempt to find where the qualifier portion of the version string begins. Will return the location of either the
      * first non-numeric char or the character after the third delimiter.
-     * 
+     *
      * @param version
      * @return index of the start of the qualifier (version.length() if no qualifier was found)
      */
@@ -186,7 +186,7 @@ public class Version
 
     /**
      * Parse the mmm (major, minor, micro) portions of the version string
-     * 
+     *
      * @param mmm The numeric portion of the version string before the qualifier
      */
     private void parseMMM( String mmm )
@@ -220,7 +220,7 @@ public class Version
 
     /**
      * Parses the qualifier into the format &gt;qualifierBase&lt;-&gt;buildnumber&lt;-&gt;snapshot&lt;.
-     * 
+     *
      * @param qualifier
      */
     private void parseQualifier( String qualifier )
@@ -241,7 +241,7 @@ public class Version
 
     /**
      * Remove any delimiters from the end of the string
-     * 
+     *
      * @param partialVersionString
      * @return
      */
@@ -270,7 +270,7 @@ public class Version
 
     /**
      * Check if all the characters in the string are digits
-     * 
+     *
      * @param str
      * @return
      */
@@ -286,7 +286,7 @@ public class Version
 
     /**
      * Checks if the original version string is a valid OSGi version.
-     * 
+     *
      * @return true if the version is valid
      */
     public boolean isValidOSGi()
@@ -302,7 +302,7 @@ public class Version
 
     /**
      * Assumed to be "0" if no minor version is specified in the string
-     * 
+     *
      * @return
      */
     public String getMinorVersion()
@@ -312,7 +312,7 @@ public class Version
 
     /**
      * Assumed to be "0" if no micro version is specified in the string
-     * 
+     *
      * @return
      */
     public String getMicroVersion()
@@ -322,7 +322,7 @@ public class Version
 
     /**
      * Update the qualifier by combining the qualifierBase, qualifierSuffix, and build number
-     * 
+     *
      * @return
      */
     private void updateQualifier()
@@ -359,7 +359,7 @@ public class Version
 
     /**
      * Get the original version string that was used to create this version object.
-     * 
+     *
      * @return the original version string
      */
     public String getOriginalVersion()
@@ -369,7 +369,7 @@ public class Version
 
     /**
      * Get original unmodified major, minor, micro portion of the version string
-     * 
+     *
      * @return
      */
     public String getOriginalMMM()
@@ -379,7 +379,7 @@ public class Version
 
     /**
      * Generate the qualifier by combining the qualifierBase, qualifierSuffix, and build number
-     * 
+     *
      * @return The qualifier part of the version string (an empty string if there is no qualifier)
      */
     public String getQualifier()
@@ -444,7 +444,7 @@ public class Version
     /**
      * Get the major, minor, micro version string and use zeros if the minor or micro were not set in the original
      * version
-     * 
+     *
      * @return
      */
     private String getThreePartMMM()
@@ -466,7 +466,7 @@ public class Version
 
     /**
      * Replaces "." delimiters with a "-";
-     * 
+     *
      * @return
      */
     private String getOSGiQualifier()
@@ -500,7 +500,7 @@ public class Version
 
     /**
      * Sets the qualifier suffix to the current version. If the suffix matches the existing one, does nothing
-     * 
+     *
      * @param partialSuffix The qualifier suffix to append. This can be a simple string like "foo", or it can optionally
      *            include a build number, for example "foo-1", which will automatically be set as the build number for
      *            this version.
@@ -556,7 +556,7 @@ public class Version
         {
             this.buildNumber = buildNumber;
         }
-        
+
         if ( SNAPSHOT_SUFFIX.equalsIgnoreCase( snapshot ) )
         {
             this.snapshot = SNAPSHOT_SUFFIX;
@@ -569,7 +569,7 @@ public class Version
     /**
      * Appends a build number to the qualifier. The build number should be a string of digits, or null if the build
      * number should be removed.
-     * 
+     *
      * @param buildNumber
      */
     public void setBuildNumber( String buildNumber )
@@ -583,7 +583,7 @@ public class Version
 
     /**
      * Sets the snapshot to "SNAPSHOT" if true, otherwise sets to null
-     * 
+     *
      * @param snapshot
      */
     public void setSnapshot( boolean snapshot )
@@ -602,7 +602,7 @@ public class Version
     /**
      * Matches a version object to versions in a set by comparing the non build number portion of the string. Then find
      * which of the matching versions has the highest build number and is therefore the latest version.
-     * 
+     *
      * @param version
      * @param versionSet
      * @return The highest build number, or 0 if no matching build numbers are found.
@@ -647,6 +647,7 @@ public class Version
     }
 
 
+    @Override
     public String toString()
     {
         StringBuffer buffer = new StringBuffer();

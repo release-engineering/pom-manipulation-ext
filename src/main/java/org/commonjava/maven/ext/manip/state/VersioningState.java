@@ -32,6 +32,8 @@ public class VersioningState
 
     public static final String VERSION_OSGI_SYSPROP = "version.osgi";
 
+    public static final String VERSION_OVERRIDE_SYSPROP = "version.override";
+
     private Map<String, String> versioningChanges;
 
     private final String suffix;
@@ -42,12 +44,15 @@ public class VersioningState
 
     private final boolean osgi;
 
+    private final String override;
+
     public VersioningState( final Properties userProps )
     {
         suffix = userProps.getProperty( VERSION_SUFFIX_SYSPROP );
         incrementSerialSuffix = userProps.getProperty( INCREMENT_SERIAL_SUFFIX_SYSPROP );
         preserveSnapshot = Boolean.parseBoolean( userProps.getProperty( VERSION_SUFFIX_SNAPSHOT_SYSPROP ) );
         osgi = Boolean.parseBoolean( userProps.getProperty( VERSION_OSGI_SYSPROP, "true" ) );
+        override = userProps.getProperty( VERSION_OVERRIDE_SYSPROP );
     }
 
     public void setVersioningChanges( final Map<String, String> versioningChanges )
@@ -75,6 +80,11 @@ public class VersioningState
         return preserveSnapshot;
     }
 
+    public String getOverride()
+    {
+        return override;
+    }
+
     /**
      * True if we should make the versions OSGi compliant
      * @return
@@ -94,7 +104,7 @@ public class VersioningState
     @Override
     public boolean isEnabled()
     {
-        return incrementSerialSuffix != null || suffix != null;
+        return incrementSerialSuffix != null || suffix != null || override != null;
     }
 
 }
