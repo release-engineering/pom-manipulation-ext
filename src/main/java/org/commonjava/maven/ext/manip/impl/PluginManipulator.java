@@ -222,34 +222,40 @@ public class PluginManipulator
                 final ProjectRef groupIdArtifactId = new ProjectRef(override.getGroupId(), override.getArtifactId());
                 final Plugin plugin = plugins.get( index );
 
-                if (pluginMgmt && plugin.getConfiguration() == null)
+                if ( override.getConfiguration() != null)
                 {
-                    plugin.setConfiguration( override.getConfiguration() );
-                    logger.debug( "Altered plugin configuration: " + groupIdArtifactId + "=" + plugin.getConfiguration());
+                    if (pluginMgmt && plugin.getConfiguration() == null)
+                    {
+                        plugin.setConfiguration( override.getConfiguration() );
+                        logger.debug( "Altered plugin configuration: " + groupIdArtifactId + "=" + plugin.getConfiguration());
+                    }
+                    else if (pluginMgmt && plugin.getConfiguration() != null)
+                    {
+                        logger.debug( "Existing plugin configuration: " + plugin.getConfiguration());
+
+                        if ( ! (plugin.getConfiguration() instanceof Xpp3Dom) || ! (override.getConfiguration() instanceof Xpp3Dom))
+                        {
+                            throw new ManipulationException ("Incorrect DOM type " + plugin.getConfiguration().getClass().getName() +
+                                                             " and" + override.getConfiguration().getClass().getName());
+                        }
+
+                        if ( configPrecedence == Precedence.REMOTE)
+                        {
+                            plugin.setConfiguration ( Xpp3DomUtils.mergeXpp3Dom
+                                                      ((Xpp3Dom)override.getConfiguration(), (Xpp3Dom)plugin.getConfiguration() ) );
+                        }
+                        else if ( configPrecedence == Precedence.LOCAL )
+                        {
+                            plugin.setConfiguration ( Xpp3DomUtils.mergeXpp3Dom
+                                                      ((Xpp3Dom)plugin.getConfiguration(), (Xpp3Dom)override.getConfiguration() ) );
+                        }
+                        logger.debug( "Altered plugin configuration: " + groupIdArtifactId + "=" + plugin.getConfiguration());
+                    }
                 }
-                else if (pluginMgmt && plugin.getConfiguration() != null)
+                else
                 {
-                    logger.debug( "Existing plugin configuration: " + plugin.getConfiguration());
-
-                    if ( ! (plugin.getConfiguration() instanceof Xpp3Dom) || ! (override.getConfiguration() instanceof Xpp3Dom))
-                    {
-                        throw new ManipulationException ("Incorrect DOM type " + plugin.getConfiguration().getClass().getName() +
-                                                         " and" + override.getConfiguration().getClass().getName());
-                    }
-
-                    if ( configPrecedence == Precedence.REMOTE)
-                    {
-                        plugin.setConfiguration ( Xpp3DomUtils.mergeXpp3Dom
-                           ((Xpp3Dom)override.getConfiguration(), (Xpp3Dom)plugin.getConfiguration() ) );
-                    }
-                    else if ( configPrecedence == Precedence.LOCAL )
-                    {
-                        plugin.setConfiguration ( Xpp3DomUtils.mergeXpp3Dom
-                           ((Xpp3Dom)plugin.getConfiguration(), (Xpp3Dom)override.getConfiguration() ) );
-                    }
-                    logger.debug( "Altered plugin configuration: " + groupIdArtifactId + "=" + plugin.getConfiguration());
+                    logger.debug ("No remote configuration to inject from " + override.toString());
                 }
-
                 // Always force the version in a pluginMgmt block or set the version if there is an existing
                 // one in build/plugins section.
                 if ( pluginMgmt || plugin.getVersion() != null )
