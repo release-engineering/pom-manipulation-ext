@@ -646,6 +646,18 @@ public class Version
         return highestBuildNum;
     }
 
+    /**
+     * Get the build number as an integer instead of a string for each numeric comparison
+     * @return
+     */
+    public int getIntegerBuildNumber()
+    {
+        if ( this.isEmpty( buildNumber ) )
+        {
+            return 0;
+        }
+        return Integer.parseInt( buildNumber );
+    }
 
     @Override
     public String toString()
