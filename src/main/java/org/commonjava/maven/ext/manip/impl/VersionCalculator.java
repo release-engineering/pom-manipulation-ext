@@ -185,14 +185,17 @@ public class VersionCalculator
         }
         else if ( incrementalSuffix != null )
         {
+            // Find matching version strings in the remote repo and increment to the next
+            // available version
             final Set<String> versionCandidates = new HashSet<String>();
-            versionCandidates.add( versionObj.getVersionString() );
             versionCandidates.addAll( getMetadataVersions( groupId, artifactId, session ) );
-
             versionObj.appendQualifierSuffix( incrementalSuffix );
-            int highestBuildNum = versionObj.findHighestMatchingBuildNumber( versionObj, versionCandidates );
-            ++highestBuildNum;
-            versionObj.setBuildNumber( Integer.toString( highestBuildNum ) );
+            int highestRemoteBuildNum = versionObj.findHighestMatchingBuildNumber( versionObj, versionCandidates );
+            ++highestRemoteBuildNum;
+            if ( highestRemoteBuildNum > versionObj.getIntegerBuildNumber() )
+            {
+                versionObj.setBuildNumber( Integer.toString( highestRemoteBuildNum ) );
+            }
             if ( !state.preserveSnapshot() )
             {
                 versionObj.setSnapshot( false );

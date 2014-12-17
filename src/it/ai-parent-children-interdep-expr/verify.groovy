@@ -11,7 +11,7 @@ def g = pom.groupId.text()
 def a = pom.artifactId.text()
 
 System.out.println( "POM Version: ${v}" )
-assert v.endsWith( '.redhat-2' )
+assert v.endsWith( '.redhat-1' )
 
 def repodir = new File( localRepo, "${g.replace('.', '/')}/${a}/${v}" )
 def repopom = new File( repodir, "${a}-${v}.pom" )
@@ -21,7 +21,7 @@ assert repopom.exists()
 def managedDeps = pom.dependencyManagement.dependencies.children
 managedDeps.each {
   System.out.println( "Checking managed dependency: ${it.groupId.text()}:${it.artifactId.text()}:${it.version.text()}" )
-  assert it.version.text().endsWith('.redhat-2')
+  assert it.version.text().endsWith('.redhat-1')
 }
 
 def children = ['child1', 'child2']
@@ -40,7 +40,7 @@ children.each() {
   a = pom.artifactId.text()
 
   System.out.println( "POM Version: ${v}" )
-  assert v.endsWith( '.redhat-2' )
+  assert v.endsWith( '.redhat-1' )
 
   def jar = new File(basedir, "${it}/target/${a}-${v}.jar" )
   System.out.println( "Checking for jar: ${jar.getAbsolutePath()}")

@@ -499,7 +499,7 @@ public class VersioningCalculatorTest
 
         final String v = "1.2.0.GA";
         final String os = "-foo-1";
-        final String ns = "foo-2";
+        final String ns = "foo-1";
 
         final String result = calculate( v + os );
         assertThat( result, equalTo( v + "-" + ns ) );
@@ -512,14 +512,60 @@ public class VersioningCalculatorTest
         final Properties props = new Properties();
 
         props.setProperty( VersioningState.INCREMENT_SERIAL_SUFFIX_SYSPROP, "foo-0" );
-        setupSession( props );
+        setupSession( props, "1.2.0.foo-2" );
 
         final String v = "1.2.0";
         final String os = ".foo-1";
-        final String ns = "foo-2";
+        final String ns = "foo-3";
 
         final String result = calculate( v + os );
         assertThat( result, equalTo( v + "." + ns ) );
+    }
+
+    @Test
+    public void incrementExistingSerialSuffix3()
+        throws Exception
+    {
+        final Properties props = new Properties();
+
+        props.setProperty( VersioningState.INCREMENT_SERIAL_SUFFIX_SYSPROP, "foo" );
+        setupSession( props, "1.2.0-foo-1", "1.2.0-foo-2" );
+
+        final String v = "1.2.0.foo-3";
+
+        final String result = calculate( v );
+        assertThat( result, equalTo( v ) );
+    }
+
+    @Test
+    public void incrementExistingSerialSuffix4()
+        throws Exception
+    {
+        final Properties props = new Properties();
+
+        props.setProperty( VersioningState.INCREMENT_SERIAL_SUFFIX_SYSPROP, "foo" );
+        setupSession( props, "1.2.0-foo-1", "1.2.0-foo-2" );
+
+        final String v = "1.2.0.foo-4";
+
+        final String result = calculate( v );
+        assertThat( result, equalTo( v ) );
+    }
+
+    @Test
+    public void incrementExistingSerialSuffix5()
+        throws Exception
+    {
+        final Properties props = new Properties();
+
+        props.setProperty( VersioningState.INCREMENT_SERIAL_SUFFIX_SYSPROP, "foo" );
+        setupSession( props, "1.2.0-foo-1", "1.2.0-foo-4" );
+
+        final String origVersion = "1.2.0.foo-2";
+        final String newVersion = "1.2.0.foo-5";
+
+        final String result = calculate( origVersion );
+        assertThat( result, equalTo( newVersion ) );
     }
 
     @Test
@@ -692,7 +738,7 @@ public class VersioningCalculatorTest
         assertThat( result, equalTo( v + "." + ns ) );
     }
 
-     @Test
+    @Test
     public void incrementExistingSerialSuffix_Property()
         throws Exception
     {
@@ -703,7 +749,7 @@ public class VersioningCalculatorTest
 
         final String v = "${property}";
         final String os = "-foo-1";
-        final String ns = "foo-2";
+        final String ns = "foo-1";
 
         final String result = calculate( v + os );
         assertThat( result, equalTo( v + "-" + ns ) );
