@@ -489,6 +489,24 @@ public class VersioningCalculatorTest
     }
 
     @Test
+    public void applySerialSuffix_InvalidOSGi()
+        throws Exception
+    {
+        final Properties props = new Properties();
+
+        final String origVersion = "1.2.3.4.Final";
+        final String suffix = "foo-1";
+        final String newVersion = "1.2.3.4-Final-foo-1";
+
+        props.setProperty( VersioningState.VERSION_SUFFIX_SYSPROP, suffix );
+        setupSession( props );
+
+
+        final String result = calculate( origVersion );
+        assertThat( result, equalTo( newVersion ) );
+    }
+
+    @Test
     public void incrementExistingSerialSuffix()
         throws Exception
     {
