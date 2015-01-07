@@ -54,6 +54,12 @@ public class VersionTest
         assertThat( version.getMinorVersion(), equalTo( "01" ) );
         assertThat( version.getMicroVersion(), equalTo( "0" ) );
         assertThat( version.getQualifier(), equalTo( "beta2_SNAPSHOT_HELLO-1" ) );
+
+        version = new Version("1.2.3.4.Final-X");
+        assertThat( version.getMajorVersion(), equalTo( "1" ) );
+        assertThat( version.getMinorVersion(), equalTo( "2" ) );
+        assertThat( version.getMicroVersion(), equalTo( "3" ) );
+        assertThat( version.getQualifier(), equalTo( "4.Final-X" ) );
     }
 
     @Test
@@ -195,6 +201,10 @@ public class VersionTest
         version = new Version("1.2.0-SNAPSHOT");
         version.appendQualifierSuffix( "jboss-2" );
         assertThat( version.getOSGiVersionString(), equalTo( "1.2.0.jboss-2-SNAPSHOT" ) );
+
+        version = new Version("1.2.3.4.GA.1");
+        version.appendQualifierSuffix( "jboss-1" );
+        assertThat( version.getOSGiVersionString(), equalTo( "1.2.3.4-GA-1-jboss-1" ) );
     }
 
     @Test
