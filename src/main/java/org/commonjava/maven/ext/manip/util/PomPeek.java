@@ -55,7 +55,10 @@ public class PomPeek
 
     private static final String[] COORD_KEYS = { G, A, V, PG, PA, PV, PKG, PRP };
 
-    private static final String MODULE_ELEM = "module";
+    /**
+     * Used to search for Maven modules / module blocks.
+     */
+    private static final String MODULES_ELEM = "modules";
 
     private static final Map<String, String> CAPTURED_PATHS = new HashMap<String, String>()
     {
@@ -146,7 +149,6 @@ public class PomPeek
                     case START_ELEMENT:
                     {
                         final String elem = xml.getLocalName();
-                        path.push( elem );
                         if ( captureValue( elem, path, xml ) )
                         {
                             // seems like xml.getElementText() traverses the END_ELEMENT event...
@@ -227,8 +229,13 @@ public class PomPeek
     private boolean captureValue( final String elem, final Stack<String> path, final XMLStreamReader xml )
         throws XMLStreamException
     {
-        final String pathStr = join( path, ":" );
-        final String key = CAPTURED_PATHS.get( pathStr );
+        final boolean isModule = path.contains(MODULES_ELEM);
+
+        path.push( elem );
+
+        final String pathStr = join(path, ":");
+        final String key = CAPTURED_PATHS.get(pathStr);
+
         if ( key != null )
         {
             elementValues.put( key, xml.getElementText()
@@ -236,10 +243,11 @@ public class PomPeek
 
             return true;
         }
-        else if ( MODULE_ELEM.equals( elem ) )
+        else if ( isModule )
         {
             modules.add( xml.getElementText()
                             .trim() );
+            return true;
         }
 
         return false;
