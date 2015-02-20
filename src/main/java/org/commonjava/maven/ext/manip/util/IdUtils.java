@@ -48,7 +48,7 @@ public final class IdUtils
      */
     public static List<ProjectVersionRef> parseGAVs( final String value )
     {
-        if ( value == null )
+        if ( value == null || value.length () == 0)
         {
             return null;
         }

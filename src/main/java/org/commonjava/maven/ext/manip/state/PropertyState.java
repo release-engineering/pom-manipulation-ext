@@ -42,7 +42,6 @@ public class PropertyState
     /**
      * Enabled ONLY if propertyManagement is provided in the user properties / CLI -D options.
      *
-     * @see #ENFORCE_SYSPROP
      * @see org.commonjava.maven.ext.manip.state.State#isEnabled()
      */
     @Override
