@@ -189,6 +189,15 @@ For example
 
     mvn install -DdependencyExclusion.junit:junit@*=
 
+It is also possible to prevent overriding a dependency version across the entire project groupIds using multiple wildcards:
+
+    mvn install -DdependencyExclusion.[groupId]:*@*=
+
+For example
+
+    mvn install -DdependencyExclusion.junit:*@*=
+
+
 ### Strict Mode Version Alignment
 
 When aligning dependency versions to some shared standard, it's possible to introduce incompatibilities that stem from too large of a version change. For instance, while it might be safe to revise a dependency's version from 1.5 to 1.5.1, it may not be safe to revise it to 2.0, or even 1.6.
