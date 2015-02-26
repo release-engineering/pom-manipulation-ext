@@ -189,6 +189,15 @@ For example
 
     mvn install -DdependencyExclusion.junit:junit@*=
 
+It is also possible to prevent overriding a dependency version across the entire project groupIds using multiple wildcards:
+
+    mvn install -DdependencyExclusion.[groupId]:*@*=
+
+For example
+
+    mvn install -DdependencyExclusion.junit:*@*=
+
+
 ### Strict Mode Version Alignment
 
 When aligning dependency versions to some shared standard, it's possible to introduce incompatibilities that stem from too large of a version change. For instance, while it might be safe to revise a dependency's version from 1.5 to 1.5.1, it may not be safe to revise it to 2.0, or even 1.6.
@@ -259,9 +268,9 @@ By default, this extension will disable the skip flag on the install and deploy 
 
 This feature does support four modes for alignment, controlled via the **enforce-skip** command-line property:
 
-1. **none** - don't do any alignment
+1. **none** - (*default*) don't do any alignment
 2. **on** - (aliased to **true**) enforce that the skip flag is **enabled**, suppressing install and deploy functions of the build (useful mainly for module-specific overrides. See below)
-3. **off** - (aliased to **false**) (*default*) enforce that the skip flag is **disabled** and that install/deploy functions will execute normally
+3. **off** - (aliased to **false**) enforce that the skip flag is **disabled** and that install/deploy functions will execute normally
 4. **detect** - detect the flag state of the install plugin in the main pom (not in profiles), and adjust *any* other install- or deploy-plugin references to the skip flag to be consistent.
 
 Additionally, the feature supports per-module overrides, which can be specified as:
