@@ -60,6 +60,8 @@ public class PomPeek
      */
     private static final String MODULES_ELEM = "modules";
 
+    private static final String PLUGINS_ELEM = "plugins";
+
     private static final Map<String, String> CAPTURED_PATHS = new HashMap<String, String>()
     {
         private static final long serialVersionUID = 1L;
@@ -229,7 +231,7 @@ public class PomPeek
     private boolean captureValue( final String elem, final Stack<String> path, final XMLStreamReader xml )
         throws XMLStreamException
     {
-        final boolean isModule = path.contains(MODULES_ELEM);
+        final boolean isModule = path.contains(MODULES_ELEM) && !path.contains(PLUGINS_ELEM);
 
         path.push( elem );
 
