@@ -17,6 +17,7 @@ import org.apache.maven.model.building.ModelSource;
 import org.apache.maven.model.resolution.InvalidRepositoryException;
 import org.apache.maven.model.resolution.ModelResolver;
 import org.apache.maven.model.resolution.UnresolvableModelException;
+import org.commonjava.maven.atlas.ident.ref.ArtifactRef;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.ext.manip.resolver.GalleyAPIWrapper;
 import org.commonjava.maven.galley.TransferException;
@@ -38,15 +39,20 @@ public class GalleyModelResolver
         throws UnresolvableModelException
     {
         Transfer transfer;
+        ArtifactRef ar = new ProjectVersionRef( groupId, artifactId, version ).asPomArtifact();
         try
         {
             transfer =
-                galleyWrapper.resolveArtifact( new ProjectVersionRef( groupId, artifactId, version ).asPomArtifact() );
+                galleyWrapper.resolveArtifact( ar );
         }
         catch ( final TransferException e )
         {
             throw new UnresolvableModelException( "Failed to resolve POM: " + e.getMessage(), groupId, artifactId,
                                                   version, e );
+        }
+        if ( transfer == null )
+        {
+            throw new UnresolvableModelException( "Failed to resolve POM: " + ar, groupId, artifactId, version );
         }
 
         return new FileModelSource( transfer.getDetachedFile() );
