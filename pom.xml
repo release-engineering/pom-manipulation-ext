@@ -51,7 +51,7 @@
 
   <properties>
     <mavenVersion>3.0.4</mavenVersion>
-    <galleyVersion>0.6.8</galleyVersion>
+    <galleyVersion>0.6.10</galleyVersion>
     <atlasVersion>0.13.6</atlasVersion>
     <it.maven.home>${project.build.directory}/apache-maven-${mavenVersion}</it.maven.home>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -136,6 +136,12 @@
     	<version>${mavenVersion}</version>
     	<scope>provided</scope>
     </dependency>
+      <dependency>
+          <groupId>org.jboss.byteman</groupId>
+          <artifactId>byteman-bmunit</artifactId>
+          <version>2.1.4.1</version>
+          <scope>test</scope>
+      </dependency>
   </dependencies>
 
 

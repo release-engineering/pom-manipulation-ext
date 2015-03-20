@@ -81,6 +81,10 @@ public class ModelIO
         {
             throw new ManipulationException( "Failed to resolve POM: %s.\n--> %s", e, ref, e.getMessage() );
         }
+        if ( transfer == null )
+        {
+            throw new ManipulationException( "Failed to resolve POM: " + ref.asPomArtifact() );
+        }
 
         InputStream in = null;
         try

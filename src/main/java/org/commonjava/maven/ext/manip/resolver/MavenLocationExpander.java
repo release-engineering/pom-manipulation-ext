@@ -10,15 +10,6 @@
  ******************************************************************************/
 package org.commonjava.maven.ext.manip.resolver;
 
-import java.io.File;
-import java.net.MalformedURLException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.artifact.repository.ArtifactRepositoryPolicy;
 import org.apache.maven.artifact.repository.MavenArtifactRepository;
@@ -42,6 +33,15 @@ import org.commonjava.maven.galley.transport.htcli.model.SimpleHttpLocation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
+import java.net.MalformedURLException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 /**
  * Galley {@link LocationExpander} implementation that expands a shorthand URI
  * given in the betterdep goals into the actual list of locations to check for
@@ -54,6 +54,12 @@ public class MavenLocationExpander
 {
 
     public static final Location EXPANSION_TARGET = new SimpleLocation( "maven:repositories" );
+
+    static
+    {
+        EXPANSION_TARGET.setAttribute(Location.CONNECTION_TIMEOUT_SECONDS, 60);
+    }
+
 
     private final List<Location> locations;
 
@@ -118,9 +124,13 @@ public class MavenLocationExpander
                     final ArtifactRepositoryPolicy releases = repo.getReleases();
                     final ArtifactRepositoryPolicy snapshots = repo.getSnapshots();
 
-                    locs.add( new SimpleHttpLocation( id, url, snapshots == null ? false : snapshots.isEnabled(),
-                                                      releases == null ? true : releases.isEnabled(), true, false, -1,
-                                                      null ) );
+                    SimpleHttpLocation addition = new SimpleHttpLocation( id, url, snapshots == null ? false : snapshots.isEnabled(),
+                                                      releases == null ? true : releases.isEnabled(), true, false,
+                                                      null );
+
+                    addition.setAttribute(Location.CONNECTION_TIMEOUT_SECONDS, 60);
+
+                    locs.add (addition);
                 }
             }
         }
@@ -176,9 +186,13 @@ public class MavenLocationExpander
                                         url = mirror.getUrl();
                                     }
 
-                                    locs.add( new SimpleHttpLocation( id, url, snapshots == null ? false
+                                    SimpleHttpLocation addition = new SimpleHttpLocation( id, url, snapshots == null ? false
                                                     : snapshots.isEnabled(), releases == null ? true
-                                                    : releases.isEnabled(), true, false, -1, null ) );
+                                                    : releases.isEnabled(), true, false, null );
+
+                                    addition.setAttribute(Location.CONNECTION_TIMEOUT_SECONDS, 60);
+
+                                    locs.add (addition);
                                 }
                             }
                         }
