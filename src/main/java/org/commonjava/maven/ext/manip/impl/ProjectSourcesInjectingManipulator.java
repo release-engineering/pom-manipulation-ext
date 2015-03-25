@@ -136,7 +136,7 @@ public class ProjectSourcesInjectingManipulator
                         config.put( "hideMavenOptsInfo", false );
                         config.put( "hideJavaOptsInfo", false );
                         config.put( "activateOutputFileMapping", false );
-                        config.put( "propertiesOutputFile", "${basedir}/build.properties" );
+                        config.put( "propertiesOutputFile", "${basedir}/build.metadata" );
                         config.put( "addJavaRuntimeInfo", true );
                         config.put( "addMavenExecutionInfo", true );
                         config.put( "addLocallyModifiedTagToFullVersion", false );
