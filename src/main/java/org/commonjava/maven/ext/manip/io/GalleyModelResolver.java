@@ -11,8 +11,11 @@
 
 package org.commonjava.maven.ext.manip.io;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.MalformedURLException;
+
 import org.apache.maven.model.Repository;
-import org.apache.maven.model.building.FileModelSource;
 import org.apache.maven.model.building.ModelSource;
 import org.apache.maven.model.resolution.InvalidRepositoryException;
 import org.apache.maven.model.resolution.ModelResolver;
@@ -22,6 +25,7 @@ import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.ext.manip.resolver.GalleyAPIWrapper;
 import org.commonjava.maven.galley.TransferException;
 import org.commonjava.maven.galley.model.Transfer;
+import org.commonjava.maven.galley.util.UrlUtils;
 
 public class GalleyModelResolver
     implements ModelResolver
@@ -39,7 +43,7 @@ public class GalleyModelResolver
         throws UnresolvableModelException
     {
         Transfer transfer;
-        ArtifactRef ar = new ProjectVersionRef( groupId, artifactId, version ).asPomArtifact();
+        final ArtifactRef ar = new ProjectVersionRef( groupId, artifactId, version ).asPomArtifact();
         try
         {
             transfer =
@@ -55,7 +59,7 @@ public class GalleyModelResolver
             throw new UnresolvableModelException( "Failed to resolve POM: " + ar, groupId, artifactId, version );
         }
 
-        return new FileModelSource( transfer.getDetachedFile() );
+        return new TransferModelSource( transfer );
     }
 
     @Override
@@ -71,6 +75,43 @@ public class GalleyModelResolver
     {
         // no state here, so we can keep this instance.
         return this;
+    }
+
+    private static final class TransferModelSource
+        implements ModelSource
+    {
+
+        private final Transfer transfer;
+
+        public TransferModelSource( final Transfer transfer )
+        {
+            this.transfer = transfer;
+        }
+
+        @Override
+        public InputStream getInputStream()
+            throws IOException
+        {
+            return transfer.openInputStream();
+        }
+
+        @Override
+        public String getLocation()
+        {
+            String location = null;
+            try
+            {
+                location = UrlUtils.buildUrl( transfer.getLocation()
+                                                      .getUri(), transfer.getPath() );
+            }
+            catch ( final MalformedURLException e )
+            {
+                location = transfer.toString();
+            }
+
+            return location;
+        }
+
     }
 
 }
