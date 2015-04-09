@@ -16,6 +16,7 @@ import static org.junit.Assert.assertThat;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 public class VersionTest
@@ -244,7 +245,7 @@ public class VersionTest
     @Test
     public void testFindHighestMatchingBuildNumber()
     {
-        Set<String> versionSet = new HashSet<String>();
+        final Set<String> versionSet = new HashSet<String>();
         Version version = new Version("1.2.0.Final-foo");
         versionSet.add( "1.2.0.Final-foo-1" );
         versionSet.add( "1.2.0.Final-foo-2" );
@@ -265,7 +266,17 @@ public class VersionTest
         versionSet.add( "1.2-foo-4" );
         assertThat( version.findHighestMatchingBuildNumber( version, versionSet ), equalTo( 4 ) );
         versionSet.clear();
+    }
 
+    @Test
+    @Ignore( "PENDING: https://github.com/release-engineering/pom-manipulation-ext/issues/122" )
+    public void testZeroFill_FindHighestMatchingBuildNumber()
+    {
+        final Set<String> versionSet = new HashSet<String>();
+        final Version version = new Version( "7" );
+        versionSet.add( "7.0.0.redhat-2" );
+        assertThat( version.findHighestMatchingBuildNumber( version, versionSet ), equalTo( 2 ) );
+        versionSet.clear();
     }
     
     @Test
