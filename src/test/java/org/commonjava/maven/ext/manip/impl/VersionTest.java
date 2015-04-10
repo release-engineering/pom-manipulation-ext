@@ -269,13 +269,21 @@ public class VersionTest
     }
 
     @Test
-    @Ignore( "PENDING: https://github.com/release-engineering/pom-manipulation-ext/issues/122" )
     public void testZeroFill_FindHighestMatchingBuildNumber()
     {
         final Set<String> versionSet = new HashSet<String>();
-        final Version version = new Version( "7" );
+        final Version majorOnlyVersion = new Version( "7" );
+        majorOnlyVersion.appendQualifierSuffix( "redhat" );
+        System.out.println("OSGi version: " + majorOnlyVersion.getOSGiVersionString());
         versionSet.add( "7.0.0.redhat-2" );
-        assertThat( version.findHighestMatchingBuildNumber( version, versionSet ), equalTo( 2 ) );
+        assertThat( majorOnlyVersion.findHighestMatchingBuildNumber( majorOnlyVersion, versionSet ), equalTo( 2 ) );
+        versionSet.clear();
+
+        final Version majorMinorVersion = new Version( "7.1" );
+        majorMinorVersion.appendQualifierSuffix( "redhat" );
+        System.out.println("OSGi version: " + majorMinorVersion.getOSGiVersionString());
+        versionSet.add( "7.1.0.redhat-2" );
+        assertThat( majorMinorVersion.findHighestMatchingBuildNumber( majorMinorVersion, versionSet ), equalTo( 2 ) );
         versionSet.clear();
     }
     
