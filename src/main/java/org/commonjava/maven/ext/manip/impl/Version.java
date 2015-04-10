@@ -611,10 +611,11 @@ public class Version
     {
         int highestBuildNum = 0;
 
-        // Build version pattern regex
+        // Build version pattern regex, matches something like "<mmm>.<qualifier>.<buildnum>".
         StringBuffer versionPatternBuf = new StringBuffer();
         versionPatternBuf.append( "(" );
         versionPatternBuf.append( Pattern.quote( getOriginalMMM() ) );
+        versionPatternBuf.append( "(" + DELIMITER_REGEX + "0)*" ); // Match zeros appended to a major only version
         versionPatternBuf.append( ")?" );
         versionPatternBuf.append( DELIMITER_REGEX );
         if ( version.getQualifierBase() != null )
@@ -622,9 +623,7 @@ public class Version
             versionPatternBuf.append( Pattern.quote( version.getQualifierBase() ) );
             versionPatternBuf.append( DELIMITER_REGEX );
         }
-        versionPatternBuf.append( "(" );
-        versionPatternBuf.append( "\\d+" );
-        versionPatternBuf.append( ")" );
+        versionPatternBuf.append( "(\\d+)" );
         String candidatePatternStr = versionPatternBuf.toString();
 
         logger.debug( "Using pattern: '{}' to find compatible versions from metadata.", candidatePatternStr );
@@ -635,7 +634,7 @@ public class Version
             final Matcher candidateSuffixMatcher = candidateSuffixPattern.matcher( compareVersion );
             if ( candidateSuffixMatcher.matches() )
             {
-                String buildNumberStr = candidateSuffixMatcher.group( 2 );
+                String buildNumberStr = candidateSuffixMatcher.group( 3 );
                 int compareBuildNum = Integer.parseInt( buildNumberStr );
                 if ( compareBuildNum > highestBuildNum )
                 {
