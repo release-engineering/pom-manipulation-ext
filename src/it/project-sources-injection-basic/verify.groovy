@@ -13,7 +13,7 @@ pom.build.plugins.children().each{
     }
 }
 
-assert new File( basedir, 'build.properties' ).exists()
+assert new File( basedir, 'build.metadata' ).exists()
 assert new File( basedir, 'target/project-sources-injection-basic-1-project-sources.tar.gz').exists()
 
 return true
