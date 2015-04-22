@@ -80,7 +80,7 @@ public class ProjectVersionEnforcingManipulator
         final ProjectVersionEnforcingState state = session.getState( ProjectVersionEnforcingState.class );
         if ( state == null || !state.isEnabled() )
         {
-            logger.debug( "Distribution skip-flag enforcement is disabled." );
+            logger.info( "Project version enforcement is disabled." );
             return Collections.emptySet();
         }
 
@@ -88,17 +88,10 @@ public class ProjectVersionEnforcingManipulator
 
         for ( final Project project : projects )
         {
-            final String ga = ga( project );
             final Model model = project.getModel();
 
             if ( model.getPackaging().equals( "pom" ) )
             {
-                if ( state.isEnabled() != true )
-                {
-                    logger.info( "Project.version enforcement is disabled for: {}.", ga );
-                    continue;
-                }
-
                 enforceProjectVersion( project, model.getDependencies(), changed );
 
                 if ( model.getDependencyManagement() != null)
@@ -130,6 +123,7 @@ public class ProjectVersionEnforcingManipulator
         {
             if ( d.getVersion().contains( PROJVER ) )
             {
+                logger.warn( "Using ${project.version} in pom files may lead to unexpected errors with inheritance." );
                 logger.info( "Replacing project.version within {} for project {}.", d, project);
                 d.setVersion( project.getVersion() );
 

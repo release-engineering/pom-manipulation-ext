@@ -296,8 +296,8 @@ If unspecified, default versions of the project sources and metadata plugins wil
 
 ## Project Version Fixup
 
-The extension will automatically (by default) fixup any occurences of `${project.version}` in poms (of packaging type 'pom'). This can avoid a problem with inheritance as the `${project.version}` in the parent is then resolved to be the current pom instead of the parent's version therebye breaking the project. This may be configured by setting:
+The extension will automatically fixup any occurences of `${project.version}` in poms (of packaging type 'pom'). This can avoid a problem with inheritance as the `${project.version}` in the parent is then resolved to be the current pom's version instead of the parent's version therebye breaking the project. This may be configured by setting:
 
     -Denforce-project-version=on|off
 
-where 'on' is default.
+where 'on' is the default.
