@@ -41,6 +41,11 @@ public class ProjectSourcesInjectingState
 
     private final String bmmpVersion;
 
+    static
+    {
+        State.activeByDefault.add( ProjectSourcesInjectingState.class );
+    }
+
     /**
      * Detects the project.src.skip and project.src.version user properties. Sets the enabled flag and the plugin version accordingly.
      */

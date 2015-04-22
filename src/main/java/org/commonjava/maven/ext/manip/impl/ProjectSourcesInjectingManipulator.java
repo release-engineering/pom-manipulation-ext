@@ -18,6 +18,7 @@ import org.commonjava.maven.ext.manip.ManipulationException;
 import org.commonjava.maven.ext.manip.model.Project;
 import org.commonjava.maven.ext.manip.state.ManipulationSession;
 import org.commonjava.maven.ext.manip.state.ProjectSourcesInjectingState;
+import org.commonjava.maven.ext.manip.state.State;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -84,7 +85,7 @@ public class ProjectSourcesInjectingManipulator
 
         // This manipulator will only run if its enabled *and* at least one other manipulator is enabled.
         if ( state.isEnabled() &&
-             session.anyStateEnabled(Collections.singletonList( ProjectSourcesInjectingState.class ) ) )
+             session.anyStateEnabled( State.activeByDefault ))
         {
             for ( final Project project : projects )
             {

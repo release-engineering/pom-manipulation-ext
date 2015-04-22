@@ -4,13 +4,11 @@ import org.apache.maven.model.Dependency;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Profile;
 import org.codehaus.plexus.component.annotations.Component;
-import org.codehaus.plexus.component.annotations.Requirement;
 import org.commonjava.maven.ext.manip.ManipulationException;
 import org.commonjava.maven.ext.manip.model.Project;
-import org.commonjava.maven.ext.manip.resolver.GalleyAPIWrapper;
-import org.commonjava.maven.ext.manip.state.DistributionEnforcingState;
 import org.commonjava.maven.ext.manip.state.ManipulationSession;
 import org.commonjava.maven.ext.manip.state.ProjectVersionEnforcingState;
+import org.commonjava.maven.ext.manip.state.State;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,8 +16,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
-import static org.commonjava.maven.ext.manip.util.IdUtils.ga;
 
 /**
  * {@link Manipulator} implementation that looks for POMs that use ${project.version} rather than
@@ -34,29 +30,20 @@ import static org.commonjava.maven.ext.manip.util.IdUtils.ga;
 public class ProjectVersionEnforcingManipulator
     implements Manipulator
 {
+
     private static final String PROJVER = "${project.version}";
 
     private final Logger logger = LoggerFactory.getLogger( getClass() );
-
-    @Requirement
-    protected GalleyAPIWrapper galleyWrapper;
 
     protected ProjectVersionEnforcingManipulator()
     {
     }
 
-    public ProjectVersionEnforcingManipulator( final GalleyAPIWrapper galleyWrapper )
-    {
-        this.galleyWrapper = galleyWrapper;
-    }
-
     /**
      * Sets the mode based on user properties and defaults.
-     * @see DistributionEnforcingState
+     * @see ProjectVersionEnforcingState
      */
-    @Override
     public void init( final ManipulationSession session )
-        throws ManipulationException
     {
         session.setState( new ProjectVersionEnforcingState( session.getUserProperties() ) );
     }
@@ -72,13 +59,15 @@ public class ProjectVersionEnforcingManipulator
 
     /**
      * For each project in the current build set, reset the version if using project.version
-     */
+    */
     @Override
     public Set<Project> applyChanges( final List<Project> projects, final ManipulationSession session )
         throws ManipulationException
     {
         final ProjectVersionEnforcingState state = session.getState( ProjectVersionEnforcingState.class );
-        if ( state == null || !state.isEnabled() )
+        if ( !session.isEnabled() ||
+             !session.anyStateEnabled( State.activeByDefault ) ||
+             state == null || !state.isEnabled() )
         {
             logger.info( "Project version enforcement is disabled." );
             return Collections.emptySet();
@@ -94,7 +83,7 @@ public class ProjectVersionEnforcingManipulator
             {
                 enforceProjectVersion( project, model.getDependencies(), changed );
 
-                if ( model.getDependencyManagement() != null)
+                if ( model.getDependencyManagement() != null )
                 {
                     enforceProjectVersion( project, model.getDependencyManagement().getDependencies(), changed );
                 }
@@ -104,10 +93,11 @@ public class ProjectVersionEnforcingManipulator
                 {
                     for ( final Profile profile : model.getProfiles() )
                     {
-                        enforceProjectVersion(project, profile.getDependencies(), changed);
-                        if ( profile.getDependencyManagement() != null)
+                        enforceProjectVersion( project, profile.getDependencies(), changed );
+                        if ( profile.getDependencyManagement() != null )
                         {
-                            enforceProjectVersion( project, profile.getDependencyManagement().getDependencies(), changed );
+                            enforceProjectVersion( project, profile.getDependencyManagement().getDependencies(),
+                                                   changed );
                         }
                     }
                 }
@@ -121,7 +111,7 @@ public class ProjectVersionEnforcingManipulator
     {
         for ( Dependency d : dependencies)
         {
-            if ( d.getVersion().contains( PROJVER ) )
+            if ( d.getVersion() != null && d.getVersion().contains( PROJVER ) )
             {
                 logger.warn( "Using ${project.version} in pom files may lead to unexpected errors with inheritance." );
                 logger.info( "Replacing project.version within {} for project {}.", d, project);

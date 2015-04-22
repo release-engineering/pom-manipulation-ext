@@ -12,6 +12,8 @@ package org.commonjava.maven.ext.manip.state;
 
 import org.commonjava.maven.ext.manip.impl.Manipulator;
 
+import java.util.ArrayList;
+
 /**
  * Basic list of methods that state collections related to different {@link Manipulator}'s should implement. This is also a marker interface to 
  * help ensure the validity of content stored in the session.
@@ -23,6 +25,11 @@ import org.commonjava.maven.ext.manip.impl.Manipulator;
  */
 public interface State
 {
+    /**
+     * Contains list of manipulations that are active by default for checking in applyChanges.
+     */
+    ArrayList<Class<? extends State>> activeByDefault = new ArrayList<Class<? extends State>>();
+
     /**
      * Return true if this State is enabled.
      */

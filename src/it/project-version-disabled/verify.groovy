@@ -7,11 +7,14 @@ System.out.println( "POM Version: ${pom.version.text()}" )
 
 dependency = pom.dependencyManagement.dependencies.dependency.find { it.artifactId.text() == "commons-lang" }
 assert dependency != null
-assert dependency.version.text() != "project.version"
+
+boolean contains = (dependency.version.text().contains( 'project.version' ) )
+assert contains == true
 
 dependency = pom.profiles.profile.dependencies.dependency.find { it.artifactId.text() == "commons-io" }
 assert dependency != null
-assert dependency.version.text() != "project.version"
+contains = (dependency.version.text().contains( 'project.version' ) )
+assert contains == true
 
 dependency = pom.dependencyManagement.dependencies.dependency.find { it.artifactId.text() == "commons-net" }
 assert dependency != null
