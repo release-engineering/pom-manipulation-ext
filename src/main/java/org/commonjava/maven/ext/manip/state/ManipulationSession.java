@@ -182,11 +182,10 @@ public class ManipulationSession
     /**
      * Checks all known states to determine whether any are enabled. Will ignore any states within
      * the supplied list.
-     * @param <T>
      * @param ignoreList
      * @return
      */
-    public <T extends State> boolean anyStateEnabled( List<Class<T>> ignoreList )
+    public boolean anyStateEnabled( List<Class<? extends State>> ignoreList )
     {
         boolean result = false;
 

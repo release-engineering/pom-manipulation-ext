@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2014 Red Hat, Inc..
+ * Copyright (c) 2015 Red Hat, Inc..
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the GNU Public License v3.0
  * which accompanies this distribution, and is available at
@@ -10,12 +10,10 @@
  ******************************************************************************/
 package org.commonjava.maven.ext.manip.state;
 
-import org.commonjava.maven.ext.manip.impl.ProjectVersionEnforcingManipulator;
-
 import java.util.Properties;
 
 /**
- * Captures configuration relating to enforcing removal of use of ${project.version} from pom. {@link ProjectVersionEnforcingManipulator}.
+ * Captures configuration relating to enforcing removal of use of ${project.version} from pom.
  */
 public class ProjectVersionEnforcingState
     implements State
@@ -23,17 +21,22 @@ public class ProjectVersionEnforcingState
     /**
      * Property used to set the enforcement mode.
      */
-    public static final String ENFORCE_SYSPROP = "enforce-project-version";
+    public static final String ENFORCE_PROJECT_VERSION = "enforce-project-version";
+
+    static
+    {
+        State.activeByDefault.add( ProjectVersionEnforcingState.class );
+    }
 
     // Default to on.
-    private final boolean mode;
+    private boolean mode = true;
 
     public ProjectVersionEnforcingState( final Properties userProps )
     {
-        final String value = userProps.getProperty( ENFORCE_SYSPROP );
-        if ( value != null)
+        final String value = userProps.getProperty( ENFORCE_PROJECT_VERSION );
+        if ( value != null )
         {
-            mode = Boolean.parseBoolean( userProps.getProperty( ENFORCE_SYSPROP ) );
+            mode = Boolean.parseBoolean( userProps.getProperty( ENFORCE_PROJECT_VERSION ) );
         }
         else
         {
@@ -44,7 +47,7 @@ public class ProjectVersionEnforcingState
     /**
      * Enabled by default; may be disabled by enforce-project-version.
      *
-     * @see #ENFORCE_SYSPROP
+     * @see #ENFORCE_PROJECT_VERSION
      * @see State#isEnabled()
      * @see EnforcingMode
      */
