@@ -9,4 +9,4 @@ cache:
      - '$HOME/.m2/repository'
 
 install: /bin/true
-script: mvn clean install -Prun-its 
+script: mvn clean install -Prun-its -l build.log 
