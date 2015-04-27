@@ -316,4 +316,10 @@ public class ProjectVersioningManipulator
         }
     }
 
+    @Override
+    public int getExecutionIndex()
+    {
+        return 10;
+    }
+
 }

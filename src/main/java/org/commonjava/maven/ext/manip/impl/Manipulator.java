@@ -57,4 +57,10 @@ public interface Manipulator
     Set<Project> applyChanges( List<Project> projects, ManipulationSession session )
         throws ManipulationException;
 
+    /**
+     * Determines the order in which manipulators are run, with the lowest number running first.
+     * Uses a 100-point scale.
+     */
+    int getExecutionIndex();
+
 }
