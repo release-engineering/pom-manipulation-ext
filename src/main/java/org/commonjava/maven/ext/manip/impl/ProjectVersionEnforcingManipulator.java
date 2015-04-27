@@ -66,8 +66,8 @@ public class ProjectVersionEnforcingManipulator
     {
         final ProjectVersionEnforcingState state = session.getState( ProjectVersionEnforcingState.class );
         if ( !session.isEnabled() ||
-             !session.anyStateEnabled( State.activeByDefault ) ||
-             state == null || !state.isEnabled() )
+                        !session.anyStateEnabled( State.activeByDefault ) ||
+                        state == null || !state.isEnabled() )
         {
             logger.info( "Project version enforcement is disabled." );
             return Collections.emptySet();
@@ -103,7 +103,10 @@ public class ProjectVersionEnforcingManipulator
                 }
             }
         }
-
+        if ( changed.size() > 0 )
+        {
+            logger.warn( "Using ${project.version} in pom files may lead to unexpected errors with inheritance." );
+        }
         return changed;
     }
 
@@ -113,9 +116,8 @@ public class ProjectVersionEnforcingManipulator
         {
             if ( d.getVersion() != null && d.getVersion().contains( PROJVER ) )
             {
-                logger.warn( "Using ${project.version} in pom files may lead to unexpected errors with inheritance." );
-                logger.info( "Replacing project.version within {} for project {}.", d, project);
-                d.setVersion( project.getVersion() );
+                logger.info( "Replacing project.version within {} for project {} with {}", d, project, project.getModel().getVersion());
+                d.setVersion( project.getModel().getVersion() );
 
                 changed.add( project );
             }
