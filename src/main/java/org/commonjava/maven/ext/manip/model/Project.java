@@ -112,6 +112,10 @@ public class Project
         return pom;
     }
 
+    /**
+     * Retrieve the model undergoing modification.
+     * @return
+     */
     public Model getModel()
     {
         return model;

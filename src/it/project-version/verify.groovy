@@ -8,10 +8,12 @@ System.out.println( "POM Version: ${pom.version.text()}" )
 dependency = pom.dependencyManagement.dependencies.dependency.find { it.artifactId.text() == "commons-lang" }
 assert dependency != null
 assert dependency.version.text() != "project.version"
+assert dependency.version.text() == "1.0.0.redhat-1"
 
 dependency = pom.profiles.profile.dependencies.dependency.find { it.artifactId.text() == "commons-io" }
 assert dependency != null
 assert dependency.version.text() != "project.version"
+assert dependency.version.text() == "1.0.0.redhat-1"
 
 dependency = pom.dependencyManagement.dependencies.dependency.find { it.artifactId.text() == "commons-net" }
 assert dependency != null

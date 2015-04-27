@@ -55,7 +55,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author jdcasey
  */
-@Component( role = Manipulator.class, hint = "project-versioning" )
+@Component( role = Manipulator.class, hint = "version-manipulator" )
 public class ProjectVersioningManipulator
     implements Manipulator
 {
