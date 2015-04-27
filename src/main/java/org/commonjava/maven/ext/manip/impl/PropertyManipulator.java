@@ -103,15 +103,16 @@ public class PropertyManipulator
                 {
                     // For any matching property that exists in the current project overwrite that value.
                     @SuppressWarnings( { "unchecked", "rawtypes" } )
+                    final
                     Set<String> keyClone = new HashSet(model.getProperties().keySet());
                     keyClone.retainAll( overrides.keySet() );
 
                     if ( keyClone.size() > 0 )
                     {
-                        Iterator<String> keys = keyClone.iterator();
+                        final Iterator<String> keys = keyClone.iterator();
                         while (keys.hasNext())
                         {
-                            String matchingKey = keys.next();
+                            final String matchingKey = keys.next();
                             logger.info( "Overwriting property (" + matchingKey + " in: " + ga( project ) + " with value " + overrides.get( matchingKey ) );
                             model.getProperties().put( matchingKey, overrides.get( matchingKey ) );
 
@@ -146,5 +147,11 @@ public class PropertyManipulator
         }
 
         return overrides;
+    }
+
+    @Override
+    public int getExecutionIndex()
+    {
+        return 20;
     }
 }

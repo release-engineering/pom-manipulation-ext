@@ -15,6 +15,11 @@
  */
 package org.commonjava.maven.ext.manip.impl;
 
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Profile;
@@ -26,11 +31,6 @@ import org.commonjava.maven.ext.manip.state.ProjectVersionEnforcingState;
 import org.commonjava.maven.ext.manip.state.State;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
 /**
  * {@link Manipulator} implementation that looks for POMs that use ${project.version} rather than
@@ -58,6 +58,7 @@ public class ProjectVersionEnforcingManipulator
      * Sets the mode based on user properties and defaults.
      * @see ProjectVersionEnforcingState
      */
+    @Override
     public void init( final ManipulationSession session )
     {
         session.setState( new ProjectVersionEnforcingState( session.getUserProperties() ) );
@@ -125,9 +126,9 @@ public class ProjectVersionEnforcingManipulator
         return changed;
     }
 
-    private void enforceProjectVersion( Project project, List<Dependency> dependencies, Set<Project> changed )
+    private void enforceProjectVersion( final Project project, final List<Dependency> dependencies, final Set<Project> changed )
     {
-        for ( Dependency d : dependencies)
+        for ( final Dependency d : dependencies)
         {
             if ( d.getVersion() != null && d.getVersion().contains( PROJVER ) )
             {
@@ -137,5 +138,11 @@ public class ProjectVersionEnforcingManipulator
                 changed.add( project );
             }
         }
+    }
+
+    @Override
+    public int getExecutionIndex()
+    {
+        return 99;
     }
 }

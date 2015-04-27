@@ -15,6 +15,17 @@
  */
 package org.commonjava.maven.ext.manip;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.project.ProjectBuilder;
 import org.codehaus.plexus.component.annotations.Component;
@@ -25,26 +36,24 @@ import org.commonjava.maven.ext.manip.io.PomIO;
 import org.commonjava.maven.ext.manip.model.Project;
 import org.commonjava.maven.ext.manip.resolver.ExtensionInfrastructure;
 import org.commonjava.maven.ext.manip.state.ManipulationSession;
+import org.commonjava.maven.ext.manip.util.ManipulatorPriortyComparator;
 import org.commonjava.maven.ext.manip.util.PomPeek;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
 
 /**
  * Coordinates manipulation of the POMs in a build, by providing methods to read the project set from files ahead of the build proper (using
  * {@link ProjectBuilder}), then other methods to coordinate all potential {@link Manipulator} implementations (along with the {@link PomIO}
  * raw-model reader/rewriter).
- *
+ * <br/>
+ * <p>
+ * Sequence of calls:
+ * <ol>
+ *   <li>{@link #init(MavenSession, ManipulationSession)}</li>
+ *   <li>{@link #scan(File, ManipulationSession)}</li>
+ *   <li>{@link #applyManipulations(List, ManipulationSession)}</li>
+ * </ol>
+ * 
  * @author jdcasey
  */
 @Component( role = ManipulationManager.class )
@@ -66,6 +75,42 @@ public class ManipulationManager
     private Map<String, ExtensionInfrastructure> infrastructure;
 
     /**
+     * Determined from {@link Manipulator#getExecutionIndex()} comparisons during {@link #init(MavenSession, ManipulationSession)}.
+     */
+    private List<Manipulator> orderedManipulators;
+
+    /**
+     * Initialize {@link ManipulationSession} using the given {@link MavenSession} instance, along with any state managed by the individual
+     * {@link Manipulator} components.
+     */
+    public void init( final MavenSession mavenSession, final ManipulationSession session )
+        throws ManipulationException
+    {
+        session.setMavenSession( mavenSession );
+
+        for ( final ExtensionInfrastructure infra : infrastructure.values() )
+        {
+            infra.init( session );
+        }
+
+        final HashMap<Manipulator, String> revMap = new HashMap<Manipulator, String>();
+        for ( final Map.Entry<String, Manipulator> entry : manipulators.entrySet() )
+        {
+            revMap.put( entry.getValue(), entry.getKey() );
+        }
+
+        orderedManipulators = new ArrayList<Manipulator>( revMap.keySet() );
+        Collections.sort( orderedManipulators, new ManipulatorPriortyComparator() );
+
+        for ( final Manipulator manipulator : orderedManipulators )
+        {
+            logger.debug( "Initialising manipulator " + manipulator.getClass()
+                                                                   .getSimpleName() );
+            manipulator.init( session );
+        }
+    }
+
+    /**
      * Scan the projects implied by the given POM file for modifications, and save the state in the session for later rewriting to apply it.
      */
     public void scan( final File pom, final ManipulationSession session )
@@ -76,10 +121,9 @@ public class ManipulationManager
 
         session.setProjects( projects );
 
-        for ( final Map.Entry<String, Manipulator> entry : manipulators.entrySet() )
+        for ( final Manipulator manipulator : orderedManipulators )
         {
-            entry.getValue()
-                 .scan( projects, session );
+            manipulator.scan( projects, session );
         }
     }
 
@@ -95,10 +139,9 @@ public class ManipulationManager
         throws ManipulationException
     {
         final Set<Project> changed = new HashSet<Project>();
-        for ( final Map.Entry<String, Manipulator> entry : manipulators.entrySet() )
+        for ( final Manipulator manipulator : orderedManipulators )
         {
-            final Set<Project> mChanged = entry.getValue()
-                                               .applyChanges( projects, session );
+            final Set<Project> mChanged = manipulator.applyChanges( projects, session );
 
             if ( mChanged != null )
             {
@@ -118,37 +161,6 @@ public class ManipulationManager
         }
 
         return changed;
-    }
-
-    /**
-     * Initialize {@link ManipulationSession} using the given {@link MavenSession} instance, along with any state managed by the individual
-     * {@link Manipulator} components.
-     */
-    public void init( final MavenSession mavenSession, final ManipulationSession session )
-        throws ManipulationException
-    {
-        session.setMavenSession( mavenSession );
-
-        for ( final ExtensionInfrastructure infra : infrastructure.values() )
-        {
-            infra.init( session );
-        }
-
-        // Enforce some ordering. The order is determined by the Component 'hint' value. We put
-        // enforce-project-version (ProjectVersionEnforcingManipulator) last as versioning manipulator
-        // needs to run before it.
-        TreeMap<String, Manipulator> sortedMap = new TreeMap<String, Manipulator>( Collections.reverseOrder() );
-        sortedMap.putAll( manipulators );
-        manipulators = sortedMap;
-
-        for ( final Map.Entry<String, Manipulator> entry : manipulators.entrySet() )
-        {
-            logger.debug( "Initialising manipulator " + entry.getKey() + " (" + entry.getValue()
-                                                                                     .getClass()
-                                                                                     .getSimpleName() + ")" );
-            entry.getValue()
-                 .init( session );
-        }
     }
 
     private List<PomPeek> peekAtPomHierarchy( final File topPom, final ManipulationSession session )

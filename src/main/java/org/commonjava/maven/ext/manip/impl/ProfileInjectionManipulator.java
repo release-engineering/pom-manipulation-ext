@@ -142,8 +142,8 @@ public class ProfileInjectionManipulator
             {
                 logger.warn( "Profile {} is activeByDefault", p );
 
-                Activation replacement = new Activation();
-                ActivationProperty replacementProp = new ActivationProperty();
+                final Activation replacement = new Activation();
+                final ActivationProperty replacementProp = new ActivationProperty();
                 replacementProp.setName( "!disableProfileActivation" );
                 replacement.setProperty( replacementProp );
 
@@ -153,5 +153,11 @@ public class ProfileInjectionManipulator
 
         logger.debug( "Adding profile {}", profile );
         profiles.add( profile );
+    }
+
+    @Override
+    public int getExecutionIndex()
+    {
+        return 50;
     }
 }

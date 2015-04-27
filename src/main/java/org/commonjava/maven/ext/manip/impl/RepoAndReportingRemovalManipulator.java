@@ -110,4 +110,10 @@ public class RepoAndReportingRemovalManipulator
 
         return changed;
     }
+
+    @Override
+    public int getExecutionIndex()
+    {
+        return 80;
+    }
 }

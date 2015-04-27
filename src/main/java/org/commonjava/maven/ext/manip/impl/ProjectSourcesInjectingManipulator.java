@@ -196,4 +196,10 @@ public class ProjectSourcesInjectingManipulator
         return Collections.emptySet();
     }
 
+    @Override
+    public int getExecutionIndex()
+    {
+        return 30;
+    }
+
 }

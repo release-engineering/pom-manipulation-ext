@@ -104,7 +104,7 @@ public class PluginManipulator
     public Set<Project> applyChanges( final List<Project> projects, final ManipulationSession session )
         throws ManipulationException
     {
-        State state = session.getState( PluginState.class );
+        final State state = session.getState( PluginState.class );
 
         if ( !session.isEnabled() || !state.isEnabled() )
         {
@@ -209,7 +209,7 @@ public class PluginManipulator
      * @param pluginVersionOverrides The list of version overrides to apply to the plugins
      * @throws ManipulationException
      */
-    protected void applyOverrides( boolean pluginMgmt, final List<Plugin> plugins,
+    protected void applyOverrides( final boolean pluginMgmt, final List<Plugin> plugins,
                                    final Map<ProjectRef, Plugin> pluginVersionOverrides ) throws ManipulationException
     {
         if ( plugins == null)
@@ -278,5 +278,11 @@ public class PluginManipulator
                 logger.info( "Added plugin version: " + override.getKey() + "=" + override.getVersion());
             }
         }
+    }
+
+    @Override
+    public int getExecutionIndex()
+    {
+        return 60;
     }
 }

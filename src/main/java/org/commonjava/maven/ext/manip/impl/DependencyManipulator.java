@@ -16,7 +16,6 @@
 package org.commonjava.maven.ext.manip.impl;
 
 import static org.apache.commons.lang.StringUtils.join;
-import static org.apache.commons.lang.StringUtils.removeStart;
 import static org.commonjava.maven.ext.manip.util.IdUtils.ga;
 import static org.commonjava.maven.ext.manip.util.PropertiesUtils.getPropertiesByPrefix;
 
@@ -651,11 +650,11 @@ public class DependencyManipulator
                         // with this one i.e. this takes precedence.
                         if ( artifactGA.endsWith(":*"))
                         {
-                            ProjectRef artifactGAPr = ProjectRef.parse(artifactGA);
-                            Iterator<String> it = remainingOverrides.keySet().iterator();
+                            final ProjectRef artifactGAPr = ProjectRef.parse(artifactGA);
+                            final Iterator<String> it = remainingOverrides.keySet().iterator();
                             while (it.hasNext())
                             {
-                                ProjectRef pr = ProjectRef.parse(it.next());
+                                final ProjectRef pr = ProjectRef.parse(it.next());
                                 if ( artifactGAPr.getGroupId().equals(pr.getGroupId()))
                                 {
                                     logger.debug ( "Removing artifactGA " + pr + " from overrides");
@@ -735,6 +734,12 @@ public class DependencyManipulator
             logger.debug( "Adding version override property for {} of {}:{}", currentGA, versionPropName, overrides.get( currentGA ));
             props.setProperty( versionPropName, overrides.get( currentGA ) );
         }
+    }
+
+    @Override
+    public int getExecutionIndex()
+    {
+        return 40;
     }
 
 }
