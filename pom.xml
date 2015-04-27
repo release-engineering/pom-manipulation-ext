@@ -14,11 +14,15 @@
   <groupId>org.commonjava.maven.ext</groupId>
   <artifactId>pom-manipulation-ext</artifactId>
   <version>1.5-SNAPSHOT</version>
+  
   <name>POM Manipulation Extension for Maven</name>
   <url>http://github.com/jdcasey/pom-manipulation-ext</url>
+  <inceptionYear>2012</inceptionYear>
+  
   <description>
     lib/ext-style extension for Apache Maven that allows pre-processing of Maven pom.xml's.
   </description>
+  
   <licenses>
     <license>
       <name>APLv2.0</name>
@@ -50,6 +54,9 @@
   </distributionManagement>
 
   <properties>
+    <projectOwner>Red Hat, Inc.</projectOwner>
+    <projectEmail>jcasey@redhat.com</projectEmail>
+    
     <mavenVersion>3.0.4</mavenVersion>
     <galleyVersion>0.6.10</galleyVersion>
     <atlasVersion>0.13.6</atlasVersion>
