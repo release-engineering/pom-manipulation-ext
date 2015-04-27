@@ -1,24 +1,35 @@
 <?xml version="1.0"?>
 <!--
-  Copyright (c) 2014 Red Hat, Inc..
-  All rights reserved. This program and the accompanying materials
-  are made available under the terms of the GNU Public License v3.0
-  which accompanies this distribution, and is available at
-  http://www.gnu.org/licenses/gpl.html
 
-  Contributors:
-      Red Hat, Inc. - initial API and implementation
+    Copyright (C) 2012 Red Hat, Inc. (jcasey@redhat.com)
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+            http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.commonjava.maven.ext</groupId>
   <artifactId>pom-manipulation-ext</artifactId>
   <version>1.5-SNAPSHOT</version>
+  
   <name>POM Manipulation Extension for Maven</name>
   <url>http://github.com/jdcasey/pom-manipulation-ext</url>
+  <inceptionYear>2012</inceptionYear>
+  
   <description>
     lib/ext-style extension for Apache Maven that allows pre-processing of Maven pom.xml's.
   </description>
+  
   <licenses>
     <license>
       <name>APLv2.0</name>
@@ -31,6 +42,16 @@
       <id>jdcasey</id>
       <name>John Casey</name>
       <email>jdcasey@commonjava.org</email>
+    </developer>
+    <developer>
+      <id>rnc</id>
+      <name>Nick Cross</name>
+      <email>ncross@redhat.com</email>
+    </developer>
+    <developer>
+      <id>pgier</id>
+      <name>Paul Gier</name>
+      <email>pgier@redhat.com</email>
     </developer>
   </developers>
 
@@ -50,6 +71,9 @@
   </distributionManagement>
 
   <properties>
+    <projectOwner>Red Hat, Inc.</projectOwner>
+    <projectEmail>jcasey@redhat.com</projectEmail>
+    
     <mavenVersion>3.0.4</mavenVersion>
     <galleyVersion>0.6.10</galleyVersion>
     <atlasVersion>0.13.6</atlasVersion>
@@ -131,10 +155,10 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-    	<groupId>org.apache.maven</groupId>
-    	<artifactId>maven-compat</artifactId>
-    	<version>${mavenVersion}</version>
-    	<scope>provided</scope>
+        <groupId>org.apache.maven</groupId>
+        <artifactId>maven-compat</artifactId>
+        <version>${mavenVersion}</version>
+        <scope>provided</scope>
     </dependency>
       <dependency>
           <groupId>org.jboss.byteman</groupId>
@@ -337,6 +361,26 @@
             </execution>
           </executions>
         </plugin>
+        <plugin>
+          <groupId>com.mycila</groupId>
+          <artifactId>license-maven-plugin</artifactId>
+          <version>2.10</version>
+          <configuration>
+            <header>com/mycila/maven/plugin/license/templates/APACHE-2.txt</header>
+            <properties>
+              <owner>${projectOwner}</owner>
+              <email>${projectEmail}</email>
+            </properties>
+            <excludes>
+              <exclude>**/README</exclude>
+              <exclude>**/LICENSE*</exclude>
+              <!--
+              <exclude>src/test/resources/**</exclude>
+              <exclude>src/main/resources/**</exclude>
+              -->
+            </excludes>
+          </configuration>
+        </plugin>
       </plugins>
     </pluginManagement>
 
@@ -389,6 +433,25 @@
 
 
   <profiles>
+    <profile>
+      <id>formatting</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>com.mycila</groupId>
+            <artifactId>license-maven-plugin</artifactId>
+            <executions>
+              <execution>
+                <phase>process-sources</phase>
+                <goals>
+                  <goal>format</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
     <profile>
       <id>run-its</id>
 
@@ -463,6 +526,17 @@
       <id>release</id>
       <build>
         <plugins>
+          <plugin>
+            <groupId>com.mycila</groupId>
+            <artifactId>license-maven-plugin</artifactId>
+            <executions>
+              <execution>
+                <goals>
+                  <goal>check</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
           <plugin>
             <artifactId>maven-source-plugin</artifactId>
           </plugin>
