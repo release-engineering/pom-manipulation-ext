@@ -32,7 +32,7 @@ import org.slf4j.LoggerFactory;
  * {@link Manipulator} implementation that can remove Reporting and Repository sections from a project's pom file.
  * Configuration is stored in a {@link RepoReportingState} instance, which is in turn stored in the {@link ManipulationSession}.
  */
-@Component( role = Manipulator.class, hint = "repo-reporting-removal" )
+@Component( role = Manipulator.class, hint = "enforce-repo-reporting-removal" )
 public class RepoAndReportingRemovalManipulator
     implements Manipulator
 {

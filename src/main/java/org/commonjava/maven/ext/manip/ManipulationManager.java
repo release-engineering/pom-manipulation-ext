@@ -10,15 +10,6 @@
  ******************************************************************************/
 package org.commonjava.maven.ext.manip;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.project.ProjectBuilder;
 import org.codehaus.plexus.component.annotations.Component;
@@ -32,6 +23,17 @@ import org.commonjava.maven.ext.manip.state.ManipulationSession;
 import org.commonjava.maven.ext.manip.util.PomPeek;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
 
 /**
  * Coordinates manipulation of the POMs in a build, by providing methods to read the project set from files ahead of the build proper (using
@@ -126,6 +128,13 @@ public class ManipulationManager
         {
             infra.init( session );
         }
+
+        // Enforce some ordering. The order is determined by the Component 'hint' value. We put
+        // enforce-project-version (ProjectVersionEnforcingManipulator) last as versioning manipulator
+        // needs to run before it.
+        TreeMap<String, Manipulator> sortedMap = new TreeMap<String, Manipulator>( Collections.reverseOrder() );
+        sortedMap.putAll( manipulators );
+        manipulators = sortedMap;
 
         for ( final Map.Entry<String, Manipulator> entry : manipulators.entrySet() )
         {

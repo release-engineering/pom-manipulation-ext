@@ -49,7 +49,7 @@ import org.slf4j.LoggerFactory;
  * {@link Manipulator} implementation that can alter dependency (and dependency management) sections in a project's pom file.
  * Configuration is stored in a {@link DependencyState} instance, which is in turn stored in the {@link ManipulationSession}.
  */
-@Component( role = Manipulator.class, hint = "bom-manipulator" )
+@Component( role = Manipulator.class, hint = "project-dependency-manipulator" )
 public class DependencyManipulator
     implements Manipulator
 {
