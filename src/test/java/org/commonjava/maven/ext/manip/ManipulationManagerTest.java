@@ -14,30 +14,33 @@
  *  limitations under the License.
  */
 
-package org.commonjava.maven.ext.manip.fixture;
+package org.commonjava.maven.ext.manip;
 
-import org.apache.maven.settings.building.SettingsBuilder;
 import org.codehaus.plexus.component.annotations.Component;
 import org.codehaus.plexus.component.annotations.Requirement;
+import org.commonjava.maven.ext.manip.fixture.PlexusTestRunner;
+import org.commonjava.maven.ext.manip.impl.Manipulator;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import static org.junit.Assert.*;
 
-import static org.junit.Assert.assertNotNull;
+import java.util.Map;
 
 @RunWith( PlexusTestRunner.class )
-@Component( role = TestWithPlexusRunner.class )
-public class TestWithPlexusRunner
+@Component( role = ManipulationManagerTest.class )
+public class ManipulationManagerTest
 {
-
     @Requirement
-    private SettingsBuilder settingsBuilder;
+    private Map<String, Manipulator> manipulators;
 
     @Test
-    public void bootUp()
+    public void testListManipulators()
     {
-        System.out.println( "Settings builder: " + settingsBuilder );
+        assertNotNull( manipulators );
 
-        assertNotNull( settingsBuilder );
+        for ( final Map.Entry<String, Manipulator> entry : manipulators.entrySet() )
+        {
+            assertTrue (entry.getValue().getExecutionIndex() > 0 && entry.getValue().getExecutionIndex() < 100);
+        }
     }
-
 }
