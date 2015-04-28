@@ -36,7 +36,7 @@ import org.commonjava.maven.ext.manip.io.PomIO;
 import org.commonjava.maven.ext.manip.model.Project;
 import org.commonjava.maven.ext.manip.resolver.ExtensionInfrastructure;
 import org.commonjava.maven.ext.manip.state.ManipulationSession;
-import org.commonjava.maven.ext.manip.util.ManipulatorPriortyComparator;
+import org.commonjava.maven.ext.manip.util.ManipulatorPriorityComparator;
 import org.commonjava.maven.ext.manip.util.PomPeek;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -100,7 +100,7 @@ public class ManipulationManager
         }
 
         orderedManipulators = new ArrayList<Manipulator>( revMap.keySet() );
-        Collections.sort( orderedManipulators, new ManipulatorPriortyComparator() );
+        Collections.sort( orderedManipulators, new ManipulatorPriorityComparator() );
 
         for ( final Manipulator manipulator : orderedManipulators )
         {

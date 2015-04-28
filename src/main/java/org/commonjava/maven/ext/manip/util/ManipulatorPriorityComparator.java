@@ -22,7 +22,7 @@ import org.commonjava.maven.ext.manip.impl.Manipulator;
 /**
  * Sorts {@link Manipulator} implementations by their execution index, in ascending order.
  */
-public class ManipulatorPriortyComparator
+public class ManipulatorPriorityComparator
     implements Comparator<Manipulator>
 {
 
