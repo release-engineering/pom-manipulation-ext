@@ -132,8 +132,10 @@ public class ProjectVersionEnforcingManipulator
         {
             if ( d.getVersion() != null && d.getVersion().contains( PROJVER ) )
             {
-                logger.info( "Replacing project.version within {} for project {} with {}", d, project, project.getModel().getVersion());
-                d.setVersion( project.getModel().getVersion() );
+                // If there has been no modifications to the model use the original version.
+                String newVersion =  project.getModel().getVersion() == null ? project.getVersion() : project.getModel().getVersion();
+                logger.info( "Replacing project.version within {} for project {} with {}", d, project, newVersion);
+                d.setVersion( newVersion );
 
                 changed.add( project );
             }

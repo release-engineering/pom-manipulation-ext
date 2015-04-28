@@ -37,7 +37,7 @@ public final class PropertiesUtils
      * from the property names when inserting them into the returned Map.
      * @param properties
      *
-     * @param prepend The String that must be at the start of the property names
+     * @param prefix The String that must be at the start of the property names
      * @return Map<String, String> map of properties with matching prepend and their values
      */
     public static Map<String, String> getPropertiesByPrefix( final Properties properties, final String prefix )
