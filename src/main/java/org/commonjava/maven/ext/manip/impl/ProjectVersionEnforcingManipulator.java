@@ -85,7 +85,7 @@ public class ProjectVersionEnforcingManipulator
                         !session.anyStateEnabled( State.activeByDefault ) ||
                         state == null || !state.isEnabled() )
         {
-            logger.info( "Project version enforcement is disabled." );
+            logger.debug( "Project version enforcement is disabled." );
             return Collections.emptySet();
         }
 
