@@ -20,7 +20,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.commonjava.maven.ext</groupId>
   <artifactId>pom-manipulation-ext</artifactId>
-  <version>1.5.1</version>
+  <version>1.6-SNAPSHOT</version>
   
   <name>POM Manipulation Extension for Maven</name>
   <url>http://github.com/jdcasey/pom-manipulation-ext</url>
@@ -59,7 +59,7 @@
     <connection>scm:git:http://jdcasey@github.com/jdcasey/pom-manipulation-ext.git</connection>
     <developerConnection>scm:git:git@github.com:jdcasey/pom-manipulation-ext.git</developerConnection>
     <url>http://github.com/jdcasey/pom-manipulation-ext</url>
-    <tag>pom-manipulation-ext-1.5.1</tag>
+    <tag>HEAD</tag>
   </scm>
 
   <distributionManagement>
