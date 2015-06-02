@@ -17,42 +17,37 @@ package org.commonjava.maven.ext.manip.io;
 
 import static org.apache.commons.io.IOUtils.closeQuietly;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.Writer;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.jar.Manifest;
 
+import org.apache.maven.io.util.DocumentModifier;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.io.ModelWriter;
 import org.apache.maven.model.io.jdom.MavenJDOMWriter;
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 import org.apache.maven.project.MavenProject;
 import org.codehaus.plexus.component.annotations.Component;
-import org.codehaus.plexus.util.WriterFactory;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 import org.commonjava.maven.ext.manip.ManipulatingEventSpy;
 import org.commonjava.maven.ext.manip.ManipulationException;
 import org.commonjava.maven.ext.manip.model.Project;
 import org.commonjava.maven.ext.manip.state.ManipulationSession;
 import org.commonjava.maven.ext.manip.util.PomPeek;
-import org.jdom.Comment;
-import org.jdom.Document;
-import org.jdom.JDOMException;
-import org.jdom.filter.ContentFilter;
-import org.jdom.input.SAXBuilder;
-import org.jdom.output.Format;
-import org.jdom.output.Format.TextMode;
-import org.jdom.output.XMLOutputter;
+import org.jdom2.Comment;
+import org.jdom2.Content;
+import org.jdom2.Document;
+import org.jdom2.JDOMException;
+import org.jdom2.filter.ContentFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -64,6 +59,8 @@ import org.slf4j.LoggerFactory;
 @Component( role = PomIO.class )
 public class PomIO
 {
+
+    private static final String MODIFIED_BY = "[Comment: <!-- Modified by POM Manipulation Extension for Maven";
 
     protected final Logger logger = LoggerFactory.getLogger( getClass() );
 
@@ -160,85 +157,41 @@ public class PomIO
     private void write( final Project project, final File pom, final Model model )
         throws ManipulationException
     {
-        Writer pomWriter = null;
         try
         {
-            final SAXBuilder builder = new SAXBuilder();
-            Document doc = builder.build( pom );
+            final MavenJDOMWriter writer = new MavenJDOMWriter( model );
 
-            String encoding = model.getModelEncoding();
-            if ( encoding == null )
-            {
-                encoding = "UTF-8";
-            }
-            final String modifiedBy = "[Comment: <!-- Modified by POM Manipulation Extension for Maven";
-
-            final Format format = Format.getRawFormat()
-                                        .setEncoding( encoding )
-                                        .setTextMode( TextMode.PRESERVE )
-                                        .setLineSeparator( System.getProperty( "line.separator" ) )
-                                        .setOmitDeclaration( false )
-                                        .setOmitEncoding( false )
-                                        .setExpandEmptyElements( true );
-
-            final ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            pomWriter = WriterFactory.newWriter( baos, encoding );
-
-            new MavenJDOMWriter().write( model, doc, pomWriter, format );
-            doc = builder.build( new ByteArrayInputStream( baos.toByteArray() ) );
-
-            // Only add the modified by to the top level pom.
-            if ( project.isInheritanceRoot() )
-            {
-                @SuppressWarnings( "unchecked" )
-                final Iterator<Comment> it = doc.getContent( new ContentFilter( ContentFilter.COMMENT ) )
-                                                .iterator();
-                while ( it.hasNext() )
-                {
-                    final Comment c = it.next();
-
-                    //final Comment c = (Comment) it.next();
-                    if ( c.toString()
-                          .startsWith( modifiedBy ) )
-                    {
-                        it.remove();
-
-                        break;
-                    }
-                }
-                doc.addContent( new Comment( " Modified by POM Manipulation Extension for Maven "
-                    + getManifestInformation() ) );
-            }
-            final List<?> rootComments = doc.getContent( new ContentFilter( ContentFilter.COMMENT ) );
-
-            final XMLOutputter xmlo = new XMLOutputter( format )
+            final String manifestInformation = project.isInheritanceRoot() ? getManifestInformation() : null;
+            new MavenJDOMWriter().write( model, pom, new DocumentModifier()
             {
                 @Override
-                protected void printComment( final Writer out, final Comment comment )
-                    throws IOException
+                public void postProcess( final Document doc )
                 {
-                    if ( comment.toString()
-                                .startsWith( modifiedBy ) )
+                    // Only add the modified by to the top level pom.
+                    if ( project.isInheritanceRoot() )
                     {
-                        out.write( getFormat().getLineSeparator() );
-                    }
+                        final Iterator<Content> it = doc.getContent( new ContentFilter( ContentFilter.COMMENT ) )
+                                                        .iterator();
+                        while ( it.hasNext() )
+                        {
+                            final Comment c = (Comment) it.next();
 
-                    super.printComment( out, comment );
+                            //final Comment c = (Comment) it.next();
+                            if ( c.toString()
+                                  .startsWith( MODIFIED_BY ) )
+                            {
+                                it.remove();
 
-                    // If root level comments exist and is the current Comment object
-                    // output an extra newline to tidy the output
-                    if ( rootComments.contains( comment ) )
-                    {
-                        out.write( System.getProperty( "line.separator" ) );
+                                break;
+                            }
+                        }
+
+                        doc.addContent( Arrays.<Content> asList( new Comment(
+                                                                              "\nModified by POM Manipulation Extension for Maven "
+                                                                                  + manifestInformation + "\n" ) ) );
                     }
                 }
-            };
-
-            pomWriter = WriterFactory.newWriter( pom, encoding );
-
-            xmlo.output( doc, pomWriter );
-
-            pomWriter.flush();
+            } );
         }
         catch ( final IOException e )
         {
@@ -247,10 +200,6 @@ public class PomIO
         catch ( final JDOMException e )
         {
             throw new ManipulationException( "Failed to parse POM for rewrite: %s. Reason: %s", e, pom, e.getMessage() );
-        }
-        finally
-        {
-            closeQuietly( pomWriter );
         }
     }
 
