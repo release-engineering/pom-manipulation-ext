@@ -19,17 +19,18 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.commonjava.maven.ext</groupId>
-  <artifactId>pom-manipulation-ext</artifactId>
+  <artifactId>pom-manipulation-parent</artifactId>
   <version>1.5.5-SNAPSHOT</version>
-  
+  <packaging>pom</packaging>
+
   <name>POM Manipulation Extension for Maven</name>
   <url>http://github.com/jdcasey/pom-manipulation-ext</url>
   <inceptionYear>2012</inceptionYear>
-  
+
   <description>
     lib/ext-style extension for Apache Maven that allows pre-processing of Maven pom.xml's.
   </description>
-  
+
   <licenses>
     <license>
       <name>APLv2.0</name>
@@ -73,7 +74,7 @@
   <properties>
     <projectOwner>Red Hat, Inc.</projectOwner>
     <projectEmail>jcasey@redhat.com</projectEmail>
-    
+
     <mavenVersion>3.0.4</mavenVersion>
     <galleyVersion>0.6.10</galleyVersion>
     <atlasVersion>0.13.6</atlasVersion>
@@ -82,107 +83,107 @@
   </properties>
 
 
-  <dependencies>
-    <dependency>
-      <groupId>org.apache.maven</groupId>
-      <artifactId>maven-core</artifactId>
-      <version>${mavenVersion}</version>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.codehaus.plexus</groupId>
-      <artifactId>plexus-component-annotations</artifactId>
-      <version>1.5.5</version>
-      <scope>provided</scope>
-    </dependency>
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>org.commonjava.maven.ext</groupId>
+        <artifactId>pom-manipulation-core</artifactId>
+        <version>${project.version}</version>
+      </dependency>
 
-    <dependency>
-      <groupId>org.commonjava.maven.atlas</groupId>
-      <artifactId>atlas-identities</artifactId>
-      <version>${atlasVersion}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.commonjava.maven.galley</groupId>
-      <artifactId>galley-core</artifactId>
-      <version>${galleyVersion}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.commonjava.maven.galley</groupId>
-      <artifactId>galley-transport-httpclient</artifactId>
-      <version>${galleyVersion}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.commonjava.maven.galley</groupId>
-      <artifactId>galley-transport-filearc</artifactId>
-      <version>${galleyVersion}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.commonjava.maven.galley</groupId>
-      <artifactId>galley-maven</artifactId>
-      <version>${galleyVersion}</version>
-    </dependency>
-    <dependency>
-      <groupId>ch.qos.logback</groupId>
-      <artifactId>logback-core</artifactId>
-      <version>1.0.12</version>
-    </dependency>
-    <dependency>
-      <groupId>ch.qos.logback</groupId>
-      <artifactId>logback-classic</artifactId>
-      <version>1.0.12</version>
-    </dependency>
+      <dependency>
+        <groupId>org.apache.maven</groupId>
+        <artifactId>maven-core</artifactId>
+        <version>${mavenVersion}</version>
+        <scope>provided</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.codehaus.plexus</groupId>
+        <artifactId>plexus-component-annotations</artifactId>
+        <version>1.5.5</version>
+        <scope>provided</scope>
+      </dependency>
 
-    <dependency>
-      <groupId>commons-lang</groupId>
-      <artifactId>commons-lang</artifactId>
-      <version>2.5</version>
-    </dependency>
-    <dependency>
-      <groupId>org.jdom</groupId>
-      <artifactId>jdom2</artifactId>
-      <version>2.0.6</version>
-    </dependency>
-    <dependency>
-      <groupId>org.commonjava.maven</groupId>
-      <artifactId>maven3-model-jdom-support</artifactId>
-      <version>1.3.1</version>
-    </dependency>
+      <dependency>
+        <groupId>org.commonjava.maven.atlas</groupId>
+        <artifactId>atlas-identities</artifactId>
+        <version>${atlasVersion}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.commonjava.maven.galley</groupId>
+        <artifactId>galley-core</artifactId>
+        <version>${galleyVersion}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.commonjava.maven.galley</groupId>
+        <artifactId>galley-transport-httpclient</artifactId>
+        <version>${galleyVersion}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.commonjava.maven.galley</groupId>
+        <artifactId>galley-transport-filearc</artifactId>
+        <version>${galleyVersion}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.commonjava.maven.galley</groupId>
+        <artifactId>galley-maven</artifactId>
+        <version>${galleyVersion}</version>
+      </dependency>
+      <dependency>
+        <groupId>ch.qos.logback</groupId>
+        <artifactId>logback-core</artifactId>
+        <version>1.0.12</version>
+      </dependency>
+      <dependency>
+        <groupId>ch.qos.logback</groupId>
+        <artifactId>logback-classic</artifactId>
+        <version>1.0.12</version>
+      </dependency>
 
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>4.10</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.maven</groupId>
-      <artifactId>maven-compat</artifactId>
-      <version>${mavenVersion}</version>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.jboss.byteman</groupId>
-      <artifactId>byteman-bmunit</artifactId>
-      <version>2.1.4.1</version>
-      <scope>test</scope>
-    </dependency>
-  </dependencies>
+      <dependency>
+        <groupId>commons-lang</groupId>
+        <artifactId>commons-lang</artifactId>
+        <version>2.5</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jdom</groupId>
+        <artifactId>jdom2</artifactId>
+        <version>2.0.6</version>
+      </dependency>
+      <dependency>
+        <groupId>org.commonjava.maven</groupId>
+        <artifactId>maven3-model-jdom-support</artifactId>
+        <version>1.3.1</version>
+      </dependency>
 
+      <dependency>
+        <groupId>junit</groupId>
+        <artifactId>junit</artifactId>
+        <version>4.10</version>
+        <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.maven</groupId>
+        <artifactId>maven-compat</artifactId>
+        <version>${mavenVersion}</version>
+        <scope>provided</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.jboss.byteman</groupId>
+        <artifactId>byteman-bmunit</artifactId>
+        <version>2.1.4.1</version>
+        <scope>test</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
 
   <build>
-    <testResources>
-      <testResource>
-        <directory>src/test/resources</directory>
-        <filtering>true</filtering>
-      </testResource>
-    </testResources>
-
     <pluginManagement>
       <plugins>
           <plugin>
               <groupId>org.apache.maven.plugins</groupId>
               <artifactId>maven-jar-plugin</artifactId>
-              <version>2.4</version>
+              <version>2.5</version>
               <configuration>
                   <archive>
                       <index>true</index>
@@ -209,6 +210,7 @@
               </configuration>
           </plugin>
         <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-resources-plugin</artifactId>
           <version>2.6</version>
           <configuration>
@@ -216,6 +218,7 @@
           </configuration>
         </plugin>
         <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-release-plugin</artifactId>
           <version>2.5</version>
           <configuration>
@@ -225,36 +228,37 @@
           </configuration>
         </plugin>
         <plugin>
-            <groupId>org.codehaus.mojo</groupId>
-            <artifactId>buildnumber-maven-plugin</artifactId>
-            <version>1.3</version>
-            <executions>
-                <execution>
-                    <phase>validate</phase>
-                    <id>buildnumber</id>
-                    <goals>
-                        <goal>create</goal>
-                    </goals>
-                    <configuration>
-                        <shortRevisionLength>8</shortRevisionLength>
-                        <timestampFormat>{0,date,dd MMMM yyyy}</timestampFormat>
-                    </configuration>
-                </execution>
-            </executions>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-shade-plugin</artifactId>
+          <version>2.2</version>
+            <configuration>
+                <archive>
+                    <index>true</index>
+                    <manifest>
+                        <addDefaultSpecificationEntries>
+                            true
+                        </addDefaultSpecificationEntries>
+                        <addDefaultImplementationEntries>
+                            true
+                        </addDefaultImplementationEntries>
+                    </manifest>
+                    <manifestEntries>
+                        <Implementation-URL>${project.url}</Implementation-URL>
+                        <Java-Version>${java.version}</Java-Version>
+                        <Java-Vendor>${java.vendor}</Java-Vendor>
+                        <Os-Name>${os.name}</Os-Name>
+                        <Os-Arch>${os.arch}</Os-Arch>
+                        <Os-Version>${os.version}</Os-Version>
+                        <Scm-Url>${project.scm.url}</Scm-Url>
+                        <Scm-Connection>${project.scm.connection}</Scm-Connection>
+                        <Scm-Revision>${buildNumber}</Scm-Revision>
+                        <Build-Timestamp>${datetime}</Build-Timestamp>
+                    </manifestEntries>
+                </archive>
+            </configuration>
         </plugin>
         <plugin>
-          <groupId>org.codehaus.plexus</groupId>
-          <artifactId>plexus-component-metadata</artifactId>
-          <version>1.5.5</version>
-          <executions>
-            <execution>
-              <goals>
-                <goal>generate-metadata</goal>
-              </goals>
-            </execution>
-          </executions>
-        </plugin>
-        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-compiler-plugin</artifactId>
           <version>3.1</version>
           <configuration>
@@ -264,6 +268,7 @@
           </configuration>
         </plugin>
         <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-dependency-plugin</artifactId>
           <version>2.8</version>
           <executions>
@@ -283,6 +288,7 @@
           </executions>
         </plugin>
         <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-invoker-plugin</artifactId>
           <version>1.8</version>
           <executions>
@@ -318,6 +324,7 @@
           </executions>
         </plugin>
         <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-source-plugin</artifactId>
           <version>2.1.2</version>
           <executions>
@@ -330,6 +337,7 @@
           </executions>
         </plugin>
         <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-surefire-plugin</artifactId>
           <version>2.18.1</version>
           <configuration>
@@ -337,6 +345,7 @@
           </configuration>
         </plugin>
         <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-javadoc-plugin</artifactId>
           <version>2.9.1</version>
           <executions>
@@ -349,6 +358,7 @@
           </executions>
         </plugin>
         <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-gpg-plugin</artifactId>
           <version>1.1</version>
           <executions>
@@ -381,57 +391,46 @@
             </excludes>
           </configuration>
         </plugin>
-      </plugins>
-    </pluginManagement>
-
-    <plugins>
         <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-shade-plugin</artifactId>
-            <version>2.2</version>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>buildnumber-maven-plugin</artifactId>
+            <version>1.3</version>
             <executions>
                 <execution>
-                    <phase>package</phase>
+                    <phase>validate</phase>
+                    <id>buildnumber</id>
                     <goals>
-                        <goal>shade</goal>
+                        <goal>create</goal>
                     </goals>
                     <configuration>
-                        <artifactSet>
-                            <includes>
-                                <include>ch.qos.logback:*</include>
-                                <include>org.slf4j:*</include>
-                                <include>org.apache.httpcomponents:*</include>
-                                <include>org.jdom:jdom2</include>
-                                <include>org.commonjava.*:*</include>
-                                <include>commons-lang:commons-lang</include>
-                                <include>commons-io:commons-io</include>
-                                <include>commons-codec:commons-codec</include>
-                                <include>commons-jxpath:commons-jxpath</include>
-                                <include>org.codehaus.plexus:plexus-interpolation</include>
-                                <include>org.jsoup:jsoup</include>
-                            </includes>
-                        </artifactSet>
-                        <relocations>
-                            <relocation>
-                                <pattern>org.slf4j</pattern>
-                                <shadedPattern>org.commonjava.slf4j</shadedPattern>
-                            </relocation>
-                        </relocations>
+                        <shortRevisionLength>8</shortRevisionLength>
+                        <timestampFormat>{0,date,dd MMMM yyyy}</timestampFormat>
                     </configuration>
                 </execution>
             </executions>
         </plugin>
         <plugin>
-            <groupId>org.codehaus.mojo</groupId>
-            <artifactId>buildnumber-maven-plugin</artifactId>
+          <groupId>org.codehaus.plexus</groupId>
+          <artifactId>plexus-component-metadata</artifactId>
+          <version>1.5.5</version>
+          <executions>
+            <execution>
+              <goals>
+                <goal>generate-metadata</goal>
+              </goals>
+            </execution>
+          </executions>
         </plugin>
-      <plugin>
-        <groupId>org.codehaus.plexus</groupId>
-        <artifactId>plexus-component-metadata</artifactId>
-      </plugin>
-    </plugins>
+      </plugins>
+    </pluginManagement>
+
   </build>
 
+  <modules>
+    <module>core</module>
+    <!-- <module>cli</module> -->
+    <module>ext</module>
+  </modules>
 
   <profiles>
     <profile>
@@ -453,76 +452,7 @@
         </plugins>
       </build>
     </profile>
-    <profile>
-      <id>run-its</id>
 
-      <properties>
-        <localRepositoryUrl>${project.build.directory}/local-repo</localRepositoryUrl>
-      </properties>
-
-      <dependencies>
-        <dependency>
-          <groupId>org.apache.maven</groupId>
-          <artifactId>apache-maven</artifactId>
-          <version>${mavenVersion}</version>
-          <type>zip</type>
-          <classifier>bin</classifier>
-          <scope>test</scope>
-        </dependency>
-      </dependencies>
-
-      <build>
-        <testResources>
-          <testResource>
-            <directory>src/it</directory>
-            <filtering>true</filtering>
-            <excludes>
-              <exclude>expression-not-rewritten/pom.xml</exclude>
-            </excludes>
-            <targetPath>../it</targetPath>
-          </testResource>
-          <testResource>
-            <directory>src/it</directory>
-            <filtering>false</filtering>
-            <includes>
-              <include>expression-not-rewritten/pom.xml</include>
-            </includes>
-            <targetPath>../it</targetPath>
-          </testResource>
-        </testResources>
-        <plugins>
-          <plugin>
-            <artifactId>maven-dependency-plugin</artifactId>
-          </plugin>
-          <plugin>
-            <artifactId>maven-resources-plugin</artifactId>
-            <executions>
-              <execution>
-                <id>copy-resources</id>
-                <phase>pre-integration-test</phase>
-                <goals>
-                  <goal>copy-resources</goal>
-                </goals>
-                <configuration>
-                  <outputDirectory>${it.maven.home}/lib/ext</outputDirectory>
-                  <resources>
-                    <resource>
-                      <directory>${project.build.directory}</directory>
-                      <includes>
-                        <include>${project.build.finalName}.jar</include>
-                      </includes>
-                    </resource>
-                  </resources>
-                </configuration>
-              </execution>
-            </executions>
-          </plugin>
-          <plugin>
-            <artifactId>maven-invoker-plugin</artifactId>
-          </plugin>
-        </plugins>
-      </build>
-    </profile>
     <profile>
       <id>release</id>
       <build>
