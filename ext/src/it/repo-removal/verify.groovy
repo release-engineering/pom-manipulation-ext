@@ -23,6 +23,11 @@ assert pom.repositories.text().size()  == 0
 assert pom.pluginRepositories.text().size() == 0
 assert pom.reporting.text().size() == 0
 
+def profile = pom.profiles.children().find { it.id.text() == 'extra-repositories' }
+assert profile.repositories.text().size() == 0
+assert profile.pluginRepositories.text().size() == 0
+assert profile.reporting.text().size() == 0
+
 def jar = new File(basedir, "target/${pom.artifactId.text()}-${pom.version.text()}.jar" )
 System.out.println( "Checking for jar: ${jar.getAbsolutePath()}")
 assert jar.exists()

@@ -24,6 +24,7 @@ import java.util.Properties;
 import java.util.Set;
 
 import org.apache.maven.model.Model;
+import org.apache.maven.model.Profile;
 import org.apache.maven.model.Repository;
 import org.codehaus.plexus.component.annotations.Component;
 import org.commonjava.maven.ext.manip.ManipulationException;
@@ -106,6 +107,35 @@ public class RepoAndReportingRemovalManipulator
                 model.setReporting( null );
                 changed.add( project );
             }
+
+            // remove repositories in the profiles as well
+            final List<Profile> profiles = model.getProfiles();
+
+            if ( !profiles.isEmpty() )
+            {
+                for ( final Profile profile : profiles )
+                {
+                    if ( !profile.getRepositories().isEmpty() )
+                    {
+                        profile.setRepositories( Collections.<Repository> emptyList() );
+                        changed.add( project );
+                    }
+
+                    if ( !profile.getPluginRepositories().isEmpty() )
+                    {
+                        profile.setPluginRepositories( Collections.<Repository> emptyList() );
+                        changed.add( project );
+                    }
+
+                    if ( profile.getReporting() != null )
+                    {
+                        profile.setReporting( null );
+                        changed.add( project );
+                    }
+                }
+
+            }
+
         }
 
         return changed;
@@ -114,6 +144,6 @@ public class RepoAndReportingRemovalManipulator
     @Override
     public int getExecutionIndex()
     {
-        return 80;
+        return 45;
     }
 }
