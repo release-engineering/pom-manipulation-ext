@@ -25,6 +25,7 @@ import java.util.Properties;
 import java.util.Set;
 
 import org.apache.maven.model.Model;
+import org.apache.maven.model.Profile;
 import org.apache.maven.model.Repository;
 import org.codehaus.plexus.component.annotations.Component;
 import org.codehaus.plexus.component.annotations.Requirement;
@@ -72,7 +73,7 @@ public class RepositoryInjectionManipulator
     }
 
     /**
-     * Apply the repository injection changes to the top level pom.
+     * Apply the repository injection changes to the the top level pom.
      */
     @Override
     public Set<Project> applyChanges( final List<Project> projects, final ManipulationSession session )
@@ -89,23 +90,41 @@ public class RepositoryInjectionManipulator
 
         final Model remoteModel = modelBuilder.resolveRawModel(state.getRemoteRepositoryInjectionMgmt());
         final List<Repository> remoteRepositories = remoteModel.getRepositories();
+        final List<Repository> remotePluginRepositories = remoteModel.getPluginRepositories();
 
         for ( final Project project : projects )
         {
+            final String ga = ga(project);
+            logger.info( getClass().getSimpleName() + " applying changes to: " + ga );
+            final Model model = project.getModel();
+
             if ( project.isInheritanceRoot() )
             {
-                final String ga = ga( project );
-                logger.info( getClass().getSimpleName() + " applying changes to: " + ga );
-                final Model model = project.getModel();
+                // inject repositories
                 final List<Repository> repositories = model.getRepositories();
 
-                final Iterator<Repository> i = remoteRepositories.iterator();
-                while ( i.hasNext() )
+                if ( !remoteRepositories.isEmpty() )
                 {
-                    addRepository(repositories, i.next());
+                    final Iterator<Repository> i1 = remoteRepositories.iterator();
+                    while (i1.hasNext()) {
+                        addRepository(repositories, i1.next());
+                    }
+                    changed.add(project);
                 }
-                changed.add( project );
+
+                // inject plugin repositories
+                final List<Repository> pluginRepositories = model.getPluginRepositories();
+
+                if ( !remotePluginRepositories.isEmpty() )
+                {
+                    final Iterator<Repository> i2 = remotePluginRepositories.iterator();
+                    while (i2.hasNext()) {
+                        addRepository(pluginRepositories, i2.next());
+                    }
+                    changed.add(project);
+                }
             }
+
         }
 
         return changed;
@@ -141,7 +160,7 @@ public class RepositoryInjectionManipulator
     @Override
     public int getExecutionIndex()
     {
-        return 50;
+        return 55;
     }
 }
 
