@@ -37,7 +37,7 @@ import org.commonjava.maven.ext.manip.model.Project;
 import org.commonjava.maven.ext.manip.resolver.ExtensionInfrastructure;
 import org.commonjava.maven.ext.manip.state.ManipulationSession;
 import org.commonjava.maven.ext.manip.util.ManipulatorPriorityComparator;
-import org.commonjava.maven.ext.manip.util.PomPeek;
+import org.commonjava.maven.galley.maven.parse.PomPeek;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -116,8 +116,8 @@ public class ManipulationManager
     public void scan( final File pom, final ManipulationSession session )
         throws ManipulationException
     {
-        final List<PomPeek> peeked = peekAtPomHierarchy( pom, session );
-        final List<Project> projects = pomIO.readModelsForManipulation( peeked, session );
+        final List<PomPeek> peeked = peekAtPomHierarchy( pom);
+        final List<Project> projects = pomIO.readModelsForManipulation( peeked);
 
         session.setProjects( projects );
 
@@ -152,7 +152,7 @@ public class ManipulationManager
         if ( !changed.isEmpty() )
         {
             logger.info( "Maven-Manipulation-Extension: Rewrite changed: " + projects );
-            pomIO.rewritePOMs( changed, session );
+            pomIO.rewritePOMs( changed);
             logger.info( "Maven-Manipulation-Extension: Finished." );
         }
         else
@@ -163,7 +163,7 @@ public class ManipulationManager
         return changed;
     }
 
-    private List<PomPeek> peekAtPomHierarchy( final File topPom, final ManipulationSession session )
+    private List<PomPeek> peekAtPomHierarchy(final File topPom)
         throws ManipulationException
     {
         final List<PomPeek> peeked = new ArrayList<PomPeek>();

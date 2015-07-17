@@ -118,7 +118,7 @@ public class ProjectVersioningManipulator
      * the list of {@link Project}'s given. This happens near the end of the Maven session-bootstrapping sequence, before the projects are
      * discovered/read by the main Maven build initialization.
      *
-     * This method depends on {@link PomIO#readModelsForManipulation(List, ManipulationSession)} output stored in the {@link ManipulationSession},
+     * This method depends on {@link PomIO#readModelsForManipulation(List)} output stored in the {@link ManipulationSession},
      * a task which is handled by the {@link ManipulationManager}.
      */
     @Override

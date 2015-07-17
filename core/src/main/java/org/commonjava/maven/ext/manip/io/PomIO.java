@@ -40,8 +40,7 @@ import org.codehaus.plexus.component.annotations.Component;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 import org.commonjava.maven.ext.manip.ManipulationException;
 import org.commonjava.maven.ext.manip.model.Project;
-import org.commonjava.maven.ext.manip.state.ManipulationSession;
-import org.commonjava.maven.ext.manip.util.PomPeek;
+import org.commonjava.maven.galley.maven.parse.PomPeek;
 import org.jdom2.Comment;
 import org.jdom2.Content;
 import org.jdom2.Document;
@@ -71,7 +70,7 @@ public class PomIO
      * Read {@link Model} instances by parsing the POM directly. This is useful to escape some post-processing that happens when the
      * {@link MavenProject#getOriginalModel()} instance is set.
      */
-    public List<Project> readModelsForManipulation( final List<PomPeek> peeked, final ManipulationSession session )
+    public List<Project> readModelsForManipulation(final List<PomPeek> peeked)
         throws ManipulationException
     {
         final List<Project> projects = new ArrayList<Project>();
@@ -124,9 +123,8 @@ public class PomIO
     /**
      * For any project listed as changed (tracked by GA in the session), write the modified model out to disk. Uses JDOM {@link ModelWriter}
      * ({@MavenJDOMWriter}) to preserve as much formatting as possible.
-     * @param logger
      */
-    public void rewritePOMs( final Set<Project> changed, final ManipulationSession session )
+    public void rewritePOMs(final Set<Project> changed)
         throws ManipulationException
     {
         for ( final Project project : changed )
