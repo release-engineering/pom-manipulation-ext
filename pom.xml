@@ -32,10 +32,18 @@
       <artifactId>atlas-identities</artifactId>
       <version>${atlasVersion}</version>
     </dependency>
+
+    <!-- Test Dependencies-->
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-      <version>3.8.1</version>
+      <version>4.10</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.github.rest-driver</groupId>
+      <artifactId>rest-client-driver</artifactId>
+      <version>1.1.41</version>
       <scope>test</scope>
     </dependency>
   </dependencies>

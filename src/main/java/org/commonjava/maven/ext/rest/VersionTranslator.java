@@ -8,6 +8,7 @@ import com.mashape.unirest.http.JsonNode;
 import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 /**
@@ -58,13 +59,13 @@ public class VersionTranslator {
         String projectGav = (String) jsonResult.get("project");
         String[] projectGavSplit = projectGav.split(":");
         ProjectVersionRef projectResult =
-                new ProjectVersionRef(projectGavSplit[0], projectGavSplit[1], projectGavSplit[3]);
+                new ProjectVersionRef(projectGavSplit[0], projectGavSplit[1], projectGavSplit[2]);
         result.add(projectResult);
 
         // Parse dependencies and create ProjectVersionRefs from it
-        List<String> dependenciesGavs = (List<String>) jsonResult.get("dependencies");
-        for (String depGav : dependenciesGavs) {
-            String[] depGavSplit = depGav.split(":");
+        JSONArray dependenciesGavs = (JSONArray) jsonResult.get("dependencies");
+        for (Integer i = 0; i < dependenciesGavs.length(); i++) {
+            String[] depGavSplit = dependenciesGavs.getString(i).split(":");
             ProjectVersionRef depResult = new ProjectVersionRef(depGavSplit[0], depGavSplit[1], depGavSplit[2]);
             result.add(depResult);
         }
