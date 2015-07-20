@@ -38,7 +38,6 @@ import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 import org.apache.maven.project.MavenProject;
 import org.codehaus.plexus.component.annotations.Component;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
-import org.commonjava.maven.ext.manip.ManipulatingEventSpy;
 import org.commonjava.maven.ext.manip.ManipulationException;
 import org.commonjava.maven.ext.manip.model.Project;
 import org.commonjava.maven.ext.manip.state.ManipulationSession;
@@ -209,7 +208,7 @@ public class PomIO
         String result = "";
         try
         {
-            final Enumeration<URL> resources = ManipulatingEventSpy.class.getClassLoader()
+            final Enumeration<URL> resources = PomIO.class.getClassLoader()
                                                                          .getResources( "META-INF/MANIFEST.MF" );
 
             while ( resources.hasMoreElements() )
