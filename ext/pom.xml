@@ -30,68 +30,112 @@
   <name>POM Manipulation for Maven Extension</name>
 
   <dependencies>
+
     <dependency>
       <groupId>org.commonjava.maven.ext</groupId>
       <artifactId>pom-manipulation-core</artifactId>
     </dependency>
 
-    <!-- <dependency> -->
-    <!--   <groupId>org.apache.maven</groupId> -->
-    <!--   <artifactId>maven-core</artifactId> -->
-    <!--   <scope>provided</scope> -->
-    <!-- </dependency> -->
-    <!-- <dependency> -->
-    <!--   <groupId>org.codehaus.plexus</groupId> -->
-    <!--   <artifactId>plexus-component-annotations</artifactId> -->
-    <!--   <scope>provided</scope> -->
-    <!-- </dependency> -->
+    <!-- External dependencies -->
 
-    <!-- <dependency> -->
-    <!--   <groupId>org.commonjava.maven.atlas</groupId> -->
-    <!--   <artifactId>atlas-identities</artifactId> -->
-    <!-- </dependency> -->
-    <!-- <dependency> -->
-    <!--   <groupId>org.commonjava.maven.galley</groupId> -->
-    <!--   <artifactId>galley-core</artifactId> -->
-    <!-- </dependency> -->
-    <!-- <dependency> -->
-    <!--   <groupId>org.commonjava.maven.galley</groupId> -->
-    <!--   <artifactId>galley-transport-httpclient</artifactId> -->
-    <!-- </dependency> -->
-    <!-- <dependency> -->
-    <!--   <groupId>org.commonjava.maven.galley</groupId> -->
-    <!--   <artifactId>galley-transport-filearc</artifactId> -->
-    <!-- </dependency> -->
-    <!-- <dependency> -->
-    <!--   <groupId>org.commonjava.maven.galley</groupId> -->
-    <!--   <artifactId>galley-maven</artifactId> -->
-    <!-- </dependency> -->
-    <!-- <dependency> -->
-    <!--   <groupId>ch.qos.logback</groupId> -->
-    <!--   <artifactId>logback-core</artifactId> -->
-    <!-- </dependency> -->
-    <!-- <dependency> -->
-    <!--   <groupId>ch.qos.logback</groupId> -->
-    <!--   <artifactId>logback-classic</artifactId> -->
-    <!-- </dependency> -->
+    <dependency>
+      <groupId>ch.qos.logback</groupId>
+      <artifactId>logback-classic</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>commons-io</groupId>
+      <artifactId>commons-io</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>commons-lang</groupId>
+      <artifactId>commons-lang</artifactId>
+    </dependency>
 
-    <!-- <dependency> -->
-    <!--   <groupId>commons-lang</groupId> -->
-    <!--   <artifactId>commons-lang</artifactId> -->
-    <!-- </dependency> -->
-    <!-- <dependency> -->
-    <!--   <groupId>org.jdom</groupId> -->
-    <!--   <artifactId>jdom2</artifactId> -->
-    <!-- </dependency> -->
-    <!-- <dependency> -->
-    <!--   <groupId>org.commonjava.maven</groupId> -->
-    <!--   <artifactId>maven3-model-jdom-support</artifactId> -->
-    <!-- </dependency> -->
-
+    <dependency>
+      <groupId>org.apache.maven</groupId>
+      <artifactId>maven-artifact</artifactId>
+      <scope>provided</scope>
+    </dependency>
     <dependency>
       <groupId>org.apache.maven</groupId>
       <artifactId>maven-compat</artifactId>
       <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.maven</groupId>
+      <artifactId>maven-core</artifactId>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.maven</groupId>
+      <artifactId>maven-model</artifactId>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.maven</groupId>
+      <artifactId>maven-model-builder</artifactId>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.maven</groupId>
+      <artifactId>maven-settings</artifactId>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.codehaus.plexus</groupId>
+      <artifactId>plexus-component-annotations</artifactId>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.codehaus.plexus</groupId>
+      <artifactId>plexus-interpolation</artifactId>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.codehaus.plexus</groupId>
+      <artifactId>plexus-utils</artifactId>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.commonjava.maven.atlas</groupId>
+      <artifactId>atlas-identities</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.commonjava.maven.galley</groupId>
+      <artifactId>galley-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.commonjava.maven.galley</groupId>
+      <artifactId>galley-core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.commonjava.maven.galley</groupId>
+      <artifactId>galley-maven</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.commonjava.maven.galley</groupId>
+      <artifactId>galley-transport-httpclient</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.commonjava.maven.galley</groupId>
+      <artifactId>galley-transport-filearc</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.commonjava.maven</groupId>
+      <artifactId>maven3-model-jdom-support</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.jdom</groupId>
+      <artifactId>jdom2</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
     </dependency>
   </dependencies>
 
@@ -156,6 +200,7 @@
                   <include>commons-jxpath:commons-jxpath</include>
                   <include>org.codehaus.plexus:plexus-interpolation</include>
                   <include>org.jsoup:jsoup</include>
+                  <include>com.fasterxml.jackson.core:*</include>
                 </includes>
                 <excludes>
                   <exclude>org.commonjava.maven.ext:pom-manipulation-core</exclude>
@@ -195,7 +240,6 @@
         <dependency>
           <groupId>org.apache.maven</groupId>
           <artifactId>apache-maven</artifactId>
-          <version>${mavenVersion}</version>
           <type>zip</type>
           <classifier>bin</classifier>
           <scope>test</scope>

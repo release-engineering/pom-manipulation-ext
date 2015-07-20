@@ -23,6 +23,7 @@ import java.util.Map;
 
 import org.commonjava.maven.ext.manip.resolver.MavenLocationExpander;
 import org.commonjava.maven.galley.TransferException;
+import org.commonjava.maven.galley.event.EventMetadata;
 import org.commonjava.maven.galley.model.ConcreteResource;
 import org.commonjava.maven.galley.model.Location;
 import org.commonjava.maven.galley.model.Transfer;
@@ -46,14 +47,21 @@ public class StubTransport
 
     @Override
     public DownloadJob createDownloadJob( final ConcreteResource resource, final Transfer transfer,
-                                          final int timeoutSeconds )
+                                          final int timeoutSeconds, EventMetadata eventMetadata )
         throws TransferException
     {
         System.out.println( "Creating download for: " + resource.getPath() );
         return new DownloadJob()
         {
+            Transfer t = null;
+
             @Override
-            public Transfer call()
+            public Transfer getTransfer() {
+                return t;
+            }
+
+            @Override
+            public DownloadJob call()
                 throws Exception
             {
                 final byte[] data = dataMap.get( resource.getPath() );
@@ -68,8 +76,9 @@ public class StubTransport
 
                 try
                 {
-                    transfer.delete( false );
-                    out = transfer.openOutputStream( TransferOperation.DOWNLOAD );
+                    t = transfer;
+                    t.delete( false );
+                    out = t.openOutputStream( TransferOperation.DOWNLOAD );
                     out.write( data );
                 }
                 finally
@@ -77,8 +86,7 @@ public class StubTransport
                     closeQuietly( in );
                     closeQuietly( out );
                 }
-
-                return transfer;
+                return this;
             }
 
             @Override
@@ -90,15 +98,15 @@ public class StubTransport
     }
 
     @Override
-    public ExistenceJob createExistenceJob( final ConcreteResource arg0, final int arg1 )
-        throws TransferException
+    public ExistenceJob createExistenceJob( final ConcreteResource arg0, final Transfer transfer, final int arg1 )
+            throws TransferException
     {
         throw new TransferException( "Not implemented in this stub!" );
     }
 
     @Override
-    public PublishJob createPublishJob( final ConcreteResource arg0, final InputStream arg1, final long arg2,
-                                        final int arg3 )
+        public PublishJob createPublishJob( final ConcreteResource arg0, final InputStream arg1, final long arg2,
+        final int arg3 )
         throws TransferException
     {
         throw new TransferException( "Not implemented in this stub!" );
@@ -124,5 +132,4 @@ public class StubTransport
     {
         throw new TransferException( "Not implemented in this stub!" );
     }
-
 }
