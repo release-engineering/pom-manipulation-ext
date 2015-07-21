@@ -21,7 +21,7 @@ import java.util.Scanner;
 /**
  * @author vdedik@redhat.com
  */
-public class VersionTranslatorTest {
+public class DefaultVersionTranslatorTest {
     private VersionTranslator versionTranslator;
 
     @Rule
@@ -29,7 +29,7 @@ public class VersionTranslatorTest {
 
     @Before
     public void startUp() {
-        this.versionTranslator = new VersionTranslator(driver.getBaseUrl());
+        this.versionTranslator = new DefaultVersionTranslator(driver.getBaseUrl());
     }
 
     @Test
@@ -97,7 +97,8 @@ public class VersionTranslatorTest {
 
     @Test
     public void testTranslateVersionsFailNoResponse() {
-        VersionTranslator versionTranslator = new VersionTranslator("http://127.0.0.2");
+        // Some url that doesn't exist used here
+        VersionTranslator versionTranslator = new DefaultVersionTranslator("http://127.0.0.2");
 
         ProjectVersionRef project = new ProjectVersionRef("com.example", "example", "1.0");
         List<ProjectVersionRef> deps = new ArrayList<ProjectVersionRef>() {{
