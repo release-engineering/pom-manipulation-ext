@@ -4,7 +4,7 @@ title: Miscellaneous PME Manipulations
 
 ### Overview
 
-In addition to the main [project-version](/guide/project-version-manip.html), [dependency](/guide/dep-manip.html), and [plugin](/guide/plugin-manip.html) manipulations, PME offers several smaller features. These feaures fall into two main categories:
+In addition to the main [project-version](project-version-manip.html), [dependency](dep-manip.html), and [plugin](plugin-manip.html) manipulations, PME offers several smaller features. These feaures fall into two main categories:
 
 * POM Cleanup
 * Build Management

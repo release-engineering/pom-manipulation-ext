@@ -41,7 +41,7 @@ If you want to make it more permanent, you could add it to your `settings.xml`:
 
 Below are links to more specific information about configuring sets of features in PME:
 
-* [Project version manipulation](/guide/project-version-manip.html)
-* [Dependency manipulation](/guide/dep-manip.html)
-* [Plugin manipulation](/guide/plugin-manip.html)
-* [Properties, Profiles, Repositories, Reporting, Etc.](/guide/misc.html)
+* [Project version manipulation](guide/project-version-manip.html)
+* [Dependency manipulation](guide/dep-manip.html)
+* [Plugin manipulation](guide/plugin-manip.html)
+* [Properties, Profiles, Repositories, Reporting, Etc.](guide/misc.html)
