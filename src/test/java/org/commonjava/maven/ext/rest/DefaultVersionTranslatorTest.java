@@ -16,7 +16,7 @@ import static org.hamcrest.CoreMatchers.*;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Scanner;
+import java.util.regex.Pattern;
 
 /**
  * @author vdedik@redhat.com
@@ -34,7 +34,8 @@ public class DefaultVersionTranslatorTest {
 
     @Test
     public void testTranslateVersionsSuccess() {
-        driver.addExpectation(onRequestTo("/").withMethod(Method.POST),
+        Pattern projectMatcher = Utils.getProjectMatcher("com.example:example:1.0");
+        driver.addExpectation(onRequestTo("/").withMethod(Method.POST).withBody(projectMatcher, "application/json"),
                 giveResponse("{'project':'com.example:example:1.0-redhat-1', " +
                                 "'dependencies': ['com.example:example-dep:1.0-redhat-1']}",
                         "application/json"));
@@ -119,7 +120,8 @@ public class DefaultVersionTranslatorTest {
     @Test(timeout=200)
     public void testTranslateVersionsPerformance() {
         driver.addExpectation(onRequestTo("/").withMethod(Method.POST),
-                giveResponse(readFileFromClasspath("example-response-performance-test.json"), "application/json"));
+                giveResponse(Utils.readFileFromClasspath(
+                        "example-response-performance-test.json"), "application/json"));
 
         ProjectVersionRef project = new ProjectVersionRef("com.example", "example", "1.0");
         List<ProjectVersionRef> deps = new ArrayList<ProjectVersionRef>() {{
@@ -127,20 +129,5 @@ public class DefaultVersionTranslatorTest {
         }};
 
         versionTranslator.translateVersions(project, deps);
-    }
-
-    private String readFileFromClasspath(String filename) {
-        StringBuilder fileContents = new StringBuilder();
-        Scanner scanner = new Scanner(this.getClass().getResourceAsStream(filename));
-        String lineSeparator = System.getProperty("line.separator");
-
-        try {
-            while(scanner.hasNextLine()) {
-                fileContents.append(scanner.nextLine() + lineSeparator);
-            }
-            return fileContents.toString();
-        } finally {
-            scanner.close();
-        }
     }
 }

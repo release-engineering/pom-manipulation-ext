@@ -1,7 +1,9 @@
 package org.commonjava.maven.ext.rest;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Map;
 
 import com.mashape.unirest.http.HttpResponse;
 import com.mashape.unirest.http.JsonNode;
@@ -28,23 +30,27 @@ public class DefaultVersionTranslator implements VersionTranslator {
     public List<ProjectVersionRef> translateVersions(ProjectVersionRef project, List<ProjectVersionRef> dependencies) {
         List<ProjectVersionRef> result = new ArrayList<ProjectVersionRef>();
 
-        // Prepare rest parameters
-        String rawProject = project.toString();
-        List<String> rawDependencies = new ArrayList<String>();
+        // Prepare request body map
+        final String rawProject = project.toString();
+        final List<String> rawDependencies = new ArrayList<String>();
         for (ProjectVersionRef dep : dependencies) {
             rawDependencies.add(dep.toString());
         }
+        Map<String, Object> requestBodyMap = new HashMap<String, Object>() {{
+            put("project", rawProject);
+            put("dependencies", rawDependencies);
+        }};
 
         // Execute request to get translated versions
         HttpResponse<JsonNode> r;
         try {
             r = Unirest.post(this.endpointUrl)
                     .header("accept", "application/json")
-                    .field("project", rawProject)
-                    .field("dependencies", rawDependencies)
+                    .header("Content-Type", "application/json")
+                    .body(new JSONObject(requestBodyMap).toString())
                     .asJson();
         } catch (UnirestException e) {
-            throw new RestException(String.format("Failed to reach server '%s'.", this.endpointUrl));
+            throw new RestException(String.format("Request to server '%s' failed.", this.endpointUrl));
         }
 
         // Handle some corner cases (5xx, 4xx)
