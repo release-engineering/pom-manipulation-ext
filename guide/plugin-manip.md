@@ -4,7 +4,7 @@ title: "Plugin Manipulation"
 
 ### Overview
 
-PME can align plugin versions and configuration using a similar pattern to [dependencies](/guide/dep-manip.html). It also has the ability to standardize the use of `skip` flags that determine whether the `maven-install-plugin` and `maven-deploy-plugin` execute. Finally, by default PME will inject plugin executions for the `project-sources-maven-plugin` and `buildmetadata-maven-plugin`, in order to promote reproducibility of the project build.
+PME can align plugin versions and configuration using a similar pattern to [dependencies](dep-manip.html). It also has the ability to standardize the use of `skip` flags that determine whether the `maven-install-plugin` and `maven-deploy-plugin` execute. Finally, by default PME will inject plugin executions for the `project-sources-maven-plugin` and `buildmetadata-maven-plugin`, in order to promote reproducibility of the project build.
 
 ### Basic Plugin Alignment
 
@@ -12,7 +12,7 @@ A remote plugin management POM is used to specify the plugin versions (and confi
 
     mvn install -DpluginManagement=org.jboss:jboss-parent:10
 
-This will inject all `<pluginManagement/>` versions and configuration from the remote POM into the local POM. As with [dependency management](/guide/dep-manip.html), multiple remote plugin management POMs can be specified on the command line using a comma separated list of GAVs.  The first POM specified will be given the highest priority if conflicts occur.
+This will inject all `<pluginManagement/>` versions and configuration from the remote POM into the local POM. As with [dependency management](dep-manip.html), multiple remote plugin management POMs can be specified on the command line using a comma separated list of GAVs.  The first POM specified will be given the highest priority if conflicts occur.
 
     mvn install -DpluginManagement=org.company:pluginMgrA:1.0,org.company:pluginMgrB:2.0
 
