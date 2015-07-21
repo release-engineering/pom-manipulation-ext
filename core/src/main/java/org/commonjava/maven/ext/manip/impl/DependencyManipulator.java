@@ -43,7 +43,7 @@ import org.commonjava.maven.ext.manip.io.ModelIO;
 import org.commonjava.maven.ext.manip.model.Project;
 import org.commonjava.maven.ext.manip.state.DependencyState;
 import org.commonjava.maven.ext.manip.state.DependencyState.VersionPropertyFormat;
-import org.commonjava.maven.ext.manip.state.ManipulationSession;
+import org.commonjava.maven.ext.manip.ManipulationSession;
 import org.commonjava.maven.ext.manip.state.State;
 import org.commonjava.maven.ext.manip.util.WildcardMap;
 import org.slf4j.Logger;

@@ -44,7 +44,7 @@ import org.commonjava.maven.ext.manip.model.Project;
 import org.commonjava.maven.ext.manip.resolver.GalleyAPIWrapper;
 import org.commonjava.maven.ext.manip.state.DistributionEnforcingState;
 import org.commonjava.maven.ext.manip.state.EnforcingMode;
-import org.commonjava.maven.ext.manip.state.ManipulationSession;
+import org.commonjava.maven.ext.manip.ManipulationSession;
 import org.commonjava.maven.galley.maven.parse.GalleyMavenXMLException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

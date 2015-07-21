@@ -22,12 +22,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Enumeration;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.jar.Manifest;
 
 import org.apache.maven.io.util.DocumentModifier;
@@ -38,7 +33,9 @@ import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 import org.apache.maven.project.MavenProject;
 import org.codehaus.plexus.component.annotations.Component;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
+import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.ext.manip.ManipulationException;
+import org.commonjava.maven.ext.manip.ManipulationManager;
 import org.commonjava.maven.ext.manip.model.Project;
 import org.commonjava.maven.galley.maven.parse.PomPeek;
 import org.jdom2.Comment;
@@ -66,11 +63,17 @@ public class PomIO
     {
     }
 
+    public List<Project> parseProject (final File pom) throws ManipulationException
+    {
+        final List<PomPeek> peeked = peekAtPomHierarchy(pom);
+        return readModelsForManipulation(peeked, pom);
+    }
+
     /**
      * Read {@link Model} instances by parsing the POM directly. This is useful to escape some post-processing that happens when the
      * {@link MavenProject#getOriginalModel()} instance is set.
      */
-    public List<Project> readModelsForManipulation(final List<PomPeek> peeked)
+    private List<Project> readModelsForManipulation(final List<PomPeek> peeked, File executionRoot)
         throws ManipulationException
     {
         final List<Project> projects = new ArrayList<Project>();
@@ -113,6 +116,11 @@ public class PomIO
 
             final Project project = new Project( pom, raw );
             project.setInheritanceRoot( peek.isInheritanceRoot() );
+
+            if ( executionRoot.equals( pom ))
+            {
+                project.setExecutionRoot (true);
+            }
 
             projects.add( project );
         }
@@ -200,6 +208,12 @@ public class PomIO
         }
     }
 
+    /**
+     * Retrieves the SHA this was built with.
+     *
+     * @return
+     * @throws ManipulationException
+     */
     private String getManifestInformation()
         throws ManipulationException
     {
@@ -232,5 +246,153 @@ public class PomIO
         }
 
         return result;
+    }
+
+    private List<PomPeek> peekAtPomHierarchy(final File topPom)
+        throws ManipulationException
+    {
+        final List<PomPeek> peeked = new ArrayList<PomPeek>();
+
+        try
+        {
+            final LinkedList<File> pendingPoms = new LinkedList<File>();
+            pendingPoms.add( topPom.getCanonicalFile() );
+
+            final String topDir = topPom.getParentFile()
+                                        .getCanonicalPath();
+
+            final Set<File> seen = new HashSet<File>();
+
+            File topLevelParent = topPom;
+
+            while ( !pendingPoms.isEmpty() )
+            {
+                final File pom = pendingPoms.removeFirst();
+                seen.add( pom );
+
+                logger.debug( "PEEK: " + pom );
+
+                final PomPeek peek = new PomPeek( pom );
+                final ProjectVersionRef key = peek.getKey();
+                if ( key != null )
+                {
+                    peeked.add( peek );
+
+                    final File dir = pom.getParentFile();
+
+                    final String relPath = peek.getParentRelativePath();
+                    if ( relPath != null )
+                    {
+                        logger.debug( "Found parent relativePath: " + relPath + " in pom: " + pom );
+                        File parent = new File( dir, relPath );
+                        if ( parent.isDirectory() )
+                        {
+                            parent = new File( parent, "pom.xml" );
+                        }
+
+                        logger.debug( "Looking for parent POM: " + parent );
+
+                        parent = parent.getCanonicalFile();
+                        if ( parent.getParentFile()
+                                   .getCanonicalPath()
+                                   .startsWith( topDir ) && parent.exists() && !seen.contains( parent )
+                            && !pendingPoms.contains( parent ) )
+                        {
+                            topLevelParent = parent;
+                            logger.debug( "Possible top level parent " + parent );
+                            pendingPoms.add( parent );
+                        }
+                        else
+                        {
+                            logger.debug( "Skipping reference to non-existent parent relativePath: '" + relPath
+                                + "' in: " + pom );
+                        }
+                    }
+
+                    final Set<String> modules = peek.getModules();
+                    if ( modules != null && !modules.isEmpty() )
+                    {
+                        for ( final String module : modules )
+                        {
+                            logger.debug( "Found module: " + module + " in pom: " + pom );
+
+                            File modPom = new File( dir, module );
+                            if ( modPom.isDirectory() )
+                            {
+                                modPom = new File( modPom, "pom.xml" );
+                            }
+
+                            logger.debug( "Looking for module POM: " + modPom );
+
+                            if ( modPom.exists() && !seen.contains( modPom )
+                                && !pendingPoms.contains( modPom ) )
+                            {
+                                pendingPoms.addLast( modPom );
+                            }
+                            else
+                            {
+                                logger.debug( "Skipping reference to non-existent module: '" + module + "' in: " + pom );
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    logger.debug( "Skipping " + pom + " as its a template file." );
+                }
+            }
+
+            final HashSet<ProjectVersionRef> projectrefs = new HashSet<ProjectVersionRef>();
+
+            for ( final PomPeek p : peeked )
+            {
+                projectrefs.add( p.getKey() );
+
+                if ( p.getPom()
+                      .equals( topLevelParent ) )
+                {
+                    logger.debug( "Setting top level parent to " + p.getPom() + " :: " + p.getKey() );
+                    p.setInheritanceRoot( true );
+                }
+            }
+
+            logger.debug( "Searching pom list " + projectrefs.toString() + " for standalone poms..." );
+
+            for ( final PomPeek p : peeked )
+            {
+                if ( p.getParentKey() == null ||
+                     ! seenThisParent(projectrefs, p.getParentKey()))
+                {
+                    logger.debug( "Found a standalone pom " + p.getPom() + " :: " + p.getKey() );
+                    p.setInheritanceRoot( true );
+                }
+            }
+        }
+        catch ( final IOException e )
+        {
+            throw new ManipulationException( "Problem peeking at POMs.", e );
+        }
+
+        return peeked;
+    }
+
+    /**
+     * Search the list of project references to establish if this parent reference exists in them. This
+     * determines whether the module is inheriting something inside the project or an external reference.
+
+     * @param projectrefs
+     * @param parentKey
+     * @return
+     */
+    private boolean seenThisParent(final HashSet<ProjectVersionRef> projectrefs, final ProjectVersionRef parentKey)
+    {
+        for (final ProjectVersionRef p : projectrefs)
+        {
+            if ( p.versionlessEquals( parentKey ))
+            {
+                return true;
+            }
+        }
+        return false;
     }
 }

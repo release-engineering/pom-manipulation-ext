@@ -39,7 +39,7 @@ import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.ext.manip.ManipulationException;
 import org.commonjava.maven.ext.manip.io.ModelIO;
 import org.commonjava.maven.ext.manip.model.Project;
-import org.commonjava.maven.ext.manip.state.ManipulationSession;
+import org.commonjava.maven.ext.manip.ManipulationSession;
 import org.commonjava.maven.ext.manip.state.PluginState;
 import org.commonjava.maven.ext.manip.state.PluginState.Precedence;
 import org.commonjava.maven.ext.manip.state.State;

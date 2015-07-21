@@ -17,7 +17,7 @@ package org.commonjava.maven.ext.manip.resolver;
 
 import org.apache.maven.execution.MavenSession;
 import org.commonjava.maven.ext.manip.ManipulationException;
-import org.commonjava.maven.ext.manip.state.ManipulationSession;
+import org.commonjava.maven.ext.manip.ManipulationSession;
 
 /**
  * Represents a piece of extension infrastructure that gets initialized when the {@link MavenSession} becomes available.

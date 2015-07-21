@@ -84,6 +84,11 @@ public class Project
      */
     private boolean inheritanceRoot;
 
+    /**
+     * Denotes if this Project is the execution root.
+     */
+    private boolean executionRoot;
+
     public Project( final ProjectVersionRef key, final File pom, final Model model )
         throws ManipulationException
     {
@@ -401,8 +406,6 @@ public class Project
      * This can be important if the model doesn't specify a groupId and its
      * parent reference is relocated (which will result in this project's
      * groupId changing, since it's inherited under these circumstances).
-     *
-     * @throws ProjectToolsException If the new coordinate's version doesn't parse.
      */
     public void updateCoord()
     {
@@ -415,7 +418,7 @@ public class Project
      * modified {@link Model} instance itself to reflect the changes.
      *
      * This may be necessary to make the updates available to other
-     * {@link ProjectModder} instances that will run after the one making the
+     * instances that will run after the one making the
      * change.
      */
     public void flushPluginMaps()
@@ -524,4 +527,17 @@ public class Project
         return new ProjectVersionRef( g, a, v );
     }
 
+    public void setExecutionRoot( boolean b )
+    {
+        executionRoot = true;
+    }
+
+    /**
+     * Returns whether this project is the execution root.
+     * @return
+     */
+    public boolean isExecutionRoot()
+    {
+        return executionRoot;
+    }
 }

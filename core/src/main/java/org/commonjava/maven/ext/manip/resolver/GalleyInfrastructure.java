@@ -26,7 +26,7 @@ import org.apache.maven.repository.MirrorSelector;
 import org.codehaus.plexus.component.annotations.Component;
 import org.codehaus.plexus.component.annotations.Requirement;
 import org.commonjava.maven.ext.manip.ManipulationException;
-import org.commonjava.maven.ext.manip.state.ManipulationSession;
+import org.commonjava.maven.ext.manip.ManipulationSession;
 import org.commonjava.maven.galley.TransferManager;
 import org.commonjava.maven.galley.internal.TransferManagerImpl;
 import org.commonjava.maven.galley.auth.MemoryPasswordManager;

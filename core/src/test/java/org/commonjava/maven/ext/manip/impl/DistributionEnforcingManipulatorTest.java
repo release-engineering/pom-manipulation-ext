@@ -59,7 +59,7 @@ import org.commonjava.maven.ext.manip.resolver.GalleyAPIWrapper;
 import org.commonjava.maven.ext.manip.resolver.GalleyInfrastructure;
 import org.commonjava.maven.ext.manip.state.DistributionEnforcingState;
 import org.commonjava.maven.ext.manip.state.EnforcingMode;
-import org.commonjava.maven.ext.manip.state.ManipulationSession;
+import org.commonjava.maven.ext.manip.ManipulationSession;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
