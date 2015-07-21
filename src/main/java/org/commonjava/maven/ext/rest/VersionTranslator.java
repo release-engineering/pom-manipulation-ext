@@ -8,6 +8,9 @@ import com.mashape.unirest.http.JsonNode;
 import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
+import org.commonjava.maven.ext.rest.exception.ClientException;
+import org.commonjava.maven.ext.rest.exception.ServerException;
+import org.commonjava.maven.ext.rest.exception.RestException;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -33,27 +36,35 @@ public class VersionTranslator {
         List<ProjectVersionRef> result = new ArrayList<ProjectVersionRef>();
 
         // Prepare rest parameters
-        String rawProject = project.getGroupId() + ":" + project.getArtifactId() + ":" + project.getVersionString();
+        String rawProject = project.toString();
         List<String> rawDependencies = new ArrayList<String>();
         for (ProjectVersionRef dep : dependencies) {
-            String gav = dep.getGroupId() + ":" + dep.getArtifactId() + ":" + dep.getVersionString();
-            rawDependencies.add(gav);
+            rawDependencies.add(dep.toString());
         }
 
         // Execute request to get translated versions
-        HttpResponse<JsonNode> rawResult = null;
+        HttpResponse<JsonNode> r;
         try {
-            rawResult = Unirest.post(this.endpointUrl)
+            r = Unirest.post(this.endpointUrl)
                     .header("accept", "application/json")
                     .field("project", rawProject)
                     .field("dependencies", rawDependencies)
                     .asJson();
         } catch (UnirestException e) {
-            e.printStackTrace();
+            throw new RestException(String.format("Failed to reach server '%s'.", this.endpointUrl));
         }
 
-        // TODO: test some corner cases (404, 500 etc)
-        JSONObject jsonResult = rawResult.getBody().getObject();
+        // Handle some corner cases (5xx, 4xx)
+        if (r.getStatus() / 100 == 5) {
+            throw new ServerException(String.format("Server at '%s' failed to translate versions for " +
+                    "project '%s'. HTTP status code %s.", this.endpointUrl, rawProject, r.getStatus()));
+        } else if (r.getStatus() / 100 == 4) {
+            throw new ClientException(String.format("Server at '%s' could not translate versions for " +
+                    "project '%s'. HTTP status code %s.", this.endpointUrl, rawProject, r.getStatus()));
+        }
+
+        // Get result object from response
+        JSONObject jsonResult = r.getBody().getObject();
 
         // Parse project version and create ProjectVersionRef from it
         String projectGav = (String) jsonResult.get("project");
