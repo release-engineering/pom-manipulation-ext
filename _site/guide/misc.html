@@ -1,0 +1,110 @@
+<!-- _includes/base.html -->
+
+
+
+
+
+<!-- base is: .. -->
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset='utf-8' />
+    <meta http-equiv="X-UA-Compatible" content="chrome=1" />
+    <meta name="description" content="" />
+
+    <link rel="stylesheet" type="text/css" media="screen" href="../stylesheets/stylesheet.css">
+
+    <title></title>
+  </head>
+
+  <body>
+
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          <a id="forkme_banner" href="">View on GitHub</a>
+
+          <h1 id="project_title"><a href="..">PME</a> @ <a href="http://commonjava.github.io/">Red Hat</a></h1>
+          <h2 id="project_tagline">Standardize Your Builds</h2>
+        </header>
+    </div>
+    <div id="navlink_wrap" class="outer">
+        
+    </div>
+    
+    <div id="pagetitle_wrap" class="outer">
+      <h3 id="pagetitle" class="inner">Miscellaneous PME Manipulations</h3>
+    </div>
+    
+
+
+
+
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+      <section id="main_content" class="inner">
+        <h3 id="overview">Overview</h3>
+
+<p>In addition to the main <a href="/guide/project-version-manip.html">project-version</a>, <a href="/guide/dep-manip.html">dependency</a>, and <a href="/guide/plugin-manip.html">plugin</a> manipulations, PME offers several smaller features. These feaures fall into two main categories:</p>
+
+<ul>
+<li>POM Cleanup</li>
+<li>Build Management</li>
+</ul>
+
+<h3 id="pom-cleanup">POM Cleanup</h3>
+
+<h4 id="repository-and-reporting-removal">Repository And Reporting Removal</h4>
+
+<p>If the property <code>-Drepo-reporting-removal=true</code> is set, PME will remove all reporting and repository sections from the POM files. </p>
+
+<p>Repository declarations in the POM are considered a bad build smell, since over time they may become defunct or move. </p>
+
+<p>Additionally, most project rebuilers aren&#39;t interested in hosting their own copy of the project&#39;s build reports or generated website; therefore, the reporting section only adds more plugin artifacts to the list of what must be present in the environment for the build to succeed. Eliminating this section simplifies the build and reduces the risk of failed builds.</p>
+
+<h4 id="profile-injection">Profile Injection</h4>
+
+<p>PME supports injection of profiles declared in a remote POM file. Simply supply a remote management POM:</p>
+<div class="highlight"><pre><code class="language-text" data-lang="text">mvn install -DprofileInjection=org.foo:profile-injection:1.0
+</code></pre></div>
+<p>The extension will, for every profile in the remote POM file, replace or add it to the local top level POM file.</p>
+
+<p><strong>Note:</strong> for any existing profile in the modified POM that specifies <code>activeByDefault</code>, this activation option will be removed so profiles are not accidentally disabled due to its exclusive semantics.</p>
+
+<h4 id="project-version-expression-replacement"><code>project.version</code> Expression Replacement</h4>
+
+<p>The extension will automatically replace occurences of the property expression <code>${project.version}</code> in POMs (of packaging type <code>pom</code>).</p>
+
+<p>This avoids a subtle problem that occurs when another project with inherits from this POM. If the child POM (the one that declares the <code>&lt;parent/&gt;</code>) specifies its own version <strong>and that version is different from the parent</strong>, that child version will be used to resolve <code>${project.version}</code> instead of the intended (parent) version. Resolving these expressions when <code>packaging</code> is set to <code>pom</code> (the only type of POM that can act as a parent) prevents this from occurring. </p>
+
+<p>This behavior may be configured by setting:</p>
+<div class="highlight"><pre><code class="language-text" data-lang="text">-Denforce-project-version=on|off
+</code></pre></div>
+<p>As explained above, the default is <code>on</code>.</p>
+
+<h3 id="build-management">Build Management</h3>
+
+<h4 id="property-override">Property Override</h4>
+
+<p>PME may also be used to override properties prior to interpolating the model. Multiple property mappings can be overridden using a similar pattern to dependencies via a remote property management pom.</p>
+<div class="highlight"><pre><code class="language-text" data-lang="text">mvn install -DpropertyManagement=org.foo:property-management:10
+</code></pre></div>
+<p>This will inject the properties at the inheritance root(s). It will also, for every injected property, find any matching property in the project and overwrite its value.</p>
+
+<p>Overriding properties can be a simple, minimalist way of controlling build behavior if the appropriate properties are already defined.</p>
+
+      </section>
+    </div>
+
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        <p class="copyright">This site is maintained by <a href="mailto:jdcasey@redhat.com">Red Hat</a>.</p>
+        <p class="copyright">Its layout is based on the Slate theme by <a href="https://github.com/jasoncostello">Jason Costello</a>.</p>
+      </footer>
+    </div>
+
+  </body>
+</html>
+

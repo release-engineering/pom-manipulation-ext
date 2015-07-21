@@ -1,0 +1,55 @@
+---
+title: "Plugin Manipulation"
+---
+
+### Overview
+
+PME can align plugin versions and configuration using a similar pattern to [dependencies](/guide/dep-manip.html). It also has the ability to standardize the use of `skip` flags that determine whether the `maven-install-plugin` and `maven-deploy-plugin` execute. Finally, by default PME will inject plugin executions for the `project-sources-maven-plugin` and `buildmetadata-maven-plugin`, in order to promote reproducibility of the project build.
+
+### Basic Plugin Alignment
+
+A remote plugin management POM is used to specify the plugin versions (and configuration) to inject:
+
+    mvn install -DpluginManagement=org.jboss:jboss-parent:10
+
+This will inject all `<pluginManagement/>` versions and configuration from the remote POM into the local POM. As with [dependency management](/guide/dep-manip.html), multiple remote plugin management POMs can be specified on the command line using a comma separated list of GAVs.  The first POM specified will be given the highest priority if conflicts occur.
+
+    mvn install -DpluginManagement=org.company:pluginMgrA:1.0,org.company:pluginMgrB:2.0
+
+If there is an existing local configuration then it will be merged with the remote. The following configuration controls the precedence:
+
+    -DpluginManagementPrecedence=[LOCAL|REMOTE]
+
+Default is `REMOTE` which means the remote configuration takes precedence over local.
+
+### Install and Deploy Skip Flag Alignment
+
+By default, this extension will disable the skip flag on the install and deploy plugins. This is useful for build environments that compare the results of install with those from deploy as a validation step. More generally, suppressing installation or deployment tends to be an aesthetic decision that can have subtle functional consequences. It's usually not really worth the hassle.
+
+This feature does support four modes for alignment, controlled via the **enforce-skip** command-line property:
+
+1. **none** - (*default*) don't do any alignment
+2. **on** - (aliased to **true**) enforce that the skip flag is **enabled**, suppressing install and deploy functions of the build (useful mainly for module-specific overrides. See below)
+3. **off** - (aliased to **false**) enforce that the skip flag is **disabled** and that install/deploy functions will execute normally
+4. **detect** - detect the flag state of the install plugin in the main pom (not in profiles), and adjust *any* other install- or deploy-plugin references to the skip flag to be consistent.
+
+Additionally, the feature supports per-module overrides, which can be specified as:
+
+    -DenforceSkip.org.group.id:artifact-id=(none|on|true|off|false|detect)
+
+### Project Sources / Build Metadata Plugin Injection
+
+The extension will inject an execution of [project-sources-maven-plugin](https://github.com/commonjava/project-sources-maven-plugin) and [build-metadata-plugin](https://github.com/release-engineering/buildmetadata-maven-plugin) by default. This will result in an archive being created containing all project sources **after** this extension has made any modifications to the pom.xml's. The archive will only be created in the execution-root project, and will be attached for installation and deployment using the `project-sources` classifier. The metadata plugin will create a build.properties file containing information (e.g. the command line) on the invoked project. This will also be included in the archive tar.
+
+**Note**: this manipulator will only be active by default if one or more other manipulators have been activated.
+
+To skip injection of the sources and metadata plugins, you can use:
+
+    mvn install -Dproject.src.skip=true
+    mvn install -Dproject.meta.skip=true
+
+If unspecified, default versions of the project sources and metadata plugins will be injected (currently, version 0.3 and 1.5.0 respectively). To gain more control over this injection, you can specify the versions for project sources and metadata plugins like this:
+
+    mvn install -Dproject.src.version=x.y
+    mvn install -Dproject.meta.version=x.y
+
