@@ -23,37 +23,57 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>org.commonjava.maven.ext</groupId>
-    <artifactId>repoMgmt1</artifactId>
-    <version>1.0</version>
+    <artifactId>repository-injection-after-removal</artifactId>
+    <version>1.0-SNAPSHOT</version>
 
-    <name>Repository Management POM to use with integration tests</name>
+    <name>Test remove and override repositories using command line properties</name>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
-    <!--profiles>
-        <profile>
-            <id>extra-repositories</id-->
 
+    <!--repositories>
+        <repository>
+            <id>jboss-public-repository-group</id>
+            <name>JBoss Public Maven Repository Group</name>
+            <url>https://repository.jboss.org/nexus/content/groups/public/</url>
+            <layout>default</layout>
+            <releases>
+                <enabled>false</enabled>
+                <updatePolicy>never</updatePolicy>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+                <updatePolicy>never</updatePolicy>
+            </snapshots>
+        </repository>
+    </repositories-->
+
+    <pluginRepositories>
+        <pluginRepository>
+            <id>jboss-public-repository-group</id>
+            <name>JBoss Public Maven Repository Group</name>
+            <url>https://repository.jboss.org/nexus/content/groups/public/</url>
+            <layout>default</layout>
+            <releases>
+                <enabled>false</enabled>
+                <updatePolicy>never</updatePolicy>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+                <updatePolicy>never</updatePolicy>
+            </snapshots>
+        </pluginRepository>
+    </pluginRepositories>
+
+    <profiles>
+        <profile>
+            <id>extra-repositories</id>
             <repositories>
                 <repository>
                     <id>jboss-public-repository-group</id>
                     <name>JBoss Public Maven Repository Group</name>
-                    <url>https://repository.jboss.org/nexus/content/groups/public/</url>
-                    <layout>default</layout>
-                    <releases>
-                        <enabled>true</enabled>
-                        <updatePolicy>never</updatePolicy>
-                    </releases>
-                    <snapshots>
-                        <enabled>false</enabled>
-                        <updatePolicy>never</updatePolicy>
-                    </snapshots>
-                </repository>
-                <repository>
-                    <id>jboss-public-repository-group-2</id>
-                    <name>JBoss Public Maven Repository Group 2</name>
                     <url>https://repository.jboss.org/nexus/content/groups/public/</url>
                     <layout>default</layout>
                     <releases>
@@ -66,7 +86,6 @@
                     </snapshots>
                 </repository>
             </repositories>
-
             <pluginRepositories>
                 <pluginRepository>
                     <id>jboss-public-repository-group</id>
@@ -82,22 +101,20 @@
                         <updatePolicy>never</updatePolicy>
                     </snapshots>
                 </pluginRepository>
-                <pluginRepository>
-                    <id>jboss-public-repository-group-2</id>
-                    <name>JBoss Public Maven Repository Group 2</name>
-                    <url>https://repository.jboss.org/nexus/content/groups/public/</url>
-                    <layout>default</layout>
-                    <releases>
-                        <enabled>false</enabled>
-                        <updatePolicy>never</updatePolicy>
-                    </releases>
-                    <snapshots>
-                        <enabled>false</enabled>
-                        <updatePolicy>never</updatePolicy>
-                    </snapshots>
-                </pluginRepository>
             </pluginRepositories>
-        <!--/profile>
-    </profiles-->
+            <reporting>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-report-plugin</artifactId>
+                        <version>2.6</version>
+                        <configuration>
+                            <aggregate>true</aggregate>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </reporting>
+        </profile>
+    </profiles>
 
 </project>
