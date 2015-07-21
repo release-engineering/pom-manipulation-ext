@@ -15,6 +15,8 @@ Multiple remote dependency-management poms can be specified using a comma separa
     mvn install -DdependencyManagement=org.foo:my-dep-pom:1.0,org.bar:my-dep-pom:2.0
 
 
+**NOTE:** For existing dependencies that reference a property, PME will update this property with the new version. If the property can't be found (e.g. it was inherited), a new one will be injected at the top level. This update of the property's value **may** implicitly align other dependencies using the same property that were not explicitly requested to be aligned.
+
 #### ODDITY: Parent Version Override
 
 PME will also change any parent reference it finds that matches an entry in the remote BOM.
@@ -33,8 +35,6 @@ will change to:
          <artifactId>switchyard-parent</artifactId>
          <version>2.0.0.Alpha1-rebuild-1</version>
 
-
-**NOTE:** For existing dependencies that reference a property, PME will update this property with the new version. If the property can't be found (e.g. it was inherited), a new one will be injected at the top level. This update of the property's value **may** implicitly align other dependencies using the same property that were not explicitly requested to be aligned.
 
 ### Direct Dependencies
 
