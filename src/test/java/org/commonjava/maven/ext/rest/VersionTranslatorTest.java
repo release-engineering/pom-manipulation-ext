@@ -16,6 +16,7 @@ import static org.hamcrest.CoreMatchers.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
 
 /**
  * @author vdedik@redhat.com
@@ -59,7 +60,7 @@ public class VersionTranslatorTest {
 
         ProjectVersionRef project = new ProjectVersionRef("com.example", "example", "1.0");
         List<ProjectVersionRef> deps = new ArrayList<ProjectVersionRef>() {{
-            add(new ProjectVersionRef("com.example", "example-dep", "1.0"));
+            // Nothing necessary here
         }};
 
         try {
@@ -80,7 +81,7 @@ public class VersionTranslatorTest {
 
         ProjectVersionRef project = new ProjectVersionRef("com.example", "example", "1.0");
         List<ProjectVersionRef> deps = new ArrayList<ProjectVersionRef>() {{
-            add(new ProjectVersionRef("com.example", "example-dep", "1.0"));
+            // Nothing necessary here
         }};
 
         try {
@@ -100,7 +101,7 @@ public class VersionTranslatorTest {
 
         ProjectVersionRef project = new ProjectVersionRef("com.example", "example", "1.0");
         List<ProjectVersionRef> deps = new ArrayList<ProjectVersionRef>() {{
-            add(new ProjectVersionRef("com.example", "example-dep", "1.0"));
+            // Nothing necessary here
         }};
 
         try {
@@ -111,6 +112,34 @@ public class VersionTranslatorTest {
         } catch (Exception ex) {
             fail(String.format("Expected exception is RestException, instead %s thrown.",
                     ex.getClass().getSimpleName()));
+        }
+    }
+
+    @Test(timeout=200)
+    public void testTranslateVersionsPerformance() {
+        driver.addExpectation(onRequestTo("/").withMethod(Method.POST),
+                giveResponse(readFileFromClasspath("example-response-performance-test.json"), "application/json"));
+
+        ProjectVersionRef project = new ProjectVersionRef("com.example", "example", "1.0");
+        List<ProjectVersionRef> deps = new ArrayList<ProjectVersionRef>() {{
+            // Nothing necessary here
+        }};
+
+        versionTranslator.translateVersions(project, deps);
+    }
+
+    private String readFileFromClasspath(String filename) {
+        StringBuilder fileContents = new StringBuilder();
+        Scanner scanner = new Scanner(this.getClass().getResourceAsStream(filename));
+        String lineSeparator = System.getProperty("line.separator");
+
+        try {
+            while(scanner.hasNextLine()) {
+                fileContents.append(scanner.nextLine() + lineSeparator);
+            }
+            return fileContents.toString();
+        } finally {
+            scanner.close();
         }
     }
 }
