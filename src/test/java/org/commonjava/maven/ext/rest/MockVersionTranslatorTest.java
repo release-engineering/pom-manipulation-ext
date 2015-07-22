@@ -31,7 +31,7 @@ public class MockVersionTranslatorTest {
         List<ProjectVersionRef> expectedResult = new ArrayList<ProjectVersionRef>() {{
             add(new ProjectVersionRef("org.overlord.rtgov", "parent", "2.0.2.redhat-1"));
             add(new ProjectVersionRef("org.jboss.soa.bpel", "riftsaw-bpel-api", "3.1.0.Final-redhat-1"));
-            add(new ProjectVersionRef("org.overlord.rtgov.common", "rtgov-elasticsearch", "2.0.2.redhat-1"));
+            add(new ProjectVersionRef("org.overlord.rtgov.common", "rtgov-elasticsearch", "2.0.2"));
         }};
 
         assertThat(actualResult, is(expectedResult));
