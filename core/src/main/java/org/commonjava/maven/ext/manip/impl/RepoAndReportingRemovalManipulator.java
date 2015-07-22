@@ -17,11 +17,7 @@ package org.commonjava.maven.ext.manip.impl;
 
 import static org.commonjava.maven.ext.manip.util.IdUtils.ga;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Properties;
-import java.util.Set;
+import java.util.*;
 
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Profile;
@@ -91,14 +87,14 @@ public class RepoAndReportingRemovalManipulator
             if ( model.getRepositories() != null && !model.getRepositories()
                                                           .isEmpty() )
             {
-                model.setRepositories( Collections.<Repository> emptyList() );
+                model.setRepositories( new ArrayList<Repository>() );
                 changed.add( project );
             }
 
             if ( model.getPluginRepositories() != null && !model.getPluginRepositories()
                                                                 .isEmpty() )
             {
-                model.setPluginRepositories( Collections.<Repository> emptyList() );
+                model.setPluginRepositories( new ArrayList<Repository>() );
                 changed.add( project );
             }
 
@@ -117,13 +113,13 @@ public class RepoAndReportingRemovalManipulator
                 {
                     if ( !profile.getRepositories().isEmpty() )
                     {
-                        profile.setRepositories( Collections.<Repository> emptyList() );
+                        profile.setRepositories( new ArrayList<Repository>() );
                         changed.add( project );
                     }
 
                     if ( !profile.getPluginRepositories().isEmpty() )
                     {
-                        profile.setPluginRepositories( Collections.<Repository> emptyList() );
+                        profile.setPluginRepositories( new ArrayList<Repository>() );
                         changed.add( project );
                     }
 

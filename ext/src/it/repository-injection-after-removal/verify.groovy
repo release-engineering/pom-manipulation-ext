@@ -30,6 +30,6 @@ assert pom.repositories.children().size() == 2
 assert pom.pluginRepositories.children().size() == 2
 
 
-// Check the releases of jboss-public-repository-group repository is injected
+// Check that jboss-public-repository-group repository is injected
 def repository = pom.repositories.repository.find { it.id.text() == 'jboss-public-repository-group' }
 assert repository != null
