@@ -15,6 +15,7 @@
  */
 package org.commonjava.maven.ext.manip.state;
 
+import org.commonjava.maven.ext.manip.ManipulationSession;
 import org.commonjava.maven.ext.manip.impl.Manipulator;
 
 import java.util.ArrayList;

@@ -13,25 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.commonjava.maven.ext.manip.state;
-
-import java.io.File;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
+package org.commonjava.maven.ext.manip;
 
 import org.apache.maven.artifact.repository.ArtifactRepository;
-import org.apache.maven.execution.MavenExecutionRequest;
 import org.apache.maven.execution.MavenSession;
-import org.apache.maven.project.ProjectBuildingRequest;
 import org.apache.maven.settings.Settings;
 import org.codehaus.plexus.component.annotations.Component;
 import org.codehaus.plexus.component.annotations.Requirement;
-import org.commonjava.maven.ext.manip.ManipulationException;
 import org.commonjava.maven.ext.manip.impl.Manipulator;
 import org.commonjava.maven.ext.manip.model.Project;
+import org.commonjava.maven.ext.manip.state.State;
+import org.commonjava.maven.ext.manip.state.VersioningState;
+
+import java.io.File;
+import java.util.*;
 
 /**
  * Repository for components that help manipulate POMs as needed, and state related to each {@link Manipulator}
@@ -75,13 +70,7 @@ public class ManipulationSession
      */
     public boolean isEnabled()
     {
-        return getExecutionRoot() != null
-            && !Boolean.valueOf( getUserProperties().getProperty( MANIPULATIONS_DISABLED_PROP, "false" ) );
-    }
-
-    public MavenExecutionRequest getRequest()
-    {
-        return mavenSession == null ? null : mavenSession.getRequest();
+        return !Boolean.valueOf( getUserProperties().getProperty( MANIPULATIONS_DISABLED_PROP, "false" ) );
     }
 
     public void setState( final State state )
@@ -94,18 +83,6 @@ public class ManipulationSession
         return stateType.cast( states.get( stateType ) );
     }
 
-    public ProjectBuildingRequest getProjectBuildingRequest()
-    {
-        return mavenSession == null ? null : mavenSession.getRequest()
-                                                         .getProjectBuildingRequest();
-    }
-
-    public boolean isRecursive()
-    {
-        return mavenSession == null ? false : mavenSession.getRequest()
-                                                          .isRecursive();
-    }
-
     public void setMavenSession( final MavenSession mavenSession )
     {
         this.mavenSession = mavenSession;
@@ -115,12 +92,6 @@ public class ManipulationSession
     {
         return mavenSession == null ? new Properties() : mavenSession.getRequest()
                                                                      .getUserProperties();
-    }
-
-    public File getExecutionRoot()
-    {
-        return mavenSession == null ? null : mavenSession.getRequest()
-                                                         .getPom();
     }
 
     public void setProjects( final List<Project> projects )
@@ -137,6 +108,17 @@ public class ManipulationSession
     {
         return mavenSession == null ? null : mavenSession.getRequest()
                                                          .getRemoteRepositories();
+    }
+
+
+    public File getPom() throws ManipulationException
+    {
+        if (mavenSession == null)
+        {
+            throw new ManipulationException( "Invalid session" );
+        }
+
+        return mavenSession.getRequest().getPom();
     }
 
     public File getTargetDir()
@@ -162,11 +144,20 @@ public class ManipulationSession
                                                          .getLocalRepository();
     }
 
+    /**
+     * Used by extension ManipulatingEventSpy to store any errors during project construction and manipulation
+     * @param error
+     */
     public void setError( final ManipulationException error )
     {
         this.error = error;
     }
 
+    /**
+     * Used by extension ManipulatinglifeCycleParticipant to retrieve any errors stored
+     * by ManipulatingEventSpy
+     * @return ManipulationException
+     */
     public ManipulationException getError()
     {
         return error;

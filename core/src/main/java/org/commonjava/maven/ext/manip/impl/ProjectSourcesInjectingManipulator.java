@@ -31,7 +31,7 @@ import org.codehaus.plexus.component.annotations.Component;
 import org.codehaus.plexus.util.xml.Xpp3Dom;
 import org.commonjava.maven.ext.manip.ManipulationException;
 import org.commonjava.maven.ext.manip.model.Project;
-import org.commonjava.maven.ext.manip.state.ManipulationSession;
+import org.commonjava.maven.ext.manip.ManipulationSession;
 import org.commonjava.maven.ext.manip.state.ProjectSourcesInjectingState;
 import org.commonjava.maven.ext.manip.state.State;
 import org.slf4j.Logger;
@@ -104,7 +104,7 @@ public class ProjectSourcesInjectingManipulator
         {
             for ( final Project project : projects )
             {
-                if ( project.getPom().equals( session.getExecutionRoot() ))
+                if ( project.isExecutionRoot() )
                 {
                     logger.info( "Examining {} to apply sources/metadata plugins.", project );
 

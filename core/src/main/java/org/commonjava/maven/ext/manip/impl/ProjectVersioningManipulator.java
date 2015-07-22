@@ -15,40 +15,22 @@
  */
 package org.commonjava.maven.ext.manip.impl;
 
-import static org.commonjava.maven.ext.manip.util.IdUtils.ga;
-import static org.commonjava.maven.ext.manip.util.IdUtils.gav;
-
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
-
 import org.apache.maven.execution.MavenExecutionRequest;
-import org.apache.maven.model.Dependency;
-import org.apache.maven.model.DependencyManagement;
-import org.apache.maven.model.Model;
-import org.apache.maven.model.ModelBase;
-import org.apache.maven.model.Parent;
-import org.apache.maven.model.Profile;
+import org.apache.maven.model.*;
 import org.codehaus.plexus.component.annotations.Component;
 import org.codehaus.plexus.component.annotations.Requirement;
-import org.codehaus.plexus.interpolation.InterpolationException;
-import org.codehaus.plexus.interpolation.PrefixAwareRecursionInterceptor;
-import org.codehaus.plexus.interpolation.PrefixedObjectValueSource;
-import org.codehaus.plexus.interpolation.PropertiesBasedValueSource;
-import org.codehaus.plexus.interpolation.RecursionInterceptor;
-import org.codehaus.plexus.interpolation.StringSearchInterpolator;
+import org.codehaus.plexus.interpolation.*;
 import org.commonjava.maven.ext.manip.ManipulationException;
-import org.commonjava.maven.ext.manip.ManipulationManager;
-import org.commonjava.maven.ext.manip.io.PomIO;
 import org.commonjava.maven.ext.manip.model.Project;
-import org.commonjava.maven.ext.manip.state.ManipulationSession;
+import org.commonjava.maven.ext.manip.ManipulationSession;
 import org.commonjava.maven.ext.manip.state.VersioningState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.*;
+
+import static org.commonjava.maven.ext.manip.util.IdUtils.ga;
+import static org.commonjava.maven.ext.manip.util.IdUtils.gav;
 
 /**
  * {@link Manipulator} implementation that can modify a project's version with either static or calculated, incremental version qualifier. Snapshot
@@ -117,9 +99,6 @@ public class ProjectVersioningManipulator
      * Apply any project versioning changes accumulated in the {@link VersioningState} instance associated with the {@link ManipulationSession} to
      * the list of {@link Project}'s given. This happens near the end of the Maven session-bootstrapping sequence, before the projects are
      * discovered/read by the main Maven build initialization.
-     *
-     * This method depends on {@link PomIO#readModelsForManipulation(List)} output stored in the {@link ManipulationSession},
-     * a task which is handled by the {@link ManipulationManager}.
      */
     @Override
     public Set<Project> applyChanges( final List<Project> projects, final ManipulationSession session )
