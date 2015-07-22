@@ -138,11 +138,6 @@ public class Cli
         try
         {
             manipulationManager.init( session );
-
-            logger.info( "### session.gettargetdir " + session.getTargetDir() + " and target "
-                                         + target );
-            logger.info ("### session.getpom " + session.getPom() + " and target " + target);
-
             manipulationManager.scanAndApply( session );
         }
         catch ( ManipulationException e )
