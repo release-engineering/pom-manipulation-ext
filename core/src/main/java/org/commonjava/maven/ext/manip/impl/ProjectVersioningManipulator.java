@@ -63,7 +63,7 @@ public class ProjectVersioningManipulator
 
     /**
      * Use the {@link VersionCalculator} to calculate any project version changes, and store them in the {@link VersioningState} that was associated
-     * with the {@link ManipulationSession} via the {@link ProjectVersioningManipulator#initRequest(MavenExecutionRequest, ManipulationSession)}
+     * with the {@link ManipulationSession} via the {@link ProjectVersioningManipulator#init(ManipulationSession)}
      * method.
      */
     @Override

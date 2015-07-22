@@ -64,7 +64,7 @@ public class PluginManipulator
     /**
      * Initialize the {@link PluginState} state holder in the {@link ManipulationSession}. This state holder detects
      * version-change configuration from the Maven user properties (-D properties from the CLI) and makes it available for
-     * later invocations of {@link AlignmentManipulator#scan(List, ManipulationSession)} and the apply* methods.
+     * later invocations of {@link Manipulator#scan(List, ManipulationSession)} and the apply* methods.
      */
     @Override
     public void init( final ManipulationSession session )

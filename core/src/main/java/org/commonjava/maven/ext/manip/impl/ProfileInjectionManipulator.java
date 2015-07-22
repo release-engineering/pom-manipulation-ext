@@ -74,7 +74,7 @@ public class ProfileInjectionManipulator
     }
 
     /**
-     * Apply the profile injecton changes to the top level pom.
+     * Apply the profile injection changes to the top level pom.
      */
     @Override
     public Set<Project> applyChanges( final List<Project> projects, final ManipulationSession session )

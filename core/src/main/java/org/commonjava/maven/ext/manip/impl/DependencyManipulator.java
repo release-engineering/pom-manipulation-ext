@@ -66,7 +66,7 @@ public class DependencyManipulator
     /**
      * Initialize the {@link DependencyState} state holder in the {@link ManipulationSession}. This state holder detects
      * version-change configuration from the Maven user properties (-D properties from the CLI) and makes it available for
-     * later invocations of {@link org.commonjava.maven.ext.manip.impl.Manipulator#scan(List, ManipulationSession)} and the apply* methods.
+     * later invocations of {@link Manipulator#scan(List, ManipulationSession)} and the apply* methods.
      */
     @Override
     public void init( final ManipulationSession session )
