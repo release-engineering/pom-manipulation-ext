@@ -1,5 +1,6 @@
 package org.commonjava.maven.ext.manip;
 
+import ch.qos.logback.classic.Level;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
@@ -12,62 +13,56 @@ import org.apache.maven.execution.DefaultMavenExecutionRequest;
 import org.apache.maven.execution.DefaultMavenExecutionResult;
 import org.apache.maven.execution.MavenExecutionRequest;
 import org.apache.maven.execution.MavenSession;
-import org.apache.maven.mae.MAEException;
-import org.apache.maven.mae.app.AbstractMAEApplication;
+import org.codehaus.plexus.DefaultPlexusContainer;
 import org.codehaus.plexus.PlexusContainer;
-import org.codehaus.plexus.component.annotations.Component;
-import org.codehaus.plexus.component.annotations.Requirement;
+import org.codehaus.plexus.PlexusContainerException;
+import org.codehaus.plexus.component.repository.exception.ComponentLookupException;
 import org.commonjava.maven.ext.manip.io.PomIO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Properties;
 
-@Component( role = Cli.class )
-public class Cli extends AbstractMAEApplication
+public class Cli
 {
     private final Logger logger = LoggerFactory.getLogger( getClass() );
 
-    @Requirement
-    private PlexusContainer container;
-
-    @Requirement
     private ManipulationSession session;
 
-    @Requirement
     private ManipulationManager manipulationManager;
 
-    @Requirement
     private PomIO pomIO;
 
+    /**
+     * Default pom file to operate against.
+     */
     private File target = new File( System.getProperty( "user.dir" ), "pom.xml" );
 
+    /**
+     * Properties a user may define on the command line.
+     */
     private Properties userProps;
 
     public static void main( String[] args )
     {
-        Cli pmeCli = new Cli();
-        try
-        {
-            pmeCli.load();
-        }
-        catch ( MAEException e )
-        {
-            pmeCli.logger.debug( "Caught problem instantiating ", e );
-            System.err.println( "Unable to start Cli subsystem" );
-            System.exit( 1 );
-        }
-
-        pmeCli.run( args );
+        new Cli().run( args );
     }
+
 
     private void run( String[] args )
     {
         Options options = new Options();
         options.addOption( "h", false, "Print this help message." );
+        options.addOption( Option.builder( "d" )
+                                 .longOpt( "debug" )
+                                 .desc( "Enable debug" )
+                                 .build() );
+        options.addOption( Option.builder( "h" )
+                                 .longOpt( "help" )
+                                 .desc( "Print help" )
+                                 .build() );
         options.addOption( Option.builder( "f" )
                                  .longOpt( "file" )
                                  .hasArgs()
@@ -98,12 +93,12 @@ public class Cli extends AbstractMAEApplication
 
         }
 
-        System.out.println( "### Options " + parser.toString() );
-        System.out.println( "### Args " + Arrays.toString( cmd.getOptions() ) );
-        System.out.println( "### Args " + Arrays.toString( cmd.getArgs() ) );
-        System.out.println( "### Args " + cmd.getArgList() );
-        System.out.println( "### Properties " + cmd.getOptionProperties( "D" ) );
-
+        if (cmd.hasOption( 'h' ))
+        {
+            HelpFormatter formatter = new HelpFormatter();
+            formatter.printHelp( "...", options );
+            System.exit( 1 );
+        }
         if (cmd.hasOption( 'D' ))
         {
             userProps = cmd.getOptionProperties( "D" );
@@ -113,7 +108,16 @@ public class Cli extends AbstractMAEApplication
             target = new File (cmd.getOptionValue( 'f' ));
         }
 
-        createSession(target);
+        createSession( target );
+
+        // Set debug logging after session creation else we get the log filled with Plexus
+        // creation stuff.
+        if (cmd.hasOption( 'd' ))
+        {
+            final ch.qos.logback.classic.Logger root =
+                            (ch.qos.logback.classic.Logger) LoggerFactory.getLogger( org.slf4j.Logger.ROOT_LOGGER_NAME );
+            root.setLevel( Level.DEBUG );
+        }
 
         if ( !session.isEnabled() )
         {
@@ -135,9 +139,9 @@ public class Cli extends AbstractMAEApplication
         {
             manipulationManager.init( session );
 
-            logger.info( "### ee.getSession().getRequest().getPom() " + session.getTargetDir() + " and target "
+            logger.info( "### session.gettargetdir " + session.getTargetDir() + " and target "
                                          + target );
-            logger.info ("### session.gettargetdir " + session.getPom() + " and target " + target);
+            logger.info ("### session.getpom " + session.getPom() + " and target " + target);
 
             manipulationManager.scanAndApply( session );
         }
@@ -148,41 +152,40 @@ public class Cli extends AbstractMAEApplication
         }
     }
 
-    @Override
-    public String getId()
-    {
-        return null;
-    }
-
-    @Override
-    public String getName()
-    {
-        return "POM Manipulation Extension for Maven " + getClass().getPackage().getImplementationVersion();
-    }
-
     private void createSession( File target )
     {
-        final MavenExecutionRequest req = new DefaultMavenExecutionRequest().setUserProperties( System.getProperties() )
-                                                                            .setUserProperties( userProps )
-                                                                            .setRemoteRepositories(
-                                                                                            Collections.<ArtifactRepository>emptyList() );
-        final MavenSession mavenSession = new MavenSession( container, null, req, new DefaultMavenExecutionResult() );
-        mavenSession.getRequest().setPom( target );
+        try
+        {
+            PlexusContainer container = new DefaultPlexusContainer( );
 
-        session.setMavenSession( mavenSession );
-    }
-/*
+            final MavenExecutionRequest req =
+                            new DefaultMavenExecutionRequest().setUserProperties( System.getProperties() )
+                                                              .setUserProperties( userProps )
+                                                              .setRemoteRepositories(
+                                                                              Collections.<ArtifactRepository>emptyList() );
+            final MavenSession mavenSession =
+                            new MavenSession( container, null, req, new DefaultMavenExecutionResult() );
 
-    @Override
-    protected void configureBuilder( final MAEEmbedderBuilder builder )
-        throws MAEException
-    {
-        super.configureBuilder( builder );
+            mavenSession.getRequest().setPom( target );
+
+            pomIO = container.lookup( PomIO.class );
+            session = container.lookup( ManipulationSession.class );
+            manipulationManager = container.lookup( ManipulationManager.class );
+
+            session.setMavenSession( mavenSession );
+        }
+        catch ( ComponentLookupException e )
+        {
+            logger.debug( "Caught problem instantiating ", e );
+            System.err.println( "Unable to start Cli subsystem" );
+            System.exit( 1 );
+            e.printStackTrace();
+        }
+        catch ( PlexusContainerException e )
+        {
+            logger.debug( "Caught problem instantiating ", e );
+            System.err.println( "Unable to start Cli subsystem" );
+            System.exit( 1 );
+        }
     }
-    @Override
-    public ComponentSelector getComponentSelector()
-    {
-        return new ComponentSelector().setSelection( SessionInitializer.class, "vman" );
-    }
-    */
 }

@@ -29,18 +29,6 @@
 
   <name>POM Manipulation CLI for Maven</name>
 
-  <dependencyManagement>
-    <dependencies>
-      <dependency>
-        <groupId>org.apache.maven.mae</groupId>
-        <artifactId>mae-app-bom</artifactId>
-        <version>${maeVersion}</version>
-        <type>pom</type>
-        <scope>import</scope>
-      </dependency>
-    </dependencies>
-  </dependencyManagement>
-
   <dependencies>
     <dependency>
       <groupId>org.commonjava.maven.ext</groupId>
@@ -54,30 +42,13 @@
     </dependency>
 
     <dependency>
-      <groupId>org.apache.maven.mae</groupId>
-      <artifactId>mae-booter</artifactId>
-      <exclusions>
-        <exclusion>
-          <groupId>log4j</groupId>
-          <artifactId>log4j</artifactId>
-        </exclusion>
-      </exclusions>
-      <scope>compile</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>org.apache.maven.mae</groupId>
-      <artifactId>mae-api</artifactId>
-      <scope>compile</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.maven.mae.components</groupId>
-      <artifactId>mae-project-tools</artifactId>
+      <groupId>org.apache.maven</groupId>
+      <artifactId>maven-core</artifactId>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.maven</groupId>
-      <artifactId>maven-core</artifactId>
+      <artifactId>maven-compat</artifactId>
       <scope>compile</scope>
     </dependency>
     <dependency>
@@ -103,6 +74,10 @@
       <scope>compile</scope>
     </dependency>
 
+    <dependency>
+      <groupId>ch.qos.logback</groupId>
+      <artifactId>logback-classic</artifactId>
+    </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
