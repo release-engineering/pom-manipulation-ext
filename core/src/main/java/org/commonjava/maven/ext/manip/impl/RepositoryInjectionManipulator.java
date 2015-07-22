@@ -15,7 +15,17 @@
  */
 package org.commonjava.maven.ext.manip.impl;
 
-import static org.commonjava.maven.ext.manip.util.IdUtils.ga;
+import org.apache.maven.model.Model;
+import org.apache.maven.model.Repository;
+import org.codehaus.plexus.component.annotations.Component;
+import org.codehaus.plexus.component.annotations.Requirement;
+import org.commonjava.maven.ext.manip.ManipulationException;
+import org.commonjava.maven.ext.manip.ManipulationSession;
+import org.commonjava.maven.ext.manip.io.ModelIO;
+import org.commonjava.maven.ext.manip.model.Project;
+import org.commonjava.maven.ext.manip.state.RepositoryInjectionState;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Collections;
 import java.util.HashSet;
@@ -24,18 +34,7 @@ import java.util.List;
 import java.util.Properties;
 import java.util.Set;
 
-import org.apache.maven.model.Model;
-import org.apache.maven.model.Profile;
-import org.apache.maven.model.Repository;
-import org.codehaus.plexus.component.annotations.Component;
-import org.codehaus.plexus.component.annotations.Requirement;
-import org.commonjava.maven.ext.manip.ManipulationException;
-import org.commonjava.maven.ext.manip.io.ModelIO;
-import org.commonjava.maven.ext.manip.model.Project;
-import org.commonjava.maven.ext.manip.state.ManipulationSession;
-import org.commonjava.maven.ext.manip.state.RepositoryInjectionState;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static org.commonjava.maven.ext.manip.util.IdUtils.ga;
 
 /**
  * {@link Manipulator} implementation that can resolve a remote pom file and inject the remote pom's
@@ -94,7 +93,7 @@ public class RepositoryInjectionManipulator
 
         for ( final Project project : projects )
         {
-            final String ga = ga(project);
+            final String ga = ga( project );
             logger.info( getClass().getSimpleName() + " applying changes to: " + ga );
             final Model model = project.getModel();
 
@@ -106,10 +105,11 @@ public class RepositoryInjectionManipulator
                 if ( !remoteRepositories.isEmpty() )
                 {
                     final Iterator<Repository> i1 = remoteRepositories.iterator();
-                    while (i1.hasNext()) {
-                        addRepository(repositories, i1.next());
+                    while ( i1.hasNext() )
+                    {
+                        addRepository( repositories, i1.next() );
                     }
-                    changed.add(project);
+                    changed.add( project );
                 }
 
                 // inject plugin repositories
@@ -118,10 +118,11 @@ public class RepositoryInjectionManipulator
                 if ( !remotePluginRepositories.isEmpty() )
                 {
                     final Iterator<Repository> i2 = remotePluginRepositories.iterator();
-                    while (i2.hasNext()) {
-                        addRepository(pluginRepositories, i2.next());
+                    while ( i2.hasNext() )
+                    {
+                        addRepository( pluginRepositories, i2.next() );
                     }
-                    changed.add(project);
+                    changed.add( project );
                 }
             }
 
