@@ -17,13 +17,10 @@ package org.commonjava.maven.ext.manip.impl;
 
 import static org.commonjava.maven.ext.manip.util.IdUtils.ga;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Properties;
-import java.util.Set;
+import java.util.*;
 
 import org.apache.maven.model.Model;
+import org.apache.maven.model.Profile;
 import org.apache.maven.model.Repository;
 import org.codehaus.plexus.component.annotations.Component;
 import org.commonjava.maven.ext.manip.ManipulationException;
@@ -90,14 +87,14 @@ public class RepoAndReportingRemovalManipulator
             if ( model.getRepositories() != null && !model.getRepositories()
                                                           .isEmpty() )
             {
-                model.setRepositories( Collections.<Repository> emptyList() );
+                model.setRepositories( new ArrayList<Repository>() );
                 changed.add( project );
             }
 
             if ( model.getPluginRepositories() != null && !model.getPluginRepositories()
                                                                 .isEmpty() )
             {
-                model.setPluginRepositories( Collections.<Repository> emptyList() );
+                model.setPluginRepositories( new ArrayList<Repository>() );
                 changed.add( project );
             }
 
@@ -106,6 +103,35 @@ public class RepoAndReportingRemovalManipulator
                 model.setReporting( null );
                 changed.add( project );
             }
+
+            // remove repositories in the profiles as well
+            final List<Profile> profiles = model.getProfiles();
+
+            if ( !profiles.isEmpty() )
+            {
+                for ( final Profile profile : profiles )
+                {
+                    if ( !profile.getRepositories().isEmpty() )
+                    {
+                        profile.setRepositories( new ArrayList<Repository>() );
+                        changed.add( project );
+                    }
+
+                    if ( !profile.getPluginRepositories().isEmpty() )
+                    {
+                        profile.setPluginRepositories( new ArrayList<Repository>() );
+                        changed.add( project );
+                    }
+
+                    if ( profile.getReporting() != null )
+                    {
+                        profile.setReporting( null );
+                        changed.add( project );
+                    }
+                }
+
+            }
+
         }
 
         return changed;
@@ -114,6 +140,6 @@ public class RepoAndReportingRemovalManipulator
     @Override
     public int getExecutionIndex()
     {
-        return 80;
+        return 45;
     }
 }

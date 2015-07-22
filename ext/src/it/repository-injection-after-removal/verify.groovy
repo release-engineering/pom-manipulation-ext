@@ -13,30 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 def pomFile = new File( basedir, 'pom.xml' )
 System.out.println( "Slurping POM: ${pomFile.getAbsolutePath()}" )
 
 def pom = new XmlSlurper().parse( pomFile )
-System.out.println( "POM Version: ${pom.version.text()}" )
 
-assert pom.repositories.text().size()  == 0
-assert pom.pluginRepositories.text().size() == 0
-assert pom.reporting.text().size() == 0
-
+// We should have no profile repositories after removal
 def profile = pom.profiles.children().find { it.id.text() == 'extra-repositories' }
 assert profile.repositories.text().size() == 0
 assert profile.pluginRepositories.text().size() == 0
 assert profile.reporting.text().size() == 0
 
-def jar = new File(basedir, "target/${pom.artifactId.text()}-${pom.version.text()}.jar" )
-System.out.println( "Checking for jar: ${jar.getAbsolutePath()}")
-assert jar.exists()
+// We should have two repositories after injection
+assert pom.repositories.children().size() == 2
+assert pom.pluginRepositories.children().size() == 2
 
-def repodir = new File('@localRepositoryUrl@', "${pom.groupId.text().replace('.', '/')}/${pom.artifactId.text()}/${pom.version.text()}" )
-def repojar = new File( repodir, "${pom.artifactId.text()}-${pom.version.text()}.jar" )
-System.out.println( "Checking for installed jar: ${repojar.getAbsolutePath()}")
-assert repojar.exists()
 
-def repopom = new File( repodir, "${pom.artifactId.text()}-${pom.version.text()}.pom" )
-System.out.println( "Checking for installed pom: ${repopom.getAbsolutePath()}")
-assert repopom.exists()
+// Check that jboss-public-repository-group repository is injected
+def repository = pom.repositories.repository.find { it.id.text() == 'jboss-public-repository-group' }
+assert repository != null
