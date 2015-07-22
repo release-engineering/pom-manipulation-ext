@@ -46,11 +46,26 @@
       <section id="main_content" class="inner">
         <h3 id="overview">Overview</h3>
 
-<p>POM Manipulation Extension (PME) is a Maven extension (in the sense of installing to <code>lib/ext</code>, not <code>pom.xml</code> <code>&lt;extensions/&gt;</code>). Its purpose is to align the versions in your POMs according to some external reference, sort of like a BOM but much more extensive and without the added baggage of a BOM declaration. </p>
+<p>POM Manipulation Extension (PME) is a Maven tool to align the versions in your POMs according to some external reference, sort of like a BOM but much more extensive and without the added baggage of a BOM declaration.</p>
+
+<p>It is suppplied as a core library, a Maven extension (in the sense of installing to <code>lib/ext</code>, not <code>pom.xml</code> <code>&lt;extensions/&gt;</code>) and a command line tool.</p>
 
 <p>PME excels in a cleanroom environment where large numbers of pre-existing projects must be rebuilt. To minimize the number of builds necessary, PME supports aligning dependency versions using an external BOM-like reference. However, it can also use a similar POM external reference to align plugin versions, and inject standardized plugin executions into project builds. Because in this scenario you&#39;re often rebuilding projects from existing release tags, PME also supports appending a rebuild version suffix, such as <code>rebuild-1</code>, where the actual rebuild number is automatically incremented beyond the highest rebuild number detected in the Maven repository.</p>
 
-<h3 id="installation">Installation</h3>
+<h3 id="installation-as-cli-tool">Installation as CLI tool.</h3>
+
+<p>Obtain the jar from <a href="http://central.maven.org/maven2/org/commonjava/maven/ext/pom-manipulation-ext">here</a> and then it may be invoked as</p>
+<div class="highlight"><pre><code class="language-text" data-lang="text">java -jar pom-manipulation-cli-&lt;version&gt;.jar
+</code></pre></div>
+<p>It supports the following arguments</p>
+<div class="highlight"><pre><code class="language-text" data-lang="text">-d,--debug        Enable debug
+-D &lt;arg&gt;          Java Properties
+-f,--file &lt;arg&gt;   POM file
+-h,--help         Print help
+</code></pre></div>
+<p>Note that all property arguments are the equivalent to those used when it is used as a Maven extension.</p>
+
+<h3 id="installation-as-an-extension">Installation as an Extension</h3>
 
 <p>Installing PME is as simple as <a href="http://central.maven.org/maven2/org/commonjava/maven/ext/pom-manipulation-ext">grabbing the binary</a> and copying it to your <code>${MAVEN_HOME}/lib/ext</code> directory. Once PME is installed, Maven should output something like the following when run:</p>
 <div class="highlight"><pre><code class="language-text" data-lang="text">[INFO] Maven-Manipulation-Extension
@@ -82,10 +97,10 @@
 <p>Below are links to more specific information about configuring sets of features in PME:</p>
 
 <ul>
-<li><a href="/guide/project-version-manip.html">Project version manipulation</a></li>
-<li><a href="/guide/dep-manip.html">Dependency manipulation</a></li>
-<li><a href="/guide/plugin-manip.html">Plugin manipulation</a></li>
-<li><a href="/guide/misc.html">Properties, Profiles, Repositories, Reporting, Etc.</a></li>
+<li><a href="guide/project-version-manip.html">Project version manipulation</a></li>
+<li><a href="guide/dep-manip.html">Dependency manipulation</a></li>
+<li><a href="guide/plugin-manip.html">Plugin manipulation</a></li>
+<li><a href="guide/misc.html">Properties, Profiles, Repositories, Reporting, Etc.</a></li>
 </ul>
 
       </section>

@@ -54,23 +54,24 @@
 <p>Multiple remote dependency-management poms can be specified using a comma separated list of GAVs (groupId, artifactId, version). The poms are specified in order of priority, so if the remote boms contain some of the same dependencies, the versions listed in the first bom in the list will be used.</p>
 <div class="highlight"><pre><code class="language-text" data-lang="text">mvn install -DdependencyManagement=org.foo:my-dep-pom:1.0,org.bar:my-dep-pom:2.0
 </code></pre></div>
-<p>The extension will change any parent reference it finds that matches an entry in the remote BOM i.e.
-<code>
-      &lt;parent&gt;
-         &lt;groupId&gt;org.switchyard&lt;/groupId&gt;
-         &lt;artifactId&gt;switchyard-parent&lt;/artifactId&gt;
-         &lt;version&gt;2.0.0.Alpha1&lt;/version&gt;
-</code>
-will change to
-<code>
-      &lt;parent&gt;
-         &lt;groupId&gt;org.switchyard&lt;/groupId&gt;
-         &lt;artifactId&gt;switchyard-parent&lt;/artifactId&gt;
-         &lt;version&gt;2.0.0.Alpha1-rebuild-1&lt;/version&gt;
-</code></p>
+<p><strong>NOTE:</strong> For existing dependencies that reference a property, PME will update this property with the new version. If the property can&#39;t be found (e.g. it was inherited), a new one will be injected at the top level. This update of the property&#39;s value <strong>may</strong> implicitly align other dependencies using the same property that were not explicitly requested to be aligned.</p>
 
-<p><strong>NOTE:</strong> Existing dependencies that reference a property the tool will update this property with the new version. If the property can&#39;t be found (e.g. it was inherited), a new one will be injected at the top level. This update of the property&#39;s value <strong>may</strong> implicitly align other dependencies using the same property that were not explicitly requested to be aligned.</p>
+<h4 id="oddity-parent-version-override">ODDITY: Parent Version Override</h4>
 
+<p>PME will also change any parent reference it finds that matches an entry in the remote BOM.</p>
+
+<p>For example:</p>
+<div class="highlight"><pre><code class="language-text" data-lang="text">  &lt;parent&gt;
+     &lt;groupId&gt;org.switchyard&lt;/groupId&gt;
+     &lt;artifactId&gt;switchyard-parent&lt;/artifactId&gt;
+     &lt;version&gt;2.0.0.Alpha1&lt;/version&gt;
+</code></pre></div>
+<p>will change to:</p>
+<div class="highlight"><pre><code class="language-text" data-lang="text">  &lt;parent&gt;
+     &lt;groupId&gt;org.switchyard&lt;/groupId&gt;
+     &lt;artifactId&gt;switchyard-parent&lt;/artifactId&gt;
+     &lt;version&gt;2.0.0.Alpha1-rebuild-1&lt;/version&gt;
+</code></pre></div>
 <h3 id="direct-dependencies">Direct Dependencies</h3>
 
 <p>By default the extension will override dependencies using declarations from the remote BOM. However, by setting the property <code>overrideDependencies</code> to <code>false</code>, the behavior can be disabled:</p>
