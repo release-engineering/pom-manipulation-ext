@@ -21,15 +21,15 @@ def pom = new XmlSlurper().parse( pomFile )
 
 // We should have no profile repositories after removal
 def profile = pom.profiles.children().find { it.id.text() == 'extra-repositories' }
-//assert profile.repositories.text().size() == 0
-//assert profile.pluginRepositories.text().size() == 0
-//assert profile.reporting.text().size() == 0
+assert profile.repositories.text().size() == 0
+assert profile.pluginRepositories.text().size() == 0
+assert profile.reporting.text().size() == 0
 
 // We should have two repositories after injection
 assert pom.repositories.children().size() == 2
 assert pom.pluginRepositories.children().size() == 2
 
 
-// Check the releases of jboss-public-repository-group repository has been enabled (overwritten after injection)
+// Check the releases of jboss-public-repository-group repository is injected
 def repository = pom.repositories.repository.find { it.id.text() == 'jboss-public-repository-group' }
-assert repository.releases.enabled.text() == 'true'
+assert repository != null

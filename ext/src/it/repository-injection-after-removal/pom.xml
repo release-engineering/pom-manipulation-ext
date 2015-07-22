@@ -33,36 +33,24 @@
     </properties>
 
 
-    <!--repositories>
+    <repositories>
         <repository>
-            <id>jboss-public-repository-group</id>
-            <name>JBoss Public Maven Repository Group</name>
-            <url>https://repository.jboss.org/nexus/content/groups/public/</url>
-            <layout>default</layout>
-            <releases>
-                <enabled>false</enabled>
-                <updatePolicy>never</updatePolicy>
-            </releases>
+            <id>oss-sonatype</id>
+            <name>oss-sonatype</name>
+            <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
             <snapshots>
-                <enabled>false</enabled>
-                <updatePolicy>never</updatePolicy>
+                <enabled>true</enabled>
             </snapshots>
         </repository>
-    </repositories-->
+    </repositories>
 
     <pluginRepositories>
         <pluginRepository>
-            <id>jboss-public-repository-group</id>
-            <name>JBoss Public Maven Repository Group</name>
-            <url>https://repository.jboss.org/nexus/content/groups/public/</url>
-            <layout>default</layout>
-            <releases>
-                <enabled>false</enabled>
-                <updatePolicy>never</updatePolicy>
-            </releases>
+            <id>oss-sonatype</id>
+            <name>oss-sonatype</name>
+            <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
             <snapshots>
-                <enabled>false</enabled>
-                <updatePolicy>never</updatePolicy>
+                <enabled>true</enabled>
             </snapshots>
         </pluginRepository>
     </pluginRepositories>
@@ -72,33 +60,21 @@
             <id>extra-repositories</id>
             <repositories>
                 <repository>
-                    <id>jboss-public-repository-group</id>
-                    <name>JBoss Public Maven Repository Group</name>
-                    <url>https://repository.jboss.org/nexus/content/groups/public/</url>
-                    <layout>default</layout>
-                    <releases>
-                        <enabled>false</enabled>
-                        <updatePolicy>never</updatePolicy>
-                    </releases>
+                    <id>oss-sonatype</id>
+                    <name>oss-sonatype</name>
+                    <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
                     <snapshots>
-                        <enabled>false</enabled>
-                        <updatePolicy>never</updatePolicy>
+                        <enabled>true</enabled>
                     </snapshots>
                 </repository>
             </repositories>
             <pluginRepositories>
                 <pluginRepository>
-                    <id>jboss-public-repository-group</id>
-                    <name>JBoss Public Maven Repository Group</name>
-                    <url>https://repository.jboss.org/nexus/content/groups/public/</url>
-                    <layout>default</layout>
-                    <releases>
-                        <enabled>false</enabled>
-                        <updatePolicy>never</updatePolicy>
-                    </releases>
+                    <id>oss-sonatype</id>
+                    <name>oss-sonatype</name>
+                    <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
                     <snapshots>
-                        <enabled>false</enabled>
-                        <updatePolicy>never</updatePolicy>
+                        <enabled>true</enabled>
                     </snapshots>
                 </pluginRepository>
             </pluginRepositories>
