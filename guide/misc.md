@@ -13,7 +13,7 @@ In addition to the main [project-version](project-version-manip.html), [dependen
 
 #### Repository And Reporting Removal
 
-If the property `-Drepo-reporting-removal=true` is set, PME will remove all reporting and repository sections from the POM files. 
+If the property `-Drepo-reporting-removal=true` is set, PME will remove all reporting and repository sections (including profiles) from the POM files.
 
 Repository declarations in the POM are considered a bad build smell, since over time they may become defunct or move. 
 
@@ -28,6 +28,14 @@ PME supports injection of profiles declared in a remote POM file. Simply supply 
 The extension will, for every profile in the remote POM file, replace or add it to the local top level POM file.
 
 **Note:** for any existing profile in the modified POM that specifies `activeByDefault`, this activation option will be removed so profiles are not accidentally disabled due to its exclusive semantics.
+
+#### Repository Injection
+
+PME supports injection of remote repositories. Supply a remote repository management POM:
+
+	mvn install -DrepositoryInjection=org.foo:repository-injection:1.0
+
+The extension will resolve a remote POM file and inject remote repositories to the local top level POM file. If there is a local repository with id identical to the injected one, it is overwritten.
 
 #### `project.version` Expression Replacement
 
