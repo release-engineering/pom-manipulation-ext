@@ -50,6 +50,8 @@ public final class IdUtils
     /**
      * Splits the value on ',', then wraps each value in {@link ProjectVersionRef#parse(String)} and prints a warning / skips in the event of a 
      * parsing error. Returns null if the input value is null.
+     * @param value a comma separated list of GAV to parse
+     * @return a collection of parsed ProjectVersionRef.
      */
     public static List<ProjectVersionRef> parseGAVs( final String value )
     {

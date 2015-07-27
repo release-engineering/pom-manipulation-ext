@@ -66,10 +66,10 @@ public class VersionCalculator
      * Calculate any project version changes for the given set of projects, and return them in a Map keyed by project
      * GA.
      *
-     * @param projects
-     * @param session
-     * @return Map<String, String>
-     * @throws ManipulationException
+     * @param projects the Projects to adjust.
+     * @param session the container session.
+     * @return a collection of GAV : new Version
+     * @throws ManipulationException if an error occurs.
      */
     public Map<String, String> calculateVersioningChanges( final Collection<Project> projects,
                                                            final ManipulationSession session )
@@ -147,12 +147,12 @@ public class VersionCalculator
     /**
      * Calculate the version modification for a given GAV.
      *
-     * @param groupId
-     * @param artifactId
-     * @param version
-     * @param session
-     * @return VersionCalculation
-     * @throws ManipulationException
+     * @param groupId the groupId to search for
+     * @param artifactId the artifactId to search for.
+     * @param version the original version to search for.
+     * @param session the container session.
+     * @return a Version object allowing the modified version to be extracted.
+     * @throws ManipulationException if an error occurs.
      */
     protected Version calculate( final String groupId, final String artifactId, final String version,
                                  final ManipulationSession session )
@@ -193,7 +193,7 @@ public class VersionCalculator
             // Find matching version strings in the remote repo and increment to the next
             // available version
             final Set<String> versionCandidates = new HashSet<String>();
-            versionCandidates.addAll( getMetadataVersions( groupId, artifactId, session ) );
+            versionCandidates.addAll( getMetadataVersions( groupId, artifactId ) );
             versionObj.appendQualifierSuffix( incrementalSuffix );
             int highestRemoteBuildNum = versionObj.findHighestMatchingBuildNumber( versionObj, versionCandidates );
             ++highestRemoteBuildNum;
@@ -212,9 +212,12 @@ public class VersionCalculator
 
     /**
      * Accumulate all available versions for a given GAV from all available repositories.
+     * @param groupId the groupId to search for
+     * @param artifactId the artifactId to search for
+     * @return Collection of versions for the specified group:artifact
+     * @throws ManipulationException if an error occurs.
      */
-    private Set<String> getMetadataVersions( final String groupId, final String artifactId,
-                                             final ManipulationSession session )
+    private Set<String> getMetadataVersions( final String groupId, final String artifactId )
         throws ManipulationException
     {
         logger.debug( "Reading available versions from repository metadata for: " + groupId + ":" + artifactId );

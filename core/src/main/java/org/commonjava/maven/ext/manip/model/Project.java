@@ -124,7 +124,7 @@ public class Project
 
     /**
      * Retrieve the model undergoing modification.
-     * @return
+     * @return the Model being modified.
      */
     public Model getModel()
     {
@@ -534,7 +534,7 @@ public class Project
 
     /**
      * Returns whether this project is the execution root.
-     * @return
+     * @return true if this Project is the execution root.
      */
     public boolean isExecutionRoot()
     {

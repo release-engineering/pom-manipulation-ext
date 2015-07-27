@@ -35,7 +35,6 @@ import org.codehaus.plexus.component.annotations.Component;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.ext.manip.ManipulationException;
-import org.commonjava.maven.ext.manip.ManipulationManager;
 import org.commonjava.maven.ext.manip.model.Project;
 import org.commonjava.maven.galley.maven.parse.PomPeek;
 import org.jdom2.Comment;
@@ -66,14 +65,19 @@ public class PomIO
     public List<Project> parseProject (final File pom) throws ManipulationException
     {
         final List<PomPeek> peeked = peekAtPomHierarchy(pom);
-        return readModelsForManipulation(peeked, pom);
+        return readModelsForManipulation( pom, peeked );
     }
 
     /**
      * Read {@link Model} instances by parsing the POM directly. This is useful to escape some post-processing that happens when the
      * {@link MavenProject#getOriginalModel()} instance is set.
+     *
+     * @param executionRoot the top level pom file.
+     * @param peeked a collection of poms resolved from the top level file.
+     * @return a collection of Projects
+     * @throws ManipulationException if an error occurs.
      */
-    private List<Project> readModelsForManipulation(final List<PomPeek> peeked, File executionRoot)
+    private List<Project> readModelsForManipulation( File executionRoot, final List<PomPeek> peeked )
         throws ManipulationException
     {
         final List<Project> projects = new ArrayList<Project>();
@@ -129,8 +133,11 @@ public class PomIO
     }
 
     /**
-     * For any project listed as changed (tracked by GA in the session), write the modified model out to disk. Uses JDOM {@link ModelWriter}
-     * ({@MavenJDOMWriter}) to preserve as much formatting as possible.
+     * For any project listed as changed (tracked by GA in the session), write the modified model out to disk.
+     * Uses JDOM {@link ModelWriter} and {@link MavenJDOMWriter} to preserve as much formatting as possible.
+     *
+     * @param changed the modified Projects to write out.
+     * @throws ManipulationException if an error occurs.
      */
     public void rewritePOMs(final Set<Project> changed)
         throws ManipulationException
@@ -211,8 +218,8 @@ public class PomIO
     /**
      * Retrieves the SHA this was built with.
      *
-     * @return
-     * @throws ManipulationException
+     * @return the GIT sha of this codebase.
+     * @throws ManipulationException if an error occurs.
      */
     private String getManifestInformation()
         throws ManipulationException

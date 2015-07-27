@@ -35,10 +35,9 @@ public final class PropertiesUtils
     /**
      * Filter Properties by accepting only properties with names that start with prefix. Trims the prefix
      * from the property names when inserting them into the returned Map.
-     * @param properties
-     *
+     * @param properties the properties to filter.
      * @param prefix The String that must be at the start of the property names
-     * @return Map<String, String> map of properties with matching prepend and their values
+     * @return map of properties with matching prepend and their values
      */
     public static Map<String, String> getPropertiesByPrefix( final Properties properties, final String prefix )
     {

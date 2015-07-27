@@ -72,6 +72,10 @@ public class ModelIO
 
     /**
      * Read the raw model (equivalent to the pom file on disk) from a given GAV.
+     *
+     * @param ref the ProjectVersion to read.
+     * @return the Maven Model for the GAV
+     * @throws ManipulationException if an error occurs.
      */
     public Model resolveRawModel( final ProjectVersionRef ref )
         throws ManipulationException

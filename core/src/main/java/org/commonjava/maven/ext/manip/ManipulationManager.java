@@ -41,7 +41,6 @@ import java.util.Set;
  * Coordinates manipulation of the POMs in a build, by providing methods to read the project set from files ahead of the build proper (using
  * {@link ProjectBuilder}), then other methods to coordinate all potential {@link Manipulator} implementations (along with the {@link PomIO}
  * raw-model reader/rewriter).
- * <br/>
  * <p>
  * Sequence of calls:
  * <ol>
@@ -82,6 +81,9 @@ public class ManipulationManager
     /**
      * Initialize {@link ManipulationSession} using the given {@link MavenSession} instance, along with any state managed by the individual
      * {@link Manipulator} components.
+     *
+     * @param session the container session for manipulation.
+     * @throws ManipulationException if an error occurs.
      */
     public void init( final ManipulationSession session )
         throws ManipulationException
@@ -108,7 +110,12 @@ public class ManipulationManager
         }
     }
 
-
+    /**
+     * Encapsulates both {@link #scan(List, ManipulationSession)} and {@link #applyManipulations(List, ManipulationSession)}
+     *
+     * @param session the container session for manipulation.
+     * @throws ManipulationException if an error occurs.
+     */
     public void scanAndApply( final ManipulationSession session )
                     throws ManipulationException
     {
@@ -147,6 +154,10 @@ public class ManipulationManager
 
     /**
      * Scan the projects implied by the given POM file for modifications, and save the state in the session for later rewriting to apply it.
+     *
+     * @param projects the list of Projects to scan.
+     * @param session the container session for manipulation.
+     * @throws ManipulationException if an error occurs.
      */
     public void scan( final List<Project> projects, final ManipulationSession session )
         throws ManipulationException
@@ -166,6 +177,11 @@ public class ManipulationManager
      *   <li>apply any manipulations from the previous {@link ManipulationManager#scan(List, ManipulationSession)} call</li>
      *   <li>rewrite any POMs that were changed</li>
      * </ul>
+     *
+     * @param projects the list of Projects to apply the changes to.
+     * @param session the container session for manipulation.
+     * @return collection of the changed projects.
+     * @throws ManipulationException if an error occurs.
      */
     public Set<Project> applyManipulations( final List<Project> projects, final ManipulationSession session )
         throws ManipulationException

@@ -31,7 +31,7 @@ public class DistributionEnforcingState
     public static final String ENFORCE_SYSPROP = "enforce-skip";
 
     /**
-     * Propery prefix used to exclude certain projects in the current build (specified as g:a) from install/deploy plugin skip-flag enforcement.
+     * Property prefix used to exclude certain projects in the current build (specified as g:a) from install/deploy plugin skip-flag enforcement.
      */
     public static final String PROJECT_EXCLUSION_PREFIX = "enforceSkip.";
     

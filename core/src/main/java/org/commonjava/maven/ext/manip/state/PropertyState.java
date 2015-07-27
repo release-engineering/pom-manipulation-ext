@@ -32,8 +32,10 @@ public class PropertyState
 
     /**
      * Suffix to enable this modder. The name of the property which contains the GAV of the remote pom from
-     * which to retrieve property mapping information. <br />
+     * which to retrieve property mapping information.
+     * <pre>
      * <code>-DpropertyManagement:org.foo:bar-property-mgmt:1.0</code>
+     * </pre>
      */
     public static final String PROPERTY_MANAGEMENT_POM_PROPERTY = "propertyManagement";
 
