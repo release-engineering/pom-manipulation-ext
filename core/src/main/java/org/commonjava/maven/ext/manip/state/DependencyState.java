@@ -31,8 +31,10 @@ public class DependencyState
 {
     /**
      * The String that needs to be prepended a system property to make it a dependencyExclusion.
-     * For example to exclude junit alignment for the GAV (org.groupId:artifactId)<br/>
+     * For example to exclude junit alignment for the GAV (org.groupId:artifactId)
+     * <pre>
      * <code>-DdependencyExclusion.junit:junit@org.groupId:artifactId</code>
+     * </pre>
      */
     public static final String DEPENDENCY_EXCLUSION_PREFIX = "dependencyExclusion.";
 
@@ -49,10 +51,12 @@ public class DependencyState
     public static final String STRICT_VIOLATION_FAILS = "strictViolationFails";
 
     /**
-     * Two possible formats currently supported for version property output:</br>
-     * <code>version.group</code></br>
-     * <code>version.group.artifact</code></br>
-     * <code>none</code> (equates to off)</br>
+     * Two possible formats currently supported for version property output:
+     * <ul>
+     * <li><code>version.group</code></li>
+     * <li><code>version.group.artifact</code></li>
+     * <li><code>none</code> (equates to off)</li>
+     * </ul>
      * Configured by the property <code>-DversionPropertyFormat=[VG|VGA|NONE]</code>
      */
     public static enum VersionPropertyFormat
@@ -64,8 +68,10 @@ public class DependencyState
 
     /**
      * The name of the property which contains the GAV of the remote pom from which to retrieve dependency management
-     * information. <br />
-     *<code>-DdependencyManagement:org.foo:bar-dep-mgmt:1.0</code>
+     * information.
+     * <pre>
+     * <code>-DdependencyManagement:org.foo:bar-dep-mgmt:1.0</code>
+     * </pre>
      */
     public static final String DEPENDENCY_MANAGEMENT_POM_PROPERTY = "dependencyManagement";
 
@@ -107,7 +113,7 @@ public class DependencyState
     }
 
     /**
-     * Whether to override unmanaged transitive dependencies in the build. Has the effect of adding (or not) new entries
+     * @return whether to override unmanaged transitive dependencies in the build. Has the effect of adding (or not) new entries
      * to dependency management when no matching dependency is found in the pom. Defaults to true.
      */
     public boolean getOverrideTransitive()
@@ -116,7 +122,7 @@ public class DependencyState
     }
 
     /**
-     * Whether to override managed dependencies in the build. Defaults to true.
+     * @return whether to override managed dependencies in the build. Defaults to true.
      */
     public boolean getOverrideDependencies()
     {

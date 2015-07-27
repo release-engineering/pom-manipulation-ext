@@ -24,22 +24,25 @@ import org.commonjava.maven.ext.manip.util.IdUtils;
 
 /**
  * Captures configuration relating to plugin alignment from the POMs. Used by {@link PluginManipulator}.
- *
  */
 public class PluginState
     implements State
 {
     /**
      * The name of the property which contains the GAV of the remote pom from which to retrieve plugin management
-     * information. <br />
+     * information.
+     * <pre>
      * <code>-DpluginManagement:org.foo:bar-plugin-mgmt:1.0</code>
+     * </pre>
      */
     private static final String PLUGIN_MANAGEMENT_POM_PROPERTY = "pluginManagement";
 
     /**
-     * Two possible methods currently supported configuration merging precedence:</br>
-     * <code>REMOTE</code> (default)</br>
-     * <code>LOCAL</code></br>
+     * Two possible methods currently supported configuration merging precedence:
+     * <pre>
+     * <code>REMOTE</code> (default)
+     * <code>LOCAL</code>
+     * </pre>
      * Configured by the property <code>-DpluginManagementPrecedence=[REMOTE|LOCAL]</code>
      */
     public static enum Precedence

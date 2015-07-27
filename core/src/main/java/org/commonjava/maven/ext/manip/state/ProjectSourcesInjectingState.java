@@ -63,6 +63,8 @@ public class ProjectSourcesInjectingState
 
     /**
      * Detects the project.src.skip and project.src.version user properties. Sets the enabled flag and the plugin version accordingly.
+     *
+     * @param userProperties the properties for the manipulator
      */
     public ProjectSourcesInjectingState( final Properties userProperties )
     {
@@ -85,6 +87,7 @@ public class ProjectSourcesInjectingState
 
     /**
      * @see ProjectSourcesInjectingState#BMMP_SKIP_PROPERTY
+     * @return whether the BuildMetadata plugin is enabled.
      */
     public boolean isBuildMetadataPluginEnabled()
     {
@@ -94,6 +97,7 @@ public class ProjectSourcesInjectingState
     /**
      * @see #PROJECT_SOURCES_PLUGIN_VERSION_PROPERTY
      * @see #DEFAULT_PROJECT_SOURCES_PLUGIN_VERSION
+     * @return the ProjectSources plugin version
      */
     public String getProjectSourcesPluginVersion()
     {
@@ -103,6 +107,7 @@ public class ProjectSourcesInjectingState
     /**
      * @see #BMMP_VERSION_PROPERTY
      * @see #DEFAULT_BMMP_VERSION
+     * @return the BuildMetadata plugin version
      */
     public String getBuildMetadataPluginVersion()
     {

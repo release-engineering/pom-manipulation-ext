@@ -15,7 +15,6 @@
  */
 package org.commonjava.maven.ext.manip.impl;
 
-import org.apache.maven.execution.MavenExecutionRequest;
 import org.apache.maven.model.*;
 import org.codehaus.plexus.component.annotations.Component;
 import org.codehaus.plexus.component.annotations.Requirement;
@@ -118,7 +117,7 @@ public class ProjectVersioningManipulator
         {
             final String ga = ga( project );
             logger.info( getClass().getSimpleName() + " applying changes to: " + ga );
-            if ( applyVersioningChanges( project, state, session ) )
+            if ( applyVersioningChanges( project, state ) )
             {
                 changed.add( project );
             }
@@ -135,10 +134,14 @@ public class ProjectVersioningManipulator
      * current build.
      *
      * If the project is modified, then it is marked as changed in the {@link ManipulationSession}, which triggers the associated POM to be rewritten.
+     *
+     * @param project Project undergoing modification.
+     * @param state the VersioningState to apply.
+     * @return whether any changes have been applied.
+     * @throws ManipulationException if an error occurs.
      */
     // TODO: Loooong method
-    protected boolean applyVersioningChanges( final Project project, final VersioningState state,
-                                              final ManipulationSession session )
+    protected boolean applyVersioningChanges( final Project project, final VersioningState state )
         throws ManipulationException
     {
         boolean changed = false;

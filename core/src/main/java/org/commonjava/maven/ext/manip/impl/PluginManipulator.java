@@ -207,7 +207,7 @@ public class PluginManipulator
      * @param pluginMgmt Denote whether we are modifying the pluginMgmt block
      * @param plugins The list of plugins to modify
      * @param pluginVersionOverrides The list of version overrides to apply to the plugins
-     * @throws ManipulationException
+     * @throws ManipulationException if an error occurs.
      */
     protected void applyOverrides( final boolean pluginMgmt, final List<Plugin> plugins,
                                    final Map<ProjectRef, Plugin> pluginVersionOverrides ) throws ManipulationException

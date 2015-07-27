@@ -276,8 +276,8 @@ public class Version
     /**
      * Check if all the characters in the string are digits
      *
-     * @param str
-     * @return
+     * @param str a string to check
+     * @return whether all the characters in the string are digits
      */
     public static boolean isNumeric( String str )
     {
@@ -308,7 +308,7 @@ public class Version
     /**
      * Assumed to be "0" if no minor version is specified in the string
      *
-     * @return
+     * @return the minor version
      */
     public String getMinorVersion()
     {
@@ -318,7 +318,7 @@ public class Version
     /**
      * Assumed to be "0" if no micro version is specified in the string
      *
-     * @return
+     * @return the micro version
      */
     public String getMicroVersion()
     {
@@ -327,8 +327,6 @@ public class Version
 
     /**
      * Update the qualifier by combining the qualifierBase, qualifierSuffix, and build number
-     *
-     * @return
      */
     private void updateQualifier()
     {
@@ -375,7 +373,7 @@ public class Version
     /**
      * Get original unmodified major, minor, micro portion of the version string
      *
-     * @return
+     * @return the original major/minor/micro version.
      */
     public String getOriginalMMM()
     {
@@ -575,7 +573,7 @@ public class Version
      * Appends a build number to the qualifier. The build number should be a string of digits, or null if the build
      * number should be removed.
      *
-     * @param buildNumber
+     * @param buildNumber to append to the qualifier.
      */
     public void setBuildNumber( String buildNumber )
     {
@@ -589,7 +587,7 @@ public class Version
     /**
      * Sets the snapshot to "SNAPSHOT" if true, otherwise sets to null
      *
-     * @param snapshot
+     * @param snapshot whether to append SNAPSHOT or not.
      */
     public void setSnapshot( boolean snapshot )
     {
@@ -608,9 +606,9 @@ public class Version
      * Matches a version object to versions in a set by comparing the non build number portion of the string. Then find
      * which of the matching versions has the highest build number and is therefore the latest version.
      *
-     * @param version
-     * @param versionSet
-     * @return The highest build number, or 0 if no matching build numbers are found.
+     * @param version the Version object to use.
+     * @param versionSet a collection of versions to compare to.
+     * @return the highest build number, or 0 if no matching build numbers are found.
      */
     public int findHighestMatchingBuildNumber( Version version, Set<String> versionSet )
     {
@@ -652,7 +650,8 @@ public class Version
 
     /**
      * Get the build number as an integer instead of a string for each numeric comparison
-     * @return
+     *
+     * @return the build number as an integer.
      */
     public int getIntegerBuildNumber()
     {

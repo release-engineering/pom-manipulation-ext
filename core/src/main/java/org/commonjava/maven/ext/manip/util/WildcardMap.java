@@ -26,8 +26,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Custom limited map implementation that handles the following format:
  * <p>
- *     String(groupId) : Map<br/>
- *     where Map contains String(artifactId):String(value)
+ *     String(groupId) : Map (where Map contains String(artifactId):String(value) ).
  * </p>
  * artifactId may be a wildcard (*) or an explicit value.
  */
@@ -38,17 +37,18 @@ public class WildcardMap
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
     /**
-     * This map represents:<br/>
+     * This map represents:
+     * <p>
      * groupId : map where map is artifactId : value
-     * <br/>
+     * </p>
      * artifactId may be a wildcard '*'.
      */
     private final TreeMap<String, LinkedHashMap<String,String>> map = new TreeMap<String, LinkedHashMap<String, String>>();
 
     /**
-     * Returns <tt>true</tt> if this map contains a mapping for the specified
+     * @param key the key to look for
+     * @return <tt>true</tt> if this map contains a mapping for the specified
      * key.
-     *
      */
     public boolean containsKey(ProjectRef key)
     {
@@ -79,6 +79,8 @@ public class WildcardMap
 
     /**
      * Associates the specified value with the specified key in this map.
+     * @param key key to associate with
+     * @param value value to associate with the key
      */
     public void put(ProjectRef key, String value)
     {
@@ -128,11 +130,10 @@ public class WildcardMap
 
 
     /**
-     * Returns the value to which the specified key is mapped,
-     * or {@code null} if this map contains no mapping for the key.
-     * <p/>
-     * Takes groupId:artifactId key which is split to index purely
+     * @param key the groupId:artifactId key which is split to index purely
      * by groupId.
+     * @return the value to which the specified key is mapped,
+     * or {@code null} if this map contains no mapping for the key.
      */
     public String get(ProjectRef key)
     {

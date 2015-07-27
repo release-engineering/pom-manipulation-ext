@@ -62,23 +62,15 @@ import org.w3c.dom.NodeList;
  * <li><code>-Denforce-skip=none</code> disables enforcement.</li>
  * </ul>
  *
- * <br/>
- *
  * <b>NOTE:</b> When using the <code>detect</code> mode, only the install-plugin configurations in the main pom (<b>not</b> those in profiles) will
  * be considered for detection. Of these, only parameters in the plugin-wide configuration OR the <code>default-install</code> execution
  * configuration will be considered. If no matching skip-flag configuration is detected, the default mode of <code>on</code> will be used.
- *
- * <br/>
- *
+ * <p>
  * Likewise, it's possible to set the enforcement mode DIFFERENTLY for a single project, using:
- * <br/>
- *
+ * </p>
  * <pre>
  * <code>-DenforceSkip.org.group.id:artifact-id=(on|true|off|false|detect|none)</code>
  * </pre>
- *
- * <br/>
- *
  * This is for systems that compare the installed artifacts against the
  * deployed artifacts as part of a post-build validation process.
  *
@@ -113,7 +105,8 @@ public class DistributionEnforcingManipulator
         this.galleyWrapper = galleyWrapper;
     }
 
-    /** Sets the mode to on, off, detect (from install plugin), or none (disabled) based on user properties.
+    /**
+     * Sets the mode to on, off, detect (from install plugin), or none (disabled) based on user properties.
      * @see DistributionEnforcingState
      */
     @Override
@@ -123,7 +116,8 @@ public class DistributionEnforcingManipulator
         session.setState( new DistributionEnforcingState( session.getUserProperties() ) );
     }
 
-    /** No pre-scanning necessary.
+    /**
+     * No pre-scanning necessary.
      */
     @Override
     public void scan( final List<Project> projects, final ManipulationSession session )
@@ -212,7 +206,7 @@ public class DistributionEnforcingManipulator
      *
      * If detection is enabled and no install-plugin is found, set the value to false (don't skip install or deploy).
      *
-     * Return the detected value, if detection is enabled.
+     * @return the detected value, if detection is enabled.
      */
     private Boolean enforceSkipFlag( final ModelBase base, Boolean baseSkipSetting, final Project project,
                                      final Set<Project> changed, final boolean detectFlagValue )
@@ -411,7 +405,7 @@ public class DistributionEnforcingManipulator
     }
 
     /**
-     * store the tuple {container, node} where container is the plugin or plugin execution and node is the skip configuration parameter.
+     * Store the tuple {container, node} where container is the plugin or plugin execution and node is the skip configuration parameter.
      * This allows modification of the Model or extraction of the flag value (if we're trying to detect the install plugin's skip flag state).
      */
     private static final class SkipReference

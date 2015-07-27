@@ -91,8 +91,7 @@ public class VersioningState
     }
 
     /**
-     * True if we should make the versions OSGi compliant
-     * @return
+     * @return true if we should make the versions OSGi compliant
      */
     public boolean osgi()
     {

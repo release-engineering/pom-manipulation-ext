@@ -86,7 +86,7 @@
 
     <maeVersion>1.0-alpha-1</maeVersion>
     <mavenVersion>3.0.4</mavenVersion>
-    <galleyVersion>0.9.1-SNAPSHOT</galleyVersion>
+    <galleyVersion>0.9.1</galleyVersion>
     <atlasVersion>0.13.6</atlasVersion>
     <it.maven.home>${project.build.directory}/apache-maven-${mavenVersion}</it.maven.home>
 

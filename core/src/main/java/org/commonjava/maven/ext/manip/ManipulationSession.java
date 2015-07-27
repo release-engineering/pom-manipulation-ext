@@ -67,6 +67,8 @@ public class ManipulationSession
      *
      * @see #MANIPULATIONS_DISABLED_PROP
      * @see VersioningState#isEnabled()
+     *
+     * @return whether the PME subsystem is enabled.
      */
     public boolean isEnabled()
     {
@@ -146,7 +148,7 @@ public class ManipulationSession
 
     /**
      * Used by extension ManipulatingEventSpy to store any errors during project construction and manipulation
-     * @param error
+     * @param error record any exception that occurred.
      */
     public void setError( final ManipulationException error )
     {
@@ -178,8 +180,8 @@ public class ManipulationSession
     /**
      * Checks all known states to determine whether any are enabled. Will ignore any states within
      * the supplied list.
-     * @param ignoreList
-     * @return
+     * @param ignoreList the list of States that should be ignored when checking if any are enabled.
+     * @return whether any of the States are enabled.
      */
     public boolean anyStateEnabled( List<Class<? extends State>> ignoreList )
     {

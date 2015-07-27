@@ -37,7 +37,7 @@ public interface State
     ArrayList<Class<? extends State>> activeByDefault = new ArrayList<Class<? extends State>>();
 
     /**
-     * Return true if this State is enabled.
+     * @return true if this State is enabled.
      */
     public abstract boolean isEnabled();
 }
