@@ -118,7 +118,7 @@ public class ProjectSourcesInjectingManipulator
 
                     boolean changed = false;
                     final Map<String, Plugin> pluginMap = build.getPluginsAsMap();
-                    if ( !pluginMap.containsKey( PROJECT_SOURCES_COORD ) )
+                    if ( state.isProjectSourcesPluginEnabled() && !pluginMap.containsKey( PROJECT_SOURCES_COORD ) )
                     {
                         final PluginExecution execution = new PluginExecution();
                         execution.setId( PROJECT_SOURCES_EXEC_ID );
@@ -136,7 +136,7 @@ public class ProjectSourcesInjectingManipulator
                         changed = true;
                     }
 
-                    if ( !pluginMap.containsKey( BMMP_COORD ) )
+                    if ( state.isBuildMetadataPluginEnabled() && !pluginMap.containsKey( BMMP_COORD ) )
                     {
                         final PluginExecution execution = new PluginExecution();
                         execution.setId( BMMP_EXEC_ID );
