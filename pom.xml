@@ -27,7 +27,7 @@
 
   <groupId>org.commonjava.maven.ext</groupId>
   <artifactId>pom-manipulation-parent</artifactId>
-  <version>1.6</version>
+  <version>1.7-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <name>POM Manipulation Extension for Maven</name>
@@ -67,7 +67,7 @@
     <connection>scm:git:http://github.com/release-engineering/pom-manipulation-ext.git</connection>
     <developerConnection>scm:git:git@github.com:release-engineering/pom-manipulation-ext.git</developerConnection>
     <url>http://github.com/release-engineering/pom-manipulation-ext</url>
-    <tag>pom-manipulation-parent-1.6</tag>
+    <tag>HEAD</tag>
   </scm>
 
   <distributionManagement>
