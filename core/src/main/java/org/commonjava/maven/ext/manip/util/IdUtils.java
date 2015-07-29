@@ -36,7 +36,7 @@ import org.slf4j.LoggerFactory;
  */
 public final class IdUtils
 {
-    private static final Logger LOGGER = LoggerFactory.getLogger( IdUtils.class );
+    private static final Logger logger = LoggerFactory.getLogger( IdUtils.class );
 
     /**
      * Regex pattern for parsing a Maven GAV
@@ -72,7 +72,8 @@ public final class IdUtils
                 }
                 catch ( final InvalidRefException e )
                 {
-                    LOGGER.warn( "Skipping invalid remote management GAV: " + gav );
+                    logger.error( "Skipping invalid remote management GAV: " + gav );
+                    throw e;
                 }
             }
 

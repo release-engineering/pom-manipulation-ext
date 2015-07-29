@@ -149,7 +149,7 @@ public class ManipulationManager
                 throw new ManipulationException( "Marker file creation failed", e );
             }
         }
-
+        logger.info( "Maven-Manipulation-Extension: Finished." );
     }
 
     /**

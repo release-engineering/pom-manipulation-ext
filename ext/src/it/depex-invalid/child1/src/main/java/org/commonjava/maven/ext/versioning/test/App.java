@@ -13,24 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-def pomFile = new File( basedir, 'pom.xml' )
-System.out.println( "Slurping POM: ${pomFile.getAbsolutePath()}" )
+package org.commonjava.maven.ext.versioning.test;
 
-def pom = new XmlSlurper().parse( pomFile )
-
-def failed = false
-def plugin = null
-pom.build.plugins.children().each{
-    if (it.artifactId == "project-sources-maven-plugin" ){
-        assert it.version == '0.3'
-    }
-    else if (it.artifactId == 'build-metadata-maven-plugin'){
-        failed = true
+/**
+ * Hello world!
+ *
+ */
+public class App 
+{
+    public static void main( String[] args )
+    {
+        System.out.println( "Hello World!" );
     }
 }
-
-assert failed != true
-assert ! new File( basedir, 'build.metadata' ).exists()
-assert new File( basedir, 'target/build-metadata-plugin-disabled-1-project-sources.tar.gz').exists()
-
-return true

@@ -37,7 +37,8 @@ public class RepositoryInjectionState
             }
             catch ( final InvalidRefException e )
             {
-                logger.warn( "Skipping repository injection! Got invalid repositoryInjection GAV: {}", gav );
+                logger.error( "Skipping repository injection! Got invalid repositoryInjection GAV: {}", gav );
+                throw e;
             }
         }
 

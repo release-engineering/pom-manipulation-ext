@@ -15,16 +15,6 @@
  */
 package org.commonjava.maven.ext.manip.io;
 
-import static org.apache.commons.io.IOUtils.closeQuietly;
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
-import java.util.*;
-import java.util.jar.Manifest;
-
 import org.apache.maven.io.util.DocumentModifier;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.io.ModelWriter;
@@ -44,6 +34,23 @@ import org.jdom2.JDOMException;
 import org.jdom2.filter.ContentFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Enumeration;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
+import java.util.jar.Manifest;
+
+import static org.apache.commons.io.IOUtils.closeQuietly;
 
 /**
  * Utility class used to read raw models for POMs, and rewrite any project POMs that were changed.
