@@ -125,6 +125,19 @@ public class ManipulatingEventSpy
                 session.setError( e );
             }
         }
+        // Catch any runtime exceptions and mark them to fail the build as well.
+        catch ( final RuntimeException e )
+        {
+            logger.error( "Extension failure", e );
+            if ( required )
+            {
+                throw e;
+            }
+            else
+            {
+                session.setError( new ManipulationException( "Caught runtime exception", e ) );
+            }
+        }
         finally
         {
             super.onEvent( event );

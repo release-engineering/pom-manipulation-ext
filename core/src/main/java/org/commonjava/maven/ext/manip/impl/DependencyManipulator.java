@@ -35,6 +35,7 @@ import org.apache.maven.model.DependencyManagement;
 import org.apache.maven.model.Model;
 import org.codehaus.plexus.component.annotations.Component;
 import org.codehaus.plexus.component.annotations.Requirement;
+import org.commonjava.maven.atlas.ident.ref.InvalidRefException;
 import org.commonjava.maven.atlas.ident.ref.ProjectRef;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.atlas.ident.ref.VersionlessArtifactRef;
@@ -234,8 +235,15 @@ public class DependencyManipulator
                                                          DependencyState.DEPENDENCY_EXCLUSION_PREFIX ) );
 
         moduleOverrides = removeReactorGAs( session, moduleOverrides );
-        moduleOverrides = applyModuleVersionOverrides( projectGA, moduleOverrides, explicitOverrides );
-
+        try
+        {
+            moduleOverrides = applyModuleVersionOverrides( projectGA, moduleOverrides, explicitOverrides );
+        }
+        catch (InvalidRefException e)
+        {
+            logger.error ("Invalid module exclusion override {} : {} ", moduleOverrides, explicitOverrides);
+            throw e;
+        }
         if ( project.isInheritanceRoot() )
         {
             // Handle the situation where the top level parent refers to a prior build that is in the BOM.

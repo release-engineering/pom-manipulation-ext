@@ -407,7 +407,7 @@ public class Project
      * parent reference is relocated (which will result in this project's
      * groupId changing, since it's inherited under these circumstances).
      */
-    public void updateCoord()
+    public void updateCoord() throws ManipulationException
     {
         key = modelKey( model );
     }
@@ -499,6 +499,7 @@ public class Project
     }
 
     private static ProjectVersionRef modelKey( final Model model )
+                    throws ManipulationException
     {
         String g = model.getGroupId();
         final String a = model.getArtifactId();
@@ -509,7 +510,7 @@ public class Project
             final Parent p = model.getParent();
             if ( p == null )
             {
-                throw new IllegalStateException( "Invalid model: " + model + " Cannot find groupId and/or version!" );
+                throw new ManipulationException( "Invalid model: " + model + " Cannot find groupId and/or version!" );
             }
 
             if ( g == null )

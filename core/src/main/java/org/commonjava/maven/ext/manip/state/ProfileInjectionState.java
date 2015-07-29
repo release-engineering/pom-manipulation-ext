@@ -52,7 +52,8 @@ public class ProfileInjectionState
             }
             catch ( final InvalidRefException e )
             {
-                logger.warn( "Skipping profile injection! Got invalid profileInjection GAV: {}", gav );
+                logger.error( "Skipping profile injection! Got invalid profileInjection GAV: {}", gav );
+                throw e;
             }
         }
 
