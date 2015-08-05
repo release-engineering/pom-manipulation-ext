@@ -455,39 +455,6 @@ public class Project
         }
     }
 
-    public ProjectRef getVersionlessParentKey()
-    {
-        final Parent parent = getParent();
-        return parent != null ? new ProjectRef( parent.getGroupId(), parent.getArtifactId() ) : null;
-    }
-
-    public List<Extension> getExtensions()
-    {
-        if ( model.getBuild() == null )
-        {
-            return Collections.emptyList();
-        }
-
-        final List<Extension> extensions = model.getBuild()
-                                                .getExtensions();
-        if ( extensions == null )
-        {
-            return Collections.emptyList();
-        }
-
-        return extensions;
-    }
-
-    public String getPackaging()
-    {
-        return model.getPackaging();
-    }
-
-    public ProjectRef getVersionlessKey()
-    {
-        return key.asProjectRef();
-    }
-
     public void setInheritanceRoot( final boolean inheritanceRoot )
     {
         this.inheritanceRoot = inheritanceRoot;

@@ -18,6 +18,7 @@ package org.commonjava.maven.ext.manip.state;
 import java.util.Map;
 import java.util.Properties;
 
+import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.ext.manip.impl.ProjectVersioningManipulator;
 
 /**
@@ -39,8 +40,6 @@ public class VersioningState
 
     public static final String VERSION_OVERRIDE_SYSPROP = "version.override";
 
-    private Map<String, String> versioningChanges;
-
     private final String suffix;
 
     private final String incrementSerialSuffix;
@@ -60,31 +59,34 @@ public class VersioningState
         override = userProps.getProperty( VERSION_OVERRIDE_SYSPROP );
     }
 
-    public void setVersioningChanges( final Map<String, String> versioningChanges )
-    {
-        this.versioningChanges = versioningChanges;
-    }
-
-    public Map<String, String> getVersioningChanges()
-    {
-        return versioningChanges;
-    }
-
+    /**
+     * @return the incremental suffix that will be appended to the project version.
+     */
     public String getIncrementalSerialSuffix()
     {
         return incrementSerialSuffix;
     }
 
+    /**
+     * @return the version suffix to be appended to the project version.
+     */
     public String getSuffix()
     {
         return suffix;
     }
 
+    /**
+     * @return true if we should preserve the snapshot
+     */
     public boolean preserveSnapshot()
     {
         return preserveSnapshot;
     }
 
+    /**
+     * Forcibly override the version to a new one.
+     * @return the new version
+     */
     public String getOverride()
     {
         return override;

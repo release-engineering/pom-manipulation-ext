@@ -15,21 +15,38 @@
  */
 package org.commonjava.maven.ext.manip.impl;
 
-import org.apache.maven.model.*;
+import static org.commonjava.maven.ext.manip.util.IdUtils.ga;
+import static org.commonjava.maven.ext.manip.util.IdUtils.gav;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
+
+import org.apache.maven.model.Dependency;
+import org.apache.maven.model.DependencyManagement;
+import org.apache.maven.model.Model;
+import org.apache.maven.model.ModelBase;
+import org.apache.maven.model.Parent;
+import org.apache.maven.model.Profile;
 import org.codehaus.plexus.component.annotations.Component;
 import org.codehaus.plexus.component.annotations.Requirement;
-import org.codehaus.plexus.interpolation.*;
+import org.codehaus.plexus.interpolation.InterpolationException;
+import org.codehaus.plexus.interpolation.PrefixAwareRecursionInterceptor;
+import org.codehaus.plexus.interpolation.PrefixedObjectValueSource;
+import org.codehaus.plexus.interpolation.PropertiesBasedValueSource;
+import org.codehaus.plexus.interpolation.RecursionInterceptor;
+import org.codehaus.plexus.interpolation.StringSearchInterpolator;
+import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.ext.manip.ManipulationException;
-import org.commonjava.maven.ext.manip.model.Project;
 import org.commonjava.maven.ext.manip.ManipulationSession;
+import org.commonjava.maven.ext.manip.model.Project;
 import org.commonjava.maven.ext.manip.state.VersioningState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.*;
-
-import static org.commonjava.maven.ext.manip.util.IdUtils.ga;
-import static org.commonjava.maven.ext.manip.util.IdUtils.gav;
 
 /**
  * {@link Manipulator} implementation that can modify a project's version with either static or calculated, incremental version qualifier. Snapshot
@@ -45,11 +62,15 @@ import static org.commonjava.maven.ext.manip.util.IdUtils.gav;
 public class ProjectVersioningManipulator
     implements Manipulator
 {
-
     private final Logger logger = LoggerFactory.getLogger( getClass() );
 
     @Requirement
     protected VersionCalculator calculator;
+
+    /**
+     * Record the versions to change.
+     */
+    protected Map<ProjectVersionRef, String> versionsByGAV;
 
     protected ProjectVersioningManipulator()
     {
@@ -77,9 +98,7 @@ public class ProjectVersioningManipulator
         }
 
         logger.info( "Version Manipulator: Calculating the necessary versioning changes." );
-        final Map<String, String> versionsByGAV = calculator.calculateVersioningChanges( projects, session );
-
-        state.setVersioningChanges( versionsByGAV );
+        versionsByGAV = calculator.calculateVersioningChanges( projects, session );
     }
 
     /**
@@ -147,7 +166,6 @@ public class ProjectVersioningManipulator
         boolean changed = false;
 
         final Model model = project.getModel();
-        final Map<String, String> versionsByGAV = state.getVersioningChanges();
 
         if ( versionsByGAV == null || versionsByGAV.isEmpty() )
         {
@@ -179,17 +197,18 @@ public class ProjectVersioningManipulator
         // If the parent version is not defined, it will be taken automatically from the project version
         if ( parent != null && parent.getVersion() != null )
         {
-            final String parentGAV = gav( parent.getGroupId(), parent.getArtifactId(), parent.getVersion() );
+            final ProjectVersionRef parentGAV = new ProjectVersionRef( parent.getGroupId(), parent.getArtifactId(), parent.getVersion() );
             logger.info( "Looking for parent: " + parentGAV );
             if ( versionsByGAV.containsKey( parentGAV ) )
             {
                 final String newVersion = versionsByGAV.get( parentGAV );
+                logger.info( "Changed parent version to: " + newVersion + " in " + parent );
                 parent.setVersion( newVersion );
                 changed = true;
             }
         }
 
-        String gav = gav( g, model.getArtifactId(), v );
+        ProjectVersionRef gav = new ProjectVersionRef( g, model.getArtifactId(), v );
         if ( model.getVersion() != null )
         {
             final String newVersion = versionsByGAV.get( gav );
@@ -244,7 +263,7 @@ public class ProjectVersioningManipulator
                 for ( final Dependency d : dm.getDependencies() )
                 {
                     gav =
-                        gav( interpolate( d.getGroupId(), ri, interp ), interpolate( d.getArtifactId(), ri, interp ),
+                        new ProjectVersionRef( interpolate( d.getGroupId(), ri, interp ), interpolate( d.getArtifactId(), ri, interp ),
                              interpolate( d.getVersion(), ri, interp ) );
                     final String newVersion = versionsByGAV.get( gav );
                     if ( newVersion != null )
@@ -261,7 +280,7 @@ public class ProjectVersioningManipulator
                 for ( final Dependency d : base.getDependencies() )
                 {
                     gav =
-                        gav( interpolate( d.getGroupId(), ri, interp ), interpolate( d.getArtifactId(), ri, interp ),
+                        new ProjectVersionRef( interpolate( d.getGroupId(), ri, interp ), interpolate( d.getArtifactId(), ri, interp ),
                              interpolate( d.getVersion(), ri, interp ) );
                     final String newVersion = versionsByGAV.get( gav );
                     if ( newVersion != null && d.getVersion() != null )

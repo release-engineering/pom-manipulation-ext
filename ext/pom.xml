@@ -30,7 +30,6 @@
   <name>POM Manipulation for Maven Extension</name>
 
   <dependencies>
-
     <dependency>
       <groupId>org.commonjava.maven.ext</groupId>
       <artifactId>pom-manipulation-core</artifactId>
@@ -141,14 +140,6 @@
 
 
   <build>
-    <testResources>
-      <testResource>
-        <directory>src/test/resources</directory>
-        <filtering>true</filtering>
-      </testResource>
-    </testResources>
-
-
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>

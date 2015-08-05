@@ -131,6 +131,7 @@ public class ManipulationManager
         }
 
         Set<Project> changed = applyManipulations( projects, session );
+
         // Create a marker file if we made some changes to prevent duplicate runs.
         if ( !changed.isEmpty() )
         {

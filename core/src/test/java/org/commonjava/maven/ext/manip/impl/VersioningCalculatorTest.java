@@ -44,6 +44,7 @@ import org.apache.maven.repository.DefaultMirrorSelector;
 import org.codehaus.plexus.DefaultPlexusContainer;
 import org.codehaus.plexus.PlexusContainer;
 import org.commonjava.maven.atlas.ident.ref.ProjectRef;
+import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.ext.manip.ManipulationException;
 import org.commonjava.maven.ext.manip.fixture.StubTransport;
 import org.commonjava.maven.ext.manip.model.Project;
@@ -72,6 +73,7 @@ public class VersioningCalculatorTest
 
     private ManipulationSession session;
 
+    @Test
     public void initFailsWithoutSuffixProperty()
         throws Exception
     {
@@ -699,10 +701,11 @@ public class VersioningCalculatorTest
         props.setProperty( VersioningState.INCREMENT_SERIAL_SUFFIX_SYSPROP, "foo-0" );
         setupSession( props, "1.2.0.GA-foo-3", "1.2.0.GA-foo-2", "1.2.0.GA-foo-9" );
 
-        final Map<String, String> result = modder.calculateVersioningChanges( Arrays.asList( p1, p2 ), session );
+        final Map<ProjectVersionRef, String>
+                        result = modder.calculateVersioningChanges( Arrays.asList( p1, p2 ), session );
 
-        assertThat( result.get( gav( GROUP_ID, ARTIFACT_ID, v + os ) ), equalTo( v + "-" + ns ) );
-        assertThat( result.get( gav( GROUP_ID, a2, v + os ) ), equalTo( v + "-" + ns ) );
+        assertThat( result.get( new ProjectVersionRef( GROUP_ID, ARTIFACT_ID, v + os ) ), equalTo( v + "-" + ns ) );
+        assertThat( result.get( new ProjectVersionRef( GROUP_ID, a2, v + os ) ), equalTo( v + "-" + ns ) );
     }
 
     @Test
@@ -738,10 +741,11 @@ public class VersioningCalculatorTest
 
         setupSession( props, versionMap );
 
-        final Map<String, String> result = modder.calculateVersioningChanges( Arrays.asList( p1, p2 ), session );
+        final Map<ProjectVersionRef, String>
+                        result = modder.calculateVersioningChanges( Arrays.asList( p1, p2 ), session );
 
-        assertThat( result.get( gav( GROUP_ID, ARTIFACT_ID, v + os ) ), equalTo( v + "-" + ns ) );
-        assertThat( result.get( gav( GROUP_ID, a2, v + os ) ), equalTo( v + "-" + ns ) );
+        assertThat( result.get( new ProjectVersionRef( GROUP_ID, ARTIFACT_ID, v + os ) ), equalTo( v + "-" + ns ) );
+        assertThat( result.get( new ProjectVersionRef( GROUP_ID, a2, v + os ) ), equalTo( v + "-" + ns ) );
     }
 
     @Test

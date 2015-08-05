@@ -27,10 +27,11 @@ import java.util.Set;
 import org.codehaus.plexus.component.annotations.Component;
 import org.codehaus.plexus.component.annotations.Requirement;
 import org.commonjava.maven.atlas.ident.ref.ProjectRef;
+import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.ext.manip.ManipulationException;
+import org.commonjava.maven.ext.manip.ManipulationSession;
 import org.commonjava.maven.ext.manip.model.Project;
 import org.commonjava.maven.ext.manip.resolver.GalleyAPIWrapper;
-import org.commonjava.maven.ext.manip.ManipulationSession;
 import org.commonjava.maven.ext.manip.state.VersioningState;
 import org.commonjava.maven.galley.maven.GalleyMavenException;
 import org.commonjava.maven.galley.maven.model.view.meta.MavenMetadataView;
@@ -50,6 +51,7 @@ public class VersionCalculator
 {
     private final Logger logger = LoggerFactory.getLogger( getClass() );
 
+    // Used by getMetadataVersions
     @Requirement
     protected GalleyAPIWrapper readerWrapper;
 
@@ -57,6 +59,7 @@ public class VersionCalculator
     {
     }
 
+    // Only used by test code
     public VersionCalculator( final GalleyAPIWrapper readerWrapper )
     {
         this.readerWrapper = readerWrapper;
@@ -71,13 +74,13 @@ public class VersionCalculator
      * @return a collection of GAV : new Version
      * @throws ManipulationException if an error occurs.
      */
-    public Map<String, String> calculateVersioningChanges( final Collection<Project> projects,
-                                                           final ManipulationSession session )
+    public Map<ProjectVersionRef, String> calculateVersioningChanges( final Collection<Project> projects,
+                                                                      final ManipulationSession session )
         throws ManipulationException
     {
         final VersioningState state = session.getState( VersioningState.class );
-        final Map<String, String> versionsByGA = new HashMap<String, String>();
-        final Map<String, Version> versionObjsByGA = new HashMap<String, Version>();
+        final Map<ProjectVersionRef, String> versionsByGAV = new HashMap<ProjectVersionRef, String>();
+        final Map<ProjectVersionRef, Version> versionObjsByGAV = new HashMap<ProjectVersionRef, Version>();
         final Set<String> versionSet = new HashSet<String>();
 
         for ( final Project project : projects )
@@ -87,7 +90,7 @@ public class VersionCalculator
 
             final Version modifiedVersion =
                 calculate( project.getGroupId(), project.getArtifactId(), originalVersion, session );
-            versionObjsByGA.put( gav( project ), modifiedVersion );
+            versionObjsByGAV.put( project.getKey(), modifiedVersion );
 
             if ( state.osgi() )
             {
@@ -111,7 +114,7 @@ public class VersionCalculator
             final String originalVersion = project.getVersion();
             String modifiedVersionString;
 
-            final Version modifiedVersion = versionObjsByGA.get( gav( project ) );
+            final Version modifiedVersion = versionObjsByGAV.get( project.getKey() );
 
             int buildNumber = modifiedVersion.findHighestMatchingBuildNumber( modifiedVersion, versionSet );
 
@@ -136,12 +139,11 @@ public class VersionCalculator
 
             if ( !originalVersion.equals( modifiedVersionString ) )
             {
-                versionsByGA.put( gav( project ), modifiedVersionString );
+                versionsByGAV.put(  project.getKey(), modifiedVersionString );
             }
-
         }
 
-        return versionsByGA;
+        return versionsByGAV;
     }
 
     /**
