@@ -100,6 +100,11 @@
         <artifactId>pom-manipulation-core</artifactId>
         <version>${project.version}</version>
       </dependency>
+      <dependency>
+        <groupId>org.commonjava.maven.ext</groupId>
+        <artifactId>pom-manipulation-ext</artifactId>
+        <version>${project.version}</version>
+      </dependency>
 
       <dependency>
         <groupId>org.apache.maven</groupId>
@@ -406,6 +411,7 @@
     <module>core</module>
     <module>cli</module>
     <module>ext</module>
+    <module>integration-test</module>
   </modules>
 
   <profiles>
