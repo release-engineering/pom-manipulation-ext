@@ -22,18 +22,19 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.repository.MirrorSelector;
+import org.apache.maven.settings.Settings;
 import org.codehaus.plexus.component.annotations.Component;
 import org.codehaus.plexus.component.annotations.Requirement;
 import org.commonjava.maven.ext.manip.ManipulationException;
-import org.commonjava.maven.ext.manip.ManipulationSession;
 import org.commonjava.maven.galley.TransferManager;
-import org.commonjava.maven.galley.internal.TransferManagerImpl;
 import org.commonjava.maven.galley.auth.MemoryPasswordManager;
 import org.commonjava.maven.galley.cache.FileCacheProvider;
 import org.commonjava.maven.galley.event.NoOpFileEventManager;
 import org.commonjava.maven.galley.filearc.FileTransport;
 import org.commonjava.maven.galley.filearc.ZipJarTransport;
+import org.commonjava.maven.galley.internal.TransferManagerImpl;
 import org.commonjava.maven.galley.internal.xfer.DownloadHandler;
 import org.commonjava.maven.galley.internal.xfer.ExistenceHandler;
 import org.commonjava.maven.galley.internal.xfer.ListingHandler;
@@ -96,18 +97,20 @@ public class GalleyInfrastructure
     {
     }
 
-    public GalleyInfrastructure( final ManipulationSession session )
+    public GalleyInfrastructure( final File targetDirectory, final List<ArtifactRepository> remoteRepositories, final ArtifactRepository localRepository,
+                                 final Settings settings, final List<String> activeProfiles)
         throws ManipulationException
     {
-        init( session );
+        init( targetDirectory, remoteRepositories, localRepository, settings, activeProfiles);
     }
 
-    public GalleyInfrastructure( final ManipulationSession session, final MirrorSelector mirrorSelector,
+    public GalleyInfrastructure( final File targetDirectory, final List<ArtifactRepository> remoteRepositories, final ArtifactRepository localRepository,
+                                 final Settings settings, final List<String> activeProfiles, final MirrorSelector mirrorSelector,
                                  final Location customLocation, final Transport customTransport, final File cacheDir )
         throws ManipulationException
     {
         this.mirrorSelector = mirrorSelector;
-        init( session, customLocation, customTransport, cacheDir );
+        init( targetDirectory, remoteRepositories, localRepository, settings, activeProfiles, customLocation, customTransport, cacheDir );
     }
 
     public MavenPomReader getPomReader()
@@ -116,13 +119,15 @@ public class GalleyInfrastructure
     }
 
     @Override
-    public void init( final ManipulationSession session )
+    public void init( final File targetDirectory, final List<ArtifactRepository> remoteRepositories, final ArtifactRepository localRepository,
+                      final Settings settings, final List<String> activeProfiles)
         throws ManipulationException
     {
-        init( session, null, null, null );
+        init( targetDirectory, remoteRepositories, localRepository, settings, activeProfiles, null, null, null );
     }
 
-    private void init( final ManipulationSession session, final Location customLocation,
+    private void init( final File targetDirectory, final List<ArtifactRepository> remoteRepositories, final ArtifactRepository localRepository,
+                      final Settings settings, final List<String> activeProfiles, final Location customLocation,
                        final Transport customTransport, File cacheDir )
         throws ManipulationException
     {
@@ -133,8 +138,8 @@ public class GalleyInfrastructure
                                 : Collections.singletonList( customLocation );
 
             locationExpander =
-                new MavenLocationExpander( custom, session.getRemoteRepositories(), session.getLocalRepository(),
-                                           mirrorSelector, session.getSettings(), session.getActiveProfiles() );
+                new MavenLocationExpander( custom, remoteRepositories, localRepository,
+                                           mirrorSelector, settings, activeProfiles );
         }
         catch ( final MalformedURLException e )
         {
@@ -158,7 +163,7 @@ public class GalleyInfrastructure
 
         if ( cacheDir == null )
         {
-            cacheDir = new File( session.getTargetDir(), "manipulator-cache" );
+            cacheDir = new File( targetDirectory, "manipulator-cache" );
         }
 
         final FileEventManager fileEvents = new NoOpFileEventManager();

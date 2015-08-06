@@ -90,7 +90,8 @@ public class ManipulationManager
     {
         for ( final ExtensionInfrastructure infra : infrastructure.values() )
         {
-            infra.init( session );
+            infra.init( session.getTargetDir(), session.getRemoteRepositories(), session.getLocalRepository(),
+                        session.getSettings(), session.getActiveProfiles() );
         }
 
         final HashMap<Manipulator, String> revMap = new HashMap<Manipulator, String>();

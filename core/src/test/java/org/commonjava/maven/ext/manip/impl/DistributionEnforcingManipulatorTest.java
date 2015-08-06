@@ -54,12 +54,12 @@ import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 import org.codehaus.plexus.DefaultPlexusContainer;
 import org.codehaus.plexus.PlexusContainer;
 import org.codehaus.plexus.util.xml.Xpp3DomBuilder;
+import org.commonjava.maven.ext.manip.ManipulationSession;
 import org.commonjava.maven.ext.manip.model.Project;
 import org.commonjava.maven.ext.manip.resolver.GalleyAPIWrapper;
 import org.commonjava.maven.ext.manip.resolver.GalleyInfrastructure;
 import org.commonjava.maven.ext.manip.state.DistributionEnforcingState;
 import org.commonjava.maven.ext.manip.state.EnforcingMode;
-import org.commonjava.maven.ext.manip.ManipulationSession;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -360,7 +360,9 @@ public class DistributionEnforcingManipulatorTest
         session = new ManipulationSession();
 
         final GalleyInfrastructure galleyInfra =
-            new GalleyInfrastructure( session, null, null, null, temp.newFolder( "cache-dir" ) );
+            new GalleyInfrastructure( session.getTargetDir(), session.getRemoteRepositories(),
+                            session.getLocalRepository(), session.getSettings(), session.getActiveProfiles(),
+                            null, null, null, temp.newFolder( "cache-dir" ) );
 
         final GalleyAPIWrapper wrapper = new GalleyAPIWrapper( galleyInfra );
 

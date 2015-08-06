@@ -149,7 +149,7 @@ public class PluginManipulator
         {
             final ProjectVersionRef ref = iter.previous();
 
-            overrides.putAll( effectiveModelBuilder.getRemotePluginVersionOverrides( ref, session ) );
+            overrides.putAll( effectiveModelBuilder.getRemotePluginVersionOverrides( ref ) );
         }
 
         return overrides;

@@ -15,7 +15,6 @@
  */
 package org.commonjava.maven.ext.manip.impl;
 
-import static org.commonjava.maven.ext.manip.util.IdUtils.gav;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertThat;
 
@@ -46,12 +45,12 @@ import org.codehaus.plexus.PlexusContainer;
 import org.commonjava.maven.atlas.ident.ref.ProjectRef;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.ext.manip.ManipulationException;
+import org.commonjava.maven.ext.manip.ManipulationSession;
 import org.commonjava.maven.ext.manip.fixture.StubTransport;
 import org.commonjava.maven.ext.manip.model.Project;
 import org.commonjava.maven.ext.manip.resolver.GalleyAPIWrapper;
 import org.commonjava.maven.ext.manip.resolver.GalleyInfrastructure;
 import org.commonjava.maven.ext.manip.resolver.MavenLocationExpander;
-import org.commonjava.maven.ext.manip.ManipulationSession;
 import org.commonjava.maven.ext.manip.state.VersioningState;
 import org.commonjava.maven.galley.model.Location;
 import org.commonjava.maven.galley.spi.transport.Transport;
@@ -871,14 +870,16 @@ public class VersioningCalculatorTest
         public TestVersionCalculator( final ManipulationSession session )
             throws ManipulationException
         {
-            super( new GalleyAPIWrapper( new GalleyInfrastructure( session ) ) );
+            super( new GalleyAPIWrapper( new GalleyInfrastructure( session.getTargetDir(), session.getRemoteRepositories(),
+                                                                   session.getLocalRepository(), session.getSettings(), session.getActiveProfiles() ) ) );
         }
 
         public TestVersionCalculator( final ManipulationSession session, final Location mdLoc, final Transport mdTrans,
                                       final File cacheDir )
             throws ManipulationException
         {
-            super( new GalleyAPIWrapper( new GalleyInfrastructure( session, new DefaultMirrorSelector(), mdLoc,
+            super( new GalleyAPIWrapper( new GalleyInfrastructure( session.getTargetDir(), session.getRemoteRepositories(),
+                                                                   session.getLocalRepository(), session.getSettings(), session.getActiveProfiles(), new DefaultMirrorSelector(), mdLoc,
                                                                    mdTrans, cacheDir ) ) );
         }
 

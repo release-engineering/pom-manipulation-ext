@@ -32,7 +32,15 @@
   <dependencies>
     <dependency>
       <groupId>org.commonjava.maven.ext</groupId>
+      <artifactId>pom-manipulation-common</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.commonjava.maven.ext</groupId>
       <artifactId>pom-manipulation-core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.commonjava.maven.ext</groupId>
+      <artifactId>pom-manipulation-io</artifactId>
     </dependency>
 
     <!-- External dependencies -->
@@ -160,6 +168,18 @@
                   <version>${project.version}</version>
                   <overWrite>true</overWrite>
                 </artifactItem>
+                <artifactItem>
+                  <groupId>org.commonjava.maven.ext</groupId>
+                  <artifactId>pom-manipulation-common</artifactId>
+                  <version>${project.version}</version>
+                  <overWrite>true</overWrite>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>org.commonjava.maven.ext</groupId>
+                  <artifactId>pom-manipulation-io</artifactId>
+                  <version>${project.version}</version>
+                  <overWrite>true</overWrite>
+                </artifactItem>
               </artifactItems>
               <outputDirectory>${project.build.directory}/classes</outputDirectory>
             </configuration>
@@ -194,7 +214,9 @@
                   <include>com.fasterxml.jackson.core:*</include>
                 </includes>
                 <excludes>
+                  <exclude>org.commonjava.maven.ext:pom-manipulation-common</exclude>
                   <exclude>org.commonjava.maven.ext:pom-manipulation-core</exclude>
+                  <exclude>org.commonjava.maven.ext:pom-manipulation-io</exclude>
                 </excludes>
               </artifactSet>
               <relocations>

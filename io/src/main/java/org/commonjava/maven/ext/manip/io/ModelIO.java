@@ -38,7 +38,6 @@ import org.commonjava.maven.atlas.ident.ref.ProjectRef;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.ext.manip.ManipulationException;
 import org.commonjava.maven.ext.manip.resolver.GalleyAPIWrapper;
-import org.commonjava.maven.ext.manip.ManipulationSession;
 import org.commonjava.maven.galley.TransferException;
 import org.commonjava.maven.galley.maven.GalleyMavenException;
 import org.commonjava.maven.galley.maven.model.view.DependencyView;
@@ -114,8 +113,7 @@ public class ModelIO
         }
     }
 
-    public Map<ProjectRef, String> getRemoteDependencyVersionOverrides( final ProjectVersionRef ref,
-                                                                        final ManipulationSession session )
+    public Map<ProjectRef, String> getRemoteDependencyVersionOverrides( final ProjectVersionRef ref )
         throws ManipulationException
     {
         logger.debug( "Resolving dependency management GAV: " + ref );
@@ -148,7 +146,7 @@ public class ModelIO
         return versionOverrides;
     }
 
-    public Properties getRemotePropertyMappingOverrides( final ProjectVersionRef ref, final ManipulationSession session )
+    public Properties getRemotePropertyMappingOverrides( final ProjectVersionRef ref )
         throws ManipulationException
     {
         logger.debug( "Resolving remote property mapping POM: " + ref );
@@ -160,8 +158,7 @@ public class ModelIO
         return m.getProperties();
     }
 
-    public Map<ProjectRef, Plugin> getRemotePluginVersionOverrides( final ProjectVersionRef ref,
-                                                                    final ManipulationSession session )
+    public Map<ProjectRef, Plugin> getRemotePluginVersionOverrides( final ProjectVersionRef ref )
         throws ManipulationException
     {
         logger.debug( "Resolving remote plugin management POM: " + ref );

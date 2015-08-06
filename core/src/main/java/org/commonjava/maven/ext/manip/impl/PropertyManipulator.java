@@ -143,7 +143,7 @@ public class PropertyManipulator
         while ( listIterator.hasPrevious() )
         {
             final ProjectVersionRef ref = listIterator.previous();
-            overrides.putAll( effectiveModelBuilder.getRemotePropertyMappingOverrides( ref, session ) );
+            overrides.putAll( effectiveModelBuilder.getRemotePropertyMappingOverrides( ref ) );
         }
 
         return overrides;

@@ -16,9 +16,9 @@
 package org.commonjava.maven.ext.manip.io;
 
 import org.apache.maven.model.resolution.UnresolvableModelException;
+import org.commonjava.maven.ext.manip.ManipulationSession;
 import org.commonjava.maven.ext.manip.resolver.GalleyAPIWrapper;
 import org.commonjava.maven.ext.manip.resolver.GalleyInfrastructure;
-import org.commonjava.maven.ext.manip.ManipulationSession;
 import org.jboss.byteman.contrib.bmunit.BMRule;
 import org.jboss.byteman.contrib.bmunit.BMUnitRunner;
 import org.junit.Rule;
@@ -44,7 +44,9 @@ public class GalleyModelResolverTest
     {
         final ManipulationSession session = new ManipulationSession();
         final GalleyInfrastructure galleyInfra =
-            new GalleyInfrastructure( session, null, null, null, temp.newFolder( "cache-dir" ) );
+            new GalleyInfrastructure( session.getTargetDir(), session.getRemoteRepositories(), session.getLocalRepository(),
+                                      session.getSettings(), session.getActiveProfiles(), null, null, null, temp.newFolder(
+                            "cache-dir" ) );
         final GalleyAPIWrapper wrapper = new GalleyAPIWrapper( galleyInfra );
         final GalleyModelResolver gm = new GalleyModelResolver(wrapper);
 

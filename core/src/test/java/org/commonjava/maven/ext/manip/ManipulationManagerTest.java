@@ -15,15 +15,17 @@
  */
 package org.commonjava.maven.ext.manip;
 
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
+import java.util.Map;
+
 import org.codehaus.plexus.component.annotations.Component;
 import org.codehaus.plexus.component.annotations.Requirement;
 import org.commonjava.maven.ext.manip.fixture.PlexusTestRunner;
 import org.commonjava.maven.ext.manip.impl.Manipulator;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import static org.junit.Assert.*;
-
-import java.util.Map;
 
 @RunWith( PlexusTestRunner.class )
 @Component( role = ManipulationManagerTest.class )

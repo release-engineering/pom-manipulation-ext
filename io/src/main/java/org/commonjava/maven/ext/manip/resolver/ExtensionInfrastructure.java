@@ -15,9 +15,13 @@
  */
 package org.commonjava.maven.ext.manip.resolver;
 
+import java.io.File;
+import java.util.List;
+
+import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.execution.MavenSession;
+import org.apache.maven.settings.Settings;
 import org.commonjava.maven.ext.manip.ManipulationException;
-import org.commonjava.maven.ext.manip.ManipulationSession;
 
 /**
  * Represents a piece of extension infrastructure that gets initialized when the {@link MavenSession} becomes available.
@@ -26,8 +30,8 @@ import org.commonjava.maven.ext.manip.ManipulationSession;
  */
 public interface ExtensionInfrastructure
 {
-
-    void init( ManipulationSession session )
+    void init( final File targetDirectory, final List<ArtifactRepository> remoteRepositories,
+               final ArtifactRepository localRepository, final Settings settings, final List<String> activeProfiles)
         throws ManipulationException;
 
 }

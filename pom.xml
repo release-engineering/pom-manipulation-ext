@@ -22,7 +22,7 @@
   <parent>
     <groupId>com.redhat.rcm</groupId>
     <artifactId>redhat-releng-tools</artifactId>
-    <version>1</version>
+    <version>2-SNAPSHOT</version>
   </parent>
 
   <groupId>org.commonjava.maven.ext</groupId>
@@ -97,12 +97,22 @@
     <dependencies>
       <dependency>
         <groupId>org.commonjava.maven.ext</groupId>
+        <artifactId>pom-manipulation-common</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.commonjava.maven.ext</groupId>
         <artifactId>pom-manipulation-core</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
         <groupId>org.commonjava.maven.ext</groupId>
         <artifactId>pom-manipulation-ext</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.commonjava.maven.ext</groupId>
+        <artifactId>pom-manipulation-io</artifactId>
         <version>${project.version}</version>
       </dependency>
 
@@ -408,6 +418,8 @@
   </build>
 
   <modules>
+    <module>common</module>
+    <module>io</module>
     <module>core</module>
     <module>cli</module>
     <module>ext</module>

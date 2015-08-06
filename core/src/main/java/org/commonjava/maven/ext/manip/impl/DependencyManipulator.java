@@ -196,7 +196,7 @@ public class DependencyManipulator
         while ( iter.hasPrevious() )
         {
             final ProjectVersionRef ref = iter.previous();
-            overrides.putAll( effectiveModelBuilder.getRemoteDependencyVersionOverrides( ref, session ) );
+            overrides.putAll( effectiveModelBuilder.getRemoteDependencyVersionOverrides( ref ) );
         }
 
         return overrides;
