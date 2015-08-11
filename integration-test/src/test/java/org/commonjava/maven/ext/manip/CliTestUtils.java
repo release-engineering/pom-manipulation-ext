@@ -21,9 +21,7 @@ import groovy.lang.Binding;
 import groovy.util.GroovyScriptEngine;
 
 import java.io.*;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 
 /**
  * @author vdedik@redhat.com
@@ -45,8 +43,21 @@ public class CliTestUtils {
      * @throws Exception
      */
     public static Integer runCli(String workingDir) throws Exception{
+        return runCli(new ArrayList<String>(), workingDir);
+    }
+
+    /**
+     * Run pom-manipulation-cli.jar with java params (-D arguments) in workingDir directory.
+     * Using test.properties in workingDir as -D arguments.
+     *
+     * @param args - List of additional command line arguments
+     * @param workingDir - Working directory in which you want the cli to be run.
+     * @return Exit value
+     * @throws Exception
+     */
+    public static Integer runCli(List<String> args, String workingDir) throws Exception{
         Properties testProperties = loadTestProps(workingDir);
-        return runCli(testProperties, workingDir);
+        return runCli(args, testProperties, workingDir);
     }
 
     /**
@@ -58,12 +69,25 @@ public class CliTestUtils {
      * @throws Exception
      */
     public static Integer runCli(Properties properties, String workingDir) throws Exception {
+        return runCli(null, properties, workingDir);
+    }
+
+    /**
+     * Run pom-manipulation-cli.jar with java params (-D arguments) in workingDir directory.
+     *
+     * @param args - List of additional command line arguments
+     * @param properties - Properties representing -D arguments
+     * @param workingDir - Working directory in which you want the cli to be run.
+     * @return Exit value
+     * @throws Exception
+     */
+    public static Integer runCli(List<String> args, Properties properties, String workingDir) throws Exception {
         Map<String, String> params = new HashMap<String, String>();
         for (final String name: properties.stringPropertyNames()) {
             params.put(name, properties.getProperty(name));
         }
 
-        return runCli(params, workingDir);
+        return runCli(args, params, workingDir);
     }
 
     /**
@@ -75,8 +99,24 @@ public class CliTestUtils {
      * @throws Exception
      */
     public static Integer runCli(Map<String, String> params, String workingDir) throws Exception {
+        return runCli(null, params, workingDir);
+    }
+
+    /**
+     * Run pom-manipulation-cli.jar with java params (-D arguments) in workingDir directory.
+     *
+     * @param args - List of additional command line arguments
+     * @param params - Map of String keys and String values representing -D arguments
+     * @param workingDir - Working directory in which you want the cli to be run.
+     * @return Exit value
+     * @throws Exception
+     */
+    public static Integer runCli(List<String> args, Map<String, String> params, String workingDir)
+            throws Exception {
+        String stringArgs = toArguments(args);
         String stringParams = toJavaParams(params);
-        String command = String.format("java -jar %s/pom-manipulation-cli.jar %s", BUILD_DIR, stringParams);
+        String command = String.format(
+                "java -jar %s/pom-manipulation-cli.jar %s %s", BUILD_DIR, stringParams, stringArgs);
 
         return runCommandAndWait(command, workingDir);
     }
@@ -164,6 +204,24 @@ public class CliTestUtils {
             stringParams += String.format("-D%s=%s ", key, params.get(key));
         }
         return stringParams;
+    }
+
+    /**
+     * Convert string arguments in a List to a String
+     *
+     * @param args - List of command line options with its arguments
+     * @return - String of options with it's arguments
+     */
+    public static String toArguments(List<String> args) {
+        if (args == null) {
+            return "";
+        }
+
+        String stringArgs = "";
+        for (String arg : args) {
+            stringArgs += String.format("%s ", arg);
+        }
+        return stringArgs;
     }
 
     /**

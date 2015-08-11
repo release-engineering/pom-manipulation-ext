@@ -64,7 +64,11 @@ public class DefaultCliIntegrationTest {
     @Test
     public void testIntegration() throws Exception {
         String testLocation = getDefaultTestLocation(testRelativeLocation);
-        runCli(testLocation);
+        List<String> args = new ArrayList<String>();
+        args.add("-s");
+        args.add(getDefaultTestLocation("settings.xml"));
+
+        runCli(args, testLocation);
         runMaven("install", DEFAULT_MVN_PARAMS, testLocation);
         verify(testLocation);
     }

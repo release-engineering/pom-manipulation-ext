@@ -41,8 +41,9 @@ public class CliTest
     {
         Cli c = new Cli();
         File pom1 = new File("/tmp/foobar");
+		File settings1 = new File("/tmp/foobarsettings");
 
-        executeMethod( c, "createSession", new Object[] { pom1 } );
+        executeMethod( c, "createSession", new Object[] { pom1, settings1 } );
 
         ManipulationSession session = (ManipulationSession) getField( c, "session" );
 
