@@ -36,22 +36,22 @@ public class DefaultCliIntegrationTest {
         add("setup");
     }};
 
-    @Parameters
+    @Parameters(name="{0}")
     public static Collection<Object[]> getFiles() {
         Collection<Object[]> params = new ArrayList<Object[]>();
         for (File rl : new File(IT_LOCATION).listFiles()) {
             if (rl.isDirectory() && !EXCLUDED_FILES.contains(rl.getName())) {
-                Object[] arr = new Object[] { rl.toString() };
+                Object[] arr = new Object[] { rl.getName() };
                 params.add(arr);
             }
         }
         return params;
     }
 
-    private String testLocation;
+    private String testRelativeLocation;
 
-    public DefaultCliIntegrationTest(String testLocation) {
-        this.testLocation = testLocation;
+    public DefaultCliIntegrationTest(String testRelativeLocation) {
+        this.testRelativeLocation = testRelativeLocation;
     }
 
     @BeforeClass
@@ -63,6 +63,7 @@ public class DefaultCliIntegrationTest {
 
     @Test
     public void testIntegration() throws Exception {
+        String testLocation = getDefaultTestLocation(testRelativeLocation);
         runCli(testLocation);
         runMaven("install", DEFAULT_MVN_PARAMS, testLocation);
         verify(testLocation);
