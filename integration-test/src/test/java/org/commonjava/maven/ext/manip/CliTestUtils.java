@@ -118,7 +118,7 @@ public class CliTestUtils {
         String command = String.format(
                 "java -jar %s/pom-manipulation-cli.jar %s %s", BUILD_DIR, stringParams, stringArgs);
 
-        return runCommandAndWait(command, workingDir);
+        return runCommandAndWait(command, workingDir, true);
     }
 
     /**
@@ -225,8 +225,7 @@ public class CliTestUtils {
     }
 
     /**
-     * Run command in another process and wait for it to finish. Throw IOException if command exits with non zero
-     * exit value.
+     * Run command in another process and wait for it to finish.
      *
      * @param command - Command to be run in another process, e.g. "mvn clean install"
      * @param workingDir - Working directory in which to run the command.
@@ -234,6 +233,21 @@ public class CliTestUtils {
      * @throws Exception
      */
     public static Integer runCommandAndWait(String command, String workingDir) throws Exception {
+        return runCommandAndWait(command, workingDir, false);
+    }
+
+    /**
+     * Run command in another process and wait for it to finish. Throw IOException if command exits with non zero
+     * exit value.
+     *
+     * @param command - Command to be run in another process, e.g. "mvn clean install"
+     * @param workingDir - Working directory in which to run the command.
+     * @param ignoreFailure - Weather or not to ignore non zero exit value, if false, IOException will be thrown when
+     *                        exit value is not 0.
+     * @return exit value.
+     * @throws Exception
+     */
+    public static Integer runCommandAndWait(String command, String workingDir, Boolean ignoreFailure) throws Exception {
         Process proc = Runtime.getRuntime().exec(command, null, new File(workingDir));
         File buildlog = new File(workingDir + "/build.log");
         File builderrlog = new File(workingDir + "/builderr.log");
@@ -251,7 +265,7 @@ public class CliTestUtils {
         stdoutFile.close();
         stderrFile.close();
 
-        if (proc.waitFor() != 0) {
+        if (!ignoreFailure && proc.waitFor() != 0) {
             throw new IOException(
                     String.format("Process exited with an error, see files %s and %s", buildlog, builderrlog));
         }

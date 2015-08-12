@@ -187,7 +187,7 @@ public class Cli
         }
         catch ( ManipulationException e )
         {
-            logger.error( "Unable to parse projects ", e );
+            logger.error( "POM Manipulation failed: Unable to parse projects ", e );
             System.exit( 1 );
         }
     }
