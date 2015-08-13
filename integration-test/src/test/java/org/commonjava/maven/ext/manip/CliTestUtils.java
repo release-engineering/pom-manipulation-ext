@@ -118,7 +118,7 @@ public class CliTestUtils {
         String command = String.format(
                 "java -jar %s/pom-manipulation-cli.jar %s %s", BUILD_DIR, stringParams, stringArgs);
 
-        return runCommandAndWait(command, workingDir, true);
+        return runCommandAndWait(command, workingDir);
     }
 
     /**
@@ -156,6 +156,10 @@ public class CliTestUtils {
      * @throws Exception
      */
     public static void verify(String workingDir) throws Exception{
+        File verify = new File(workingDir + "/verify.groovy");
+        if (!verify.isFile()) {
+            return;
+        }
         Binding binding = new Binding();
         binding.setVariable("basedir", workingDir);
         GroovyScriptEngine engine = new GroovyScriptEngine(workingDir);
@@ -170,12 +174,26 @@ public class CliTestUtils {
      * @throws Exception
      */
     public static Properties loadTestProps(String workingDir) throws Exception {
-        File testPropsFile = new File(workingDir + "/test.properties");
-        Properties testProps = new Properties();
-        FileInputStream fis = new FileInputStream(testPropsFile);
-        testProps.load(fis);
+        return loadProps(workingDir, "test.properties");
+    }
 
-        return testProps;
+    /**
+     * Load *.properties from workingDir directory.
+     *
+     * @param workingDir - Directory that contains *.properties.
+     * @param fileName - File name of the *.properties file
+     * @return Loaded properties
+     * @throws Exception
+     */
+    public static Properties loadProps(String workingDir, String fileName) throws Exception {
+        File propsFile = new File(workingDir + "/" + fileName);
+        Properties props = new Properties();
+        if (propsFile.isFile()) {
+            FileInputStream fis = new FileInputStream(propsFile);
+            props.load(fis);
+        }
+
+        return props;
     }
 
     /**
@@ -224,6 +242,7 @@ public class CliTestUtils {
         return stringArgs;
     }
 
+
     /**
      * Run command in another process and wait for it to finish.
      *
@@ -233,43 +252,28 @@ public class CliTestUtils {
      * @throws Exception
      */
     public static Integer runCommandAndWait(String command, String workingDir) throws Exception {
-        return runCommandAndWait(command, workingDir, false);
-    }
-
-    /**
-     * Run command in another process and wait for it to finish. Throw IOException if command exits with non zero
-     * exit value.
-     *
-     * @param command - Command to be run in another process, e.g. "mvn clean install"
-     * @param workingDir - Working directory in which to run the command.
-     * @param ignoreFailure - Weather or not to ignore non zero exit value, if false, IOException will be thrown when
-     *                        exit value is not 0.
-     * @return exit value.
-     * @throws Exception
-     */
-    public static Integer runCommandAndWait(String command, String workingDir, Boolean ignoreFailure) throws Exception {
         Process proc = Runtime.getRuntime().exec(command, null, new File(workingDir));
         File buildlog = new File(workingDir + "/build.log");
-        File builderrlog = new File(workingDir + "/builderr.log");
 
-        InputStream stdout = new BufferedInputStream(proc.getInputStream());
-        FileOutputStream stdoutFile = new FileOutputStream(buildlog);
-        ByteStreams.copy(stdout, stdoutFile);
+        BufferedReader stdout = new BufferedReader(new InputStreamReader(proc.getInputStream()));
+        BufferedReader stderr = new BufferedReader(new InputStreamReader(proc.getErrorStream()));
+        PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter(buildlog, true)));
 
-        InputStream stderr = new BufferedInputStream(proc.getErrorStream());
-        FileOutputStream stderrFile = new FileOutputStream(builderrlog);
-        ByteStreams.copy(stderr, stderrFile);
+        String line = null;
+        String errline = null;
+        while ((line = stdout.readLine()) != null || (errline = stderr.readLine()) != null) {
+            if (line != null) {
+                out.println(line);
+            }
+            if (errline != null) {
+                out.println(errline);
+            }
+        }
 
         stdout.close();
         stderr.close();
-        stdoutFile.close();
-        stderrFile.close();
+        out.close();
 
-        if (!ignoreFailure && proc.waitFor() != 0) {
-            throw new IOException(
-                    String.format("Process exited with an error, see files %s and %s", buildlog, builderrlog));
-        }
-
-        return proc.exitValue();
+        return proc.waitFor();
     }
 }

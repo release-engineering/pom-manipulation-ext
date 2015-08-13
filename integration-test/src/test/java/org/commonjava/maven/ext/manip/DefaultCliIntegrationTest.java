@@ -63,13 +63,14 @@ public class DefaultCliIntegrationTest {
 
     @Test
     public void testIntegration() throws Exception {
-        String testLocation = getDefaultTestLocation(testRelativeLocation);
+        String test = getDefaultTestLocation(testRelativeLocation);
         List<String> args = new ArrayList<String>();
         args.add("-s");
         args.add(getDefaultTestLocation("settings.xml"));
+        args.add("-d");
 
-        runCli(args, testLocation);
-        runMaven("install", DEFAULT_MVN_PARAMS, testLocation);
-        verify(testLocation);
+        runCli(args, test);
+        runMaven("install", DEFAULT_MVN_PARAMS, test);
+        verify(test);
     }
 }
