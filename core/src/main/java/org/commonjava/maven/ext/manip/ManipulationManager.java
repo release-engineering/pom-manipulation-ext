@@ -23,6 +23,7 @@ import org.commonjava.maven.ext.manip.impl.Manipulator;
 import org.commonjava.maven.ext.manip.io.PomIO;
 import org.commonjava.maven.ext.manip.model.Project;
 import org.commonjava.maven.ext.manip.resolver.ExtensionInfrastructure;
+import org.commonjava.maven.ext.manip.resolver.GalleyInfrastructure;
 import org.commonjava.maven.ext.manip.util.ManipulatorPriorityComparator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -150,6 +151,11 @@ public class ManipulationManager
             {
                 throw new ManipulationException( "Marker file creation failed", e );
             }
+        }
+
+        // Ensure shutdown of executor service
+        if (infrastructure.containsKey("galley")) {
+            ((GalleyInfrastructure) infrastructure.get("galley")).finish();
         }
         logger.info( "Maven-Manipulation-Extension: Finished." );
     }
