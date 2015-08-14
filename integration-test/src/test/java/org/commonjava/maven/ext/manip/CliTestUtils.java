@@ -16,12 +16,17 @@
 
 package org.commonjava.maven.ext.manip;
 
-import com.google.common.io.ByteStreams;
 import groovy.lang.Binding;
 import groovy.util.GroovyScriptEngine;
+import org.commonjava.maven.ext.manip.invoker.DefaultExecutionParser;
+import org.commonjava.maven.ext.manip.invoker.Execution;
+import org.commonjava.maven.ext.manip.invoker.ExecutionParser;
+import org.commonjava.maven.ext.manip.invoker.Utils;
 
 import java.io.*;
 import java.util.*;
+
+import static org.junit.Assert.*;
 
 /**
  * @author vdedik@redhat.com
@@ -33,6 +38,48 @@ public class CliTestUtils {
     public static final Map<String, String> DEFAULT_MVN_PARAMS = new HashMap<String, String>() {{
         put("maven.repo.local", LOCAL_REPO);
     }};
+
+    /**
+     * Run the same/similar execution to what invoker plugin would run.
+     *
+     * @param workingDir - Working directory where the invoker properties are.
+     * @throws Exception
+     */
+    public static void runLikeInvoker(String workingDir) throws Exception {
+        ExecutionParser executionParser = new DefaultExecutionParser(DefaultExecutionParser.DEFAULT_HANDLERS);
+        Collection<Execution> executions = executionParser.parse(workingDir);
+
+        // Execute
+        for (Execution e : executions) {
+            List<String> args = new ArrayList<String>();
+            args.add("-s");
+            args.add(getDefaultTestLocation("settings.xml"));
+            args.add("-d");
+
+            // Run PME-Cli
+            Integer cliExitValue = runCli(args, e.getJavaParams(), e.getLocation());
+
+            // Run Maven
+            Map<String, String> mavenParams = new HashMap<String, String>();
+            mavenParams.putAll(DEFAULT_MVN_PARAMS);
+            mavenParams.putAll(e.getJavaParams());
+            Integer mavenExitValue = runMaven(e.getMvnCommand(), mavenParams, e.getLocation());
+
+            // Test return codes
+            if (e.isSuccess()) {
+                assertEquals("PME-Cli exited with a non zero value.",
+                        Integer.valueOf(0), cliExitValue);
+                assertEquals("Maven exited with a non zero value.",
+                        Integer.valueOf(0), mavenExitValue);
+            } else {
+                assertTrue("Exit value of either PME-Cli or Maven must be non-zero.",
+                        cliExitValue != 0 || mavenExitValue != 0);
+            }
+        }
+
+        // Verify
+        verify(workingDir);
+    }
 
     /**
      * Run pom-manipulation-cli.jar with java params (-D arguments) in workingDir directory.
@@ -56,38 +103,9 @@ public class CliTestUtils {
      * @throws Exception
      */
     public static Integer runCli(List<String> args, String workingDir) throws Exception{
-        Properties testProperties = loadTestProps(workingDir);
-        return runCli(args, testProperties, workingDir);
-    }
-
-    /**
-     * Run pom-manipulation-cli.jar with java params (-D arguments) in workingDir directory.
-     *
-     * @param properties - Properties representing -D arguments
-     * @param workingDir - Working directory in which you want the cli to be run.
-     * @return Exit value
-     * @throws Exception
-     */
-    public static Integer runCli(Properties properties, String workingDir) throws Exception {
-        return runCli(null, properties, workingDir);
-    }
-
-    /**
-     * Run pom-manipulation-cli.jar with java params (-D arguments) in workingDir directory.
-     *
-     * @param args - List of additional command line arguments
-     * @param properties - Properties representing -D arguments
-     * @param workingDir - Working directory in which you want the cli to be run.
-     * @return Exit value
-     * @throws Exception
-     */
-    public static Integer runCli(List<String> args, Properties properties, String workingDir) throws Exception {
-        Map<String, String> params = new HashMap<String, String>();
-        for (final String name: properties.stringPropertyNames()) {
-            params.put(name, properties.getProperty(name));
-        }
-
-        return runCli(args, params, workingDir);
+        Properties testProperties = Utils.loadProps(workingDir + "/test.properties");
+        Map<String, String> javaParams = Utils.propsToMap(testProperties);
+        return runCli(args, javaParams, workingDir);
     }
 
     /**
@@ -164,36 +182,6 @@ public class CliTestUtils {
         binding.setVariable("basedir", workingDir);
         GroovyScriptEngine engine = new GroovyScriptEngine(workingDir);
         engine.run("verify.groovy", binding);
-    }
-
-    /**
-     * Load test.properties from workingDir directory.
-     *
-     * @param workingDir - Directory that contains test.properties.
-     * @return Loaded properties
-     * @throws Exception
-     */
-    public static Properties loadTestProps(String workingDir) throws Exception {
-        return loadProps(workingDir, "test.properties");
-    }
-
-    /**
-     * Load *.properties from workingDir directory.
-     *
-     * @param workingDir - Directory that contains *.properties.
-     * @param fileName - File name of the *.properties file
-     * @return Loaded properties
-     * @throws Exception
-     */
-    public static Properties loadProps(String workingDir, String fileName) throws Exception {
-        File propsFile = new File(workingDir + "/" + fileName);
-        Properties props = new Properties();
-        if (propsFile.isFile()) {
-            FileInputStream fis = new FileInputStream(propsFile);
-            props.load(fis);
-        }
-
-        return props;
     }
 
     /**

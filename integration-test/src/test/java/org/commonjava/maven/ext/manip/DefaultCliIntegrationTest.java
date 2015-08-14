@@ -23,9 +23,7 @@ import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 
 import static org.commonjava.maven.ext.manip.CliTestUtils.*;
 
@@ -34,6 +32,10 @@ import static org.commonjava.maven.ext.manip.CliTestUtils.*;
 public class DefaultCliIntegrationTest {
     private static final List<String> EXCLUDED_FILES = new ArrayList<String>() {{
         add("setup");
+    }};
+
+    private static final Map<String, String> LOCATION_REWRITE = new HashMap<String, String>() {{
+        put("simple-numeric-directory-path", "simple-numeric-directory-path/parent");
     }};
 
     @Parameters(name="{0}")
@@ -63,14 +65,12 @@ public class DefaultCliIntegrationTest {
 
     @Test
     public void testIntegration() throws Exception {
-        String test = getDefaultTestLocation(testRelativeLocation);
-        List<String> args = new ArrayList<String>();
-        args.add("-s");
-        args.add(getDefaultTestLocation("settings.xml"));
-        args.add("-d");
+        String testRelativeLocation = this.testRelativeLocation;
+        if (LOCATION_REWRITE.containsKey(this.testRelativeLocation)) {
+            testRelativeLocation = LOCATION_REWRITE.get(this.testRelativeLocation);
+        }
 
-        runCli(args, test);
-        runMaven("install", DEFAULT_MVN_PARAMS, test);
-        verify(test);
+        String test = getDefaultTestLocation(testRelativeLocation);
+        runLikeInvoker(test);
     }
 }

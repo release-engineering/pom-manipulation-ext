@@ -174,7 +174,7 @@ public class Cli
             logger.info( "Manipulation engine disabled. No project found." );
             return;
         }
-        else if ( new File( target, ManipulationManager.MARKER_FILE ).exists() )
+        else if ( new File( target.getParentFile(), ManipulationManager.MARKER_FILE ).exists() )
         {
             logger.info( "Skipping manipulation as previous execution found." );
             return;
@@ -188,6 +188,10 @@ public class Cli
         catch ( ManipulationException e )
         {
             logger.error( "POM Manipulation failed: Unable to parse projects ", e );
+            System.exit( 1 );
+        }
+        catch ( Exception e ) {
+            logger.error( "POM Manipulation failed.", e);
             System.exit( 1 );
         }
     }
