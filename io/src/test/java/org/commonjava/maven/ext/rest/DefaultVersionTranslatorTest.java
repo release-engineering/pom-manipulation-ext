@@ -1,45 +1,64 @@
 package org.commonjava.maven.ext.rest;
 
-import com.github.restdriver.clientdriver.ClientDriverRequest.Method;
-import com.github.restdriver.clientdriver.ClientDriverRule;
-import static com.github.restdriver.clientdriver.RestClientDriver.*;
 
+import com.mashape.unirest.http.Unirest;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
-import org.commonjava.maven.ext.rest.exception.ClientException;
 import org.commonjava.maven.ext.rest.exception.RestException;
-import org.commonjava.maven.ext.rest.exception.ServerException;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
+import org.commonjava.maven.ext.rest.handler.AddSuffixJettyHandler;
+import org.commonjava.maven.ext.server.HttpServer;
+import org.commonjava.maven.ext.server.JettyHttpServer;
+import org.eclipse.jetty.server.Handler;
+import org.json.JSONArray;
+import org.junit.*;
+
 import static org.junit.Assert.*;
 import static org.hamcrest.CoreMatchers.*;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Pattern;
 
 /**
  * @author vdedik@redhat.com
  */
 public class DefaultVersionTranslatorTest {
-    private VersionTranslator versionTranslator;
+    private DefaultVersionTranslator versionTranslator;
+    private static HttpServer httpServer;
+    private static List<ProjectVersionRef> aLotOfDeps;
 
-    @Rule
-    public ClientDriverRule driver = new ClientDriverRule();
+    @BeforeClass
+    public static void startUp() {
+        Handler handler = new AddSuffixJettyHandler();
+        httpServer = new JettyHttpServer(handler);
+
+        aLotOfDeps = new ArrayList<ProjectVersionRef>();
+        String longJsonFile = Utils.readFileFromClasspath("example-response-performance-test.json");
+        JSONArray jsonDeps = new JSONArray(longJsonFile);
+        for (Integer i = 0; i < jsonDeps.length(); i++) {
+            aLotOfDeps.add(Utils.fromString(jsonDeps.getString(i)));
+        }
+    }
+
+    @AfterClass
+    public static void tearDown() {
+        httpServer.shutdown();
+    }
 
     @Before
-    public void startUp() {
-        this.versionTranslator = new DefaultVersionTranslator(driver.getBaseUrl());
+    public void initTest() {
+        this.versionTranslator = new DefaultVersionTranslator("http://127.0.0.1:" + httpServer.getPort());
+    }
+
+    @Test
+    public void testConnection() {
+        try {
+            Unirest.post(this.versionTranslator.getEndpointUrl()).asString();
+        } catch (Exception e) {
+            fail("Failed to connect to server, exception message: " + e.getMessage());
+        }
     }
 
     @Test
     public void testTranslateVersionsSuccess() {
-        Pattern projectMatcher = Utils.getProjectMatcher("com.example:example:1.0");
-        driver.addExpectation(onRequestTo("/").withMethod(Method.POST).withBody(projectMatcher, "application/json"),
-                giveResponse("{'project':'com.example:example:1.0-redhat-1', " +
-                                "'dependencies': ['com.example:example-dep:1.0-redhat-1']}",
-                        "application/json"));
-
         ProjectVersionRef project = new ProjectVersionRef("com.example", "example", "1.0");
         List<ProjectVersionRef> deps = new ArrayList<ProjectVersionRef>() {{
             add(new ProjectVersionRef("com.example", "example-dep", "1.0"));
@@ -54,47 +73,6 @@ public class DefaultVersionTranslatorTest {
         assertThat(actualResult, is(expectedResult));
     }
 
-    @Test
-    public void testTranslateVersionsFail5xx() {
-        driver.addExpectation(onRequestTo("/").withMethod(Method.POST),
-                giveEmptyResponse().withStatus(500));
-
-        ProjectVersionRef project = new ProjectVersionRef("com.example", "example", "1.0");
-        List<ProjectVersionRef> deps = new ArrayList<ProjectVersionRef>() {{
-            // Nothing necessary here
-        }};
-
-        try {
-            versionTranslator.translateVersions(project, deps);
-            fail("Failed to throw ServerException when server responded with status code 500.");
-        } catch (ServerException ex) {
-            // Pass
-        } catch (Exception ex) {
-            fail(String.format("Expected exception is ServerException, instead %s thrown.",
-                    ex.getClass().getSimpleName()));
-        }
-    }
-
-    @Test
-    public void testTranslateVersionsFail4xx() {
-        driver.addExpectation(onRequestTo("/").withMethod(Method.POST),
-                giveEmptyResponse().withStatus(400));
-
-        ProjectVersionRef project = new ProjectVersionRef("com.example", "example", "1.0");
-        List<ProjectVersionRef> deps = new ArrayList<ProjectVersionRef>() {{
-            // Nothing necessary here
-        }};
-
-        try {
-            versionTranslator.translateVersions(project, deps);
-            fail("Failed to throw ClientException when server responded with status code 400.");
-        } catch (ClientException ex) {
-            // Pass
-        } catch (Exception ex) {
-            fail(String.format("Expected exception is ClientException, instead %s thrown.",
-                    ex.getClass().getSimpleName()));
-        }
-    }
 
     @Test
     public void testTranslateVersionsFailNoResponse() {
@@ -117,17 +95,9 @@ public class DefaultVersionTranslatorTest {
         }
     }
 
-    @Test(timeout=200)
+    @Test(timeout=300)
     public void testTranslateVersionsPerformance() {
-        driver.addExpectation(onRequestTo("/").withMethod(Method.POST),
-                giveResponse(Utils.readFileFromClasspath(
-                        "example-response-performance-test.json"), "application/json"));
-
         ProjectVersionRef project = new ProjectVersionRef("com.example", "example", "1.0");
-        List<ProjectVersionRef> deps = new ArrayList<ProjectVersionRef>() {{
-            // Nothing necessary here
-        }};
-
-        versionTranslator.translateVersions(project, deps);
+        versionTranslator.translateVersions(project, aLotOfDeps);
     }
 }

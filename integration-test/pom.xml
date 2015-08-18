@@ -35,6 +35,14 @@
       <artifactId>pom-manipulation-ext</artifactId>
     </dependency>
     <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.codehaus.groovy</groupId>
+      <artifactId>groovy-all</artifactId>
+    </dependency>
+    <dependency>
       <groupId>org.apache.maven</groupId>
       <artifactId>apache-maven</artifactId>
       <type>zip</type>
@@ -65,32 +73,64 @@
         </includes>
         <targetPath>../it</targetPath>
       </testResource>
+      <testResource>
+        <directory>src/it</directory>
+        <targetPath>../it-cli</targetPath>
+        <filtering>true</filtering>
+        <excludes>
+          <exclude>expression-not-rewritten/pom.xml</exclude>
+        </excludes>
+      </testResource>
+      <testResource>
+        <directory>src/it</directory>
+        <targetPath>../it-cli</targetPath>
+        <filtering>false</filtering>
+        <includes>
+          <include>expression-not-rewritten/pom.xml</include>
+        </includes>
+      </testResource>
     </testResources>
     <plugins>
       <plugin>
         <artifactId>maven-dependency-plugin</artifactId>
         <executions>
-            <execution>             
-              <id>copy-artifact</id>
-              <phase>package</phase>
-              <goals>
-                <goal>copy</goal>
-              </goals>
-              <configuration>
-                <artifactItems>
-                    <artifactItem>
-                      <groupId>${project.groupId}</groupId>
-                      <artifactId>pom-manipulation-ext</artifactId>
-                      <version>${project.version}</version>
-                    </artifactItem>
-                </artifactItems>
-                <outputDirectory>${it.maven.home}/lib/ext</outputDirectory>
-              </configuration>
-            </execution>
-          </executions>
+          <execution>
+            <id>copy-pme</id>
+            <phase>test-compile</phase>
+            <goals>
+              <goal>copy</goal>
+            </goals>
+            <configuration>
+              <artifactItems>
+                <artifactItem>
+                  <groupId>${project.groupId}</groupId>
+                  <artifactId>pom-manipulation-ext</artifactId>
+                  <version>${project.version}</version>
+                  <outputDirectory>${it.maven.home}/lib/ext</outputDirectory>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>${project.groupId}</groupId>
+                  <artifactId>pom-manipulation-cli</artifactId>
+                  <version>${project.version}</version>
+                  <outputDirectory>${project.build.directory}</outputDirectory>
+                  <destFileName>pom-manipulation-cli.jar</destFileName>
+                </artifactItem>
+              </artifactItems>
+            </configuration>
+          </execution>
+        </executions>
       </plugin>
       <plugin>
         <artifactId>maven-invoker-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <systemPropertyVariables>
+            <buildDirectory>${project.build.directory}</buildDirectory>
+          </systemPropertyVariables>
+        </configuration>
       </plugin>
     </plugins>
   </build>

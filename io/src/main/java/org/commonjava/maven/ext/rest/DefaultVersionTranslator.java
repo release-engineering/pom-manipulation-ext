@@ -50,7 +50,8 @@ public class DefaultVersionTranslator implements VersionTranslator {
                     .body(new JSONObject(requestBodyMap).toString())
                     .asJson();
         } catch (UnirestException e) {
-            throw new RestException(String.format("Request to server '%s' failed.", this.endpointUrl));
+            throw new RestException(String.format(
+                    "Request to server '%s' failed. Exception message: %s", this.endpointUrl, e.getMessage()));
         }
 
         // Handle some corner cases (5xx, 4xx)
@@ -66,20 +67,20 @@ public class DefaultVersionTranslator implements VersionTranslator {
         JSONObject jsonResult = r.getBody().getObject();
 
         // Parse project version and create ProjectVersionRef from it
-        String projectGav = (String) jsonResult.get("project");
-        String[] projectGavSplit = projectGav.split(":");
-        ProjectVersionRef projectResult =
-                new ProjectVersionRef(projectGavSplit[0], projectGavSplit[1], projectGavSplit[2]);
+        ProjectVersionRef projectResult = Utils.fromString(jsonResult.getString("project"));
         result.add(projectResult);
 
         // Parse dependencies and create ProjectVersionRefs from it
         JSONArray dependenciesGavs = (JSONArray) jsonResult.get("dependencies");
         for (Integer i = 0; i < dependenciesGavs.length(); i++) {
-            String[] depGavSplit = dependenciesGavs.getString(i).split(":");
-            ProjectVersionRef depResult = new ProjectVersionRef(depGavSplit[0], depGavSplit[1], depGavSplit[2]);
+            ProjectVersionRef depResult = Utils.fromString(dependenciesGavs.getString(i));
             result.add(depResult);
         }
 
         return result;
+    }
+
+    public String getEndpointUrl() {
+        return endpointUrl;
     }
 }

@@ -16,7 +16,7 @@
 package org.commonjava.maven.ext.manip.util;
 
 import static org.junit.Assert.assertThat;
-import static org.junit.internal.matchers.StringContains.containsString;
+import static org.hamcrest.Matchers.containsString;
 
 import junit.framework.TestCase;
 

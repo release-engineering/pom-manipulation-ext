@@ -244,9 +244,9 @@
         <version>20140107</version>
       </dependency>
       <dependency>
-        <groupId>com.github.rest-driver</groupId>
-        <artifactId>rest-client-driver</artifactId>
-        <version>1.1.41</version>
+        <groupId>org.eclipse.jetty</groupId>
+        <artifactId>jetty-server</artifactId>
+        <version>8.1.17.v20150415</version>
       </dependency>
 
       <dependency>
@@ -274,7 +274,7 @@
       <dependency>
         <groupId>junit</groupId>
         <artifactId>junit</artifactId>
-        <version>4.10</version>
+        <version>4.12</version>
         <scope>test</scope>
       </dependency>
       <dependency>
@@ -287,6 +287,13 @@
         <groupId>org.jboss.byteman</groupId>
         <artifactId>byteman-bmunit</artifactId>
         <version>2.1.4.1</version>
+        <scope>test</scope>
+      </dependency>
+
+      <dependency>
+        <groupId>org.codehaus.groovy</groupId>
+        <artifactId>groovy-all</artifactId>
+        <version>2.0.1</version>
         <scope>test</scope>
       </dependency>
     </dependencies>

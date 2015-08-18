@@ -30,7 +30,7 @@
       <repositories>
         <repository>
           <id>local.central</id>
-          <url>@localRepositoryUrl@</url>
+          <url>file://@localRepositoryUrl@</url>
           <releases>
             <enabled>true</enabled>
           </releases>
@@ -42,7 +42,7 @@
       <pluginRepositories>
         <pluginRepository>
           <id>local.central</id>
-          <url>@localRepositoryUrl@</url>
+          <url>file://@localRepositoryUrl@</url>
           <releases>
             <enabled>true</enabled>
           </releases>

@@ -93,6 +93,8 @@ public class GalleyInfrastructure
 
     private XPathManager xpaths;
 
+    private ExecutorService executor;
+
     protected GalleyInfrastructure()
     {
     }
@@ -172,7 +174,7 @@ public class GalleyInfrastructure
             new FileCacheProvider( cacheDir, new HashedLocationPathGenerator(), fileEvents, new NoOpTransferDecorator() );
 
         final NotFoundCache nfc = new MemoryNotFoundCache();
-        final ExecutorService executor = Executors.newCachedThreadPool();
+        executor = Executors.newCachedThreadPool();
 
         final TransferManager transfers =
             new TransferManagerImpl( transports, cache, nfc, fileEvents, new DownloadHandler( nfc, executor ),
@@ -216,5 +218,9 @@ public class GalleyInfrastructure
     public XPathManager getXPath()
     {
         return xpaths;
+    }
+
+    public void finish() {
+        executor.shutdown();
     }
 }
