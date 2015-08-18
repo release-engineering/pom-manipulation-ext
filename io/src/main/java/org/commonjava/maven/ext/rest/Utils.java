@@ -1,5 +1,7 @@
 package org.commonjava.maven.ext.rest;
 
+import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
+
 import java.util.Scanner;
 import java.util.regex.Pattern;
 
@@ -22,7 +24,10 @@ public class Utils {
         }
     }
 
-    public static Pattern getProjectMatcher(String gav) {
-        return Pattern.compile(".*\"project\":\\w*\"" + gav + "\".*");
+    public static ProjectVersionRef fromString(String gav) {
+        String[] projectGavSplit = gav.split(":");
+        ProjectVersionRef result =
+                new ProjectVersionRef(projectGavSplit[0], projectGavSplit[1], projectGavSplit[2]);
+        return result;
     }
 }

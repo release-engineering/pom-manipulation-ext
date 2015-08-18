@@ -244,9 +244,9 @@
         <version>20140107</version>
       </dependency>
       <dependency>
-        <groupId>com.github.rest-driver</groupId>
-        <artifactId>rest-client-driver</artifactId>
-        <version>1.1.41</version>
+        <groupId>org.eclipse.jetty</groupId>
+        <artifactId>jetty-server</artifactId>
+        <version>8.1.17.v20150415</version>
       </dependency>
 
       <dependency>

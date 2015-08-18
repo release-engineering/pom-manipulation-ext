@@ -141,8 +141,8 @@
     </dependency>
 
     <dependency>
-      <groupId>com.github.rest-driver</groupId>
-      <artifactId>rest-client-driver</artifactId>
+      <groupId>org.eclipse.jetty</groupId>
+      <artifactId>jetty-server</artifactId>
     </dependency>
 
     <dependency>

@@ -16,5 +16,6 @@ public interface VersionTranslator {
      * @param dependencies - List of dependencies of the project
      * @return List of ProjectVersionRef objects, cointains both the main project and it's dependencies
      */
-    public List<ProjectVersionRef> translateVersions(ProjectVersionRef project, List<ProjectVersionRef> dependencies);
+    List<ProjectVersionRef> translateVersions(ProjectVersionRef project, List<ProjectVersionRef> dependencies);
+
 }
