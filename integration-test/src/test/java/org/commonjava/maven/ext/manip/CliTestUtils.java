@@ -33,8 +33,9 @@ import static org.junit.Assert.*;
  */
 public class CliTestUtils {
     public static final String BUILD_DIR = System.getProperty("buildDirectory");
+    public static final String MVN_LOCATION = System.getProperty("mavenLocation");
     public static final String IT_LOCATION = BUILD_DIR + "/it-cli";
-    public static final String LOCAL_REPO = BUILD_DIR + "/local-repo";
+    public static final String LOCAL_REPO = System.getProperty("localRepositoryPath");
     public static final Map<String, String> DEFAULT_MVN_PARAMS = new HashMap<String, String>() {{
         put("maven.repo.local", LOCAL_REPO);
     }};
@@ -162,7 +163,7 @@ public class CliTestUtils {
      */
     public static Integer runMaven(String commands, Map<String, String> params, String workingDir) throws Exception {
         String stringParams = toJavaParams(params);
-        String commandMaven = String.format("mvn %s %s ", commands, stringParams);
+        String commandMaven = String.format(MVN_LOCATION + "/bin/mvn %s %s ", commands, stringParams);
 
         return runCommandAndWait(commandMaven, workingDir);
     }
