@@ -15,41 +15,19 @@
  */
 package org.commonjava.maven.ext.manip.state;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Properties;
-
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.ext.manip.impl.DependencyManipulator;
 import org.commonjava.maven.ext.manip.util.IdUtils;
 
+import java.util.List;
+import java.util.Properties;
+
 /**
  * Captures configuration relating to dependency alignment from the POMs. Used by {@link DependencyManipulator}.
  */
-public class DependencyState
+public class DependencyState extends CommonDependencyState
     implements State
 {
-    /**
-     * The String that needs to be prepended a system property to make it a dependencyExclusion.
-     * For example to exclude junit alignment for the GAV (org.groupId:artifactId)
-     * <pre>
-     * <code>-DdependencyExclusion.junit:junit@org.groupId:artifactId</code>
-     * </pre>
-     */
-    public static final String DEPENDENCY_EXCLUSION_PREFIX = "dependencyExclusion.";
-
-    /**
-     * Enables strict checking of non-exclusion dependency versions before aligning to the given BOM dependencies.
-     * For example, <code>1.1</code> will match <code>1.1-rebuild-1</code> in strict mode, but <code>1.2</code> will not.
-     */
-    public static final String STRICT_DEPENDENCIES = "strictAlignment";
-
-    /**
-     * When false, strict version-alignment violations will be reported in the warning log-level, but WILL NOT FAIL THE BUILD. When true, the build
-     * will fail if such a violation is detected. Default value is false.
-     */
-    public static final String STRICT_VIOLATION_FAILS = "strictViolationFails";
-
     /**
      * Two possible formats currently supported for version property output:
      * <ul>
@@ -77,26 +55,9 @@ public class DependencyState
 
     private final List<ProjectVersionRef> depMgmt;
 
-    private final boolean overrideTransitive;
-
-    private final boolean overrideDependencies;
-
-    private final boolean strict;
-
-    private final boolean failOnStrictViolation;
-
-    /**
-     * Used to store mappings of old property -> new version.
-     */
-    private final HashMap<String, String> versionPropertyUpdateMap = new HashMap<String, String>();
-
-
     public DependencyState( final Properties userProps )
     {
-        overrideTransitive = Boolean.valueOf( userProps.getProperty( "overrideTransitive", "true" ) );
-        overrideDependencies = Boolean.valueOf( userProps.getProperty( "overrideDependencies", "true" ) );
-        strict = Boolean.valueOf( userProps.getProperty( STRICT_DEPENDENCIES, "false" ) );
-        failOnStrictViolation = Boolean.valueOf( userProps.getProperty( STRICT_VIOLATION_FAILS, "false" ) );
+        super (userProps);
 
         depMgmt = IdUtils.parseGAVs( userProps.getProperty( DEPENDENCY_MANAGEMENT_POM_PROPERTY ) );
     }
@@ -112,41 +73,8 @@ public class DependencyState
         return depMgmt != null && !depMgmt.isEmpty();
     }
 
-    /**
-     * @return whether to override unmanaged transitive dependencies in the build. Has the effect of adding (or not) new entries
-     * to dependency management when no matching dependency is found in the pom. Defaults to true.
-     */
-    public boolean getOverrideTransitive()
-    {
-        return overrideTransitive;
-    }
-
-    /**
-     * @return whether to override managed dependencies in the build. Defaults to true.
-     */
-    public boolean getOverrideDependencies()
-    {
-        return overrideDependencies;
-    }
-
     public List<ProjectVersionRef> getRemoteDepMgmt()
     {
         return depMgmt;
     }
-
-    public boolean getStrict()
-    {
-        return strict;
-    }
-
-    public HashMap<String, String> getVersionPropertyUpdateMap()
-    {
-        return versionPropertyUpdateMap;
-    }
-
-    public boolean getFailOnStrictViolation()
-    {
-        return failOnStrictViolation;
-    }
-
 }

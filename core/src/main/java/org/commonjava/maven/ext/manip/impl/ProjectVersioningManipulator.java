@@ -68,7 +68,8 @@ public class ProjectVersioningManipulator
     protected VersionCalculator calculator;
 
     /**
-     * Record the versions to change.
+     * Record the versions to change. Essentially this contains a mapping of original
+     * project GAV to new version to change.
      */
     protected Map<ProjectVersionRef, String> versionsByGAV;
 
@@ -136,7 +137,7 @@ public class ProjectVersioningManipulator
         {
             final String ga = ga( project );
             logger.info( getClass().getSimpleName() + " applying changes to: " + ga );
-            if ( applyVersioningChanges( project, state ) )
+            if ( applyVersioningChanges( project ) )
             {
                 changed.add( project );
             }
@@ -155,12 +156,11 @@ public class ProjectVersioningManipulator
      * If the project is modified, then it is marked as changed in the {@link ManipulationSession}, which triggers the associated POM to be rewritten.
      *
      * @param project Project undergoing modification.
-     * @param state the VersioningState to apply.
      * @return whether any changes have been applied.
      * @throws ManipulationException if an error occurs.
      */
     // TODO: Loooong method
-    protected boolean applyVersioningChanges( final Project project, final VersioningState state )
+    protected boolean applyVersioningChanges( final Project project )
         throws ManipulationException
     {
         boolean changed = false;
@@ -178,6 +178,7 @@ public class ProjectVersioningManipulator
         }
 
         logger.info( "Looking for applicable versioning changes in: " + gav( model ) );
+        logger.info("###$$$ versionsByGAV contains " + versionsByGAV);
 
         String g = model.getGroupId();
         String v = model.getVersion();
@@ -322,5 +323,4 @@ public class ProjectVersioningManipulator
     {
         return 10;
     }
-
 }

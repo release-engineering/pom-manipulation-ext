@@ -224,6 +224,7 @@
                   <include>commons-jxpath:commons-jxpath</include>
                   <include>org.codehaus.plexus:plexus-interpolation</include>
                   <include>org.jsoup:jsoup</include>
+                  <include>com.mashape.unirest:unirest-java</include>
                   <include>com.fasterxml.jackson.core:*</include>
                 </includes>
                 <excludes>

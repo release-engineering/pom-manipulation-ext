@@ -34,4 +34,5 @@ public interface ExtensionInfrastructure
                final ArtifactRepository localRepository, final Settings settings, final List<String> activeProfiles)
         throws ManipulationException;
 
+    void finish ();
 }

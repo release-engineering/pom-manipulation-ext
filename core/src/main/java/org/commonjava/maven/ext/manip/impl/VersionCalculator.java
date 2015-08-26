@@ -42,7 +42,8 @@ import org.slf4j.LoggerFactory;
  * Component that calculates project version modifications, based on configuration stored in {@link VersioningState}.
  * Snapshots may/may not be preserved, and either a static or incremental (calculated) version qualifier may / may not
  * be incorporated in the version. The calculator strives for OSGi compatibility, so the use of '.' and '-' qualifier
- * separators will vary accordingly. See: http://www.aqute.biz/Bnd/Versioning for an explanation of OSGi versioning.
+ * separators will vary accordingly. See: http://www.aqute.biz/Bnd/Versioning and
+ * http://www.osgi.org/wiki/uploads/Links/SemanticVersioning.pdf for an explanation of OSGi versioning.
  *
  * @author jdcasey
  */

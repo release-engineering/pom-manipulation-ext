@@ -75,6 +75,10 @@ public class VersionTest
         assertThat( version.isValidOSGi(), equalTo( false ) );
         assertThat( version.getOSGiVersionString(), equalTo( "1.2.0.beta2" ) );
 
+        version = new Version("1.2");
+        assertThat( version.isValidOSGi(), equalTo( true ) );
+        assertThat( version.getOSGiVersionString(), equalTo( "1.2" ) );
+
         version = new Version("1");
         assertThat( version.isValidOSGi(), equalTo( true ) );
         assertThat( version.getOSGiVersionString(), equalTo( "1" ) );

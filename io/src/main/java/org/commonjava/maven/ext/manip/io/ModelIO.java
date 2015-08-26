@@ -15,7 +15,27 @@
  */
 package org.commonjava.maven.ext.manip.io;
 
-import static org.apache.commons.io.IOUtils.closeQuietly;
+import org.apache.maven.model.Model;
+import org.apache.maven.model.Plugin;
+import org.apache.maven.model.building.ModelBuilder;
+import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
+import org.codehaus.plexus.component.annotations.Component;
+import org.codehaus.plexus.component.annotations.Requirement;
+import org.codehaus.plexus.util.xml.Xpp3Dom;
+import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
+import org.commonjava.maven.atlas.ident.ref.ArtifactRef;
+import org.commonjava.maven.atlas.ident.ref.ProjectRef;
+import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
+import org.commonjava.maven.atlas.ident.ref.VersionlessArtifactRef;
+import org.commonjava.maven.ext.manip.ManipulationException;
+import org.commonjava.maven.ext.manip.resolver.GalleyAPIWrapper;
+import org.commonjava.maven.galley.TransferException;
+import org.commonjava.maven.galley.maven.GalleyMavenException;
+import org.commonjava.maven.galley.maven.model.view.DependencyView;
+import org.commonjava.maven.galley.maven.model.view.MavenPomView;
+import org.commonjava.maven.galley.model.Transfer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -26,25 +46,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
-import org.apache.maven.model.Model;
-import org.apache.maven.model.Plugin;
-import org.apache.maven.model.building.ModelBuilder;
-import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
-import org.codehaus.plexus.component.annotations.Component;
-import org.codehaus.plexus.component.annotations.Requirement;
-import org.codehaus.plexus.util.xml.Xpp3Dom;
-import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
-import org.commonjava.maven.atlas.ident.ref.ProjectRef;
-import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
-import org.commonjava.maven.ext.manip.ManipulationException;
-import org.commonjava.maven.ext.manip.resolver.GalleyAPIWrapper;
-import org.commonjava.maven.galley.TransferException;
-import org.commonjava.maven.galley.maven.GalleyMavenException;
-import org.commonjava.maven.galley.maven.model.view.DependencyView;
-import org.commonjava.maven.galley.maven.model.view.MavenPomView;
-import org.commonjava.maven.galley.model.Transfer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static org.apache.commons.io.IOUtils.closeQuietly;
 
 /**
  * Class to resolve artifact descriptors (pom files) from a maven repository
@@ -113,12 +115,13 @@ public class ModelIO
         }
     }
 
-    public Map<ProjectRef, String> getRemoteDependencyVersionOverrides( final ProjectVersionRef ref )
+    public Map<ArtifactRef, String> getRemoteDependencyVersionOverrides( final ProjectVersionRef ref )
         throws ManipulationException
     {
         logger.debug( "Resolving dependency management GAV: " + ref );
 
-        final Map<ProjectRef, String> versionOverrides = new LinkedHashMap<ProjectRef, String>();
+        final Map<ArtifactRef, String> versionOverrides =
+                        new LinkedHashMap<ArtifactRef, String>();
         try
         {
             final MavenPomView pomView = galleyWrapper.readPomView( ref );
@@ -133,7 +136,7 @@ public class ModelIO
 
             for ( final DependencyView dep : deps )
             {
-                versionOverrides.put( dep.asVersionlessArtifactRef(), dep.getVersion() );
+                versionOverrides.put( dep.asArtifactRef(), dep.getVersion() );
                 logger.debug( "Added version override for: " + dep.asProjectRef()
                                                                   .toString() + ":" + dep.getVersion() );
             }

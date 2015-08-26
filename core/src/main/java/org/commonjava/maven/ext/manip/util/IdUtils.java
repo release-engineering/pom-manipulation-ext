@@ -38,11 +38,6 @@ public final class IdUtils
 {
     private static final Logger logger = LoggerFactory.getLogger( IdUtils.class );
 
-    /**
-     * Regex pattern for parsing a Maven GAV
-     */
-    public static final Pattern gavPattern = Pattern.compile( "\\s*([\\w\\-_.]+):([\\w\\-_.]+):(\\d[\\w\\-_.]+)\\s*" );
-
     private IdUtils()
     {
     }
@@ -79,12 +74,6 @@ public final class IdUtils
 
             return refs;
         }
-    }
-
-    public static boolean validGav( final String gav )
-    {
-        final Matcher matcher = gavPattern.matcher( gav );
-        return matcher.matches();
     }
 
     public static String gav( final MavenProject project )
