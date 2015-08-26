@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 
-package org.commonjava.maven.ext.rest.handler;
+package org.commonjava.maven.ext.manip.rest.handler;
 
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Request;

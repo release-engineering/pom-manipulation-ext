@@ -1,4 +1,4 @@
-package org.commonjava.maven.ext.rest.exception;
+package org.commonjava.maven.ext.manip.rest.exception;
 
 /**
  * @author vdedik@redhat.com

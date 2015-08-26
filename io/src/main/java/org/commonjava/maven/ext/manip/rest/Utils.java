@@ -1,9 +1,8 @@
-package org.commonjava.maven.ext.rest;
+package org.commonjava.maven.ext.manip.rest;
 
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 
 import java.util.Scanner;
-import java.util.regex.Pattern;
 
 /**
  * @author vdedik@redhat.com

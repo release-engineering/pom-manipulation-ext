@@ -14,17 +14,14 @@
  *  limitations under the License.
  */
 
-package org.commonjava.maven.ext.server.exception;
+package org.commonjava.maven.ext.manip.server;
 
 /**
  * @author vdedik@redhat.com
  */
-public class ServerSetupException extends RuntimeException {
-    public ServerSetupException(String message) {
-        super(message);
-    }
+public interface HttpServer {
 
-    public ServerSetupException(String message, Exception e) {
-        super(message, e);
-    }
+    Integer getPort();
+
+    void shutdown();
 }

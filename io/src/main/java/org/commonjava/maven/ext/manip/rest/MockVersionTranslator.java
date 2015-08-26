@@ -1,8 +1,8 @@
-package org.commonjava.maven.ext.rest;
+package org.commonjava.maven.ext.manip.rest;
 
-import org.commonjava.maven.ext.rest.handler.AddSuffixJettyHandler;
-import org.commonjava.maven.ext.server.HttpServer;
-import org.commonjava.maven.ext.server.JettyHttpServer;
+import org.commonjava.maven.ext.manip.rest.handler.AddSuffixJettyHandler;
+import org.commonjava.maven.ext.manip.server.HttpServer;
+import org.commonjava.maven.ext.manip.server.JettyHttpServer;
 
 /**
  * @author vdedik@redhat.com

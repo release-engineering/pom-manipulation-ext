@@ -1,4 +1,4 @@
-package org.commonjava.maven.ext.rest;
+package org.commonjava.maven.ext.manip.rest;
 
 import java.util.HashMap;
 import java.util.List;
@@ -10,9 +10,9 @@ import com.mashape.unirest.http.JsonNode;
 import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
-import org.commonjava.maven.ext.rest.exception.ClientException;
-import org.commonjava.maven.ext.rest.exception.ServerException;
-import org.commonjava.maven.ext.rest.exception.RestException;
+import org.commonjava.maven.ext.manip.rest.exception.ClientException;
+import org.commonjava.maven.ext.manip.rest.exception.ServerException;
+import org.commonjava.maven.ext.manip.rest.exception.RestException;
 import org.json.JSONArray;
 import org.json.JSONObject;
 

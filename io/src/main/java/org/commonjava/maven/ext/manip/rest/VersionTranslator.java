@@ -1,4 +1,4 @@
-package org.commonjava.maven.ext.rest;
+package org.commonjava.maven.ext.manip.rest;
 
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 

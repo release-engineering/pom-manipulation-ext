@@ -14,10 +14,10 @@
  *  limitations under the License.
  */
 
-package org.commonjava.maven.ext.server;
+package org.commonjava.maven.ext.manip.server;
 
-import org.commonjava.maven.ext.server.exception.ServerInternalException;
-import org.commonjava.maven.ext.server.exception.ServerSetupException;
+import org.commonjava.maven.ext.manip.server.exception.ServerInternalException;
+import org.commonjava.maven.ext.manip.server.exception.ServerSetupException;
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Server;

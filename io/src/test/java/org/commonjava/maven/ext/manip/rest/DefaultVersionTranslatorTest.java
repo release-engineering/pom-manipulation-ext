@@ -1,12 +1,12 @@
-package org.commonjava.maven.ext.rest;
+package org.commonjava.maven.ext.manip.rest;
 
 
 import com.mashape.unirest.http.Unirest;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
-import org.commonjava.maven.ext.rest.exception.RestException;
-import org.commonjava.maven.ext.rest.handler.AddSuffixJettyHandler;
-import org.commonjava.maven.ext.server.HttpServer;
-import org.commonjava.maven.ext.server.JettyHttpServer;
+import org.commonjava.maven.ext.manip.rest.exception.RestException;
+import org.commonjava.maven.ext.manip.rest.handler.AddSuffixJettyHandler;
+import org.commonjava.maven.ext.manip.server.HttpServer;
+import org.commonjava.maven.ext.manip.server.JettyHttpServer;
 import org.eclipse.jetty.server.Handler;
 import org.json.JSONArray;
 import org.junit.*;
@@ -31,7 +31,7 @@ public class DefaultVersionTranslatorTest {
         httpServer = new JettyHttpServer(handler);
 
         aLotOfDeps = new ArrayList<ProjectVersionRef>();
-        String longJsonFile = Utils.readFileFromClasspath("example-response-performance-test.json");
+        String longJsonFile = Utils.readFileFromClasspath( "example-response-performance-test.json");
         JSONArray jsonDeps = new JSONArray(longJsonFile);
         for (Integer i = 0; i < jsonDeps.length(); i++) {
             aLotOfDeps.add(Utils.fromString(jsonDeps.getString(i)));
@@ -77,7 +77,7 @@ public class DefaultVersionTranslatorTest {
     @Test
     public void testTranslateVersionsFailNoResponse() {
         // Some url that doesn't exist used here
-        VersionTranslator versionTranslator = new DefaultVersionTranslator("http://127.0.0.2");
+        VersionTranslator versionTranslator = new DefaultVersionTranslator( "http://127.0.0.2");
 
         ProjectVersionRef project = new ProjectVersionRef("com.example", "example", "1.0");
         List<ProjectVersionRef> deps = new ArrayList<ProjectVersionRef>() {{

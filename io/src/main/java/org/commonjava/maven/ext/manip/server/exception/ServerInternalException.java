@@ -14,14 +14,17 @@
  *  limitations under the License.
  */
 
-package org.commonjava.maven.ext.server;
+package org.commonjava.maven.ext.manip.server.exception;
 
 /**
  * @author vdedik@redhat.com
  */
-public interface HttpServer {
+public class ServerInternalException  extends RuntimeException {
+    public ServerInternalException(String message) {
+        super(message);
+    }
 
-    Integer getPort();
-
-    void shutdown();
+    public ServerInternalException(String message, Exception e) {
+        super(message, e);
+    }
 }
