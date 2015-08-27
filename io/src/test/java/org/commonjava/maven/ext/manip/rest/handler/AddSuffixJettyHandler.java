@@ -65,30 +65,34 @@ public class AddSuffixJettyHandler extends AbstractHandler implements Handler {
             // Get Request Body
             StringBuffer jb = new StringBuffer();
             String line = null;
-            JSONObject requestBody = null;
+            JSONArray requestBody = null;
             try {
                 BufferedReader reader = request.getReader();
                 while ((line = reader.readLine()) != null) {
                     jb.append(line);
                 }
 
-                requestBody = new JSONObject(jb.toString());
+                requestBody = new JSONArray(jb.toString());
             } catch (Exception e) {
                 LOGGER.warn("Error reading request body. {}", e.getMessage());
                 return;
             }
 
             // Prepare Response
-            JSONObject responseBody = new JSONObject();
-            responseBody.put("project", requestBody.get("project") + "-" + this.suffix);
-            if (requestBody.has("dependencies")) {
-                JSONArray jsonDeps = requestBody.getJSONArray("dependencies");
-                JSONArray responseDeps = new JSONArray();
-                for (Integer i = 0; i < jsonDeps.length(); i++) {
-                    String dep = (String) jsonDeps.get(i);
-                    responseDeps.put(dep + "-" + this.suffix);
-                }
-                responseBody.put("dependencies", responseDeps);
+            JSONArray responseBody = new JSONArray();
+            for (Integer i = 0; i < requestBody.length(); i++) {
+                JSONObject gav = requestBody.getJSONObject(i);
+                String version = gav.getString("version");
+                JSONArray availableVersions = new JSONArray();
+                String bestMatchVersion = version + "-" + this.suffix;
+                availableVersions.put(bestMatchVersion);
+
+                gav.put("bestMatchVersion", bestMatchVersion);
+                gav.put("whitelisted", false);
+                gav.put("blacklisted", false);
+                gav.put("availableVersions", availableVersions);
+
+                responseBody.put(gav);
             }
 
             // Set Response

@@ -4,48 +4,44 @@ package org.commonjava.maven.ext.manip.rest;
 import com.mashape.unirest.http.Unirest;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.ext.manip.rest.exception.RestException;
-import org.commonjava.maven.ext.manip.rest.handler.AddSuffixJettyHandler;
-import org.commonjava.maven.ext.manip.server.HttpServer;
-import org.commonjava.maven.ext.manip.server.JettyHttpServer;
-import org.eclipse.jetty.server.Handler;
+import org.commonjava.maven.ext.manip.rest.rule.MockServer;
 import org.json.JSONArray;
+import org.json.JSONObject;
 import org.junit.*;
 
 import static org.junit.Assert.*;
 import static org.hamcrest.CoreMatchers.*;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 /**
  * @author vdedik@redhat.com
  */
 public class DefaultVersionTranslatorTest {
+    private static List<ProjectVersionRef> aLotOfGavs;
     private DefaultVersionTranslator versionTranslator;
-    private static HttpServer httpServer;
-    private static List<ProjectVersionRef> aLotOfDeps;
+
+
+    @ClassRule
+    public static MockServer mockServer = new MockServer();
 
     @BeforeClass
     public static void startUp() {
-        Handler handler = new AddSuffixJettyHandler();
-        httpServer = new JettyHttpServer(handler);
+        aLotOfGavs = new ArrayList<ProjectVersionRef>();
+        String longJsonFile = readFileFromClasspath( "example-response-performance-test.json");
+        JSONArray jsonGavs = new JSONArray(longJsonFile);
+        for (Integer i = 0; i < jsonGavs.length(); i++) {
+            JSONObject jsonGav = jsonGavs.getJSONObject(i);
 
-        aLotOfDeps = new ArrayList<ProjectVersionRef>();
-        String longJsonFile = Utils.readFileFromClasspath( "example-response-performance-test.json");
-        JSONArray jsonDeps = new JSONArray(longJsonFile);
-        for (Integer i = 0; i < jsonDeps.length(); i++) {
-            aLotOfDeps.add(Utils.fromString(jsonDeps.getString(i)));
+            ProjectVersionRef gav = new ProjectVersionRef(
+                    jsonGav.getString("groupId"), jsonGav.getString("artifactId"), jsonGav.getString("version"));
+            aLotOfGavs.add(gav);
         }
     }
 
-    @AfterClass
-    public static void tearDown() {
-        httpServer.shutdown();
-    }
-
     @Before
-    public void initTest() {
-        this.versionTranslator = new DefaultVersionTranslator("http://127.0.0.1:" + httpServer.getPort());
+    public void before() {
+        this.versionTranslator = new DefaultVersionTranslator(mockServer.getUrl());
     }
 
     @Test
@@ -59,15 +55,19 @@ public class DefaultVersionTranslatorTest {
 
     @Test
     public void testTranslateVersionsSuccess() {
-        ProjectVersionRef project = new ProjectVersionRef("com.example", "example", "1.0");
-        List<ProjectVersionRef> deps = new ArrayList<ProjectVersionRef>() {{
-            add(new ProjectVersionRef("com.example", "example-dep", "1.0"));
+        List<ProjectVersionRef> gavs = new ArrayList<ProjectVersionRef>() {{
+            add(new ProjectVersionRef("com.example", "example", "1.0"));
+            add(new ProjectVersionRef("com.example", "example-dep", "2.0"));
+            add(new ProjectVersionRef("org.commonjava", "example", "1.0"));
+            add(new ProjectVersionRef("org.commonjava", "example", "1.1"));
         }};
 
-        List<ProjectVersionRef> actualResult = versionTranslator.translateVersions(project, deps);
-        List<ProjectVersionRef> expectedResult = new ArrayList<ProjectVersionRef>() {{
-            add(new ProjectVersionRef("com.example", "example", "1.0-redhat-1"));
-            add(new ProjectVersionRef("com.example", "example-dep", "1.0-redhat-1"));
+        Map<ProjectVersionRef, String> actualResult = versionTranslator.translateVersions(gavs);
+        Map<ProjectVersionRef, String> expectedResult = new HashMap<ProjectVersionRef, String>() {{
+            put(new ProjectVersionRef("com.example", "example", "1.0"), "1.0-redhat-1");
+            put(new ProjectVersionRef("com.example", "example-dep", "2.0"), "2.0-redhat-1");
+            put(new ProjectVersionRef("org.commonjava", "example", "1.0"), "1.0-redhat-1");
+            put(new ProjectVersionRef("org.commonjava", "example", "1.1"), "1.1-redhat-1");
         }};
 
         assertThat(actualResult, is(expectedResult));
@@ -79,13 +79,12 @@ public class DefaultVersionTranslatorTest {
         // Some url that doesn't exist used here
         VersionTranslator versionTranslator = new DefaultVersionTranslator( "http://127.0.0.2");
 
-        ProjectVersionRef project = new ProjectVersionRef("com.example", "example", "1.0");
-        List<ProjectVersionRef> deps = new ArrayList<ProjectVersionRef>() {{
-            // Nothing necessary here
+        List<ProjectVersionRef> gavs = new ArrayList<ProjectVersionRef>() {{
+            add(new ProjectVersionRef("com.example", "example", "1.0"));
         }};
 
         try {
-            versionTranslator.translateVersions(project, deps);
+            versionTranslator.translateVersions(gavs);
             fail("Failed to throw RestException when server failed to respond.");
         } catch (RestException ex) {
             // Pass
@@ -97,7 +96,21 @@ public class DefaultVersionTranslatorTest {
 
     @Test(timeout=300)
     public void testTranslateVersionsPerformance() {
-        ProjectVersionRef project = new ProjectVersionRef("com.example", "example", "1.0");
-        versionTranslator.translateVersions(project, aLotOfDeps);
+        versionTranslator.translateVersions(aLotOfGavs);
+    }
+
+    private static String readFileFromClasspath(String filename) {
+        StringBuilder fileContents = new StringBuilder();
+        Scanner scanner = new Scanner(DefaultVersionTranslatorTest.class.getResourceAsStream(filename));
+        String lineSeparator = System.getProperty("line.separator");
+
+        try {
+            while(scanner.hasNextLine()) {
+                fileContents.append(scanner.nextLine() + lineSeparator);
+            }
+            return fileContents.toString();
+        } finally {
+            scanner.close();
+        }
     }
 }

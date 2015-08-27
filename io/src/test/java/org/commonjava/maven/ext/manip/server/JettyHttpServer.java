@@ -30,7 +30,7 @@ import org.slf4j.LoggerFactory;
  */
 public class JettyHttpServer implements HttpServer {
     private static final Logger LOGGER = LoggerFactory.getLogger(JettyHttpServer.class);
-    private static final Integer DEFAULT_PORT = 8089;
+    public static final Integer DEFAULT_PORT = 8089;
 
     private Integer port;
     private final Server jettyServer;

@@ -1,1002 +1,5002 @@
 [
-    "com.example:example-dependency1:1.0",
-    "com.example:example-dependency2:1.0",
-    "com.example:example-dependency3:1.0",
-    "com.example:example-dependency4:1.0",
-    "com.example:example-dependency5:1.0",
-    "com.example:example-dependency6:1.0",
-    "com.example:example-dependency7:1.0",
-    "com.example:example-dependency8:1.0",
-    "com.example:example-dependency9:1.0",
-    "com.example:example-dependency10:1.0",
-    "com.example:example-dependency11:1.0",
-    "com.example:example-dependency12:1.0",
-    "com.example:example-dependency13:1.0",
-    "com.example:example-dependency14:1.0",
-    "com.example:example-dependency15:1.0",
-    "com.example:example-dependency16:1.0",
-    "com.example:example-dependency17:1.0",
-    "com.example:example-dependency18:1.0",
-    "com.example:example-dependency19:1.0",
-    "com.example:example-dependency20:1.0",
-    "com.example:example-dependency21:1.0",
-    "com.example:example-dependency22:1.0",
-    "com.example:example-dependency23:1.0",
-    "com.example:example-dependency24:1.0",
-    "com.example:example-dependency25:1.0",
-    "com.example:example-dependency26:1.0",
-    "com.example:example-dependency27:1.0",
-    "com.example:example-dependency28:1.0",
-    "com.example:example-dependency29:1.0",
-    "com.example:example-dependency30:1.0",
-    "com.example:example-dependency31:1.0",
-    "com.example:example-dependency32:1.0",
-    "com.example:example-dependency33:1.0",
-    "com.example:example-dependency34:1.0",
-    "com.example:example-dependency35:1.0",
-    "com.example:example-dependency36:1.0",
-    "com.example:example-dependency37:1.0",
-    "com.example:example-dependency38:1.0",
-    "com.example:example-dependency39:1.0",
-    "com.example:example-dependency40:1.0",
-    "com.example:example-dependency41:1.0",
-    "com.example:example-dependency42:1.0",
-    "com.example:example-dependency43:1.0",
-    "com.example:example-dependency44:1.0",
-    "com.example:example-dependency45:1.0",
-    "com.example:example-dependency46:1.0",
-    "com.example:example-dependency47:1.0",
-    "com.example:example-dependency48:1.0",
-    "com.example:example-dependency49:1.0",
-    "com.example:example-dependency50:1.0",
-    "com.example:example-dependency51:1.0",
-    "com.example:example-dependency52:1.0",
-    "com.example:example-dependency53:1.0",
-    "com.example:example-dependency54:1.0",
-    "com.example:example-dependency55:1.0",
-    "com.example:example-dependency56:1.0",
-    "com.example:example-dependency57:1.0",
-    "com.example:example-dependency58:1.0",
-    "com.example:example-dependency59:1.0",
-    "com.example:example-dependency60:1.0",
-    "com.example:example-dependency61:1.0",
-    "com.example:example-dependency62:1.0",
-    "com.example:example-dependency63:1.0",
-    "com.example:example-dependency64:1.0",
-    "com.example:example-dependency65:1.0",
-    "com.example:example-dependency66:1.0",
-    "com.example:example-dependency67:1.0",
-    "com.example:example-dependency68:1.0",
-    "com.example:example-dependency69:1.0",
-    "com.example:example-dependency70:1.0",
-    "com.example:example-dependency71:1.0",
-    "com.example:example-dependency72:1.0",
-    "com.example:example-dependency73:1.0",
-    "com.example:example-dependency74:1.0",
-    "com.example:example-dependency75:1.0",
-    "com.example:example-dependency76:1.0",
-    "com.example:example-dependency77:1.0",
-    "com.example:example-dependency78:1.0",
-    "com.example:example-dependency79:1.0",
-    "com.example:example-dependency80:1.0",
-    "com.example:example-dependency81:1.0",
-    "com.example:example-dependency82:1.0",
-    "com.example:example-dependency83:1.0",
-    "com.example:example-dependency84:1.0",
-    "com.example:example-dependency85:1.0",
-    "com.example:example-dependency86:1.0",
-    "com.example:example-dependency87:1.0",
-    "com.example:example-dependency88:1.0",
-    "com.example:example-dependency89:1.0",
-    "com.example:example-dependency90:1.0",
-    "com.example:example-dependency91:1.0",
-    "com.example:example-dependency92:1.0",
-    "com.example:example-dependency93:1.0",
-    "com.example:example-dependency94:1.0",
-    "com.example:example-dependency95:1.0",
-    "com.example:example-dependency96:1.0",
-    "com.example:example-dependency97:1.0",
-    "com.example:example-dependency98:1.0",
-    "com.example:example-dependency99:1.0",
-    "com.example:example-dependency100:1.0",
-    "com.example:example-dependency101:1.0",
-    "com.example:example-dependency102:1.0",
-    "com.example:example-dependency103:1.0",
-    "com.example:example-dependency104:1.0",
-    "com.example:example-dependency105:1.0",
-    "com.example:example-dependency106:1.0",
-    "com.example:example-dependency107:1.0",
-    "com.example:example-dependency108:1.0",
-    "com.example:example-dependency109:1.0",
-    "com.example:example-dependency110:1.0",
-    "com.example:example-dependency111:1.0",
-    "com.example:example-dependency112:1.0",
-    "com.example:example-dependency113:1.0",
-    "com.example:example-dependency114:1.0",
-    "com.example:example-dependency115:1.0",
-    "com.example:example-dependency116:1.0",
-    "com.example:example-dependency117:1.0",
-    "com.example:example-dependency118:1.0",
-    "com.example:example-dependency119:1.0",
-    "com.example:example-dependency120:1.0",
-    "com.example:example-dependency121:1.0",
-    "com.example:example-dependency122:1.0",
-    "com.example:example-dependency123:1.0",
-    "com.example:example-dependency124:1.0",
-    "com.example:example-dependency125:1.0",
-    "com.example:example-dependency126:1.0",
-    "com.example:example-dependency127:1.0",
-    "com.example:example-dependency128:1.0",
-    "com.example:example-dependency129:1.0",
-    "com.example:example-dependency130:1.0",
-    "com.example:example-dependency131:1.0",
-    "com.example:example-dependency132:1.0",
-    "com.example:example-dependency133:1.0",
-    "com.example:example-dependency134:1.0",
-    "com.example:example-dependency135:1.0",
-    "com.example:example-dependency136:1.0",
-    "com.example:example-dependency137:1.0",
-    "com.example:example-dependency138:1.0",
-    "com.example:example-dependency139:1.0",
-    "com.example:example-dependency140:1.0",
-    "com.example:example-dependency141:1.0",
-    "com.example:example-dependency142:1.0",
-    "com.example:example-dependency143:1.0",
-    "com.example:example-dependency144:1.0",
-    "com.example:example-dependency145:1.0",
-    "com.example:example-dependency146:1.0",
-    "com.example:example-dependency147:1.0",
-    "com.example:example-dependency148:1.0",
-    "com.example:example-dependency149:1.0",
-    "com.example:example-dependency150:1.0",
-    "com.example:example-dependency151:1.0",
-    "com.example:example-dependency152:1.0",
-    "com.example:example-dependency153:1.0",
-    "com.example:example-dependency154:1.0",
-    "com.example:example-dependency155:1.0",
-    "com.example:example-dependency156:1.0",
-    "com.example:example-dependency157:1.0",
-    "com.example:example-dependency158:1.0",
-    "com.example:example-dependency159:1.0",
-    "com.example:example-dependency160:1.0",
-    "com.example:example-dependency161:1.0",
-    "com.example:example-dependency162:1.0",
-    "com.example:example-dependency163:1.0",
-    "com.example:example-dependency164:1.0",
-    "com.example:example-dependency165:1.0",
-    "com.example:example-dependency166:1.0",
-    "com.example:example-dependency167:1.0",
-    "com.example:example-dependency168:1.0",
-    "com.example:example-dependency169:1.0",
-    "com.example:example-dependency170:1.0",
-    "com.example:example-dependency171:1.0",
-    "com.example:example-dependency172:1.0",
-    "com.example:example-dependency173:1.0",
-    "com.example:example-dependency174:1.0",
-    "com.example:example-dependency175:1.0",
-    "com.example:example-dependency176:1.0",
-    "com.example:example-dependency177:1.0",
-    "com.example:example-dependency178:1.0",
-    "com.example:example-dependency179:1.0",
-    "com.example:example-dependency180:1.0",
-    "com.example:example-dependency181:1.0",
-    "com.example:example-dependency182:1.0",
-    "com.example:example-dependency183:1.0",
-    "com.example:example-dependency184:1.0",
-    "com.example:example-dependency185:1.0",
-    "com.example:example-dependency186:1.0",
-    "com.example:example-dependency187:1.0",
-    "com.example:example-dependency188:1.0",
-    "com.example:example-dependency189:1.0",
-    "com.example:example-dependency190:1.0",
-    "com.example:example-dependency191:1.0",
-    "com.example:example-dependency192:1.0",
-    "com.example:example-dependency193:1.0",
-    "com.example:example-dependency194:1.0",
-    "com.example:example-dependency195:1.0",
-    "com.example:example-dependency196:1.0",
-    "com.example:example-dependency197:1.0",
-    "com.example:example-dependency198:1.0",
-    "com.example:example-dependency199:1.0",
-    "com.example:example-dependency200:1.0",
-    "com.example:example-dependency201:1.0",
-    "com.example:example-dependency202:1.0",
-    "com.example:example-dependency203:1.0",
-    "com.example:example-dependency204:1.0",
-    "com.example:example-dependency205:1.0",
-    "com.example:example-dependency206:1.0",
-    "com.example:example-dependency207:1.0",
-    "com.example:example-dependency208:1.0",
-    "com.example:example-dependency209:1.0",
-    "com.example:example-dependency210:1.0",
-    "com.example:example-dependency211:1.0",
-    "com.example:example-dependency212:1.0",
-    "com.example:example-dependency213:1.0",
-    "com.example:example-dependency214:1.0",
-    "com.example:example-dependency215:1.0",
-    "com.example:example-dependency216:1.0",
-    "com.example:example-dependency217:1.0",
-    "com.example:example-dependency218:1.0",
-    "com.example:example-dependency219:1.0",
-    "com.example:example-dependency220:1.0",
-    "com.example:example-dependency221:1.0",
-    "com.example:example-dependency222:1.0",
-    "com.example:example-dependency223:1.0",
-    "com.example:example-dependency224:1.0",
-    "com.example:example-dependency225:1.0",
-    "com.example:example-dependency226:1.0",
-    "com.example:example-dependency227:1.0",
-    "com.example:example-dependency228:1.0",
-    "com.example:example-dependency229:1.0",
-    "com.example:example-dependency230:1.0",
-    "com.example:example-dependency231:1.0",
-    "com.example:example-dependency232:1.0",
-    "com.example:example-dependency233:1.0",
-    "com.example:example-dependency234:1.0",
-    "com.example:example-dependency235:1.0",
-    "com.example:example-dependency236:1.0",
-    "com.example:example-dependency237:1.0",
-    "com.example:example-dependency238:1.0",
-    "com.example:example-dependency239:1.0",
-    "com.example:example-dependency240:1.0",
-    "com.example:example-dependency241:1.0",
-    "com.example:example-dependency242:1.0",
-    "com.example:example-dependency243:1.0",
-    "com.example:example-dependency244:1.0",
-    "com.example:example-dependency245:1.0",
-    "com.example:example-dependency246:1.0",
-    "com.example:example-dependency247:1.0",
-    "com.example:example-dependency248:1.0",
-    "com.example:example-dependency249:1.0",
-    "com.example:example-dependency250:1.0",
-    "com.example:example-dependency251:1.0",
-    "com.example:example-dependency252:1.0",
-    "com.example:example-dependency253:1.0",
-    "com.example:example-dependency254:1.0",
-    "com.example:example-dependency255:1.0",
-    "com.example:example-dependency256:1.0",
-    "com.example:example-dependency257:1.0",
-    "com.example:example-dependency258:1.0",
-    "com.example:example-dependency259:1.0",
-    "com.example:example-dependency260:1.0",
-    "com.example:example-dependency261:1.0",
-    "com.example:example-dependency262:1.0",
-    "com.example:example-dependency263:1.0",
-    "com.example:example-dependency264:1.0",
-    "com.example:example-dependency265:1.0",
-    "com.example:example-dependency266:1.0",
-    "com.example:example-dependency267:1.0",
-    "com.example:example-dependency268:1.0",
-    "com.example:example-dependency269:1.0",
-    "com.example:example-dependency270:1.0",
-    "com.example:example-dependency271:1.0",
-    "com.example:example-dependency272:1.0",
-    "com.example:example-dependency273:1.0",
-    "com.example:example-dependency274:1.0",
-    "com.example:example-dependency275:1.0",
-    "com.example:example-dependency276:1.0",
-    "com.example:example-dependency277:1.0",
-    "com.example:example-dependency278:1.0",
-    "com.example:example-dependency279:1.0",
-    "com.example:example-dependency280:1.0",
-    "com.example:example-dependency281:1.0",
-    "com.example:example-dependency282:1.0",
-    "com.example:example-dependency283:1.0",
-    "com.example:example-dependency284:1.0",
-    "com.example:example-dependency285:1.0",
-    "com.example:example-dependency286:1.0",
-    "com.example:example-dependency287:1.0",
-    "com.example:example-dependency288:1.0",
-    "com.example:example-dependency289:1.0",
-    "com.example:example-dependency290:1.0",
-    "com.example:example-dependency291:1.0",
-    "com.example:example-dependency292:1.0",
-    "com.example:example-dependency293:1.0",
-    "com.example:example-dependency294:1.0",
-    "com.example:example-dependency295:1.0",
-    "com.example:example-dependency296:1.0",
-    "com.example:example-dependency297:1.0",
-    "com.example:example-dependency298:1.0",
-    "com.example:example-dependency299:1.0",
-    "com.example:example-dependency300:1.0",
-    "com.example:example-dependency301:1.0",
-    "com.example:example-dependency302:1.0",
-    "com.example:example-dependency303:1.0",
-    "com.example:example-dependency304:1.0",
-    "com.example:example-dependency305:1.0",
-    "com.example:example-dependency306:1.0",
-    "com.example:example-dependency307:1.0",
-    "com.example:example-dependency308:1.0",
-    "com.example:example-dependency309:1.0",
-    "com.example:example-dependency310:1.0",
-    "com.example:example-dependency311:1.0",
-    "com.example:example-dependency312:1.0",
-    "com.example:example-dependency313:1.0",
-    "com.example:example-dependency314:1.0",
-    "com.example:example-dependency315:1.0",
-    "com.example:example-dependency316:1.0",
-    "com.example:example-dependency317:1.0",
-    "com.example:example-dependency318:1.0",
-    "com.example:example-dependency319:1.0",
-    "com.example:example-dependency320:1.0",
-    "com.example:example-dependency321:1.0",
-    "com.example:example-dependency322:1.0",
-    "com.example:example-dependency323:1.0",
-    "com.example:example-dependency324:1.0",
-    "com.example:example-dependency325:1.0",
-    "com.example:example-dependency326:1.0",
-    "com.example:example-dependency327:1.0",
-    "com.example:example-dependency328:1.0",
-    "com.example:example-dependency329:1.0",
-    "com.example:example-dependency330:1.0",
-    "com.example:example-dependency331:1.0",
-    "com.example:example-dependency332:1.0",
-    "com.example:example-dependency333:1.0",
-    "com.example:example-dependency334:1.0",
-    "com.example:example-dependency335:1.0",
-    "com.example:example-dependency336:1.0",
-    "com.example:example-dependency337:1.0",
-    "com.example:example-dependency338:1.0",
-    "com.example:example-dependency339:1.0",
-    "com.example:example-dependency340:1.0",
-    "com.example:example-dependency341:1.0",
-    "com.example:example-dependency342:1.0",
-    "com.example:example-dependency343:1.0",
-    "com.example:example-dependency344:1.0",
-    "com.example:example-dependency345:1.0",
-    "com.example:example-dependency346:1.0",
-    "com.example:example-dependency347:1.0",
-    "com.example:example-dependency348:1.0",
-    "com.example:example-dependency349:1.0",
-    "com.example:example-dependency350:1.0",
-    "com.example:example-dependency351:1.0",
-    "com.example:example-dependency352:1.0",
-    "com.example:example-dependency353:1.0",
-    "com.example:example-dependency354:1.0",
-    "com.example:example-dependency355:1.0",
-    "com.example:example-dependency356:1.0",
-    "com.example:example-dependency357:1.0",
-    "com.example:example-dependency358:1.0",
-    "com.example:example-dependency359:1.0",
-    "com.example:example-dependency360:1.0",
-    "com.example:example-dependency361:1.0",
-    "com.example:example-dependency362:1.0",
-    "com.example:example-dependency363:1.0",
-    "com.example:example-dependency364:1.0",
-    "com.example:example-dependency365:1.0",
-    "com.example:example-dependency366:1.0",
-    "com.example:example-dependency367:1.0",
-    "com.example:example-dependency368:1.0",
-    "com.example:example-dependency369:1.0",
-    "com.example:example-dependency370:1.0",
-    "com.example:example-dependency371:1.0",
-    "com.example:example-dependency372:1.0",
-    "com.example:example-dependency373:1.0",
-    "com.example:example-dependency374:1.0",
-    "com.example:example-dependency375:1.0",
-    "com.example:example-dependency376:1.0",
-    "com.example:example-dependency377:1.0",
-    "com.example:example-dependency378:1.0",
-    "com.example:example-dependency379:1.0",
-    "com.example:example-dependency380:1.0",
-    "com.example:example-dependency381:1.0",
-    "com.example:example-dependency382:1.0",
-    "com.example:example-dependency383:1.0",
-    "com.example:example-dependency384:1.0",
-    "com.example:example-dependency385:1.0",
-    "com.example:example-dependency386:1.0",
-    "com.example:example-dependency387:1.0",
-    "com.example:example-dependency388:1.0",
-    "com.example:example-dependency389:1.0",
-    "com.example:example-dependency390:1.0",
-    "com.example:example-dependency391:1.0",
-    "com.example:example-dependency392:1.0",
-    "com.example:example-dependency393:1.0",
-    "com.example:example-dependency394:1.0",
-    "com.example:example-dependency395:1.0",
-    "com.example:example-dependency396:1.0",
-    "com.example:example-dependency397:1.0",
-    "com.example:example-dependency398:1.0",
-    "com.example:example-dependency399:1.0",
-    "com.example:example-dependency400:1.0",
-    "com.example:example-dependency401:1.0",
-    "com.example:example-dependency402:1.0",
-    "com.example:example-dependency403:1.0",
-    "com.example:example-dependency404:1.0",
-    "com.example:example-dependency405:1.0",
-    "com.example:example-dependency406:1.0",
-    "com.example:example-dependency407:1.0",
-    "com.example:example-dependency408:1.0",
-    "com.example:example-dependency409:1.0",
-    "com.example:example-dependency410:1.0",
-    "com.example:example-dependency411:1.0",
-    "com.example:example-dependency412:1.0",
-    "com.example:example-dependency413:1.0",
-    "com.example:example-dependency414:1.0",
-    "com.example:example-dependency415:1.0",
-    "com.example:example-dependency416:1.0",
-    "com.example:example-dependency417:1.0",
-    "com.example:example-dependency418:1.0",
-    "com.example:example-dependency419:1.0",
-    "com.example:example-dependency420:1.0",
-    "com.example:example-dependency421:1.0",
-    "com.example:example-dependency422:1.0",
-    "com.example:example-dependency423:1.0",
-    "com.example:example-dependency424:1.0",
-    "com.example:example-dependency425:1.0",
-    "com.example:example-dependency426:1.0",
-    "com.example:example-dependency427:1.0",
-    "com.example:example-dependency428:1.0",
-    "com.example:example-dependency429:1.0",
-    "com.example:example-dependency430:1.0",
-    "com.example:example-dependency431:1.0",
-    "com.example:example-dependency432:1.0",
-    "com.example:example-dependency433:1.0",
-    "com.example:example-dependency434:1.0",
-    "com.example:example-dependency435:1.0",
-    "com.example:example-dependency436:1.0",
-    "com.example:example-dependency437:1.0",
-    "com.example:example-dependency438:1.0",
-    "com.example:example-dependency439:1.0",
-    "com.example:example-dependency440:1.0",
-    "com.example:example-dependency441:1.0",
-    "com.example:example-dependency442:1.0",
-    "com.example:example-dependency443:1.0",
-    "com.example:example-dependency444:1.0",
-    "com.example:example-dependency445:1.0",
-    "com.example:example-dependency446:1.0",
-    "com.example:example-dependency447:1.0",
-    "com.example:example-dependency448:1.0",
-    "com.example:example-dependency449:1.0",
-    "com.example:example-dependency450:1.0",
-    "com.example:example-dependency451:1.0",
-    "com.example:example-dependency452:1.0",
-    "com.example:example-dependency453:1.0",
-    "com.example:example-dependency454:1.0",
-    "com.example:example-dependency455:1.0",
-    "com.example:example-dependency456:1.0",
-    "com.example:example-dependency457:1.0",
-    "com.example:example-dependency458:1.0",
-    "com.example:example-dependency459:1.0",
-    "com.example:example-dependency460:1.0",
-    "com.example:example-dependency461:1.0",
-    "com.example:example-dependency462:1.0",
-    "com.example:example-dependency463:1.0",
-    "com.example:example-dependency464:1.0",
-    "com.example:example-dependency465:1.0",
-    "com.example:example-dependency466:1.0",
-    "com.example:example-dependency467:1.0",
-    "com.example:example-dependency468:1.0",
-    "com.example:example-dependency469:1.0",
-    "com.example:example-dependency470:1.0",
-    "com.example:example-dependency471:1.0",
-    "com.example:example-dependency472:1.0",
-    "com.example:example-dependency473:1.0",
-    "com.example:example-dependency474:1.0",
-    "com.example:example-dependency475:1.0",
-    "com.example:example-dependency476:1.0",
-    "com.example:example-dependency477:1.0",
-    "com.example:example-dependency478:1.0",
-    "com.example:example-dependency479:1.0",
-    "com.example:example-dependency480:1.0",
-    "com.example:example-dependency481:1.0",
-    "com.example:example-dependency482:1.0",
-    "com.example:example-dependency483:1.0",
-    "com.example:example-dependency484:1.0",
-    "com.example:example-dependency485:1.0",
-    "com.example:example-dependency486:1.0",
-    "com.example:example-dependency487:1.0",
-    "com.example:example-dependency488:1.0",
-    "com.example:example-dependency489:1.0",
-    "com.example:example-dependency490:1.0",
-    "com.example:example-dependency491:1.0",
-    "com.example:example-dependency492:1.0",
-    "com.example:example-dependency493:1.0",
-    "com.example:example-dependency494:1.0",
-    "com.example:example-dependency495:1.0",
-    "com.example:example-dependency496:1.0",
-    "com.example:example-dependency497:1.0",
-    "com.example:example-dependency498:1.0",
-    "com.example:example-dependency499:1.0",
-    "com.example:example-dependency500:1.0",
-    "com.example:example-dependency501:1.0",
-    "com.example:example-dependency502:1.0",
-    "com.example:example-dependency503:1.0",
-    "com.example:example-dependency504:1.0",
-    "com.example:example-dependency505:1.0",
-    "com.example:example-dependency506:1.0",
-    "com.example:example-dependency507:1.0",
-    "com.example:example-dependency508:1.0",
-    "com.example:example-dependency509:1.0",
-    "com.example:example-dependency510:1.0",
-    "com.example:example-dependency511:1.0",
-    "com.example:example-dependency512:1.0",
-    "com.example:example-dependency513:1.0",
-    "com.example:example-dependency514:1.0",
-    "com.example:example-dependency515:1.0",
-    "com.example:example-dependency516:1.0",
-    "com.example:example-dependency517:1.0",
-    "com.example:example-dependency518:1.0",
-    "com.example:example-dependency519:1.0",
-    "com.example:example-dependency520:1.0",
-    "com.example:example-dependency521:1.0",
-    "com.example:example-dependency522:1.0",
-    "com.example:example-dependency523:1.0",
-    "com.example:example-dependency524:1.0",
-    "com.example:example-dependency525:1.0",
-    "com.example:example-dependency526:1.0",
-    "com.example:example-dependency527:1.0",
-    "com.example:example-dependency528:1.0",
-    "com.example:example-dependency529:1.0",
-    "com.example:example-dependency530:1.0",
-    "com.example:example-dependency531:1.0",
-    "com.example:example-dependency532:1.0",
-    "com.example:example-dependency533:1.0",
-    "com.example:example-dependency534:1.0",
-    "com.example:example-dependency535:1.0",
-    "com.example:example-dependency536:1.0",
-    "com.example:example-dependency537:1.0",
-    "com.example:example-dependency538:1.0",
-    "com.example:example-dependency539:1.0",
-    "com.example:example-dependency540:1.0",
-    "com.example:example-dependency541:1.0",
-    "com.example:example-dependency542:1.0",
-    "com.example:example-dependency543:1.0",
-    "com.example:example-dependency544:1.0",
-    "com.example:example-dependency545:1.0",
-    "com.example:example-dependency546:1.0",
-    "com.example:example-dependency547:1.0",
-    "com.example:example-dependency548:1.0",
-    "com.example:example-dependency549:1.0",
-    "com.example:example-dependency550:1.0",
-    "com.example:example-dependency551:1.0",
-    "com.example:example-dependency552:1.0",
-    "com.example:example-dependency553:1.0",
-    "com.example:example-dependency554:1.0",
-    "com.example:example-dependency555:1.0",
-    "com.example:example-dependency556:1.0",
-    "com.example:example-dependency557:1.0",
-    "com.example:example-dependency558:1.0",
-    "com.example:example-dependency559:1.0",
-    "com.example:example-dependency560:1.0",
-    "com.example:example-dependency561:1.0",
-    "com.example:example-dependency562:1.0",
-    "com.example:example-dependency563:1.0",
-    "com.example:example-dependency564:1.0",
-    "com.example:example-dependency565:1.0",
-    "com.example:example-dependency566:1.0",
-    "com.example:example-dependency567:1.0",
-    "com.example:example-dependency568:1.0",
-    "com.example:example-dependency569:1.0",
-    "com.example:example-dependency570:1.0",
-    "com.example:example-dependency571:1.0",
-    "com.example:example-dependency572:1.0",
-    "com.example:example-dependency573:1.0",
-    "com.example:example-dependency574:1.0",
-    "com.example:example-dependency575:1.0",
-    "com.example:example-dependency576:1.0",
-    "com.example:example-dependency577:1.0",
-    "com.example:example-dependency578:1.0",
-    "com.example:example-dependency579:1.0",
-    "com.example:example-dependency580:1.0",
-    "com.example:example-dependency581:1.0",
-    "com.example:example-dependency582:1.0",
-    "com.example:example-dependency583:1.0",
-    "com.example:example-dependency584:1.0",
-    "com.example:example-dependency585:1.0",
-    "com.example:example-dependency586:1.0",
-    "com.example:example-dependency587:1.0",
-    "com.example:example-dependency588:1.0",
-    "com.example:example-dependency589:1.0",
-    "com.example:example-dependency590:1.0",
-    "com.example:example-dependency591:1.0",
-    "com.example:example-dependency592:1.0",
-    "com.example:example-dependency593:1.0",
-    "com.example:example-dependency594:1.0",
-    "com.example:example-dependency595:1.0",
-    "com.example:example-dependency596:1.0",
-    "com.example:example-dependency597:1.0",
-    "com.example:example-dependency598:1.0",
-    "com.example:example-dependency599:1.0",
-    "com.example:example-dependency600:1.0",
-    "com.example:example-dependency601:1.0",
-    "com.example:example-dependency602:1.0",
-    "com.example:example-dependency603:1.0",
-    "com.example:example-dependency604:1.0",
-    "com.example:example-dependency605:1.0",
-    "com.example:example-dependency606:1.0",
-    "com.example:example-dependency607:1.0",
-    "com.example:example-dependency608:1.0",
-    "com.example:example-dependency609:1.0",
-    "com.example:example-dependency610:1.0",
-    "com.example:example-dependency611:1.0",
-    "com.example:example-dependency612:1.0",
-    "com.example:example-dependency613:1.0",
-    "com.example:example-dependency614:1.0",
-    "com.example:example-dependency615:1.0",
-    "com.example:example-dependency616:1.0",
-    "com.example:example-dependency617:1.0",
-    "com.example:example-dependency618:1.0",
-    "com.example:example-dependency619:1.0",
-    "com.example:example-dependency620:1.0",
-    "com.example:example-dependency621:1.0",
-    "com.example:example-dependency622:1.0",
-    "com.example:example-dependency623:1.0",
-    "com.example:example-dependency624:1.0",
-    "com.example:example-dependency625:1.0",
-    "com.example:example-dependency626:1.0",
-    "com.example:example-dependency627:1.0",
-    "com.example:example-dependency628:1.0",
-    "com.example:example-dependency629:1.0",
-    "com.example:example-dependency630:1.0",
-    "com.example:example-dependency631:1.0",
-    "com.example:example-dependency632:1.0",
-    "com.example:example-dependency633:1.0",
-    "com.example:example-dependency634:1.0",
-    "com.example:example-dependency635:1.0",
-    "com.example:example-dependency636:1.0",
-    "com.example:example-dependency637:1.0",
-    "com.example:example-dependency638:1.0",
-    "com.example:example-dependency639:1.0",
-    "com.example:example-dependency640:1.0",
-    "com.example:example-dependency641:1.0",
-    "com.example:example-dependency642:1.0",
-    "com.example:example-dependency643:1.0",
-    "com.example:example-dependency644:1.0",
-    "com.example:example-dependency645:1.0",
-    "com.example:example-dependency646:1.0",
-    "com.example:example-dependency647:1.0",
-    "com.example:example-dependency648:1.0",
-    "com.example:example-dependency649:1.0",
-    "com.example:example-dependency650:1.0",
-    "com.example:example-dependency651:1.0",
-    "com.example:example-dependency652:1.0",
-    "com.example:example-dependency653:1.0",
-    "com.example:example-dependency654:1.0",
-    "com.example:example-dependency655:1.0",
-    "com.example:example-dependency656:1.0",
-    "com.example:example-dependency657:1.0",
-    "com.example:example-dependency658:1.0",
-    "com.example:example-dependency659:1.0",
-    "com.example:example-dependency660:1.0",
-    "com.example:example-dependency661:1.0",
-    "com.example:example-dependency662:1.0",
-    "com.example:example-dependency663:1.0",
-    "com.example:example-dependency664:1.0",
-    "com.example:example-dependency665:1.0",
-    "com.example:example-dependency666:1.0",
-    "com.example:example-dependency667:1.0",
-    "com.example:example-dependency668:1.0",
-    "com.example:example-dependency669:1.0",
-    "com.example:example-dependency670:1.0",
-    "com.example:example-dependency671:1.0",
-    "com.example:example-dependency672:1.0",
-    "com.example:example-dependency673:1.0",
-    "com.example:example-dependency674:1.0",
-    "com.example:example-dependency675:1.0",
-    "com.example:example-dependency676:1.0",
-    "com.example:example-dependency677:1.0",
-    "com.example:example-dependency678:1.0",
-    "com.example:example-dependency679:1.0",
-    "com.example:example-dependency680:1.0",
-    "com.example:example-dependency681:1.0",
-    "com.example:example-dependency682:1.0",
-    "com.example:example-dependency683:1.0",
-    "com.example:example-dependency684:1.0",
-    "com.example:example-dependency685:1.0",
-    "com.example:example-dependency686:1.0",
-    "com.example:example-dependency687:1.0",
-    "com.example:example-dependency688:1.0",
-    "com.example:example-dependency689:1.0",
-    "com.example:example-dependency690:1.0",
-    "com.example:example-dependency691:1.0",
-    "com.example:example-dependency692:1.0",
-    "com.example:example-dependency693:1.0",
-    "com.example:example-dependency694:1.0",
-    "com.example:example-dependency695:1.0",
-    "com.example:example-dependency696:1.0",
-    "com.example:example-dependency697:1.0",
-    "com.example:example-dependency698:1.0",
-    "com.example:example-dependency699:1.0",
-    "com.example:example-dependency700:1.0",
-    "com.example:example-dependency701:1.0",
-    "com.example:example-dependency702:1.0",
-    "com.example:example-dependency703:1.0",
-    "com.example:example-dependency704:1.0",
-    "com.example:example-dependency705:1.0",
-    "com.example:example-dependency706:1.0",
-    "com.example:example-dependency707:1.0",
-    "com.example:example-dependency708:1.0",
-    "com.example:example-dependency709:1.0",
-    "com.example:example-dependency710:1.0",
-    "com.example:example-dependency711:1.0",
-    "com.example:example-dependency712:1.0",
-    "com.example:example-dependency713:1.0",
-    "com.example:example-dependency714:1.0",
-    "com.example:example-dependency715:1.0",
-    "com.example:example-dependency716:1.0",
-    "com.example:example-dependency717:1.0",
-    "com.example:example-dependency718:1.0",
-    "com.example:example-dependency719:1.0",
-    "com.example:example-dependency720:1.0",
-    "com.example:example-dependency721:1.0",
-    "com.example:example-dependency722:1.0",
-    "com.example:example-dependency723:1.0",
-    "com.example:example-dependency724:1.0",
-    "com.example:example-dependency725:1.0",
-    "com.example:example-dependency726:1.0",
-    "com.example:example-dependency727:1.0",
-    "com.example:example-dependency728:1.0",
-    "com.example:example-dependency729:1.0",
-    "com.example:example-dependency730:1.0",
-    "com.example:example-dependency731:1.0",
-    "com.example:example-dependency732:1.0",
-    "com.example:example-dependency733:1.0",
-    "com.example:example-dependency734:1.0",
-    "com.example:example-dependency735:1.0",
-    "com.example:example-dependency736:1.0",
-    "com.example:example-dependency737:1.0",
-    "com.example:example-dependency738:1.0",
-    "com.example:example-dependency739:1.0",
-    "com.example:example-dependency740:1.0",
-    "com.example:example-dependency741:1.0",
-    "com.example:example-dependency742:1.0",
-    "com.example:example-dependency743:1.0",
-    "com.example:example-dependency744:1.0",
-    "com.example:example-dependency745:1.0",
-    "com.example:example-dependency746:1.0",
-    "com.example:example-dependency747:1.0",
-    "com.example:example-dependency748:1.0",
-    "com.example:example-dependency749:1.0",
-    "com.example:example-dependency750:1.0",
-    "com.example:example-dependency751:1.0",
-    "com.example:example-dependency752:1.0",
-    "com.example:example-dependency753:1.0",
-    "com.example:example-dependency754:1.0",
-    "com.example:example-dependency755:1.0",
-    "com.example:example-dependency756:1.0",
-    "com.example:example-dependency757:1.0",
-    "com.example:example-dependency758:1.0",
-    "com.example:example-dependency759:1.0",
-    "com.example:example-dependency760:1.0",
-    "com.example:example-dependency761:1.0",
-    "com.example:example-dependency762:1.0",
-    "com.example:example-dependency763:1.0",
-    "com.example:example-dependency764:1.0",
-    "com.example:example-dependency765:1.0",
-    "com.example:example-dependency766:1.0",
-    "com.example:example-dependency767:1.0",
-    "com.example:example-dependency768:1.0",
-    "com.example:example-dependency769:1.0",
-    "com.example:example-dependency770:1.0",
-    "com.example:example-dependency771:1.0",
-    "com.example:example-dependency772:1.0",
-    "com.example:example-dependency773:1.0",
-    "com.example:example-dependency774:1.0",
-    "com.example:example-dependency775:1.0",
-    "com.example:example-dependency776:1.0",
-    "com.example:example-dependency777:1.0",
-    "com.example:example-dependency778:1.0",
-    "com.example:example-dependency779:1.0",
-    "com.example:example-dependency780:1.0",
-    "com.example:example-dependency781:1.0",
-    "com.example:example-dependency782:1.0",
-    "com.example:example-dependency783:1.0",
-    "com.example:example-dependency784:1.0",
-    "com.example:example-dependency785:1.0",
-    "com.example:example-dependency786:1.0",
-    "com.example:example-dependency787:1.0",
-    "com.example:example-dependency788:1.0",
-    "com.example:example-dependency789:1.0",
-    "com.example:example-dependency790:1.0",
-    "com.example:example-dependency791:1.0",
-    "com.example:example-dependency792:1.0",
-    "com.example:example-dependency793:1.0",
-    "com.example:example-dependency794:1.0",
-    "com.example:example-dependency795:1.0",
-    "com.example:example-dependency796:1.0",
-    "com.example:example-dependency797:1.0",
-    "com.example:example-dependency798:1.0",
-    "com.example:example-dependency799:1.0",
-    "com.example:example-dependency800:1.0",
-    "com.example:example-dependency801:1.0",
-    "com.example:example-dependency802:1.0",
-    "com.example:example-dependency803:1.0",
-    "com.example:example-dependency804:1.0",
-    "com.example:example-dependency805:1.0",
-    "com.example:example-dependency806:1.0",
-    "com.example:example-dependency807:1.0",
-    "com.example:example-dependency808:1.0",
-    "com.example:example-dependency809:1.0",
-    "com.example:example-dependency810:1.0",
-    "com.example:example-dependency811:1.0",
-    "com.example:example-dependency812:1.0",
-    "com.example:example-dependency813:1.0",
-    "com.example:example-dependency814:1.0",
-    "com.example:example-dependency815:1.0",
-    "com.example:example-dependency816:1.0",
-    "com.example:example-dependency817:1.0",
-    "com.example:example-dependency818:1.0",
-    "com.example:example-dependency819:1.0",
-    "com.example:example-dependency820:1.0",
-    "com.example:example-dependency821:1.0",
-    "com.example:example-dependency822:1.0",
-    "com.example:example-dependency823:1.0",
-    "com.example:example-dependency824:1.0",
-    "com.example:example-dependency825:1.0",
-    "com.example:example-dependency826:1.0",
-    "com.example:example-dependency827:1.0",
-    "com.example:example-dependency828:1.0",
-    "com.example:example-dependency829:1.0",
-    "com.example:example-dependency830:1.0",
-    "com.example:example-dependency831:1.0",
-    "com.example:example-dependency832:1.0",
-    "com.example:example-dependency833:1.0",
-    "com.example:example-dependency834:1.0",
-    "com.example:example-dependency835:1.0",
-    "com.example:example-dependency836:1.0",
-    "com.example:example-dependency837:1.0",
-    "com.example:example-dependency838:1.0",
-    "com.example:example-dependency839:1.0",
-    "com.example:example-dependency840:1.0",
-    "com.example:example-dependency841:1.0",
-    "com.example:example-dependency842:1.0",
-    "com.example:example-dependency843:1.0",
-    "com.example:example-dependency844:1.0",
-    "com.example:example-dependency845:1.0",
-    "com.example:example-dependency846:1.0",
-    "com.example:example-dependency847:1.0",
-    "com.example:example-dependency848:1.0",
-    "com.example:example-dependency849:1.0",
-    "com.example:example-dependency850:1.0",
-    "com.example:example-dependency851:1.0",
-    "com.example:example-dependency852:1.0",
-    "com.example:example-dependency853:1.0",
-    "com.example:example-dependency854:1.0",
-    "com.example:example-dependency855:1.0",
-    "com.example:example-dependency856:1.0",
-    "com.example:example-dependency857:1.0",
-    "com.example:example-dependency858:1.0",
-    "com.example:example-dependency859:1.0",
-    "com.example:example-dependency860:1.0",
-    "com.example:example-dependency861:1.0",
-    "com.example:example-dependency862:1.0",
-    "com.example:example-dependency863:1.0",
-    "com.example:example-dependency864:1.0",
-    "com.example:example-dependency865:1.0",
-    "com.example:example-dependency866:1.0",
-    "com.example:example-dependency867:1.0",
-    "com.example:example-dependency868:1.0",
-    "com.example:example-dependency869:1.0",
-    "com.example:example-dependency870:1.0",
-    "com.example:example-dependency871:1.0",
-    "com.example:example-dependency872:1.0",
-    "com.example:example-dependency873:1.0",
-    "com.example:example-dependency874:1.0",
-    "com.example:example-dependency875:1.0",
-    "com.example:example-dependency876:1.0",
-    "com.example:example-dependency877:1.0",
-    "com.example:example-dependency878:1.0",
-    "com.example:example-dependency879:1.0",
-    "com.example:example-dependency880:1.0",
-    "com.example:example-dependency881:1.0",
-    "com.example:example-dependency882:1.0",
-    "com.example:example-dependency883:1.0",
-    "com.example:example-dependency884:1.0",
-    "com.example:example-dependency885:1.0",
-    "com.example:example-dependency886:1.0",
-    "com.example:example-dependency887:1.0",
-    "com.example:example-dependency888:1.0",
-    "com.example:example-dependency889:1.0",
-    "com.example:example-dependency890:1.0",
-    "com.example:example-dependency891:1.0",
-    "com.example:example-dependency892:1.0",
-    "com.example:example-dependency893:1.0",
-    "com.example:example-dependency894:1.0",
-    "com.example:example-dependency895:1.0",
-    "com.example:example-dependency896:1.0",
-    "com.example:example-dependency897:1.0",
-    "com.example:example-dependency898:1.0",
-    "com.example:example-dependency899:1.0",
-    "com.example:example-dependency900:1.0",
-    "com.example:example-dependency901:1.0",
-    "com.example:example-dependency902:1.0",
-    "com.example:example-dependency903:1.0",
-    "com.example:example-dependency904:1.0",
-    "com.example:example-dependency905:1.0",
-    "com.example:example-dependency906:1.0",
-    "com.example:example-dependency907:1.0",
-    "com.example:example-dependency908:1.0",
-    "com.example:example-dependency909:1.0",
-    "com.example:example-dependency910:1.0",
-    "com.example:example-dependency911:1.0",
-    "com.example:example-dependency912:1.0",
-    "com.example:example-dependency913:1.0",
-    "com.example:example-dependency914:1.0",
-    "com.example:example-dependency915:1.0",
-    "com.example:example-dependency916:1.0",
-    "com.example:example-dependency917:1.0",
-    "com.example:example-dependency918:1.0",
-    "com.example:example-dependency919:1.0",
-    "com.example:example-dependency920:1.0",
-    "com.example:example-dependency921:1.0",
-    "com.example:example-dependency922:1.0",
-    "com.example:example-dependency923:1.0",
-    "com.example:example-dependency924:1.0",
-    "com.example:example-dependency925:1.0",
-    "com.example:example-dependency926:1.0",
-    "com.example:example-dependency927:1.0",
-    "com.example:example-dependency928:1.0",
-    "com.example:example-dependency929:1.0",
-    "com.example:example-dependency930:1.0",
-    "com.example:example-dependency931:1.0",
-    "com.example:example-dependency932:1.0",
-    "com.example:example-dependency933:1.0",
-    "com.example:example-dependency934:1.0",
-    "com.example:example-dependency935:1.0",
-    "com.example:example-dependency936:1.0",
-    "com.example:example-dependency937:1.0",
-    "com.example:example-dependency938:1.0",
-    "com.example:example-dependency939:1.0",
-    "com.example:example-dependency940:1.0",
-    "com.example:example-dependency941:1.0",
-    "com.example:example-dependency942:1.0",
-    "com.example:example-dependency943:1.0",
-    "com.example:example-dependency944:1.0",
-    "com.example:example-dependency945:1.0",
-    "com.example:example-dependency946:1.0",
-    "com.example:example-dependency947:1.0",
-    "com.example:example-dependency948:1.0",
-    "com.example:example-dependency949:1.0",
-    "com.example:example-dependency950:1.0",
-    "com.example:example-dependency951:1.0",
-    "com.example:example-dependency952:1.0",
-    "com.example:example-dependency953:1.0",
-    "com.example:example-dependency954:1.0",
-    "com.example:example-dependency955:1.0",
-    "com.example:example-dependency956:1.0",
-    "com.example:example-dependency957:1.0",
-    "com.example:example-dependency958:1.0",
-    "com.example:example-dependency959:1.0",
-    "com.example:example-dependency960:1.0",
-    "com.example:example-dependency961:1.0",
-    "com.example:example-dependency962:1.0",
-    "com.example:example-dependency963:1.0",
-    "com.example:example-dependency964:1.0",
-    "com.example:example-dependency965:1.0",
-    "com.example:example-dependency966:1.0",
-    "com.example:example-dependency967:1.0",
-    "com.example:example-dependency968:1.0",
-    "com.example:example-dependency969:1.0",
-    "com.example:example-dependency970:1.0",
-    "com.example:example-dependency971:1.0",
-    "com.example:example-dependency972:1.0",
-    "com.example:example-dependency973:1.0",
-    "com.example:example-dependency974:1.0",
-    "com.example:example-dependency975:1.0",
-    "com.example:example-dependency976:1.0",
-    "com.example:example-dependency977:1.0",
-    "com.example:example-dependency978:1.0",
-    "com.example:example-dependency979:1.0",
-    "com.example:example-dependency980:1.0",
-    "com.example:example-dependency981:1.0",
-    "com.example:example-dependency982:1.0",
-    "com.example:example-dependency983:1.0",
-    "com.example:example-dependency984:1.0",
-    "com.example:example-dependency985:1.0",
-    "com.example:example-dependency986:1.0",
-    "com.example:example-dependency987:1.0",
-    "com.example:example-dependency988:1.0",
-    "com.example:example-dependency989:1.0",
-    "com.example:example-dependency990:1.0",
-    "com.example:example-dependency991:1.0",
-    "com.example:example-dependency992:1.0",
-    "com.example:example-dependency993:1.0",
-    "com.example:example-dependency994:1.0",
-    "com.example:example-dependency995:1.0",
-    "com.example:example-dependency996:1.0",
-    "com.example:example-dependency997:1.0",
-    "com.example:example-dependency998:1.0",
-    "com.example:example-dependency999:1.0",
-    "com.example:example-dependency1000:1.0"
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency1",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency2",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency3",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency4",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency5",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency6",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency7",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency8",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency9",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency10",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency11",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency12",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency13",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency14",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency15",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency16",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency17",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency18",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency19",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency20",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency21",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency22",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency23",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency24",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency25",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency26",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency27",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency28",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency29",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency30",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency31",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency32",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency33",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency34",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency35",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency36",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency37",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency38",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency39",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency40",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency41",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency42",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency43",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency44",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency45",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency46",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency47",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency48",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency49",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency50",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency51",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency52",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency53",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency54",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency55",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency56",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency57",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency58",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency59",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency60",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency61",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency62",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency63",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency64",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency65",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency66",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency67",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency68",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency69",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency70",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency71",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency72",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency73",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency74",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency75",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency76",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency77",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency78",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency79",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency80",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency81",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency82",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency83",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency84",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency85",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency86",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency87",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency88",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency89",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency90",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency91",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency92",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency93",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency94",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency95",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency96",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency97",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency98",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency99",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency100",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency101",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency102",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency103",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency104",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency105",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency106",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency107",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency108",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency109",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency110",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency111",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency112",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency113",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency114",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency115",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency116",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency117",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency118",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency119",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency120",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency121",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency122",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency123",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency124",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency125",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency126",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency127",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency128",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency129",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency130",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency131",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency132",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency133",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency134",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency135",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency136",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency137",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency138",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency139",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency140",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency141",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency142",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency143",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency144",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency145",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency146",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency147",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency148",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency149",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency150",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency151",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency152",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency153",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency154",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency155",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency156",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency157",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency158",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency159",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency160",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency161",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency162",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency163",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency164",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency165",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency166",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency167",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency168",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency169",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency170",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency171",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency172",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency173",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency174",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency175",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency176",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency177",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency178",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency179",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency180",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency181",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency182",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency183",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency184",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency185",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency186",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency187",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency188",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency189",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency190",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency191",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency192",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency193",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency194",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency195",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency196",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency197",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency198",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency199",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency200",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency201",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency202",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency203",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency204",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency205",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency206",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency207",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency208",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency209",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency210",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency211",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency212",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency213",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency214",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency215",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency216",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency217",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency218",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency219",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency220",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency221",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency222",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency223",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency224",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency225",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency226",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency227",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency228",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency229",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency230",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency231",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency232",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency233",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency234",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency235",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency236",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency237",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency238",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency239",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency240",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency241",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency242",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency243",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency244",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency245",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency246",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency247",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency248",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency249",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency250",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency251",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency252",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency253",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency254",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency255",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency256",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency257",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency258",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency259",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency260",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency261",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency262",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency263",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency264",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency265",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency266",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency267",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency268",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency269",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency270",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency271",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency272",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency273",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency274",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency275",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency276",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency277",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency278",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency279",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency280",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency281",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency282",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency283",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency284",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency285",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency286",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency287",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency288",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency289",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency290",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency291",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency292",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency293",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency294",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency295",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency296",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency297",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency298",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency299",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency300",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency301",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency302",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency303",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency304",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency305",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency306",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency307",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency308",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency309",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency310",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency311",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency312",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency313",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency314",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency315",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency316",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency317",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency318",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency319",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency320",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency321",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency322",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency323",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency324",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency325",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency326",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency327",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency328",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency329",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency330",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency331",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency332",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency333",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency334",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency335",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency336",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency337",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency338",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency339",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency340",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency341",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency342",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency343",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency344",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency345",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency346",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency347",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency348",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency349",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency350",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency351",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency352",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency353",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency354",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency355",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency356",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency357",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency358",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency359",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency360",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency361",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency362",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency363",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency364",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency365",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency366",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency367",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency368",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency369",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency370",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency371",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency372",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency373",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency374",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency375",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency376",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency377",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency378",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency379",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency380",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency381",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency382",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency383",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency384",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency385",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency386",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency387",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency388",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency389",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency390",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency391",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency392",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency393",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency394",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency395",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency396",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency397",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency398",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency399",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency400",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency401",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency402",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency403",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency404",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency405",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency406",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency407",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency408",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency409",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency410",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency411",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency412",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency413",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency414",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency415",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency416",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency417",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency418",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency419",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency420",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency421",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency422",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency423",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency424",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency425",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency426",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency427",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency428",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency429",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency430",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency431",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency432",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency433",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency434",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency435",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency436",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency437",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency438",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency439",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency440",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency441",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency442",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency443",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency444",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency445",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency446",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency447",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency448",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency449",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency450",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency451",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency452",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency453",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency454",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency455",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency456",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency457",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency458",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency459",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency460",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency461",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency462",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency463",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency464",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency465",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency466",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency467",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency468",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency469",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency470",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency471",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency472",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency473",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency474",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency475",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency476",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency477",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency478",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency479",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency480",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency481",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency482",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency483",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency484",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency485",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency486",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency487",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency488",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency489",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency490",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency491",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency492",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency493",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency494",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency495",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency496",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency497",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency498",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency499",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency500",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency501",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency502",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency503",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency504",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency505",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency506",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency507",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency508",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency509",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency510",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency511",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency512",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency513",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency514",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency515",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency516",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency517",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency518",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency519",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency520",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency521",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency522",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency523",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency524",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency525",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency526",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency527",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency528",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency529",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency530",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency531",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency532",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency533",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency534",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency535",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency536",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency537",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency538",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency539",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency540",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency541",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency542",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency543",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency544",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency545",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency546",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency547",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency548",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency549",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency550",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency551",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency552",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency553",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency554",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency555",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency556",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency557",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency558",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency559",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency560",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency561",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency562",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency563",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency564",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency565",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency566",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency567",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency568",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency569",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency570",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency571",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency572",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency573",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency574",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency575",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency576",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency577",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency578",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency579",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency580",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency581",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency582",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency583",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency584",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency585",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency586",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency587",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency588",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency589",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency590",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency591",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency592",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency593",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency594",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency595",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency596",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency597",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency598",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency599",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency600",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency601",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency602",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency603",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency604",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency605",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency606",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency607",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency608",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency609",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency610",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency611",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency612",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency613",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency614",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency615",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency616",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency617",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency618",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency619",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency620",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency621",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency622",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency623",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency624",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency625",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency626",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency627",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency628",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency629",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency630",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency631",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency632",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency633",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency634",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency635",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency636",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency637",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency638",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency639",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency640",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency641",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency642",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency643",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency644",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency645",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency646",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency647",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency648",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency649",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency650",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency651",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency652",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency653",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency654",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency655",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency656",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency657",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency658",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency659",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency660",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency661",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency662",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency663",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency664",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency665",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency666",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency667",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency668",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency669",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency670",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency671",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency672",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency673",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency674",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency675",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency676",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency677",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency678",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency679",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency680",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency681",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency682",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency683",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency684",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency685",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency686",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency687",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency688",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency689",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency690",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency691",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency692",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency693",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency694",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency695",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency696",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency697",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency698",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency699",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency700",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency701",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency702",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency703",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency704",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency705",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency706",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency707",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency708",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency709",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency710",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency711",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency712",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency713",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency714",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency715",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency716",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency717",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency718",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency719",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency720",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency721",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency722",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency723",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency724",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency725",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency726",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency727",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency728",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency729",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency730",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency731",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency732",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency733",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency734",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency735",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency736",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency737",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency738",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency739",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency740",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency741",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency742",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency743",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency744",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency745",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency746",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency747",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency748",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency749",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency750",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency751",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency752",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency753",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency754",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency755",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency756",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency757",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency758",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency759",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency760",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency761",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency762",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency763",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency764",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency765",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency766",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency767",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency768",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency769",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency770",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency771",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency772",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency773",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency774",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency775",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency776",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency777",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency778",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency779",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency780",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency781",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency782",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency783",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency784",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency785",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency786",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency787",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency788",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency789",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency790",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency791",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency792",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency793",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency794",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency795",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency796",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency797",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency798",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency799",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency800",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency801",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency802",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency803",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency804",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency805",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency806",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency807",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency808",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency809",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency810",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency811",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency812",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency813",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency814",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency815",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency816",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency817",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency818",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency819",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency820",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency821",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency822",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency823",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency824",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency825",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency826",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency827",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency828",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency829",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency830",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency831",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency832",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency833",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency834",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency835",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency836",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency837",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency838",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency839",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency840",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency841",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency842",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency843",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency844",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency845",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency846",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency847",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency848",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency849",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency850",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency851",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency852",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency853",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency854",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency855",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency856",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency857",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency858",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency859",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency860",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency861",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency862",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency863",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency864",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency865",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency866",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency867",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency868",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency869",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency870",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency871",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency872",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency873",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency874",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency875",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency876",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency877",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency878",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency879",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency880",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency881",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency882",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency883",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency884",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency885",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency886",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency887",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency888",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency889",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency890",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency891",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency892",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency893",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency894",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency895",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency896",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency897",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency898",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency899",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency900",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency901",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency902",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency903",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency904",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency905",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency906",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency907",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency908",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency909",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency910",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency911",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency912",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency913",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency914",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency915",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency916",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency917",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency918",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency919",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency920",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency921",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency922",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency923",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency924",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency925",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency926",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency927",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency928",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency929",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency930",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency931",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency932",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency933",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency934",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency935",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency936",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency937",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency938",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency939",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency940",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency941",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency942",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency943",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency944",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency945",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency946",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency947",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency948",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency949",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency950",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency951",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency952",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency953",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency954",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency955",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency956",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency957",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency958",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency959",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency960",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency961",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency962",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency963",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency964",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency965",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency966",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency967",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency968",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency969",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency970",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency971",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency972",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency973",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency974",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency975",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency976",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency977",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency978",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency979",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency980",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency981",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency982",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency983",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency984",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency985",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency986",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency987",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency988",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency989",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency990",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency991",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency992",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency993",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency994",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency995",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency996",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency997",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency998",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency999",
+        "version": "1.0"
+    },
+    {
+        "groupId": "com.example",
+        "artifactId": "example-dependency1000",
+        "version": "1.0"
+    }
 ]

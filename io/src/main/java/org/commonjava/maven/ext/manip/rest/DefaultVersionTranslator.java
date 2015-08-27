@@ -27,19 +27,19 @@ public class DefaultVersionTranslator implements VersionTranslator {
     }
 
     @SuppressWarnings("unchecked")
-    public List<ProjectVersionRef> translateVersions(ProjectVersionRef project, List<ProjectVersionRef> dependencies) {
-        List<ProjectVersionRef> result = new ArrayList<ProjectVersionRef>();
+    public Map<ProjectVersionRef, String> translateVersions(List<ProjectVersionRef> projects) {
+        Map<ProjectVersionRef, String> result = new HashMap<ProjectVersionRef, String>();
 
         // Prepare request body map
-        final String rawProject = project.toString();
-        final List<String> rawDependencies = new ArrayList<String>();
-        for (ProjectVersionRef dep : dependencies) {
-            rawDependencies.add(dep.toString());
+        JSONArray requestBody = new JSONArray();
+        for (ProjectVersionRef project: projects) {
+            JSONObject gav = new JSONObject();
+            gav.put("groupId", project.getGroupId());
+            gav.put("artifactId", project.getArtifactId());
+            gav.put("version", project.getVersionString());
+
+            requestBody.put(gav);
         }
-        Map<String, Object> requestBodyMap = new HashMap<String, Object>() {{
-            put("project", rawProject);
-            put("dependencies", rawDependencies);
-        }};
 
         // Execute request to get translated versions
         HttpResponse<JsonNode> r;
@@ -47,7 +47,7 @@ public class DefaultVersionTranslator implements VersionTranslator {
             r = Unirest.post(this.endpointUrl)
                     .header("accept", "application/json")
                     .header("Content-Type", "application/json")
-                    .body(new JSONObject(requestBodyMap).toString())
+                    .body(requestBody.toString())
                     .asJson();
         } catch (UnirestException e) {
             throw new RestException(String.format(
@@ -56,25 +56,27 @@ public class DefaultVersionTranslator implements VersionTranslator {
 
         // Handle some corner cases (5xx, 4xx)
         if (r.getStatus() / 100 == 5) {
-            throw new ServerException(String.format("Server at '%s' failed to translate versions for " +
-                    "project '%s'. HTTP status code %s.", this.endpointUrl, rawProject, r.getStatus()));
+            throw new ServerException(String.format("Server at '%s' failed to translate versions. " +
+                    "HTTP status code %s.", this.endpointUrl, r.getStatus()));
         } else if (r.getStatus() / 100 == 4) {
-            throw new ClientException(String.format("Server at '%s' could not translate versions for " +
-                    "project '%s'. HTTP status code %s.", this.endpointUrl, rawProject, r.getStatus()));
+            throw new ClientException(String.format("Server at '%s' could not translate versions. " +
+                    "HTTP status code %s.", this.endpointUrl, r.getStatus()));
         }
 
         // Get result object from response
-        JSONObject jsonResult = r.getBody().getObject();
+        JSONArray jsonResult = r.getBody().getArray();
 
-        // Parse project version and create ProjectVersionRef from it
-        ProjectVersionRef projectResult = Utils.fromString(jsonResult.getString("project"));
-        result.add(projectResult);
+        // Populate map with projects and best matching versions
+        for (Integer i = 0; i < jsonResult.length(); i++) {
+            String groupId = jsonResult.getJSONObject(i).getString("groupId");
+            String artifactId = jsonResult.getJSONObject(i).getString("artifactId");
+            String version = jsonResult.getJSONObject(i).getString("version");
+            String bestMatchVersion = jsonResult.getJSONObject(i).getString("bestMatchVersion");
 
-        // Parse dependencies and create ProjectVersionRefs from it
-        JSONArray dependenciesGavs = (JSONArray) jsonResult.get("dependencies");
-        for (Integer i = 0; i < dependenciesGavs.length(); i++) {
-            ProjectVersionRef depResult = Utils.fromString(dependenciesGavs.getString(i));
-            result.add(depResult);
+            if (bestMatchVersion != null) {
+                ProjectVersionRef project = new ProjectVersionRef(groupId, artifactId, version);
+                result.put(project, bestMatchVersion);
+            }
         }
 
         return result;

@@ -3,6 +3,7 @@ package org.commonjava.maven.ext.manip.rest;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author vdedik@redhat.com
@@ -12,10 +13,9 @@ public interface VersionTranslator {
     /**
      * Executes HTTP request to a REST service that translates versions
      *
-     * @param project - Represents project with groupId, artifactId and version
-     * @param dependencies - List of dependencies of the project
-     * @return List of ProjectVersionRef objects, cointains both the main project and it's dependencies
+     * @param projects - List of projects (GAVs)
+     * @return Map of ProjectVersionRef objects as keys and translated versions as values
      */
-    List<ProjectVersionRef> translateVersions(ProjectVersionRef project, List<ProjectVersionRef> dependencies);
+    Map<ProjectVersionRef, String> translateVersions(List<ProjectVersionRef> projects);
 
 }
