@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-/**
+
 def pomFile = new File( basedir, 'pom.xml' )
 def pomChildFile = new File( basedir, 'child/pom.xml' )
 System.out.println( "Slurping POM: ${pomFile.getAbsolutePath()} and ${pomChildFile.getAbsolutePath()}" )
@@ -22,15 +22,31 @@ System.out.println( "Slurping POM: ${pomFile.getAbsolutePath()} and ${pomChildFi
 def pom = new XmlSlurper().parse( pomFile )
 def pomChild = new XmlSlurper().parse( pomChildFile )
 
+System.out.println( "POM Version: ${pom.version.text()}" )
+assert pom.version.text().endsWith( '.rebuild-1' )
+System.out.println( "POM Child Version: ${pomChild.version.text()}" )
+assert pomChild.parent.version.text().endsWith( '.rebuild-1' )
+
+// Currently the AddSuffixJettyHandler doesn't do OSGi compatibility.
+/*
 def dependency = pom.dependencyManagement.dependencies.dependency.find { it.artifactId.text() == "commons-lang" }
 assert dependency != null
-assert dependency.version.text() == "2.5"
+assert dependency.version.text() == "1.0-redhat-1"
 
-// Test overrideTransitive=false
-def junitDependency = pom.dependencyManagement.dependencies.dependency.find { it.artifactId.text() == "junit" }
-assert junitDependency.size() == 0
+def junitDependency = pom.dependencies.dependency.find { it.artifactId.text() == "errai-common" }
+assert dependency != null
+assert dependency.version.text() == "1.1.Final"
+
+def passed = false
+pom.properties.each {
+    if ( it.text().contains ("3.1-redhat-1") )
+    {
+        passed = true
+    }
+}
+assert (passed == true)
 
 def childDependency = pomChild.dependencyManagement.dependencies.dependency.find { it.artifactId.text() == "junit" }
 assert childDependency != null
-assert childDependency.version.text() == "4.1"
+assert childDependency.version.text() == "4.1-redhat-1"
 */

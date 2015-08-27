@@ -23,11 +23,11 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>org.commonjava.maven.ext</groupId>
-  <artifactId>dependency-version-manip-child-module</artifactId>
+  <artifactId>rest-dependency-version-manip-child-module</artifactId>
   <version>1.0-SNAPSHOT</version>
   <packaging>pom</packaging>
 
-  <name>Module to test dependencies within parent and child</name>
+  <name>Module to test REST manipulation of project version and dependencies within parent and child</name>
 
   <properties>
     <errai-tools>1.1-Final</errai-tools>

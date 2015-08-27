@@ -35,6 +35,10 @@
       <artifactId>pom-manipulation-ext</artifactId>
     </dependency>
     <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+    </dependency>
+    <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
     </dependency>
@@ -179,7 +183,6 @@
                 <goal>clean</goal>
                 <goal>package</goal>
               </goals>
-              <!-- <cloneProjectsTo>${project.build.directory}/it</cloneProjectsTo> -->
               <localRepositoryPath>${localRepositoryUrlExt}</localRepositoryPath>
               <mavenHome>${it.maven.home}</mavenHome>
               <setupIncludes>
@@ -191,6 +194,10 @@
                 <pomInclude>simple-numeric-directory-path/parent/pom.xml</pomInclude>
                 <pomInclude>*/pom.xml</pomInclude>
               </pomIncludes>
+              <pomExcludes>
+                <!-- Only run by JUnit as we need a Mock REST server started -->
+                <pomExclude>rest-dependency-version-manip-child-module/pom.xml</pomExclude>
+              </pomExcludes>
               <projectsDirectory>${project.build.directory}/it-${extIter}</projectsDirectory>
               <postBuildHookScript>verify</postBuildHookScript>
               <settingsFile>src/it/settings.xml</settingsFile>

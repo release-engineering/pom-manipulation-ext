@@ -33,8 +33,10 @@ public class DefaultCliIntegrationTest
 {
     private static final List<String> EXCLUDED_FILES = new ArrayList<String>()
     {{
-            add( "setup" );
-        }};
+        add( "setup" );
+        // Run in a separate test so a Mock server may be started.
+        add("rest-dependency-version-manip-child-module");
+    }};
 
     private static final Map<String, String> LOCATION_REWRITE = new HashMap<String, String>()
     {{
