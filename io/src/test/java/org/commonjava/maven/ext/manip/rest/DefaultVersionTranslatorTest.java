@@ -111,7 +111,7 @@ public class DefaultVersionTranslatorTest
         }
     }
 
-    @Test( timeout = 300 )
+    @Test( timeout = 500 )
     public void testTranslateVersionsPerformance()
     {
         versionTranslator.translateVersions( aLotOfGavs );
