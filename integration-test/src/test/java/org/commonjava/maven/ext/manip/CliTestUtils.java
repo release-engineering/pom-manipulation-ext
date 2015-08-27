@@ -35,7 +35,7 @@ public class CliTestUtils
 {
     public static final String BUILD_DIR = System.getProperty( "buildDirectory" );
 
-    public static final String MVN_LOCATION = System.getProperty( "mavenLocation" );
+    public static final String MVN_LOCATION = System.getProperty("maven.home");
 
     public static final String IT_LOCATION = BUILD_DIR + "/it-cli";
 
@@ -154,7 +154,7 @@ public class CliTestUtils
         String command =
             String.format( "java -jar %s/pom-manipulation-cli.jar %s %s", BUILD_DIR, stringParams, stringArgs );
 
-        return runCommandAndWait( command, workingDir );
+        return runCommandAndWait( command, workingDir, null );
     }
 
     /**
@@ -184,9 +184,9 @@ public class CliTestUtils
         throws Exception
     {
         String stringParams = toJavaParams( params );
-        String commandMaven = String.format( MVN_LOCATION + "/bin/mvn %s %s ", commands, stringParams );
+        String commandMaven = String.format( "mvn %s %s ", commands, stringParams );
 
-        return runCommandAndWait( commandMaven, workingDir );
+        return runCommandAndWait(commandMaven, workingDir, MVN_LOCATION + "/bin");
     }
 
     /**
@@ -267,14 +267,21 @@ public class CliTestUtils
      *
      * @param command - Command to be run in another process, e.g. "mvn clean install"
      * @param workingDir - Working directory in which to run the command.
+     * @param s
      * @return exit value.
      * @throws Exception
      */
-    public static Integer runCommandAndWait( String command, String workingDir )
+    public static Integer runCommandAndWait( String command, String workingDir, String extraPath )
         throws Exception
     {
-        Process proc = Runtime.getRuntime().exec( command, null, new File( workingDir ) );
-        File buildlog = new File( workingDir + "/build.log" );
+        String path = System.getenv( "PATH" );
+        if (extraPath != null)
+        {
+            path = extraPath + System.getProperty("path.separator") + path;
+        }
+
+        Process proc = Runtime.getRuntime().exec(command, new String[] {"M2_HOME=" + MVN_LOCATION, "PATH=" + path}, new File(workingDir));
+        File buildlog = new File(workingDir + "/build.log");
 
         BufferedReader stdout = new BufferedReader( new InputStreamReader( proc.getInputStream() ) );
         BufferedReader stderr = new BufferedReader( new InputStreamReader( proc.getErrorStream() ) );

@@ -212,7 +212,7 @@
           <runOrder>alphabetical</runOrder>
           <systemPropertyVariables>
             <buildDirectory>${project.build.directory}</buildDirectory>
-            <mavenLocation>${it.maven.home}</mavenLocation>
+            <maven.home>${it.maven.home}</maven.home>
             <localRepositoryPath>${localRepositoryUrlCli}</localRepositoryPath>
           </systemPropertyVariables>
         </configuration>
