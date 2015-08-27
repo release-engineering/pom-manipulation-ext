@@ -199,7 +199,7 @@ public class ProjectSourcesInjectingManipulator
     @Override
     public int getExecutionIndex()
     {
-        return 30;
+        return 65;
     }
 
 }

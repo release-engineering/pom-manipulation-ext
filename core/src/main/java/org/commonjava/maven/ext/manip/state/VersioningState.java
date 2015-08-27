@@ -15,11 +15,14 @@
  */
 package org.commonjava.maven.ext.manip.state;
 
-import java.util.Map;
-import java.util.Properties;
-
+import org.commonjava.maven.atlas.ident.ref.ProjectRef;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.ext.manip.impl.ProjectVersioningManipulator;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
 
 /**
  * Captures configuration and changes relating to the projects' versions. Used by {@link ProjectVersioningManipulator}.
@@ -49,6 +52,11 @@ public class VersioningState
     private final boolean osgi;
 
     private final String override;
+
+    /**
+     * Store preprocessed metadata from the REST call in order to use for incremental lookup.
+     */
+    private Map<ProjectRef, Set<String>> restMetaData;
 
     public VersioningState( final Properties userProps )
     {
@@ -113,4 +121,13 @@ public class VersioningState
         return incrementSerialSuffix != null || suffix != null || override != null;
     }
 
+    public void setRESTMetadata( Map<ProjectRef, Set<String>> versionStates )
+    {
+        restMetaData = versionStates;
+    }
+
+    public Map<ProjectRef, Set<String>> getRESTMetadata( )
+    {
+        return restMetaData;
+    }
 }

@@ -15,8 +15,11 @@
  */
 package org.commonjava.maven.ext.manip.state;
 
+import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.ext.manip.impl.DependencyManipulator;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 
 /**
@@ -31,6 +34,9 @@ public class DependencyRESTState extends CommonDependencyState
     public static final String REST_URL = "restEndpoint";
 
     private final String restURL;
+
+    private final Map<ProjectVersionRef, String> projectVersionsByGAV = new HashMap<ProjectVersionRef, String>();
+
 
     public DependencyRESTState( final Properties userProps )
     {

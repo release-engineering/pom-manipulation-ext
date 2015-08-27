@@ -18,6 +18,7 @@ package org.commonjava.maven.ext.manip.impl;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.Profile;
 import org.codehaus.plexus.component.annotations.Component;
+import org.codehaus.plexus.component.annotations.Requirement;
 import org.commonjava.maven.atlas.ident.ref.ArtifactRef;
 import org.commonjava.maven.atlas.ident.ref.ProjectRef;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
@@ -25,14 +26,15 @@ import org.commonjava.maven.atlas.ident.ref.TypeAndClassifier;
 import org.commonjava.maven.ext.manip.ManipulationException;
 import org.commonjava.maven.ext.manip.ManipulationSession;
 import org.commonjava.maven.ext.manip.model.Project;
+import org.commonjava.maven.ext.manip.rest.DefaultVersionTranslator;
+import org.commonjava.maven.ext.manip.rest.VersionTranslator;
 import org.commonjava.maven.ext.manip.state.DependencyRESTState;
 import org.commonjava.maven.ext.manip.state.State;
 import org.commonjava.maven.ext.manip.state.VersioningState;
-import org.commonjava.maven.ext.manip.rest.DefaultVersionTranslator;
-import org.commonjava.maven.ext.manip.rest.VersionTranslator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -43,7 +45,10 @@ import java.util.Properties;
 import java.util.Set;
 
 /**
- * Wraps DependencyManipulator and VersioningManipulator so we can batch the what-do-we-need-to-change to the REST Client.
+ * This Manipulator runs first. It makes a REST call to an external service to load the GAVs to align the project version
+ * and dependencies to.
+ * It utilises the majority of the CommonDependencyManipulation code to change the dependencies and injects the Project GA versions
+ * into the VersioningState in case the VersioningManipulator has been activated.
  */
 @Component( role = Manipulator.class, hint = "dependency-rest-manipulator" )
 public class DependencyRESTManipulator
@@ -54,10 +59,12 @@ public class DependencyRESTManipulator
 
     private VersionTranslator restEndpoint;
 
+    private Map<ProjectVersionRef, String> restResult = new HashMap<ProjectVersionRef, String>();
+    private ArrayList<ProjectVersionRef> restParam = new ArrayList<ProjectVersionRef>();
+
     private Set<ArtifactRef> localDeps = new HashSet<ArtifactRef>();
     private ProjectVersionRef projVersion;
 
-    private final Map<ProjectVersionRef, String> projectVersionsByGAV = new HashMap<ProjectVersionRef, String>();
 
     protected DependencyRESTManipulator()
     {
@@ -68,16 +75,13 @@ public class DependencyRESTManipulator
     {
         final Properties userProps = session.getUserProperties();
         DependencyRESTState state = new DependencyRESTState( userProps );
+        session.setState( state );
 
         restEndpoint = new DefaultVersionTranslator( state.getRESTURL() );
-
-        session.setState( state );
     }
 
     /**
-     * Use the {@link VersionCalculator} to calculate any project version changes, and store them in the {@link VersioningState} that was associated
-     * with the {@link ManipulationSession} via the {@link DependencyRESTManipulator#init(ManipulationSession)}
-     * method.
+     * Prescans the Project to build up a list of Project GAs and also the various Dependencies.
      */
     @Override
     public void scan( final List<Project> projects, final ManipulationSession session )
@@ -91,29 +95,15 @@ public class DependencyRESTManipulator
             return;
         }
 
-        // Get the rest endpoint for versiontranslator from the state and initialise it.
-
-        // We need to find the current ProjectVersion and the versions of all Dependencies.
-
-        // Need a better way than current api
-        // https://github.com/VaclavDedik/maven-tooling-rest-client/blob/master/src/main/java/org/commonjava/maven/ext/rest/DefaultVersionTranslator.java
-        // to return the information.
-        //
-        // It might be useful to implement https://github.com/release-engineering/pom-manipulation-ext/issues/33 and use ProjectRef everywhere or ProjectVersionRef
-        // to avoid Map<String,String> usage.
-        //
-        // Note that simply returning the new ProjectVersionRefs is not sufficient - as we can't map from old:new (can't guarantee the list is in predictable
-        // order for instance).
-        // Maybe provide storage within the class and Map<ProjectVersionRef,ProjectVersionRef> for old->new
-        //
-        // Note current DependencyManipulator loads ProjectRef,NewVersion from the BOM i.e. source for mapping is versionless.
-
+        // Iterate over current project set and populate list of dependencies and project GAs.
         for ( final Project project : projects )
         {
-            if ( project.isInheritanceRoot() )
+            if (project.isInheritanceRoot())
             {
                 projVersion = project.getKey();
             }
+            // TODO: Check this : For the rest API I think we need to check every project GA not just inheritance root.
+            restParam.add( project.getKey() );
 
             recordDependencies( projects, localDeps, project.getManagedDependencies() );
             recordDependencies( projects, localDeps, project.getDependencies() );
@@ -132,27 +122,39 @@ public class DependencyRESTManipulator
             }
         }
 
-
-        if ( projVersion == null )
-        {
-            throw new ManipulationException( "Unable to locate inheritance root POM file " );
-        }
-
         // Ok we now have a defined list of top level project plus a unique list of all possible dependencies.
         // Need to send that to the rest interface to get a translation.
 
         if ( logger.isDebugEnabled() )
         {
-            logger.debug( "Top level project version is " + projVersion );
-            logger.debug( "Dependencies are " + localDeps );
+            logger.debug( "Project GA and Dependencies are " + localDeps );
         }
 
-        //### Render into OSGi format.
-        //### projVersion = new ProjectVersionRef( projVersion.getGroupId(), projVersion.getArtifactId(),
-        //###                                  new Version( projVersion.getVersionString() ).getOSGiVersionString() );
+        // Call the REST to populate the result.
+        restResult = (Map<ProjectVersionRef, String>) load ( state, session );
 
-        System.out.println( "Top level project version is " + projVersion );
-        System.out.println( "Dependencies are " + localDeps );
+        // Parse the rest result for the project GAs and store them in versioning state for use
+        // there by incremental suffix calculation.
+        Map<ProjectRef, Set<String>> versionStates = new HashMap<ProjectRef, Set<String>>();
+        for ( final Project p : projects )
+        {
+            if ( restResult.containsKey( p.getKey() ) )
+            {
+                // Found part of the current project to store in Versioning State
+                Set<String> versions = versionStates.get( p.getKey().asProjectRef() );
+                if (versions == null)
+                {
+                    versions = new HashSet<String>();
+                    versionStates.put( p.getKey().asProjectRef(), versions );
+                }
+                versions.add( restResult.get( p.getKey() ) );
+            }
+        }
+        logger.debug ("Added the following ProjectRef:Version into VersionState" + versionStates);
+        final VersioningState vs = session.getState( VersioningState.class );
+        vs.setRESTMetadata (versionStates);
+
+        logger.debug ("Rest result is " + restResult);
     }
 
     /**
@@ -173,36 +175,19 @@ public class DependencyRESTManipulator
         }
 
         final Map<ArtifactRef, String> overrides = new HashMap<ArtifactRef, String>( );
-        Map<ProjectVersionRef, String> remote = (Map<ProjectVersionRef, String>) load ( state, session );
-        String newProjectVersion = remote.get (projVersion);
-        // TODO: handle the resulting projectversion. If its null its the first redhat-x increment. Otherwise we
-        // need to use the VersionCalculator to increment and build the next one.
-        if (newProjectVersion == null)
-        {
-            // ### newProjectVersion = new Version( projVersion.getVersionString() ).getOSGiVersionString() );
-        }
 
         // Convert the loaded remote ProjectVersionRefs to the original ArtifactRefs
         for (ArtifactRef a : localDeps)
         {
-            if (remote.containsKey( a.asProjectVersionRef() ))
+            logger.debug ("### Searching localDeps " + a );
+            if (restResult.containsKey( a.asProjectVersionRef() ))
             {
-                logger.debug ("### localDeps has " + remote.get(a.asProjectVersionRef()));
-                overrides.put( a, remote.get( a.asProjectVersionRef()));
+                logger.debug ("### restResult has " + restResult.get(a.asProjectVersionRef()));
+                overrides.put( a, restResult.get( a.asProjectVersionRef()));
             }
         }
-        // Store list of all possible project GAV with new project version
-        for (Project p : projects)
-        {
-            projectVersionsByGAV.put (p.getKey(), newProjectVersion);
-        }
-        // Call versioning code to convert project versions
-        for (Project p : projects)
-        {
-            // applyVersioningChanges projectVersionsByGAV
-        }
 
-        logger.info( "###*** applyChanges for " + this.getClass() );
+        logger.info( "### Calling internalApplyChanges with " + overrides );
         Set<Project> changed = internalApplyChanges( projects, session, overrides );
         logger.info( "###*** applyChanges get " + changed );
 
@@ -213,9 +198,24 @@ public class DependencyRESTManipulator
     public Map<? extends ProjectRef, String> load ( final State state, final ManipulationSession session )
             throws ManipulationException
     {
-        final Map<ProjectVersionRef, String> result = new HashMap<ProjectVersionRef, String>();
+        for ( ArtifactRef p : localDeps)
+        {
+            restParam.add( p.asProjectVersionRef() );
+        }
+
         // ############# SIMULATE REST CALL-------> <---------
-        result.put( projVersion, projVersion.getVersionString() );
+        final Map<ProjectVersionRef, String> result = new HashMap<ProjectVersionRef, String>();
+
+        logger.debug ("### Calling rest implementation with " + projVersion + " and restParam " + restParam);
+
+        List<ProjectVersionRef> oldstylerestresult = restEndpoint.translateVersions( projVersion, restParam );
+        int index = 0;
+        for (ProjectVersionRef rp : restParam)
+        {
+            result.put( rp, oldstylerestresult.get( index++ ).getVersionString() );
+        }
+/*
+//###        result.put( projVersion, projVersion.getVersionString() );
         for ( ArtifactRef p : localDeps)
         {
             result.put ( p.asProjectVersionRef(), p.getVersionString());
@@ -223,14 +223,15 @@ public class DependencyRESTManipulator
         }
         logger.info ("### Returning result " + result);
         // ################################
-
+*/
         return result;
     }
 
     @Override
     public int getExecutionIndex()
     {
-        return 40;
+        // Low value index so it runs first in order to call the REST API.
+        return 10;
     }
 
 
@@ -292,8 +293,6 @@ public class DependencyRESTManipulator
                 throw new ManipulationException( "NYI : handling for versions (" + version
                                                                  + ") with multiple embedded properties is NYI. " );
             }
-            // TODO: handle the result
-
             for ( Project p : projects)
             {
                 if ( p.getModel().getProperties().containsKey (property) )
@@ -306,7 +305,6 @@ public class DependencyRESTManipulator
                     }
                 }
             }
-
         }
         return result;
     }

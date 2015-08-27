@@ -152,6 +152,6 @@ public class PropertyManipulator
     @Override
     public int getExecutionIndex()
     {
-        return 20;
+        return 30;
     }
 }
