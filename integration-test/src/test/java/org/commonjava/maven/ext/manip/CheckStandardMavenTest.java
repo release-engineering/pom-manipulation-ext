@@ -31,23 +31,24 @@ import static org.junit.Assert.assertTrue;
 public class CheckStandardMavenTest
 {
     @Rule
-    public TemporaryFolder folder= new TemporaryFolder();
+    public TemporaryFolder folder = new TemporaryFolder();
 
     @Test
-    public void verifyMavenWithExtensions() throws Exception
+    public void verifyMavenWithExtensions()
+        throws Exception
     {
         File tmpFolder = folder.newFolder();
 
-        runMaven("-X install", DEFAULT_MVN_PARAMS, tmpFolder.toString());
+        runMaven( "-X install", DEFAULT_MVN_PARAMS, tmpFolder.toString() );
 
-        File []files = tmpFolder.listFiles();
+        File[] files = tmpFolder.listFiles();
 
-        assertTrue (files.length == 1);
-        assertTrue ("build.log".equals(files[0].getName()));
+        assertTrue( files.length == 1 );
+        assertTrue( "build.log".equals( files[0].getName() ) );
 
-        String contents = FileUtils.readFileToString(files[0]);
+        String contents = FileUtils.readFileToString( files[0] );
 
-        assertFalse("Native Maven should not have PME installed!",
-                contents.contains("Manipulation engine disabled. No project found."));
+        assertFalse( "Native Maven should not have PME installed!",
+                     contents.contains( "Manipulation engine disabled. No project found." ) );
     }
 }

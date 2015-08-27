@@ -31,14 +31,20 @@ import static org.junit.Assert.*;
 /**
  * @author vdedik@redhat.com
  */
-public class CliTestUtils {
-    public static final String BUILD_DIR = System.getProperty("buildDirectory");
-    public static final String MVN_LOCATION = System.getProperty("mavenLocation");
+public class CliTestUtils
+{
+    public static final String BUILD_DIR = System.getProperty( "buildDirectory" );
+
+    public static final String MVN_LOCATION = System.getProperty( "mavenLocation" );
+
     public static final String IT_LOCATION = BUILD_DIR + "/it-cli";
-    public static final String LOCAL_REPO = System.getProperty("localRepositoryPath");
-    public static final Map<String, String> DEFAULT_MVN_PARAMS = new HashMap<String, String>() {{
-        put("maven.repo.local", LOCAL_REPO);
-    }};
+
+    public static final String LOCAL_REPO = System.getProperty( "localRepositoryPath" );
+
+    public static final Map<String, String> DEFAULT_MVN_PARAMS = new HashMap<String, String>()
+    {{
+            put( "maven.repo.local", LOCAL_REPO );
+        }};
 
     /**
      * Run the same/similar execution to what invoker plugin would run.
@@ -46,40 +52,44 @@ public class CliTestUtils {
      * @param workingDir - Working directory where the invoker properties are.
      * @throws Exception
      */
-    public static void runLikeInvoker(String workingDir) throws Exception {
-        ExecutionParser executionParser = new DefaultExecutionParser(DefaultExecutionParser.DEFAULT_HANDLERS);
-        Collection<Execution> executions = executionParser.parse(workingDir);
+    public static void runLikeInvoker( String workingDir )
+        throws Exception
+    {
+        ExecutionParser executionParser = new DefaultExecutionParser( DefaultExecutionParser.DEFAULT_HANDLERS );
+        Collection<Execution> executions = executionParser.parse( workingDir );
 
         // Execute
-        for (Execution e : executions) {
+        for ( Execution e : executions )
+        {
             List<String> args = new ArrayList<String>();
-            args.add("-s");
-            args.add(getDefaultTestLocation("settings.xml"));
-            args.add("-d");
+            args.add( "-s" );
+            args.add( getDefaultTestLocation( "settings.xml" ) );
+            args.add( "-d" );
 
             // Run PME-Cli
-            Integer cliExitValue = runCli(args, e.getJavaParams(), e.getLocation());
+            Integer cliExitValue = runCli( args, e.getJavaParams(), e.getLocation() );
 
             // Run Maven
             Map<String, String> mavenParams = new HashMap<String, String>();
-            mavenParams.putAll(DEFAULT_MVN_PARAMS);
-            mavenParams.putAll(e.getJavaParams());
-            Integer mavenExitValue = runMaven(e.getMvnCommand(), mavenParams, e.getLocation());
+            mavenParams.putAll( DEFAULT_MVN_PARAMS );
+            mavenParams.putAll( e.getJavaParams() );
+            Integer mavenExitValue = runMaven( e.getMvnCommand(), mavenParams, e.getLocation() );
 
             // Test return codes
-            if (e.isSuccess()) {
-                assertEquals("PME-Cli exited with a non zero value.",
-                        Integer.valueOf(0), cliExitValue);
-                assertEquals("Maven exited with a non zero value.",
-                        Integer.valueOf(0), mavenExitValue);
-            } else {
-                assertTrue("Exit value of either PME-Cli or Maven must be non-zero.",
-                        cliExitValue != 0 || mavenExitValue != 0);
+            if ( e.isSuccess() )
+            {
+                assertEquals( "PME-Cli exited with a non zero value.", Integer.valueOf( 0 ), cliExitValue );
+                assertEquals( "Maven exited with a non zero value.", Integer.valueOf( 0 ), mavenExitValue );
+            }
+            else
+            {
+                assertTrue( "Exit value of either PME-Cli or Maven must be non-zero.",
+                            cliExitValue != 0 || mavenExitValue != 0 );
             }
         }
 
         // Verify
-        verify(workingDir);
+        verify( workingDir );
     }
 
     /**
@@ -90,8 +100,10 @@ public class CliTestUtils {
      * @return Exit value
      * @throws Exception
      */
-    public static Integer runCli(String workingDir) throws Exception{
-        return runCli(new ArrayList<String>(), workingDir);
+    public static Integer runCli( String workingDir )
+        throws Exception
+    {
+        return runCli( new ArrayList<String>(), workingDir );
     }
 
     /**
@@ -103,10 +115,12 @@ public class CliTestUtils {
      * @return Exit value
      * @throws Exception
      */
-    public static Integer runCli(List<String> args, String workingDir) throws Exception{
-        Properties testProperties = Utils.loadProps(workingDir + "/test.properties");
-        Map<String, String> javaParams = Utils.propsToMap(testProperties);
-        return runCli(args, javaParams, workingDir);
+    public static Integer runCli( List<String> args, String workingDir )
+        throws Exception
+    {
+        Properties testProperties = Utils.loadProps( workingDir + "/test.properties" );
+        Map<String, String> javaParams = Utils.propsToMap( testProperties );
+        return runCli( args, javaParams, workingDir );
     }
 
     /**
@@ -117,8 +131,10 @@ public class CliTestUtils {
      * @return Exit value
      * @throws Exception
      */
-    public static Integer runCli(Map<String, String> params, String workingDir) throws Exception {
-        return runCli(null, params, workingDir);
+    public static Integer runCli( Map<String, String> params, String workingDir )
+        throws Exception
+    {
+        return runCli( null, params, workingDir );
     }
 
     /**
@@ -130,14 +146,15 @@ public class CliTestUtils {
      * @return Exit value
      * @throws Exception
      */
-    public static Integer runCli(List<String> args, Map<String, String> params, String workingDir)
-            throws Exception {
-        String stringArgs = toArguments(args);
-        String stringParams = toJavaParams(params);
-        String command = String.format(
-                "java -jar %s/pom-manipulation-cli.jar %s %s", BUILD_DIR, stringParams, stringArgs);
+    public static Integer runCli( List<String> args, Map<String, String> params, String workingDir )
+        throws Exception
+    {
+        String stringArgs = toArguments( args );
+        String stringParams = toJavaParams( params );
+        String command =
+            String.format( "java -jar %s/pom-manipulation-cli.jar %s %s", BUILD_DIR, stringParams, stringArgs );
 
-        return runCommandAndWait(command, workingDir);
+        return runCommandAndWait( command, workingDir );
     }
 
     /**
@@ -148,8 +165,10 @@ public class CliTestUtils {
      * @return Exit value
      * @throws Exception
      */
-    public static Integer runMaven(String commands, String workingDir) throws Exception {
-        return runMaven(commands, null, workingDir);
+    public static Integer runMaven( String commands, String workingDir )
+        throws Exception
+    {
+        return runMaven( commands, null, workingDir );
     }
 
     /**
@@ -161,11 +180,13 @@ public class CliTestUtils {
      * @return Exit value
      * @throws Exception
      */
-    public static Integer runMaven(String commands, Map<String, String> params, String workingDir) throws Exception {
-        String stringParams = toJavaParams(params);
-        String commandMaven = String.format(MVN_LOCATION + "/bin/mvn %s %s ", commands, stringParams);
+    public static Integer runMaven( String commands, Map<String, String> params, String workingDir )
+        throws Exception
+    {
+        String stringParams = toJavaParams( params );
+        String commandMaven = String.format( MVN_LOCATION + "/bin/mvn %s %s ", commands, stringParams );
 
-        return runCommandAndWait(commandMaven, workingDir);
+        return runCommandAndWait( commandMaven, workingDir );
     }
 
     /**
@@ -174,15 +195,18 @@ public class CliTestUtils {
      * @param workingDir - Directory with verify.groovy script.
      * @throws Exception
      */
-    public static void verify(String workingDir) throws Exception{
-        File verify = new File(workingDir + "/verify.groovy");
-        if (!verify.isFile()) {
+    public static void verify( String workingDir )
+        throws Exception
+    {
+        File verify = new File( workingDir + "/verify.groovy" );
+        if ( !verify.isFile() )
+        {
             return;
         }
         Binding binding = new Binding();
-        binding.setVariable("basedir", workingDir);
-        GroovyScriptEngine engine = new GroovyScriptEngine(workingDir);
-        engine.run("verify.groovy", binding);
+        binding.setVariable( "basedir", workingDir );
+        GroovyScriptEngine engine = new GroovyScriptEngine( workingDir );
+        engine.run( "verify.groovy", binding );
     }
 
     /**
@@ -191,8 +215,9 @@ public class CliTestUtils {
      * @param test - Test name.
      * @return Default location of integration test, e.g. ~/pom-manipulation-ext/integration-test/target/it-cli/it-test
      */
-    public static String getDefaultTestLocation(String test) {
-        return String.format("%s/%s", IT_LOCATION, test);
+    public static String getDefaultTestLocation( String test )
+    {
+        return String.format( "%s/%s", IT_LOCATION, test );
     }
 
     /**
@@ -201,14 +226,17 @@ public class CliTestUtils {
      * @param params - Map of java parameters
      * @return - String of -D arguments
      */
-    public static String toJavaParams(Map<String, String> params) {
-        if (params == null) {
+    public static String toJavaParams( Map<String, String> params )
+    {
+        if ( params == null )
+        {
             return "";
         }
 
         String stringParams = "";
-        for (String key : params.keySet()) {
-            stringParams += String.format("-D%s=%s ", key, params.get(key));
+        for ( String key : params.keySet() )
+        {
+            stringParams += String.format( "-D%s=%s ", key, params.get( key ) );
         }
         return stringParams;
     }
@@ -219,18 +247,20 @@ public class CliTestUtils {
      * @param args - List of command line options with its arguments
      * @return - String of options with it's arguments
      */
-    public static String toArguments(List<String> args) {
-        if (args == null) {
+    public static String toArguments( List<String> args )
+    {
+        if ( args == null )
+        {
             return "";
         }
 
         String stringArgs = "";
-        for (String arg : args) {
-            stringArgs += String.format("%s ", arg);
+        for ( String arg : args )
+        {
+            stringArgs += String.format( "%s ", arg );
         }
         return stringArgs;
     }
-
 
     /**
      * Run command in another process and wait for it to finish.
@@ -240,22 +270,27 @@ public class CliTestUtils {
      * @return exit value.
      * @throws Exception
      */
-    public static Integer runCommandAndWait(String command, String workingDir) throws Exception {
-        Process proc = Runtime.getRuntime().exec(command, null, new File(workingDir));
-        File buildlog = new File(workingDir + "/build.log");
+    public static Integer runCommandAndWait( String command, String workingDir )
+        throws Exception
+    {
+        Process proc = Runtime.getRuntime().exec( command, null, new File( workingDir ) );
+        File buildlog = new File( workingDir + "/build.log" );
 
-        BufferedReader stdout = new BufferedReader(new InputStreamReader(proc.getInputStream()));
-        BufferedReader stderr = new BufferedReader(new InputStreamReader(proc.getErrorStream()));
-        PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter(buildlog, true)));
+        BufferedReader stdout = new BufferedReader( new InputStreamReader( proc.getInputStream() ) );
+        BufferedReader stderr = new BufferedReader( new InputStreamReader( proc.getErrorStream() ) );
+        PrintWriter out = new PrintWriter( new BufferedWriter( new FileWriter( buildlog, true ) ) );
 
         String line = null;
         String errline = null;
-        while ((line = stdout.readLine()) != null || (errline = stderr.readLine()) != null) {
-            if (line != null) {
-                out.println(line);
+        while ( ( line = stdout.readLine() ) != null || ( errline = stderr.readLine() ) != null )
+        {
+            if ( line != null )
+            {
+                out.println( line );
             }
-            if (errline != null) {
-                out.println(errline);
+            if ( errline != null )
+            {
+                out.println( errline );
             }
         }
 

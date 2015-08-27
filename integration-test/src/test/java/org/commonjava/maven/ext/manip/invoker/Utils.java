@@ -25,7 +25,8 @@ import java.util.Properties;
 /**
  * @author vdedik@redhat.com
  */
-public class Utils {
+public class Utils
+{
 
     /**
      * Loads *.properties file.
@@ -33,14 +34,19 @@ public class Utils {
      * @param filePath - File path of the *.properties file
      * @return Loaded properties
      */
-    public static Properties loadProps(String filePath) {
-        File propsFile = new File(filePath);
+    public static Properties loadProps( String filePath )
+    {
+        File propsFile = new File( filePath );
         Properties props = new Properties();
-        if (propsFile.isFile()) {
-            try {
-                FileInputStream fis = new FileInputStream(propsFile);
-                props.load(fis);
-            } catch (Exception e) {
+        if ( propsFile.isFile() )
+        {
+            try
+            {
+                FileInputStream fis = new FileInputStream( propsFile );
+                props.load( fis );
+            }
+            catch ( Exception e )
+            {
                 // ignore
             }
         }
@@ -48,10 +54,12 @@ public class Utils {
         return props;
     }
 
-    public static Map<String, String> propsToMap(Properties props) {
+    public static Map<String, String> propsToMap( Properties props )
+    {
         Map<String, String> map = new HashMap<String, String>();
-        for (Object p : props.keySet()) {
-            map.put((String) p, props.getProperty((String) p));
+        for ( Object p : props.keySet() )
+        {
+            map.put( (String) p, props.getProperty( (String) p ) );
         }
 
         return map;

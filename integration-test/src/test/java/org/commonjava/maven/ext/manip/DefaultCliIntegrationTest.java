@@ -27,31 +27,37 @@ import java.util.*;
 
 import static org.commonjava.maven.ext.manip.CliTestUtils.*;
 
-@SuppressWarnings("ConstantConditions")
-@RunWith(Parameterized.class)
-public class DefaultCliIntegrationTest {
-    private static final List<String> EXCLUDED_FILES = new ArrayList<String>() {{
-        add("setup");
-    }};
+@SuppressWarnings( "ConstantConditions" )
+@RunWith( Parameterized.class )
+public class DefaultCliIntegrationTest
+{
+    private static final List<String> EXCLUDED_FILES = new ArrayList<String>()
+    {{
+            add( "setup" );
+        }};
 
-    private static final Map<String, String> LOCATION_REWRITE = new HashMap<String, String>() {{
-        put("simple-numeric-directory-path", "simple-numeric-directory-path/parent");
-    }};
+    private static final Map<String, String> LOCATION_REWRITE = new HashMap<String, String>()
+    {{
+            put( "simple-numeric-directory-path", "simple-numeric-directory-path/parent" );
+        }};
 
-    @Parameters(name="{0}")
-    public static Collection<Object[]> getFiles() {
+    @Parameters( name = "{0}" )
+    public static Collection<Object[]> getFiles()
+    {
         Collection<Object[]> params = new ArrayList<Object[]>();
         // Hack to allow a single parameterized test to be run.
-        if ( System.getProperties().containsKey("cli-test"))
+        if ( System.getProperties().containsKey( "cli-test" ) )
         {
-            params.add (new Object[] { System.getProperty("cli-test") } );
+            params.add( new Object[] { System.getProperty( "cli-test" ) } );
         }
         else
         {
-            for (File rl : new File(IT_LOCATION).listFiles()) {
-                if (rl.isDirectory() && !EXCLUDED_FILES.contains(rl.getName())) {
+            for ( File rl : new File( IT_LOCATION ).listFiles() )
+            {
+                if ( rl.isDirectory() && !EXCLUDED_FILES.contains( rl.getName() ) )
+                {
                     Object[] arr = new Object[] { rl.getName() };
-                    params.add(arr);
+                    params.add( arr );
                 }
             }
         }
@@ -61,25 +67,32 @@ public class DefaultCliIntegrationTest {
 
     private String testRelativeLocation;
 
-    public DefaultCliIntegrationTest(String testRelativeLocation) {
+    public DefaultCliIntegrationTest( String testRelativeLocation )
+    {
         this.testRelativeLocation = testRelativeLocation;
     }
 
     @BeforeClass
-    public static void setUp() throws Exception {
-        for (File setupTest : new File(getDefaultTestLocation("setup")).listFiles()) {
-            runMaven("install", DEFAULT_MVN_PARAMS, setupTest.toString());
+    public static void setUp()
+        throws Exception
+    {
+        for ( File setupTest : new File( getDefaultTestLocation( "setup" ) ).listFiles() )
+        {
+            runMaven( "install", DEFAULT_MVN_PARAMS, setupTest.toString() );
         }
     }
 
     @Test
-    public void testIntegration() throws Exception {
+    public void testIntegration()
+        throws Exception
+    {
         String testRelativeLocation = this.testRelativeLocation;
-        if (LOCATION_REWRITE.containsKey(this.testRelativeLocation)) {
-            testRelativeLocation = LOCATION_REWRITE.get(this.testRelativeLocation);
+        if ( LOCATION_REWRITE.containsKey( this.testRelativeLocation ) )
+        {
+            testRelativeLocation = LOCATION_REWRITE.get( this.testRelativeLocation );
         }
 
-        String test = getDefaultTestLocation(testRelativeLocation);
-        runLikeInvoker(test);
+        String test = getDefaultTestLocation( testRelativeLocation );
+        runLikeInvoker( test );
     }
 }

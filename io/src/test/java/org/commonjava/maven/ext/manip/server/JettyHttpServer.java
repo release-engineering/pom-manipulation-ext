@@ -28,49 +28,64 @@ import org.slf4j.LoggerFactory;
 /**
  * @author vdedik@redhat.com
  */
-public class JettyHttpServer implements HttpServer {
-    private static final Logger LOGGER = LoggerFactory.getLogger(JettyHttpServer.class);
+public class JettyHttpServer
+    implements HttpServer
+{
+    private static final Logger LOGGER = LoggerFactory.getLogger( JettyHttpServer.class );
+
     public static final Integer DEFAULT_PORT = 8089;
 
     private Integer port;
+
     private final Server jettyServer;
+
     private Handler handler;
 
-    public JettyHttpServer(Handler handler) {
-        this(handler, DEFAULT_PORT);
+    public JettyHttpServer( Handler handler )
+    {
+        this( handler, DEFAULT_PORT );
     }
 
-    public JettyHttpServer(Handler handler, Integer port) {
+    public JettyHttpServer( Handler handler, Integer port )
+    {
         this.port = port;
         this.handler = handler;
-        this.jettyServer = createAndStartJetty(port);
+        this.jettyServer = createAndStartJetty( port );
     }
 
-    public Integer getPort() {
+    public Integer getPort()
+    {
         return this.port;
     }
 
-    public void shutdown() {
-        try {
+    public void shutdown()
+    {
+        try
+        {
             this.jettyServer.stop();
-        } catch (Exception e) {
-            throw new ServerInternalException("Error shutting down jetty", e);
+        }
+        catch ( Exception e )
+        {
+            throw new ServerInternalException( "Error shutting down jetty", e );
         }
     }
 
-    private Server createAndStartJetty(Integer port) {
+    private Server createAndStartJetty( Integer port )
+    {
         Server jetty = new Server();
         Connector conn = new SelectChannelConnector();
-        conn.setHost("127.0.0.1");
-        conn.setPort(this.port);
-        jetty.addConnector(conn);
-        jetty.setHandler(handler);
+        conn.setHost( "127.0.0.1" );
+        conn.setPort( this.port );
+        jetty.addConnector( conn );
+        jetty.setHandler( handler );
 
-        try {
+        try
+        {
             jetty.start();
-        }  catch (Exception e) {
-            throw new ServerSetupException(
-                    "Error starting jetty on port " + port, e);
+        }
+        catch ( Exception e )
+        {
+            throw new ServerSetupException( "Error starting jetty on port " + port, e );
         }
 
         return jetty;

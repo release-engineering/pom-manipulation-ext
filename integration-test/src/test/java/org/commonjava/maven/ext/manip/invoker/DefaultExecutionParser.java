@@ -21,73 +21,91 @@ import java.util.*;
 /**
  * @author vdedik@redhat.com
  */
-public class DefaultExecutionParser implements ExecutionParser {
-    public static final List<ExecutionParserHandler> DEFAULT_HANDLERS = new ArrayList<ExecutionParserHandler>() {{
-        add(ExecutionParser.BUILD_HANDLER);
-        add(ExecutionParser.BUILD_RESULT_HANDLER);
-        add(ExecutionParser.SYSTEM_PROPERTIES_HANDLER);
-    }};
+public class DefaultExecutionParser
+    implements ExecutionParser
+{
+    public static final List<ExecutionParserHandler> DEFAULT_HANDLERS = new ArrayList<ExecutionParserHandler>()
+    {{
+            add( ExecutionParser.BUILD_HANDLER );
+            add( ExecutionParser.BUILD_RESULT_HANDLER );
+            add( ExecutionParser.SYSTEM_PROPERTIES_HANDLER );
+        }};
 
     private List<ExecutionParserHandler> handlers;
 
-    public DefaultExecutionParser() {
-        this(new ArrayList<ExecutionParserHandler>());
+    public DefaultExecutionParser()
+    {
+        this( new ArrayList<ExecutionParserHandler>() );
     }
 
-    public DefaultExecutionParser(List<ExecutionParserHandler> handlers) {
+    public DefaultExecutionParser( List<ExecutionParserHandler> handlers )
+    {
         this.handlers = handlers;
     }
 
     @Override
-    public Collection<Execution> parse(String workingDir) {
-        final Properties invokerProperties = Utils.loadProps(workingDir + "/invoker.properties");
+    public Collection<Execution> parse( String workingDir )
+    {
+        final Properties invokerProperties = Utils.loadProps( workingDir + "/invoker.properties" );
         Map<Integer, Execution> executions = new TreeMap<Integer, Execution>();
 
-        for (Object rawKey : invokerProperties.keySet()) {
+        for ( Object rawKey : invokerProperties.keySet() )
+        {
             final String key = (String) rawKey;
-            String[] parts = key.split("\\.");
+            String[] parts = key.split( "\\." );
             Integer id;
-            try {
-                id = Integer.parseInt(parts[parts.length - 1]);
-            } catch (NumberFormatException e) {
+            try
+            {
+                id = Integer.parseInt( parts[parts.length - 1] );
+            }
+            catch ( NumberFormatException e )
+            {
                 id = 1;
             }
             Execution execution;
-            if (executions.containsKey(id)) {
-                execution = executions.get(id);
-            } else {
+            if ( executions.containsKey( id ) )
+            {
+                execution = executions.get( id );
+            }
+            else
+            {
                 // Create new execution
                 execution = new Execution();
-                execution.setLocation(workingDir);
+                execution.setLocation( workingDir );
             }
 
             // Run through all handlers
-            for (ExecutionParserHandler handler : handlers) {
-                handler.handle(execution, new HashMap<String, String>() {{
-                    put("key", key);
-                    put("value", invokerProperties.getProperty(key));
-                }});
+            for ( ExecutionParserHandler handler : handlers )
+            {
+                handler.handle( execution, new HashMap<String, String>()
+                {{
+                        put( "key", key );
+                        put( "value", invokerProperties.getProperty( key ) );
+                    }} );
             }
 
-            executions.put(id, execution);
+            executions.put( id, execution );
         }
-        if (invokerProperties.keySet().isEmpty()) {
+        if ( invokerProperties.keySet().isEmpty() )
+        {
             // by default do one execution (maven install)
             Execution execution = new Execution();
-            execution.setLocation(workingDir);
-            execution.setMvnCommand("install");
-            executions.put(1, execution);
+            execution.setLocation( workingDir );
+            execution.setMvnCommand( "install" );
+            executions.put( 1, execution );
         }
         // Run POST_HANDLER
-        for (Execution execution : executions.values()) {
-            ExecutionParser.POST_HANDLER.handle(execution, null);
+        for ( Execution execution : executions.values() )
+        {
+            ExecutionParser.POST_HANDLER.handle( execution, null );
         }
 
         return executions.values();
     }
 
     @Override
-    public void addHandler(ExecutionParserHandler handler) {
-        handlers.add(handler);
+    public void addHandler( ExecutionParserHandler handler )
+    {
+        handlers.add( handler );
     }
 }

@@ -8,7 +8,8 @@ import java.util.Map;
 /**
  * @author vdedik@redhat.com
  */
-public interface VersionTranslator {
+public interface VersionTranslator
+{
 
     /**
      * Executes HTTP request to a REST service that translates versions
@@ -16,6 +17,6 @@ public interface VersionTranslator {
      * @param projects - List of projects (GAVs)
      * @return Map of ProjectVersionRef objects as keys and translated versions as values
      */
-    Map<ProjectVersionRef, String> translateVersions(List<ProjectVersionRef> projects);
+    Map<ProjectVersionRef, String> translateVersions( List<ProjectVersionRef> projects );
 
 }

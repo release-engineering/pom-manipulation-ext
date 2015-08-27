@@ -21,41 +21,53 @@ import java.util.Map;
 /**
  * @author vdedik@redhat.com
  */
-public class Execution {
+public class Execution
+{
     private String mvnCommand;
+
     private String location;
+
     private Boolean success = true;
+
     private Map<String, String> javaParams;
 
-    public Map<String, String> getJavaParams() {
+    public Map<String, String> getJavaParams()
+    {
         return javaParams;
     }
 
-    public void setJavaParams(Map<String, String> javaParams) {
+    public void setJavaParams( Map<String, String> javaParams )
+    {
         this.javaParams = javaParams;
     }
 
-    public String getLocation() {
+    public String getLocation()
+    {
         return location;
     }
 
-    public void setLocation(String location) {
+    public void setLocation( String location )
+    {
         this.location = location;
     }
 
-    public String getMvnCommand() {
+    public String getMvnCommand()
+    {
         return mvnCommand;
     }
 
-    public void setMvnCommand(String mvnCommand) {
+    public void setMvnCommand( String mvnCommand )
+    {
         this.mvnCommand = mvnCommand;
     }
 
-    public Boolean isSuccess() {
+    public Boolean isSuccess()
+    {
         return success;
     }
 
-    public void setSuccess(Boolean success) {
+    public void setSuccess( Boolean success )
+    {
         this.success = success;
     }
 }

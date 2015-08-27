@@ -33,77 +33,96 @@ import java.io.IOException;
 /**
  * @author vdedik@redhat.com
  */
-public class AddSuffixJettyHandler extends AbstractHandler implements Handler {
-    private static final Logger LOGGER = LoggerFactory.getLogger(AddSuffixJettyHandler.class);
+public class AddSuffixJettyHandler
+                extends AbstractHandler
+                implements Handler
+{
+    private static final Logger LOGGER = LoggerFactory.getLogger( AddSuffixJettyHandler.class );
+
     private static final String DEFAULT_ENDPOINT = "/";
+
     private static final String DEFAULT_METHOD = "POST";
+
     private static final String DEFAULT_SUFFIX = "redhat-1";
 
     private final String endpoint;
+
     private final String method;
+
     private final String suffix;
 
-    public AddSuffixJettyHandler() {
-        this(DEFAULT_ENDPOINT, DEFAULT_METHOD, DEFAULT_SUFFIX);
+    public AddSuffixJettyHandler()
+    {
+        this( DEFAULT_ENDPOINT, DEFAULT_METHOD, DEFAULT_SUFFIX );
     }
 
-    public AddSuffixJettyHandler(String endpoint, String method, String suffix) {
+    public AddSuffixJettyHandler( String endpoint, String method, String suffix )
+    {
         this.endpoint = endpoint;
         this.method = method;
         this.suffix = suffix;
     }
 
-    @Override
-    public void handle(String target, Request baseRequest, HttpServletRequest request, HttpServletResponse response)
-            throws IOException, ServletException {
+    @Override public void handle( String target, Request baseRequest, HttpServletRequest request,
+                                  HttpServletResponse response )
+                    throws IOException, ServletException
+    {
 
-        LOGGER.info("Handling: {} {}", request.getMethod(), request.getPathInfo());
+        LOGGER.info( "Handling: {} {}", request.getMethod(), request.getPathInfo() );
 
-        if (target.equals(this.endpoint) && request.getMethod().equals(this.method)) {
-            LOGGER.info("Handling with AddSuffixJettyHandler");
+        if ( target.equals( this.endpoint ) && request.getMethod().equals( this.method ) )
+        {
+            LOGGER.info( "Handling with AddSuffixJettyHandler" );
 
             // Get Request Body
             StringBuffer jb = new StringBuffer();
             String line = null;
             JSONArray requestBody = null;
-            try {
+            try
+            {
                 BufferedReader reader = request.getReader();
-                while ((line = reader.readLine()) != null) {
-                    jb.append(line);
+                while ( ( line = reader.readLine() ) != null )
+                {
+                    jb.append( line );
                 }
 
-                requestBody = new JSONArray(jb.toString());
-            } catch (Exception e) {
-                LOGGER.warn("Error reading request body. {}", e.getMessage());
+                requestBody = new JSONArray( jb.toString() );
+            }
+            catch ( Exception e )
+            {
+                LOGGER.warn( "Error reading request body. {}", e.getMessage() );
                 return;
             }
 
             // Prepare Response
             JSONArray responseBody = new JSONArray();
-            for (Integer i = 0; i < requestBody.length(); i++) {
-                JSONObject gav = requestBody.getJSONObject(i);
-                String version = gav.getString("version");
+            for ( Integer i = 0; i < requestBody.length(); i++ )
+            {
+                JSONObject gav = requestBody.getJSONObject( i );
+                String version = gav.getString( "version" );
                 JSONArray availableVersions = new JSONArray();
                 String bestMatchVersion = version + "-" + this.suffix;
-                availableVersions.put(bestMatchVersion);
+                availableVersions.put( bestMatchVersion );
 
-                gav.put("bestMatchVersion", bestMatchVersion);
-                gav.put("whitelisted", false);
-                gav.put("blacklisted", false);
-                gav.put("availableVersions", availableVersions);
+                gav.put( "bestMatchVersion", bestMatchVersion );
+                gav.put( "whitelisted", false );
+                gav.put( "blacklisted", false );
+                gav.put( "availableVersions", availableVersions );
 
-                responseBody.put(gav);
+                responseBody.put( gav );
             }
 
             // Set Response
-            response.setContentType("application/json;charset=utf-8");
-            response.setStatus(HttpServletResponse.SC_OK);
-            baseRequest.setHandled(true);
-            response.getWriter().println(responseBody.toString());
-        } else {
-            LOGGER.info("Handling: {} {} with AddSuffixJettyHandler failed," +
-                            " because expected method was {} and endpoint {}",
-                    request.getMethod(), request.getPathInfo(), this.method, this.endpoint);
+            response.setContentType( "application/json;charset=utf-8" );
+            response.setStatus( HttpServletResponse.SC_OK );
+            baseRequest.setHandled( true );
+            response.getWriter().println( responseBody.toString() );
+        }
+        else
+        {
+            LOGGER.info( "Handling: {} {} with AddSuffixJettyHandler failed,"
+                                         + " because expected method was {} and endpoint {}", request.getMethod(),
+                         request.getPathInfo(), this.method, this.endpoint );
         }
     }
 }

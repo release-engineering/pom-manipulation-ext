@@ -24,25 +24,31 @@ import org.junit.rules.ExternalResource;
 /**
  * @author vdedik@redhat.com
  */
-public class MockServer extends ExternalResource {
+public class MockServer
+    extends ExternalResource
+{
 
     private HttpServer httpServer;
 
     @Override
-    public void before() {
-        httpServer = new JettyHttpServer(new AddSuffixJettyHandler());
+    public void before()
+    {
+        httpServer = new JettyHttpServer( new AddSuffixJettyHandler() );
     }
 
     @Override
-    public void after() {
+    public void after()
+    {
         httpServer.shutdown();
     }
 
-    public String getUrl() {
+    public String getUrl()
+    {
         return "http://127.0.0.1:" + getPort();
     }
 
-    public Integer getPort() {
+    public Integer getPort()
+    {
         return httpServer.getPort();
     }
 }
