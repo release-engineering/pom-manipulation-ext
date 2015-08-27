@@ -51,4 +51,18 @@ public class MockServer
     {
         return httpServer.getPort();
     }
+
+    public static void main( String[] args )
+    {
+        final MockServer ms = new MockServer();
+        ms.before();
+        Runtime.getRuntime().addShutdownHook(new Thread(){
+            @Override
+            public void run()
+            {
+                System.out.println ("Shutting down JettyServer");
+                ms.after();
+            }
+        });
+    }
 }

@@ -35,6 +35,12 @@
       <artifactId>pom-manipulation-ext</artifactId>
     </dependency>
     <dependency>
+      <groupId>org.commonjava.maven.ext</groupId>
+      <artifactId>pom-manipulation-io</artifactId>
+      <type>test-jar</type>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
     </dependency>
@@ -51,6 +57,11 @@
       <artifactId>apache-maven</artifactId>
       <type>zip</type>
       <classifier>bin</classifier>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.jetty</groupId>
+      <artifactId>jetty-server</artifactId>
       <scope>test</scope>
     </dependency>
   </dependencies>

@@ -16,9 +16,8 @@
 
 package org.commonjava.maven.ext.manip;
 
-import org.commonjava.maven.ext.manip.rest.MockVersionTranslator;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
+import org.commonjava.maven.ext.manip.rest.rule.MockServer;
+import org.junit.ClassRule;
 import org.junit.Test;
 
 import static org.commonjava.maven.ext.manip.CliTestUtils.getDefaultTestLocation;
@@ -26,17 +25,8 @@ import static org.commonjava.maven.ext.manip.CliTestUtils.runLikeInvoker;
 
 public class RESTIntegrationTest
 {
-    private static MockVersionTranslator versionTranslator;
-
-    @BeforeClass
-    public static void startUp() {
-        versionTranslator = new MockVersionTranslator();
-    }
-
-    @AfterClass
-    public static void tearDown() {
-        versionTranslator.shutdownMockServer();
-    }
+    @ClassRule
+    public static MockServer mockServer = new MockServer();
 
     @Test
     public void testIntegration() throws Exception
