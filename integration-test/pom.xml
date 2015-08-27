@@ -118,7 +118,6 @@
       <plugin>
         <groupId>com.soebes.maven.plugins</groupId>
         <artifactId>iterator-maven-plugin</artifactId>
-        <version>0.3</version>
         <executions>
           <execution>
             <phase>process-test-resources</phase>
