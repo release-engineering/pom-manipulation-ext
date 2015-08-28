@@ -29,9 +29,16 @@ public class RESTIntegrationTest
     public static MockServer mockServer = new MockServer();
 
     @Test
-    public void testIntegration() throws Exception
+    public void testRESTVersionDepManip() throws Exception
     {
         String test = getDefaultTestLocation( "rest-dependency-version-manip-child-module" );
+        runLikeInvoker( test );
+    }
+
+    @Test
+    public void testRESTVersionManip() throws Exception
+    {
+        String test = getDefaultTestLocation( "rest-version-manip-only" );
         runLikeInvoker( test );
     }
 }
