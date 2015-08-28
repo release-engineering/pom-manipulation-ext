@@ -148,8 +148,6 @@ public class DependencyRESTManipulator
         logger.debug ("Added the following ProjectRef:Version into VersionState" + versionStates);
         final VersioningState vs = session.getState( VersioningState.class );
         vs.setRESTMetadata (versionStates);
-
-        logger.debug ("Rest result is " + restResult);
     }
 
     /**
@@ -198,11 +196,9 @@ public class DependencyRESTManipulator
             restParam.add( p.asProjectVersionRef() );
         }
 
-        logger.debug ("### Calling rest implementation with restParam " + restParam);
-
+        logger.debug ("Calling REST client api with {} ", restParam);
         final Map<ProjectVersionRef, String> result = restEndpoint.translateVersions( restParam );
-
-        logger.debug ("### Got back from rest " + result);
+        logger.debug ("REST Client returned {} ", result);
 
         return result;
     }
@@ -244,7 +240,6 @@ public class DependencyRESTManipulator
             {
                 deps.add( new ArtifactRef( new ProjectVersionRef( d.getGroupId(), d.getArtifactId(),
                                                                   resolveProperties ( projects, d.getVersion())),
-//###                                                                  new Version( resolveProperties ( projects, d.getVersion()) ).getOSGiVersionString()),
                                            new TypeAndClassifier( d.getType(), d.getClassifier() ), Boolean.parseBoolean( d.getOptional())));
             }
         }

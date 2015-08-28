@@ -422,13 +422,10 @@ public class Version
 
     public String getOSGiVersionString()
     {
-        System.out.println ("### isValidOSGI " + isValidOSGi() + " and qualifier " + !hasQualifier());
         if ( isValidOSGi() && !hasQualifier() )
         {
             return originalVersion;
         }
-        System.out.println ("### numericVersion " + numericVersion);
-
         StringBuilder osgiVersion = new StringBuilder();
         if ( numericVersion )
         {

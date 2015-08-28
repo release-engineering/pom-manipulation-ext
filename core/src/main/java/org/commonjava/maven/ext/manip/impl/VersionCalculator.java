@@ -196,15 +196,13 @@ public class VersionCalculator
             // Find matching version strings in the remote repo and increment to the next
             // available version
             final Set<String> versionCandidates = new HashSet<String>();
-            // TODO ############ Version candidates needs to change - if xxxx is set in VersioningState get value from that else
-            // call getmetadataversions
+
             Map<ProjectRef, Set<String>> rm = state.getRESTMetadata();
             if ( rm != null)
             {
-                logger.debug ("### VersionCalculator has " + rm);
+                // If the REST Client has prepopulated incremental data use that instead of the examining the repository.
                 if (rm.size() > 0)
                 {
-                    logger.debug( "### VersionCalculator state rest metadata has " + rm.get( new ProjectRef( groupId, artifactId ) ) );
                     // Use preloaded metadata from remote repository, loaded via a REST Call.
                     versionCandidates.addAll( rm.get( new ProjectRef( groupId, artifactId ) ) );
                 }
@@ -214,8 +212,6 @@ public class VersionCalculator
                 // Load metadata from local repository
                 versionCandidates.addAll( getMetadataVersions( groupId, artifactId ) );
             }
-            logger.debug ("### Version candidates is now " + versionCandidates);
-
             versionObj.appendQualifierSuffix( incrementalSuffix );
             int highestRemoteBuildNum = versionObj.findHighestMatchingBuildNumber( versionObj, versionCandidates );
             ++highestRemoteBuildNum;

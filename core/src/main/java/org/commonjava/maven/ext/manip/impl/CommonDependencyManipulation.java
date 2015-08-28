@@ -21,8 +21,6 @@ import org.apache.maven.model.Model;
 import org.commonjava.maven.atlas.ident.ref.ArtifactRef;
 import org.commonjava.maven.atlas.ident.ref.InvalidRefException;
 import org.commonjava.maven.atlas.ident.ref.ProjectRef;
-import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
-import org.commonjava.maven.atlas.ident.ref.VersionlessArtifactRef;
 import org.commonjava.maven.ext.manip.ManipulationException;
 import org.commonjava.maven.ext.manip.ManipulationSession;
 import org.commonjava.maven.ext.manip.model.Project;
@@ -56,7 +54,7 @@ abstract public class CommonDependencyManipulation implements RemoteDependencies
     protected final Logger logger = LoggerFactory.getLogger( getClass() );
 
     /**
-     * Used to store mappings of old property -> new version.
+     * Used to store mappings of old property to new version.
      */
     protected final HashMap<String, String> versionPropertyUpdateMap = new HashMap<String, String>();
 

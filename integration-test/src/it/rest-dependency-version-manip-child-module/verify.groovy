@@ -28,14 +28,13 @@ System.out.println( "POM Child Version: ${pomChild.version.text()}" )
 assert pomChild.parent.version.text().endsWith( '.rebuild-1' )
 
 // Currently the AddSuffixJettyHandler doesn't do OSGi compatibility.
-/*
 def dependency = pom.dependencyManagement.dependencies.dependency.find { it.artifactId.text() == "commons-lang" }
 assert dependency != null
 assert dependency.version.text() == "1.0-redhat-1"
 
-def junitDependency = pom.dependencies.dependency.find { it.artifactId.text() == "errai-common" }
+dependency = pom.dependencies.dependency.find { it.artifactId.text() == "errai-common" }
 assert dependency != null
-assert dependency.version.text() == "1.1.Final"
+assert dependency.version.text() == "1.1-Final-redhat-1"
 
 def passed = false
 pom.properties.each {
@@ -46,7 +45,13 @@ pom.properties.each {
 }
 assert (passed == true)
 
-def childDependency = pomChild.dependencyManagement.dependencies.dependency.find { it.artifactId.text() == "junit" }
-assert childDependency != null
-assert childDependency.version.text() == "4.1-redhat-1"
+dependency = pomChild.dependencyManagement.dependencies.dependency.find { it.artifactId.text() == "junit" }
+assert dependency != null
+assert dependency.version.text() == "4.1-redhat-1"
+
+/*
+ Currently dependency replacement is not handling multiple GA with different V in different modules.
+dependency = pomChild.dependencyManagement.dependencies.dependency.find { it.artifactId.text() == "commons-lang" }
+assert dependency != null
+assert dependency.version.text() == "2.6-redhat-1"
 */

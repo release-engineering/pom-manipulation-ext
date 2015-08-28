@@ -178,7 +178,6 @@ public class ProjectVersioningManipulator
         }
 
         logger.info( "Looking for applicable versioning changes in: " + gav( model ) );
-        logger.info("###$$$ versionsByGAV contains " + versionsByGAV);
 
         String g = model.getGroupId();
         String v = model.getVersion();
