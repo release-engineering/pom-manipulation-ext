@@ -16,11 +16,10 @@
 
 package org.commonjava.maven.ext.manip.rest.handler;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.handler.AbstractHandler;
-import org.json.JSONArray;
-import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,10 +28,14 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author vdedik@redhat.com
  */
+@SuppressWarnings( "unchecked" )
 public class AddSuffixJettyHandler
                 extends AbstractHandler
                 implements Handler
@@ -50,6 +53,8 @@ public class AddSuffixJettyHandler
     private final String method;
 
     private final String suffix;
+
+    private ObjectMapper objectMapper = new ObjectMapper();
 
     public AddSuffixJettyHandler()
     {
@@ -76,17 +81,15 @@ public class AddSuffixJettyHandler
 
             // Get Request Body
             StringBuffer jb = new StringBuffer();
-            String line = null;
-            JSONArray requestBody = null;
             try
             {
+                String line;
                 BufferedReader reader = request.getReader();
                 while ( ( line = reader.readLine() ) != null )
                 {
                     jb.append( line );
                 }
 
-                requestBody = new JSONArray( jb.toString() );
             }
             catch ( Exception e )
             {
@@ -94,29 +97,30 @@ public class AddSuffixJettyHandler
                 return;
             }
 
+            List<Map<String, Object>> requestBody = objectMapper.readValue( jb.toString(), List.class );
+
             // Prepare Response
-            JSONArray responseBody = new JSONArray();
-            for ( Integer i = 0; i < requestBody.length(); i++ )
+            List<Map<String, Object>> responseBody = new ArrayList<Map<String, Object>>();
+            for ( Map<String, Object> gav : requestBody)
             {
-                JSONObject gav = requestBody.getJSONObject( i );
-                String version = gav.getString( "version" );
-                JSONArray availableVersions = new JSONArray();
+                String version = (String) gav.get( "version" );
+                List<String> availableVersions = new ArrayList<String>();
                 String bestMatchVersion = version + "-" + this.suffix;
-                availableVersions.put( bestMatchVersion );
+                availableVersions.add( bestMatchVersion );
 
                 gav.put( "bestMatchVersion", bestMatchVersion );
                 gav.put( "whitelisted", false );
                 gav.put( "blacklisted", false );
                 gav.put( "availableVersions", availableVersions );
 
-                responseBody.put( gav );
+                responseBody.add( gav );
             }
 
             // Set Response
             response.setContentType( "application/json;charset=utf-8" );
             response.setStatus( HttpServletResponse.SC_OK );
             baseRequest.setHandled( true );
-            response.getWriter().println( responseBody.toString() );
+            response.getWriter().println( objectMapper.writeValueAsString( responseBody ) );
         }
         else
         {

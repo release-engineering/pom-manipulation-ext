@@ -1,16 +1,17 @@
 package org.commonjava.maven.ext.manip.rest;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mashape.unirest.http.Unirest;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.ext.manip.rest.exception.RestException;
 import org.commonjava.maven.ext.manip.rest.rule.MockServer;
-import org.json.JSONArray;
-import org.json.JSONObject;
 import org.junit.*;
 
 import static org.junit.Assert.*;
 import static org.hamcrest.CoreMatchers.*;
 
+import java.io.IOException;
 import java.util.*;
 
 /**
@@ -27,18 +28,19 @@ public class DefaultVersionTranslatorTest
 
     @BeforeClass
     public static void startUp()
+        throws IOException
     {
         aLotOfGavs = new ArrayList<ProjectVersionRef>();
         String longJsonFile = readFileFromClasspath( "example-response-performance-test.json" );
-        JSONArray jsonGavs = new JSONArray( longJsonFile );
-        for ( Integer i = 0; i < jsonGavs.length(); i++ )
-        {
-            JSONObject jsonGav = jsonGavs.getJSONObject( i );
 
-            ProjectVersionRef gav =
-                new ProjectVersionRef( jsonGav.getString( "groupId" ), jsonGav.getString( "artifactId" ),
-                                       jsonGav.getString( "version" ) );
-            aLotOfGavs.add( gav );
+        ObjectMapper objectMapper = new ObjectMapper();
+        List<Map<String, String>> gavs = objectMapper.readValue(
+            longJsonFile, new TypeReference<List<Map<String, String>>>() {} );
+        for ( Map<String, String> gav : gavs )
+        {
+            ProjectVersionRef project =
+                new ProjectVersionRef( gav.get( "groupId" ), gav.get( "artifactId" ), gav.get( "version" ) );
+            aLotOfGavs.add( project );
         }
     }
 
