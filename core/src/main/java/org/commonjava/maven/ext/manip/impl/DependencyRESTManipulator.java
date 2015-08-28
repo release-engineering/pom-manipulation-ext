@@ -63,7 +63,6 @@ public class DependencyRESTManipulator
     private ArrayList<ProjectVersionRef> restParam = new ArrayList<ProjectVersionRef>();
 
     private Set<ArtifactRef> localDeps = new HashSet<ArtifactRef>();
-    private ProjectVersionRef projVersion;
 
 
     protected DependencyRESTManipulator()
@@ -98,10 +97,6 @@ public class DependencyRESTManipulator
         // Iterate over current project set and populate list of dependencies and project GAs.
         for ( final Project project : projects )
         {
-            if (project.isInheritanceRoot())
-            {
-                projVersion = project.getKey();
-            }
             // TODO: Check this : For the rest API I think we need to check every project GA not just inheritance root.
             restParam.add( project.getKey() );
 
@@ -203,27 +198,12 @@ public class DependencyRESTManipulator
             restParam.add( p.asProjectVersionRef() );
         }
 
-        // ############# SIMULATE REST CALL-------> <---------
-        final Map<ProjectVersionRef, String> result = new HashMap<ProjectVersionRef, String>();
+        logger.debug ("### Calling rest implementation with restParam " + restParam);
 
-        logger.debug ("### Calling rest implementation with " + projVersion + " and restParam " + restParam);
+        final Map<ProjectVersionRef, String> result = restEndpoint.translateVersions( restParam );
 
-        List<ProjectVersionRef> oldstylerestresult = restEndpoint.translateVersions( projVersion, restParam );
-        int index = 0;
-        for (ProjectVersionRef rp : restParam)
-        {
-            result.put( rp, oldstylerestresult.get( index++ ).getVersionString() );
-        }
-/*
-//###        result.put( projVersion, projVersion.getVersionString() );
-        for ( ArtifactRef p : localDeps)
-        {
-            result.put ( p.asProjectVersionRef(), p.getVersionString());
-//###                            p.asVersionlessArtifactRef( p.getTypeAndClassifier(), p.isOptional() ), p.getVersionString());
-        }
-        logger.info ("### Returning result " + result);
-        // ################################
-*/
+        logger.debug ("### Got back from rest " + result);
+
         return result;
     }
 
