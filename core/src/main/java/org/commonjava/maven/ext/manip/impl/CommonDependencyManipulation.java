@@ -87,42 +87,7 @@ abstract public class CommonDependencyManipulation implements RemoteDependencies
         {
             for (final String key : versionPropertyUpdateMap.keySet())
             {
-                boolean found = false;
-
-                for (final Project p : result)
-                {
-                    if ( p.getModel().getProperties().containsKey (key) )
-                    {
-                        logger.info( "Updating property {} with {} ", key, versionPropertyUpdateMap.get( key ) );
-                        final String oldValue = p.getModel().getProperties().getProperty( key );
-                        final String overrideVersion = versionPropertyUpdateMap.get( key );
-
-                        found = true;
-
-                        if ( strict )
-                        {
-                            if ( oldValue != null && !overrideVersion.startsWith( oldValue ) )
-                            {
-                                if ( state.getFailOnStrictViolation() )
-                                {
-                                    throw new ManipulationException(
-                                                                     "Replacement: {} of original version: {} in property: {} violates the strict version-alignment rule!",
-                                                                     overrideVersion, oldValue, key );
-                                }
-                                else
-                                {
-                                    logger.warn( "Replacement: {} of original version: {} in property: {} violates the strict version-alignment rule!",
-                                                 overrideVersion, oldValue, key );
-                                    // Ignore the dependency override. As found has been set to true it won't inject
-                                    // a new property either.
-                                    continue;
-                                }
-                            }
-                        }
-
-                        p.getModel().getProperties().setProperty( key, versionPropertyUpdateMap.get( key ) );
-                    }
-                }
+                boolean found = updateProperties( state, result, key, versionPropertyUpdateMap.get( key ) );
 
                 if ( found == false )
                 {
@@ -142,6 +107,69 @@ abstract public class CommonDependencyManipulation implements RemoteDependencies
             }
         }
         return result;
+    }
+
+    /**
+     * Recursively update properties.
+     * 
+     * @param state
+     * @param projects
+     * @param key
+     * @param newValue
+     * @return
+     * @throws ManipulationException
+     */
+    private boolean updateProperties (DependencyState state, Set<Project> projects, String key, String newValue)
+                    throws ManipulationException
+    {
+        boolean found = false;
+        for ( final Project p : projects )
+        {
+            if ( p.getModel().getProperties().containsKey( key ) )
+            {
+                final String oldValue = p.getModel().getProperties().getProperty( key );
+                final String overrideVersion = newValue;
+
+                logger.info( "Updating property {} / {} with {} ", key, oldValue, newValue );
+
+                found = true;
+
+                if ( oldValue.startsWith( "${" ))
+                {
+                    if ( ! updateProperties( state, projects, oldValue.substring( 2, oldValue.indexOf( '}' ) ), newValue ))
+                    {
+                        logger.error( "Recursive property not found for {} with {} " , oldValue, newValue );
+                        return false;
+                    }
+                }
+                else
+                {
+                    if ( state.getStrict() )
+                    {
+                        if ( oldValue != null && !overrideVersion.startsWith( oldValue ) )
+                        {
+                            if ( state.getFailOnStrictViolation() )
+                            {
+                                throw new ManipulationException(
+                                                "Replacement: {} of original version: {} in property: {} violates the strict version-alignment rule!",
+                                                overrideVersion, oldValue, key );
+                            }
+                            else
+                            {
+                                logger.warn( "Replacement: {} of original version: {} in property: {} violates the strict version-alignment rule!",
+                                             overrideVersion, oldValue, key );
+                                // Ignore the dependency override. As found has been set to true it won't inject
+                                // a new property either.
+                                continue;
+                            }
+                        }
+                    }
+
+                    p.getModel().getProperties().setProperty( key, newValue );
+                }
+            }
+        }
+        return found;
     }
 
     /**
