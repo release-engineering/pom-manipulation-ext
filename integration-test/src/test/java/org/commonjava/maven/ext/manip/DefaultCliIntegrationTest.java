@@ -21,16 +21,28 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-import static org.commonjava.maven.ext.manip.CliTestUtils.*;
+import static org.commonjava.maven.ext.manip.CliTestUtils.DEFAULT_MVN_PARAMS;
+import static org.commonjava.maven.ext.manip.CliTestUtils.IT_LOCATION;
+import static org.commonjava.maven.ext.manip.CliTestUtils.getDefaultTestLocation;
+import static org.commonjava.maven.ext.manip.CliTestUtils.runLikeInvoker;
+import static org.commonjava.maven.ext.manip.CliTestUtils.runMaven;
 
 @SuppressWarnings( "ConstantConditions" )
 @RunWith( Parameterized.class )
 public class DefaultCliIntegrationTest
 {
+    private static final Logger LOGGER = LoggerFactory.getLogger( DefaultCliIntegrationTest.class );
+
     private static final List<String> EXCLUDED_FILES = new ArrayList<String>()
     {{
         add( "setup" );
@@ -93,7 +105,7 @@ public class DefaultCliIntegrationTest
         {
             testRelativeLocation = LOCATION_REWRITE.get( this.testRelativeLocation );
         }
-
+        LOGGER.info ("Testing {}", testRelativeLocation);
         String test = getDefaultTestLocation( testRelativeLocation );
         runLikeInvoker( test );
     }
