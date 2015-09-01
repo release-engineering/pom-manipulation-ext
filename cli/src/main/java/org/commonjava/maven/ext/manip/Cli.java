@@ -55,7 +55,7 @@ import java.util.Properties;
 public class Cli
 {
     public static final File DEFAULT_GLOBAL_SETTINGS_FILE =
-            new File( System.getProperty( "maven.home", System.getProperty( "user.dir", "" ) ), "conf/settings.xml" );
+        new File( System.getProperty( "maven.home", System.getProperty( "user.dir", "" ) ), "conf/settings.xml" );
 
     private final Logger logger = LoggerFactory.getLogger( getClass() );
 
@@ -84,7 +84,6 @@ public class Cli
     {
         new Cli().run( args );
     }
-
 
     private void run( String[] args )
     {
@@ -134,33 +133,33 @@ public class Cli
 
         }
 
-        if (cmd.hasOption( 'h' ))
+        if ( cmd.hasOption( 'h' ) )
         {
             HelpFormatter formatter = new HelpFormatter();
             formatter.printHelp( "...", options );
             System.exit( 1 );
         }
-        if (cmd.hasOption( 'D' ))
+        if ( cmd.hasOption( 'D' ) )
         {
             userProps = cmd.getOptionProperties( "D" );
         }
-        if (cmd.hasOption( 'f' ))
+        if ( cmd.hasOption( 'f' ) )
         {
-            target = new File (cmd.getOptionValue( 'f' ));
+            target = new File( cmd.getOptionValue( 'f' ) );
         }
-        if (cmd.hasOption( 's' ))
+        if ( cmd.hasOption( 's' ) )
         {
-            settings = new File (cmd.getOptionValue( 's' ));
+            settings = new File( cmd.getOptionValue( 's' ) );
         }
 
         createSession( target, settings );
 
         // Set debug logging after session creation else we get the log filled with Plexus
         // creation stuff.
-        if (cmd.hasOption( 'd' ))
+        if ( cmd.hasOption( 'd' ) )
         {
             final ch.qos.logback.classic.Logger root =
-                            (ch.qos.logback.classic.Logger) LoggerFactory.getLogger( org.slf4j.Logger.ROOT_LOGGER_NAME );
+                (ch.qos.logback.classic.Logger) LoggerFactory.getLogger( org.slf4j.Logger.ROOT_LOGGER_NAME );
             root.setLevel( Level.DEBUG );
         }
 
@@ -190,8 +189,9 @@ public class Cli
             logger.error( "POM Manipulation failed: Unable to parse projects ", e );
             System.exit( 1 );
         }
-        catch ( Exception e ) {
-            logger.error( "POM Manipulation failed.", e);
+        catch ( Exception e )
+        {
+            logger.error( "POM Manipulation failed.", e );
             System.exit( 1 );
         }
     }
@@ -203,20 +203,21 @@ public class Cli
             PlexusContainer container = new DefaultPlexusContainer( );
 
             final MavenExecutionRequest req =
-                            new DefaultMavenExecutionRequest().setUserProperties(System.getProperties())
-                                                              .setUserProperties(userProps)
-                                                              .setRemoteRepositories(
-                                                                      Collections.<ArtifactRepository>emptyList());
-            if (settings != null) {
-                req.setUserSettingsFile(settings);
-                req.setGlobalSettingsFile(settings);
+                new DefaultMavenExecutionRequest().setUserProperties( System.getProperties() )
+                                                  .setUserProperties( userProps )
+                                                  .setRemoteRepositories( Collections.<ArtifactRepository>emptyList() );
+            if ( settings != null )
+            {
+                req.setUserSettingsFile( settings );
+                req.setGlobalSettingsFile( settings );
 
-                MavenExecutionRequestPopulator executionRequestPopulator = container.lookup(MavenExecutionRequestPopulator.class);
-                executionRequestPopulator.populateFromSettings(req, parseSettings(settings));
+                MavenExecutionRequestPopulator executionRequestPopulator =
+                    container.lookup( MavenExecutionRequestPopulator.class );
+                executionRequestPopulator.populateFromSettings( req, parseSettings( settings ) );
             }
 
             final MavenSession mavenSession =
-                            new MavenSession( container, null, req, new DefaultMavenExecutionResult() );
+                new MavenSession( container, null, req, new DefaultMavenExecutionResult() );
 
             mavenSession.getRequest().setPom( target );
 
@@ -245,43 +246,51 @@ public class Cli
             System.err.println( "Unable to parse settings.xml file" );
             System.exit( 1 );
         }
-        catch (MavenExecutionRequestPopulationException e) {
-            e.printStackTrace();
+        catch ( MavenExecutionRequestPopulationException e )
+        {
+            logger.debug( "Caught problem populating maven request from settings file ", e );
+            System.err.println( "Unable to create maven execution request from settings.xml file" );
+            System.exit( 1 );
         }
     }
 
-    private Settings parseSettings(File settings)
-            throws PlexusContainerException, ComponentLookupException, SettingsBuildingException
+    private Settings parseSettings( File settings )
+        throws PlexusContainerException, ComponentLookupException, SettingsBuildingException
     {
-        PlexusContainer container = new DefaultPlexusContainer( );
+        PlexusContainer container = new DefaultPlexusContainer();
         DefaultSettingsBuildingRequest settingsRequest = new DefaultSettingsBuildingRequest();
-        settingsRequest.setUserSettingsFile(settings);
-        settingsRequest.setGlobalSettingsFile(DEFAULT_GLOBAL_SETTINGS_FILE);
+        settingsRequest.setUserSettingsFile( settings );
+        settingsRequest.setGlobalSettingsFile( DEFAULT_GLOBAL_SETTINGS_FILE );
 
-        SettingsBuilder settingsBuilder = container.lookup(SettingsBuilder.class);
-        SettingsBuildingResult settingsResult = settingsBuilder.build(settingsRequest);
+        SettingsBuilder settingsBuilder = container.lookup( SettingsBuilder.class );
+        SettingsBuildingResult settingsResult = settingsBuilder.build( settingsRequest );
         Settings effectiveSettings = settingsResult.getEffectiveSettings();
 
-        ProfileSelector profileSelector = container.lookup(ProfileSelector.class);
-        ProfileActivationContext profileActivationContext = new DefaultProfileActivationContext()
-                .setActiveProfileIds(effectiveSettings.getActiveProfiles());
+        ProfileSelector profileSelector = container.lookup( ProfileSelector.class );
+        ProfileActivationContext profileActivationContext =
+            new DefaultProfileActivationContext().setActiveProfileIds( effectiveSettings.getActiveProfiles() );
         List<org.apache.maven.model.Profile> modelProfiles = new ArrayList<org.apache.maven.model.Profile>();
-        for (Profile profile : effectiveSettings.getProfiles()) {
-            modelProfiles.add(SettingsUtils.convertFromSettingsProfile(profile));
+        for ( Profile profile : effectiveSettings.getProfiles() )
+        {
+            modelProfiles.add( SettingsUtils.convertFromSettingsProfile( profile ) );
         }
-        List<org.apache.maven.model.Profile> activeModelProfiles = profileSelector
-                .getActiveProfiles(modelProfiles, profileActivationContext, new ModelProblemCollector() {
+        List<org.apache.maven.model.Profile> activeModelProfiles =
+            profileSelector.getActiveProfiles( modelProfiles, profileActivationContext, new ModelProblemCollector()
+            {
 
-                    @Override
-                    public void add(ModelProblem.Severity severity, String message, InputLocation location, Exception cause) {
-                        // do nothing
-                    }
-                });
+                @Override
+                public void add( ModelProblem.Severity severity, String message, InputLocation location,
+                                 Exception cause )
+                {
+                    // do nothing
+                }
+            } );
         List<String> activeProfiles = new ArrayList<String>();
-        for (org.apache.maven.model.Profile profile : activeModelProfiles) {
-            activeProfiles.add(profile.getId());
+        for ( org.apache.maven.model.Profile profile : activeModelProfiles )
+        {
+            activeProfiles.add( profile.getId() );
         }
-        effectiveSettings.setActiveProfiles(activeProfiles);
+        effectiveSettings.setActiveProfiles( activeProfiles );
 
         return effectiveSettings;
     }
