@@ -1,27 +1,46 @@
 package org.commonjava.maven.ext.manip.rest;
 
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mashape.unirest.http.Unirest;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.ext.manip.rest.exception.RestException;
 import org.commonjava.maven.ext.manip.rest.rule.MockServer;
-import org.junit.*;
-
-import static org.junit.Assert.*;
-import static org.hamcrest.CoreMatchers.*;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.ClassRule;
+import org.junit.FixMethodOrder;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.TestName;
+import org.junit.runners.MethodSorters;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Scanner;
+
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 
 /**
  * @author vdedik@redhat.com
  */
+@FixMethodOrder( MethodSorters.NAME_ASCENDING)
 public class DefaultVersionTranslatorTest
 {
     private static List<ProjectVersionRef> aLotOfGavs;
 
     private DefaultVersionTranslator versionTranslator;
+
+    @Rule
+    public TestName testName = new TestName();
 
     @ClassRule
     public static MockServer mockServer = new MockServer();
@@ -47,6 +66,8 @@ public class DefaultVersionTranslatorTest
     @Before
     public void before()
     {
+        LoggerFactory.getLogger( DefaultVersionTranslator.class ).info ("Executing test " + testName.getMethodName());
+
         this.versionTranslator = new DefaultVersionTranslator( mockServer.getUrl() );
     }
 
@@ -64,7 +85,7 @@ public class DefaultVersionTranslatorTest
     }
 
     @Test
-    public void testTranslateVersionsSuccess()
+    public void testTranslateVersions()
     {
         List<ProjectVersionRef> gavs = new ArrayList<ProjectVersionRef>()
         {{
@@ -116,6 +137,9 @@ public class DefaultVersionTranslatorTest
     @Test( timeout = 500 )
     public void testTranslateVersionsPerformance()
     {
+        // Disable logging for this test as impacts timing.
+        ((Logger)LoggerFactory.getLogger( Logger.ROOT_LOGGER_NAME)).setLevel( Level.WARN );
+
         versionTranslator.translateVersions( aLotOfGavs );
     }
 
