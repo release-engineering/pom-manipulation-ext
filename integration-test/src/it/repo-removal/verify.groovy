@@ -40,3 +40,10 @@ assert repojar.exists()
 def repopom = new File( repodir, "${pom.artifactId.text()}-${pom.version.text()}.pom" )
 System.out.println( "Checking for installed pom: ${repopom.getAbsolutePath()}")
 assert repopom.exists()
+
+def settingsFile = new File ( basedir, 'settings.xml' )
+assert settingsFile.exists()
+
+def settings = new XmlSlurper().parse( settingsFile )
+assert settings.profiles.children().find( { it.id.text() == 'extra-repositories' } ).size() == 1
+assert settings.profiles.children().find( { it.id.text() == 'removed-by-pme' } ).size() == 1
