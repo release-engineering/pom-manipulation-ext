@@ -17,13 +17,18 @@ package org.commonjava.maven.ext.manip.impl;
 
 import static org.commonjava.maven.ext.manip.util.IdUtils.ga;
 
+import java.io.File;
 import java.util.*;
 
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Profile;
 import org.apache.maven.model.Repository;
+import org.apache.maven.settings.Settings;
+import org.apache.maven.settings.SettingsUtils;
 import org.codehaus.plexus.component.annotations.Component;
+import org.codehaus.plexus.component.annotations.Requirement;
 import org.commonjava.maven.ext.manip.ManipulationException;
+import org.commonjava.maven.ext.manip.io.SettingsIO;
 import org.commonjava.maven.ext.manip.model.Project;
 import org.commonjava.maven.ext.manip.ManipulationSession;
 import org.commonjava.maven.ext.manip.state.RepoReportingState;
@@ -40,6 +45,9 @@ public class RepoAndReportingRemovalManipulator
 {
 
     private final Logger logger = LoggerFactory.getLogger( getClass() );
+
+    @Requirement
+    protected SettingsIO settingsWriter;
 
     /**
      * No prescanning required for Repository and Reporting Removal.
@@ -78,6 +86,10 @@ public class RepoAndReportingRemovalManipulator
 
         final Set<Project> changed = new HashSet<Project>();
 
+        Settings backupSettings = new Settings();
+        Profile backupProfile = new Profile();
+        backupProfile.setId( "removed-by-pme" );
+
         for ( final Project project : projects )
         {
             final String ga = ga( project );
@@ -87,6 +99,10 @@ public class RepoAndReportingRemovalManipulator
             if ( model.getRepositories() != null && !model.getRepositories()
                                                           .isEmpty() )
             {
+                for ( Repository repository : model.getRepositories() )
+                {
+                    backupProfile.addRepository( repository );
+                }
                 model.setRepositories( new ArrayList<Repository>() );
                 changed.add( project );
             }
@@ -94,12 +110,17 @@ public class RepoAndReportingRemovalManipulator
             if ( model.getPluginRepositories() != null && !model.getPluginRepositories()
                                                                 .isEmpty() )
             {
+                for ( Repository repository : model.getPluginRepositories() )
+                {
+                    backupProfile.addPluginRepository( repository );
+                }
                 model.setPluginRepositories( new ArrayList<Repository>() );
                 changed.add( project );
             }
 
             if ( model.getReporting() != null )
             {
+                backupProfile.setReporting( model.getReporting() );
                 model.setReporting( null );
                 changed.add( project );
             }
@@ -111,28 +132,58 @@ public class RepoAndReportingRemovalManipulator
             {
                 for ( final Profile profile : profiles )
                 {
+                    Profile repoProfile = new Profile();
+                    repoProfile.setId( profile.getId() );
+
                     if ( !profile.getRepositories().isEmpty() )
                     {
+                        for ( Repository repository : profile.getRepositories() )
+                        {
+                            repoProfile.addRepository( repository );
+                        }
                         profile.setRepositories( new ArrayList<Repository>() );
                         changed.add( project );
                     }
 
                     if ( !profile.getPluginRepositories().isEmpty() )
                     {
+                        for ( Repository repository : profile.getPluginRepositories() )
+                        {
+                            repoProfile.addPluginRepository( repository );
+                        }
                         profile.setPluginRepositories( new ArrayList<Repository>() );
                         changed.add( project );
                     }
 
                     if ( profile.getReporting() != null )
                     {
+                        repoProfile.setReporting( profile.getReporting() );
                         profile.setReporting( null );
                         changed.add( project );
                     }
+
+                    if ( !repoProfile.getRepositories().isEmpty() && !repoProfile.getPluginRepositories().isEmpty()
+                        && repoProfile.getReporting() != null )
+                    {
+                        backupSettings.addProfile( SettingsUtils.convertToSettingsProfile( repoProfile ) );
+                    }
                 }
-
             }
-
         }
+
+        // create new settings file with the removed repositories and reporting
+        if ( !backupProfile.getRepositories().isEmpty() && !backupProfile.getPluginRepositories().isEmpty()
+            && backupProfile.getReporting() != null )
+        {
+            backupSettings.addProfile( SettingsUtils.convertToSettingsProfile( backupProfile ) );
+        }
+        File settingsFile = state.getRemovalBackupSettings();
+        if ( settingsFile == null )
+        {
+            String topDir = session.getTargetDir().getParentFile().getPath();
+            settingsFile = new File( topDir, "settings.xml" );
+        }
+        settingsWriter.update( backupSettings, settingsFile );
 
         return changed;
     }

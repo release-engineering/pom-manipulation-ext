@@ -15,6 +15,7 @@
  */
 package org.commonjava.maven.ext.manip.state;
 
+import java.io.File;
 import java.util.Properties;
 
 import org.commonjava.maven.ext.manip.impl.RepoAndReportingRemovalManipulator;
@@ -31,11 +32,24 @@ public class RepoReportingState
      */
     public static final String RR_SUFFIX_SYSPROP = "repo-reporting-removal";
 
+    public static final String RR_SETTINGS_SFX_SYSPROP = "removal-backup-settings";
+
     private final boolean removal;
+
+    private final File settingsFile;
 
     public RepoReportingState( final Properties userProps )
     {
         removal = Boolean.parseBoolean( userProps.getProperty( RR_SUFFIX_SYSPROP ) );
+
+        String settingsFilePath = userProps.getProperty( RR_SETTINGS_SFX_SYSPROP );
+        if (settingsFilePath != null)
+        {
+            settingsFile = new File( settingsFilePath );
+        } else
+        {
+            settingsFile = null;
+        }
     }
 
     /**
@@ -48,6 +62,11 @@ public class RepoReportingState
     public boolean isEnabled()
     {
         return removal == true;
+    }
+
+    public File getRemovalBackupSettings()
+    {
+        return settingsFile;
     }
 
 }
