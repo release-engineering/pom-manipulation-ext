@@ -17,18 +17,9 @@ def pomFile = new File( basedir, 'pom.xml' )
 System.out.println( "Slurping POM: ${pomFile.getAbsolutePath()}" )
 
 def pom = new XmlSlurper().parse( pomFile )
-def counter = 0
-def sources = 0
 
-pom.dependencyManagement.dependencies.childNodes().each {
-    counter++;
+def dependency = pom.dependencies.dependency.find { it.artifactId.text() == "junit" }
+assert dependency != null
+assert dependency.version.text() == "4.1"
 
-    if ( it.text().contains ("sources") )
-    {
-        sources++
-    }
-}
-
-// Checks that 5 dependencies have been injected - 2 junit and 2 commons-lang and 1 jboss-parent.
-assert counter == 5
-assert sources == 2
+assert pom.parent.version.text() == "15"

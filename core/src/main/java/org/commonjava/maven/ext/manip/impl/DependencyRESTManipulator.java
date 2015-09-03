@@ -18,7 +18,6 @@ package org.commonjava.maven.ext.manip.impl;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.Profile;
 import org.codehaus.plexus.component.annotations.Component;
-import org.codehaus.plexus.component.annotations.Requirement;
 import org.commonjava.maven.atlas.ident.ref.ArtifactRef;
 import org.commonjava.maven.atlas.ident.ref.ProjectRef;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
@@ -172,17 +171,14 @@ public class DependencyRESTManipulator
         // Convert the loaded remote ProjectVersionRefs to the original ArtifactRefs
         for (ArtifactRef a : localDeps)
         {
-            logger.debug ("### Searching localDeps " + a );
             if (restResult.containsKey( a.asProjectVersionRef() ))
             {
-                logger.debug ("### restResult has " + restResult.get(a.asProjectVersionRef()));
                 overrides.put( a, restResult.get( a.asProjectVersionRef()));
             }
         }
 
-        logger.info( "### Calling internalApplyChanges with " + overrides );
+        logger.debug( "Calling internalApplyChanges with {} ", overrides );
         Set<Project> changed = internalApplyChanges( projects, session, overrides );
-        logger.info( "###*** applyChanges get " + changed );
 
         return changed;
     }
