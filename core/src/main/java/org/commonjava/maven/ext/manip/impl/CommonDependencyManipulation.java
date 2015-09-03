@@ -18,6 +18,7 @@ package org.commonjava.maven.ext.manip.impl;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.DependencyManagement;
 import org.apache.maven.model.Model;
+import org.apache.maven.model.Profile;
 import org.commonjava.maven.atlas.ident.ref.ArtifactRef;
 import org.commonjava.maven.atlas.ident.ref.InvalidRefException;
 import org.commonjava.maven.atlas.ident.ref.ProjectRef;
@@ -200,6 +201,7 @@ abstract public class CommonDependencyManipulation
             logger.error( "Invalid module exclusion override {} : {} ", moduleOverrides, explicitOverrides );
             throw e;
         }
+
         if ( project.isInheritanceRoot() )
         {
             // Handle the situation where the top level parent refers to a prior build that is in the BOM.
@@ -343,6 +345,25 @@ abstract public class CommonDependencyManipulation
             final List<Dependency> projectDependencies = model.getDependencies();
             applyOverrides( session, projectDependencies, moduleOverrides );
             applyExplicitOverrides( versionPropertyUpdateMap, explicitOverrides, projectDependencies );
+
+            // Now check all possible profiles and update them.
+            List<Profile> profiles = project.getModel().getProfiles();
+            if ( profiles != null )
+            {
+                for ( Profile p : profiles )
+                {
+                    logger.debug( "Iterating profile {} " , p.getId() );
+                    if ( p.getDependencyManagement() != null )
+                    {
+                        applyOverrides( session, p.getDependencyManagement().getDependencies(), moduleOverrides );
+                        applyExplicitOverrides( versionPropertyUpdateMap, explicitOverrides,
+                                                p.getDependencyManagement().getDependencies() );
+                    }
+                    final List<Dependency> profileDependencies = p.getDependencies();
+                    applyOverrides( session, profileDependencies, moduleOverrides );
+                    applyExplicitOverrides( versionPropertyUpdateMap, explicitOverrides, profileDependencies );
+                }
+            }
         }
         else
         {
