@@ -49,9 +49,6 @@ dependency = pomChild.dependencyManagement.dependencies.dependency.find { it.art
 assert dependency != null
 assert dependency.version.text() == "4.1-redhat-1"
 
-/*
- Currently dependency replacement is not handling multiple GA with different V in different modules.
 dependency = pomChild.dependencyManagement.dependencies.dependency.find { it.artifactId.text() == "commons-lang" }
 assert dependency != null
 assert dependency.version.text() == "2.6-redhat-1"
-*/

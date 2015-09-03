@@ -13,22 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-def pomFile = new File( basedir, 'pom.xml' )
-System.out.println( "Slurping POM: ${pomFile.getAbsolutePath()}" )
+package test;
 
-def pom = new XmlSlurper().parse( pomFile )
-def counter = 0
-def sources = 0
+import org.junit.Test;
 
-pom.dependencyManagement.dependencies.childNodes().each {
-    counter++;
-
-    if ( it.text().contains ("sources") )
+public class HelloWorldwithJUnit
+{
+    public static void main (String [] args)
     {
-        sources++
+        System.out.println("hello");
+    }
+
+    @Test
+    public void test()
+    {
+        // Just a dummy method to verify that we can compile again JUnit 4
     }
 }
-
-// Checks that 5 dependencies have been injected - 2 junit and 2 commons-lang and 1 jboss-parent.
-assert counter == 5
-assert sources == 2
