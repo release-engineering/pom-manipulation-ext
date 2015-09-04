@@ -29,6 +29,7 @@ import org.commonjava.maven.ext.manip.spi.RemoteDependenciesSPI;
 import org.commonjava.maven.ext.manip.state.DependencyState;
 import org.commonjava.maven.ext.manip.state.DependencyState.VersionPropertyFormat;
 import org.commonjava.maven.ext.manip.state.State;
+import org.commonjava.maven.ext.manip.state.VersioningState;
 import org.commonjava.maven.ext.manip.util.WildcardMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -89,7 +90,7 @@ abstract public class CommonDependencyManipulation
         {
             for ( final String key : versionPropertyUpdateMap.keySet() )
             {
-                boolean found = updateProperties( state, result, key, versionPropertyUpdateMap.get( key ) );
+                boolean found = updateProperties( session, result, key, versionPropertyUpdateMap.get( key ) );
 
                 if ( !found )
                 {
@@ -114,17 +115,19 @@ abstract public class CommonDependencyManipulation
     /**
      * Recursively update properties.
      *
-     * @param state the DependencyState
+     * @param session the DependencyState
      * @param projects the current set of projects we are scanning.
      * @param key a key to look for.
      * @param newValue a value to look for.
      * @return true if changes were made.
      * @throws ManipulationException
      */
-    private boolean updateProperties( DependencyState state, Set<Project> projects, String key, String newValue )
+    private boolean updateProperties( ManipulationSession session, Set<Project> projects, String key, String newValue )
                     throws ManipulationException
     {
+        final DependencyState state = session.getState( DependencyState.class );
         boolean found = false;
+
         for ( final Project p : projects )
         {
             if ( p.getModel().getProperties().containsKey( key ) )
@@ -137,7 +140,7 @@ abstract public class CommonDependencyManipulation
 
                 if ( oldValue != null && oldValue.startsWith( "${" ) )
                 {
-                    if ( !updateProperties( state, projects, oldValue.substring( 2, oldValue.indexOf( '}' ) ),
+                    if ( !updateProperties( session, projects, oldValue.substring( 2, oldValue.indexOf( '}' ) ),
                                             newValue ) )
                     {
                         logger.error( "Recursive property not found for {} with {} ", oldValue, newValue );
@@ -148,7 +151,8 @@ abstract public class CommonDependencyManipulation
                 {
                     if ( state.getStrict() )
                     {
-                        if ( oldValue != null && !newValue.startsWith( oldValue ) )
+//                        if ( oldValue != null && !newValue.startsWith( oldValue ) )
+                        if ( ! checkStrictValue( session, oldValue, newValue ) )
                         {
                             if ( state.getFailOnStrictViolation() )
                             {
@@ -218,7 +222,8 @@ abstract public class CommonDependencyManipulation
                     {
                         if ( state.getStrict() )
                         {
-                            if ( oldValue != null && !newValue.startsWith( oldValue ) )
+                            if ( ! checkStrictValue( session, oldValue, newValue ) )
+//                            if ( oldValue != null && !newValue.startsWith( oldValue ) )
                             {
                                 if ( state.getFailOnStrictViolation() )
                                 {
@@ -463,16 +468,6 @@ abstract public class CommonDependencyManipulation
         final DependencyState state = session.getState( DependencyState.class );
         final boolean strict = state.getStrict();
 
-        /*
-        Theoretically there could be multiple GA with different V in the overrides list. This would only make
-        sense in strict alignment mode - i.e. search out those deps with matching and change them.
-
-        In the non-strict mode - we probably should not expect any multiples... convert all to GA format ?
-
-        How also to account for failOnStrictViolation? This is for strict mode where we want to fail if they don't
-        match.
-         */
-
         // Apply matching overrides to dependencies
         for ( final Dependency dependency : dependencies )
         {
@@ -522,8 +517,7 @@ abstract public class CommonDependencyManipulation
                         }
                         else
                         {
-                            // FIXME : Here we should be able to exact match if strict ...
-                            if ( strict && !overrideVersion.startsWith( oldVersion ) )
+                            if ( strict && ! checkStrictValue( session, oldVersion, overrideVersion) )
                             {
                                 if ( state.getFailOnStrictViolation() )
                                 {
@@ -771,5 +765,58 @@ abstract public class CommonDependencyManipulation
                           overrides.get( currentGA ) );
             props.setProperty( versionPropName, overrides.get( currentGA ) );
         }
+    }
+
+
+    /**
+     * Check the version change is valid in strict mode.
+     *
+     * @param session the manipulation session
+     * @param oldValue the original version
+     * @param newValue the new version
+     * @return true if the version can be changed to the new version
+     */
+    private boolean checkStrictValue (ManipulationSession session, String oldValue, String newValue)
+    {
+        // New value might be e.g. 3.1-rebuild-1 or 3.1.0.rebuild-1 (i.e. it *might* be OSGi compliant).
+        final VersioningState state = session.getState( VersioningState.class );
+        final Version v = new Version( oldValue );
+
+        String newVersion = newValue;
+        String suffix = null;
+        String osgiVersion = v.getOSGiVersionString();
+
+        if ( state.getIncrementalSerialSuffix() != null && state.getIncrementalSerialSuffix().length() > 0)
+        {
+            suffix = state.getIncrementalSerialSuffix();
+        }
+        else if ( state.getSuffix() != null && state.getSuffix().length() > 0)
+        {
+            suffix = state.getSuffix().substring( 0, state.getSuffix().indexOf( '-' ) );
+        }
+
+        if ( suffix != null)
+        {
+            v.appendQualifierSuffix( suffix );
+            osgiVersion = v.getOSGiVersionString();
+            osgiVersion = osgiVersion.substring( 0, osgiVersion.indexOf( suffix ) - 1 );
+
+            if ( newValue.contains( suffix ) )
+            {
+                newVersion = newValue.substring( 0, newValue.indexOf( suffix ) - 1 );
+            }
+        }
+
+        logger.debug ("Comparing original version {} and OSGi variant {} with new version {} and suffix removed {} " ,
+                      oldValue, osgiVersion, newValue, newVersion);
+
+        // We compare both an OSGi'ied oldVersion and the non-OSGi version against the possible new version (which has
+        // had its suffix stripped) in order to check whether its a valid change.
+        boolean result = false;
+        if ( oldValue != null && oldValue.equals( newVersion ) || osgiVersion.equals( newVersion ))
+        {
+            result = true;
+        }
+        return result;
     }
 }

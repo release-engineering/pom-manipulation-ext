@@ -43,7 +43,7 @@
       </dependency>
       <dependency>
         <groupId>org.commonjava.maven.ext</groupId>
-        <artifactId>depMgmt4</artifactId>
+        <artifactId>depMgmt2</artifactId>
         <version>1.0</version>
         <type>pom</type>
         <scope>import</scope>

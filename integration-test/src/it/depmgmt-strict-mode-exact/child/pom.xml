@@ -24,42 +24,47 @@
 
   <parent>
     <groupId>org.commonjava.maven.ext</groupId>
-    <artifactId>child-module-dependency-profile</artifactId>
+    <artifactId>depmgmt-strict-mode-exact</artifactId>
     <version>1.0-SNAPSHOT</version>
   </parent>
 
-  <artifactId>child-module-dependency-profile-child</artifactId>
+  <artifactId>depmgmt-strict-mode-exact-child</artifactId>
 
-  <name>Test override dependency version with profiles</name>
+  <name>Module to test exact strict mode alignent within parent and child</name>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
 
-  <profiles>
-    <profile>
-      <id>one</id>
-      <activation>
-        <activeByDefault>true</activeByDefault>
-      </activation>
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>junit</groupId>
+        <artifactId>junit</artifactId>
+        <version>4.1</version>
+      </dependency>
+      <dependency>
+        <groupId>commons-lang</groupId>
+        <artifactId>commons-lang</artifactId>
+        <version>2.6</version>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
 
-      <dependencyManagement>
-        <dependencies>
-          <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>3.8.2</version>
-          </dependency>
-        </dependencies>
-      </dependencyManagement>
-
-      <dependencies>
-        <dependency>
-          <groupId>junit</groupId>
-          <artifactId>junit</artifactId>
-        </dependency>
-      </dependencies>
-    </profile>
-  </profiles>
+  <dependencies>
+    <dependency>
+      <groupId>commons-httpclient</groupId>
+      <artifactId>commons-httpclient</artifactId>
+      <version>3.1</version>
+    </dependency>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>commons-lang</groupId>
+      <artifactId>commons-lang</artifactId>
+    </dependency>
+  </dependencies>
 
 </project>
