@@ -23,32 +23,31 @@ def pom = new XmlSlurper().parse( pomFile )
 def pomChild = new XmlSlurper().parse( pomChildFile )
 
 System.out.println( "POM Version: ${pom.version.text()}" )
-assert pom.version.text().endsWith( '.redhat-1' )
+assert pom.version.text().endsWith( '.redhat-6' )
 System.out.println( "POM Child Version: ${pomChild.version.text()}" )
-assert pomChild.parent.version.text().endsWith( '.redhat-1' )
+assert pomChild.parent.version.text().endsWith( '.redhat-6' )
 
-// Currently the AddSuffixJettyHandler doesn't do OSGi compatibility.
-def dependency = pom.dependencyManagement.dependencies.dependency.find { it.artifactId.text() == "commons-lang" }
+dependency = pom.dependencyManagement.dependencies.dependency.find { it.artifactId.text() == "commons-lang" }
 assert dependency != null
-assert dependency.version.text() == "1.0-redhat-1"
-
-dependency = pom.dependencies.dependency.find { it.artifactId.text() == "errai-common" }
-assert dependency != null
-assert dependency.version.text() == "1.1-Final-redhat-1"
+assert dependency.version.text() == "1.0"
 
 def passed = false
 pom.properties.each {
-    if ( it.text().contains ("3.1-redhat-1") )
+    if ( ! it.text().contains ("redhat-1") )
     {
         passed = true
     }
 }
 assert (passed == true)
 
-dependency = pomChild.dependencyManagement.dependencies.dependency.find { it.artifactId.text() == "junit" }
+dependency = pomChild.dependencies.dependency.find { it.artifactId.text() == "commons-httpclient" }
 assert dependency != null
-assert dependency.version.text() == "4.1-redhat-1"
+assert dependency.version.text() == "3.1-redhat-1"
 
 dependency = pomChild.dependencyManagement.dependencies.dependency.find { it.artifactId.text() == "commons-lang" }
 assert dependency != null
-assert dependency.version.text() == "2.6-redhat-1"
+assert dependency.version.text() == "2.6.0.redhat-4"
+
+dependency = pomChild.dependencyManagement.dependencies.dependency.find { it.artifactId.text() == "junit" }
+assert dependency != null
+assert dependency.version.text() == "4.1"

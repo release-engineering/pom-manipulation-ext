@@ -83,6 +83,15 @@ public class VersionTest
         assertThat( version.isValidOSGi(), equalTo( true ) );
         assertThat( version.getOSGiVersionString(), equalTo( "1" ) );
 
+        version = new Version("2.6");
+        assertThat( version.isValidOSGi(), equalTo( true ) );
+        assertThat( version.getOSGiVersionString(), equalTo( "2.6" ) );
+
+        version = new Version("2.6");
+        version.appendQualifierSuffix( "rebuild-1" );
+        assertThat( version.isValidOSGi(), equalTo( true ) );
+        assertThat( version.getOSGiVersionString(), equalTo( "2.6.0.rebuild-1" ) );
+
         version = new Version("12.1.100");
         assertThat( version.isValidOSGi(), equalTo( true ) );
         assertThat( version.getOSGiVersionString(), equalTo( "12.1.100" ) );
