@@ -94,19 +94,22 @@ public class ProfileInjectionManipulator
 
         for ( final Project project : projects )
         {
-            if ( project.isInheritanceRoot() )
+            if ( project.isInheritanceRoot())
             {
                 final String ga = ga( project );
                 logger.info( getClass().getSimpleName() + " applying changes to: " + ga );
                 final Model model = project.getModel();
                 final List<Profile> profiles = model.getProfiles();
 
-                final Iterator<Profile> i = remoteProfiles.iterator();
-                while ( i.hasNext() )
+                if ( !remoteProfiles.isEmpty() )
                 {
-                    addProfile( profiles, i.next() );
+                    final Iterator<Profile> i = remoteProfiles.iterator();
+                    while ( i.hasNext() )
+                    {
+                        addProfile( profiles, i.next() );
+                    }
+                    changed.add( project );
                 }
-                changed.add( project );
             }
         }
 
