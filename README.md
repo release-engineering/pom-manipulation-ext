@@ -7,3 +7,18 @@ It is suppplied as a core library, a Maven extension (in the sense of installing
 This extension combines many of the features of [VMan](https://github.com/jdcasey/pom-version-manipulator), [Maven Versioning Extension](https://github.com/jdcasey/maven-versioning-extension) and [Maven Dependency Management Extension](https://github.com/jboss/maven-dependency-management-extension).
 
 For more details on usage see https://release-engineering.github.io/pom-manipulation-ext.
+
+## Developing
+
+### Prequisites
+
+* Java 1.6 or later
+* Maven 3.0.4 or later.
+
+### Commits
+
+An example `codestyle.xml` is supplied which is compatible with Eclipse and may also be imported into IntelliJ. There is also an IntelliJ compatible copyright template suitable for use when the project is imported into IntelliJ.
+
+### Building
+
+`mvn clean install` will compile and run all of the unit tests. In order to run the integration tests `-Prun-its` should be passed in. For the command line tests, it is possible to run a specific one by passing e.g. `-Dtest=DefaultCliIntegrationTest -Dtest-cli=<test name e.g. depmgmt-strict-mode-exact>`.
