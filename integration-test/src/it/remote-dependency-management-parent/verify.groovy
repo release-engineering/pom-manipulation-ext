@@ -22,4 +22,4 @@ def dependency = pom.dependencies.dependency.find { it.artifactId.text() == "jun
 assert dependency != null
 assert dependency.version.text() == "4.1"
 
-assert pom.parent.version.text() == "15"
+assert pom.parent.version.text() == "5"

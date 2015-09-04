@@ -60,7 +60,7 @@
       <dependency>
         <groupId>org.jboss</groupId>
         <artifactId>jboss-parent</artifactId>
-        <version>15</version>
+        <version>5</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
