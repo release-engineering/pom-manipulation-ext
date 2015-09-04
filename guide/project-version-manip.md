@@ -4,7 +4,7 @@ title: "Project Version Manipulation"
 
 ### Overview
 
-When rebuilding a Maven project's sources from a release tag (or really for any version that has already been released), it's important **NOT** to republish the original GAV (groupId, artifactId, version) coordinate. If you change anything during your rebuild (even a plugin version), you could produce a result that is not a binary equivalent of the original release. To help avoid this, PME supports automatically updating the project version to append a serial rebuild suffix. PME's re-versioning feature may also make other changes to the project version, in order to make the resulting version OSGi-compliant where possible. 
+When rebuilding a Maven project's sources from a release tag (or really for any version that has already been released), it's important **NOT** to republish the original GAV (groupId, artifactId, version) coordinate. If you change anything during your rebuild (even a plugin version), you could produce a result that is not a binary equivalent of the original release. To help avoid this, PME supports automatically updating the project version to append a serial rebuild suffix. PME's re-versioning feature may also make other changes to the project version, in order to make the resulting version OSGi-compliant where possible.
 
 PME offers the following version-related configuration:
 
@@ -16,7 +16,13 @@ The extension is configured using the property `version.incremental.suffix`.
 
     mvn install -Dversion.incremental.suffix=rebuild
 
-The Maven repository metadata will be checked to locate the latest released version of the project artifacts, and the next version is selected by the extension.
+#### Version Increment Metadata
+
+The metadata to work out what the correct version of the increment should be can be sourced the one of two different locations.
+
+1. By default the Maven repository metadata will be checked to locate the latest released version of the project artifacts, and the next version is selected by the extension.
+
+2. Alternatively if the property `-DrestURL` has been configured the the REST client service will be used as a source. For more details on this see Dependency Manipulation.
 
 ### Manual version suffix
 
