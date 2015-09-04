@@ -267,7 +267,7 @@ public class CliTestUtils
      *
      * @param command - Command to be run in another process, e.g. "mvn clean install"
      * @param workingDir - Working directory in which to run the command.
-     * @param s
+     * @param extraPath
      * @return exit value.
      * @throws Exception
      */

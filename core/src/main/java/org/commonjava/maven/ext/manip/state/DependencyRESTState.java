@@ -28,11 +28,6 @@ import java.util.Properties;
 public class DependencyRESTState extends CommonDependencyState
     implements State
 {
-    /**
-     * The name of the property which contains the remote REST URL.
-     */
-    public static final String REST_URL = "restEndpoint";
-
     private final String restURL;
 
     private final Map<ProjectVersionRef, String> projectVersionsByGAV = new HashMap<ProjectVersionRef, String>();
