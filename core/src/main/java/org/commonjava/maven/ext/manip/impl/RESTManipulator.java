@@ -27,8 +27,8 @@ import org.commonjava.maven.ext.manip.ManipulationSession;
 import org.commonjava.maven.ext.manip.model.Project;
 import org.commonjava.maven.ext.manip.rest.DefaultVersionTranslator;
 import org.commonjava.maven.ext.manip.rest.VersionTranslator;
-import org.commonjava.maven.ext.manip.state.DependencyRESTState;
-import org.commonjava.maven.ext.manip.state.State;
+import org.commonjava.maven.ext.manip.state.DependencyState;
+import org.commonjava.maven.ext.manip.state.RESTState;
 import org.commonjava.maven.ext.manip.state.VersioningState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,27 +44,18 @@ import java.util.Properties;
 import java.util.Set;
 
 /**
- * This Manipulator runs first. It makes a REST call to an external service to load the GAVs to align the project version
- * and dependencies to.
- * It utilises the majority of the CommonDependencyManipulation code to change the dependencies and injects the Project GA versions
- * into the VersioningState in case the VersioningManipulator has been activated.
+ * This Manipulator runs first. It makes a REST call to an external service to loadRemoteOverrides the GAVs to align the project version
+ * and dependencies to. It will prepopulate Project GA versions into the VersioningState in case the VersioningManipulator has been activated
+ * and the remote overrides into the DependencyState for those as well.
  */
-@Component( role = Manipulator.class, hint = "dependency-rest-manipulator" )
-public class DependencyRESTManipulator
-        extends CommonDependencyManipulation
-        implements Manipulator
+@Component( role = Manipulator.class, hint = "rest-manipulator" )
+public class RESTManipulator implements Manipulator
 {
     private final Logger logger = LoggerFactory.getLogger( getClass() );
 
     private VersionTranslator restEndpoint;
 
-    private Map<ProjectVersionRef, String> restResult = new HashMap<ProjectVersionRef, String>();
-    private ArrayList<ProjectVersionRef> restParam = new ArrayList<ProjectVersionRef>();
-
-    private Set<ArtifactRef> localDeps = new HashSet<ArtifactRef>();
-
-
-    protected DependencyRESTManipulator()
+    protected RESTManipulator()
     {
     }
 
@@ -72,7 +63,7 @@ public class DependencyRESTManipulator
     public void init( final ManipulationSession session )
     {
         final Properties userProps = session.getUserProperties();
-        DependencyRESTState state = new DependencyRESTState( userProps );
+        RESTState state = new RESTState( userProps );
         session.setState( state );
 
         restEndpoint = new DefaultVersionTranslator( state.getRESTURL() );
@@ -85,7 +76,11 @@ public class DependencyRESTManipulator
     public void scan( final List<Project> projects, final ManipulationSession session )
                     throws ManipulationException
     {
-        final DependencyRESTState state = session.getState( DependencyRESTState.class );
+        final RESTState state = session.getState( RESTState.class );
+        final ArrayList<ProjectVersionRef> restParam = new ArrayList<ProjectVersionRef>();
+        final Set<ArtifactRef> localDeps = new HashSet<ArtifactRef>();
+
+        Map<ProjectVersionRef, String> restResult;
 
         if ( !session.isEnabled() || !state.isEnabled() )
         {
@@ -125,7 +120,14 @@ public class DependencyRESTManipulator
         }
 
         // Call the REST to populate the result.
-        restResult = (Map<ProjectVersionRef, String>) load ( state, session );
+        for ( ArtifactRef p : localDeps)
+        {
+            restParam.add( p.asProjectVersionRef() );
+        }
+
+        logger.debug ("Calling REST client api with {} ", restParam);
+        restResult = restEndpoint.translateVersions( restParam );
+        logger.debug ("REST Client returned {} ", restResult);
 
         // Parse the rest result for the project GAs and store them in versioning state for use
         // there by incremental suffix calculation.
@@ -147,25 +149,8 @@ public class DependencyRESTManipulator
         logger.debug ("Added the following ProjectRef:Version into VersionState" + versionStates);
         final VersioningState vs = session.getState( VersioningState.class );
         vs.setRESTMetadata (versionStates);
-    }
 
-    /**
-     * Apply any project dependency changes accumulated in the {@link VersioningState} instance associated with the {@link ManipulationSession} to
-     * the list of {@link Project}'s given. This happens near the end of the Maven session-bootstrapping sequence, before the projects are
-     * discovered/read by the main Maven build initialization.
-     */
-    @Override
-    public Set<Project> applyChanges( final List<Project> projects, final ManipulationSession session )
-                    throws ManipulationException
-    {
-        final DependencyRESTState state = session.getState( DependencyRESTState.class );
-
-        if ( !session.isEnabled() || !state.isEnabled() )
-        {
-            logger.debug( getClass().getSimpleName() + ": Nothing to do!" );
-            return Collections.emptySet();
-        }
-
+        final DependencyState ds = session.getState( DependencyState.class );
         final Map<ArtifactRef, String> overrides = new HashMap<ArtifactRef, String>( );
 
         // Convert the loaded remote ProjectVersionRefs to the original ArtifactRefs
@@ -176,36 +161,26 @@ public class DependencyRESTManipulator
                 overrides.put( a, restResult.get( a.asProjectVersionRef()));
             }
         }
-
-        logger.debug( "Calling internalApplyChanges with {} ", overrides );
-        Set<Project> changed = internalApplyChanges( projects, session, overrides );
-
-        return changed;
+        logger.debug( "Setting REST Overrides {} ", overrides );
+        ds.setRemoteRESTOverrides( overrides );
     }
 
+    /**
+     * No-op in this case - any changes, if configured, would happen in Versioning or Dependency Manipulators.
+     */
     @Override
-    public Map<? extends ProjectRef, String> load ( final State state, final ManipulationSession session )
-            throws ManipulationException
+    public Set<Project> applyChanges( final List<Project> projects, final ManipulationSession session )
+                    throws ManipulationException
     {
-        for ( ArtifactRef p : localDeps)
-        {
-            restParam.add( p.asProjectVersionRef() );
-        }
-
-        logger.debug ("Calling REST client api with {} ", restParam);
-        final Map<ProjectVersionRef, String> result = restEndpoint.translateVersions( restParam );
-        logger.debug ("REST Client returned {} ", result);
-
-        return result;
+        return Collections.emptySet();
     }
 
     @Override
     public int getExecutionIndex()
     {
         // Low value index so it runs first in order to call the REST API.
-        return 10;
+        return 5;
     }
-
 
     /**
      * Translate a given set of dependencies into ProjectVersionRefs.

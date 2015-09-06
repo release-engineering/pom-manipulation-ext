@@ -15,28 +15,19 @@
  */
 package org.commonjava.maven.ext.manip.state;
 
-import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.ext.manip.impl.DependencyManipulator;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Properties;
 
 /**
  * Captures configuration relating to dependency alignment from the POMs. Used by {@link DependencyManipulator}.
  */
-public class DependencyRESTState extends CommonDependencyState
-    implements State
+public class RESTState implements State
 {
     private final String restURL;
 
-    private final Map<ProjectVersionRef, String> projectVersionsByGAV = new HashMap<ProjectVersionRef, String>();
-
-
-    public DependencyRESTState( final Properties userProps )
+    public RESTState( final Properties userProps )
     {
-        super (userProps);
-
         restURL = userProps.getProperty( "restURL" );
     }
 
