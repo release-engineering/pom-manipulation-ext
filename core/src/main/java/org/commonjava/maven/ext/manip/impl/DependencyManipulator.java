@@ -356,7 +356,7 @@ public class DependencyManipulator implements Manipulator
                 applyExplicitOverrides( versionPropertyUpdateMap, explicitOverrides, dependencies );
 
                 // Add/override a property to the build for each override
-                addVersionOverrideProperties( session, matchedOverrides, model.getProperties() );
+//                addVersionOverrideProperties( session, matchedOverrides, model.getProperties() );
 
                 if ( session.getState( DependencyState.class ).getOverrideTransitive() )
                 {
@@ -388,7 +388,7 @@ public class DependencyManipulator implements Manipulator
                         logger.debug( "New entry added to <DependencyManagement/> - {} : {} ", var, artifactVersion );
 
                         // Add/override a property to the build for each override
-                        addVersionOverrideProperties( session, nonMatchingVersionOverrides, model.getProperties() );
+//                        addVersionOverrideProperties( session, nonMatchingVersionOverrides, model.getProperties() );
                     }
 
                     dependencyManagement.getDependencies().addAll( 0, extraDeps );
