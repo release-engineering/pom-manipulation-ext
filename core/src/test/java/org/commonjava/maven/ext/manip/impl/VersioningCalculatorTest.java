@@ -44,6 +44,8 @@ import org.codehaus.plexus.DefaultPlexusContainer;
 import org.codehaus.plexus.PlexusContainer;
 import org.commonjava.maven.atlas.ident.ref.ProjectRef;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
+import org.commonjava.maven.atlas.ident.ref.SimpleProjectRef;
+import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef;
 import org.commonjava.maven.ext.manip.ManipulationException;
 import org.commonjava.maven.ext.manip.ManipulationSession;
 import org.commonjava.maven.ext.manip.fixture.StubTransport;
@@ -703,8 +705,8 @@ public class VersioningCalculatorTest
         final Map<ProjectVersionRef, String>
                         result = modder.calculateVersioningChanges( Arrays.asList( p1, p2 ), session );
 
-        assertThat( result.get( new ProjectVersionRef( GROUP_ID, ARTIFACT_ID, v + os ) ), equalTo( v + "-" + ns ) );
-        assertThat( result.get( new ProjectVersionRef( GROUP_ID, a2, v + os ) ), equalTo( v + "-" + ns ) );
+        assertThat( result.get( new SimpleProjectVersionRef( GROUP_ID, ARTIFACT_ID, v + os ) ), equalTo( v + "-" + ns ) );
+        assertThat( result.get( new SimpleProjectVersionRef( GROUP_ID, a2, v + os ) ), equalTo( v + "-" + ns ) );
     }
 
     @Test
@@ -733,9 +735,9 @@ public class VersioningCalculatorTest
         props.setProperty( VersioningState.INCREMENT_SERIAL_SUFFIX_SYSPROP, "foo-0" );
         final Map<ProjectRef, String[]> versionMap = new HashMap<ProjectRef, String[]>();
 
-        versionMap.put( new ProjectRef( p1.getGroupId(), p1.getArtifactId() ), new String[] { "1.2.0.GA-foo-3",
+        versionMap.put( new SimpleProjectRef( p1.getGroupId(), p1.getArtifactId() ), new String[] { "1.2.0.GA-foo-3",
             "1.2.0.GA-foo-2", "1.2.0.GA-foo-9" } );
-        versionMap.put( new ProjectRef( p2.getGroupId(), p2.getArtifactId() ), new String[] { "1.2.0.GA-foo-3",
+        versionMap.put( new SimpleProjectRef( p2.getGroupId(), p2.getArtifactId() ), new String[] { "1.2.0.GA-foo-3",
             "1.2.0.GA-foo-2" } );
 
         setupSession( props, versionMap );
@@ -743,8 +745,8 @@ public class VersioningCalculatorTest
         final Map<ProjectVersionRef, String>
                         result = modder.calculateVersioningChanges( Arrays.asList( p1, p2 ), session );
 
-        assertThat( result.get( new ProjectVersionRef( GROUP_ID, ARTIFACT_ID, v + os ) ), equalTo( v + "-" + ns ) );
-        assertThat( result.get( new ProjectVersionRef( GROUP_ID, a2, v + os ) ), equalTo( v + "-" + ns ) );
+        assertThat( result.get( new SimpleProjectVersionRef( GROUP_ID, ARTIFACT_ID, v + os ) ), equalTo( v + "-" + ns ) );
+        assertThat( result.get( new SimpleProjectVersionRef( GROUP_ID, a2, v + os ) ), equalTo( v + "-" + ns ) );
     }
 
     @Test
@@ -813,7 +815,7 @@ public class VersioningCalculatorTest
     private VersioningState setupSession( final Properties properties, final String... versions )
         throws Exception
     {
-        return setupSession( properties, Collections.singletonMap( new ProjectRef( GROUP_ID, ARTIFACT_ID ), versions ) );
+        return setupSession( properties, Collections.<ProjectRef, String[]> singletonMap( new SimpleProjectRef( GROUP_ID, ARTIFACT_ID ), versions ) );
     }
 
     private VersioningState setupSession( final Properties properties, final Map<ProjectRef, String[]> versionMap )

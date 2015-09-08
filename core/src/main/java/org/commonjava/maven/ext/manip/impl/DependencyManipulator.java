@@ -25,6 +25,8 @@ import org.commonjava.maven.atlas.ident.ref.ArtifactRef;
 import org.commonjava.maven.atlas.ident.ref.InvalidRefException;
 import org.commonjava.maven.atlas.ident.ref.ProjectRef;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
+import org.commonjava.maven.atlas.ident.ref.SimpleArtifactRef;
+import org.commonjava.maven.atlas.ident.ref.SimpleProjectRef;
 import org.commonjava.maven.ext.manip.ManipulationException;
 import org.commonjava.maven.ext.manip.ManipulationSession;
 import org.commonjava.maven.ext.manip.io.ModelIO;
@@ -298,7 +300,7 @@ public class DependencyManipulator implements Manipulator
                     String oldValue = project.getParent().getVersion();
                     String newValue = moduleOverrides.get( ar );
 
-                    if ( ar.asProjectRef().equals( ProjectRef.parse( ga(project.getParent()) ) ))
+                    if ( ar.asProjectRef().equals( SimpleProjectRef.parse( ga(project.getParent()) ) ))
                     {
                         if ( state.getStrict() )
                         {
@@ -471,7 +473,7 @@ public class DependencyManipulator implements Manipulator
         // Apply matching overrides to dependencies
         for ( final Dependency dependency : dependencies )
         {
-            final ProjectRef groupIdArtifactId = new ProjectRef( dependency.getGroupId(), dependency.getArtifactId() );
+            final ProjectRef groupIdArtifactId = new SimpleProjectRef( dependency.getGroupId(), dependency.getArtifactId() );
 
             if ( explicitOverrides.containsKey( groupIdArtifactId ) )
             {
@@ -550,7 +552,7 @@ public class DependencyManipulator implements Manipulator
         // Apply matching overrides to dependencies
         for ( final Dependency dependency : dependencies )
         {
-            ProjectRef depPr = new ProjectRef( dependency.getGroupId(), dependency.getArtifactId() );
+            ProjectRef depPr = new SimpleProjectRef( dependency.getGroupId(), dependency.getArtifactId() );
 
             // We might have junit:junit:3.8.2 and junit:junit:4.1 for differing override scenarios within the
             // overrides list. If strict mode alignment is enabled, using multiple overrides will work with
@@ -642,7 +644,7 @@ public class DependencyManipulator implements Manipulator
         for ( final Project project : session.getProjects() )
         {
             final String reactorGA = gav( project.getModel() );
-            reducedVersionOverrides.remove( ArtifactRef.parse( reactorGA ) );
+            reducedVersionOverrides.remove( SimpleArtifactRef.parse( reactorGA ) );
         }
         return reducedVersionOverrides;
     }
@@ -716,13 +718,13 @@ public class DependencyManipulator implements Manipulator
                     {
                         if ( currentValue != null && currentValue.length() > 0 )
                         {
-                            explicitOverrides.put( ProjectRef.parse( artifactGA ), currentValue );
+                            explicitOverrides.put( SimpleProjectRef.parse( artifactGA ), currentValue );
                             logger.debug( "Overriding module dependency for {} with {} : {}", moduleGA, artifactGA,
                                           currentValue );
                         }
                         else
                         {
-                            removeGA( remainingOverrides, ProjectRef.parse( artifactGA ) );
+                            removeGA( remainingOverrides, SimpleProjectRef.parse( artifactGA ) );
                             logger.debug( "Ignoring module dependency override for {} " + moduleGA );
                         }
                     }
@@ -741,7 +743,7 @@ public class DependencyManipulator implements Manipulator
                     logger.debug( "For artifact override: {}, checking if current overrides already contain a module-specific version.",
                                   artifactGA );
 
-                    if ( explicitOverrides.containsKey( ProjectRef.parse( artifactGA ) ) )
+                    if ( explicitOverrides.containsKey( SimpleProjectRef.parse( artifactGA ) ) )
                     {
                         logger.debug( "For artifact override: {}, current overrides already contain a module-specific version. Skip.",
                                       artifactGA );
@@ -753,7 +755,7 @@ public class DependencyManipulator implements Manipulator
                     {
                         logger.debug( "Overriding module dependency for {} with {} : {}", projectGA, artifactGA,
                                       currentValue );
-                        explicitOverrides.put( ProjectRef.parse( artifactGA ), currentValue );
+                        explicitOverrides.put( SimpleProjectRef.parse( artifactGA ), currentValue );
                     }
                     else
                     {
@@ -761,7 +763,7 @@ public class DependencyManipulator implements Manipulator
                         // with this one i.e. this takes precedence.
                         if ( artifactGA.endsWith( ":*" ) )
                         {
-                            final ProjectRef artifactGAPr = ProjectRef.parse( artifactGA );
+                            final ProjectRef artifactGAPr = SimpleProjectRef.parse( artifactGA );
                             final Iterator<ArtifactRef> it = remainingOverrides.keySet().iterator();
                             while ( it.hasNext() )
                             {
@@ -775,7 +777,7 @@ public class DependencyManipulator implements Manipulator
                         }
                         else
                         {
-                            removeGA( remainingOverrides, ProjectRef.parse( artifactGA ) );
+                            removeGA( remainingOverrides, SimpleProjectRef.parse( artifactGA ) );
                             logger.debug( "Removing artifactGA " + artifactGA + " from overrides" );
                         }
                         logger.debug( "Ignoring module dependency override for {} " + projectGA );

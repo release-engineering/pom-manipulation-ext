@@ -35,6 +35,7 @@ import org.apache.maven.model.ReportPlugin;
 import org.apache.maven.model.Reporting;
 import org.apache.maven.model.building.ModelBuildingResult;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
+import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef;
 import org.commonjava.maven.ext.manip.ManipulationException;
 
 /**
@@ -473,7 +474,7 @@ public class Project
         }
 
 
-        return new ProjectVersionRef( g, a, v );
+        return new SimpleProjectVersionRef( g, a, v );
     }
 
     public void setExecutionRoot( boolean b )

@@ -19,6 +19,7 @@ import java.util.Properties;
 
 import org.commonjava.maven.atlas.ident.ref.InvalidRefException;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
+import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef;
 import org.commonjava.maven.ext.manip.impl.RepositoryInjectionManipulator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,7 +49,7 @@ public class RepositoryInjectionState
         {
             try
             {
-                ref = ProjectVersionRef.parse( gav );
+                ref = SimpleProjectVersionRef.parse( gav );
             }
             catch ( final InvalidRefException e )
             {

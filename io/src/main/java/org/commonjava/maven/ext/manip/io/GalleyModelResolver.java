@@ -26,6 +26,7 @@ import org.apache.maven.model.resolution.ModelResolver;
 import org.apache.maven.model.resolution.UnresolvableModelException;
 import org.commonjava.maven.atlas.ident.ref.ArtifactRef;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
+import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef;
 import org.commonjava.maven.ext.manip.resolver.GalleyAPIWrapper;
 import org.commonjava.maven.galley.TransferException;
 import org.commonjava.maven.galley.model.Transfer;
@@ -47,7 +48,7 @@ public class GalleyModelResolver
         throws UnresolvableModelException
     {
         Transfer transfer;
-        final ArtifactRef ar = new ProjectVersionRef( groupId, artifactId, version ).asPomArtifact();
+        final ArtifactRef ar = new SimpleProjectVersionRef( groupId, artifactId, version ).asPomArtifact();
         try
         {
             transfer =

@@ -26,6 +26,7 @@ import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 import org.commonjava.maven.atlas.ident.ref.ArtifactRef;
 import org.commonjava.maven.atlas.ident.ref.ProjectRef;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
+import org.commonjava.maven.atlas.ident.ref.SimpleProjectRef;
 import org.commonjava.maven.atlas.ident.ref.VersionlessArtifactRef;
 import org.commonjava.maven.ext.manip.ManipulationException;
 import org.commonjava.maven.ext.manip.resolver.GalleyAPIWrapper;
@@ -179,7 +180,7 @@ public class ModelIO
             while (plit.hasNext())
             {
                 Plugin p = plit.next();
-                ProjectRef pr = new ProjectRef (p.getGroupId(), p.getArtifactId());
+                ProjectRef pr = new SimpleProjectRef(p.getGroupId(), p.getArtifactId());
 
                 if ( p.getVersion().startsWith( "${" ))
                 {

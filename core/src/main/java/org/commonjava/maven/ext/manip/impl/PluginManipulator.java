@@ -15,17 +15,6 @@
  */
 package org.commonjava.maven.ext.manip.impl;
 
-import static org.commonjava.maven.ext.manip.util.IdUtils.ga;
-
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.ListIterator;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
-
 import org.apache.maven.model.Build;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Plugin;
@@ -36,15 +25,27 @@ import org.codehaus.plexus.util.xml.Xpp3Dom;
 import org.codehaus.plexus.util.xml.Xpp3DomUtils;
 import org.commonjava.maven.atlas.ident.ref.ProjectRef;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
+import org.commonjava.maven.atlas.ident.ref.SimpleProjectRef;
 import org.commonjava.maven.ext.manip.ManipulationException;
+import org.commonjava.maven.ext.manip.ManipulationSession;
 import org.commonjava.maven.ext.manip.io.ModelIO;
 import org.commonjava.maven.ext.manip.model.Project;
-import org.commonjava.maven.ext.manip.ManipulationSession;
 import org.commonjava.maven.ext.manip.state.PluginState;
 import org.commonjava.maven.ext.manip.state.PluginState.Precedence;
 import org.commonjava.maven.ext.manip.state.State;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.ListIterator;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
+
+import static org.commonjava.maven.ext.manip.util.IdUtils.ga;
 
 /**
  * {@link Manipulator} implementation that can alter plugin sections in a project's pom file.
@@ -224,7 +225,7 @@ public class PluginManipulator
 
             if ( index != -1 )
             {
-                final ProjectRef groupIdArtifactId = new ProjectRef(override.getGroupId(), override.getArtifactId());
+                final ProjectRef groupIdArtifactId = new SimpleProjectRef(override.getGroupId(), override.getArtifactId());
                 final Plugin plugin = plugins.get( index );
 
                 if ( override.getConfiguration() != null)

@@ -6,6 +6,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mashape.unirest.http.Unirest;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
+import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef;
 import org.commonjava.maven.ext.manip.rest.exception.RestException;
 import org.commonjava.maven.ext.manip.rest.rule.MockServer;
 import org.junit.Before;
@@ -58,7 +59,7 @@ public class DefaultVersionTranslatorTest
         for ( Map<String, String> gav : gavs )
         {
             ProjectVersionRef project =
-                new ProjectVersionRef( gav.get( "groupId" ), gav.get( "artifactId" ), gav.get( "version" ) );
+                new SimpleProjectVersionRef( gav.get( "groupId" ), gav.get( "artifactId" ), gav.get( "version" ) );
             aLotOfGavs.add( project );
         }
     }
@@ -89,19 +90,19 @@ public class DefaultVersionTranslatorTest
     {
         List<ProjectVersionRef> gavs = new ArrayList<ProjectVersionRef>()
         {{
-                add( new ProjectVersionRef( "com.example", "example", "1.0" ) );
-                add( new ProjectVersionRef( "com.example", "example-dep", "2.0" ) );
-                add( new ProjectVersionRef( "org.commonjava", "example", "1.0" ) );
-                add( new ProjectVersionRef( "org.commonjava", "example", "1.1" ) );
+                add( new SimpleProjectVersionRef( "com.example", "example", "1.0" ) );
+                add( new SimpleProjectVersionRef( "com.example", "example-dep", "2.0" ) );
+                add( new SimpleProjectVersionRef( "org.commonjava", "example", "1.0" ) );
+                add( new SimpleProjectVersionRef( "org.commonjava", "example", "1.1" ) );
             }};
 
         Map<ProjectVersionRef, String> actualResult = versionTranslator.translateVersions( gavs );
         Map<ProjectVersionRef, String> expectedResult = new HashMap<ProjectVersionRef, String>()
         {{
-                put( new ProjectVersionRef( "com.example", "example", "1.0" ), "1.0-redhat-1" );
-                put( new ProjectVersionRef( "com.example", "example-dep", "2.0" ), "2.0-redhat-1" );
-                put( new ProjectVersionRef( "org.commonjava", "example", "1.0" ), "1.0-redhat-1" );
-                put( new ProjectVersionRef( "org.commonjava", "example", "1.1" ), "1.1-redhat-1" );
+                put( new SimpleProjectVersionRef( "com.example", "example", "1.0" ), "1.0-redhat-1" );
+                put( new SimpleProjectVersionRef( "com.example", "example-dep", "2.0" ), "2.0-redhat-1" );
+                put( new SimpleProjectVersionRef( "org.commonjava", "example", "1.0" ), "1.0-redhat-1" );
+                put( new SimpleProjectVersionRef( "org.commonjava", "example", "1.1" ), "1.1-redhat-1" );
             }};
 
         assertThat( actualResult, is( expectedResult ) );
@@ -115,7 +116,7 @@ public class DefaultVersionTranslatorTest
 
         List<ProjectVersionRef> gavs = new ArrayList<ProjectVersionRef>()
         {{
-                add( new ProjectVersionRef( "com.example", "example", "1.0" ) );
+                add( new SimpleProjectVersionRef( "com.example", "example", "1.0" ) );
             }};
 
         try
