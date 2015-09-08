@@ -74,6 +74,7 @@ For example to apply an explicit dependency override only to module B of project
 
     mvn install -DdependencyExclusion.junit:junit@org.foo:moduleB=4.10
 
+**NOTE:** Explicit overrides like this will take precedence over strict alignment.
 
 #### Per-Module Prevention of Override
 
