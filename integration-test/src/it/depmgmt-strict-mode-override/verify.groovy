@@ -22,9 +22,7 @@ def pom = new XmlSlurper().parse( pomFile )
 
 dependency = pom.dependencies.dependency.find { it.artifactId.text() == "commons-lang" }
 assert dependency != null
-assert dependency.version.text() == "1.0"
-// Overrides currently take lesser priority than strict mode.
-// assert dependency.version.text() == "3.0"
+assert dependency.version.text() == "3.0"
 
 dependency = pom.dependencies.dependency.find { it.artifactId.text() == "junit" }
 assert dependency != null
@@ -32,10 +30,9 @@ assert dependency.version.text().contains ("junitversion")
 
 def failed = false
 pom.properties.each {
-// Overrides currently take lesser priority than strict mode.
-//    if ( ! it.text().contains ("4.12") )
-    if ( ! it.text().contains ("3.8.2") )
+    if ( ! it.text().contains ("4.12") )
     {
         failed = true
     }
 }
+assert (failed == false)
