@@ -21,7 +21,9 @@ import org.codehaus.plexus.component.annotations.Component;
 import org.commonjava.maven.atlas.ident.ref.ArtifactRef;
 import org.commonjava.maven.atlas.ident.ref.ProjectRef;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
-import org.commonjava.maven.atlas.ident.ref.TypeAndClassifier;
+import org.commonjava.maven.atlas.ident.ref.SimpleArtifactRef;
+import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef;
+import org.commonjava.maven.atlas.ident.ref.SimpleTypeAndClassifier;
 import org.commonjava.maven.ext.manip.ManipulationException;
 import org.commonjava.maven.ext.manip.ManipulationSession;
 import org.commonjava.maven.ext.manip.model.Project;
@@ -209,9 +211,9 @@ public class RESTManipulator implements Manipulator
             }
             else
             {
-                deps.add( new ArtifactRef( new ProjectVersionRef( d.getGroupId(), d.getArtifactId(),
-                                                                  resolveProperties ( projects, d.getVersion())),
-                                           new TypeAndClassifier( d.getType(), d.getClassifier() ), Boolean.parseBoolean( d.getOptional())));
+                deps.add( new SimpleArtifactRef( new SimpleProjectVersionRef( d.getGroupId(), d.getArtifactId(),
+                                                                        resolveProperties( projects, d.getVersion() ) ),
+                                           new SimpleTypeAndClassifier( d.getType(), d.getClassifier() ), Boolean.parseBoolean( d.getOptional())));
             }
         }
     }

@@ -15,19 +15,11 @@
  */
 package org.commonjava.maven.ext.manip.impl;
 
-import static org.commonjava.maven.ext.manip.util.IdUtils.gav;
-
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import org.codehaus.plexus.component.annotations.Component;
 import org.codehaus.plexus.component.annotations.Requirement;
 import org.commonjava.maven.atlas.ident.ref.ProjectRef;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
+import org.commonjava.maven.atlas.ident.ref.SimpleProjectRef;
 import org.commonjava.maven.ext.manip.ManipulationException;
 import org.commonjava.maven.ext.manip.ManipulationSession;
 import org.commonjava.maven.ext.manip.model.Project;
@@ -37,6 +29,15 @@ import org.commonjava.maven.galley.maven.GalleyMavenException;
 import org.commonjava.maven.galley.maven.model.view.meta.MavenMetadataView;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import static org.commonjava.maven.ext.manip.util.IdUtils.gav;
 
 /**
  * Component that calculates project version modifications, based on configuration stored in {@link VersioningState}.
@@ -204,7 +205,7 @@ public class VersionCalculator
                 if (rm.size() > 0)
                 {
                     // Use preloaded metadata from remote repository, loaded via a REST Call.
-                    versionCandidates.addAll( rm.get( new ProjectRef( groupId, artifactId ) ) );
+                    versionCandidates.addAll( rm.get( new SimpleProjectRef( groupId, artifactId ) ) );
                 }
             }
             else
@@ -243,7 +244,7 @@ public class VersionCalculator
         try
         {
             final MavenMetadataView metadataView =
-                readerWrapper.readMetadataView( new ProjectRef( groupId, artifactId ) );
+                readerWrapper.readMetadataView( new SimpleProjectRef( groupId, artifactId ) );
 
             final List<String> versions =
                 metadataView.resolveXPathToAggregatedStringList( "/metadata/versioning/versions/version", true, -1 );

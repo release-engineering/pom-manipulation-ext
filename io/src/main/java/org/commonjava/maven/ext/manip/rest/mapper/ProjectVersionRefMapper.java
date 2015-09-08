@@ -19,6 +19,7 @@ package org.commonjava.maven.ext.manip.rest.mapper;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.mashape.unirest.http.ObjectMapper;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
+import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef;
 import org.commonjava.maven.ext.manip.rest.exception.RestException;
 
 import java.io.IOException;
@@ -61,7 +62,7 @@ public class ProjectVersionRefMapper implements ObjectMapper
 
             if ( bestMatchVersion != null )
             {
-                ProjectVersionRef project = new ProjectVersionRef( groupId, artifactId, version );
+                ProjectVersionRef project = new SimpleProjectVersionRef( groupId, artifactId, version );
                 result.put( project, bestMatchVersion );
             }
         }

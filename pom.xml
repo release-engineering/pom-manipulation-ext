@@ -86,8 +86,8 @@
 
     <maeVersion>1.0-alpha-1</maeVersion>
     <mavenVersion>3.0.4</mavenVersion>
-    <galleyVersion>0.9.1</galleyVersion>
-    <atlasVersion>0.13.6</atlasVersion>
+    <atlasVersion>0.15.0</atlasVersion>
+    <galleyVersion>0.10.0</galleyVersion>
 
   </properties>
 

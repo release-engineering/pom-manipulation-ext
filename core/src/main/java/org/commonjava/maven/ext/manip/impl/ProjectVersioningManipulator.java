@@ -41,6 +41,7 @@ import org.codehaus.plexus.interpolation.PropertiesBasedValueSource;
 import org.codehaus.plexus.interpolation.RecursionInterceptor;
 import org.codehaus.plexus.interpolation.StringSearchInterpolator;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
+import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef;
 import org.commonjava.maven.ext.manip.ManipulationException;
 import org.commonjava.maven.ext.manip.ManipulationSession;
 import org.commonjava.maven.ext.manip.model.Project;
@@ -197,7 +198,8 @@ public class ProjectVersioningManipulator
         // If the parent version is not defined, it will be taken automatically from the project version
         if ( parent != null && parent.getVersion() != null )
         {
-            final ProjectVersionRef parentGAV = new ProjectVersionRef( parent.getGroupId(), parent.getArtifactId(), parent.getVersion() );
+            final ProjectVersionRef parentGAV =
+                    new SimpleProjectVersionRef( parent.getGroupId(), parent.getArtifactId(), parent.getVersion() );
             logger.info( "Looking for parent: " + parentGAV );
             if ( versionsByGAV.containsKey( parentGAV ) )
             {
@@ -208,7 +210,7 @@ public class ProjectVersioningManipulator
             }
         }
 
-        ProjectVersionRef gav = new ProjectVersionRef( g, model.getArtifactId(), v );
+        ProjectVersionRef gav = new SimpleProjectVersionRef( g, model.getArtifactId(), v );
         if ( model.getVersion() != null )
         {
             final String newVersion = versionsByGAV.get( gav );
@@ -262,9 +264,8 @@ public class ProjectVersioningManipulator
             {
                 for ( final Dependency d : dm.getDependencies() )
                 {
-                    gav =
-                        new ProjectVersionRef( interpolate( d.getGroupId(), ri, interp ), interpolate( d.getArtifactId(), ri, interp ),
-                             interpolate( d.getVersion(), ri, interp ) );
+                    gav = new SimpleProjectVersionRef( interpolate( d.getGroupId(), ri, interp ), interpolate( d.getArtifactId(), ri, interp ),
+                                                       interpolate( d.getVersion(), ri, interp ) );
                     final String newVersion = versionsByGAV.get( gav );
                     if ( newVersion != null )
                     {
@@ -279,9 +280,8 @@ public class ProjectVersioningManipulator
             {
                 for ( final Dependency d : base.getDependencies() )
                 {
-                    gav =
-                        new ProjectVersionRef( interpolate( d.getGroupId(), ri, interp ), interpolate( d.getArtifactId(), ri, interp ),
-                             interpolate( d.getVersion(), ri, interp ) );
+                    gav = new SimpleProjectVersionRef( interpolate( d.getGroupId(), ri, interp ), interpolate( d.getArtifactId(), ri, interp ),
+                                                       interpolate( d.getVersion(), ri, interp ) );
                     final String newVersion = versionsByGAV.get( gav );
                     if ( newVersion != null && d.getVersion() != null )
                     {

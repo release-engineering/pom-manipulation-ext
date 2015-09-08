@@ -21,6 +21,7 @@ import static org.hamcrest.Matchers.containsString;
 import junit.framework.TestCase;
 
 import org.commonjava.maven.atlas.ident.ref.ProjectRef;
+import org.commonjava.maven.atlas.ident.ref.SimpleProjectRef;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -59,18 +60,18 @@ public class WildcardMapTest extends TestCase
     @Test
     public void testContainsKey() throws Exception
     {
-        map.put(ProjectRef.parse("org.group:new-artifact"), "1.2");
+        map.put( SimpleProjectRef.parse( "org.group:new-artifact" ), "1.2");
 
-        assertFalse(map.containsKey(ProjectRef.parse("org.group:*")));
-        assertFalse(map.containsKey(ProjectRef.parse("org.group:old-artifact")));
+        assertFalse(map.containsKey( SimpleProjectRef.parse( "org.group:*" )));
+        assertFalse(map.containsKey( SimpleProjectRef.parse( "org.group:old-artifact" )));
     }
 
     @Test
     public void testGet() throws Exception
     {
         final String value = "1.2";
-        ProjectRef key1 = ProjectRef.parse("org.group:new-artifact");
-        ProjectRef key2 = ProjectRef.parse("org.group:new-new-artifact");
+        ProjectRef key1 = SimpleProjectRef.parse( "org.group:new-artifact" );
+        ProjectRef key2 = SimpleProjectRef.parse( "org.group:new-new-artifact" );
 
         map.put(key1, value);
         map.put(key2, value);
@@ -84,15 +85,15 @@ public class WildcardMapTest extends TestCase
     {
         final String value = "1.2";
 
-        map.put(ProjectRef.parse("org.group:new-artifact"), value);
+        map.put( SimpleProjectRef.parse( "org.group:new-artifact" ), value);
 
-        assertFalse(value.equals(map.get(ProjectRef.parse("org.group:i-dont-exist-artifact"))));
+        assertFalse(value.equals(map.get( SimpleProjectRef.parse( "org.group:i-dont-exist-artifact" ))));
     }
 
     @Test
     public void testPut() throws Exception
     {
-        ProjectRef key = ProjectRef.parse("foo:bar");
+        ProjectRef key = SimpleProjectRef.parse( "foo:bar" );
 
         map.put(key, "value");
         assertTrue("Should have retrieved value", map.containsKey(key));
@@ -101,9 +102,9 @@ public class WildcardMapTest extends TestCase
     @Test
     public void testPutWildcard() throws Exception
     {
-        ProjectRef key1 = ProjectRef.parse("org.group:*");
-        ProjectRef key2 = ProjectRef.parse("org.group:artifact");
-        ProjectRef key3 = ProjectRef.parse("org.group:new-artifact");
+        ProjectRef key1 = SimpleProjectRef.parse( "org.group:*" );
+        ProjectRef key2 = SimpleProjectRef.parse( "org.group:artifact" );
+        ProjectRef key3 = SimpleProjectRef.parse( "org.group:new-artifact" );
 
         map.put(key1, "1.1");
 
@@ -123,8 +124,8 @@ public class WildcardMapTest extends TestCase
     @Test
     public void testPutWildcardSecond() throws Exception
     {
-        ProjectRef key1 = ProjectRef.parse("org.group:artifact");
-        ProjectRef key2 = ProjectRef.parse("org.group:*");
+        ProjectRef key1 = SimpleProjectRef.parse( "org.group:artifact" );
+        ProjectRef key2 = SimpleProjectRef.parse( "org.group:*" );
 
         map.put(key1, "1.1");
         map.put(key2, "1.2");

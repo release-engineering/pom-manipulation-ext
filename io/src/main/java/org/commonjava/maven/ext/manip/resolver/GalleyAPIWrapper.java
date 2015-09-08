@@ -25,6 +25,7 @@ import org.codehaus.plexus.component.annotations.Requirement;
 import org.commonjava.maven.atlas.ident.ref.ArtifactRef;
 import org.commonjava.maven.atlas.ident.ref.ProjectRef;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
+import org.commonjava.maven.atlas.ident.ref.SimpleProjectRef;
 import org.commonjava.maven.galley.TransferException;
 import org.commonjava.maven.galley.maven.GalleyMavenException;
 import org.commonjava.maven.galley.maven.model.view.DocRef;
@@ -80,7 +81,7 @@ public class GalleyAPIWrapper
         final Document document = infra.getXml()
                                        .parseDocument( xml, new ByteArrayInputStream( xml.getBytes() ) );
 
-        final DocRef<ProjectRef> ref = new DocRef<ProjectRef>( new ProjectRef( "unknown", "unknown" ), xml, document );
+        final DocRef<ProjectRef> ref = new DocRef<ProjectRef>( new SimpleProjectRef( "unknown", "unknown" ), xml, document );
         return new MavenXmlView<ProjectRef>( Collections.singletonList( ref ), infra.getXPath(), infra.getXml() );
     }
 

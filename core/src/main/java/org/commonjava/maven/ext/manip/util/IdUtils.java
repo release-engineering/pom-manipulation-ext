@@ -25,6 +25,7 @@ import org.apache.maven.model.Parent;
 import org.apache.maven.project.MavenProject;
 import org.commonjava.maven.atlas.ident.ref.InvalidRefException;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
+import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef;
 import org.commonjava.maven.ext.manip.model.Project;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,7 +44,7 @@ public final class IdUtils
     }
 
     /**
-     * Splits the value on ',', then wraps each value in {@link ProjectVersionRef#parse(String)} and prints a warning / skips in the event of a 
+     * Splits the value on ',', then wraps each value in {@link SimpleProjectVersionRef#parse(String)} and prints a warning / skips in the event of a
      * parsing error. Returns null if the input value is null.
      * @param value a comma separated list of GAV to parse
      * @return a collection of parsed ProjectVersionRef.
@@ -62,7 +63,7 @@ public final class IdUtils
             {
                 try
                 {
-                    final ProjectVersionRef ref = ProjectVersionRef.parse( gav );
+                    final ProjectVersionRef ref = SimpleProjectVersionRef.parse( gav );
                     refs.add( ref );
                 }
                 catch ( final InvalidRefException e )

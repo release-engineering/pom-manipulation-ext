@@ -37,6 +37,7 @@ import org.apache.maven.model.Parent;
 import org.apache.maven.model.Profile;
 import org.apache.maven.project.MavenProject;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
+import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef;
 import org.commonjava.maven.ext.manip.ManipulationException;
 import org.commonjava.maven.ext.manip.ManipulationSession;
 import org.commonjava.maven.ext.manip.model.Project;
@@ -65,7 +66,7 @@ public class ProjectVersionManipulatorTest
         final String mv = orig.getVersion() + "." + suff;
 
         final Map<ProjectVersionRef, String> versionsByGAV = new HashMap<ProjectVersionRef, String>();
-        versionsByGAV.put( new ProjectVersionRef( orig.getGroupId(), orig.getArtifactId(), orig.getVersion() ), mv );
+        versionsByGAV.put( new SimpleProjectVersionRef( orig.getGroupId(), orig.getArtifactId(), orig.getVersion() ), mv );
 
         final MavenProject project = new MavenProject( eff );
         project.setOriginalModel( orig );
@@ -104,7 +105,7 @@ public class ProjectVersionManipulatorTest
 
         final Map<ProjectVersionRef, String> versionsByGA = new HashMap<ProjectVersionRef, String>();
         // Not putting original group/artifact/version as they are group & version are null which causes problems with ProjectVersionRef
-        versionsByGA.put( new ProjectVersionRef( origParent.getGroupId(), origParent.getArtifactId(), origParent.getVersion() ), mv );
+        versionsByGA.put( new SimpleProjectVersionRef( origParent.getGroupId(), origParent.getArtifactId(), origParent.getVersion() ), mv );
 
         final List<MavenProject> projects = new ArrayList<MavenProject>();
 
@@ -184,9 +185,11 @@ public class ProjectVersionManipulatorTest
         final String mv = orig.getVersion() + "." + suff;
 
         final Map<ProjectVersionRef, String> versionsByGA = new HashMap<ProjectVersionRef, String>();
-        versionsByGA.put( new ProjectVersionRef( orig.getGroupId(), orig.getArtifactId(), orig.getVersion() ), mv );
-        versionsByGA.put( new ProjectVersionRef( depModel.getGroupId(), depModel.getArtifactId(), depModel.getVersion() ), mv );
-        versionsByGA.put( new ProjectVersionRef( dmModel.getGroupId(), dmModel.getArtifactId(), dmModel.getVersion() ), mv );
+        versionsByGA.put( new SimpleProjectVersionRef( orig.getGroupId(), orig.getArtifactId(), orig.getVersion() ), mv );
+        versionsByGA.put(
+                new SimpleProjectVersionRef( depModel.getGroupId(), depModel.getArtifactId(), depModel.getVersion() ), mv );
+        versionsByGA.put(
+                new SimpleProjectVersionRef( dmModel.getGroupId(), dmModel.getArtifactId(), dmModel.getVersion() ), mv );
 
         final List<MavenProject> projects = new ArrayList<MavenProject>();
 
@@ -295,8 +298,9 @@ public class ProjectVersionManipulatorTest
         final String mv = orig.getVersion() + "." + suff;
 
         final Map<ProjectVersionRef, String> versionsByGA = new HashMap<ProjectVersionRef, String>();
-        versionsByGA.put( new ProjectVersionRef( orig.getGroupId(), orig.getArtifactId(), orig.getVersion() ), mv );
-        versionsByGA.put( new ProjectVersionRef( depModel.getGroupId(), depModel.getArtifactId(), depModel.getVersion() ), mv );
+        versionsByGA.put( new SimpleProjectVersionRef( orig.getGroupId(), orig.getArtifactId(), orig.getVersion() ), mv );
+        versionsByGA.put(
+                new SimpleProjectVersionRef( depModel.getGroupId(), depModel.getArtifactId(), depModel.getVersion() ), mv );
 
         final List<MavenProject> projects = new ArrayList<MavenProject>();
 
@@ -411,9 +415,11 @@ public class ProjectVersionManipulatorTest
         final String mv = orig.getVersion() + "." + suff;
 
         final Map<ProjectVersionRef, String> versionsByGA = new HashMap<ProjectVersionRef, String>();
-        versionsByGA.put( new ProjectVersionRef( orig.getGroupId(), orig.getArtifactId(), orig.getVersion() ), mv );
-        versionsByGA.put( new ProjectVersionRef( depModel.getGroupId(), depModel.getArtifactId(), depModel.getVersion() ), mv );
-        versionsByGA.put( new ProjectVersionRef( dmModel.getGroupId(), dmModel.getArtifactId(), dmModel.getVersion() ), mv );
+        versionsByGA.put( new SimpleProjectVersionRef( orig.getGroupId(), orig.getArtifactId(), orig.getVersion() ), mv );
+        versionsByGA.put(
+                new SimpleProjectVersionRef( depModel.getGroupId(), depModel.getArtifactId(), depModel.getVersion() ), mv );
+        versionsByGA.put(
+                new SimpleProjectVersionRef( dmModel.getGroupId(), dmModel.getArtifactId(), dmModel.getVersion() ), mv );
 
         final List<MavenProject> projects = new ArrayList<MavenProject>();
 
@@ -529,8 +535,9 @@ public class ProjectVersionManipulatorTest
         final String mv = orig.getVersion() + "." + suff;
 
         final Map<ProjectVersionRef, String> versionsByGA = new HashMap<ProjectVersionRef, String>();
-        versionsByGA.put( new ProjectVersionRef( orig.getGroupId(), orig.getArtifactId(), orig.getVersion() ), mv );
-        versionsByGA.put( new ProjectVersionRef( depModel.getGroupId(), depModel.getArtifactId(), depModel.getVersion() ), mv );
+        versionsByGA.put( new SimpleProjectVersionRef( orig.getGroupId(), orig.getArtifactId(), orig.getVersion() ), mv );
+        versionsByGA.put(
+                new SimpleProjectVersionRef( depModel.getGroupId(), depModel.getArtifactId(), depModel.getVersion() ), mv );
 
         final List<MavenProject> projects = new ArrayList<MavenProject>();
 
@@ -638,7 +645,7 @@ public class ProjectVersionManipulatorTest
             {
                 if ( applyVersioningChanges( new Project (project.getOriginalModel()) ) )
                 {
-                    final String v = versionsByGAV.get( ProjectVersionRef.parse( gav( project ) ) );
+                    final String v = versionsByGAV.get( SimpleProjectVersionRef.parse( gav( project ) ) );
                     logger.info( project.getName() + " (" + gav( project ) + "): VERSION MODIFIED\n    New version: "
                         + v );
 
