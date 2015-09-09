@@ -178,10 +178,9 @@ public class PomIO
     {
         try
         {
-            final MavenJDOMWriter writer = new MavenJDOMWriter( model );
-
             final String manifestInformation = project.isInheritanceRoot() ? getManifestInformation() : null;
-            new MavenJDOMWriter().write( model, pom, new DocumentModifier()
+
+            new MavenJDOMWriter( model ).write( model, pom, new DocumentModifier()
             {
                 @Override
                 public void postProcess( final Document doc )
@@ -195,7 +194,6 @@ public class PomIO
                         {
                             final Comment c = (Comment) it.next();
 
-                            //final Comment c = (Comment) it.next();
                             if ( c.toString()
                                   .startsWith( MODIFIED_BY ) )
                             {

@@ -381,9 +381,6 @@ public class DependencyManipulator implements Manipulator
 
                 applyExplicitOverrides( explicitVersionPropertyUpdateMap, explicitOverrides, dependencies );
 
-                // Add/override a property to the build for each override
-//                addVersionOverrideProperties( session, matchedOverrides, model.getProperties() );
-
                 if ( session.getState( DependencyState.class ).getOverrideTransitive() )
                 {
                     final List<Dependency> extraDeps = new ArrayList<Dependency>();
@@ -412,9 +409,6 @@ public class DependencyManipulator implements Manipulator
 
                         extraDeps.add( newDependency );
                         logger.debug( "New entry added to <DependencyManagement/> - {} : {} ", var, artifactVersion );
-
-                        // Add/override a property to the build for each override
-//                        addVersionOverrideProperties( session, nonMatchingVersionOverrides, model.getProperties() );
                     }
 
                     dependencyManagement.getDependencies().addAll( 0, extraDeps );
@@ -486,9 +480,9 @@ public class DependencyManipulator implements Manipulator
      * dependencyExclusion. However they have to be separated out from standard overrides so we can easily
      * ignore any property references (and overwrite them).
      *
-     *
+     * @param versionPropertyUpdateMap properties to update
      * @param explicitOverrides
-     * @param dependencies
+     * @param dependencies dependencies to check
      * @throws ManipulationException
      */
     private void applyExplicitOverrides( final Map<String, String> versionPropertyUpdateMap,
@@ -827,50 +821,6 @@ public class DependencyManipulator implements Manipulator
             {
                 it.remove();
             }
-        }
-    }
-
-    /***
-     * Add properties to the build which match the version overrides.
-     * The property names are in the format
-     * @param session the ManipulationSession
-     */
-    private void addVersionOverrideProperties( final ManipulationSession session,
-                                               final Map<ArtifactRef, String> overrides, final Properties props )
-    {
-        final Properties properties = session.getUserProperties();
-        DependencyState.VersionPropertyFormat result = DependencyState.VersionPropertyFormat.VG;
-
-        switch ( DependencyState.VersionPropertyFormat.valueOf(
-                        properties.getProperty( "versionPropertyFormat", DependencyState.VersionPropertyFormat.NONE.toString() )
-                                  .toUpperCase() ) )
-        {
-            case VG:
-            {
-                result = DependencyState.VersionPropertyFormat.VG;
-                break;
-            }
-            case VGA:
-            {
-                result = DependencyState.VersionPropertyFormat.VGA;
-                break;
-            }
-            case NONE:
-            {
-                // Property injection disabled.
-                return;
-            }
-        }
-
-        for ( final ArtifactRef currentGA : overrides.keySet() )
-        {
-            final String versionPropName = "version." + ( result == DependencyState.VersionPropertyFormat.VGA ?
-                            currentGA.asProjectVersionRef().toString() :
-                            currentGA.asProjectRef().toString() );
-
-            logger.debug( "Adding version override property for {} of {}:{}", currentGA, versionPropName,
-                          overrides.get( currentGA ) );
-            props.setProperty( versionPropName, overrides.get( currentGA ) );
         }
     }
 

@@ -60,22 +60,6 @@ public class DependencyState
      */
     public static final String DEPENDENCY_MANAGEMENT_POM_PROPERTY = "dependencyManagement";
 
-    /**
-     * Two possible formats currently supported for version property output:
-     * <ul>
-     * <li><code>version.group</code></li>
-     * <li><code>version.group.artifact</code></li>
-     * <li><code>none</code> (equates to off)</li>
-     * </ul>
-     * Configured by the property <code>-DversionPropertyFormat=[VG|VGA|NONE]</code>
-     */
-    public static enum VersionPropertyFormat
-    {
-        VG,
-        VGA,
-        NONE;
-    }
-
     private final boolean overrideTransitive;
 
     private final boolean overrideDependencies;
