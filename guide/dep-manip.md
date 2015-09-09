@@ -130,17 +130,3 @@ If, instead, the build should fail when strict-mode checks are violated, add the
 This will cause the build to fail with a ManipulationException, and prevent the extension from rewriting any POM files.
 
 **NOTE:** dependency exclusions they will not work if the dependency uses a version property that has been changed by another dependency modification. Explicit version override will overwrite the property value though.
-
-### Dependency Property Injection (DEPRECATED)
-
-The extension will automatically set properties which match the version overrides.  These properties can be used, for example, in resource filtering in the build.  By default the extension supports two different formats for the properties. It is controlled by the property:
-
-    -DversionPropertyFormat=[VG|VGA|NONE]
-
-Where:
-
-* `VG` is `version.<group>` (e.g. `version.org.slf4j`)
-* `VGA` is `version.<group>.<artifact>`
-* `NONE` disables the injection
-
-The default is `NONE`.
