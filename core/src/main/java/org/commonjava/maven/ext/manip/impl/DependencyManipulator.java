@@ -379,7 +379,7 @@ public class DependencyManipulator implements Manipulator
                                 new LinkedHashMap<ArtifactRef, String>( moduleOverrides );
                 matchedOverrides.keySet().removeAll( nonMatchingVersionOverrides.keySet() );
 
-                applyExplicitOverrides( session, explicitVersionPropertyUpdateMap, explicitOverrides, dependencies );
+                applyExplicitOverrides( explicitVersionPropertyUpdateMap, explicitOverrides, dependencies );
 
                 // Add/override a property to the build for each override
 //                addVersionOverrideProperties( session, matchedOverrides, model.getProperties() );
@@ -438,7 +438,7 @@ public class DependencyManipulator implements Manipulator
             {
                 logger.debug( "Applying overrides to managed dependencies for: {}\n{}", projectGA, moduleOverrides );
                 applyOverrides( session, dependencyManagement.getDependencies(), moduleOverrides );
-                applyExplicitOverrides( session, explicitVersionPropertyUpdateMap, explicitOverrides,
+                applyExplicitOverrides( explicitVersionPropertyUpdateMap, explicitOverrides,
                                         dependencyManagement.getDependencies() );
             }
             else
@@ -454,7 +454,7 @@ public class DependencyManipulator implements Manipulator
             // Apply overrides to project direct dependencies
             final List<Dependency> projectDependencies = model.getDependencies();
             applyOverrides( session, projectDependencies, moduleOverrides );
-            applyExplicitOverrides( session, explicitVersionPropertyUpdateMap, explicitOverrides, projectDependencies );
+            applyExplicitOverrides( explicitVersionPropertyUpdateMap, explicitOverrides, projectDependencies );
 
             // Now check all possible profiles and update them.
             List<Profile> profiles = project.getModel().getProfiles();
@@ -466,12 +466,12 @@ public class DependencyManipulator implements Manipulator
                     if ( p.getDependencyManagement() != null )
                     {
                         applyOverrides( session, p.getDependencyManagement().getDependencies(), moduleOverrides );
-                        applyExplicitOverrides( session, explicitVersionPropertyUpdateMap, explicitOverrides,
+                        applyExplicitOverrides( explicitVersionPropertyUpdateMap, explicitOverrides,
                                                 p.getDependencyManagement().getDependencies() );
                     }
                     final List<Dependency> profileDependencies = p.getDependencies();
                     applyOverrides( session, profileDependencies, moduleOverrides );
-                    applyExplicitOverrides( session, explicitVersionPropertyUpdateMap, explicitOverrides, profileDependencies );
+                    applyExplicitOverrides( explicitVersionPropertyUpdateMap, explicitOverrides, profileDependencies );
                 }
             }
         }
@@ -487,17 +487,14 @@ public class DependencyManipulator implements Manipulator
      * ignore any property references (and overwrite them).
      *
      *
-     * @param session
      * @param explicitOverrides
      * @param dependencies
      * @throws ManipulationException
      */
-    private void applyExplicitOverrides( ManipulationSession session, final Map<String, String> versionPropertyUpdateMap,
+    private void applyExplicitOverrides( final Map<String, String> versionPropertyUpdateMap,
                                          final WildcardMap explicitOverrides, final List<Dependency> dependencies )
                     throws ManipulationException
     {
-        final DependencyState state = session.getState( DependencyState.class );
-
         // Apply matching overrides to dependencies
         for ( final Dependency dependency : dependencies )
         {
