@@ -22,7 +22,7 @@
   <parent>
     <groupId>com.redhat.rcm</groupId>
     <artifactId>redhat-releng-tools</artifactId>
-    <version>2-SNAPSHOT</version>
+    <version>2</version>
   </parent>
 
   <groupId>org.commonjava.maven.ext</groupId>
@@ -84,7 +84,6 @@
 
     <javaVersion>1.6</javaVersion>
 
-    <maeVersion>1.0-alpha-1</maeVersion>
     <mavenVersion>3.0.4</mavenVersion>
     <atlasVersion>0.15.0</atlasVersion>
     <galleyVersion>0.10.0</galleyVersion>
@@ -97,27 +96,27 @@
       <dependency>
         <groupId>org.commonjava.maven.ext</groupId>
         <artifactId>pom-manipulation-common</artifactId>
-        <version>${project.version}</version>
+        <version>1.7-SNAPSHOT</version>
       </dependency>
       <dependency>
         <groupId>org.commonjava.maven.ext</groupId>
         <artifactId>pom-manipulation-core</artifactId>
-        <version>${project.version}</version>
+        <version>1.7-SNAPSHOT</version>
       </dependency>
       <dependency>
         <groupId>org.commonjava.maven.ext</groupId>
         <artifactId>pom-manipulation-ext</artifactId>
-        <version>${project.version}</version>
+        <version>1.7-SNAPSHOT</version>
       </dependency>
       <dependency>
         <groupId>org.commonjava.maven.ext</groupId>
         <artifactId>pom-manipulation-io</artifactId>
-        <version>${project.version}</version>
+        <version>1.7-SNAPSHOT</version>
       </dependency>
       <dependency>
         <groupId>org.commonjava.maven.ext</groupId>
         <artifactId>pom-manipulation-io</artifactId>
-        <version>${project.version}</version>
+        <version>1.7-SNAPSHOT</version>
         <type>test-jar</type>
       </dependency>
 
