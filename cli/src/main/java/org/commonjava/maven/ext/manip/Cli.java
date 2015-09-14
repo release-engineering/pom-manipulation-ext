@@ -24,7 +24,12 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.maven.artifact.repository.ArtifactRepository;
-import org.apache.maven.execution.*;
+import org.apache.maven.execution.DefaultMavenExecutionRequest;
+import org.apache.maven.execution.DefaultMavenExecutionResult;
+import org.apache.maven.execution.MavenExecutionRequest;
+import org.apache.maven.execution.MavenExecutionRequestPopulationException;
+import org.apache.maven.execution.MavenExecutionRequestPopulator;
+import org.apache.maven.execution.MavenSession;
 import org.apache.maven.model.InputLocation;
 import org.apache.maven.model.building.ModelProblem;
 import org.apache.maven.model.building.ModelProblemCollector;
@@ -42,15 +47,26 @@ import org.codehaus.plexus.DefaultPlexusContainer;
 import org.codehaus.plexus.PlexusContainer;
 import org.codehaus.plexus.PlexusContainerException;
 import org.codehaus.plexus.component.repository.exception.ComponentLookupException;
+import org.commonjava.maven.atlas.ident.ref.ArtifactRef;
+import org.commonjava.maven.atlas.ident.ref.SimpleArtifactRef;
+import org.commonjava.maven.ext.manip.impl.RESTManipulator;
 import org.commonjava.maven.ext.manip.io.PomIO;
+import org.commonjava.maven.ext.manip.model.Project;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Properties;
+import java.util.Set;
+import java.util.TreeSet;
+
+import static org.apache.commons.lang.StringUtils.join;
+import static org.commonjava.maven.ext.manip.util.IdUtils.gav;
 
 public class Cli
 {
@@ -108,6 +124,10 @@ public class Cli
                                  .hasArgs()
                                  .numberOfArgs(1)
                                  .desc("Optional settings.xml file")
+                                 .build() );
+        options.addOption( Option.builder( "p" )
+                                 .longOpt("printDeps")
+                                 .desc("Print all project dependencies")
                                  .build() );
         options.addOption( Option.builder( "D" )
                                  .hasArgs()
@@ -182,7 +202,21 @@ public class Cli
         try
         {
             manipulationManager.init( session );
-            manipulationManager.scanAndApply( session );
+
+            if ( cmd.hasOption( 'p' ))
+            {
+                TreeSet<String> ts = new TreeSet<String>(  );
+                for ( ArtifactRef ar : RESTManipulator.establishDependencies( pomIO.parseProject( session.getPom() )))
+                {
+                    ts.add (ar.asProjectVersionRef().toString());
+                }
+
+                System.out.println ("Got\n\n" +  join( ts, "\n" ) );
+            }
+            else
+            {
+                manipulationManager.scanAndApply( session );
+            }
         }
         catch ( ManipulationException e )
         {

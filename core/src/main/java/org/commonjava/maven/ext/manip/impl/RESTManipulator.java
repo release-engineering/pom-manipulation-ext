@@ -53,13 +53,9 @@ import java.util.Set;
 @Component( role = Manipulator.class, hint = "rest-manipulator" )
 public class RESTManipulator implements Manipulator
 {
-    private final Logger logger = LoggerFactory.getLogger( getClass() );
+    private static final Logger logger = LoggerFactory.getLogger( RESTManipulator.class );
 
     private VersionTranslator restEndpoint;
-
-    protected RESTManipulator()
-    {
-    }
 
     @Override
     public void init( final ManipulationSession session )
@@ -80,7 +76,6 @@ public class RESTManipulator implements Manipulator
     {
         final RESTState state = session.getState( RESTState.class );
         final ArrayList<ProjectVersionRef> restParam = new ArrayList<ProjectVersionRef>();
-        final Set<ArtifactRef> localDeps = new HashSet<ArtifactRef>();
 
         Map<ProjectVersionRef, String> restResult;
 
@@ -90,28 +85,13 @@ public class RESTManipulator implements Manipulator
             return;
         }
 
-        // Iterate over current project set and populate list of dependencies and project GAs.
         for ( final Project project : projects )
         {
             // TODO: Check this : For the rest API I think we need to check every project GA not just inheritance root.
             restParam.add( project.getKey() );
-
-            recordDependencies( projects, localDeps, project.getManagedDependencies() );
-            recordDependencies( projects, localDeps, project.getDependencies() );
-
-            List<Profile> profiles = project.getModel().getProfiles();
-            if ( profiles != null )
-            {
-                for ( Profile p : profiles )
-                {
-                    if ( p.getDependencyManagement() != null )
-                    {
-                        recordDependencies( projects, localDeps, p.getDependencyManagement().getDependencies() );
-                    }
-                    recordDependencies( projects, localDeps, p.getDependencies() );
-                }
-            }
         }
+
+        Set<ArtifactRef> localDeps = establishDependencies( projects );
 
         // Ok we now have a defined list of top level project plus a unique list of all possible dependencies.
         // Need to send that to the rest interface to get a translation.
@@ -122,7 +102,7 @@ public class RESTManipulator implements Manipulator
         }
 
         // Call the REST to populate the result.
-        for ( ArtifactRef p : localDeps)
+        for ( ArtifactRef p : localDeps )
         {
             restParam.add( p.asProjectVersionRef() );
         }
@@ -156,7 +136,7 @@ public class RESTManipulator implements Manipulator
         final Map<ArtifactRef, String> overrides = new HashMap<ArtifactRef, String>( );
 
         // Convert the loaded remote ProjectVersionRefs to the original ArtifactRefs
-        for (ArtifactRef a : localDeps)
+        for (ArtifactRef a : localDeps )
         {
             if (restResult.containsKey( a.asProjectVersionRef() ))
             {
@@ -184,6 +164,41 @@ public class RESTManipulator implements Manipulator
         return 5;
     }
 
+
+    /**
+     * Scans a list of projects and accumulates all dependencies and returns them.
+     * @param projects the projects to scan.
+     * @return an unsorted set of ArtifactRefs used.
+     * @throws ManipulationException
+     */
+    public static Set<ArtifactRef> establishDependencies( final List<Project> projects ) throws ManipulationException
+    {
+        Set<ArtifactRef> localDeps = new HashSet<ArtifactRef>();
+
+        // Iterate over current project set and populate list of dependencies
+        for ( final Project project : projects )
+        {
+            recordDependencies( projects, localDeps, project.getManagedDependencies() );
+            recordDependencies( projects, localDeps, project.getDependencies() );
+
+            List<Profile> profiles = project.getModel().getProfiles();
+            if ( profiles != null )
+            {
+                for ( Profile p : profiles )
+                {
+                    if ( p.getDependencyManagement() != null )
+                    {
+                        recordDependencies( projects, localDeps, p.getDependencyManagement().getDependencies() );
+                    }
+                    recordDependencies( projects, localDeps, p.getDependencies() );
+                }
+            }
+        }
+
+        return localDeps;
+    }
+
+
     /**
      * Translate a given set of dependencies into ProjectVersionRefs.
      *
@@ -191,7 +206,7 @@ public class RESTManipulator implements Manipulator
      * @param deps Set of ProjectVersionRef to store the results in.
      * @param dependencies dependencies to examine
      */
-    private void recordDependencies( List<Project> projects, Set<ArtifactRef> deps, Iterable<Dependency> dependencies )
+    private static void recordDependencies( List<Project> projects, Set<ArtifactRef> deps, Iterable<Dependency> dependencies )
                     throws ManipulationException
     {
         if ( dependencies == null )
@@ -226,7 +241,7 @@ public class RESTManipulator implements Manipulator
      * @return the version string
      * @throws ManipulationException
      */
-    private String resolveProperties( List<Project> projects, String version )
+    private static String resolveProperties( List<Project> projects, String version )
                     throws ManipulationException
     {
         String result = version;
@@ -243,7 +258,12 @@ public class RESTManipulator implements Manipulator
             }
             for ( Project p : projects)
             {
-                if ( p.getModel().getProperties().containsKey (property) )
+                logger.debug( "Scanning {} for property {} and found {} ", p, property, p.getModel().getProperties() );
+                if ( property.equals( "project.version" ))
+                {
+                    result = p.getVersion();
+                }
+                else if ( p.getModel().getProperties().containsKey (property) )
                 {
                     result = p.getModel().getProperties().getProperty( property );
 
