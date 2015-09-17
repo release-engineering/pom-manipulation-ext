@@ -265,13 +265,13 @@ public class DependencyManipulator implements Manipulator
                             if ( state.getFailOnStrictViolation() )
                             {
                                 throw new ManipulationException(
-                                                "Property replacement: {} of original version: {} in property: {} violates the strict version-alignment rule!",
-                                                newValue, oldValue, key );
+                                                "Replacing original property version {} with new version {} for {} violates the strict version-alignment rule!",
+                                                 oldValue, newValue, key );
                             }
                             else
                             {
-                                logger.warn( "Property replacement: {} of original version: {} in property: {} violates the strict version-alignment rule!",
-                                             newValue, oldValue, key );
+                                logger.warn( "Replacing original property version {} with new version {} for {} violates the strict version-alignment rule!",
+                                             oldValue, newValue, key );
                                 // Ignore the dependency override. As found has been set to true it won't inject
                                 // a new property either.
                                 continue;
@@ -527,7 +527,7 @@ public class DependencyManipulator implements Manipulator
                             throw new ManipulationException( "NYI : handling for versions (" + oldVersion
                                                                              + ") with multiple embedded properties is NYI. " );
                         }
-                        logger.debug( "Original version was a property mapping; caching new fixed value for update {} -> {}",
+                        logger.debug( "Explicit overrides : original version was a property mapping; caching new fixed value for update {} -> {}",
                                       oldProperty, overrideVersion );
 
                         final String oldVersionProp = oldVersion.substring( 2, oldVersion.length() - 1 );
@@ -582,7 +582,6 @@ public class DependencyManipulator implements Manipulator
             for ( final ArtifactRef ar : overrides.keySet() )
             {
                 ProjectRef groupIdArtifactId = ar.asProjectRef();
-                logger.debug ("Comparing project group:artifact {} to overrides ga {} ", depPr, groupIdArtifactId);
 
                 if ( depPr.equals( groupIdArtifactId ) )
                 {
@@ -609,8 +608,8 @@ public class DependencyManipulator implements Manipulator
                                 throw new ManipulationException( "NYI : handling for versions (" + oldVersion
                                                                                  + ") with multiple embedded properties is NYI. " );
                             }
-                            logger.debug( "Original version was a property mapping; caching new value for update {} -> {}",
-                                          oldProperty, overrideVersion );
+                            logger.debug( "For {} ; original version was a property mapping; caching new value for update {} -> {}",
+                                          ar, oldProperty, overrideVersion );
 
                             final String oldVersionProp = oldVersion.substring( 2, oldVersion.length() - 1 );
 
@@ -623,13 +622,13 @@ public class DependencyManipulator implements Manipulator
                                 if ( state.getFailOnStrictViolation() )
                                 {
                                     throw new ManipulationException(
-                                                    "Replacement: {} of original version: {} in dependency: {} violates the strict version-alignment rule!",
-                                                    overrideVersion, oldVersion, groupIdArtifactId.toString() );
+                                                     "Replacing original version {} in dependency {} with new version {} violates the strict version-alignment rule!",
+                                                     oldVersion, groupIdArtifactId.toString(), overrideVersion );
                                 }
                                 else
                                 {
-                                    logger.warn( "Replacement: {} of original version: {} in dependency: {} violates the strict version-alignment rule!",
-                                                 overrideVersion, oldVersion, groupIdArtifactId );
+                                    logger.warn( "Replacing original version {} in dependency {} with new version {} violates the strict version-alignment rule!",
+                                                 oldVersion, groupIdArtifactId, overrideVersion );
                                 }
                             }
                             else
