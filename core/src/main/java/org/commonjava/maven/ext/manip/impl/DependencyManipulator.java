@@ -265,13 +265,13 @@ public class DependencyManipulator implements Manipulator
                             if ( state.getFailOnStrictViolation() )
                             {
                                 throw new ManipulationException(
-                                                "Property replacement: {} of original version: {} in property: {} violates the strict version-alignment rule!",
-                                                newValue, oldValue, key );
+                                                "Replacing original property version {} with new version {} for {} violates the strict version-alignment rule!",
+                                                 oldValue, newValue, key );
                             }
                             else
                             {
-                                logger.warn( "Property replacement: {} of original version: {} in property: {} violates the strict version-alignment rule!",
-                                             newValue, oldValue, key );
+                                logger.warn( "Replacing original property version {} with new version {} for {} violates the strict version-alignment rule!",
+                                             oldValue, newValue, key );
                                 // Ignore the dependency override. As found has been set to true it won't inject
                                 // a new property either.
                                 continue;
@@ -622,13 +622,13 @@ public class DependencyManipulator implements Manipulator
                                 if ( state.getFailOnStrictViolation() )
                                 {
                                     throw new ManipulationException(
-                                                    "Replacement: {} of original version: {} in dependency: {} violates the strict version-alignment rule!",
-                                                    overrideVersion, oldVersion, groupIdArtifactId.toString() );
+                                                     "Replacing original version {} in dependency {} with new version {} violates the strict version-alignment rule!",
+                                                     oldVersion, groupIdArtifactId.toString(), overrideVersion );
                                 }
                                 else
                                 {
-                                    logger.warn( "Replacement: {} of original version: {} in dependency: {} violates the strict version-alignment rule!",
-                                                 overrideVersion, oldVersion, groupIdArtifactId );
+                                    logger.warn( "Replacing original version {} in dependency {} with new version {} violates the strict version-alignment rule!",
+                                                 oldVersion, groupIdArtifactId, overrideVersion );
                                 }
                             }
                             else
