@@ -40,6 +40,7 @@ import org.codehaus.plexus.interpolation.PrefixedObjectValueSource;
 import org.codehaus.plexus.interpolation.PropertiesBasedValueSource;
 import org.codehaus.plexus.interpolation.RecursionInterceptor;
 import org.codehaus.plexus.interpolation.StringSearchInterpolator;
+import org.commonjava.maven.atlas.ident.ref.InvalidRefException;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef;
 import org.commonjava.maven.ext.manip.ManipulationException;
@@ -264,14 +265,22 @@ public class ProjectVersioningManipulator
             {
                 for ( final Dependency d : dm.getDependencies() )
                 {
-                    gav = new SimpleProjectVersionRef( interpolate( d.getGroupId(), ri, interp ), interpolate( d.getArtifactId(), ri, interp ),
-                                                       interpolate( d.getVersion(), ri, interp ) );
-                    final String newVersion = versionsByGAV.get( gav );
-                    if ( newVersion != null )
+                    try
                     {
-                        d.setVersion( newVersion );
-                        logger.info( "Changed managed: " + d + " in " + base );
-                        changed = true;
+                        gav = new SimpleProjectVersionRef( interpolate( d.getGroupId(), ri, interp ),
+                                                           interpolate( d.getArtifactId(), ri, interp ),
+                                                           interpolate( d.getVersion(), ri, interp ) );
+                        final String newVersion = versionsByGAV.get( gav );
+                        if ( newVersion != null )
+                        {
+                            d.setVersion( newVersion );
+                            logger.info( "Changed managed: " + d + " in " + base );
+                            changed = true;
+                        }
+                    }
+                    catch ( InvalidRefException ire)
+                    {
+                        logger.debug( "Unable to change version for dependency {} due to {} ", d.toString(), ire );
                     }
                 }
             }
@@ -280,14 +289,23 @@ public class ProjectVersioningManipulator
             {
                 for ( final Dependency d : base.getDependencies() )
                 {
-                    gav = new SimpleProjectVersionRef( interpolate( d.getGroupId(), ri, interp ), interpolate( d.getArtifactId(), ri, interp ),
-                                                       interpolate( d.getVersion(), ri, interp ) );
-                    final String newVersion = versionsByGAV.get( gav );
-                    if ( newVersion != null && d.getVersion() != null )
+                    try
                     {
-                        d.setVersion( newVersion );
-                        logger.info( "Changed: " + d + " in " + base );
-                        changed = true;
+                        gav = new SimpleProjectVersionRef( interpolate( d.getGroupId(), ri, interp ),
+                                                           interpolate( d.getArtifactId(), ri, interp ),
+                                                           interpolate( d.getVersion(), ri, interp ) );
+
+                        final String newVersion = versionsByGAV.get( gav );
+                        if ( newVersion != null && d.getVersion() != null )
+                        {
+                            d.setVersion( newVersion );
+                            logger.info( "Changed: " + d + " in " + base );
+                            changed = true;
+                        }
+                    }
+                    catch ( InvalidRefException ire)
+                    {
+                        logger.debug( "Unable to change version for dependency {} due to {} ", d.toString(), ire );
                     }
                 }
             }
