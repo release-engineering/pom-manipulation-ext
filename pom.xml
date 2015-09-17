@@ -421,6 +421,7 @@
     <module>core</module>
     <module>cli</module>
     <module>ext</module>
+    <module>integration-test</module>
   </modules>
 
   <profiles>
@@ -467,12 +468,6 @@
           </plugin>
         </plugins>
       </build>
-    </profile>
-    <profile>
-      <id>run-its</id>
-      <modules>
-        <module>integration-test</module>
-      </modules>
     </profile>
   </profiles>
 </project>
