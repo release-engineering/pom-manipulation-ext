@@ -588,10 +588,13 @@ public class DependencyManipulator implements Manipulator
                     final String oldVersion = dependency.getVersion();
                     final String overrideVersion = overrides.get( ar );
 
-                    if ( overrideVersion == null || overrideVersion.length() == 0 || oldVersion == null
-                                    || oldVersion.length() == 0 )
+                    if ( overrideVersion == null || overrideVersion.length() == 0 )
                     {
-                        logger.warn( "Unable to align to an empty version for " + groupIdArtifactId + "; ignoring" );
+                        logger.warn( "Unable to align with an empty override version for " + groupIdArtifactId + "; ignoring" );
+                    }
+                    else if ( oldVersion == null || oldVersion.length() == 0 )
+                    {
+                        logger.warn( "Dependency is a managed version for " + groupIdArtifactId + "; ignoring" );
                     }
                     else
                     {
@@ -608,12 +611,20 @@ public class DependencyManipulator implements Manipulator
                                 throw new ManipulationException( "NYI : handling for versions (" + oldVersion
                                                                                  + ") with multiple embedded properties is NYI. " );
                             }
-                            logger.debug( "For {} ; original version was a property mapping; caching new value for update {} -> {}",
-                                          ar, oldProperty, overrideVersion );
+                            else if ("project.version".equals( oldProperty ))
+                            {
+                                logger.debug("For {} ; original version was a property mapping. Not caching value as property is built-in ( {} -> {} )",
+                                              ar, oldProperty, overrideVersion );
+                            }
+                            else
+                            {
+                                logger.debug( "For {} ; original version was a property mapping; caching new value for update {} -> {}",
+                                              ar, oldProperty, overrideVersion );
 
-                            final String oldVersionProp = oldVersion.substring( 2, oldVersion.length() - 1 );
+                                final String oldVersionProp = oldVersion.substring( 2, oldVersion.length() - 1 );
 
-                            versionPropertyUpdateMap.put( oldVersionProp, overrideVersion );
+                                versionPropertyUpdateMap.put( oldVersionProp, overrideVersion );
+                            }
                         }
                         else
                         {
