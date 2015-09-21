@@ -175,7 +175,7 @@ public class DependencyManipulator implements Manipulator
         // If we've changed something now update any old properties with the new values.
         if ( result.size() > 0 )
         {
-            logger.debug ("Iterating for standard overrides...");
+            logger.info ("Iterating for standard overrides...");
             for ( final String key : versionPropertyUpdateMap.keySet() )
             {
                 boolean found = updateProperties( session, result, false, key, versionPropertyUpdateMap.get( key ) );
@@ -196,7 +196,7 @@ public class DependencyManipulator implements Manipulator
                     }
                 }
             }
-            logger.debug ("Iterating for explicit overrides...");
+            logger.info ("Iterating for explicit overrides...");
             for ( final String key : explicitVersionPropertyUpdateMap.keySet() )
             {
                 boolean found = updateProperties( session, result, true, key, explicitVersionPropertyUpdateMap.get( key ) );
