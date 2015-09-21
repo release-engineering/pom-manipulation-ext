@@ -175,28 +175,7 @@ public class DependencyManipulator implements Manipulator
         // If we've changed something now update any old properties with the new values.
         if ( result.size() > 0 )
         {
-            logger.debug ("Iterating for explicit overrides...");
-            for ( final String key : explicitVersionPropertyUpdateMap.keySet() )
-            {
-                boolean found = updateProperties( session, result, true, key, explicitVersionPropertyUpdateMap.get( key ) );
-
-                if ( !found )
-                {
-                    // Problem in this scenario is that we know we have a property update map but we have not found a
-                    // property to update. Its possible this property has been inherited from a parent. Override in the
-                    // top pom for safety.
-                    logger.info( "Unable to find a property for {} to update for explicit overrides", key );
-                    for ( final Project p : result )
-                    {
-                        if ( p.isInheritanceRoot() )
-                        {
-                            logger.info( "Adding property {} with {} ", key, explicitVersionPropertyUpdateMap.get( key ) );
-                            p.getModel().getProperties().setProperty( key, explicitVersionPropertyUpdateMap.get( key ) );
-                        }
-                    }
-                }
-            }
-            logger.debug ("Iterating for standard overrides...");
+            logger.info ("Iterating for standard overrides...");
             for ( final String key : versionPropertyUpdateMap.keySet() )
             {
                 boolean found = updateProperties( session, result, false, key, versionPropertyUpdateMap.get( key ) );
@@ -213,6 +192,27 @@ public class DependencyManipulator implements Manipulator
                         {
                             logger.info( "Adding property {} with {} ", key, versionPropertyUpdateMap.get( key ) );
                             p.getModel().getProperties().setProperty( key, versionPropertyUpdateMap.get( key ) );
+                        }
+                    }
+                }
+            }
+            logger.info ("Iterating for explicit overrides...");
+            for ( final String key : explicitVersionPropertyUpdateMap.keySet() )
+            {
+                boolean found = updateProperties( session, result, true, key, explicitVersionPropertyUpdateMap.get( key ) );
+
+                if ( !found )
+                {
+                    // Problem in this scenario is that we know we have a property update map but we have not found a
+                    // property to update. Its possible this property has been inherited from a parent. Override in the
+                    // top pom for safety.
+                    logger.info( "Unable to find a property for {} to update for explicit overrides", key );
+                    for ( final Project p : result )
+                    {
+                        if ( p.isInheritanceRoot() )
+                        {
+                            logger.info( "Adding property {} with {} ", key, explicitVersionPropertyUpdateMap.get( key ) );
+                            p.getModel().getProperties().setProperty( key, explicitVersionPropertyUpdateMap.get( key ) );
                         }
                     }
                 }
@@ -588,10 +588,13 @@ public class DependencyManipulator implements Manipulator
                     final String oldVersion = dependency.getVersion();
                     final String overrideVersion = overrides.get( ar );
 
-                    if ( overrideVersion == null || overrideVersion.length() == 0 || oldVersion == null
-                                    || oldVersion.length() == 0 )
+                    if ( overrideVersion == null || overrideVersion.length() == 0 )
                     {
-                        logger.warn( "Unable to align to an empty version for " + groupIdArtifactId + "; ignoring" );
+                        logger.warn( "Unable to align with an empty override version for " + groupIdArtifactId + "; ignoring" );
+                    }
+                    else if ( oldVersion == null || oldVersion.length() == 0 )
+                    {
+                        logger.warn( "Dependency is a managed version for " + groupIdArtifactId + "; ignoring" );
                     }
                     else
                     {
@@ -608,12 +611,20 @@ public class DependencyManipulator implements Manipulator
                                 throw new ManipulationException( "NYI : handling for versions (" + oldVersion
                                                                                  + ") with multiple embedded properties is NYI. " );
                             }
-                            logger.debug( "For {} ; original version was a property mapping; caching new value for update {} -> {}",
-                                          ar, oldProperty, overrideVersion );
+                            else if ("project.version".equals( oldProperty ))
+                            {
+                                logger.debug("For {} ; original version was a property mapping. Not caching value as property is built-in ( {} -> {} )",
+                                              ar, oldProperty, overrideVersion );
+                            }
+                            else
+                            {
+                                logger.debug( "For {} ; original version was a property mapping; caching new value for update {} -> {}",
+                                              ar, oldProperty, overrideVersion );
 
-                            final String oldVersionProp = oldVersion.substring( 2, oldVersion.length() - 1 );
+                                final String oldVersionProp = oldVersion.substring( 2, oldVersion.length() - 1 );
 
-                            versionPropertyUpdateMap.put( oldVersionProp, overrideVersion );
+                                versionPropertyUpdateMap.put( oldVersionProp, overrideVersion );
+                            }
                         }
                         else
                         {
