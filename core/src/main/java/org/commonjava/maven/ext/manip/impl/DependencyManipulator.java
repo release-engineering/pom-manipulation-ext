@@ -175,27 +175,6 @@ public class DependencyManipulator implements Manipulator
         // If we've changed something now update any old properties with the new values.
         if ( result.size() > 0 )
         {
-            logger.debug ("Iterating for explicit overrides...");
-            for ( final String key : explicitVersionPropertyUpdateMap.keySet() )
-            {
-                boolean found = updateProperties( session, result, true, key, explicitVersionPropertyUpdateMap.get( key ) );
-
-                if ( !found )
-                {
-                    // Problem in this scenario is that we know we have a property update map but we have not found a
-                    // property to update. Its possible this property has been inherited from a parent. Override in the
-                    // top pom for safety.
-                    logger.info( "Unable to find a property for {} to update for explicit overrides", key );
-                    for ( final Project p : result )
-                    {
-                        if ( p.isInheritanceRoot() )
-                        {
-                            logger.info( "Adding property {} with {} ", key, explicitVersionPropertyUpdateMap.get( key ) );
-                            p.getModel().getProperties().setProperty( key, explicitVersionPropertyUpdateMap.get( key ) );
-                        }
-                    }
-                }
-            }
             logger.debug ("Iterating for standard overrides...");
             for ( final String key : versionPropertyUpdateMap.keySet() )
             {
@@ -213,6 +192,27 @@ public class DependencyManipulator implements Manipulator
                         {
                             logger.info( "Adding property {} with {} ", key, versionPropertyUpdateMap.get( key ) );
                             p.getModel().getProperties().setProperty( key, versionPropertyUpdateMap.get( key ) );
+                        }
+                    }
+                }
+            }
+            logger.debug ("Iterating for explicit overrides...");
+            for ( final String key : explicitVersionPropertyUpdateMap.keySet() )
+            {
+                boolean found = updateProperties( session, result, true, key, explicitVersionPropertyUpdateMap.get( key ) );
+
+                if ( !found )
+                {
+                    // Problem in this scenario is that we know we have a property update map but we have not found a
+                    // property to update. Its possible this property has been inherited from a parent. Override in the
+                    // top pom for safety.
+                    logger.info( "Unable to find a property for {} to update for explicit overrides", key );
+                    for ( final Project p : result )
+                    {
+                        if ( p.isInheritanceRoot() )
+                        {
+                            logger.info( "Adding property {} with {} ", key, explicitVersionPropertyUpdateMap.get( key ) );
+                            p.getModel().getProperties().setProperty( key, explicitVersionPropertyUpdateMap.get( key ) );
                         }
                     }
                 }
