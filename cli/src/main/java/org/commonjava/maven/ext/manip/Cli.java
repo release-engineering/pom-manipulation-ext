@@ -53,6 +53,7 @@ import org.commonjava.maven.atlas.ident.ref.SimpleArtifactRef;
 import org.commonjava.maven.ext.manip.impl.RESTManipulator;
 import org.commonjava.maven.ext.manip.io.PomIO;
 import org.commonjava.maven.ext.manip.model.Project;
+import org.commonjava.maven.ext.manip.model.SimpleScopedArtifactRef;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -126,6 +127,11 @@ public class Cli
                                  .numberOfArgs(1)
                                  .desc("Optional settings.xml file")
                                  .build() );
+        options.addOption( Option.builder( "P" )
+                                 .longOpt("activeProfiles")
+                                 .desc("Comma separated list of active profiles. Only used with '-p' (Print all project dependencies)")
+                                 .numberOfArgs(1)
+                                 .build() );
         options.addOption( Option.builder( "p" )
                                  .longOpt("printDeps")
                                  .desc("Print all project dependencies")
@@ -194,7 +200,8 @@ public class Cli
             logger.info( "Manipulation engine disabled. No project found." );
             return;
         }
-        else if ( new File( target.getParentFile(), ManipulationManager.MARKER_FILE ).exists() )
+        // Don't bother skipping if we're just trying to analyse deps.
+        else if ( new File( target.getParentFile(), ManipulationManager.MARKER_FILE ).exists() && !cmd.hasOption( 'p' ))
         {
             logger.info( "Skipping manipulation as previous execution found." );
             return;
@@ -206,13 +213,23 @@ public class Cli
 
             if ( cmd.hasOption( 'p' ))
             {
-                TreeSet<String> ts = new TreeSet<String>(  );
-                for ( ArtifactRef ar : RESTManipulator.establishDependencies( pomIO.parseProject( session.getPom() )))
+                Set<String> activeProfiles = null;
+                if ( cmd.hasOption( 'P' ))
                 {
-                    ts.add (ar.asProjectVersionRef().toString());
+                    activeProfiles = new HashSet<String>(  );
+                    Collections.addAll( activeProfiles, cmd.getOptionValue( 'P' ).split( "," ));
                 }
-
-                System.out.println ("Got\n\n" +  join( ts, "\n" ) );
+                Set<ArtifactRef> ts = RESTManipulator.establishDependencies( pomIO.parseProject( session.getPom() ), activeProfiles );
+                System.out.println ("Found the following dependencies:\n\n" );
+                for ( ArtifactRef a : ts)
+                {
+                    String scope = null;
+                    if ( a instanceof  SimpleScopedArtifactRef)
+                    {
+                        scope = ((SimpleScopedArtifactRef)a).getScope();
+                    }
+                    System.out.format("%-80s%10s\n", a.toString(), scope );
+                }
             }
             else
             {
