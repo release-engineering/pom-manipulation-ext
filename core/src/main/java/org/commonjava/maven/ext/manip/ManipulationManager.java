@@ -127,9 +127,6 @@ public class ManipulationManager
         for ( final Project project : projects )
         {
             logger.debug( "Got " + project + " (POM: " + project.getPom() + ")" );
-            // TODO: FIXME: Remove once test #176 is added.
-            logger.debug( "### Project is execution root " + project.isExecutionRoot() + " and is inheritance root "
-                                          + project.isInheritanceRoot() );
         }
 
         Set<Project> changed = applyManipulations( projects, session );
