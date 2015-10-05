@@ -31,46 +31,24 @@ def repopom = new File( repodir, "${a}-${v}.pom" )
 System.out.println( "Checking for installed pom: ${repopom.getAbsolutePath()}")
 assert repopom.exists()
 
-System.out.println( "Checking child output..." )
+System.out.println( "Checking parent output..." )
 
-pomFile = new File( basedir, '../child/pom.xml' )
+pomFile = new File( basedir, 'parent/pom.xml' )
 System.out.println( "Slurping POM: ${pomFile.getAbsolutePath()}" )
 
 pom = new XmlSlurper().parse( pomFile )
-assert !pom.groupId.text()
-assert !pom.version.text()
-
-v = pom.parent.version.text()
-g = pom.parent.groupId.text()
+v = pom.version.text()
+g = pom.groupId.text()
 a = pom.artifactId.text()
 
 System.out.println( "POM Version: ${v}" )
 assert v.endsWith( '.redhat-1' )
 
-def jar = new File(basedir, "../child/target/${a}-${v}.jar" )
-System.out.println( "Checking for jar: ${jar.getAbsolutePath()}")
-assert jar.exists()
-
-repodir = new File('@localRepositoryUrl@', "${g.replace('.', '/')}/${a}/${v}" )
-
-repopom = new File( repodir, "${a}-${v}.pom" )
-System.out.println( "Checking for installed pom: ${repopom.getAbsolutePath()}")
-assert repopom.exists()
-
-def repojar = new File( repodir, "${a}-${v}.jar" )
-System.out.println( "Checking for installed jar: ${repojar.getAbsolutePath()}")
-assert repojar.exists()
-
 def buildLog = new File( basedir, 'build.log' )
 def executionRoot = false
-def inheritanceRoot = false
 buildLog.eachLine {
-   if (it.contains( "Setting execution root to org.commonjava.maven.ext.versioning.test:simple-numeric-directory-path:")) {
+   if (it.contains( "Setting execution root to org.commonjava.maven.ext.versioning.test:simple-numeric-directory-path-child-inverse:1.")) {
       executionRoot = true
-   }
-   if (it.contains( "and is the inheritance root")) {
-      inheritanceRoot = true
    }
 }
 assert executionRoot == true
-assert inheritanceRoot == true

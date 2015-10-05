@@ -130,6 +130,8 @@ public class PomIO
 
             if ( executionRoot.equals( pom ))
             {
+                logger.debug( "Setting execution root to {} with file {}" +
+                      (project.isInheritanceRoot() ? " and is the inheritance root. ": ""), project, pom );
                 project.setExecutionRoot (true);
             }
 
