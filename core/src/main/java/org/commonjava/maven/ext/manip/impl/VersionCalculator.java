@@ -118,13 +118,18 @@ public class VersionCalculator
 
             final Version modifiedVersion = versionObjsByGAV.get( project.getKey() );
 
-            int buildNumber = modifiedVersion.findHighestMatchingBuildNumber( modifiedVersion, versionSet );
-
-            // If the buildNumber is greater than zero, it means we found a match and have to
-            // set the build number to avoid version conflicts.
-            if ( buildNumber > 0 )
+            // If there is only a single version there is no real need to try and find the highest matching.
+            // This also fixes the problem where there is a single version and leading zeros.
+            if (versionSet.size() > 1)
             {
-                modifiedVersion.setBuildNumber( Integer.toString( buildNumber ) );
+                int buildNumber = modifiedVersion.findHighestMatchingBuildNumber( modifiedVersion, versionSet );
+
+                // If the buildNumber is greater than zero, it means we found a match and have to
+                // set the build number to avoid version conflicts.
+                if ( buildNumber > 0 )
+                {
+                    modifiedVersion.setBuildNumber( Integer.toString( buildNumber ) );
+                }
             }
 
             if ( state.osgi() )
@@ -216,6 +221,7 @@ public class VersionCalculator
             versionObj.appendQualifierSuffix( incrementalSuffix );
             int highestRemoteBuildNum = versionObj.findHighestMatchingBuildNumber( versionObj, versionCandidates );
             ++highestRemoteBuildNum;
+
             if ( highestRemoteBuildNum > versionObj.getIntegerBuildNumber() )
             {
                 versionObj.setBuildNumber( Integer.toString( highestRemoteBuildNum ) );

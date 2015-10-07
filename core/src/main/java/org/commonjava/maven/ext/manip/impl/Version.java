@@ -644,6 +644,8 @@ public class Version
                 }
             }
         }
+        logger.debug ("Found highest matching build number {} from set {} ", highestBuildNum, versionSet);
+
         return highestBuildNum;
     }
 
