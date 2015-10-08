@@ -22,7 +22,7 @@ The metadata to work out what the correct version of the increment should be can
 
 1. By default the Maven repository metadata will be checked to locate the latest released version of the project artifacts, and the next version is selected by the extension.
 
-2. Alternatively if the property `-DrestURL` has been configured the the REST client service will be used as a source. For more details on this see Dependency Manipulation.
+2. Alternatively if the property `-DrestURL` has been configured the the REST client service will be used as a source. For more details on this see Dependency Manipulation. See [here](./dep-manip.html) for more details on the REST endpoint.
 
 ### Manual version suffix
 

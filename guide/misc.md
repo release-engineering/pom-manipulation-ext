@@ -15,7 +15,16 @@ In addition to the main [project-version](project-version-manip.html), [dependen
 
 If the property `-Drepo-reporting-removal=true` is set, PME will remove all reporting and repository sections (including profiles) from the POM files.
 
-Repository declarations in the POM are considered a bad build smell, since over time they may become defunct or move. 
+Repository declarations in the POM are considered a bad build smell, since over time they may become defunct or move.
+
+If the property `-Drepo-removal-ignorelocalhost` is set (default: false) PME will not remove repositories that contain the following definitions
+
+* file://
+* [http || https]://localhost
+* [http || https]://127.00.1
+* [http || https]://::1
+
+Occasionally a project's more complex example/quickstart may have a local repository definition; this allows those to be preserved.
 
 Additionally, most project rebuilers aren't interested in hosting their own copy of the project's build reports or generated website; therefore, the reporting section only adds more plugin artifacts to the list of what must be present in the environment for the build to succeed. Eliminating this section simplifies the build and reduces the risk of failed builds.
 
@@ -41,7 +50,7 @@ The extension will resolve a remote POM file and inject remote repositories to t
 
 The extension will automatically replace occurences of the property expression `${project.version}` in POMs (of packaging type `pom`).
 
-This avoids a subtle problem that occurs when another project with inherits from this POM. If the child POM (the one that declares the `<parent/>`) specifies its own version **and that version is different from the parent**, that child version will be used to resolve `${project.version}` instead of the intended (parent) version. Resolving these expressions when `packaging` is set to `pom` (the only type of POM that can act as a parent) prevents this from occurring. 
+This avoids a subtle problem that occurs when another project with inherits from this POM. If the child POM (the one that declares the `<parent/>`) specifies its own version **and that version is different from the parent**, that child version will be used to resolve `${project.version}` instead of the intended (parent) version. Resolving these expressions when `packaging` is set to `pom` (the only type of POM that can act as a parent) prevents this from occurring.
 
 This behavior may be configured by setting:
 
@@ -60,4 +69,3 @@ PME may also be used to override properties prior to interpolating the model. Mu
 This will inject the properties at the inheritance root(s). It will also, for every injected property, find any matching property in the project and overwrite its value.
 
 Overriding properties can be a simple, minimalist way of controlling build behavior if the appropriate properties are already defined.
-
