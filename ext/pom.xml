@@ -22,7 +22,7 @@
   <parent>
     <groupId>org.commonjava.maven.ext</groupId>
     <artifactId>pom-manipulation-parent</artifactId>
-    <version>1.8-SNAPSHOT</version>
+    <version>1.8</version>
   </parent>
 
   <artifactId>pom-manipulation-ext</artifactId>
@@ -197,7 +197,7 @@
                 </relocation>
               </relocations>
               <transformers>
-                <transformer implementation="org.apache.maven.plugins.shade.resource.ComponentsXmlResourceTransformer"/>
+                <transformer implementation="org.apache.maven.plugins.shade.resource.ComponentsXmlResourceTransformer" />
               </transformers>
             </configuration>
           </execution>
