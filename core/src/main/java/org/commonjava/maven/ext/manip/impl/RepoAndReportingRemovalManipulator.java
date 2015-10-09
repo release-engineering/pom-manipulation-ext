@@ -94,6 +94,7 @@ public class RepoAndReportingRemovalManipulator
         Settings backupSettings = new Settings();
         Profile backupProfile = new Profile();
         backupProfile.setId( "removed-by-pme" );
+        backupSettings.addActiveProfile( "removed-by-pme" );
 
         for ( final Project project : projects )
         {
