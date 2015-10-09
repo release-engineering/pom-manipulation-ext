@@ -15,11 +15,6 @@
  */
 package org.commonjava.maven.ext.manip.impl;
 
-import static org.commonjava.maven.ext.manip.util.IdUtils.ga;
-
-import java.io.File;
-import java.util.*;
-
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Profile;
 import org.apache.maven.model.Repository;
@@ -28,12 +23,22 @@ import org.apache.maven.settings.SettingsUtils;
 import org.codehaus.plexus.component.annotations.Component;
 import org.codehaus.plexus.component.annotations.Requirement;
 import org.commonjava.maven.ext.manip.ManipulationException;
+import org.commonjava.maven.ext.manip.ManipulationSession;
 import org.commonjava.maven.ext.manip.io.SettingsIO;
 import org.commonjava.maven.ext.manip.model.Project;
-import org.commonjava.maven.ext.manip.ManipulationSession;
 import org.commonjava.maven.ext.manip.state.RepoReportingState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Properties;
+import java.util.Set;
+
+import static org.commonjava.maven.ext.manip.util.IdUtils.ga;
 
 /**
  * {@link Manipulator} implementation that can remove Reporting and Repository sections from a project's pom file.
@@ -89,6 +94,7 @@ public class RepoAndReportingRemovalManipulator
         Settings backupSettings = new Settings();
         Profile backupProfile = new Profile();
         backupProfile.setId( "removed-by-pme" );
+        backupSettings.addActiveProfile( "removed-by-pme" );
 
         for ( final Project project : projects )
         {
@@ -96,26 +102,28 @@ public class RepoAndReportingRemovalManipulator
             logger.info( getClass().getSimpleName() + " applying changes to: " + ga );
             final Model model = project.getModel();
 
-            if ( model.getRepositories() != null && !model.getRepositories()
-                                                          .isEmpty() )
+            Iterator<Repository> it = model.getRepositories().iterator();
+            while (it.hasNext())
             {
-                for ( Repository repository : model.getRepositories() )
+                Repository repository = it.next();
+                if (removeRepository( state, repository ))
                 {
                     backupProfile.addRepository( repository );
+                    it.remove();
+                    changed.add( project );
                 }
-                model.setRepositories( new ArrayList<Repository>() );
-                changed.add( project );
             }
 
-            if ( model.getPluginRepositories() != null && !model.getPluginRepositories()
-                                                                .isEmpty() )
+            it = model.getPluginRepositories().iterator();
+            while (it.hasNext())
             {
-                for ( Repository repository : model.getPluginRepositories() )
+                Repository repository = it.next();
+                if (removeRepository( state, repository ))
                 {
                     backupProfile.addPluginRepository( repository );
+                    it.remove();
+                    changed.add( project );
                 }
-                model.setPluginRepositories( new ArrayList<Repository>() );
-                changed.add( project );
             }
 
             if ( model.getReporting() != null )
@@ -128,45 +136,46 @@ public class RepoAndReportingRemovalManipulator
             // remove repositories in the profiles as well
             final List<Profile> profiles = model.getProfiles();
 
-            if ( !profiles.isEmpty() )
+            for ( final Profile profile : profiles )
             {
-                for ( final Profile profile : profiles )
+                Profile repoProfile = new Profile();
+                repoProfile.setId( profile.getId() );
+
+                it = profile.getRepositories().iterator();
+                while ( it.hasNext() )
                 {
-                    Profile repoProfile = new Profile();
-                    repoProfile.setId( profile.getId() );
-
-                    if ( !profile.getRepositories().isEmpty() )
+                    Repository repository = it.next();
+                    if ( removeRepository( state, repository ) )
                     {
-                        for ( Repository repository : profile.getRepositories() )
-                        {
-                            repoProfile.addRepository( repository );
-                        }
-                        profile.setRepositories( new ArrayList<Repository>() );
+                        repoProfile.addRepository( repository );
+                        it.remove();
                         changed.add( project );
                     }
+                }
 
-                    if ( !profile.getPluginRepositories().isEmpty() )
+                it = profile.getPluginRepositories().iterator();
+                while ( it.hasNext() )
+                {
+                    Repository repository = it.next();
+                    if ( removeRepository( state, repository ) )
                     {
-                        for ( Repository repository : profile.getPluginRepositories() )
-                        {
-                            repoProfile.addPluginRepository( repository );
-                        }
-                        profile.setPluginRepositories( new ArrayList<Repository>() );
+                        repoProfile.addPluginRepository( repository );
+                        it.remove();
                         changed.add( project );
                     }
+                }
 
-                    if ( profile.getReporting() != null )
-                    {
-                        repoProfile.setReporting( profile.getReporting() );
-                        profile.setReporting( null );
-                        changed.add( project );
-                    }
+                if ( profile.getReporting() != null )
+                {
+                    repoProfile.setReporting( profile.getReporting() );
+                    profile.setReporting( null );
+                    changed.add( project );
+                }
 
-                    if ( !repoProfile.getRepositories().isEmpty() && !repoProfile.getPluginRepositories().isEmpty()
-                        && repoProfile.getReporting() != null )
-                    {
-                        backupSettings.addProfile( SettingsUtils.convertToSettingsProfile( repoProfile ) );
-                    }
+                if ( !repoProfile.getRepositories().isEmpty() && !repoProfile.getPluginRepositories().isEmpty()
+                                && repoProfile.getReporting() != null )
+                {
+                    backupSettings.addProfile( SettingsUtils.convertToSettingsProfile( repoProfile ) );
                 }
             }
         }
@@ -187,6 +196,36 @@ public class RepoAndReportingRemovalManipulator
 
         return changed;
     }
+
+    /**
+     * Examine the repository to see if we should not remove it.
+     * @param state to query the ignoreLocal value
+     * @param repo the repository to examine
+     * @return boolean whether to remove this repository
+     */
+    private boolean removeRepository (RepoReportingState state, Repository repo)
+    {
+        boolean result = true;
+
+        if (state.ignoreLocal())
+        {
+            String url = repo.getUrl();
+            // According to https://maven.apache.org/plugins/maven-site-plugin/examples/adding-deploy-protocol.html
+            // supported repositories are file, http and https.
+            if (url.startsWith( "file:" ) ||
+                url.startsWith( "http://localhost" ) ||
+                url.startsWith( "https://localhost" ) ||
+                url.startsWith( "http://127.0.0.1" ) ||
+                url.startsWith( "https://127.0.0.1" ) ||
+                url.startsWith( "http://::1" ) ||
+                url.startsWith( "https://::1" ) )
+            {
+                result = false;
+            }
+        }
+        return result;
+    }
+
 
     @Override
     public int getExecutionIndex()

@@ -29,6 +29,7 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Iterator;
 
 /**
  * @author vdedik@redhat.com
@@ -76,10 +77,26 @@ public class SettingsIO
 
             for ( Profile profile : settings.getProfiles() )
             {
+                Iterator<Profile> i = defaultSettings.getProfiles().iterator();
+                while (i.hasNext())
+                {
+                    if (i.next().getId().equals( profile.getId() ))
+                    {
+                        i.remove();
+                    }
+                }
                 defaultSettings.addProfile( profile );
             }
             for ( String activeProfile : settings.getActiveProfiles() )
             {
+                Iterator<String> i = defaultSettings.getActiveProfiles().iterator();
+                while (i.hasNext())
+                {
+                    if (i.next().equals( activeProfile ))
+                    {
+                        i.remove();
+                    }
+                }
                 defaultSettings.addActiveProfile( activeProfile );
             }
             for ( Mirror mirror : settings.getMirrors() )

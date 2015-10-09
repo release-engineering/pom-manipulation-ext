@@ -15,10 +15,10 @@
  */
 package org.commonjava.maven.ext.manip.state;
 
+import org.commonjava.maven.ext.manip.impl.RepoAndReportingRemovalManipulator;
+
 import java.io.File;
 import java.util.Properties;
-
-import org.commonjava.maven.ext.manip.impl.RepoAndReportingRemovalManipulator;
 
 /**
  * Captures configuration relating to removing reporting/repositories from the POMs. Used by {@link RepoAndReportingRemovalManipulator}.
@@ -34,13 +34,19 @@ public class RepoReportingState
 
     public static final String RR_SETTINGS_SFX_SYSPROP = "removal-backup-settings";
 
+    public static final String RR_SUFFIX_IGNORELOCAL = "repo-removal-ignorelocalhost";
+
     private final boolean removal;
 
     private final File settingsFile;
 
+    private final boolean ignoreLocal;
+
     public RepoReportingState( final Properties userProps )
     {
         removal = Boolean.parseBoolean( userProps.getProperty( RR_SUFFIX_SYSPROP ) );
+
+        ignoreLocal = Boolean.parseBoolean( userProps.getProperty( RR_SUFFIX_SYSPROP) );
 
         String settingsFilePath = userProps.getProperty( RR_SETTINGS_SFX_SYSPROP );
         if (settingsFilePath != null)
@@ -69,4 +75,8 @@ public class RepoReportingState
         return settingsFile;
     }
 
+    public boolean ignoreLocal()
+    {
+        return ignoreLocal;
+    }
 }
