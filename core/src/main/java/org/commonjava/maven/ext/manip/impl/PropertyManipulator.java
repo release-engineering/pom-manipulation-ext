@@ -15,7 +15,17 @@
  */
 package org.commonjava.maven.ext.manip.impl;
 
-import static org.commonjava.maven.ext.manip.util.IdUtils.ga;
+import org.apache.maven.model.Model;
+import org.codehaus.plexus.component.annotations.Component;
+import org.codehaus.plexus.component.annotations.Requirement;
+import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
+import org.commonjava.maven.ext.manip.ManipulationException;
+import org.commonjava.maven.ext.manip.ManipulationSession;
+import org.commonjava.maven.ext.manip.io.ModelIO;
+import org.commonjava.maven.ext.manip.model.Project;
+import org.commonjava.maven.ext.manip.state.PropertyState;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Collections;
 import java.util.HashSet;
@@ -25,17 +35,7 @@ import java.util.ListIterator;
 import java.util.Properties;
 import java.util.Set;
 
-import org.apache.maven.model.Model;
-import org.codehaus.plexus.component.annotations.Component;
-import org.codehaus.plexus.component.annotations.Requirement;
-import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
-import org.commonjava.maven.ext.manip.ManipulationException;
-import org.commonjava.maven.ext.manip.io.ModelIO;
-import org.commonjava.maven.ext.manip.model.Project;
-import org.commonjava.maven.ext.manip.ManipulationSession;
-import org.commonjava.maven.ext.manip.state.PropertyState;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static org.commonjava.maven.ext.manip.util.IdUtils.ga;
 
 /**
  * {@link Manipulator} implementation that can alter property sections in a project's pom file.

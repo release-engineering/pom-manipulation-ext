@@ -15,9 +15,9 @@
  */
 package org.commonjava.maven.ext.manip.util;
 
-import java.util.Comparator;
-
 import org.commonjava.maven.ext.manip.impl.Manipulator;
+
+import java.util.Comparator;
 
 /**
  * Sorts {@link Manipulator} implementations by their execution index, in ascending order.

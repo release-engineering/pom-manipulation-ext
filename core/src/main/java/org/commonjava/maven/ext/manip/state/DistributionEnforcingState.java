@@ -15,9 +15,9 @@
  */
 package org.commonjava.maven.ext.manip.state;
 
-import java.util.Properties;
-
 import org.commonjava.maven.ext.manip.impl.DistributionEnforcingManipulator;
+
+import java.util.Properties;
 
 /**
  * Captures configuration relating to enforcing distribution (install/deploy) configurations within the POM(s). Used by {@link DistributionEnforcingManipulator}.

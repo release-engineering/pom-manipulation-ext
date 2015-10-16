@@ -15,17 +15,6 @@
  */
 package org.commonjava.maven.ext.manip.impl;
 
-import static org.commonjava.maven.ext.manip.util.IdUtils.ga;
-import static org.commonjava.maven.ext.manip.util.IdUtils.gav;
-
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
-
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.DependencyManagement;
 import org.apache.maven.model.Model;
@@ -49,6 +38,17 @@ import org.commonjava.maven.ext.manip.model.Project;
 import org.commonjava.maven.ext.manip.state.VersioningState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
+
+import static org.commonjava.maven.ext.manip.util.IdUtils.ga;
+import static org.commonjava.maven.ext.manip.util.IdUtils.gav;
 
 /**
  * {@link Manipulator} implementation that can modify a project's version with either static or calculated, incremental version qualifier. Snapshot

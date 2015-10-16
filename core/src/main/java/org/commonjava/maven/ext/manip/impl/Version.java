@@ -15,14 +15,14 @@
  */
 package org.commonjava.maven.ext.manip.impl;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Component that reads a version string and makes various modifications to it such as converting to a valid OSGi

@@ -15,9 +15,9 @@
  */
 package org.commonjava.maven.ext.manip.state;
 
-import java.util.Properties;
-
 import org.commonjava.maven.ext.manip.impl.ProjectSourcesInjectingManipulator;
+
+import java.util.Properties;
 
 /**
  * Captures configuration parameters for use with {@link ProjectSourcesInjectingManipulator}. This state implementation captures two properties:

@@ -15,13 +15,13 @@
  */
 package org.commonjava.maven.ext.manip.util;
 
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.TreeMap;
-
 import org.commonjava.maven.atlas.ident.ref.ProjectRef;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.TreeMap;
 
 /**
  * Custom limited map implementation that handles the following format:

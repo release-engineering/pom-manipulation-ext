@@ -15,16 +15,16 @@
  */
 package org.commonjava.maven.ext.manip.impl;
 
-import java.util.List;
-import java.util.Set;
-
 import org.apache.maven.project.MavenProject;
 import org.commonjava.maven.ext.manip.ManipulationException;
-import org.commonjava.maven.ext.manip.model.Project;
 import org.commonjava.maven.ext.manip.ManipulationSession;
+import org.commonjava.maven.ext.manip.model.Project;
 import org.commonjava.maven.ext.manip.state.State;
 import org.commonjava.maven.ext.manip.state.VersioningState;
 import org.commonjava.maven.ext.manip.util.IdUtils;
+
+import java.util.List;
+import java.util.Set;
 
 /**
  * Represents one way that a POM may be manipulated/modified during pre-processing. State is kept separately for each {@link Manipulator}
