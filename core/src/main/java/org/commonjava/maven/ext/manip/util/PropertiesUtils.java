@@ -15,12 +15,12 @@
  */
 package org.commonjava.maven.ext.manip.util;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Commonly used manipulations / extractions from project / user (CLI) properties.

@@ -15,12 +15,12 @@
  */
 package org.commonjava.maven.ext.manip.state;
 
-import java.util.List;
-import java.util.Properties;
-
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.ext.manip.impl.PluginManipulator;
 import org.commonjava.maven.ext.manip.util.IdUtils;
+
+import java.util.List;
+import java.util.Properties;
 
 /**
  * Captures configuration relating to plugin alignment from the POMs. Used by {@link PluginManipulator}.
