@@ -28,6 +28,10 @@ Occasionally a project's more complex example/quickstart may have a local reposi
 
 Additionally, most project rebuilers aren't interested in hosting their own copy of the project's build reports or generated website; therefore, the reporting section only adds more plugin artifacts to the list of what must be present in the environment for the build to succeed. Eliminating this section simplifies the build and reduces the risk of failed builds.
 
+#### Plugin Removal
+
+If the property `-Dplugin-removal=group:artifact,....` is set, PME will remove the specified plugins from the POM files. The argument should be a comma separate list of group:artifact.
+
 #### Profile Injection
 
 PME supports injection of profiles declared in a remote POM file. Simply supply a remote management POM:
