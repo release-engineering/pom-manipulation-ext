@@ -38,7 +38,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -117,7 +116,7 @@ public class PluginManipulator
         if ( changed.size() > 0 )
         {
             logger.info( "Iterating for standard overrides..." );
-            for ( final String key : state.getVersionPropertyOverrideKeys() )
+            for ( final String key : state.getVersionPropertyOverrides().keySet() )
             {
                 // Ignore strict alignment for plugins ; if we're attempting to use a differing plugin
                 // its unlikely to be an exact match.
@@ -280,36 +279,7 @@ public class PluginManipulator
                 // one in build/plugins section.
                 if ( pluginMgmt || oldVersion != null )
                 {
-                    // Handle the situation where we are updating a dependency that has an existing property - in this
-                    // case we want to update the property instead.
-                    // TODO: Handle the scenario where the version might be ${....}${....}
-                    if ( oldVersion.startsWith( "${" ) )
-                    {
-                        final int endIndex = oldVersion.indexOf( '}' );
-                        final String oldProperty = oldVersion.substring( 2, endIndex );
-
-                        if ( endIndex != oldVersion.length() - 1 )
-                        {
-                            throw new ManipulationException( "NYI : handling for versions (" + oldVersion
-                                                                             + ") with multiple embedded properties is NYI. " );
-                        }
-                        else if ( "project.version".equals( oldProperty ) )
-                        {
-                            logger.debug( "For {} ; original version was a property mapping. Not caching value as property is built-in ( {} -> {} )",
-                                          plugin, oldProperty, override.getVersion() );
-                        }
-                        else
-                        {
-                            logger.debug(
-                                    "For {} ; original version was a property mapping; caching new value for update {} -> {}",
-                                    plugin, oldProperty, override.getVersion() );
-
-                            final String oldVersionProp = oldVersion.substring( 2, oldVersion.length() - 1 );
-
-                            pluginState.addVersionPropertyOverride( oldVersionProp, override.getVersion() );
-                        }
-                    }
-                    else
+                    if ( ! PropertiesUtils.cacheProperty( pluginState.getVersionPropertyOverrides(), oldVersion, override.getVersion(), plugin ))
                     {
                         plugin.setVersion( override.getVersion() );
                         logger.info( "Altered plugin version: " + groupIdArtifactId + "=" + override.getVersion() );

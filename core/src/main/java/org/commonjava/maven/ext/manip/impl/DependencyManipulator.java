@@ -450,26 +450,9 @@ public class DependencyManipulator implements Manipulator
                 }
                 else
                 {
-                    logger.debug( "Force aligning {} to {}.", groupIdArtifactId, overrideVersion );
+                    logger.debug( "Explicit overrides : force aligning {} to {}.", groupIdArtifactId, overrideVersion );
 
-                    if ( oldVersion.startsWith( "${" ) )
-                    {
-                        final int endIndex = oldVersion.indexOf( '}' );
-                        final String oldProperty = oldVersion.substring( 2, endIndex );
-
-                        if ( endIndex != oldVersion.length() - 1 )
-                        {
-                            throw new ManipulationException( "NYI : handling for versions (" + oldVersion
-                                                                             + ") with multiple embedded properties is NYI. " );
-                        }
-                        logger.debug( "Explicit overrides : original version was a property mapping; caching new fixed value for update {} -> {}",
-                                      oldProperty, overrideVersion );
-
-                        final String oldVersionProp = oldVersion.substring( 2, oldVersion.length() - 1 );
-
-                        versionPropertyUpdateMap.put( oldVersionProp, overrideVersion );
-                    }
-                    else
+                    if ( ! PropertiesUtils.cacheProperty( versionPropertyUpdateMap, oldVersion, overrideVersion, dependency ))
                     {
                         // Not checking strict version alignment here as explicit overrides take priority.
                         dependency.setVersion( overrideVersion );
@@ -533,35 +516,7 @@ public class DependencyManipulator implements Manipulator
                     }
                     else
                     {
-                        // Handle the situation where we are updating a dependency that has an existing property - in this
-                        // case we want to update the property instead.
-                        // TODO: Handle the scenario where the version might be ${....}${....}
-                        if ( oldVersion.startsWith( "${" ) )
-                        {
-                            final int endIndex = oldVersion.indexOf( '}' );
-                            final String oldProperty = oldVersion.substring( 2, endIndex );
-
-                            if ( endIndex != oldVersion.length() - 1 )
-                            {
-                                throw new ManipulationException( "NYI : handling for versions (" + oldVersion
-                                                                                 + ") with multiple embedded properties is NYI. " );
-                            }
-                            else if ("project.version".equals( oldProperty ))
-                            {
-                                logger.debug("For {} ; original version was a property mapping. Not caching value as property is built-in ( {} -> {} )",
-                                              ar, oldProperty, overrideVersion );
-                            }
-                            else
-                            {
-                                logger.debug( "For {} ; original version was a property mapping; caching new value for update {} -> {}",
-                                              ar, oldProperty, overrideVersion );
-
-                                final String oldVersionProp = oldVersion.substring( 2, oldVersion.length() - 1 );
-
-                                versionPropertyUpdateMap.put( oldVersionProp, overrideVersion );
-                            }
-                        }
-                        else
+                        if ( ! PropertiesUtils.cacheProperty( versionPropertyUpdateMap, oldVersion, overrideVersion, ar ))
                         {
                             if ( strict && ! PropertiesUtils.checkStrictValue( session, oldVersion, overrideVersion) )
                             {
