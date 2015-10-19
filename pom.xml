@@ -27,7 +27,7 @@
 
   <groupId>org.commonjava.maven.ext</groupId>
   <artifactId>pom-manipulation-parent</artifactId>
-  <version>1.9.2-SNAPSHOT</version>
+  <version>1.10-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <name>POM Manipulation Extension for Maven</name>
@@ -97,27 +97,27 @@
       <dependency>
         <groupId>org.commonjava.maven.ext</groupId>
         <artifactId>pom-manipulation-common</artifactId>
-        <version>1.9.2-SNAPSHOT</version>
+        <version>1.10-SNAPSHOT</version>
       </dependency>
       <dependency>
         <groupId>org.commonjava.maven.ext</groupId>
         <artifactId>pom-manipulation-core</artifactId>
-        <version>1.9.2-SNAPSHOT</version>
+        <version>1.10-SNAPSHOT</version>
       </dependency>
       <dependency>
         <groupId>org.commonjava.maven.ext</groupId>
         <artifactId>pom-manipulation-ext</artifactId>
-        <version>1.9.2-SNAPSHOT</version>
+        <version>1.10-SNAPSHOT</version>
       </dependency>
       <dependency>
         <groupId>org.commonjava.maven.ext</groupId>
         <artifactId>pom-manipulation-io</artifactId>
-        <version>1.9.2-SNAPSHOT</version>
+        <version>1.10-SNAPSHOT</version>
       </dependency>
       <dependency>
         <groupId>org.commonjava.maven.ext</groupId>
         <artifactId>pom-manipulation-io</artifactId>
-        <version>1.9.2-SNAPSHOT</version>
+        <version>1.10-SNAPSHOT</version>
         <type>test-jar</type>
       </dependency>
 
