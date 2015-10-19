@@ -33,10 +33,12 @@ import org.commonjava.maven.ext.manip.model.Project;
 import org.commonjava.maven.ext.manip.state.PluginState;
 import org.commonjava.maven.ext.manip.state.PluginState.Precedence;
 import org.commonjava.maven.ext.manip.state.State;
+import org.commonjava.maven.ext.manip.util.PropertiesUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -61,6 +63,11 @@ public class PluginManipulator
     protected ModelIO effectiveModelBuilder;
 
     private Precedence configPrecedence = Precedence.REMOTE;
+
+    /**
+     * Used to store mappings of old property to new version.
+     */
+    protected final HashMap<String, String> versionPropertyUpdateMap = new HashMap<String, String>();
 
     /**
      * Initialize the {@link PluginState} state holder in the {@link ManipulationSession}. This state holder detects
@@ -128,7 +135,33 @@ public class PluginManipulator
                 changed.add( project );
             }
         }
+        // If we've changed something now update any old properties with the new values.
+        if ( changed.size() > 0 )
+        {
+            logger.info( "Iterating for standard overrides..." );
+            for ( final String key : versionPropertyUpdateMap.keySet() )
+            {
+                // Ignore strict alignment for plugins ; if we're attempting to use a differing plugin
+                // its unlikely to be an exact match.
+                boolean found = PropertiesUtils.updateProperties( session, changed, true, key, versionPropertyUpdateMap.get( key ) );
 
+                if ( !found )
+                {
+                    // Problem in this scenario is that we know we have a property update map but we have not found a
+                    // property to update. Its possible this property has been inherited from a parent. Override in the
+                    // top pom for safety.
+                    logger.info( "Unable to find a property for {} to update", key );
+                    for ( final Project p : changed )
+                    {
+                        if ( p.isInheritanceRoot() )
+                        {
+                            logger.info( "Adding property {} with {} ", key, versionPropertyUpdateMap.get( key ) );
+                            p.getModel().getProperties().setProperty( key, versionPropertyUpdateMap.get( key ) );
+                        }
+                    }
+                }
+            }
+        }
         return changed;
     }
 
@@ -262,14 +295,45 @@ public class PluginManipulator
                 {
                     logger.debug ("No remote configuration to inject from " + override.toString());
                 }
+                String oldVersion = plugin.getVersion();
                 // Always force the version in a pluginMgmt block or set the version if there is an existing
                 // one in build/plugins section.
-                if ( pluginMgmt || plugin.getVersion() != null )
+                if ( pluginMgmt || oldVersion != null )
                 {
-                    plugin.setVersion( override.getVersion() );
-                    logger.info( "Altered plugin version: " + groupIdArtifactId + "=" + override.getVersion());
-                }
+                    // Handle the situation where we are updating a dependency that has an existing property - in this
+                    // case we want to update the property instead.
+                    // TODO: Handle the scenario where the version might be ${....}${....}
+                    if ( oldVersion.startsWith( "${" ) )
+                    {
+                        final int endIndex = oldVersion.indexOf( '}' );
+                        final String oldProperty = oldVersion.substring( 2, endIndex );
 
+                        if ( endIndex != oldVersion.length() - 1 )
+                        {
+                            throw new ManipulationException( "NYI : handling for versions (" + oldVersion
+                                                                             + ") with multiple embedded properties is NYI. " );
+                        }
+                        else if ( "project.version".equals( oldProperty ) )
+                        {
+                            logger.debug( "For {} ; original version was a property mapping. Not caching value as property is built-in ( {} -> {} )",
+                                          plugin, oldProperty, override.getVersion() );
+                        }
+                        else
+                        {
+                            logger.debug( "For {} ; original version was a property mapping; caching new value for update {} -> {}",
+                                          plugin, oldProperty, override.getVersion() );
+
+                            final String oldVersionProp = oldVersion.substring( 2, oldVersion.length() - 1 );
+
+                            versionPropertyUpdateMap.put( oldVersionProp, override.getVersion() );
+                        }
+                    }
+                    else
+                    {
+                        plugin.setVersion( override.getVersion() );
+                        logger.info( "Altered plugin version: " + groupIdArtifactId + "=" + override.getVersion() );
+                    }
+                }
             }
             // If the plugin doesn't exist but has a configuration section in the remote inject it so we
             // get the correct config.
