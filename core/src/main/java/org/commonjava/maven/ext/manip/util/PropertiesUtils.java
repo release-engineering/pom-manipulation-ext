@@ -17,7 +17,6 @@ package org.commonjava.maven.ext.manip.util;
 
 import org.commonjava.maven.ext.manip.ManipulationException;
 import org.commonjava.maven.ext.manip.ManipulationSession;
-import org.commonjava.maven.ext.manip.impl.DependencyManipulator;
 import org.commonjava.maven.ext.manip.impl.Version;
 import org.commonjava.maven.ext.manip.model.Project;
 import org.commonjava.maven.ext.manip.state.DependencyState;
@@ -185,6 +184,51 @@ public final class PropertiesUtils
         boolean result = false;
         if ( oldValue != null && oldValue.equals( newVersion ) || osgiVersion.equals( newVersion ))
         {
+            result = true;
+        }
+        return result;
+    }
+
+    /**
+     * This will check if the old version (e.g. in a plugin ore dependency) is a property and if so
+     * store the mapping in a map.
+     * @param versionPropertyUpdateMap the map to store any updates in
+     * @param oldVersion original property value
+     * @param newVersion new property value
+     * @param originalType that this property is used in (i.e. a plugin or a dependency)
+     * @return true if a property was found and cached.
+     * @throws ManipulationException
+     */
+    public static boolean cacheProperty( Map<String, String> versionPropertyUpdateMap, String oldVersion,
+                                         String newVersion, Object originalType )
+                    throws ManipulationException
+    {
+        boolean result = false;
+        // TODO: Handle the scenario where the version might be ${....}${....}
+        if ( oldVersion.startsWith( "${" ) )
+        {
+            final int endIndex = oldVersion.indexOf( '}' );
+            final String oldProperty = oldVersion.substring( 2, endIndex );
+
+            if ( endIndex != oldVersion.length() - 1 )
+            {
+                throw new ManipulationException( "NYI : handling for versions (" + oldVersion
+                                                                 + ") with multiple embedded properties is NYI. " );
+            }
+            else if ( "project.version".equals( oldProperty ) )
+            {
+                logger.debug( "For {} ; original version was a property mapping. Not caching value as property is built-in ( {} -> {} )",
+                              originalType, oldProperty, newVersion );
+            }
+            else
+            {
+                logger.debug( "For {} ; original version was a property mapping; caching new value for update {} -> {}",
+                              originalType, oldProperty, newVersion );
+
+                final String oldVersionProp = oldVersion.substring( 2, oldVersion.length() - 1 );
+
+                versionPropertyUpdateMap.put( oldVersionProp, newVersion );
+            }
             result = true;
         }
         return result;
