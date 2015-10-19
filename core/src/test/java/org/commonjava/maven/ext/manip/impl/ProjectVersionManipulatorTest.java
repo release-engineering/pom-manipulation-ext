@@ -638,19 +638,19 @@ public class ProjectVersionManipulatorTest
             throws ManipulationException
         {
             final VersioningState state = new VersioningState( session.getUserProperties() );
-            super.versionsByGAV = _versionsByGAV;
+            state.setVersionsByGAVMap( _versionsByGAV );
 
             final Set<MavenProject> changed = new HashSet<MavenProject>();
             for ( final MavenProject project : projects )
             {
-                if ( applyVersioningChanges( new Project (project.getOriginalModel()) ) )
+                if ( applyVersioningChanges( new Project (project.getOriginalModel()), state ) )
                 {
-                    final String v = versionsByGAV.get( SimpleProjectVersionRef.parse( gav( project ) ) );
+                    final String v = _versionsByGAV.get( SimpleProjectVersionRef.parse( gav( project ) ) );
                     logger.info( project.getName() + " (" + gav( project ) + "): VERSION MODIFIED\n    New version: "
                         + v );
 
                     // this is a bigger model, so only do this if the originalModel was modded.
-                    applyVersioningChanges( new Project (project.getModel()) );
+                    applyVersioningChanges( new Project (project.getModel()), state );
                     changed.add( project );
 
                     if ( v != null )

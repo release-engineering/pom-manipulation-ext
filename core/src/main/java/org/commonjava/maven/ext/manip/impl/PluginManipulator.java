@@ -62,13 +62,6 @@ public class PluginManipulator
     @Requirement
     protected ModelIO effectiveModelBuilder;
 
-    private Precedence configPrecedence = Precedence.REMOTE;
-
-    /**
-     * Used to store mappings of old property to new version.
-     */
-    protected final HashMap<String, String> versionPropertyUpdateMap = new HashMap<String, String>();
-
     /**
      * Initialize the {@link PluginState} state holder in the {@link ManipulationSession}. This state holder detects
      * version-change configuration from the Maven user properties (-D properties from the CLI) and makes it available for
@@ -79,21 +72,6 @@ public class PluginManipulator
     {
         final Properties userProps = session.getUserProperties();
         session.setState( new PluginState( userProps ) );
-
-        switch ( Precedence.valueOf( userProps.getProperty( "pluginManagementPrecedence",
-                                                                        Precedence.REMOTE.toString() ).toUpperCase() ) )
-        {
-            case REMOTE:
-            {
-                configPrecedence = Precedence.REMOTE;
-                break;
-            }
-            case LOCAL:
-            {
-                configPrecedence = Precedence.LOCAL;
-                break;
-            }
-        }
     }
 
     /**
@@ -112,7 +90,7 @@ public class PluginManipulator
     public Set<Project> applyChanges( final List<Project> projects, final ManipulationSession session )
         throws ManipulationException
     {
-        final State state = session.getState( PluginState.class );
+        final PluginState state = session.getState( PluginState.class );
 
         if ( !session.isEnabled() || !state.isEnabled() )
         {
@@ -139,11 +117,11 @@ public class PluginManipulator
         if ( changed.size() > 0 )
         {
             logger.info( "Iterating for standard overrides..." );
-            for ( final String key : versionPropertyUpdateMap.keySet() )
+            for ( final String key : state.getVersionPropertyOverrideKeys() )
             {
                 // Ignore strict alignment for plugins ; if we're attempting to use a differing plugin
                 // its unlikely to be an exact match.
-                boolean found = PropertiesUtils.updateProperties( session, changed, true, key, versionPropertyUpdateMap.get( key ) );
+                boolean found = PropertiesUtils.updateProperties( session, changed, true, key, state.getVersionPropertyOverride( key ) );
 
                 if ( !found )
                 {
@@ -155,8 +133,8 @@ public class PluginManipulator
                     {
                         if ( p.isInheritanceRoot() )
                         {
-                            logger.info( "Adding property {} with {} ", key, versionPropertyUpdateMap.get( key ) );
-                            p.getModel().getProperties().setProperty( key, versionPropertyUpdateMap.get( key ) );
+                            logger.info( "Adding property {} with {} ", key, state.getVersionPropertyOverride( key ) );
+                            p.getModel().getProperties().setProperty( key, state.getVersionPropertyOverride( key ) );
                         }
                     }
                 }
@@ -195,6 +173,8 @@ public class PluginManipulator
     {
         logger.info( "Applying plugin changes to: " + ga( project ) );
 
+        PluginState state = session.getState( PluginState.class );
+
         if ( project.isInheritanceRoot() )
         {
             // If the model doesn't have any plugin management set by default, create one for it
@@ -219,7 +199,7 @@ public class PluginManipulator
             }
 
             // Override plugin management versions
-            applyOverrides( true, pluginManagement.getPlugins(), override );
+            applyOverrides( true, pluginManagement.getPlugins(), override, state );
         }
 
         if ( model.getBuild() != null )
@@ -230,7 +210,7 @@ public class PluginManipulator
 
             // We can't wipe out the versions as we can't guarantee that the plugins are listed
             // in the top level pluginManagement block.
-            applyOverrides( false, projectPlugins, override );
+            applyOverrides( false, projectPlugins, override, state );
         }
 
     }
@@ -244,7 +224,7 @@ public class PluginManipulator
      * @throws ManipulationException if an error occurs.
      */
     protected void applyOverrides( final boolean pluginMgmt, final List<Plugin> plugins,
-                                   final Map<ProjectRef, Plugin> pluginVersionOverrides ) throws ManipulationException
+                                   final Map<ProjectRef, Plugin> pluginVersionOverrides, PluginState pluginState ) throws ManipulationException
     {
         if ( plugins == null)
         {
@@ -278,12 +258,12 @@ public class PluginManipulator
                                                              " and" + override.getConfiguration().getClass().getName());
                         }
 
-                        if ( configPrecedence == Precedence.REMOTE)
+                        if ( pluginState.getConfigPrecedence() == Precedence.REMOTE)
                         {
                             plugin.setConfiguration ( Xpp3DomUtils.mergeXpp3Dom
                                                       ((Xpp3Dom)override.getConfiguration(), (Xpp3Dom)plugin.getConfiguration() ) );
                         }
-                        else if ( configPrecedence == Precedence.LOCAL )
+                        else if ( pluginState.getConfigPrecedence() == Precedence.LOCAL )
                         {
                             plugin.setConfiguration ( Xpp3DomUtils.mergeXpp3Dom
                                                       ((Xpp3Dom)plugin.getConfiguration(), (Xpp3Dom)override.getConfiguration() ) );
@@ -320,12 +300,13 @@ public class PluginManipulator
                         }
                         else
                         {
-                            logger.debug( "For {} ; original version was a property mapping; caching new value for update {} -> {}",
-                                          plugin, oldProperty, override.getVersion() );
+                            logger.debug(
+                                    "For {} ; original version was a property mapping; caching new value for update {} -> {}",
+                                    plugin, oldProperty, override.getVersion() );
 
                             final String oldVersionProp = oldVersion.substring( 2, oldVersion.length() - 1 );
 
-                            versionPropertyUpdateMap.put( oldVersionProp, override.getVersion() );
+                            pluginState.addVersionPropertyOverride( oldVersionProp, override.getVersion() );
                         }
                     }
                     else

@@ -16,8 +16,10 @@
 package org.commonjava.maven.ext.manip.state;
 
 import org.commonjava.maven.atlas.ident.ref.ProjectRef;
+import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.ext.manip.impl.ProjectVersioningManipulator;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
@@ -50,6 +52,12 @@ public class VersioningState
     private final boolean osgi;
 
     private final String override;
+
+    /**
+     * Record the versions to change. Essentially this contains a mapping of original
+     * project GAV to new version to change.
+     */
+    private final Map<ProjectVersionRef, String> versionsByGAV = new HashMap<ProjectVersionRef, String>();
 
     /**
      * Store preprocessed metadata from the REST call in order to use for incremental lookup.
@@ -127,5 +135,20 @@ public class VersioningState
     public Map<ProjectRef, Set<String>> getRESTMetadata( )
     {
         return restMetaData;
+    }
+
+    public void setVersionsByGAVMap( Map<ProjectVersionRef, String> versionsByGAV )
+    {
+        this.versionsByGAV.putAll( versionsByGAV );
+    }
+
+    public boolean hasVersionsByGAVMap()
+    {
+        return versionsByGAV != null && !versionsByGAV.isEmpty();
+    }
+
+    public Map<ProjectVersionRef, String> getVersionsByGAVMap()
+    {
+        return versionsByGAV;
     }
 }

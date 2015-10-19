@@ -16,6 +16,8 @@
 package org.commonjava.maven.ext.manip.state;
 
 import org.commonjava.maven.ext.manip.impl.DependencyManipulator;
+import org.commonjava.maven.ext.manip.rest.DefaultVersionTranslator;
+import org.commonjava.maven.ext.manip.rest.VersionTranslator;
 
 import java.util.Properties;
 
@@ -26,9 +28,12 @@ public class RESTState implements State
 {
     private final String restURL;
 
+    private final VersionTranslator restEndpoint;
+
     public RESTState( final Properties userProps )
     {
         restURL = userProps.getProperty( "restURL" );
+        restEndpoint = new DefaultVersionTranslator( restURL );
     }
 
     /**
@@ -48,5 +53,10 @@ public class RESTState implements State
     public String getRESTURL()
     {
         return restURL;
+    }
+
+    public VersionTranslator getVersionTranslator()
+    {
+        return restEndpoint;
     }
 }
