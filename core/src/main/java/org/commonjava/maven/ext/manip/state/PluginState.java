@@ -109,9 +109,9 @@ public class PluginState
         return versionPropertyUpdateMap.get( prop );
     }
 
-    public Set<String> getVersionPropertyOverrideKeys()
+    public Map<String, String> getVersionPropertyOverrides()
     {
-        return versionPropertyUpdateMap.keySet();
+        return versionPropertyUpdateMap;
     }
 
     public Precedence getConfigPrecedence()
