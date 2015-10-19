@@ -57,16 +57,12 @@ public class RESTManipulator implements Manipulator
 {
     private static final Logger logger = LoggerFactory.getLogger( RESTManipulator.class );
 
-    private VersionTranslator restEndpoint;
-
     @Override
     public void init( final ManipulationSession session )
     {
         final Properties userProps = session.getUserProperties();
         RESTState state = new RESTState( userProps );
         session.setState( state );
-
-        restEndpoint = new DefaultVersionTranslator( state.getRESTURL() );
     }
 
     /**
@@ -110,7 +106,7 @@ public class RESTManipulator implements Manipulator
         }
 
         logger.debug ("Calling REST client api with {} ", restParam);
-        restResult = restEndpoint.translateVersions( restParam );
+        restResult = state.getVersionTranslator().translateVersions( restParam );
         logger.debug ("REST Client returned {} ", restResult);
 
         // Parse the rest result for the project GAs and store them in versioning state for use

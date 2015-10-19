@@ -45,7 +45,7 @@ import static org.commonjava.maven.ext.manip.util.IdUtils.ga;
  */
 @Component( role = Manipulator.class, hint = "plugin-removal-manipulator" )
 public class PluginRemovalManipulator
-    implements Manipulator
+        implements Manipulator
 {
     private final Logger logger = LoggerFactory.getLogger( getClass() );
 
@@ -66,7 +66,7 @@ public class PluginRemovalManipulator
      */
     @Override
     public void scan( final List<Project> projects, final ManipulationSession session )
-        throws ManipulationException
+            throws ManipulationException
     {
     }
 
@@ -75,7 +75,7 @@ public class PluginRemovalManipulator
      */
     @Override
     public Set<Project> applyChanges( final List<Project> projects, final ManipulationSession session )
-        throws ManipulationException
+            throws ManipulationException
     {
         final State state = session.getState( PluginRemovalState.class );
 
@@ -100,9 +100,8 @@ public class PluginRemovalManipulator
         return changed;
     }
 
-
     protected boolean apply( final ManipulationSession session, final Project project, final Model model )
-        throws ManipulationException
+            throws ManipulationException
     {
         final PluginRemovalState state = session.getState( PluginRemovalState.class );
 
@@ -114,25 +113,29 @@ public class PluginRemovalManipulator
 
         for ( final Profile profile : model.getProfiles() )
         {
-            if (scanPlugins( pluginsToRemove, profile.getBuild().getPlugins() ))
+            if ( profile.getBuild() != null && scanPlugins( pluginsToRemove, profile.getBuild().getPlugins() ) )
             {
                 result = true;
             }
         }
         return result;
-   }
+    }
 
-    private boolean scanPlugins (List<ProjectRef> pluginsToRemove, List<Plugin> plugins)
+    private boolean scanPlugins( List<ProjectRef> pluginsToRemove, List<Plugin> plugins )
     {
-        Iterator<Plugin> it = plugins.iterator();
         boolean result = false;
+        if ( plugins == null )
+        {
+            return result;
+        }
 
-        while (it.hasNext())
+        Iterator<Plugin> it = plugins.iterator();
+        while ( it.hasNext() )
         {
             Plugin p = it.next();
-            if ( pluginsToRemove.contains( SimpleProjectRef.parse (p.getKey())))
+            if ( pluginsToRemove.contains( SimpleProjectRef.parse( p.getKey() ) ) )
             {
-                logger.debug ("Removing {} ", p.toString());
+                logger.debug( "Removing {} ", p.toString() );
                 it.remove();
                 result = true;
             }

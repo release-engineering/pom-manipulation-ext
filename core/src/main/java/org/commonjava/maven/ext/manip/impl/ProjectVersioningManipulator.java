@@ -69,12 +69,6 @@ public class ProjectVersioningManipulator
     @Requirement
     protected VersionCalculator calculator;
 
-    /**
-     * Record the versions to change. Essentially this contains a mapping of original
-     * project GAV to new version to change.
-     */
-    protected Map<ProjectVersionRef, String> versionsByGAV;
-
     protected ProjectVersioningManipulator()
     {
     }
@@ -101,7 +95,7 @@ public class ProjectVersioningManipulator
         }
 
         logger.info( "Version Manipulator: Calculating the necessary versioning changes." );
-        versionsByGAV = calculator.calculateVersioningChanges( projects, session );
+        state.setVersionsByGAVMap( calculator.calculateVersioningChanges( projects, session ) );
     }
 
     /**
@@ -139,7 +133,7 @@ public class ProjectVersioningManipulator
         {
             final String ga = ga( project );
             logger.info( getClass().getSimpleName() + " applying changes to: " + ga );
-            if ( applyVersioningChanges( project ) )
+            if ( applyVersioningChanges( project, state ) )
             {
                 changed.add( project );
             }
@@ -158,18 +152,19 @@ public class ProjectVersioningManipulator
      * If the project is modified, then it is marked as changed in the {@link ManipulationSession}, which triggers the associated POM to be rewritten.
      *
      * @param project Project undergoing modification.
+     * @param state
      * @return whether any changes have been applied.
      * @throws ManipulationException if an error occurs.
      */
     // TODO: Loooong method
-    protected boolean applyVersioningChanges( final Project project )
+    protected boolean applyVersioningChanges( final Project project, VersioningState state )
         throws ManipulationException
     {
         boolean changed = false;
 
         final Model model = project.getModel();
 
-        if ( versionsByGAV == null || versionsByGAV.isEmpty() )
+        if ( !state.hasVersionsByGAVMap() )
         {
             return false;
         }
@@ -195,6 +190,7 @@ public class ProjectVersioningManipulator
             v = parent.getVersion();
         }
 
+        Map<ProjectVersionRef, String> versionsByGAV = state.getVersionsByGAVMap();
         // If the parent version is defined, it might be necessary to change it
         // If the parent version is not defined, it will be taken automatically from the project version
         if ( parent != null && parent.getVersion() != null )

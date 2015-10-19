@@ -19,8 +19,11 @@ import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.ext.manip.impl.PluginManipulator;
 import org.commonjava.maven.ext.manip.util.IdUtils;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 
 /**
  * Captures configuration relating to plugin alignment from the POMs. Used by {@link PluginManipulator}.
@@ -53,9 +56,31 @@ public class PluginState
 
     private final List<ProjectVersionRef> pluginMgmt;
 
+    private final Precedence configPrecedence;
+
+    /**
+     * Used to store mappings of old property to new version.
+     */
+    private final Map<String, String> versionPropertyUpdateMap = new HashMap<String, String>();
+
     public PluginState( final Properties userProps )
     {
         pluginMgmt = IdUtils.parseGAVs( userProps.getProperty( PLUGIN_MANAGEMENT_POM_PROPERTY ) );
+        switch ( Precedence.valueOf( userProps.getProperty( "pluginManagementPrecedence",
+                                                            Precedence.REMOTE.toString() ).toUpperCase() ) )
+        {
+            case LOCAL:
+            {
+                configPrecedence = Precedence.LOCAL;
+                break;
+            }
+            case REMOTE:
+            default:
+            {
+                configPrecedence = Precedence.REMOTE;
+                break;
+            }
+        }
     }
 
     /**
@@ -73,4 +98,25 @@ public class PluginState
     {
         return pluginMgmt;
     }
+
+    public void addVersionPropertyOverride( String oldVersionProp, String version )
+    {
+        versionPropertyUpdateMap.put( oldVersionProp, version );
+    }
+
+    public String getVersionPropertyOverride( String prop )
+    {
+        return versionPropertyUpdateMap.get( prop );
+    }
+
+    public Set<String> getVersionPropertyOverrideKeys()
+    {
+        return versionPropertyUpdateMap.keySet();
+    }
+
+    public Precedence getConfigPrecedence()
+    {
+        return configPrecedence;
+    }
+
 }
