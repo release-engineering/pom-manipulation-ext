@@ -17,6 +17,7 @@ package org.commonjava.maven.ext.manip.io;
 
 import static org.apache.commons.io.IOUtils.closeQuietly;
 
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -32,6 +33,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.jar.Manifest;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.maven.io.util.DocumentModifier;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.io.ModelWriter;
@@ -49,6 +51,7 @@ import org.jdom2.Content;
 import org.jdom2.Document;
 import org.jdom2.JDOMException;
 import org.jdom2.filter.ContentFilter;
+import org.jdom2.output.LineSeparator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -182,7 +185,16 @@ public class PomIO
         {
             final String manifestInformation = project.isInheritanceRoot() ? getManifestInformation() : null;
 
-            new MavenJDOMWriter( model ).write( model, pom, new DocumentModifier()
+            MavenJDOMWriter mjw = new MavenJDOMWriter( model );
+
+            // We possibly could store the EOL type in the Project when we first read
+            // the file but we would then have to do a dual read, then write as opposed
+            // to a read, then read + write now.
+            LineSeparator ls = determineEOL( pom );
+            logger.debug ("For file {} line ending is {} ", pom, ls);
+            mjw.setLineSeparator( ls );
+
+            mjw.write( model, pom, new DocumentModifier()
             {
                 @Override
                 public void postProcess( final Document doc )
@@ -408,5 +420,50 @@ public class PomIO
             }
         }
         return false;
+    }
+
+
+    private static LineSeparator determineEOL( File pom )
+        throws ManipulationException
+    {
+        FileInputStream fileIn = null;
+        BufferedInputStream bufferIn = null;
+
+        try
+        {
+            fileIn = new FileInputStream( pom );
+            bufferIn = new BufferedInputStream( fileIn );
+            int prev = -1;
+            int ch;
+            while ( ( ch = bufferIn.read() ) != -1 )
+            {
+                if ( ch == '\n' )
+                {
+                    if ( prev == '\r' )
+                    {
+                        return LineSeparator.CRNL;
+                    }
+                    else
+                    {
+                        return LineSeparator.NL;
+                    }
+                }
+                else if ( prev == '\r' )
+                {
+                    return LineSeparator.CR;
+                }
+                prev = ch;
+            }
+            throw new ManipulationException( "Could not determine end-of-line marker mode" );
+        }
+        catch ( IOException ioe )
+        {
+            throw new ManipulationException( "Could not determine end-of-line marker mode", ioe );
+        }
+        finally
+        {
+            // Clean up:
+            IOUtils.closeQuietly( bufferIn );
+        }
     }
 }
