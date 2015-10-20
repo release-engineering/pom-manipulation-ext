@@ -109,7 +109,10 @@ public class PluginRemovalManipulator
 
         boolean result = false;
         List<ProjectRef> pluginsToRemove = state.getPluginRemoval();
-        result = scanPlugins( pluginsToRemove, model.getBuild().getPlugins() );
+        if ( model.getBuild() != null )
+        {
+            result = scanPlugins( pluginsToRemove, model.getBuild().getPlugins() );
+        }
 
         for ( final Profile profile : model.getProfiles() )
         {

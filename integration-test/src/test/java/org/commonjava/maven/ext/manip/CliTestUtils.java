@@ -77,12 +77,12 @@ public class CliTestUtils
             // Test return codes
             if ( e.isSuccess() )
             {
-                assertEquals( "PME-Cli exited with a non zero value.", Integer.valueOf( 0 ), cliExitValue );
-                assertEquals( "Maven exited with a non zero value.", Integer.valueOf( 0 ), mavenExitValue );
+                assertEquals( "PME-Cli (running in: " + workingDir + ") exited with a non zero value.", Integer.valueOf( 0 ), cliExitValue );
+                assertEquals( "Maven (running in: \" + workingDir + \") exited with a non zero value.", Integer.valueOf( 0 ), mavenExitValue );
             }
             else
             {
-                assertTrue( "Exit value of either PME-Cli or Maven must be non-zero.",
+                assertTrue( "Exit value of either PME-Cli or Maven (running in: \" + workingDir + \") must be non-zero.",
                             cliExitValue != 0 || mavenExitValue != 0 );
             }
         }
