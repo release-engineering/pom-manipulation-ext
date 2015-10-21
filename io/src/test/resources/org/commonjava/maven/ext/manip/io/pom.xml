@@ -6,5 +6,6 @@
     <artifactId>dospom</artifactId>
     <version>1.0</version>
     <packaging>pom</packaging>
+    <!-- Test Comment -->
 
 </project>

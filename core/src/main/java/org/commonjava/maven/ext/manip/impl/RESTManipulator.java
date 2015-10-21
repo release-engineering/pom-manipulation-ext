@@ -28,8 +28,6 @@ import org.commonjava.maven.ext.manip.ManipulationException;
 import org.commonjava.maven.ext.manip.ManipulationSession;
 import org.commonjava.maven.ext.manip.model.Project;
 import org.commonjava.maven.ext.manip.model.SimpleScopedArtifactRef;
-import org.commonjava.maven.ext.manip.rest.DefaultVersionTranslator;
-import org.commonjava.maven.ext.manip.rest.VersionTranslator;
 import org.commonjava.maven.ext.manip.state.DependencyState;
 import org.commonjava.maven.ext.manip.state.RESTState;
 import org.commonjava.maven.ext.manip.state.VersioningState;
@@ -210,8 +208,8 @@ public class RESTManipulator implements Manipulator
         {
             if ( project.isInheritanceRoot() || scanAll || activeModules.contains( project.getPom().getParentFile().getName() ) )
             {
-                recordDependencies( projects, localDeps, project.getManagedDependencies() );
-                recordDependencies( projects, localDeps, project.getDependencies() );
+                recordDependencies( projects, project, localDeps, project.getManagedDependencies() );
+                recordDependencies( projects, project, localDeps, project.getDependencies() );
 
                 List<Profile> profiles = project.getModel().getProfiles();
                 if ( profiles != null )
@@ -224,9 +222,9 @@ public class RESTManipulator implements Manipulator
                         }
                         if ( p.getDependencyManagement() != null )
                         {
-                            recordDependencies( projects, localDeps, p.getDependencyManagement().getDependencies() );
+                            recordDependencies( projects, project, localDeps, p.getDependencyManagement().getDependencies() );
                         }
-                        recordDependencies( projects, localDeps, p.getDependencies() );
+                        recordDependencies( projects, project, localDeps, p.getDependencies() );
                     }
                 }
             }
@@ -239,12 +237,12 @@ public class RESTManipulator implements Manipulator
 
     /**
      * Translate a given set of dependencies into ProjectVersionRefs.
-     *
-     * @param projects
+     * @param projects list of all projects
+     * @param project currently scanned project
      * @param deps Set of ProjectVersionRef to store the results in.
      * @param dependencies dependencies to examine
      */
-    private static void recordDependencies( List<Project> projects, Set<ArtifactRef> deps, Iterable<Dependency> dependencies )
+    private static void recordDependencies( List<Project> projects, Project project, Set<ArtifactRef> deps, Iterable<Dependency> dependencies )
                     throws ManipulationException
     {
         if ( dependencies == null )
@@ -264,8 +262,10 @@ public class RESTManipulator implements Manipulator
             }
             else
             {
-                deps.add( new SimpleScopedArtifactRef( new SimpleProjectVersionRef( d.getGroupId(), d.getArtifactId(),
-                                                                                    resolveProperties( projects, d.getVersion() ) ),
+                deps.add( new SimpleScopedArtifactRef( new SimpleProjectVersionRef(
+                                d.getGroupId().equals( "${project.groupId}" ) ? project.getGroupId() : d.getGroupId(),
+                                d.getArtifactId().equals( "${project.artifactId}" ) ? project.getArtifactId() : d.getArtifactId(),
+                                resolveProperties( projects, d.getVersion() ) ),
                                                        new SimpleTypeAndClassifier( d.getType(), d.getClassifier() ), Boolean.parseBoolean( d.getOptional()),
                                                        // TODO: Should atlas handle default scope?
                                                        d.getScope() == null ? DependencyScope.compile.realName() : d.getScope()));
