@@ -46,7 +46,13 @@
     </dependency>
     <dependency>
       <groupId>org.codehaus.groovy</groupId>
-      <artifactId>groovy-all</artifactId>
+      <artifactId>groovy</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.codehaus.groovy</groupId>
+      <artifactId>groovy-xml</artifactId>
+      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.maven</groupId>

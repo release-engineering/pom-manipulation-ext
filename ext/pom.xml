@@ -144,6 +144,15 @@
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
     </dependency>
+
+    <dependency>
+      <groupId>org.codehaus.groovy</groupId>
+      <artifactId>groovy</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.codehaus.groovy</groupId>
+      <artifactId>groovy-json</artifactId>
+    </dependency>
   </dependencies>
 
 
@@ -188,6 +197,8 @@
                   <include>org.jsoup:jsoup</include>
                   <include>com.mashape.unirest:unirest-java</include>
                   <include>com.fasterxml.jackson.core:*</include>
+                  <include>org.codehaus.groovy:groovy</include>
+                  <include>org.codehaus.groovy:groovy-json</include>
                 </includes>
               </artifactSet>
               <relocations>

@@ -23,7 +23,7 @@ import java.util.List;
 import java.util.Properties;
 
 /**
- * Captures configuration relating to plugin alignment from the POMs. Used by {@link PluginManipulator}.
+ * Captures configuration relating to plugin removal from the POMs.
  */
 public class PluginRemovalState
     implements State
@@ -44,7 +44,7 @@ public class PluginRemovalState
     }
 
     /**
-     * Enabled ONLY if propertyManagement is provided in the user properties / CLI -D options.
+     * Enabled ONLY if plugin-removal is provided in the user properties / CLI -D options.
      *
      * @see State#isEnabled()
      */
