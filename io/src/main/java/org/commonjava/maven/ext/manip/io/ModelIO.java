@@ -131,15 +131,15 @@ public class ModelIO
             final List<DependencyView> deps = pomView.getAllManagedDependencies();
             if ( deps == null || deps.isEmpty() )
             {
-                throw new ManipulationException(
-                                                 "Attempting to align to a BOM that does not have a dependencyManagement section" );
+                logger.warn( "Attempting to align to a BOM that does not have a dependencyManagement section" );
             }
-
-            for ( final DependencyView dep : deps )
+            else
             {
-                versionOverrides.put( dep.asArtifactRef(), dep.getVersion() );
-                logger.debug( "Added version override for: " + dep.asProjectRef()
-                                                                  .toString() + ":" + dep.getVersion() );
+                for ( final DependencyView dep : deps )
+                {
+                    versionOverrides.put( dep.asArtifactRef(), dep.getVersion() );
+                    logger.debug( "Added version override for: " + dep.asProjectRef().toString() + ":" + dep.getVersion() );
+                }
             }
         }
         catch ( final GalleyMavenException e )
