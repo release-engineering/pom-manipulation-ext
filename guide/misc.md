@@ -28,9 +28,19 @@ Occasionally a project's more complex example/quickstart may have a local reposi
 
 Additionally, most project rebuilers aren't interested in hosting their own copy of the project's build reports or generated website; therefore, the reporting section only adds more plugin artifacts to the list of what must be present in the environment for the build to succeed. Eliminating this section simplifies the build and reduces the risk of failed builds.
 
-#### Plugin Removal
+#### `project.version` Expression Replacement
 
-If the property `-Dplugin-removal=group:artifact,....` is set, PME will remove the specified plugins from the POM files. The argument should be a comma separate list of group:artifact.
+The extension will automatically replace occurences of the property expression `${project.version}` in POMs (of packaging type `pom`).
+
+This avoids a subtle problem that occurs when another project with inherits from this POM. If the child POM (the one that declares the `<parent/>`) specifies its own version **and that version is different from the parent**, that child version will be used to resolve `${project.version}` instead of the intended (parent) version. Resolving these expressions when `packaging` is set to `pom` (the only type of POM that can act as a parent) prevents this from occurring.
+
+This behavior may be configured by setting:
+
+    -Denforce-project-version=on|off
+
+As explained above, the default is `on`.
+
+### Build Management
 
 #### Profile Injection
 
@@ -49,20 +59,6 @@ PME supports injection of remote repositories. Supply a remote repository manage
 	mvn install -DrepositoryInjection=org.foo:repository-injection:1.0
 
 The extension will resolve a remote POM file and inject remote repositories to the local top level POM file. If there is a local repository with id identical to the injected one, it is overwritten.
-
-#### `project.version` Expression Replacement
-
-The extension will automatically replace occurences of the property expression `${project.version}` in POMs (of packaging type `pom`).
-
-This avoids a subtle problem that occurs when another project with inherits from this POM. If the child POM (the one that declares the `<parent/>`) specifies its own version **and that version is different from the parent**, that child version will be used to resolve `${project.version}` instead of the intended (parent) version. Resolving these expressions when `packaging` is set to `pom` (the only type of POM that can act as a parent) prevents this from occurring.
-
-This behavior may be configured by setting:
-
-    -Denforce-project-version=on|off
-
-As explained above, the default is `on`.
-
-### Build Management
 
 #### Property Override
 
