@@ -48,6 +48,7 @@ println "#### BINDINGS:"
 binding.variables.each{
   println it.key
   println it.value
+  println it.value.getClass().toString()
 }
 println "#### BINDINGS END"
 // End...

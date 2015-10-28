@@ -106,6 +106,8 @@ public class GroovyManipulator
                 {
                     binding.setProperty( "basedir", project.getPom().getParentFile().toString() );
                     binding.setProperty( "name", project.getKey() );
+                    binding.setProperty( "project", project );
+                    binding.setProperty( "projects", projects );
 
                     logger.info ("Executing {} on {} with binding {} ", groovyScript, project, binding.getVariables());
 
