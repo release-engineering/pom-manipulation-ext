@@ -53,7 +53,9 @@ It will have the following properties injected into it:
 | Property      | Value |
 | ------------- |:-------------:|
 | basedir       | Directory of the execution root |
-| name          | Project name |
+| projects      | ArrayList of all [Projects](https://github.com/release-engineering/pom-manipulation-ext/blob/master/common/src/main/java/org/commonjava/maven/ext/manip/model/Project.java) |
+| project       | Current [Project](https://github.com/release-engineering/pom-manipulation-ext/blob/master/common/src/main/java/org/commonjava/maven/ext/manip/model/Project.java)|
+| name          | Current project GAV (a [ProjectVersionRef](https://github.com/Commonjava/atlas/blob/master/identities/src/main/java/org/commonjava/maven/atlas/ident/ref/ProjectVersionRef.java)) |
 
 
 A typical groovy script might be:
