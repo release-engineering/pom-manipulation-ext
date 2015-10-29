@@ -38,6 +38,7 @@ import org.commonjava.maven.galley.model.Transfer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
@@ -71,7 +72,6 @@ public class ModelIO
     {
 
     }
-
     /**
      * Read the raw model (equivalent to the pom file on disk) from a given GAV.
      *
@@ -115,6 +115,35 @@ public class ModelIO
             closeQuietly( in );
         }
     }
+
+    /**
+     * Read the raw file from a given GAVTC (GAV + Type and Classifier). Useful if we need to read
+     * a remote file.
+     *
+     * @param ref the ArtifactRef to read.
+     * @return the file for the GAVTC
+     * @throws ManipulationException if an error occurs.
+     */
+    public File resolveRawFile( final ArtifactRef ref )
+                    throws ManipulationException
+    {
+        Transfer transfer;
+        try
+        {
+            transfer = galleyWrapper.resolveArtifact( ref );
+        }
+        catch ( final TransferException e )
+        {
+            throw new ManipulationException( "Failed to resolve POM: %s.\n--> %s", e, ref, e.getMessage() );
+        }
+        if ( transfer == null )
+        {
+            throw new ManipulationException( "Failed to resolve POM: " + ref.asPomArtifact() );
+        }
+
+        return transfer.getDetachedFile();
+    }
+
 
     public Map<ArtifactRef, String> getRemoteDependencyVersionOverrides( final ProjectVersionRef ref )
         throws ManipulationException
