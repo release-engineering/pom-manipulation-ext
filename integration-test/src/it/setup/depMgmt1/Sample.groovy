@@ -48,24 +48,15 @@ public class Processor {
 }
 // These are both debug AND test statements - do NOT remove. If the injection (in GroovyManipulator)
 // fails these prints will cause the test to fail.
-println "#### BINDINGS:"
-println binding.variables.basedir
-println binding.variables.gav
-println binding.variables.projects
-println binding.variables.project
-
-binding.variables.each{
-//  println it.key
-//  println it.value
-  println it.value.getClass().toString()
-}
-println "#### BINDINGS END"
-
 println "#### BASESCRIPT:"
 println pme.getBaseDir()
+println pme.getBaseDir().getClass().getName()
 println pme.getGAV()
+println pme.getGAV().getClass().getName()
 println pme.getProjects()
-println pme.getProject()
+println pme.getProject().getClass().getName()
+println pme.getProjects()
+println pme.getProject().getClass().getName()
 println "#### BASESCRIPT END"
 // End...
 

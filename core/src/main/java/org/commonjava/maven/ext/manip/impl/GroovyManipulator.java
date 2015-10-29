@@ -98,22 +98,16 @@ public class GroovyManipulator
 
             final File groovyScript = modelBuilder.resolveRawFile( ar );
 
-            Binding binding = new Binding( );
             CompilerConfiguration config = new CompilerConfiguration();
             config.setScriptBaseClass(org.commonjava.maven.ext.manip.groovy.BaseScript.class.getName());
-            GroovyShell shell = new GroovyShell( binding );
+            GroovyShell shell = new GroovyShell( );
             Script script = null;
 
             for ( final Project project : projects )
             {
                 if ( project.isExecutionRoot() )
                 {
-                    binding.setProperty( "basedir", project.getPom().getParentFile() );
-                    binding.setProperty( "gav", project.getKey() );
-                    binding.setProperty( "project", project );
-                    binding.setProperty( "projects", projects );
-
-                    logger.info ("Executing {} on {} with binding {} ", groovyScript, project, binding.getVariables());
+                    logger.info ("Executing {} on {}", groovyScript, project);
 
                     try
                     {
