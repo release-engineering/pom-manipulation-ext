@@ -37,6 +37,10 @@ Additionally, the feature supports per-module overrides, which can be specified 
 
     -DenforceSkip.org.group.id:artifact-id=(none|on|true|off|false|detect)
 
+### Plugin Removal
+
+If the property `-Dplugin-removal=group:artifact,....` is set, PME will remove the specified plugins from the POM files. The argument should be a comma separate list of group:artifact.
+
 ### Project Sources / Build Metadata Plugin Injection
 
 The extension will inject an execution of [project-sources-maven-plugin](https://github.com/commonjava/project-sources-maven-plugin) and [build-metadata-plugin](https://github.com/release-engineering/buildmetadata-maven-plugin) by default. This will result in an archive being created containing all project sources **after** this extension has made any modifications to the pom.xml's. The archive will only be created in the execution-root project, and will be attached for installation and deployment using the `project-sources` classifier. The metadata plugin will create a build.properties file containing information (e.g. the command line) on the invoked project. This will also be included in the archive tar.
@@ -52,4 +56,3 @@ If unspecified, default versions of the project sources and metadata plugins wil
 
     mvn install -Dproject.src.version=x.y
     mvn install -Dproject.meta.version=x.y
-

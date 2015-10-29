@@ -62,3 +62,4 @@ Below are links to more specific information about configuring sets of features 
 * [Dependency manipulation](guide/dep-manip.html)
 * [Plugin manipulation](guide/plugin-manip.html)
 * [Properties, Profiles, Repositories, Reporting, Etc.](guide/misc.html)
+* [Groovy Script Injection](guide/groovy.html)
