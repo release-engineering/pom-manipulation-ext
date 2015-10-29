@@ -32,6 +32,10 @@
   <dependencies>
     <dependency>
       <groupId>org.commonjava.maven.ext</groupId>
+      <artifactId>pom-manipulation-core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.commonjava.maven.ext</groupId>
       <artifactId>pom-manipulation-io</artifactId>
       <type>test-jar</type>
       <scope>test</scope>
@@ -44,10 +48,13 @@
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
     </dependency>
+      <dependency>
+        <groupId>org.codehaus.groovy</groupId>
+        <artifactId>groovy-json</artifactId>
+      </dependency>
     <dependency>
       <groupId>org.codehaus.groovy</groupId>
       <artifactId>groovy</artifactId>
-      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.codehaus.groovy</groupId>

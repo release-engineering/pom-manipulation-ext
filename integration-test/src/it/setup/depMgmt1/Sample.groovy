@@ -1,11 +1,14 @@
 
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
+import groovy.transform.BaseScript
 import groovy.util.logging.Slf4j
+
+@BaseScript org.commonjava.maven.ext.manip.groovy.BaseScript pme
 
 @Slf4j
 public class Processor {
-    def binding
+    File basedir
 
     private void parseDeps(Map n) {
         def iterator = n.iterator()
@@ -25,7 +28,7 @@ public class Processor {
     def execute() {
         log.info("Running ShrinkwrapProcessor...")
 
-        def shrinkwrap = new File (binding.variables.basedir +
+        def shrinkwrap = new File (basedir.toString() +
                 java.nio.file.FileSystems.getDefault().getSeparator() + "shrink.json")
 
         log.info("shrinkwrap json is " + shrinkwrap)
@@ -43,15 +46,28 @@ public class Processor {
         }
     }
 }
-// Debug...
+// These are both debug AND test statements - do NOT remove. If the injection (in GroovyManipulator)
+// fails these prints will cause the test to fail.
 println "#### BINDINGS:"
+println binding.variables.basedir
+println binding.variables.gav
+println binding.variables.projects
+println binding.variables.project
+
 binding.variables.each{
-  println it.key
-  println it.value
+//  println it.key
+//  println it.value
   println it.value.getClass().toString()
 }
 println "#### BINDINGS END"
+
+println "#### BASESCRIPT:"
+println pme.getBaseDir()
+println pme.getGAV()
+println pme.getProjects()
+println pme.getProject()
+println "#### BASESCRIPT END"
 // End...
 
-def Processor sp = new Processor(binding:binding)
+def Processor sp = new Processor(basedir:pme.getBaseDir())
 sp.execute()

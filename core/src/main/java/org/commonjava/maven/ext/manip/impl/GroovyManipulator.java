@@ -17,8 +17,10 @@ package org.commonjava.maven.ext.manip.impl;
 
 import groovy.lang.Binding;
 import groovy.lang.GroovyShell;
+import groovy.lang.MissingMethodException;
 import groovy.lang.Script;
 import org.codehaus.groovy.control.CompilationFailedException;
+import org.codehaus.groovy.control.CompilerConfiguration;
 import org.codehaus.plexus.component.annotations.Component;
 import org.codehaus.plexus.component.annotations.Requirement;
 import org.commonjava.maven.atlas.ident.ref.ArtifactRef;
@@ -97,6 +99,8 @@ public class GroovyManipulator
             final File groovyScript = modelBuilder.resolveRawFile( ar );
 
             Binding binding = new Binding( );
+            CompilerConfiguration config = new CompilerConfiguration();
+            config.setScriptBaseClass(org.commonjava.maven.ext.manip.groovy.BaseScript.class.getName());
             GroovyShell shell = new GroovyShell( binding );
             Script script = null;
 
@@ -104,8 +108,8 @@ public class GroovyManipulator
             {
                 if ( project.isExecutionRoot() )
                 {
-                    binding.setProperty( "basedir", project.getPom().getParentFile().toString() );
-                    binding.setProperty( "name", project.getKey() );
+                    binding.setProperty( "basedir", project.getPom().getParentFile() );
+                    binding.setProperty( "gav", project.getKey() );
                     binding.setProperty( "project", project );
                     binding.setProperty( "projects", projects );
 
@@ -114,6 +118,12 @@ public class GroovyManipulator
                     try
                     {
                         script = shell.parse( groovyScript );
+
+                        script.invokeMethod( "setValues", new Object[] { projects, project } );
+                    }
+                    catch (MissingMethodException e)
+                    {
+                        throw new ManipulationException( "Unable to inject values into base script", e );
                     }
                     catch (CompilationFailedException e)
                     {
