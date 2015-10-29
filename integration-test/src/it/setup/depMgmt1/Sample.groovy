@@ -28,8 +28,7 @@ public class Processor {
     def execute() {
         log.info("Running ShrinkwrapProcessor...")
 
-        def shrinkwrap = new File (basedir.toString() +
-                java.nio.file.FileSystems.getDefault().getSeparator() + "shrink.json")
+        def shrinkwrap = new File (basedir.toString() + File.separator + "shrink.json")
 
         log.info("shrinkwrap json is " + shrinkwrap)
 
