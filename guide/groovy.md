@@ -99,8 +99,7 @@ A typical groovy script that alters a JSON file on disk might be:
         def execute() {
             log.info("Running ShrinkwrapProcessor...")
 
-            def shrinkwrap = new File (basedir.toString() +
-                java.nio.file.FileSystems.getDefault().getSeparator() +
+            def shrinkwrap = new File (basedir.toString() + File.separator +
                 "shrink.json")
 
             log.info("shrinkwrap json is " + shrinkwrap)
