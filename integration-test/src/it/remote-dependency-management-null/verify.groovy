@@ -23,13 +23,4 @@ def dependency = pom.dependencies.dependency.find { it.artifactId.text() == "jun
 assert dependency != null
 assert dependency.version.text() == "3.8.2"
 
-// An exception is thrown if there aren't any dependencies. Search the build.log for the exception.
-def buildLog = new File( basedir, 'build.log' )
-def exceptionRaised = false
-buildLog.eachLine {
-   if (it.contains( "POM Manipulation failed")) {
-      exceptionRaised = true
-   }
-}
-
-assert exceptionRaised == true
+// With a502aca no exception is thrown if there aren't any dependencies.
