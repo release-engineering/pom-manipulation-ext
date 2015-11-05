@@ -15,12 +15,11 @@
  */
 package org.commonjava.maven.ext.manip.impl;
 
-import groovy.lang.Binding;
 import groovy.lang.GroovyShell;
 import groovy.lang.MissingMethodException;
 import groovy.lang.Script;
+import org.apache.commons.io.FileUtils;
 import org.codehaus.groovy.control.CompilationFailedException;
-import org.codehaus.groovy.control.CompilerConfiguration;
 import org.codehaus.plexus.component.annotations.Component;
 import org.codehaus.plexus.component.annotations.Requirement;
 import org.commonjava.maven.atlas.ident.ref.ArtifactRef;
@@ -98,8 +97,6 @@ public class GroovyManipulator
 
             final File groovyScript = modelBuilder.resolveRawFile( ar );
 
-            CompilerConfiguration config = new CompilerConfiguration();
-            config.setScriptBaseClass(org.commonjava.maven.ext.manip.groovy.BaseScript.class.getName());
             GroovyShell shell = new GroovyShell( );
             Script script = null;
 
@@ -117,10 +114,26 @@ public class GroovyManipulator
                     }
                     catch (MissingMethodException e)
                     {
+                        try
+                        {
+                            logger.debug ( "Failure when injecting into script {} ", FileUtils.readFileToString( groovyScript ) );
+                        }
+                        catch ( IOException e1 )
+                        {
+                            logger.debug ("Unable to read script file {} for debugging! {} ", groovyScript, e1);
+                        }
                         throw new ManipulationException( "Unable to inject values into base script", e );
                     }
                     catch (CompilationFailedException e)
                     {
+                        try
+                        {
+                            logger.debug ( "Failure when parsing script {} ", FileUtils.readFileToString( groovyScript ) );
+                        }
+                        catch ( IOException e1 )
+                        {
+                            logger.debug ("Unable to read script file {} for debugging! {} ", groovyScript, e1);
+                        }
                         throw new ManipulationException( "Unable to parse script", e );
                     }
                     catch ( IOException e )

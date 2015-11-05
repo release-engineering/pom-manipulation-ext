@@ -31,6 +31,7 @@ import org.commonjava.maven.ext.manip.model.SimpleScopedArtifactRef;
 import org.commonjava.maven.ext.manip.state.DependencyState;
 import org.commonjava.maven.ext.manip.state.RESTState;
 import org.commonjava.maven.ext.manip.state.VersioningState;
+import org.commonjava.maven.ext.manip.util.PropertiesUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -265,7 +266,7 @@ public class RESTManipulator implements Manipulator
                 deps.add( new SimpleScopedArtifactRef( new SimpleProjectVersionRef(
                                 d.getGroupId().equals( "${project.groupId}" ) ? project.getGroupId() : d.getGroupId(),
                                 d.getArtifactId().equals( "${project.artifactId}" ) ? project.getArtifactId() : d.getArtifactId(),
-                                resolveProperties( projects, d.getVersion() ) ),
+                                PropertiesUtils.resolveProperties( projects, d.getVersion() ) ),
                                                        new SimpleTypeAndClassifier( d.getType(), d.getClassifier() ), Boolean.parseBoolean( d.getOptional()),
                                                        // TODO: Should atlas handle default scope?
                                                        d.getScope() == null ? DependencyScope.compile.realName() : d.getScope()));
@@ -273,47 +274,4 @@ public class RESTManipulator implements Manipulator
         }
     }
 
-    /**
-     * This recursively checks the supplied version and recursively resolves it if its a property.
-     *
-     * @param projects set of projects
-     * @param version version to check
-     * @return the version string
-     * @throws ManipulationException
-     */
-    private static String resolveProperties( List<Project> projects, String version )
-                    throws ManipulationException
-    {
-        String result = version;
-
-        if (version.startsWith( "${" ) )
-        {
-            final int endIndex = version.indexOf( '}' );
-            final String property = version.substring( 2, endIndex );
-
-            if ( endIndex != version.length() - 1 )
-            {
-                throw new ManipulationException( "NYI : handling for versions (" + version
-                                                                 + ") with multiple embedded properties is NYI. " );
-            }
-            for ( Project p : projects)
-            {
-                logger.debug( "Scanning {} for property {} and found {} ", p, property, p.getModel().getProperties() );
-                if ( property.equals( "project.version" ))
-                {
-                    result = p.getVersion();
-                }
-                else if ( p.getModel().getProperties().containsKey (property) )
-                {
-                    result = p.getModel().getProperties().getProperty( property );
-
-                    if ( result.startsWith( "${" ))
-                    {
-                        result = resolveProperties( projects, result );
-                    }
-                }
-            }
-        }
-        return result;
-    }
 }
