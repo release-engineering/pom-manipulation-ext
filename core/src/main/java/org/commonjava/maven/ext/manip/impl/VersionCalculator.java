@@ -25,12 +25,12 @@ import org.commonjava.maven.ext.manip.ManipulationSession;
 import org.commonjava.maven.ext.manip.model.Project;
 import org.commonjava.maven.ext.manip.resolver.GalleyAPIWrapper;
 import org.commonjava.maven.ext.manip.state.VersioningState;
+import org.commonjava.maven.ext.manip.util.PropertiesUtils;
 import org.commonjava.maven.galley.maven.GalleyMavenException;
 import org.commonjava.maven.galley.maven.model.view.meta.MavenMetadataView;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -76,7 +76,7 @@ public class VersionCalculator
      * @return a collection of GAV : new Version
      * @throws ManipulationException if an error occurs.
      */
-    public Map<ProjectVersionRef, String> calculateVersioningChanges( final Collection<Project> projects,
+    public Map<ProjectVersionRef, String> calculateVersioningChanges( final List<Project> projects,
                                                                       final ManipulationSession session )
         throws ManipulationException
     {
@@ -87,9 +87,9 @@ public class VersionCalculator
 
         for ( final Project project : projects )
         {
-            final String originalVersion = project.getVersion();
+            String originalVersion = project.getVersion();
             String modifiedVersionString;
-
+            originalVersion = PropertiesUtils.resolveProperties( projects, originalVersion);
             final Version modifiedVersion =
                 calculate( project.getGroupId(), project.getArtifactId(), originalVersion, session );
             versionObjsByGAV.put( project.getKey(), modifiedVersion );

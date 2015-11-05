@@ -17,6 +17,7 @@ package org.commonjava.maven.ext.manip.util;
 
 import org.commonjava.maven.ext.manip.ManipulationException;
 import org.commonjava.maven.ext.manip.ManipulationSession;
+import org.commonjava.maven.ext.manip.impl.RESTManipulator;
 import org.commonjava.maven.ext.manip.impl.Version;
 import org.commonjava.maven.ext.manip.model.Project;
 import org.commonjava.maven.ext.manip.state.DependencyState;
@@ -25,6 +26,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
@@ -90,6 +92,7 @@ public final class PropertiesUtils
 
         for ( final Project p : projects )
         {
+            logger.debug ("### Looking for key {} " , key);
             if ( p.getModel().getProperties().containsKey( key ) )
             {
                 final String oldValue = p.getModel().getProperties().getProperty( key );
@@ -190,7 +193,7 @@ public final class PropertiesUtils
     }
 
     /**
-     * This will check if the old version (e.g. in a plugin ore dependency) is a property and if so
+     * This will check if the old version (e.g. in a plugin or dependency) is a property and if so
      * store the mapping in a map.
      * @param versionPropertyUpdateMap the map to store any updates in
      * @param oldVersion original property value
@@ -230,6 +233,50 @@ public final class PropertiesUtils
                 versionPropertyUpdateMap.put( oldVersionProp, newVersion );
             }
             result = true;
+        }
+        return result;
+    }
+
+    /**
+     * This recursively checks the supplied version and recursively resolves it if its a property.
+     *
+     * @param projects set of projects
+     * @param version version to check
+     * @return the version string
+     * @throws ManipulationException
+     */
+    public static String resolveProperties( List<Project> projects, String version )
+                    throws ManipulationException
+    {
+        String result = version;
+
+        if (version.startsWith( "${" ) )
+        {
+            final int endIndex = version.indexOf( '}' );
+            final String property = version.substring( 2, endIndex );
+
+            if ( endIndex != version.length() - 1 )
+            {
+                throw new ManipulationException( "NYI : handling for versions (" + version
+                                                                 + ") with multiple embedded properties is NYI. " );
+            }
+            for ( Project p : projects)
+            {
+                logger.debug( "Scanning {} for property {} and found {} ", p, property, p.getModel().getProperties() );
+                if ( property.equals( "project.version" ))
+                {
+                    result = p.getVersion();
+                }
+                else if ( p.getModel().getProperties().containsKey (property) )
+                {
+                    result = p.getModel().getProperties().getProperty( property );
+
+                    if ( result.startsWith( "${" ))
+                    {
+                        result = resolveProperties( projects, result );
+                    }
+                }
+            }
         }
         return result;
     }

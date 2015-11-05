@@ -72,7 +72,7 @@ public class ProjectVersionManipulatorTest
         project.setOriginalModel( orig );
 
         final Set<MavenProject> changes =
-            newVersioningModifier().applyVersioningChanges( Collections.singleton( project ), versionsByGAV );
+            newVersioningModifier().applyVersioningChanges( Collections.singletonList( project ), versionsByGAV );
 
         assertThat( changes.size(), equalTo( 1 ) );
         assertThat( orig.getVersion(), equalTo( mv ) );
@@ -643,14 +643,14 @@ public class ProjectVersionManipulatorTest
             final Set<MavenProject> changed = new HashSet<MavenProject>();
             for ( final MavenProject project : projects )
             {
-                if ( applyVersioningChanges( new Project (project.getOriginalModel()), state ) )
+                if ( applyVersioningChanges( session, null, new Project ( project.getOriginalModel()), state ) )
                 {
                     final String v = _versionsByGAV.get( SimpleProjectVersionRef.parse( gav( project ) ) );
                     logger.info( project.getName() + " (" + gav( project ) + "): VERSION MODIFIED\n    New version: "
                         + v );
 
                     // this is a bigger model, so only do this if the originalModel was modded.
-                    applyVersioningChanges( new Project (project.getModel()), state );
+                    applyVersioningChanges( session, null, new Project ( project.getModel()), state );
                     changed.add( project );
 
                     if ( v != null )

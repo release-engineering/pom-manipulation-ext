@@ -36,6 +36,7 @@ import org.commonjava.maven.ext.manip.ManipulationException;
 import org.commonjava.maven.ext.manip.ManipulationSession;
 import org.commonjava.maven.ext.manip.model.Project;
 import org.commonjava.maven.ext.manip.state.VersioningState;
+import org.commonjava.maven.ext.manip.util.PropertiesUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -133,7 +134,7 @@ public class ProjectVersioningManipulator
         {
             final String ga = ga( project );
             logger.info( getClass().getSimpleName() + " applying changes to: " + ga );
-            if ( applyVersioningChanges( project, state ) )
+            if ( applyVersioningChanges( session, projects, project, state ) )
             {
                 changed.add( project );
             }
@@ -151,13 +152,17 @@ public class ProjectVersioningManipulator
      *
      * If the project is modified, then it is marked as changed in the {@link ManipulationSession}, which triggers the associated POM to be rewritten.
      *
+     *
+     * @param session the current session
+     * @param projects list of all projects
      * @param project Project undergoing modification.
      * @param state
      * @return whether any changes have been applied.
      * @throws ManipulationException if an error occurs.
      */
     // TODO: Loooong method
-    protected boolean applyVersioningChanges( final Project project, VersioningState state )
+    protected boolean applyVersioningChanges( final ManipulationSession session, final List<Project> projects,
+                                              final Project project, final VersioningState state )
         throws ManipulationException
     {
         boolean changed = false;
@@ -202,7 +207,14 @@ public class ProjectVersioningManipulator
             {
                 final String newVersion = versionsByGAV.get( parentGAV );
                 logger.info( "Changed parent version to: " + newVersion + " in " + parent );
-                parent.setVersion( newVersion );
+                if (parentGAV.getVersionString().startsWith( "${" ))
+                {
+                    PropertiesUtils.updateProperties( session, new HashSet<Project>( projects ), false, extractPropertyName( parentGAV.getVersionString() ), newVersion );
+                }
+                else
+                {
+                    parent.setVersion( newVersion );
+                }
                 changed = true;
             }
         }
@@ -214,7 +226,14 @@ public class ProjectVersioningManipulator
             logger.info( "Looking for new version: " + gav + " (found: " + newVersion + ")" );
             if ( newVersion != null && model.getVersion() != null )
             {
-                model.setVersion( newVersion );
+                if (gav.getVersionString().startsWith( "${" ))
+                {
+                    PropertiesUtils.updateProperties( session, new HashSet<Project>( projects ), false, extractPropertyName( gav.getVersionString() ), newVersion );
+                }
+                else
+                {
+                    model.setVersion( newVersion );
+                }
                 logger.info( "Changed main version in " + gav( model ) );
                 changed = true;
             }
@@ -269,8 +288,15 @@ public class ProjectVersioningManipulator
                         final String newVersion = versionsByGAV.get( gav );
                         if ( newVersion != null )
                         {
-                            d.setVersion( newVersion );
-                            logger.info( "Changed managed: " + d + " in " + base );
+                            if (gav.getVersionString().startsWith( "${" ))
+                            {
+                                PropertiesUtils.updateProperties( session, new HashSet<Project>( projects ), false, extractPropertyName( gav.getVersionString() ), newVersion );
+                            }
+                            else
+                            {
+                                d.setVersion( newVersion );
+                            }
+                            logger.info( "Changed managed: " + d + " in " + base + " to " + newVersion + " from " + gav.getVersionString() );
                             changed = true;
                         }
                     }
@@ -292,10 +318,18 @@ public class ProjectVersioningManipulator
                                                            interpolate( d.getVersion(), ri, interp ) );
 
                         final String newVersion = versionsByGAV.get( gav );
+
                         if ( newVersion != null && d.getVersion() != null )
                         {
-                            d.setVersion( newVersion );
-                            logger.info( "Changed: " + d + " in " + base );
+                            if (gav.getVersionString().startsWith( "${" ))
+                            {
+                                PropertiesUtils.updateProperties( session, new HashSet<Project>( projects ), false, extractPropertyName( gav.getVersionString() ), newVersion );
+                            }
+                            else
+                            {
+                                d.setVersion( newVersion );
+                            }
+                            logger.info( "Changed: " + d + " in " + base + " to " + newVersion + " from " + gav.getVersionString());
                             changed = true;
                         }
                     }
@@ -329,6 +363,20 @@ public class ProjectVersioningManipulator
         {
             throw new ManipulationException( "Failed to interpolate: %s. Reason: %s", e, src, e.getMessage() );
         }
+    }
+
+    private String extractPropertyName (String version) throws ManipulationException
+    {
+        // TODO: Handle the scenario where the version might be ${....}${....}
+        final int endIndex = version.indexOf( '}' );
+        final String property = version.substring( 2, endIndex );
+
+        if ( endIndex != version.length() - 1 )
+        {
+            throw new ManipulationException( "NYI : handling for versions (" + version
+                                                             + ") with multiple embedded properties is NYI. " );
+        }
+        return property;
     }
 
     @Override
