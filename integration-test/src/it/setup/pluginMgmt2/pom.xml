@@ -30,6 +30,8 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+    <maven-jar-plugin>2.4</maven-jar-plugin>
   </properties>
 
   <build>
@@ -40,6 +42,37 @@
           <artifactId>maven-compiler-plugin</artifactId>
           <version>3.1</version>
         </plugin>
+
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-jar-plugin</artifactId>
+          <version>${maven-jar-plugin}</version>
+          <configuration>
+            <archive>
+              <index>true</index>
+              <manifest>
+                <addDefaultSpecificationEntries>
+                  true
+                </addDefaultSpecificationEntries>
+                <addDefaultImplementationEntries>
+                  true
+                </addDefaultImplementationEntries>
+              </manifest>
+              <manifestEntries>
+                <Implementation-URL>\${project.url}</Implementation-URL>
+                <Java-Version>\${java.version}</Java-Version>
+                <Java-Vendor>\${java.vendor}</Java-Vendor>
+                <Os-Name>\${os.name}</Os-Name>
+                <Os-Arch>\${os.arch}</Os-Arch>
+                <Os-Version>\${os.version}</Os-Version>
+                <Scm-Url>\${project.scm.url}</Scm-Url>
+                <Scm-Connection>\${project.scm.connection}</Scm-Connection>
+                <Scm-Revision>\${buildNumber}</Scm-Revision>
+              </manifestEntries>
+            </archive>
+          </configuration>
+        </plugin>
+
       </plugins>
     </pluginManagement>
   </build>

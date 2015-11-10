@@ -242,6 +242,7 @@ public class PluginManipulator
 
                 if ( override.getConfiguration() != null)
                 {
+                    logger.debug ("Injecting plugin configuration" + override.getConfiguration());
                     if (pluginMgmt && plugin.getConfiguration() == null)
                     {
                         plugin.setConfiguration( override.getConfiguration() );

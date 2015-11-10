@@ -92,7 +92,6 @@ public final class PropertiesUtils
 
         for ( final Project p : projects )
         {
-            logger.debug ("### Looking for key {} " , key);
             if ( p.getModel().getProperties().containsKey( key ) )
             {
                 final String oldValue = p.getModel().getProperties().getProperty( key );
