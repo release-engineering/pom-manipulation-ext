@@ -261,8 +261,11 @@ public class ModelIO
             {
                 String replacement = resolveProperty (model.getProperties(), child.getValue() );
 
-                logger.debug( "Replacing child value " + child.getValue() + " with " + replacement );
-                child.setValue( replacement );
+                if (replacement != null && replacement.length() > 0)
+                {
+                    logger.debug( "Replacing child value " + child.getValue() + " with " + replacement );
+                    child.setValue( replacement );
+                }
             }
 
         }
