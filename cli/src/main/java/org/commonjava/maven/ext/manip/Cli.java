@@ -23,6 +23,7 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
+import org.apache.commons.io.FileUtils;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.artifact.repository.MavenArtifactRepository;
 import org.apache.maven.execution.DefaultMavenExecutionRequest;
@@ -132,9 +133,18 @@ public class Cli
                                  .desc("Comma separated list of active profiles. Only used with '-p' (Print all project dependencies)")
                                  .numberOfArgs(1)
                                  .build() );
+        options.addOption( Option.builder( "o" )
+                                 .longOpt("outputFile")
+                                 .desc("outputFile to output dependencies to. Only used with '-p' (Print all project dependencies)")
+                                 .numberOfArgs(1)
+                                 .build() );
         options.addOption( Option.builder( "p" )
                                  .longOpt("printDeps")
                                  .desc("Print all project dependencies")
+                                 .build() );
+        options.addOption( Option.builder( )
+                                 .longOpt("printGAVTC")
+                                 .desc("Print all project dependencies in group:artifact:version:type:classifier with scope information")
                                  .build() );
         options.addOption( Option.builder( "D" )
                                  .hasArgs()
@@ -220,7 +230,14 @@ public class Cli
                     Collections.addAll( activeProfiles, cmd.getOptionValue( 'P' ).split( "," ));
                 }
                 Set<ArtifactRef> ts = RESTManipulator.establishDependencies( pomIO.parseProject( session.getPom() ), activeProfiles );
-                System.out.println ("Found the following dependencies:\n\n" );
+                logger.info ("Found {} dependencies.", ts.size() );
+                File output = null;
+
+                if (cmd.hasOption( 'o' ))
+                {
+                   output = new File(cmd.getOptionValue( 'o' ));
+                   output.delete();
+                }
                 for ( ArtifactRef a : ts)
                 {
                     String scope = null;
@@ -228,7 +245,28 @@ public class Cli
                     {
                         scope = ((SimpleScopedArtifactRef)a).getScope();
                     }
-                    System.out.format("%-80s%10s\n", a.toString(), scope );
+                    if (cmd.hasOption( 'o' ))
+                    {
+                        if ( cmd.hasOption( "printGAVTC" ) )
+                        {
+                            FileUtils.writeStringToFile( output, String.format( "%-80s%10s\n", a, scope), true );
+                        }
+                        else
+                        {
+                            FileUtils.writeStringToFile( output, a.asProjectVersionRef().toString() + '\n', true );
+                        }
+                    }
+                    else
+                    {
+                        if ( cmd.hasOption( "printGAVTC" ) )
+                        {
+                            System.out.format( "%-80s%10s\n", a, scope );
+                        }
+                        else
+                        {
+                            System.out.println( a.asProjectVersionRef() );
+                        }
+                    }
                 }
             }
             else
