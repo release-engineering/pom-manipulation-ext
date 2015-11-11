@@ -156,11 +156,14 @@ public class PluginManipulator
 
         final ListIterator<ProjectVersionRef> iter = gavs.listIterator( gavs.size() );
         // Iterate in reverse order so that the first GAV in the list overwrites the last
+
+        Properties exclusions = (Properties) session.getUserProperties().clone();
+        exclusions.putAll( System.getProperties() );
+
         while ( iter.hasPrevious() )
         {
             final ProjectVersionRef ref = iter.previous();
-
-            overrides.putAll( effectiveModelBuilder.getRemotePluginVersionOverrides( ref ) );
+            overrides.putAll( effectiveModelBuilder.getRemotePluginVersionOverrides( ref, exclusions ) );
         }
 
         return overrides;

@@ -27,7 +27,6 @@ import org.commonjava.maven.atlas.ident.ref.ArtifactRef;
 import org.commonjava.maven.atlas.ident.ref.ProjectRef;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleProjectRef;
-import org.commonjava.maven.atlas.ident.ref.VersionlessArtifactRef;
 import org.commonjava.maven.ext.manip.ManipulationException;
 import org.commonjava.maven.ext.manip.resolver.GalleyAPIWrapper;
 import org.commonjava.maven.galley.TransferException;
@@ -191,7 +190,15 @@ public class ModelIO
         return m.getProperties();
     }
 
-    public Map<ProjectRef, Plugin> getRemotePluginVersionOverrides( final ProjectVersionRef ref )
+    /**
+     * Return remote Plugins to override
+     * @param ref the remote reference to resolve.
+     * @param userProperties a collection of properties to ignore when resolving the remote plugin property expressions.
+     * @return
+     * @throws ManipulationException
+     */
+    public Map<ProjectRef, Plugin> getRemotePluginVersionOverrides( final ProjectVersionRef ref,
+                                                                    Properties userProperties )
         throws ManipulationException
     {
         logger.debug( "Resolving remote plugin management POM: " + ref );
@@ -214,7 +221,8 @@ public class ModelIO
                 if ( p.getVersion().startsWith( "${" ))
                 {
                     // Property reference to something in the remote pom. Resolve and inline it now.
-                    String newVersion = resolveProperty (m.getProperties(), p.getVersion() );
+                    String newVersion = resolveProperty (userProperties, m.getProperties(), p.getVersion() );
+
                     logger.debug( "Replacing plugin override version " + p.getVersion() +
                                   " with " + newVersion);
                     p.setVersion( newVersion );
@@ -225,7 +233,7 @@ public class ModelIO
                 // resolve any properties.
                 if (p.getConfiguration() != null)
                 {
-                    processChildren (m, (Xpp3Dom)p.getConfiguration());
+                    processChildren (userProperties, m, (Xpp3Dom)p.getConfiguration());
                 }
 
                 logger.debug( "Added plugin override for: " + pr.toString() + ":" + p.getVersion() +
@@ -244,10 +252,11 @@ public class ModelIO
 
     /**
      * Recursively process the DOM elements to inline any property values from the model.
+     * @param userProperties
      * @param model
      * @param parent
      */
-    private void processChildren (Model model, Xpp3Dom parent)
+    private void processChildren( Properties userProperties, Model model, Xpp3Dom parent )
     {
         for ( int i = 0 ; i < parent.getChildCount() ; i++)
         {
@@ -255,11 +264,11 @@ public class ModelIO
 
             if ( child.getChildCount() > 0)
             {
-                processChildren (model, child);
+                processChildren ( userProperties, model, child);
             }
             if ( child.getValue() != null && child.getValue().startsWith( "${" ))
             {
-                String replacement = resolveProperty (model.getProperties(), child.getValue() );
+                String replacement = resolveProperty ( userProperties, model.getProperties(), child.getValue() );
 
                 if (replacement != null && replacement.length() > 0)
                 {
@@ -274,22 +283,24 @@ public class ModelIO
 
     /**
      * Recursively resolve a property value.
+     *
+     * @param userProperties
      * @param p
      * @param key
      * @return the value of the key
      */
-    private String resolveProperty (Properties p, String key)
+    private String resolveProperty( Properties userProperties, Properties p, String key )
     {
         String result = "";
         String child = key.substring( 2, key.length() - 1 );
 
-        if ( p.containsKey( child ) )
+        if ( p.containsKey( child ) && ! userProperties.containsKey( child ) )
         {
             result = p.getProperty( child );
 
             if ( result.startsWith( "${" ) )
             {
-                result = resolveProperty (p, result);
+                result = resolveProperty ( userProperties, p, result);
             }
         }
         return result;
