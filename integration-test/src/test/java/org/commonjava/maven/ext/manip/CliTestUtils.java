@@ -177,9 +177,27 @@ public class CliTestUtils
         String stringArgs = toArguments( args );
         String stringParams = toJavaParams( params );
         String command =
-            String.format( "java -jar %s/pom-manipulation-cli.jar %s %s", BUILD_DIR, stringParams, stringArgs );
+            String.format( "%s -jar %s/pom-manipulation-cli.jar %s %s", getJavaBin().getAbsolutePath(), BUILD_DIR, stringParams, stringArgs );
 
         return runCommandAndWait( command, workingDir, null );
+    }
+
+    public static File getJavaBin()
+    {
+        String javaHome = System.getProperty( "java.home" );
+        File dir = new File( javaHome );
+        String subPath = "bin/java";
+        if ( javaHome.endsWith( "jre" ) )
+        {
+            File jvm = dir.getParentFile();
+            File jvmExe = new File( jvm, subPath );
+            if ( jvmExe.exists() )
+            {
+                return jvmExe;
+            }
+        }
+
+        return new File( dir, subPath );
     }
 
     /**
