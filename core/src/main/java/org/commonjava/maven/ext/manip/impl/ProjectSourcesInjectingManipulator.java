@@ -147,18 +147,32 @@ public class ProjectSourcesInjectingManipulator
 
                         final Map<String, Object> config = new HashMap<String, Object>();
                         config.put( "createPropertiesReport", true );
-                        config.put( "createXmlReport", false );
                         config.put( "hideCommandLineInfo", false );
                         config.put( "hideMavenOptsInfo", false );
                         config.put( "hideJavaOptsInfo", false );
                         config.put( "activateOutputFileMapping", false );
-                        config.put( "propertiesOutputFile", "${basedir}/build.metadata" );
                         config.put( "addJavaRuntimeInfo", true );
                         config.put( "addMavenExecutionInfo", true );
+
+                        // Default name is build.properties but we currently prefer build.metadata.
+                        config.put( "propertiesOutputFile",
+                                    "${project.build.outputDirectory}/META-INF/build.metadata" );
+                        // Deactivate features we don't want.
+                        config.put( "createXmlReport", false );
                         config.put( "addLocallyModifiedTagToFullVersion", false );
                         config.put( "addToGeneratedSources", false );
                         config.put( "validateCheckout", false );
                         config.put( "forceNewProperties", true );
+                        config.put( "addBuildDateToFullVersion", false );
+                        config.put( "addHostInfo", false );
+                        config.put( "addBuildDateInfo", false );
+
+                        final Xpp3Dom additionalLocations = new Xpp3Dom( "addToLocations" );
+                        final Xpp3Dom additionalLocation = new Xpp3Dom( "addToLocation" );
+
+                        xml.addChild( additionalLocations );
+                        additionalLocations.addChild( additionalLocation );
+                        additionalLocation.setValue( "${session.executionRootDirectory}" );
 
                         for ( final Map.Entry<String, Object> entry : config.entrySet() )
                         {
@@ -178,7 +192,6 @@ public class ProjectSourcesInjectingManipulator
                         plugin.setArtifactId( BMMP_AID );
                         plugin.setVersion( state.getBuildMetadataPluginVersion() );
                         plugin.addExecution( execution );
-                        plugin.setInherited( false );
 
                         build.addPlugin( plugin );
 
