@@ -17,6 +17,7 @@ package org.commonjava.maven.ext.manip.server;
 
 import org.commonjava.maven.ext.manip.server.exception.ServerInternalException;
 import org.commonjava.maven.ext.manip.server.exception.ServerSetupException;
+import org.commonjava.test.http.util.PortFinder;
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Server;
@@ -38,7 +39,12 @@ public class JettyHttpServer
 
     public JettyHttpServer( Handler handler )
     {
-        this.port = PortFinder.findOpenPort( 16 );
+        this( handler, PortFinder.findOpenPort(5) );
+    }
+
+    public JettyHttpServer( Handler handler, Integer port )
+    {
+        this.port = port;
         this.handler = handler;
         this.jettyServer = createAndStartJetty( port );
     }
