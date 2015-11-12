@@ -22,8 +22,6 @@ import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.nio.SelectChannelConnector;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * @author vdedik@redhat.com
