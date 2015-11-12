@@ -22,7 +22,7 @@
   <parent>
     <groupId>com.redhat.rcm</groupId>
     <artifactId>redhat-releng-tools</artifactId>
-    <version>2</version>
+    <version>2-SNAPSHOT</version>
   </parent>
 
   <groupId>org.commonjava.maven.ext</groupId>
@@ -83,6 +83,7 @@
     <projectEmail>jcasey@redhat.com</projectEmail>
 
     <javaVersion>1.6</javaVersion>
+    <javaTestVersion>1.7</javaTestVersion>
 
     <mavenVersion>3.0.4</mavenVersion>
     <atlasVersion>0.15.0</atlasVersion>
