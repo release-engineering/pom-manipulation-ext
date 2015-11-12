@@ -17,10 +17,14 @@ package org.commonjava.maven.ext.manip;
 
 import groovy.lang.Binding;
 import groovy.util.GroovyScriptEngine;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.commonjava.maven.ext.manip.invoker.DefaultExecutionParser;
 import org.commonjava.maven.ext.manip.invoker.Execution;
 import org.commonjava.maven.ext.manip.invoker.ExecutionParser;
 import org.commonjava.maven.ext.manip.invoker.Utils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.util.*;
@@ -45,6 +49,8 @@ public class CliTestUtils
             put( "maven.repo.local", LOCAL_REPO );
         }};
 
+    private static final java.lang.String REST_URL_PROPERTY = "restURL";
+
     /**
      * Run the same/similar execution to what invoker plugin would run.
      *
@@ -52,6 +58,19 @@ public class CliTestUtils
      * @throws Exception
      */
     public static void runLikeInvoker( String workingDir )
+            throws Exception
+    {
+        runLikeInvoker( workingDir, null );
+    }
+
+    /**
+     * Run the same/similar execution to what invoker plugin would run.
+     *
+     * @param workingDir - Working directory where the invoker properties are.
+     * @param restURL The URL to the REST server that manages versions, or null
+     * @throws Exception
+     */
+    public static void runLikeInvoker( String workingDir, String restURL )
         throws Exception
     {
         ExecutionParser executionParser = new DefaultExecutionParser( DefaultExecutionParser.DEFAULT_HANDLERS );
@@ -60,6 +79,13 @@ public class CliTestUtils
         // Execute
         for ( Execution e : executions )
         {
+            if ( restURL != null )
+            {
+                Logger logger = LoggerFactory.getLogger( CliTestUtils.class );
+                logger.info( "Resetting REST URL to: {}", restURL );
+                e.getJavaParams().put( REST_URL_PROPERTY, restURL );
+            }
+
             List<String> args = new ArrayList<String>();
             args.add( "-s" );
             args.add( getDefaultTestLocation( "settings.xml" ) );

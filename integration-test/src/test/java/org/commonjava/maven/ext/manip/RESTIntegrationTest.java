@@ -31,13 +31,13 @@ public class RESTIntegrationTest
     public void testRESTVersionDepManip() throws Exception
     {
         String test = getDefaultTestLocation( "rest-dependency-version-manip-child-module" );
-        runLikeInvoker( test );
+        runLikeInvoker( test, mockServer.getUrl() );
     }
 
     @Test
     public void testRESTVersionManip() throws Exception
     {
         String test = getDefaultTestLocation( "rest-version-manip-only" );
-        runLikeInvoker( test );
+        runLikeInvoker( test, mockServer.getUrl() );
     }
 }

@@ -15,11 +15,21 @@
  */
 package org.commonjava.maven.ext.manip.rest.exception;
 
+import com.mashape.unirest.http.exceptions.UnirestException;
+
 /**
  * @author vdedik@redhat.com
  */
-public class RestException extends RuntimeException {
-    public RestException(String msg) {
-        super(msg);
+public class RestException
+        extends RuntimeException
+{
+    public RestException( String msg )
+    {
+        super( msg );
+    }
+
+    public RestException( String message, Throwable e )
+    {
+        super( message, e );
     }
 }

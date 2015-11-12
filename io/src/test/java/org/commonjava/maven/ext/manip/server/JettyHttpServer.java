@@ -28,10 +28,8 @@ import org.slf4j.LoggerFactory;
  * @author vdedik@redhat.com
  */
 public class JettyHttpServer
-    implements HttpServer
+        implements HttpServer
 {
-    public static final Integer DEFAULT_PORT = 8089;
-
     private Integer port;
 
     private final Server jettyServer;
@@ -40,12 +38,7 @@ public class JettyHttpServer
 
     public JettyHttpServer( Handler handler )
     {
-        this( handler, DEFAULT_PORT );
-    }
-
-    public JettyHttpServer( Handler handler, Integer port )
-    {
-        this.port = port;
+        this.port = PortFinder.findOpenPort( 16 );
         this.handler = handler;
         this.jettyServer = createAndStartJetty( port );
     }
