@@ -299,6 +299,12 @@
         <version>2.1.4.1</version>
         <scope>test</scope>
       </dependency>
+      <dependency>
+        <groupId>org.commonjava.util</groupId>
+        <artifactId>http-testserver</artifactId>
+        <version>1.1</version>
+        <scope>test</scope>
+      </dependency>
 
       <dependency>
         <groupId>org.codehaus.groovy</groupId>

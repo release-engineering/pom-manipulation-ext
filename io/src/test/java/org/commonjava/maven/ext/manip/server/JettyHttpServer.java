@@ -17,6 +17,7 @@ package org.commonjava.maven.ext.manip.server;
 
 import org.commonjava.maven.ext.manip.server.exception.ServerInternalException;
 import org.commonjava.maven.ext.manip.server.exception.ServerSetupException;
+import org.commonjava.test.http.util.PortFinder;
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Server;
@@ -30,8 +31,6 @@ import org.slf4j.LoggerFactory;
 public class JettyHttpServer
     implements HttpServer
 {
-    public static final Integer DEFAULT_PORT = 8089;
-
     private Integer port;
 
     private final Server jettyServer;
@@ -40,7 +39,7 @@ public class JettyHttpServer
 
     public JettyHttpServer( Handler handler )
     {
-        this( handler, DEFAULT_PORT );
+        this( handler, PortFinder.findOpenPort(5) );
     }
 
     public JettyHttpServer( Handler handler, Integer port )
