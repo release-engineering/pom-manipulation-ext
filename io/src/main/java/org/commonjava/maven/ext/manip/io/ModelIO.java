@@ -17,6 +17,7 @@ package org.commonjava.maven.ext.manip.io;
 
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Plugin;
+import org.apache.maven.model.PluginExecution;
 import org.apache.maven.model.building.ModelBuilder;
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 import org.codehaus.plexus.component.annotations.Component;
@@ -27,7 +28,6 @@ import org.commonjava.maven.atlas.ident.ref.ArtifactRef;
 import org.commonjava.maven.atlas.ident.ref.ProjectRef;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleProjectRef;
-import org.commonjava.maven.atlas.ident.ref.VersionlessArtifactRef;
 import org.commonjava.maven.ext.manip.ManipulationException;
 import org.commonjava.maven.ext.manip.resolver.GalleyAPIWrapper;
 import org.commonjava.maven.galley.TransferException;
@@ -191,13 +191,21 @@ public class ModelIO
         return m.getProperties();
     }
 
-    public Map<ProjectRef, Plugin> getRemotePluginVersionOverrides( final ProjectVersionRef ref )
+    /**
+     * Return remote Plugins to override
+     * @param ref the remote reference to resolve.
+     * @param userProperties a collection of properties to ignore when resolving the remote plugin property expressions.
+     * @return
+     * @throws ManipulationException
+     */
+    public Map<ProjectRef, Plugin> getRemotePluginVersionOverrides( final ProjectVersionRef ref,
+                                                                    Properties userProperties )
         throws ManipulationException
     {
         logger.debug( "Resolving remote plugin management POM: " + ref );
 
         final Model m = resolveRawModel ( ref );
-        final Map<ProjectRef, Plugin> versionOverrides = new HashMap<ProjectRef, Plugin>();
+        final Map<ProjectRef, Plugin> pluginOverrides = new HashMap<ProjectRef, Plugin>();
 
         // TODO: active profiles!
         if ( m.getBuild() != null && m.getBuild().getPluginManagement() != null)
@@ -211,25 +219,36 @@ public class ModelIO
                 Plugin p = plit.next();
                 ProjectRef pr = new SimpleProjectRef(p.getGroupId(), p.getArtifactId());
 
-                if ( p.getVersion().startsWith( "${" ))
+                if ( p.getVersion() != null && p.getVersion().startsWith( "${" ))
                 {
                     // Property reference to something in the remote pom. Resolve and inline it now.
-                    String newVersion = resolveProperty (m.getProperties(), p.getVersion() );
+                    String newVersion = resolveProperty (userProperties, m.getProperties(), p.getVersion() );
+
                     logger.debug( "Replacing plugin override version " + p.getVersion() +
                                   " with " + newVersion);
                     p.setVersion( newVersion );
                 }
-                versionOverrides.put( pr, p );
+                pluginOverrides.put( pr, p );
 
                 // If we have a configuration block, as per with plugin versions ensure we
                 // resolve any properties.
                 if (p.getConfiguration() != null)
                 {
-                    processChildren (m, (Xpp3Dom)p.getConfiguration());
+                    processChildren (userProperties, m, (Xpp3Dom)p.getConfiguration());
+                }
+
+                if (p.getExecutions() != null)
+                {
+                    List<PluginExecution> exes = p.getExecutions();
+
+                    for (PluginExecution pe : exes)
+                    {
+                        processChildren( userProperties, m, (Xpp3Dom) pe.getConfiguration() );
+                    }
                 }
 
                 logger.debug( "Added plugin override for: " + pr.toString() + ":" + p.getVersion() +
-                              " with configuration\n" + p.getConfiguration());
+                              " with configuration\n" + p.getConfiguration() + " and executions " + p.getExecutions());
             }
         }
         else
@@ -238,16 +257,17 @@ public class ModelIO
                             "Attempting to align to a BOM that does not have a pluginManagement section" );
         }
 
-        return versionOverrides;
+        return pluginOverrides;
     }
 
 
     /**
      * Recursively process the DOM elements to inline any property values from the model.
+     * @param userProperties
      * @param model
      * @param parent
      */
-    private void processChildren (Model model, Xpp3Dom parent)
+    private void processChildren( Properties userProperties, Model model, Xpp3Dom parent )
     {
         for ( int i = 0 ; i < parent.getChildCount() ; i++)
         {
@@ -255,11 +275,11 @@ public class ModelIO
 
             if ( child.getChildCount() > 0)
             {
-                processChildren (model, child);
+                processChildren ( userProperties, model, child);
             }
             if ( child.getValue() != null && child.getValue().startsWith( "${" ))
             {
-                String replacement = resolveProperty (model.getProperties(), child.getValue() );
+                String replacement = resolveProperty ( userProperties, model.getProperties(), child.getValue() );
 
                 if (replacement != null && replacement.length() > 0)
                 {
@@ -274,22 +294,24 @@ public class ModelIO
 
     /**
      * Recursively resolve a property value.
+     *
+     * @param userProperties
      * @param p
      * @param key
      * @return the value of the key
      */
-    private String resolveProperty (Properties p, String key)
+    private String resolveProperty( Properties userProperties, Properties p, String key )
     {
         String result = "";
         String child = key.substring( 2, key.length() - 1 );
 
-        if ( p.containsKey( child ) )
+        if ( p.containsKey( child ) && ! userProperties.containsKey( child ) )
         {
             result = p.getProperty( child );
 
             if ( result.startsWith( "${" ) )
             {
-                result = resolveProperty (p, result);
+                result = resolveProperty ( userProperties, p, result);
             }
         }
         return result;
