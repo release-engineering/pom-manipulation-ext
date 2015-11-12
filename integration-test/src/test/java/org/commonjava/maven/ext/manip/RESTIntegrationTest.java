@@ -19,6 +19,8 @@ import org.commonjava.maven.ext.manip.rest.rule.MockServer;
 import org.junit.ClassRule;
 import org.junit.Test;
 
+import java.io.File;
+
 import static org.commonjava.maven.ext.manip.CliTestUtils.getDefaultTestLocation;
 import static org.commonjava.maven.ext.manip.CliTestUtils.runLikeInvoker;
 
