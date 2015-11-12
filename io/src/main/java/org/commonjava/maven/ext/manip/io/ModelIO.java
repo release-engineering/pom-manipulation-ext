@@ -17,6 +17,7 @@ package org.commonjava.maven.ext.manip.io;
 
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Plugin;
+import org.apache.maven.model.PluginExecution;
 import org.apache.maven.model.building.ModelBuilder;
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 import org.codehaus.plexus.component.annotations.Component;
@@ -204,7 +205,7 @@ public class ModelIO
         logger.debug( "Resolving remote plugin management POM: " + ref );
 
         final Model m = resolveRawModel ( ref );
-        final Map<ProjectRef, Plugin> versionOverrides = new HashMap<ProjectRef, Plugin>();
+        final Map<ProjectRef, Plugin> pluginOverrides = new HashMap<ProjectRef, Plugin>();
 
         // TODO: active profiles!
         if ( m.getBuild() != null && m.getBuild().getPluginManagement() != null)
@@ -218,7 +219,7 @@ public class ModelIO
                 Plugin p = plit.next();
                 ProjectRef pr = new SimpleProjectRef(p.getGroupId(), p.getArtifactId());
 
-                if ( p.getVersion().startsWith( "${" ))
+                if ( p.getVersion() != null && p.getVersion().startsWith( "${" ))
                 {
                     // Property reference to something in the remote pom. Resolve and inline it now.
                     String newVersion = resolveProperty (userProperties, m.getProperties(), p.getVersion() );
@@ -227,7 +228,7 @@ public class ModelIO
                                   " with " + newVersion);
                     p.setVersion( newVersion );
                 }
-                versionOverrides.put( pr, p );
+                pluginOverrides.put( pr, p );
 
                 // If we have a configuration block, as per with plugin versions ensure we
                 // resolve any properties.
@@ -236,8 +237,18 @@ public class ModelIO
                     processChildren (userProperties, m, (Xpp3Dom)p.getConfiguration());
                 }
 
+                if (p.getExecutions() != null)
+                {
+                    List<PluginExecution> exes = p.getExecutions();
+
+                    for (PluginExecution pe : exes)
+                    {
+                        processChildren( userProperties, m, (Xpp3Dom) pe.getConfiguration() );
+                    }
+                }
+
                 logger.debug( "Added plugin override for: " + pr.toString() + ":" + p.getVersion() +
-                              " with configuration\n" + p.getConfiguration());
+                              " with configuration\n" + p.getConfiguration() + " and executions " + p.getExecutions());
             }
         }
         else
@@ -246,7 +257,7 @@ public class ModelIO
                             "Attempting to align to a BOM that does not have a pluginManagement section" );
         }
 
-        return versionOverrides;
+        return pluginOverrides;
     }
 
 

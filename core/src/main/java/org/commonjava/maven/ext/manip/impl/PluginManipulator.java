@@ -18,9 +18,11 @@ package org.commonjava.maven.ext.manip.impl;
 import org.apache.maven.model.Build;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Plugin;
+import org.apache.maven.model.PluginExecution;
 import org.apache.maven.model.PluginManagement;
 import org.codehaus.plexus.component.annotations.Component;
 import org.codehaus.plexus.component.annotations.Requirement;
+import org.codehaus.plexus.util.CollectionUtils;
 import org.codehaus.plexus.util.xml.Xpp3Dom;
 import org.codehaus.plexus.util.xml.Xpp3DomUtils;
 import org.commonjava.maven.atlas.ident.ref.ProjectRef;
@@ -236,7 +238,7 @@ public class PluginManipulator
         for ( final Plugin override : pluginVersionOverrides.values())
         {
             final int index = plugins.indexOf( override );
-            logger.debug( "plugin override" + override + " and index " + index);
+            logger.debug( "plugin override" + override + " and index " + index );
 
             if ( index != -1 )
             {
@@ -278,6 +280,22 @@ public class PluginManipulator
                 {
                     logger.debug ("No remote configuration to inject from " + override.toString());
                 }
+
+                if (override.getExecutions() != null)
+                {
+                    Map<String,PluginExecution> newExecutions = override.getExecutionsAsMap();
+                    Map<String,PluginExecution> originalExecutions = plugin.getExecutionsAsMap();
+
+                    if ( CollectionUtils.intersection( originalExecutions.keySet(), newExecutions.keySet() ).size() > 0)
+                    {
+                        throw new ManipulationException( "Unable to inject executions " + originalExecutions +
+                                                                         " as they clash with an existing set " + newExecutions );
+                    }
+
+                    logger.debug ("Injecting executions {} ", override.getExecutions());
+                    plugin.getExecutions().addAll( override.getExecutions() );
+                }
+
                 String oldVersion = plugin.getVersion();
                 // Always force the version in a pluginMgmt block or set the version if there is an existing
                 // one in build/plugins section.
@@ -292,7 +310,7 @@ public class PluginManipulator
             }
             // If the plugin doesn't exist but has a configuration section in the remote inject it so we
             // get the correct config.
-            else if ( pluginMgmt && override.getConfiguration() != null )
+            else if ( pluginMgmt && ( override.getConfiguration() != null || override.getExecutions() != null ) )
             {
                 plugins.add( override );
                 logger.info( "Added plugin version: " + override.getKey() + "=" + override.getVersion());

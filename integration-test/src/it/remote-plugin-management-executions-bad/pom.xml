@@ -23,23 +23,22 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>org.commonjava.maven.ext</groupId>
-  <artifactId>pluginMgmt1</artifactId>
-  <version>1.0</version>
+  <artifactId>remote-plugin-management-executions</artifactId>
+  <version>1.0-SNAPSHOT</version>
 
-  <name>Plugin Management POM to use with integration tests</name>
+  <name>Test override plugin version using command line property</name>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-
-    <maven.compiler.target>1.6</maven.compiler.target>
-    <maven.compiler.source>1.6</maven.compiler.source>
-
-    <maven.compiler.argument.target>${maven.compiler.target}</maven.compiler.argument.target>
-    <maven.compiler.argument.source>${maven.compiler.source}</maven.compiler.argument.source>
-
-    <maven.compiler.plugin.version>3.1</maven.compiler.plugin.version>
-
   </properties>
+
+  <dependencies>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>4.1</version>
+    </dependency>
+  </dependencies>
 
   <build>
     <pluginManagement>
@@ -47,19 +46,12 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-compiler-plugin</artifactId>
-          <version>${maven.compiler.plugin.version}</version>
-          <configuration>
-              <debug>true</debug>
-              <source>${maven.compiler.argument.target}</source>
-              <target>${maven.compiler.argument.target}</target>
-          </configuration>
+          <version>99-bad</version>
         </plugin>
-
-
-        <!-- Set properties containing the scm revision and build timestamp -->
         <plugin>
           <groupId>org.codehaus.mojo</groupId>
           <artifactId>buildnumber-maven-plugin</artifactId>
+          <version>1.2</version>
           <executions>
             <execution>
               <id>get-build-timestamp</id>
@@ -67,29 +59,10 @@
               <goals>
                 <goal>create-timestamp</goal>
               </goals>
-              <configuration>
-                <!-- Example date: Wed, 4 Jul 2001 12:08:56 -0700 -->
-                <timestampFormat>EEE, d MMM yyyy HH:mm:ss Z</timestampFormat>
-                <timestampPropertyName>build.datetime</timestampPropertyName>
-              </configuration>
-            </execution>
-            <execution>
-              <id>get-scm-revision</id>
-              <phase>initialize</phase>
-              <goals>
-                <goal>create</goal>
-              </goals>
-              <configuration>
-                <doCheck>false</doCheck>
-                <doUpdate>false</doUpdate>
-                <revisionOnScmFailure>UNKNOWN</revisionOnScmFailure>
-                <getRevisionOnlyOnce>true</getRevisionOnlyOnce>
-              </configuration>
             </execution>
           </executions>
         </plugin>
       </plugins>
     </pluginManagement>
   </build>
-
 </project>
