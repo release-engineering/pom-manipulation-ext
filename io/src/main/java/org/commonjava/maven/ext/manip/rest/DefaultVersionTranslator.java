@@ -58,7 +58,7 @@ public class DefaultVersionTranslator
         {
             throw new RestException(
                 String.format( "Request to server '%s' failed. Exception message: %s", this.endpointUrl,
-                               e.getMessage() ) );
+                               e.getMessage() ), e );
         }
 
         // Handle some corner cases (5xx, 4xx)

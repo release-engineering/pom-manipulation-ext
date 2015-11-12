@@ -49,7 +49,7 @@ public class ProjectVersionRefMapper implements ObjectMapper
         }
         catch ( IOException e )
         {
-            throw new RestException( e.getMessage() );
+            throw new RestException( "Failed to read list-of-maps response from version server: " + e.getMessage(), e );
         }
 
         for ( Map<String, Object> gav: responseBody )
@@ -91,7 +91,7 @@ public class ProjectVersionRefMapper implements ObjectMapper
         }
         catch ( JsonProcessingException e )
         {
-            throw new RestException( e.getMessage() );
+            throw new RestException( "Failed to serialize version request: " + e.getMessage(), e );
         }
     }
 }
