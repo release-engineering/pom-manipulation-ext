@@ -243,7 +243,9 @@ public class ModelIO
 
                     for (PluginExecution pe : exes)
                     {
-                        processChildren( userProperties, m, (Xpp3Dom) pe.getConfiguration() );
+                        if (pe.getConfiguration() != null) {
+                            processChildren( userProperties, m, (Xpp3Dom) pe.getConfiguration() );
+                        }
                     }
                 }
 
