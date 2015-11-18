@@ -15,7 +15,8 @@
  */
 package org.commonjava.maven.ext.manip.io;
 
-import org.apache.maven.model.resolution.UnresolvableModelException;
+import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef;
+import org.commonjava.maven.ext.manip.ManipulationException;
 import org.commonjava.maven.ext.manip.ManipulationSession;
 import org.commonjava.maven.ext.manip.resolver.GalleyAPIWrapper;
 import org.commonjava.maven.ext.manip.resolver.GalleyInfrastructure;
@@ -26,13 +27,15 @@ import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
 
+import java.lang.reflect.Field;
+
 @RunWith(BMUnitRunner.class)
-public class GalleyModelResolverTest
+public class ModelResolverTest
 {
     @Rule
     public TemporaryFolder temp = new TemporaryFolder();
 
-    @Test(expected = UnresolvableModelException.class)
+    @Test(expected = ManipulationException.class)
     @BMRule(name = "retrieve-first-null",
                     targetClass = "ArtifactManagerImpl",
                     targetMethod = "retrieveFirst(List<? extends Location> locations, ArtifactRef ref)",
@@ -48,8 +51,11 @@ public class GalleyModelResolverTest
                                       session.getSettings(), session.getActiveProfiles(), null, null, null, temp.newFolder(
                             "cache-dir" ) );
         final GalleyAPIWrapper wrapper = new GalleyAPIWrapper( galleyInfra );
-        final GalleyModelResolver gm = new GalleyModelResolver(wrapper);
+        final ModelIO model = new ModelIO();
+        final Field f = ModelIO.class.getDeclaredField( "galleyWrapper" );
+        f.setAccessible( true );
+        f.set(model, wrapper);
 
-        gm.resolveModel("org.commonjava", "commonjava", "5");
+        model.resolveRawModel( SimpleProjectVersionRef.parse( "org.commonjava:commonjava:5"  ) );
     }
 }
