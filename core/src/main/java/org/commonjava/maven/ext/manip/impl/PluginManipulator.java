@@ -286,14 +286,18 @@ public class PluginManipulator
                     Map<String,PluginExecution> newExecutions = override.getExecutionsAsMap();
                     Map<String,PluginExecution> originalExecutions = plugin.getExecutionsAsMap();
 
-                    if ( CollectionUtils.intersection( originalExecutions.keySet(), newExecutions.keySet() ).size() > 0)
+                    for (PluginExecution pe : newExecutions.values())
                     {
-                        throw new ManipulationException( "Unable to inject executions " + originalExecutions +
-                                                                         " as they clash with an existing set " + newExecutions );
+                        if (originalExecutions.containsKey( pe.getId() ) )
+                        {
+                            logger.warn ("Unable to inject execution " + pe.getId() + " as it clashes with an existing execution");
+                        }
+                        else
+                        {
+                            logger.debug ("Injecting execution {} ", pe);
+                            plugin.getExecutions().add (pe);
+                        }
                     }
-
-                    logger.debug ("Injecting executions {} ", override.getExecutions());
-                    plugin.getExecutions().addAll( override.getExecutions() );
                 }
 
                 String oldVersion = plugin.getVersion();
