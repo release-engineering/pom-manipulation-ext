@@ -148,11 +148,9 @@ public class ProjectSourcesInjectingManipulator
                         final Map<String, Object> config = new HashMap<String, Object>();
                         config.put( "createPropertiesReport", true );
                         config.put( "hideCommandLineInfo", false );
-                        config.put( "hideMavenOptsInfo", false );
                         config.put( "hideJavaOptsInfo", false );
                         config.put( "activateOutputFileMapping", false );
                         config.put( "addJavaRuntimeInfo", true );
-                        config.put( "addMavenExecutionInfo", true );
 
                         // Default name is build.properties but we currently prefer build.metadata.
                         config.put( "propertiesOutputFile",
@@ -167,6 +165,7 @@ public class ProjectSourcesInjectingManipulator
                         config.put( "addHostInfo", false );
                         config.put( "addBuildDateInfo", false );
                         config.put( "addOsInfo", false );
+                        config.put( "addMavenExecutionInfo", false );
 
                         final Xpp3Dom additionalLocations = new Xpp3Dom( "addToLocations" );
                         final Xpp3Dom additionalLocation = new Xpp3Dom( "addToLocation" );
