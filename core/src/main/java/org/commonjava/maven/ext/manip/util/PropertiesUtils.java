@@ -149,6 +149,10 @@ public final class PropertiesUtils
      */
     public static boolean checkStrictValue( ManipulationSession session, String oldValue, String newValue )
     {
+        if (oldValue == null || newValue == null) {
+            return false;
+        }
+
         // New value might be e.g. 3.1-rebuild-1 or 3.1.0.rebuild-1 (i.e. it *might* be OSGi compliant).
         final VersioningState state = session.getState( VersioningState.class );
         final Version v = new Version( oldValue );
@@ -184,7 +188,7 @@ public final class PropertiesUtils
         // We compare both an OSGi'ied oldVersion and the non-OSGi version against the possible new version (which has
         // had its suffix stripped) in order to check whether its a valid change.
         boolean result = false;
-        if ( oldValue != null && oldValue.equals( newVersion ) || osgiVersion.equals( newVersion ))
+        if ( oldValue.equals( newVersion ) || osgiVersion.equals( newVersion ))
         {
             result = true;
         }
@@ -205,13 +209,9 @@ public final class PropertiesUtils
                                          String newVersion, Object originalType )
                     throws ManipulationException
     {
-        if (oldVersion == null) {
-            return false;
-        }
-
         boolean result = false;
         // TODO: Handle the scenario where the version might be ${....}${....}
-        if ( oldVersion.startsWith( "${" ) )
+        if ( oldVersion != null && oldVersion.startsWith( "${" ) )
         {
             final int endIndex = oldVersion.indexOf( '}' );
             final String oldProperty = oldVersion.substring( 2, endIndex );
