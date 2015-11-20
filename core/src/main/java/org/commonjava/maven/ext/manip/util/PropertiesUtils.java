@@ -205,6 +205,10 @@ public final class PropertiesUtils
                                          String newVersion, Object originalType )
                     throws ManipulationException
     {
+        if (oldVersion == null) {
+            return false;
+        }
+
         boolean result = false;
         // TODO: Handle the scenario where the version might be ${....}${....}
         if ( oldVersion.startsWith( "${" ) )
