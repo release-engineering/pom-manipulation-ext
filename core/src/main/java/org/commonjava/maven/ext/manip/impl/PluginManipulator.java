@@ -303,7 +303,7 @@ public class PluginManipulator
                 String oldVersion = plugin.getVersion();
                 // Always force the version in a pluginMgmt block or set the version if there is an existing
                 // one in build/plugins section.
-                if ( ( pluginMgmt || oldVersion != null ) && override.getVersion() != null && override.getVersion().length() > 0 )
+                if ( override.getVersion() != null && override.getVersion().length() > 0 )
                 {
                     if ( ! PropertiesUtils.cacheProperty( pluginState.getVersionPropertyOverrides(), oldVersion, override.getVersion(), plugin ))
                     {
