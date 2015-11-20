@@ -303,13 +303,17 @@ public class PluginManipulator
                 String oldVersion = plugin.getVersion();
                 // Always force the version in a pluginMgmt block or set the version if there is an existing
                 // one in build/plugins section.
-                if ( ( pluginMgmt || oldVersion != null ) && override.getVersion() != null && override.getVersion().length() > 0 )
+                if ( override.getVersion() != null && override.getVersion().length() > 0 )
                 {
-                    if ( ! PropertiesUtils.cacheProperty( pluginState.getVersionPropertyOverrides(), oldVersion, override.getVersion(), plugin ))
+                    if (oldVersion == null)
                     {
                         plugin.setVersion( override.getVersion() );
-                        logger.info( "Altered plugin version: " + groupIdArtifactId + "=" + override.getVersion() );
                     }
+                    else if ( ! PropertiesUtils.cacheProperty( pluginState.getVersionPropertyOverrides(), oldVersion, override.getVersion(), plugin ))
+                    {
+                        plugin.setVersion( override.getVersion() );
+                    }
+                    logger.info( "Altered plugin version: " + groupIdArtifactId + "=" + override.getVersion() );
                 }
             }
             // If the plugin doesn't exist but has a configuration section in the remote inject it so we
