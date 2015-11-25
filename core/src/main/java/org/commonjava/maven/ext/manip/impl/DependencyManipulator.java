@@ -493,7 +493,7 @@ public class DependencyManipulator implements Manipulator
             ProjectRef depPr = new SimpleProjectRef( dependency.getGroupId(), dependency.getArtifactId() );
 
             // We might have junit:junit:3.8.2 and junit:junit:4.1 for differing override scenarios within the
-            // overrides list. If strict mode alignment is enabled, using multiple overrides will work with
+            // overrides list. If strict mode alignment is enabled, using parentmultiple overrides will work with
             // different modules. It is currently undefined what will happen if non-strict mode is enabled and
             // multiple versions are in the remote override list (be it from a bom or rest call). Actually, what
             // will most likely happen is last-wins.

@@ -157,9 +157,10 @@ public class GroovyManipulator
     }
 
 
+    // Groovy script manipulation should run last.
     @Override
     public int getExecutionIndex()
     {
-        return 90;
+        return 99;
     }
 }
