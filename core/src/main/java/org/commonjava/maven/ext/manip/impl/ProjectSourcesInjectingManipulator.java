@@ -166,6 +166,7 @@ public class ProjectSourcesInjectingManipulator
                         config.put( "addBuildDateInfo", false );
                         config.put( "addOsInfo", false );
                         config.put( "addMavenExecutionInfo", false );
+                        config.put( "addToFilters", false);
 
                         final Xpp3Dom additionalLocations = new Xpp3Dom( "addToLocations" );
                         final Xpp3Dom additionalLocation = new Xpp3Dom( "addToLocation" );
