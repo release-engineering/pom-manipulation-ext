@@ -56,7 +56,8 @@ The deployed file can then be used with e.g.
 
 ### Groovy Scripts
 
-The groovy script will be run once on the execution root (i.e. where Maven is invoked).
+The groovy script will be run once on the execution root (i.e. where Maven is invoked). The groovy script will run **after** all the other Manipulators have run.
+
 Each script should use the [BaseScript](http://docs.groovy-lang.org/latest/html/gapi/groovy/transform/BaseScript.html)
 annotation:
 
@@ -120,3 +121,22 @@ A typical groovy script that alters a JSON file on disk might be:
 
     def Processor sp = new Processor(basedir:pme.getBaseDir()))
     sp.execute()
+
+
+
+If a developer wishes to setup an IDE to write the groovy script we would recommend adding to the POM file and activating this profile within the IDE:
+
+    <!-- This profile is only used within IntelliJ for Groovy development -->
+    <profiles>
+      <profile>
+        <id>groovy</id>
+        <dependencies>
+          <dependency>
+            <groupId>org.commonjava.maven.ext</groupId>
+            <artifactId>pom-manipulation-core</artifactId>
+            <version>1.13</version>
+            <scope>provided</scope>
+          </dependency>
+        </dependencies>
+      </profile>
+    </profiles>
