@@ -23,23 +23,29 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>org.commonjava.maven.ext</groupId>
-  <artifactId>pluginMgmt1</artifactId>
-  <version>1.0</version>
+  <artifactId>basic-plugin-management-dependency</artifactId>
+  <version>1.0-SNAPSHOT</version>
 
-  <name>Plugin Management POM to use with integration tests</name>
+  <name>Test override plugin version and dependency using command line property</name>
+
+  <scm>
+    <connection>scm:git:http://github.com/release-engineering/pom-manipulation-ext.git</connection>
+    <developerConnection>scm:git:git@github.com:release-engineering/pom-manipulation-ext.git</developerConnection>
+    <url>http://github.com/release-engineering/pom-manipulation-ext</url>
+    <tag>HEAD</tag>
+  </scm>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-
-    <maven.compiler.target>1.6</maven.compiler.target>
-    <maven.compiler.source>1.6</maven.compiler.source>
-
-    <maven.compiler.argument.target>${maven.compiler.target}</maven.compiler.argument.target>
-    <maven.compiler.argument.source>${maven.compiler.source}</maven.compiler.argument.source>
-
-    <maven.compiler.plugin.version>3.1</maven.compiler.plugin.version>
-
   </properties>
+
+  <dependencies>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>4.1</version>
+    </dependency>
+  </dependencies>
 
   <build>
     <pluginManagement>
@@ -47,16 +53,9 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-compiler-plugin</artifactId>
-          <version>${maven.compiler.plugin.version}</version>
-          <configuration>
-              <debug>true</debug>
-              <source>${maven.compiler.argument.target}</source>
-              <target>${maven.compiler.argument.target}</target>
-          </configuration>
+          <version>99-bad</version>
         </plugin>
 
-
-        <!-- Set properties containing the scm revision and build timestamp -->
         <plugin>
           <groupId>org.codehaus.mojo</groupId>
           <artifactId>buildnumber-maven-plugin</artifactId>
@@ -89,14 +88,29 @@
           </executions>
           <dependencies>
             <dependency>
+              <groupId>org.apache.maven</groupId>
+              <artifactId>maven-core</artifactId>
+              <version>2.2.1</version>
+            </dependency>
+            <dependency>
               <groupId>commons-lang</groupId>
               <artifactId>commons-lang</artifactId>
-              <version>2.5</version>
+              <version>1.0</version>
             </dependency>
           </dependencies>
         </plugin>
+
       </plugins>
     </pluginManagement>
+
+
+    <plugins>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>buildnumber-maven-plugin</artifactId>
+      </plugin>
+    </plugins>
+
   </build>
 
 </project>

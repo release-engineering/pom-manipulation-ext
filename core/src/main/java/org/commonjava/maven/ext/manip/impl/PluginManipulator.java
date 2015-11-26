@@ -16,6 +16,7 @@
 package org.commonjava.maven.ext.manip.impl;
 
 import org.apache.maven.model.Build;
+import org.apache.maven.model.Dependency;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Plugin;
 import org.apache.maven.model.PluginExecution;
@@ -28,6 +29,7 @@ import org.codehaus.plexus.util.xml.Xpp3DomUtils;
 import org.commonjava.maven.atlas.ident.ref.ProjectRef;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleProjectRef;
+import org.commonjava.maven.atlas.ident.ref.VersionlessArtifactRef;
 import org.commonjava.maven.ext.manip.ManipulationException;
 import org.commonjava.maven.ext.manip.ManipulationSession;
 import org.commonjava.maven.ext.manip.io.ModelIO;
@@ -39,8 +41,10 @@ import org.commonjava.maven.ext.manip.util.PropertiesUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.ListIterator;
@@ -298,6 +302,32 @@ public class PluginManipulator
                             plugin.getExecutions().add (pe);
                         }
                     }
+                }
+
+                if (override.getDependencies().size() > 0)
+                {
+                    logger.debug( "Checking original plugin dependencies versus override" );
+                    // First, remove any Dependency from the original Plugin if the GA exists in the override.
+                    Iterator<Dependency> originalIt = plugin.getDependencies().iterator();
+                    while (originalIt.hasNext())
+                    {
+                        Dependency originalD = originalIt.next();
+                        Iterator<Dependency> overrideIt = override.getDependencies().iterator();
+                        while ( overrideIt.hasNext() )
+                        {
+                            Dependency newD = overrideIt.next();
+                            if (originalD.getGroupId().equals( newD.getGroupId() ) &&
+                                originalD.getArtifactId().equals( newD.getArtifactId() ) )
+                            {
+                                logger.debug( "Removing original dependency {} in favour of {} ", originalD, newD );
+                                originalIt.remove();
+                                break;
+                            }
+                        }
+                    }
+                    // Now merge them together.
+                    logger.debug( "Adding in plugin dependencies {}", override.getDependencies() );
+                    plugin.getDependencies().addAll( override.getDependencies() );
                 }
 
                 String oldVersion = plugin.getVersion();
