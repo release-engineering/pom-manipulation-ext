@@ -154,9 +154,7 @@ public class DistributionEnforcingManipulator
             return Collections.emptySet();
         }
 
-        final Map<String, String> excluded =
-            getPropertiesByPrefix( session.getUserProperties(), DistributionEnforcingState.PROJECT_EXCLUSION_PREFIX );
-
+        final Map<String, String> excluded = state.getExcludedProjects();
         final Set<Project> changed = new HashSet<Project>();
 
         for ( final Project project : projects )

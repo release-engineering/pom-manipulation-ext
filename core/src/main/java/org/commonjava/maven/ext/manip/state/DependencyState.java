@@ -19,6 +19,7 @@ import org.commonjava.maven.atlas.ident.ref.ArtifactRef;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.ext.manip.impl.DependencyManipulator;
 import org.commonjava.maven.ext.manip.util.IdUtils;
+import org.commonjava.maven.ext.manip.util.PropertiesUtils;
 
 import java.util.List;
 import java.util.Map;
@@ -70,6 +71,8 @@ public class DependencyState
 
     private final List<ProjectVersionRef> remoteBOMdepMgmt;
 
+    private final Map<String, String> dependencyExclusions;
+
     private Map<ArtifactRef, String> remoteRESTdepMgmt;
 
     
@@ -79,8 +82,8 @@ public class DependencyState
         overrideDependencies = Boolean.valueOf( userProps.getProperty( "overrideDependencies", "true" ) );
         strict = Boolean.valueOf( userProps.getProperty( STRICT_DEPENDENCIES, "false" ) );
         failOnStrictViolation = Boolean.valueOf( userProps.getProperty( STRICT_VIOLATION_FAILS, "false" ) );
-
         remoteBOMdepMgmt = IdUtils.parseGAVs( userProps.getProperty( DEPENDENCY_MANAGEMENT_POM_PROPERTY ) );
+        dependencyExclusions = PropertiesUtils.getPropertiesByPrefix( userProps, DEPENDENCY_EXCLUSION_PREFIX );
     }
 
     /**
@@ -91,8 +94,9 @@ public class DependencyState
     @Override
     public boolean isEnabled()
     {
-        return ( remoteBOMdepMgmt != null && !remoteBOMdepMgmt.isEmpty()) || (
-                        remoteRESTdepMgmt != null && !remoteRESTdepMgmt.isEmpty());
+        return ( ( remoteBOMdepMgmt != null && !remoteBOMdepMgmt.isEmpty()   ) ||
+                 ( remoteRESTdepMgmt != null && !remoteRESTdepMgmt.isEmpty() ) ||
+                 ( dependencyExclusions.size() > 0 ) );
     }
 
     public List<ProjectVersionRef> getRemoteBOMDepMgmt()
@@ -136,4 +140,10 @@ public class DependencyState
     {
         return remoteRESTdepMgmt;
     }
+
+    public Map<String, String> getDependencyExclusions( )
+    {
+        return dependencyExclusions;
+    }
+
 }

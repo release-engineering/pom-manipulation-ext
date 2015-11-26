@@ -17,7 +17,10 @@ package org.commonjava.maven.ext.manip.state;
 
 import org.commonjava.maven.ext.manip.impl.DistributionEnforcingManipulator;
 
+import java.util.Map;
 import java.util.Properties;
+
+import static org.commonjava.maven.ext.manip.util.PropertiesUtils.getPropertiesByPrefix;
 
 /**
  * Captures configuration relating to enforcing distribution (install/deploy) configurations within the POM(s). Used by {@link DistributionEnforcingManipulator}.
@@ -37,9 +40,13 @@ public class DistributionEnforcingState
     
     private final EnforcingMode mode;
 
+    private final Map<String, String> excludedProjects;
+
     public DistributionEnforcingState( final Properties userProps )
     {
         final String value = userProps.getProperty( ENFORCE_SYSPROP );
+
+        this.excludedProjects = getPropertiesByPrefix( userProps, DistributionEnforcingState.PROJECT_EXCLUSION_PREFIX );
         this.mode = EnforcingMode.getMode( value );
     }
     
@@ -61,4 +68,8 @@ public class DistributionEnforcingState
         return mode != EnforcingMode.none;
     }
 
+    public Map<String, String> getExcludedProjects()
+    {
+        return excludedProjects;
+    }
 }

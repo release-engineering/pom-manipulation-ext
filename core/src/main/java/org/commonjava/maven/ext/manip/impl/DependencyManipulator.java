@@ -158,13 +158,14 @@ public class DependencyManipulator implements Manipulator
                                                  Map<ArtifactRef, String> overrides )
                     throws ManipulationException
     {
+        final DependencyState state = session.getState( DependencyState.class );
         final Set<Project> result = new HashSet<Project>();
 
         for ( final Project project : projects )
         {
             final Model model = project.getModel();
 
-            if ( overrides.size() > 0 )
+            if ( overrides.size() > 0 || state.getDependencyExclusions().size() > 0)
             {
                 apply( session, project, model, overrides );
 
@@ -239,8 +240,7 @@ public class DependencyManipulator implements Manipulator
         try
         {
             moduleOverrides = applyModuleVersionOverrides( projectGA,
-                                                           getPropertiesByPrefix( session.getUserProperties(),
-                                                           DependencyState.DEPENDENCY_EXCLUSION_PREFIX ),
+                                                           state.getDependencyExclusions(),
                                                            moduleOverrides, explicitOverrides );
         }
         catch ( InvalidRefException e )
@@ -288,6 +288,17 @@ public class DependencyManipulator implements Manipulator
                         break;
                     }
                 }
+
+                // Apply any explicit overrides to the top level parent. Convert it to a simulated
+                // dependency so we can reuse applyExplicitOverrides.
+                ArrayList<Dependency> pDeps = new ArrayList<Dependency>();
+                Dependency d = new Dependency();
+                d.setGroupId( project.getParent().getGroupId() );
+                d.setArtifactId( project.getParent().getArtifactId() );
+                d.setVersion( project.getParent().getVersion() );
+                pDeps.add( d );
+                applyExplicitOverrides( explicitVersionPropertyUpdateMap, explicitOverrides, pDeps );
+                project.getParent().setVersion( d.getVersion() );
             }
 
             if ( session.getState( DependencyState.class ).getOverrideDependencies() )

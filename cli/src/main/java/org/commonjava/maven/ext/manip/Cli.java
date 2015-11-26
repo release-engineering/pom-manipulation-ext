@@ -50,10 +50,8 @@ import org.codehaus.plexus.PlexusContainer;
 import org.codehaus.plexus.PlexusContainerException;
 import org.codehaus.plexus.component.repository.exception.ComponentLookupException;
 import org.commonjava.maven.atlas.ident.ref.ArtifactRef;
-import org.commonjava.maven.atlas.ident.ref.SimpleArtifactRef;
 import org.commonjava.maven.ext.manip.impl.RESTManipulator;
 import org.commonjava.maven.ext.manip.io.PomIO;
-import org.commonjava.maven.ext.manip.model.Project;
 import org.commonjava.maven.ext.manip.model.SimpleScopedArtifactRef;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,14 +60,9 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
-import java.util.TreeSet;
-
-import static org.apache.commons.lang.StringUtils.join;
-import static org.commonjava.maven.ext.manip.util.IdUtils.gav;
 
 public class Cli
 {
