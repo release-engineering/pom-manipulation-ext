@@ -201,6 +201,12 @@
         <groupId>org.commonjava.maven.galley</groupId>
         <artifactId>galley-transport-httpclient</artifactId>
         <version>${galleyVersion}</version>
+        <exclusions>
+          <exclusion>
+            <groupId>org.slf4j</groupId>
+            <artifactId>log4j-over-slf4j</artifactId>
+          </exclusion>
+        </exclusions>
       </dependency>
       <dependency>
         <groupId>org.commonjava.maven.galley</groupId>
@@ -274,7 +280,7 @@
       <dependency>
         <groupId>org.slf4j</groupId>
         <artifactId>slf4j-api</artifactId>
-        <version>1.7.7</version>
+        <version>1.7.13</version>
       </dependency>
 
       <dependency>
