@@ -15,14 +15,16 @@
  */
 package org.commonjava.maven.ext.manip;
 
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.LoggerContext;
+import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.ConsoleAppender;
 import groovy.lang.Binding;
 import groovy.util.GroovyScriptEngine;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
 import org.commonjava.maven.ext.manip.invoker.DefaultExecutionParser;
 import org.commonjava.maven.ext.manip.invoker.Execution;
 import org.commonjava.maven.ext.manip.invoker.ExecutionParser;
-import org.commonjava.maven.ext.manip.invoker.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,32 +38,35 @@ import static org.junit.Assert.*;
  */
 public class CliTestUtils
 {
-    public static final String BUILD_DIR = System.getProperty( "buildDirectory" );
+    private static final Logger logger = LoggerFactory.getLogger( CliTestUtils.class );
 
-    public static final String MVN_LOCATION = System.getProperty("maven.home");
+    private static final String BUILD_DIR = System.getProperty( "buildDirectory" );
 
-    public static final String IT_LOCATION = BUILD_DIR + "/it-cli";
+    private static final String MVN_LOCATION = System.getProperty("maven.home");
 
-    public static final String LOCAL_REPO = System.getProperty( "localRepositoryPath" );
+    private static final String LOCAL_REPO = System.getProperty( "localRepositoryPath" );
 
-    public static final Map<String, String> DEFAULT_MVN_PARAMS = new HashMap<String, String>()
+    private static final String REST_URL_PROPERTY = "restURL";
+
+    protected static final String IT_LOCATION = BUILD_DIR + "/it-cli";
+
+    protected static final Map<String, String> DEFAULT_MVN_PARAMS = new HashMap<String, String>()
     {{
             put( "maven.repo.local", LOCAL_REPO );
-        }};
+    }};
 
-    private static final java.lang.String REST_URL_PROPERTY = "restURL";
+    protected static final List<String> EXCLUDED_FILES = new ArrayList<String>()
+    {{
+        add( "setup" );
+        // Run in a separate test so a Mock server may be started.
+        add("rest-dependency-version-manip-child-module");
+        add("rest-version-manip-only");
+    }};
 
-    /**
-     * Run the same/similar execution to what invoker plugin would run.
-     *
-     * @param workingDir - Working directory where the invoker properties are.
-     * @throws Exception
-     */
-    public static void runLikeInvoker( String workingDir )
-            throws Exception
-    {
-        runLikeInvoker( workingDir, null );
-    }
+    protected static final Map<String, String> LOCATION_REWRITE = new HashMap<String, String>()
+    {{
+            put( "simple-numeric-directory-path", "simple-numeric-directory-path/parent" );
+    }};
 
     /**
      * Run the same/similar execution to what invoker plugin would run.
@@ -81,7 +86,6 @@ public class CliTestUtils
         {
             if ( restURL != null )
             {
-                Logger logger = LoggerFactory.getLogger( CliTestUtils.class );
                 logger.info( "Resetting REST URL to: {}", restURL );
                 e.getJavaParams().put( REST_URL_PROPERTY, restURL );
             }
@@ -94,6 +98,7 @@ public class CliTestUtils
             // Run PME-Cli
             Integer cliExitValue = runCli( args, e.getJavaParams(), e.getLocation() );
 
+            logger.info ("Returned {} from running {} ", cliExitValue, args);
             // Run Maven
             Map<String, String> mavenParams = new HashMap<String, String>();
             mavenParams.putAll( DEFAULT_MVN_PARAMS );
@@ -119,51 +124,6 @@ public class CliTestUtils
 
     /**
      * Run pom-manipulation-cli.jar with java params (-D arguments) in workingDir directory.
-     * Using test.properties in workingDir as -D arguments.
-     *
-     * @param workingDir - Working directory in which you want the cli to be run.
-     * @return Exit value
-     * @throws Exception
-     */
-    public static Integer runCli( String workingDir )
-        throws Exception
-    {
-        return runCli( new ArrayList<String>(), workingDir );
-    }
-
-    /**
-     * Run pom-manipulation-cli.jar with java params (-D arguments) in workingDir directory.
-     * Using test.properties in workingDir as -D arguments.
-     *
-     * @param args - List of additional command line arguments
-     * @param workingDir - Working directory in which you want the cli to be run.
-     * @return Exit value
-     * @throws Exception
-     */
-    public static Integer runCli( List<String> args, String workingDir )
-        throws Exception
-    {
-        Properties testProperties = Utils.loadProps( workingDir + "/test.properties" );
-        Map<String, String> javaParams = Utils.propsToMap( testProperties );
-        return runCli( args, javaParams, workingDir );
-    }
-
-    /**
-     * Run pom-manipulation-cli.jar with java params (-D arguments) in workingDir directory.
-     *
-     * @param params - Map of String keys and String values representing -D arguments
-     * @param workingDir - Working directory in which you want the cli to be run.
-     * @return Exit value
-     * @throws Exception
-     */
-    public static Integer runCli( Map<String, String> params, String workingDir )
-        throws Exception
-    {
-        return runCli( null, params, workingDir );
-    }
-
-    /**
-     * Run pom-manipulation-cli.jar with java params (-D arguments) in workingDir directory.
      *
      * @param args - List of additional command line arguments
      * @param params - Map of String keys and String values representing -D arguments
@@ -171,47 +131,39 @@ public class CliTestUtils
      * @return Exit value
      * @throws Exception
      */
-    public static Integer runCli( List<String> args, Map<String, String> params, String workingDir )
+    private static Integer runCli( List<String> args, Map<String, String> params, String workingDir )
         throws Exception
     {
-        String stringArgs = toArguments( args );
-        String stringParams = toJavaParams( params );
-        String command =
-            String.format( "%s -jar %s/pom-manipulation-cli.jar %s %s", getJavaBin().getAbsolutePath(), BUILD_DIR, stringParams, stringArgs );
+        ArrayList<String> arguments = new ArrayList<String>( args );
+        Collections.addAll( arguments, toJavaParams( params ).split( "\\s+" ) );
+        arguments.add( "--log=" + workingDir + File.separator + "build.log" );
+        arguments.add( "--file=" + workingDir + File.separator + "pom.xml" );
 
-        return runCommandAndWait( command, workingDir, null );
-    }
+        logger.info( "Invoking CLI with {} ", arguments );
+        int result = new Cli().run( arguments.toArray( new String[arguments.size()] ) );
 
-    public static File getJavaBin()
-    {
-        String javaHome = System.getProperty( "java.home" );
-        File dir = new File( javaHome );
-        String subPath = "bin/java";
-        if ( javaHome.endsWith( "jre" ) )
-        {
-            File jvm = dir.getParentFile();
-            File jvmExe = new File( jvm, subPath );
-            if ( jvmExe.exists() )
-            {
-                return jvmExe;
-            }
-        }
+        // This is a bit of a hack. The CLI, if log-to-file is enabled resets the logging. As we don't fork and run
+        // in the same process this means we need to reset it back again. The benefit of not forking is a simpler test
+        // harness and it saves time when running the tests.
+        final ch.qos.logback.classic.Logger root = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger( org.slf4j.Logger.ROOT_LOGGER_NAME );
 
-        return new File( dir, subPath );
-    }
+        LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
+        loggerContext.reset();
 
-    /**
-     * Run maven process with commands in workingDir directory.
-     *
-     * @param commands - String representing maven command(s), e.g. "clean install".
-     * @param workingDir - Working directory.
-     * @return Exit value
-     * @throws Exception
-     */
-    public static Integer runMaven( String commands, String workingDir )
-        throws Exception
-    {
-        return runMaven( commands, null, workingDir );
+        PatternLayoutEncoder ple = new PatternLayoutEncoder();
+        ple.setPattern( "[%t] %level %logger{32} - %msg%n" );
+        ple.setContext( loggerContext );
+        ple.start();
+
+        ConsoleAppender<ILoggingEvent> consoleAppender = new ConsoleAppender<ILoggingEvent>();
+        consoleAppender.setEncoder( ple );
+        consoleAppender.setContext( loggerContext );
+        consoleAppender.start();
+
+        root.addAppender( consoleAppender );
+        root.setLevel( Level.INFO );
+
+        return new Integer( result );
     }
 
     /**
@@ -238,7 +190,7 @@ public class CliTestUtils
      * @param workingDir - Directory with verify.groovy script.
      * @throws Exception
      */
-    public static void verify( String workingDir )
+    private static void verify( String workingDir )
         throws Exception
     {
         File verify = new File( workingDir + "/verify.groovy" );
@@ -269,7 +221,7 @@ public class CliTestUtils
      * @param params - Map of java parameters
      * @return - String of -D arguments
      */
-    public static String toJavaParams( Map<String, String> params )
+    private static String toJavaParams( Map<String, String> params )
     {
         if ( params == null )
         {
@@ -284,26 +236,6 @@ public class CliTestUtils
         return stringParams;
     }
 
-    /**
-     * Convert string arguments in a List to a String
-     *
-     * @param args - List of command line options with its arguments
-     * @return - String of options with it's arguments
-     */
-    public static String toArguments( List<String> args )
-    {
-        if ( args == null )
-        {
-            return "";
-        }
-
-        String stringArgs = "";
-        for ( String arg : args )
-        {
-            stringArgs += String.format( "%s ", arg );
-        }
-        return stringArgs;
-    }
 
     /**
      * Run command in another process and wait for it to finish.
@@ -314,7 +246,7 @@ public class CliTestUtils
      * @return exit value.
      * @throws Exception
      */
-    public static Integer runCommandAndWait( String command, String workingDir, String extraPath )
+    private static Integer runCommandAndWait( String command, String workingDir, String extraPath )
         throws Exception
     {
         String path = System.getenv( "PATH" );

@@ -26,9 +26,6 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 import static org.commonjava.maven.ext.manip.CliTestUtils.DEFAULT_MVN_PARAMS;
 import static org.commonjava.maven.ext.manip.CliTestUtils.IT_LOCATION;
@@ -42,19 +39,6 @@ public class DefaultCliIntegrationTest
 {
     private static final Logger LOGGER = LoggerFactory.getLogger( DefaultCliIntegrationTest.class );
 
-    private static final List<String> EXCLUDED_FILES = new ArrayList<String>()
-    {{
-        add( "setup" );
-        // Run in a separate test so a Mock server may be started.
-        add("rest-dependency-version-manip-child-module");
-        add("rest-version-manip-only");
-    }};
-
-    private static final Map<String, String> LOCATION_REWRITE = new HashMap<String, String>()
-    {{
-            put( "simple-numeric-directory-path", "simple-numeric-directory-path/parent" );
-        }};
-
     @Parameters( name = "{0}" )
     public static Collection<Object[]> getFiles()
     {
@@ -62,13 +46,16 @@ public class DefaultCliIntegrationTest
         // Hack to allow a single parameterized test to be run.
         if ( System.getProperties().containsKey( "test-cli" ) )
         {
-            params.add (new Object[] { System.getProperty("test-cli") } );
+            for (String t : System.getProperty("test-cli").split( "," ))
+            {
+                params.add( new Object[] { t } );
+            }
         }
         else
         {
             for ( File rl : new File( IT_LOCATION ).listFiles() )
             {
-                if ( rl.isDirectory() && !EXCLUDED_FILES.contains( rl.getName() ) )
+                if ( rl.isDirectory() && !CliTestUtils.EXCLUDED_FILES.contains( rl.getName() ) )
                 {
                     Object[] arr = new Object[] { rl.getName() };
                     params.add( arr );
@@ -92,7 +79,13 @@ public class DefaultCliIntegrationTest
     {
         for ( File setupTest : new File( getDefaultTestLocation( "setup" ) ).listFiles() )
         {
-            runMaven( "install", DEFAULT_MVN_PARAMS, setupTest.toString() );
+            LOGGER.info ("Running install for {}", setupTest.toString());
+
+            // Try to do some simplistic checks to see if this has already been done.
+            if ( ! setupExists( setupTest ))
+            {
+                runMaven( "install", DEFAULT_MVN_PARAMS, setupTest.toString() );
+            }
         }
     }
 
@@ -101,12 +94,30 @@ public class DefaultCliIntegrationTest
         throws Exception
     {
         String testRelativeLocation = this.testRelativeLocation;
-        if ( LOCATION_REWRITE.containsKey( this.testRelativeLocation ) )
+        if ( CliTestUtils.LOCATION_REWRITE.containsKey( this.testRelativeLocation ) )
         {
-            testRelativeLocation = LOCATION_REWRITE.get( this.testRelativeLocation );
+            testRelativeLocation = CliTestUtils.LOCATION_REWRITE.get( this.testRelativeLocation );
         }
         LOGGER.info ("Testing {}", testRelativeLocation);
         String test = getDefaultTestLocation( testRelativeLocation );
-        runLikeInvoker( test );
+        runLikeInvoker( test, null );
+    }
+
+
+    private static boolean setupExists (File test)
+    {
+        boolean result = false;
+        File t1 = new File (DEFAULT_MVN_PARAMS.get( "maven.repo.local" ),"org/commonjava/maven/ext/");
+        if ( t1.exists())
+        {
+            File t2 = new File( t1, test.getName() );
+            File t3 = new File( t2, "1.0" );
+            if (t2.exists() && t3.exists() && t3.listFiles() != null && t3.listFiles().length > 0)
+            {
+                LOGGER.info( "Setup has already been run for {}", test);
+                return true;
+            }
+        }
+        return result;
     }
 }

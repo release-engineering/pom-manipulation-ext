@@ -40,6 +40,13 @@
       <type>test-jar</type>
       <scope>test</scope>
     </dependency>
+    <!-- Note: we are not depending on full pom-manipulation-cli as its a shaded jar and -->
+    <!-- causes SLF4J binding issues -->
+    <dependency>
+      <groupId>org.commonjava.maven.ext</groupId>
+      <artifactId>pom-manipulation-cli</artifactId>
+      <classifier>minimal</classifier>
+    </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
@@ -48,10 +55,10 @@
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
     </dependency>
-      <dependency>
-        <groupId>org.codehaus.groovy</groupId>
-        <artifactId>groovy-json</artifactId>
-      </dependency>
+    <dependency>
+      <groupId>org.codehaus.groovy</groupId>
+      <artifactId>groovy-json</artifactId>
+    </dependency>
     <dependency>
       <groupId>org.codehaus.groovy</groupId>
       <artifactId>groovy</artifactId>
@@ -94,6 +101,23 @@
       <plugins>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-jar-plugin</artifactId>
+          <executions>
+            <execution>
+              <id>default-jar</id>
+              <phase>skip</phase>
+            </execution>
+            <execution>
+              <id>test-jar</id>
+              <goals>
+                <goal>test-jar</goal>
+              </goals>
+              <phase>package</phase>
+            </execution>
+          </executions>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-surefire-plugin</artifactId>
           <configuration>
             <skipTests>true</skipTests>
@@ -112,24 +136,6 @@
           <plugin>
             <artifactId>maven-dependency-plugin</artifactId>
             <executions>
-              <execution>
-                <id>copy-pme-cli</id>
-                <phase>generate-test-resources</phase>
-                <goals>
-                  <goal>copy</goal>
-                </goals>
-                <configuration>
-                  <artifactItems>
-                    <artifactItem>
-                      <groupId>${project.groupId}</groupId>
-                      <artifactId>pom-manipulation-cli</artifactId>
-                      <version>${project.version}</version>
-                      <outputDirectory>${project.build.directory}</outputDirectory>
-                      <destFileName>pom-manipulation-cli.jar</destFileName>
-                    </artifactItem>
-                  </artifactItems>
-                </configuration>
-              </execution>
               <execution>
                 <id>unpack-maven</id>
                 <phase>generate-test-resources</phase>
