@@ -284,8 +284,7 @@ public class PomIO
             final LinkedList<File> pendingPoms = new LinkedList<File>();
             pendingPoms.add( topPom.getCanonicalFile() );
 
-            final String topDir = topPom.getParentFile()
-                                        .getCanonicalPath();
+            final String topDir = topPom.getAbsoluteFile().getParentFile().getCanonicalPath();
 
             final Set<File> seen = new HashSet<File>();
 

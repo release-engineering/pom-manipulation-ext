@@ -99,11 +99,7 @@ public class Cli
 
     public static void main( String[] args )
     {
-        if ( new Cli().run( args ) == 1 )
-        {
-            // Propagate the correct return code.
-            System.exit( 1 );
-        }
+        System.exit ( new Cli().run( args ) );
     }
 
     public int run( String[] args )
@@ -238,7 +234,7 @@ public class Cli
         {
             manipulationManager.init( session );
 
-            if ( cmd.hasOption( 'p' ) )
+            if ( cmd.hasOption( 'p' ) || cmd.hasOption( "printGAVTC" ) )
             {
                 Set<String> activeProfiles = null;
                 if ( cmd.hasOption( 'P' ) )
