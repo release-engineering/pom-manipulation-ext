@@ -22,7 +22,7 @@
   <parent>
     <groupId>org.commonjava.maven.ext</groupId>
     <artifactId>pom-manipulation-parent</artifactId>
-    <version>1.14</version>
+    <version>1.14.0.1</version>
   </parent>
 
   <artifactId>pom-manipulation-integration-test</artifactId>
@@ -121,6 +121,18 @@
           <artifactId>maven-surefire-plugin</artifactId>
           <configuration>
             <skipTests>true</skipTests>
+          </configuration>
+        </plugin>
+        <plugin>
+          <artifactId>maven-install-plugin</artifactId>
+          <configuration>
+            <skip>true</skip>
+          </configuration>
+        </plugin>
+        <plugin>
+          <artifactId>maven-deploy-plugin</artifactId>
+          <configuration>
+            <skip>true</skip>
           </configuration>
         </plugin>
       </plugins>
