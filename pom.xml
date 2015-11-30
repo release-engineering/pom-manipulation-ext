@@ -27,7 +27,7 @@
 
   <groupId>org.commonjava.maven.ext</groupId>
   <artifactId>pom-manipulation-parent</artifactId>
-  <version>1.14</version>
+  <version>1.14.0.2</version>
   <packaging>pom</packaging>
 
   <name>POM Manipulation Extension for Maven</name>
