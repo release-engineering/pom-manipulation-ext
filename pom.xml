@@ -102,6 +102,17 @@
       </dependency>
       <dependency>
         <groupId>org.commonjava.maven.ext</groupId>
+        <artifactId>pom-manipulation-cli</artifactId>
+        <version>1.14-SNAPSHOT</version>
+      </dependency>
+      <dependency>
+        <groupId>org.commonjava.maven.ext</groupId>
+        <artifactId>pom-manipulation-cli</artifactId>
+        <classifier>minimal</classifier>
+        <version>1.14-SNAPSHOT</version>
+      </dependency>
+      <dependency>
+        <groupId>org.commonjava.maven.ext</groupId>
         <artifactId>pom-manipulation-core</artifactId>
         <version>1.14-SNAPSHOT</version>
       </dependency>
@@ -286,6 +297,11 @@
       <dependency>
         <groupId>ch.qos.logback</groupId>
         <artifactId>logback-classic</artifactId>
+        <version>1.0.12</version>
+      </dependency>
+      <dependency>
+        <groupId>ch.qos.logback</groupId>
+        <artifactId>logback-core</artifactId>
         <version>1.0.12</version>
       </dependency>
       <dependency>
