@@ -15,6 +15,8 @@
  */
 package org.commonjava.maven.ext.manip.invoker;
 
+import org.commonjava.maven.ext.manip.TestUtils;
+
 import java.util.Collection;
 import java.util.Map;
 import java.util.Properties;
@@ -78,10 +80,10 @@ public interface ExecutionParser
 
             if ( key.matches( "invoker\\.systemPropertiesFile.*" ) )
             {
-                Properties props = Utils.loadProps( execution.getLocation() + "/" + value );
+                Properties props = TestUtils.loadProps( execution.getLocation() + "/" + value );
 
                 // Properties to Map
-                Map<String, String> javaParams = Utils.propsToMap( props );
+                Map<String, String> javaParams = TestUtils.propsToMap( props );
                 if ( execution.getJavaParams() != null )
                 {
                     javaParams.putAll( execution.getJavaParams() );
@@ -103,8 +105,8 @@ public interface ExecutionParser
         {
             if ( execution.getJavaParams() == null )
             {
-                Properties props = Utils.loadProps( execution.getLocation() + "/test.properties" );
-                Map<String, String> javaParams = Utils.propsToMap( props );
+                Properties props = TestUtils.loadProps( execution.getLocation() + "/test.properties" );
+                Map<String, String> javaParams = TestUtils.propsToMap( props );
                 execution.setJavaParams( javaParams );
             }
         }
