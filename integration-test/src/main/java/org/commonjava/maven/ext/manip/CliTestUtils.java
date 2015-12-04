@@ -59,8 +59,8 @@ public class CliTestUtils
     {{
         add( "setup" );
         // Run in a separate test so a Mock server may be started.
-        add("rest-dependency-version-manip-child-module");
-        add("rest-version-manip-only");
+        add( "rest-dependency-version-manip-child-module" );
+        add( "rest-version-manip-only" );
     }};
 
     protected static final Map<String, String> LOCATION_REWRITE = new HashMap<String, String>()
