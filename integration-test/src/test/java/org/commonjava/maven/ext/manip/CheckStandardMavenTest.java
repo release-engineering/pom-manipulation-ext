@@ -22,8 +22,8 @@ import org.junit.rules.TemporaryFolder;
 
 import java.io.File;
 
-import static org.commonjava.maven.ext.manip.CliTestUtils.DEFAULT_MVN_PARAMS;
-import static org.commonjava.maven.ext.manip.CliTestUtils.runMaven;
+import static org.commonjava.maven.ext.manip.TestUtils.DEFAULT_MVN_PARAMS;
+import static org.commonjava.maven.ext.manip.TestUtils.runMaven;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 

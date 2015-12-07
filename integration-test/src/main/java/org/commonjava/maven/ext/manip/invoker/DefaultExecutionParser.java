@@ -15,6 +15,8 @@
  */
 package org.commonjava.maven.ext.manip.invoker;
 
+import org.commonjava.maven.ext.manip.TestUtils;
+
 import java.util.*;
 
 /**
@@ -45,7 +47,7 @@ public class DefaultExecutionParser
     @Override
     public Collection<Execution> parse( String workingDir )
     {
-        final Properties invokerProperties = Utils.loadProps( workingDir + "/invoker.properties" );
+        final Properties invokerProperties = TestUtils.loadProps( workingDir + "/invoker.properties" );
         Map<Integer, Execution> executions = new TreeMap<Integer, Execution>();
 
         for ( Object rawKey : invokerProperties.keySet() )

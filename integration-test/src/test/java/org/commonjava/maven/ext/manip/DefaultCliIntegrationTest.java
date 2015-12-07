@@ -27,11 +27,11 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import static org.commonjava.maven.ext.manip.CliTestUtils.DEFAULT_MVN_PARAMS;
-import static org.commonjava.maven.ext.manip.CliTestUtils.IT_LOCATION;
-import static org.commonjava.maven.ext.manip.CliTestUtils.getDefaultTestLocation;
-import static org.commonjava.maven.ext.manip.CliTestUtils.runLikeInvoker;
-import static org.commonjava.maven.ext.manip.CliTestUtils.runMaven;
+import static org.commonjava.maven.ext.manip.TestUtils.DEFAULT_MVN_PARAMS;
+import static org.commonjava.maven.ext.manip.TestUtils.IT_LOCATION;
+import static org.commonjava.maven.ext.manip.TestUtils.getDefaultTestLocation;
+import static org.commonjava.maven.ext.manip.TestUtils.runLikeInvoker;
+import static org.commonjava.maven.ext.manip.TestUtils.runMaven;
 
 @SuppressWarnings( "ConstantConditions" )
 @RunWith( Parameterized.class )
@@ -55,7 +55,7 @@ public class DefaultCliIntegrationTest
         {
             for ( File rl : new File( IT_LOCATION ).listFiles() )
             {
-                if ( rl.isDirectory() && !CliTestUtils.EXCLUDED_FILES.contains( rl.getName() ) )
+                if ( rl.isDirectory() && !TestUtils.EXCLUDED_FILES.contains( rl.getName() ) )
                 {
                     Object[] arr = new Object[] { rl.getName() };
                     params.add( arr );
@@ -94,9 +94,9 @@ public class DefaultCliIntegrationTest
         throws Exception
     {
         String testRelativeLocation = this.testRelativeLocation;
-        if ( CliTestUtils.LOCATION_REWRITE.containsKey( this.testRelativeLocation ) )
+        if ( TestUtils.LOCATION_REWRITE.containsKey( this.testRelativeLocation ) )
         {
-            testRelativeLocation = CliTestUtils.LOCATION_REWRITE.get( this.testRelativeLocation );
+            testRelativeLocation = TestUtils.LOCATION_REWRITE.get( this.testRelativeLocation );
         }
         LOGGER.info ("Testing {}", testRelativeLocation);
         String test = getDefaultTestLocation( testRelativeLocation );

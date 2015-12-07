@@ -36,9 +36,9 @@ import static org.junit.Assert.*;
 /**
  * @author vdedik@redhat.com
  */
-public class CliTestUtils
+public class TestUtils
 {
-    private static final Logger logger = LoggerFactory.getLogger( CliTestUtils.class );
+    private static final Logger logger = LoggerFactory.getLogger( TestUtils.class );
 
     private static final String BUILD_DIR = System.getProperty( "buildDirectory" );
 
@@ -59,8 +59,8 @@ public class CliTestUtils
     {{
         add( "setup" );
         // Run in a separate test so a Mock server may be started.
-        add("rest-dependency-version-manip-child-module");
-        add("rest-version-manip-only");
+        add( "rest-dependency-version-manip-child-module" );
+        add( "rest-version-manip-only" );
     }};
 
     protected static final Map<String, String> LOCATION_REWRITE = new HashMap<String, String>()
@@ -281,5 +281,42 @@ public class CliTestUtils
         out.close();
 
         return proc.waitFor();
+    }
+
+    /**
+     * Loads *.properties file.
+     *
+     * @param filePath - File path of the *.properties file
+     * @return Loaded properties
+     */
+    public static Properties loadProps( String filePath )
+    {
+        File propsFile = new File( filePath );
+        Properties props = new Properties();
+        if ( propsFile.isFile() )
+        {
+            try
+            {
+                FileInputStream fis = new FileInputStream( propsFile );
+                props.load( fis );
+            }
+            catch ( Exception e )
+            {
+                // ignore
+            }
+        }
+
+        return props;
+    }
+
+    public static Map<String, String> propsToMap( Properties props )
+    {
+        Map<String, String> map = new HashMap<String, String>();
+        for ( Object p : props.keySet() )
+        {
+            map.put( (String) p, props.getProperty( (String) p ) );
+        }
+
+        return map;
     }
 }

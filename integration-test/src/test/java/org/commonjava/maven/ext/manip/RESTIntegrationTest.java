@@ -19,8 +19,8 @@ import org.commonjava.maven.ext.manip.rest.rule.MockServer;
 import org.junit.ClassRule;
 import org.junit.Test;
 
-import static org.commonjava.maven.ext.manip.CliTestUtils.getDefaultTestLocation;
-import static org.commonjava.maven.ext.manip.CliTestUtils.runLikeInvoker;
+import static org.commonjava.maven.ext.manip.TestUtils.getDefaultTestLocation;
+import static org.commonjava.maven.ext.manip.TestUtils.runLikeInvoker;
 
 public class RESTIntegrationTest
 {
