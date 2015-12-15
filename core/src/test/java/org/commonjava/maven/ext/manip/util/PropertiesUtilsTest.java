@@ -15,26 +15,14 @@
  */
 package org.commonjava.maven.ext.manip.util;
 
-import static org.junit.Assert.assertThat;
+import junit.framework.TestCase;
+import org.commonjava.maven.ext.manip.ManipulationSession;
+import org.junit.Test;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.hamcrest.Matchers.containsString;
-
-import junit.framework.TestCase;
-
-import org.commonjava.maven.ext.manip.ManipulationSession;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.slf4j.LoggerFactory;
-
-import ch.qos.logback.classic.Logger;
-import ch.qos.logback.classic.spi.ILoggingEvent;
-import ch.qos.logback.core.read.ListAppender;
-
-public class PropertiesUtilTest extends TestCase
+public class PropertiesUtilsTest extends TestCase
 {
 
     @Test
