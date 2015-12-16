@@ -109,7 +109,7 @@ public class TestUtils
             if ( e.isSuccess() )
             {
                 assertEquals( "PME-Cli (running in: " + workingDir + ") exited with a non zero value.", Integer.valueOf( 0 ), cliExitValue );
-                assertEquals( "Maven (running in: \" + workingDir + \") exited with a non zero value.", Integer.valueOf( 0 ), mavenExitValue );
+                assertEquals( "Maven (running in: " + workingDir + ") exited with a non zero value.", Integer.valueOf( 0 ), mavenExitValue );
             }
             else
             {
