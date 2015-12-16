@@ -45,7 +45,7 @@ public class ProfileInjectionState
     {
         final String gav = userProps.getProperty( PROFILE_INJECTION_PROPERTY );
         ProjectVersionRef ref = null;
-        if ( gav != null )
+        if ( gav != null && gav.length() > 0 )
         {
             try
             {
