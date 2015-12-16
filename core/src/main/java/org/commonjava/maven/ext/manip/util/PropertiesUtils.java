@@ -170,18 +170,18 @@ public final class PropertiesUtils
             suffix = state.getSuffix().substring( 0, state.getSuffix().indexOf( '-' ) );
         }
 
-        if ( suffix != null)
+        // We only need to dummy up and add a suffix if there is no qualifier. This allows us
+        // to work out the OSGi version.
+        if ( suffix != null && !v.hasQualifier())
         {
             v.appendQualifierSuffix( suffix );
             osgiVersion = v.getOSGiVersionString();
             osgiVersion = osgiVersion.substring( 0, osgiVersion.indexOf( suffix ) - 1 );
-
-            if ( newValue.contains( suffix ) )
-            {
-                newVersion = newValue.substring( 0, newValue.indexOf( suffix ) - 1 );
-            }
         }
-
+        if (suffix != null && newValue.contains( suffix ) )
+        {
+            newVersion = newValue.substring( 0, newValue.indexOf( suffix ) - 1 );
+        }
         logger.debug ( "Comparing original version {} and OSGi variant {} with new version {} and suffix removed {} " ,
                                              oldValue, osgiVersion, newValue, newVersion);
 
