@@ -41,7 +41,6 @@ public class DefaultVersionTranslator
         Unirest.setObjectMapper( new ProjectVersionRefMapper() );
     }
 
-    @SuppressWarnings( "unchecked" )
     public Map<ProjectVersionRef, String> translateVersions( List<ProjectVersionRef> projects )
     {
         // Execute request to get translated versions

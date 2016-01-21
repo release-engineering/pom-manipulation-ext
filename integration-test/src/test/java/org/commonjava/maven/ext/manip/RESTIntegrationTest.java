@@ -15,6 +15,7 @@
  */
 package org.commonjava.maven.ext.manip;
 
+import org.commonjava.maven.ext.manip.rest.handler.AddSuffixJettyHandler;
 import org.commonjava.maven.ext.manip.rest.rule.MockServer;
 import org.junit.ClassRule;
 import org.junit.Test;
@@ -25,7 +26,7 @@ import static org.commonjava.maven.ext.manip.TestUtils.runLikeInvoker;
 public class RESTIntegrationTest
 {
     @ClassRule
-    public static MockServer mockServer = new MockServer();
+    public static MockServer mockServer = new MockServer(new AddSuffixJettyHandler(  ));
 
     @Test
     public void testRESTVersionDepManip() throws Exception

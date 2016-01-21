@@ -23,6 +23,7 @@ import com.mashape.unirest.http.Unirest;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef;
 import org.commonjava.maven.ext.manip.rest.exception.RestException;
+import org.commonjava.maven.ext.manip.rest.handler.AddSuffixJettyHandler;
 import org.commonjava.maven.ext.manip.rest.rule.MockServer;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -59,7 +60,7 @@ public class DefaultVersionTranslatorTest
     public TestName testName = new TestName();
 
     @ClassRule
-    public static MockServer mockServer = new MockServer();
+    public static MockServer mockServer = new MockServer(new AddSuffixJettyHandler());
 
     @BeforeClass
     public static void startUp()
@@ -141,6 +142,7 @@ public class DefaultVersionTranslatorTest
         }
         catch ( RestException ex )
         {
+            System.out.println ("Caught ex" + ex);
             // Pass
         }
         catch ( Exception ex )
