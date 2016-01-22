@@ -18,6 +18,7 @@ package org.commonjava.maven.ext.manip.rest.rule;
 import org.commonjava.maven.ext.manip.rest.handler.AddSuffixJettyHandler;
 import org.commonjava.maven.ext.manip.server.HttpServer;
 import org.commonjava.maven.ext.manip.server.JettyHttpServer;
+import org.eclipse.jetty.server.handler.AbstractHandler;
 import org.junit.rules.ExternalResource;
 
 /**
@@ -26,13 +27,18 @@ import org.junit.rules.ExternalResource;
 public class MockServer
     extends ExternalResource
 {
-
     private HttpServer httpServer;
+    private AbstractHandler handler;
+
+    public MockServer (AbstractHandler handler)
+    {
+        this.handler = handler;
+    }
 
     @Override
     public void before()
     {
-        httpServer = new JettyHttpServer( new AddSuffixJettyHandler() );
+        httpServer = new JettyHttpServer( handler );
     }
 
     @Override
@@ -53,7 +59,7 @@ public class MockServer
 
     public static void main( String[] args )
     {
-        final MockServer ms = new MockServer();
+        final MockServer ms = new MockServer(new AddSuffixJettyHandler(  ));
         ms.before();
         Runtime.getRuntime().addShutdownHook(new Thread(){
             @Override

@@ -20,6 +20,8 @@ import com.mashape.unirest.http.ObjectMapper;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef;
 import org.commonjava.maven.ext.manip.rest.exception.RestException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -30,9 +32,9 @@ import java.util.Map;
 /**
  * @author vdedik@redhat.com
  */
-@SuppressWarnings( "unchecked" )
 public class ProjectVersionRefMapper implements ObjectMapper
 {
+    private final Logger logger = LoggerFactory.getLogger( getClass() );
 
     private com.fasterxml.jackson.databind.ObjectMapper objectMapper
         = new com.fasterxml.jackson.databind.ObjectMapper();
@@ -43,6 +45,15 @@ public class ProjectVersionRefMapper implements ObjectMapper
         List<Map<String, Object>> responseBody;
         Map<ProjectVersionRef, String> result = new HashMap<ProjectVersionRef, String>();
 
+        // Workaround for https://github.com/Mashape/unirest-java/issues/122
+        // Rather than throwing an exception we return an empty body which allows
+        // DefaultVersionTranslator to examine the status codes.
+        if (s.startsWith( "<" ))
+        {
+            // Read an HTML string.
+            logger.error( "Read HTML string '{}' rather than a JSON stream.", s );
+            return result;
+        }
         try
         {
             responseBody = objectMapper.readValue( s, List.class );
