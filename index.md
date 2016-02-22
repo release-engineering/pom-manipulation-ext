@@ -17,10 +17,22 @@ Obtain the jar from [here](http://central.maven.org/maven2/org/commonjava/maven/
 
 It supports the following arguments
 
-    -d,--debug        Enable debug
-    -D <arg>          Java Properties
-    -f,--file <arg>   POM file
-    -h,--help         Print help
+    -d,--debug                Enable debug
+    -D <arg>                  Java Properties
+    -f,--file <arg>           POM file
+    -h,--help                 Print help
+    -l,--log <arg>            Log file to output logging to
+    -o,--outputFile <arg>     outputFile to output dependencies to. Only
+                              used with '-p' (Print all project
+                              dependencies)
+    -P,--activeProfiles <arg> Comma separated list of active profiles. Only
+                              used with '-p' (Print all project
+                              dependencies)
+    -p,--printDeps            Print all project dependencies
+    --printGAVTC              Print all project dependencies in
+                              group:artifact:version:type:classifier with
+                              scope information
+    -s,--settings <arg>       Optional settings.xml file
 
 Note that all property arguments are the equivalent to those used when it is used as a Maven extension.
 

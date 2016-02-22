@@ -168,3 +168,14 @@ If, instead, the build should fail when strict-mode checks are violated, add the
 This will cause the build to fail with a ManipulationException, and prevent the extension from rewriting any POM files.
 
 **NOTE:** dependency exclusions they will not work if the dependency uses a version property that has been changed by another dependency modification. Explicit version override will overwrite the property value though.
+
+
+### Dependency Relocations
+
+In order to handle the situation where one groupId is changed to another (e.g. from community to product) the relocation manipulator can be used. Multiple relocations may be comma separated and an optional version component may be added; the version will override any prior version used in the dependency. Note this is akin to using the dependencyExclusion functionality with an explicit version.
+
+    -DdependencyRelocation=oldGroupId:newGroupId@version,....
+
+or
+
+    -DdependencyRelocation=oldGroupId:newGroupId,....
