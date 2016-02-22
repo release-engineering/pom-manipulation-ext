@@ -146,4 +146,8 @@ public class DependencyState
         return dependencyExclusions;
     }
 
+    public void updateExclusions (String key, String value)
+    {
+        dependencyExclusions.put( key, value );
+    }
 }
