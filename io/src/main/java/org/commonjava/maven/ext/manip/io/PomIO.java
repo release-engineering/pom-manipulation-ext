@@ -160,7 +160,7 @@ public class PomIO
             File pom = project.getPom();
 
             final Model model = project.getModel();
-            logger.info( "Rewriting: " + model.toString() + " in place of: " + project.getId()
+            logger.trace( "Rewriting: " + model.toString() + " in place of: " + project.getId()
                          + "\n       to POM: " + pom );
 
             write( project, pom, model );
@@ -191,7 +191,6 @@ public class PomIO
             // the file but we would then have to do a dual read, then write as opposed
             // to a read, then read + write now.
             LineSeparator ls = determineEOL( pom );
-            logger.debug ("For file {} line ending is {} ", pom, ls);
             mjw.setLineSeparator( ls );
 
             mjw.write( model, pom, new DocumentModifier()
@@ -315,8 +314,6 @@ public class PomIO
                             parent = new File( parent, "pom.xml" );
                         }
 
-                        logger.debug( "Looking for parent POM: " + parent );
-
                         parent = parent.getCanonicalFile();
                         if ( parent.getParentFile()
                                    .getCanonicalPath()
@@ -346,8 +343,6 @@ public class PomIO
                             {
                                 modPom = new File( modPom, "pom.xml" );
                             }
-
-                            logger.debug( "Looking for module POM: " + modPom );
 
                             if ( modPom.exists() && !seen.contains( modPom )
                                 && !pendingPoms.contains( modPom ) )

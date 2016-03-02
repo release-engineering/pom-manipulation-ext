@@ -15,8 +15,6 @@
  */
 package org.commonjava.maven.ext.manip.rest.exception;
 
-import com.mashape.unirest.http.exceptions.UnirestException;
-
 /**
  * @author vdedik@redhat.com
  */

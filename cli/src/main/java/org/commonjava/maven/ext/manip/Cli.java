@@ -107,6 +107,7 @@ public class Cli
         Options options = new Options();
         options.addOption( "h", false, "Print this help message." );
         options.addOption( Option.builder( "d" ).longOpt( "debug" ).desc( "Enable debug" ).build() );
+        options.addOption( Option.builder( "t" ).longOpt( "debug" ).desc( "Enable trace" ).build() );
         options.addOption( Option.builder( "h" ).longOpt( "help" ).desc( "Print help" ).build() );
         options.addOption( Option.builder( "f" )
                                  .longOpt( "file" )
@@ -211,6 +212,10 @@ public class Cli
         if ( cmd.hasOption( 'd' ) )
         {
             root.setLevel( Level.DEBUG );
+        }
+        if ( cmd.hasOption( 't' ) )
+        {
+            root.setLevel( Level.TRACE );
         }
 
         if ( !session.isEnabled() )

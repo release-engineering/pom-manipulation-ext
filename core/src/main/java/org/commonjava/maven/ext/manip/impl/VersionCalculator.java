@@ -210,7 +210,10 @@ public class VersionCalculator
                 if (rm.size() > 0)
                 {
                     // Use preloaded metadata from remote repository, loaded via a REST Call.
-                    versionCandidates.addAll( rm.get( new SimpleProjectRef( groupId, artifactId ) ) );
+                    if (rm.get( new SimpleProjectRef( groupId, artifactId ) ) != null)
+                    {
+                        versionCandidates.addAll( rm.get( new SimpleProjectRef( groupId, artifactId ) ) );
+                    }
                 }
             }
             else
