@@ -202,7 +202,7 @@ public class ProjectVersioningManipulator
         {
             final ProjectVersionRef parentGAV =
                     new SimpleProjectVersionRef( parent.getGroupId(), parent.getArtifactId(), parent.getVersion() );
-            logger.info( "Looking for parent: " + parentGAV );
+
             if ( versionsByGAV.containsKey( parentGAV ) )
             {
                 final String newVersion = versionsByGAV.get( parentGAV );
@@ -248,7 +248,6 @@ public class ProjectVersioningManipulator
             if (newVersion != null)
             {
                 model.setVersion( newVersion );
-                logger.info( "Force inject main version in " + gav( model ) );
                 changed = true;
             }
         }
@@ -340,12 +339,7 @@ public class ProjectVersioningManipulator
                 }
             }
         }
-
-        if ( changed )
-        {
-            logger.info( "Applied versioning changes to: " + gav( model ) );
-        }
-
+        
         return changed;
     }
 

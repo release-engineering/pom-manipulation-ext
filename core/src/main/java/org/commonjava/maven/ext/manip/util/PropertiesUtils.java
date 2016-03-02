@@ -265,7 +265,7 @@ public final class PropertiesUtils
             }
             for ( Project p : projects)
             {
-                logger.debug( "Scanning {} for property {} and found {} ", p, property, p.getModel().getProperties() );
+                logger.trace( "Scanning {} for property {} and found {} ", p, property, p.getModel().getProperties() );
                 if ( property.equals( "project.version" ))
                 {
                     result = p.getVersion();

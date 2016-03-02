@@ -135,8 +135,7 @@ public class ProjectVersionEnforcingManipulator
                 String newVersion =  project.getModel().getVersion() == null ?
                                 project.getModel().getParent ().getVersion () : project.getModel().getVersion ();
 
-                logger.info( "Replacing project.version within {} for project {} with {}", d, project, newVersion);
-                logger.debug ("Original version is " + project.getVersion() + " and model is " + project.getModel());
+                logger.debug( "Replacing project.version within {} for project {} with {}", d, project, newVersion);
 
                 d.setVersion( newVersion );
                 changed.add( project );

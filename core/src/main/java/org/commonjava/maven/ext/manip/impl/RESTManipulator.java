@@ -28,6 +28,7 @@ import org.commonjava.maven.ext.manip.ManipulationException;
 import org.commonjava.maven.ext.manip.ManipulationSession;
 import org.commonjava.maven.ext.manip.model.Project;
 import org.commonjava.maven.ext.manip.model.SimpleScopedArtifactRef;
+import org.commonjava.maven.ext.manip.rest.exception.RestException;
 import org.commonjava.maven.ext.manip.state.DependencyState;
 import org.commonjava.maven.ext.manip.state.RESTState;
 import org.commonjava.maven.ext.manip.state.VersioningState;
@@ -37,6 +38,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -45,6 +47,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.concurrent.TimeUnit;
 
 /**
  * This Manipulator runs first. It makes a REST call to an external service to loadRemoteOverrides the GAVs to align the project version
@@ -92,20 +95,26 @@ public class RESTManipulator implements Manipulator
 
         // Ok we now have a defined list of top level project plus a unique list of all possible dependencies.
         // Need to send that to the rest interface to get a translation.
-
-        if ( logger.isDebugEnabled() )
-        {
-            logger.debug( "Project GA and Dependencies are " + localDeps );
-        }
-
-        // Call the REST to populate the result.
         for ( ArtifactRef p : localDeps )
         {
             restParam.add( p.asProjectVersionRef() );
         }
 
-        logger.debug ("Calling REST client api with {} ", restParam);
-        restResult = state.getVersionTranslator().translateVersions( restParam );
+        // Call the REST to populate the result.
+        logger.debug ("Passing the following into the REST client api {} ", restParam);
+        logger.info ("Calling REST client...");
+        long start = System.nanoTime();
+
+        try
+        {
+            restResult = state.getVersionTranslator().translateVersions( restParam );
+        }
+        catch (RestException e)
+        {
+            printFinishTime( start );
+            throw e;
+        }
+        printFinishTime( start );
         logger.debug ("REST Client returned {} ", restResult);
 
         // Parse the rest result for the project GAs and store them in versioning state for use
@@ -125,7 +134,7 @@ public class RESTManipulator implements Manipulator
                 versions.add( restResult.get( p.getKey() ) );
             }
         }
-        logger.debug ("Added the following ProjectRef:Version into VersionState" + versionStates);
+        logger.info ("Added the following ProjectRef:Version from REST call into VersionState {}", versionStates);
         final VersioningState vs = session.getState( VersioningState.class );
         vs.setRESTMetadata (versionStates);
 
@@ -197,7 +206,7 @@ public class RESTManipulator implements Manipulator
                     }
                 }
             }
-            logger.info ("Found {} active modules with {} active profiles.", activeModules, activeProfiles);
+            logger.debug ("Found {} active modules with {} active profiles.", activeModules, activeProfiles);
         }
         else
         {
@@ -259,7 +268,7 @@ public class RESTManipulator implements Manipulator
 
             if ( d.getVersion() == null )
             {
-                logger.debug( "Skipping dependency " + d + " as empty version." );
+                logger.trace( "Skipping dependency " + d + " as empty version." );
             }
             else
             {
@@ -274,4 +283,13 @@ public class RESTManipulator implements Manipulator
         }
     }
 
+
+    private void printFinishTime(long start)
+    {
+        long finish = System.nanoTime();
+        long minutes = TimeUnit.NANOSECONDS.toMinutes( finish - start );
+        long seconds = TimeUnit.NANOSECONDS.toSeconds( finish - start ) - ( minutes * 60 );
+        logger.info ( "REST client finished... (took {} min, {} sec, {} millisec)", minutes, seconds,
+                      (TimeUnit.NANOSECONDS.toMillis( finish - start ) - ( minutes * 60 * 1000 ) - ( seconds * 1000) ));
+    }
 }

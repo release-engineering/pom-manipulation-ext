@@ -523,7 +523,7 @@ public class DependencyManipulator implements Manipulator
                     }
                     else if ( oldVersion == null || oldVersion.length() == 0 )
                     {
-                        logger.warn( "Dependency is a managed version for " + groupIdArtifactId + "; ignoring" );
+                        logger.debug( "Dependency is a managed version for " + groupIdArtifactId + "; ignoring" );
                     }
                     else
                     {
