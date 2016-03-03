@@ -87,10 +87,10 @@ public class WildcardMap
         String groupId = key.getGroupId();
         String artifactId = key.getArtifactId();
 
-        LinkedHashMap vMap = map.get(groupId);
+        LinkedHashMap<String,String> vMap = map.get(groupId);
         if ( vMap == null)
         {
-            vMap = new LinkedHashMap();
+            vMap = new LinkedHashMap<String,String>();
         }
         boolean wildcard = false;
 

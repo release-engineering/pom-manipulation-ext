@@ -31,16 +31,15 @@ public class SimpleScopedArtifactRef extends SimpleArtifactRef
     private final DependencyScope scope;
 
     public SimpleScopedArtifactRef( final String groupId, final String artifactId, final VersionSpec version,
-                              final String type, final String classifier, final boolean optional,
-                              final String scope)
+                              final String type, final String classifier, final String scope)
     {
-        super( groupId, artifactId, version, type, classifier, optional );
+        super( groupId, artifactId, version, type, classifier);
         this.scope = DependencyScope.getScope( scope );
     }
 
-    public SimpleScopedArtifactRef( final ProjectVersionRef ref, final TypeAndClassifier tc, final boolean optional, final String scope )
+    public SimpleScopedArtifactRef( final ProjectVersionRef ref, final TypeAndClassifier tc, final String scope )
     {
-        super( ref, tc, optional );
+        super( ref, tc );
         this.scope = DependencyScope.getScope( scope );
     }
 

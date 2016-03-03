@@ -276,7 +276,7 @@ public class RESTManipulator implements Manipulator
                                 d.getGroupId().equals( "${project.groupId}" ) ? project.getGroupId() : d.getGroupId(),
                                 d.getArtifactId().equals( "${project.artifactId}" ) ? project.getArtifactId() : d.getArtifactId(),
                                 PropertiesUtils.resolveProperties( projects, d.getVersion() ) ),
-                                                       new SimpleTypeAndClassifier( d.getType(), d.getClassifier() ), Boolean.parseBoolean( d.getOptional()),
+                                                       new SimpleTypeAndClassifier( d.getType(), d.getClassifier() ),
                                                        // TODO: Should atlas handle default scope?
                                                        d.getScope() == null ? DependencyScope.compile.realName() : d.getScope()));
             }
