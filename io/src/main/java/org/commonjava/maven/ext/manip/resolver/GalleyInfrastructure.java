@@ -41,6 +41,7 @@ import org.commonjava.maven.galley.internal.xfer.ListingHandler;
 import org.commonjava.maven.galley.internal.xfer.UploadHandler;
 import org.commonjava.maven.galley.io.HashedLocationPathGenerator;
 import org.commonjava.maven.galley.io.NoOpTransferDecorator;
+import org.commonjava.maven.galley.io.SpecialPathManagerImpl;
 import org.commonjava.maven.galley.maven.ArtifactManager;
 import org.commonjava.maven.galley.maven.ArtifactMetadataManager;
 import org.commonjava.maven.galley.maven.internal.ArtifactManagerImpl;
@@ -179,7 +180,9 @@ public class GalleyInfrastructure
         final TransferManager transfers =
             new TransferManagerImpl( transports, cache, nfc, fileEvents, new DownloadHandler( nfc, executor ),
                                      new UploadHandler( nfc, executor ), new ListingHandler( nfc ),
-                                     new ExistenceHandler( nfc ), executor );
+                                     new ExistenceHandler( nfc ),
+                                     new SpecialPathManagerImpl(),
+                                     executor );
 
         final TypeMapper types = new StandardTypeMapper();
         final ArtifactMetadataManager metadataManager = new ArtifactMetadataManagerImpl( transfers, locationExpander );

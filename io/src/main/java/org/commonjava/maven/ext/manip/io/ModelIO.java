@@ -195,8 +195,8 @@ public class ModelIO
      * Return remote Plugins to override
      * @param ref the remote reference to resolve.
      * @param userProperties a collection of properties to ignore when resolving the remote plugin property expressions.
-     * @return
-     * @throws ManipulationException
+     * @return a map containing ProjectRef to Plugins
+     * @throws ManipulationException if an error occurs
      */
     public Map<ProjectRef, Plugin> getRemotePluginVersionOverrides( final ProjectVersionRef ref,
                                                                     Properties userProperties )

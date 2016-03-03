@@ -346,10 +346,6 @@ public class DependencyManipulator implements Manipulator
                         newDependency.setArtifactId( var.getArtifactId() );
                         newDependency.setType( var.getType() );
                         newDependency.setClassifier( var.getClassifier() );
-                        if ( var.isOptional() )
-                        {
-                            newDependency.setOptional( var.isOptional() );
-                        }
 
                         final String artifactVersion = moduleOverrides.get( var );
                         newDependency.setVersion( artifactVersion );

@@ -86,8 +86,8 @@
     <javaTestVersion>1.7</javaTestVersion>
 
     <mavenVersion>3.0.4</mavenVersion>
-    <atlasVersion>0.15.0</atlasVersion>
-    <galleyVersion>0.10.0</galleyVersion>
+    <atlasVersion>0.16.0</atlasVersion>
+    <galleyVersion>0.11.3</galleyVersion>
 
     <enforceBestPractices>false</enforceBestPractices>
   </properties>
@@ -349,6 +349,7 @@
         <artifactId>groovy-xml</artifactId>
         <version>2.4.5</version>
       </dependency>
+
     </dependencies>
   </dependencyManagement>
 

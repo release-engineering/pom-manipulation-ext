@@ -216,12 +216,11 @@ public class PomIO
                             }
                         }
 
-                        doc.addContent( Arrays.<Content> asList( new Comment(
-                                                                              "\nModified by POM Manipulation Extension for Maven "
+                        doc.addContent( Arrays.<Content> asList( new Comment("\nModified by POM Manipulation Extension for Maven "
                                                                                   + manifestInformation + "\n" ) ) );
                     }
                 }
-            } );
+            });
         }
         catch ( final IOException e )
         {

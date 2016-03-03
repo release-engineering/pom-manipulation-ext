@@ -351,7 +351,7 @@ public class ProjectVersioningManipulator
                 }
             }
         }
-        
+
         return changed;
     }
 
