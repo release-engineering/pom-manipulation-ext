@@ -119,7 +119,7 @@ public class ProjectVersionEnforcingManipulator
                 }
             }
         }
-        if ( changed.size() > 0 )
+        if (!changed.isEmpty())
         {
             logger.warn( "Using ${project.version} in pom files may lead to unexpected errors with inheritance." );
         }

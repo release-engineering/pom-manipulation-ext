@@ -96,7 +96,7 @@ public class DependencyState
     {
         return ( ( remoteBOMdepMgmt != null && !remoteBOMdepMgmt.isEmpty()   ) ||
                  ( remoteRESTdepMgmt != null && !remoteRESTdepMgmt.isEmpty() ) ||
-                 ( dependencyExclusions.size() > 0 ) );
+                 (!dependencyExclusions.isEmpty()) );
     }
 
     public List<ProjectVersionRef> getRemoteBOMDepMgmt()

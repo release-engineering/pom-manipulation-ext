@@ -166,7 +166,7 @@ public class DependencyManipulator implements Manipulator
         {
             final Model model = project.getModel();
 
-            if ( overrides.size() > 0 || state.getDependencyExclusions().size() > 0)
+            if (!overrides.isEmpty() || !state.getDependencyExclusions().isEmpty())
             {
                 apply( session, project, model, overrides );
 
@@ -175,7 +175,7 @@ public class DependencyManipulator implements Manipulator
         }
 
         // If we've changed something now update any old properties with the new values.
-        if ( result.size() > 0 )
+        if (!result.isEmpty())
         {
             logger.info ("Iterating for standard overrides...");
             for ( final String key : versionPropertyUpdateMap.keySet() )
@@ -647,7 +647,7 @@ public class DependencyManipulator implements Manipulator
 
                     if ( moduleGA.equals( projectGA ) )
                     {
-                        if ( currentValue != null && currentValue.length() > 0 )
+                        if ( currentValue != null && !currentValue.isEmpty())
                         {
                             explicitOverrides.put( SimpleProjectRef.parse( artifactGA ), currentValue );
                             logger.debug( "Overriding module dependency for {} with {} : {}", moduleGA, artifactGA,
@@ -682,7 +682,7 @@ public class DependencyManipulator implements Manipulator
                     }
 
                     // I think this is only used for e.g. dependencyExclusion.groupId:artifactId@*=<explicitVersion>
-                    if ( currentValue != null && currentValue.length() > 0 )
+                    if ( currentValue != null && !currentValue.isEmpty())
                     {
                         logger.debug( "Overriding module dependency for {} with {} : {}", projectGA, artifactGA,
                                       currentValue );

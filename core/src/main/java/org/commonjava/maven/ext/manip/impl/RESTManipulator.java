@@ -184,7 +184,7 @@ public class RESTManipulator implements Manipulator
         Set<String> activeModules = new HashSet<String>();
         boolean scanAll = false;
 
-        if (activeProfiles != null && activeProfiles.size() > 0)
+        if (activeProfiles != null && !activeProfiles.isEmpty())
         {
             for ( final Project project : projects )
             {
@@ -198,7 +198,7 @@ public class RESTManipulator implements Manipulator
                     {
                         for ( Profile p : profiles )
                         {
-                            if ( activeProfiles != null && activeProfiles.size() > 0 && activeProfiles.contains(p.getId() ) )
+                            if ( activeProfiles != null && !activeProfiles.isEmpty() && activeProfiles.contains(p.getId() ) )
                             {
                                 activeModules.addAll( p.getModules() );
                             }

@@ -111,7 +111,7 @@ public class PluginManipulator
         {
             final Model model = project.getModel();
 
-            if ( overrides.size() > 0 )
+            if (!overrides.isEmpty())
             {
                 apply( session, project, model, overrides );
 
@@ -119,7 +119,7 @@ public class PluginManipulator
             }
         }
         // If we've changed something now update any old properties with the new values.
-        if ( changed.size() > 0 )
+        if (!changed.isEmpty())
         {
             logger.info( "Iterating for standard overrides..." );
             for ( final String key : state.getVersionPropertyOverrides().keySet() )
@@ -304,7 +304,7 @@ public class PluginManipulator
                     }
                 }
 
-                if (override.getDependencies().size() > 0)
+                if (!override.getDependencies().isEmpty())
                 {
                     logger.debug( "Checking original plugin dependencies versus override" );
                     // First, remove any Dependency from the original Plugin if the GA exists in the override.
@@ -333,7 +333,7 @@ public class PluginManipulator
                 String oldVersion = plugin.getVersion();
                 // Always force the version in a pluginMgmt block or set the version if there is an existing
                 // one in build/plugins section.
-                if ( override.getVersion() != null && override.getVersion().length() > 0 )
+                if ( override.getVersion() != null && !override.getVersion().isEmpty())
                 {
                     if ( ! PropertiesUtils.cacheProperty( pluginState.getVersionPropertyOverrides(), oldVersion, override.getVersion(), plugin ))
                     {

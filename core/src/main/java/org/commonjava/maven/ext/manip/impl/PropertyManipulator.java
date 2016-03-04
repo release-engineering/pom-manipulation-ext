@@ -88,7 +88,7 @@ public class PropertyManipulator
         {
             final Model model = project.getModel();
 
-            if ( overrides.size() > 0 )
+            if (!overrides.isEmpty())
             {
                 // Only inject the new properties at the top level.
                 if ( project.isInheritanceRoot() )
@@ -107,7 +107,7 @@ public class PropertyManipulator
                     Set<String> keyClone = new HashSet(model.getProperties().keySet());
                     keyClone.retainAll( overrides.keySet() );
 
-                    if ( keyClone.size() > 0 )
+                    if (!keyClone.isEmpty())
                     {
                         final Iterator<String> keys = keyClone.iterator();
                         while (keys.hasNext())
