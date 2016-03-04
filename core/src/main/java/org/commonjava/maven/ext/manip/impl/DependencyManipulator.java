@@ -49,6 +49,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
+import static org.apache.commons.lang.StringUtils.isEmpty;
 import static org.apache.commons.lang.StringUtils.join;
 import static org.commonjava.maven.ext.manip.util.IdUtils.ga;
 import static org.commonjava.maven.ext.manip.util.IdUtils.gav;
@@ -445,10 +446,9 @@ public class DependencyManipulator implements Manipulator
                 final String overrideVersion = explicitOverrides.get( groupIdArtifactId );
                 final String oldVersion = dependency.getVersion();
 
-                if ( overrideVersion == null || overrideVersion.length() == 0 || oldVersion == null
-                                || oldVersion.length() == 0 )
+                if ( isEmpty( overrideVersion )|| isEmpty( oldVersion ) )
                 {
-                    if ( oldVersion == null || oldVersion.length() == 0 )
+                    if ( isEmpty( oldVersion ) )
                     {
                         logger.warn( "Unable to force align as no existing version field to update for "
                                                      + groupIdArtifactId + "; ignoring" );
@@ -517,11 +517,11 @@ public class DependencyManipulator implements Manipulator
                     final String oldVersion = dependency.getVersion();
                     final String overrideVersion = overrides.get( ar );
 
-                    if ( overrideVersion == null || overrideVersion.length() == 0 )
+                    if ( isEmpty( overrideVersion ) )
                     {
                         logger.warn( "Unable to align with an empty override version for " + groupIdArtifactId + "; ignoring" );
                     }
-                    else if ( oldVersion == null || oldVersion.length() == 0 )
+                    else if ( isEmpty( oldVersion ) )
                     {
                         logger.debug( "Dependency is a managed version for " + groupIdArtifactId + "; ignoring" );
                     }

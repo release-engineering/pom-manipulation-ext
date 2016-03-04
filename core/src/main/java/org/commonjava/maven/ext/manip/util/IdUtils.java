@@ -32,6 +32,8 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.apache.commons.lang.StringUtils.isEmpty;
+
 /**
  * Convenience utilities for converting {@link Model} and {@link MavenProject} instances to GA / GAV strings.
  *
@@ -53,7 +55,7 @@ public final class IdUtils
      */
     public static List<ProjectVersionRef> parseGAVs( final String value )
     {
-        if ( value == null || value.length () == 0)
+        if ( isEmpty( value ) )
         {
             return null;
         }
@@ -87,7 +89,7 @@ public final class IdUtils
      */
     public static List<ArtifactRef> parseGAVTCs( final String value )
     {
-        if ( value == null || value.length () == 0)
+        if ( isEmpty (value ) )
         {
             return null;
         }
@@ -121,7 +123,7 @@ public final class IdUtils
      */
     public static List<ProjectRef> parseGAs( final String value )
     {
-        if ( value == null || value.length () == 0)
+        if ( isEmpty( value ) )
         {
             return null;
         }

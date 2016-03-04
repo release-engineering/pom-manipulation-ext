@@ -25,6 +25,8 @@ import org.slf4j.LoggerFactory;
 import java.util.HashMap;
 import java.util.Properties;
 
+import static org.apache.commons.lang.StringUtils.isNotEmpty;
+
 /**
  * Captures configuration relating to groupId relocation for POMs.
  */
@@ -52,7 +54,7 @@ public class RelocationState
     {
         String value = userProps.getProperty( DEPENDENCY_RELOCATIONS );
 
-        if ( !( value == null || value.length () == 0) )
+        if ( isNotEmpty (value) )
         {
             final String[] relocations = value.split( "," );
             for ( final String r : relocations )
