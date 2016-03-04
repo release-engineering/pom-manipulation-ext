@@ -48,6 +48,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
+import static org.apache.commons.lang.StringUtils.isEmpty;
 import static org.commonjava.maven.ext.manip.util.IdUtils.ga;
 import static org.commonjava.maven.ext.manip.util.IdUtils.gav;
 
@@ -279,6 +280,11 @@ public class ProjectVersioningManipulator
             {
                 for ( final Dependency d : dm.getDependencies() )
                 {
+                    if ( isEmpty (interpolate( d.getVersion(), ri, interp )))
+                    {
+                        logger.trace( "Skipping dependency " + d + " as empty version." );
+                        continue;
+                    }
                     try
                     {
                         gav = new SimpleProjectVersionRef( interpolate( d.getGroupId(), ri, interp ),
@@ -312,6 +318,12 @@ public class ProjectVersioningManipulator
                 {
                     try
                     {
+                        if ( isEmpty (interpolate( d.getVersion(), ri, interp )))
+                        {
+                            logger.trace( "Skipping dependency " + d + " as empty version." );
+                            continue;
+                        }
+
                         gav = new SimpleProjectVersionRef( interpolate( d.getGroupId(), ri, interp ),
                                                            interpolate( d.getArtifactId(), ri, interp ),
                                                            interpolate( d.getVersion(), ri, interp ) );
