@@ -161,11 +161,11 @@ public final class PropertiesUtils
         String suffix = null;
         String osgiVersion = v.getOSGiVersionString();
 
-        if ( state.getIncrementalSerialSuffix() != null && state.getIncrementalSerialSuffix().length() > 0)
+        if ( state.getIncrementalSerialSuffix() != null && !state.getIncrementalSerialSuffix().isEmpty())
         {
             suffix = state.getIncrementalSerialSuffix();
         }
-        else if ( state.getSuffix() != null && state.getSuffix().length() > 0)
+        else if ( state.getSuffix() != null && !state.getSuffix().isEmpty())
         {
             suffix = state.getSuffix().substring( 0, state.getSuffix().indexOf( '-' ) );
         }

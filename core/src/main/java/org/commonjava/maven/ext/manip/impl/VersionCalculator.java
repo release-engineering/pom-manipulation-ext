@@ -207,7 +207,7 @@ public class VersionCalculator
             if ( rm != null)
             {
                 // If the REST Client has prepopulated incremental data use that instead of the examining the repository.
-                if (rm.size() > 0)
+                if (!rm.isEmpty())
                 {
                     // Use preloaded metadata from remote repository, loaded via a REST Call.
                     if (rm.get( new SimpleProjectRef( groupId, artifactId ) ) != null)

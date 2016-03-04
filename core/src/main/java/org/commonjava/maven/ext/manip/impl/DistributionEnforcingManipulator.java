@@ -233,7 +233,7 @@ public class DistributionEnforcingManipulator
                         textVal = textVal.trim();
                     }
 
-                    if ( textVal.length() > 0 )
+                    if (!textVal.isEmpty())
                     {
                         skipSetting = Boolean.parseBoolean( textVal );
                         baseSkipSetting = skipSetting;

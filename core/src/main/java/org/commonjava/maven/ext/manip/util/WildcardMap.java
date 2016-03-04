@@ -58,7 +58,7 @@ public class WildcardMap
 
         LinkedHashMap vMap = map.get(groupId);
 
-        if ( vMap == null || vMap.size() == 0)
+        if ( vMap == null || vMap.isEmpty())
         {
             result = false;
         }
@@ -97,7 +97,7 @@ public class WildcardMap
         if ( WILDCARD.equals(artifactId))
         {
             // Erase any previous mappings.
-            if ( vMap.size() > 0)
+            if (!vMap.isEmpty())
             {
                 logger.warn ("Emptying map with keys " + vMap.keySet() + " as replacing with wildcard mapping " + key);
             }

@@ -44,7 +44,7 @@ public class RESTState implements State
     @Override
     public boolean isEnabled()
     {
-        return restURL != null && restURL.length() > 0;
+        return restURL != null && !restURL.isEmpty();
     }
 
     /**
