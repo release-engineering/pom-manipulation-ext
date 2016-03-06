@@ -615,11 +615,10 @@ public class Version
 
         // Build version pattern regex, matches something like "<mmm>.<qualifier>.<buildnum>".
         StringBuffer versionPatternBuf = new StringBuffer();
-        versionPatternBuf.append( "(" );
-        versionPatternBuf.append( Pattern.quote( getOriginalMMM() ) );
-        versionPatternBuf.append( "(" + DELIMITER_REGEX + "0)*" ); // Match zeros appended to a major only version
-        versionPatternBuf.append( ")?" );
-        versionPatternBuf.append( DELIMITER_REGEX );
+        versionPatternBuf.append( '(' )
+                .append( Pattern.quote( getOriginalMMM() ) ).append('(').append( DELIMITER_REGEX).append("0)*") // Match zeros appended to a major only version
+                .append( ")?" )
+                .append( DELIMITER_REGEX );
         if ( version.getQualifierBase() != null )
         {
             versionPatternBuf.append( Pattern.quote( version.getQualifierBase() ) );
