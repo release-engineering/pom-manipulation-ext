@@ -71,6 +71,8 @@ import java.util.Set;
 
 public class Cli
 {
+    private static final String PRINT_GAVTC = "printGAVTC";
+
     public static final File DEFAULT_GLOBAL_SETTINGS_FILE =
         new File( System.getProperty( "maven.home", System.getProperty( "user.dir", "" ) ), "conf/settings.xml" );
 
@@ -138,7 +140,7 @@ public class Cli
                                  .build() );
         options.addOption( Option.builder( "p" ).longOpt( "printDeps" ).desc( "Print all project dependencies" ).build() );
         options.addOption( Option.builder()
-                                 .longOpt( "printGAVTC" )
+                                 .longOpt( PRINT_GAVTC )
                                  .desc( "Print all project dependencies in group:artifact:version:type:classifier with scope information" )
                                  .build() );
         options.addOption( Option.builder( "D" )
@@ -239,7 +241,7 @@ public class Cli
         {
             manipulationManager.init( session );
 
-            if ( cmd.hasOption( 'p' ) || cmd.hasOption( "printGAVTC" ) )
+            if ( cmd.hasOption( 'p' ) || cmd.hasOption( PRINT_GAVTC ) )
             {
                 Set<String> activeProfiles = null;
                 if ( cmd.hasOption( 'P' ) )
@@ -265,7 +267,7 @@ public class Cli
                     }
                     if ( cmd.hasOption( 'o' ) )
                     {
-                        if ( cmd.hasOption( "printGAVTC" ) )
+                        if ( cmd.hasOption( PRINT_GAVTC ) )
                         {
                             FileUtils.writeStringToFile( output, String.format( "%-80s%10s\n", a, scope ), true );
                         }
@@ -276,7 +278,7 @@ public class Cli
                     }
                     else
                     {
-                        if ( cmd.hasOption( "printGAVTC" ) )
+                        if ( cmd.hasOption( PRINT_GAVTC ) )
                         {
                             System.out.format( "%-80s%10s\n", a, scope );
                         }

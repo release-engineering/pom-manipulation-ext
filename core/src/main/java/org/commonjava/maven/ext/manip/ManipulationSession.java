@@ -43,6 +43,8 @@ import java.util.Properties;
 public class ManipulationSession
 {
 
+    private static final String TARGET = "target";
+    
     public static final String MANIPULATIONS_DISABLED_PROP = "manipulation.disable";
 
     @Requirement( role = Manipulator.class )
@@ -131,17 +133,17 @@ public class ManipulationSession
     {
         if ( mavenSession == null )
         {
-            return new File( "target" );
+            return new File( TARGET );
         }
 
         final File pom = mavenSession.getRequest()
                                      .getPom();
         if ( pom == null )
         {
-            return new File( "target" );
+            return new File( TARGET );
         }
 
-        return new File( pom.getParentFile(), "target" );
+        return new File( pom.getParentFile(), TARGET );
     }
 
     public ArtifactRepository getLocalRepository()

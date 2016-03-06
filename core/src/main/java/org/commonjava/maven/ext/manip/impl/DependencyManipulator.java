@@ -62,6 +62,8 @@ import static org.commonjava.maven.ext.manip.util.PropertiesUtils.getPropertiesB
 @Component( role = Manipulator.class, hint = "project-dependency-manipulator" )
 public class DependencyManipulator implements Manipulator
 {
+    private static final String IGNORING = "; ignoring";
+
     protected final Logger logger = LoggerFactory.getLogger( getClass() );
 
     /**
@@ -451,12 +453,12 @@ public class DependencyManipulator implements Manipulator
                     if ( isEmpty( oldVersion ) )
                     {
                         logger.warn( "Unable to force align as no existing version field to update for "
-                                                     + groupIdArtifactId + "; ignoring" );
+                                                     + groupIdArtifactId + IGNORING );
                     }
                     else
                     {
                         logger.warn( "Unable to force align as override version is empty for " + groupIdArtifactId
-                                                     + "; ignoring" );
+                                                     + IGNORING );
                     }
                 }
                 else
@@ -519,11 +521,11 @@ public class DependencyManipulator implements Manipulator
 
                     if ( isEmpty( overrideVersion ) )
                     {
-                        logger.warn( "Unable to align with an empty override version for " + groupIdArtifactId + "; ignoring" );
+                        logger.warn( "Unable to align with an empty override version for " + groupIdArtifactId + IGNORING );
                     }
                     else if ( isEmpty( oldVersion ) )
                     {
-                        logger.debug( "Dependency is a managed version for " + groupIdArtifactId + "; ignoring" );
+                        logger.debug( "Dependency is a managed version for " + groupIdArtifactId + IGNORING );
                     }
                     else
                     {
