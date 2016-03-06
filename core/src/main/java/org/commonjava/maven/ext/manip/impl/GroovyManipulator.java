@@ -47,6 +47,9 @@ import java.util.Set;
 public class GroovyManipulator
     implements Manipulator
 {
+
+    private static final String UNABLE_TO_PARSE_SCRIPT = "Unable to parse script";
+
     private final Logger logger = LoggerFactory.getLogger( getClass() );
 
     @Requirement
@@ -134,11 +137,11 @@ public class GroovyManipulator
                         {
                             logger.debug ("Unable to read script file {} for debugging! {} ", groovyScript, e1);
                         }
-                        throw new ManipulationException( "Unable to parse script", e );
+                        throw new ManipulationException( UNABLE_TO_PARSE_SCRIPT, e );
                     }
                     catch ( IOException e )
                     {
-                        throw new ManipulationException( "Unable to parse script", e );
+                        throw new ManipulationException( UNABLE_TO_PARSE_SCRIPT, e );
                     }
                     try
                     {
@@ -146,7 +149,7 @@ public class GroovyManipulator
                     }
                     catch ( Exception e )
                     {
-                        throw new ManipulationException( "Unable to parse script", e );
+                        throw new ManipulationException( UNABLE_TO_PARSE_SCRIPT, e );
                     }
 
                     changed.add( project );

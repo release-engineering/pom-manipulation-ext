@@ -41,6 +41,10 @@ import static org.apache.commons.lang.StringUtils.isEmpty;
  */
 public final class IdUtils
 {
+    private static final String SKIPPING_INVALID_REMOTE_MANAGEMENT_GAV = "Skipping invalid remote management GAV: ";
+
+    private static final String THREE_PERCENTAGE_S= "%s:%s:%s";
+
     private static final Logger logger = LoggerFactory.getLogger( IdUtils.class );
 
     private IdUtils()
@@ -72,7 +76,7 @@ public final class IdUtils
                 }
                 catch ( final InvalidRefException e )
                 {
-                    logger.error( "Skipping invalid remote management GAV: " + gav );
+                    logger.error( SKIPPING_INVALID_REMOTE_MANAGEMENT_GAV + gav );
                     throw e;
                 }
             }
@@ -106,7 +110,7 @@ public final class IdUtils
                 }
                 catch ( final InvalidRefException e )
                 {
-                    logger.error( "Skipping invalid remote management GAV: " + gav );
+                    logger.error( SKIPPING_INVALID_REMOTE_MANAGEMENT_GAV + gav );
                     throw e;
                 }
             }
@@ -140,7 +144,7 @@ public final class IdUtils
                 }
                 catch ( final InvalidRefException e )
                 {
-                    logger.error( "Skipping invalid remote management GAV: " + gav );
+                    logger.error( SKIPPING_INVALID_REMOTE_MANAGEMENT_GAV + gav );
                     throw e;
                 }
             }
@@ -151,12 +155,12 @@ public final class IdUtils
 
     public static String gav( final MavenProject project )
     {
-        return String.format( "%s:%s:%s", project.getGroupId(), project.getArtifactId(), project.getVersion() );
+        return String.format( THREE_PERCENTAGE_S, project.getGroupId(), project.getArtifactId(), project.getVersion() );
     }
 
     public static String gav( final Project project )
     {
-        return String.format( "%s:%s:%s", project.getGroupId(), project.getArtifactId(), project.getVersion() );
+        return String.format( THREE_PERCENTAGE_S, project.getGroupId(), project.getArtifactId(), project.getVersion() );
     }
 
     public static String gav( final Model model )
@@ -178,7 +182,7 @@ public final class IdUtils
             }
         }
 
-        return String.format( "%s:%s:%s", g, model.getArtifactId(), v );
+        return String.format( THREE_PERCENTAGE_S, g, model.getArtifactId(), v );
     }
 
     public static String ga( final Model model )
@@ -219,7 +223,7 @@ public final class IdUtils
 
     public static String gav( final String g, final String a, final String v )
     {
-        return String.format( "%s:%s:%s", g, a, v );
+        return String.format( THREE_PERCENTAGE_S, g, a, v );
     }
 
 }
