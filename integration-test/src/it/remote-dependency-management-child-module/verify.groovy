@@ -32,3 +32,5 @@ assert junitDependency.size() == 0
 def childDependency = pomChild.dependencyManagement.dependencies.dependency.find { it.artifactId.text() == "junit" }
 assert childDependency != null
 assert childDependency.version.text() == "4.1"
+
+assert ! pomChildFile.text.contains("project.groupId")
