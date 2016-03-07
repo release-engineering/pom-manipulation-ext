@@ -20,9 +20,9 @@ Repository declarations in the POM are considered a bad build smell, since over 
 If the property `-Drepo-removal-ignorelocalhost` is set (default: false) PME will not remove repositories that contain the following definitions
 
 * file://
-* [http || https]://localhost
-* [http || https]://127.00.1
-* [http || https]://::1
+* (http or https)://localhost
+* (http or https)://127.00.1
+* (http or https)://::1
 
 Occasionally a project's more complex example/quickstart may have a local repository definition; this allows those to be preserved.
 
