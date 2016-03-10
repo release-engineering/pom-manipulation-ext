@@ -60,7 +60,7 @@ public final class PropertiesUtils
             {
                 final String trimmedPropertyName = propertyName.substring( prefixLength );
                 String value = properties.getProperty( propertyName );
-                if ( value.equals( "true" ) )
+                if ( value != null && value.equals( "true" ) )
                 {
                     logger.warn( "Work around Brew/Maven bug - removing erroneous 'true' value for {}.",
                                  trimmedPropertyName );
