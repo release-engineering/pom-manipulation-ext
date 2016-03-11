@@ -256,13 +256,14 @@ public final class PropertiesUtils
         if (version.startsWith( "${" ) )
         {
             final int endIndex = version.indexOf( '}' );
-            final String property = version.substring( 2, endIndex );
 
             if ( endIndex != version.length() - 1 )
             {
                 throw new ManipulationException( "NYI : handling for versions (" + version
                                                                  + ") with multiple embedded properties is NYI. " );
             }
+
+            final String property = version.substring( 2, endIndex );
             for ( Project p : projects)
             {
                 logger.trace( "Scanning {} for property {} and found {} ", p, property, p.getModel().getProperties() );

@@ -42,7 +42,6 @@ public class ProjectVersionRefMapper implements ObjectMapper
     @Override
     public Map<ProjectVersionRef, String> readValue( String s )
     {
-        List<Map<String, Object>> responseBody;
         Map<ProjectVersionRef, String> result = new HashMap<ProjectVersionRef, String>();
 
         // Workaround for https://github.com/Mashape/unirest-java/issues/122
@@ -54,6 +53,8 @@ public class ProjectVersionRefMapper implements ObjectMapper
             logger.error( "Read HTML string '{}' rather than a JSON stream.", s );
             return result;
         }
+
+        List<Map<String, Object>> responseBody;
         try
         {
             responseBody = objectMapper.readValue( s, List.class );

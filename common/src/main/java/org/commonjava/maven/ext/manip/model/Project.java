@@ -451,7 +451,6 @@ public class Project
                     throws ManipulationException
     {
         String g = model.getGroupId();
-        final String a = model.getArtifactId();
         String v = model.getVersion();
 
         if ( g == null || v == null )
@@ -473,7 +472,7 @@ public class Project
 
         }
 
-
+        final String a = model.getArtifactId();
         return new SimpleProjectVersionRef( g, a, v );
     }
 
