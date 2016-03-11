@@ -172,10 +172,6 @@ This will cause the build to fail with a ManipulationException, and prevent the 
 
 ### Dependency Relocations
 
-In order to handle the situation where one groupId is changed to another (e.g. from community to product) the relocation manipulator can be used. Multiple relocations may be comma separated and an optional version component may be added; the version will override any prior version used in the dependency. Note this is akin to using the dependencyExclusion functionality with an explicit version.
+In order to handle the situation where one GAV is changed to another (e.g. from community to product) the relocation manipulator can be used. Multiple relocations may be comma separated and an optional version component may be added; the version will override any prior version used in the dependency. Note this is akin to using the dependencyExclusion functionality with an explicit version. The artifact override is optional.
 
-    -DdependencyRelocation=oldGroupId:newGroupId@version,....
-
-or
-
-    -DdependencyRelocation=oldGroupId:newGroupId,....
+    -DdependencyRelocations.oldGroupId:[oldArtifact]@newGroupId:[newArtifactId]=[version],...
