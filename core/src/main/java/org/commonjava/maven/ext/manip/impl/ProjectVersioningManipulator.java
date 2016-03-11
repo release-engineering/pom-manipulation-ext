@@ -166,15 +166,13 @@ public class ProjectVersioningManipulator
                                               final Project project, final VersioningState state )
         throws ManipulationException
     {
-        boolean changed = false;
-
-        final Model model = project.getModel();
 
         if ( !state.hasVersionsByGAVMap() )
         {
             return false;
         }
 
+        final Model model = project.getModel();
         if ( model == null )
         {
             return false;
@@ -196,6 +194,7 @@ public class ProjectVersioningManipulator
             v = parent.getVersion();
         }
 
+        boolean changed = false;
         Map<ProjectVersionRef, String> versionsByGAV = state.getVersionsByGAVMap();
         // If the parent version is defined, it might be necessary to change it
         // If the parent version is not defined, it will be taken automatically from the project version
@@ -375,14 +374,14 @@ public class ProjectVersioningManipulator
     {
         // TODO: Handle the scenario where the version might be ${....}${....}
         final int endIndex = version.indexOf( '}' );
-        final String property = version.substring( 2, endIndex );
 
         if ( endIndex != version.length() - 1 )
         {
             throw new ManipulationException( "NYI : handling for versions (" + version
                                                              + ") with multiple embedded properties is NYI. " );
         }
-        return property;
+
+        return version.substring( 2, endIndex );
     }
 
     @Override

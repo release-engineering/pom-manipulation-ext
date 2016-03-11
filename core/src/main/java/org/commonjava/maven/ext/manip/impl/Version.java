@@ -164,7 +164,6 @@ public class Version
      */
     private int getQualifierIndex( String version )
     {
-        final int QUALIFIER_NOT_FOUND = version.length();
 
         int qualifierIndex = 0;
         int delimiterCount = 0;
@@ -186,7 +185,7 @@ public class Version
                 return qualifierIndex;
             }
         }
-        return QUALIFIER_NOT_FOUND;
+        return version.length();
     }
 
     /**

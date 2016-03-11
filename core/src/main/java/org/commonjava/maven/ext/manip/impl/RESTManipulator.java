@@ -75,9 +75,6 @@ public class RESTManipulator implements Manipulator
                     throws ManipulationException
     {
         final RESTState state = session.getState( RESTState.class );
-        final ArrayList<ProjectVersionRef> restParam = new ArrayList<ProjectVersionRef>();
-
-        Map<ProjectVersionRef, String> restResult;
 
         if ( !session.isEnabled() || !state.isEnabled() )
         {
@@ -85,6 +82,7 @@ public class RESTManipulator implements Manipulator
             return;
         }
 
+        final ArrayList<ProjectVersionRef> restParam = new ArrayList<ProjectVersionRef>();
         for ( final Project project : projects )
         {
             // TODO: Check this : For the rest API I think we need to check every project GA not just inheritance root.
@@ -104,6 +102,7 @@ public class RESTManipulator implements Manipulator
         logger.debug ("Passing the following into the REST client api {} ", restParam);
         logger.info ("Calling REST client...");
         long start = System.nanoTime();
+        Map<ProjectVersionRef, String> restResult;
 
         try
         {
