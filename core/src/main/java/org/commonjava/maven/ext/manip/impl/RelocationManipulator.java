@@ -28,11 +28,11 @@ import org.commonjava.maven.ext.manip.state.DependencyState;
 import org.commonjava.maven.ext.manip.state.PluginState;
 import org.commonjava.maven.ext.manip.state.RelocationState;
 import org.commonjava.maven.ext.manip.state.State;
+import org.commonjava.maven.ext.manip.util.WildcardMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
@@ -53,7 +53,7 @@ public class RelocationManipulator
 
     /**
      * Initialize the {@link PluginState} state holder in the {@link ManipulationSession}. This state holder detects
-     * version-change configuration from the Maven user properties (-D properties from the CLI) and makes it available for
+     * relocation configuration from the Maven user properties (-D properties from the CLI) and makes it available for
      * later invocations of {@link Manipulator#scan(List, ManipulationSession)} and the apply* methods.
      */
     @Override
@@ -65,7 +65,7 @@ public class RelocationManipulator
     }
 
     /**
-     * No prescanning required for BOM manipulation.
+     * No prescanning required for relocations.
      */
     @Override
     public void scan( final List<Project> projects, final ManipulationSession session )
@@ -74,7 +74,7 @@ public class RelocationManipulator
     }
 
     /**
-     * Apply the alignment changes to the list of {@link Project}'s given.
+     * Apply the relocation changes to the list of {@link Project}'s given.
      */
     @Override
     public Set<Project> applyChanges( final List<Project> projects, final ManipulationSession session )
@@ -108,7 +108,7 @@ public class RelocationManipulator
     {
         boolean result = false;
         final RelocationState state = session.getState( RelocationState.class );
-        final HashMap<String, ProjectVersionRef> relocations = state.getDependencyRelocations();
+        final WildcardMap<ProjectVersionRef> relocations = state.getDependencyRelocations();
 
         logger.info( "Applying relocation changes to: " + ga( project ) );
 
@@ -132,38 +132,57 @@ public class RelocationManipulator
         return result;
     }
 
-    private boolean updateDependencies( ManipulationSession session, HashMap<String, ProjectVersionRef> relocations,
+    private boolean updateDependencies( ManipulationSession session, WildcardMap<ProjectVersionRef> relocations,
                                         List<Dependency> dependencies )
     {
         boolean result = false;
 
         for ( final Dependency d : dependencies )
         {
-            if (relocations.containsKey( d.getGroupId() ))
+            if (relocations.containsKey( d ))
             {
-                updateDependencyExclusion(session, relocations.get( d.getGroupId() ), d);
+                ProjectVersionRef pvr = relocations.get( d );
+                updateDependencyExclusion(session, pvr, d);
 
-                logger.info ("Replacing {} by {}", d.getGroupId(), relocations.get( d.getGroupId() ).getGroupId() );
-                d.setGroupId( relocations.get( d.getGroupId() ).getGroupId() );
+                logger.info ("Replacing groupId {} by {} and artifactId {} with {}",
+                             d.getGroupId(), pvr.getGroupId(), d.getArtifactId(), pvr.getGroupId() );
+
+                if ( ! pvr.getArtifactId().equals( WildcardMap.WILDCARD ))
+                {
+                    d.setArtifactId( pvr.getArtifactId() );
+                }
+                d.setGroupId( pvr.getGroupId() );
                 result = true;
             }
         }
         return result;
     }
 
+    /**
+     *
+     * @param session the manipulation session
+     * @param projectVersionRef Map containing the update information for relocations.
+     * @param d the dependency we are processing the exclusion for.
+     */
     private void updateDependencyExclusion( ManipulationSession session, ProjectVersionRef projectVersionRef, Dependency d )
     {
         final DependencyState state = session.getState( DependencyState.class );
 
-        if (projectVersionRef.getVersionString().equals( "*" ) )
+        if (projectVersionRef.getVersionString().equals( WildcardMap.WILDCARD ) )
         {
             logger.debug ("No version alignment to perform for relocations");
         }
         else
         {
-            logger.debug ("Adding dependencyExclusion {} & {}", projectVersionRef.getGroupId() + ':' + d.getArtifactId() + "@*",
+            String artifact = d.getArtifactId();
+            if ( ! projectVersionRef.getArtifactId().equals( WildcardMap.WILDCARD ))
+            {
+                artifact = projectVersionRef.getArtifactId();
+            }
+
+            logger.debug ("Adding dependencyExclusion {} & {}", projectVersionRef.getGroupId() + ':' + artifact + "@*",
                           projectVersionRef.getVersionString() );
-            state.updateExclusions( projectVersionRef.getGroupId() + ':' + d.getArtifactId() + "@*", projectVersionRef.getVersionString() );
+            state.updateExclusions( projectVersionRef.getGroupId() + ':' + artifact + "@*", projectVersionRef.getVersionString() );
         }
     }
 

@@ -15,6 +15,7 @@
  */
 package org.commonjava.maven.ext.manip.util;
 
+import org.apache.maven.model.Dependency;
 import org.commonjava.maven.atlas.ident.ref.ProjectRef;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,9 +31,9 @@ import java.util.TreeMap;
  * </p>
  * artifactId may be a wildcard (*) or an explicit value.
  */
-public class WildcardMap
+public class WildcardMap<T>
 {
-    private static final String WILDCARD = "*";
+    public static final String WILDCARD = "*";
 
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -43,7 +44,20 @@ public class WildcardMap
      * </p>
      * artifactId may be a wildcard '*'.
      */
-    private final TreeMap<String, LinkedHashMap<String,String>> map = new TreeMap<String, LinkedHashMap<String, String>>();
+    private final TreeMap<String, LinkedHashMap<String,T>> map = new TreeMap<String, LinkedHashMap<String, T>>();
+
+    /**
+     * @param key the key to look for
+     * @return <tt>true</tt> if this map contains a mapping for the specified
+     * key.
+     */
+    public boolean containsKey(Dependency key)
+    {
+        String groupId = key.getGroupId();
+        String artifactId = key.getArtifactId();
+
+        return internalContainsKey( groupId, artifactId );
+    }
 
     /**
      * @param key the key to look for
@@ -54,6 +68,12 @@ public class WildcardMap
     {
         String groupId = key.getGroupId();
         String artifactId = key.getArtifactId();
+
+        return internalContainsKey( groupId, artifactId );
+    }
+
+    private boolean internalContainsKey(String groupId, String artifactId)
+    {
         boolean result;
 
         LinkedHashMap vMap = map.get(groupId);
@@ -82,15 +102,15 @@ public class WildcardMap
      * @param key key to associate with
      * @param value value to associate with the key
      */
-    public void put(ProjectRef key, String value)
+    public void put(ProjectRef key, T value)
     {
         String groupId = key.getGroupId();
         String artifactId = key.getArtifactId();
 
-        LinkedHashMap<String,String> vMap = map.get(groupId);
+        LinkedHashMap<String,T> vMap = map.get(groupId);
         if ( vMap == null)
         {
-            vMap = new LinkedHashMap<String,String>();
+            vMap = new LinkedHashMap<String,T>();
         }
         boolean wildcard = false;
 
@@ -135,13 +155,33 @@ public class WildcardMap
      * @return the value to which the specified key is mapped,
      * or {@code null} if this map contains no mapping for the key.
      */
-    public String get(ProjectRef key)
+    public T get(Dependency key)
     {
         String groupId = key.getGroupId();
         String artifactId = key.getArtifactId();
-        String result = null;
 
-        LinkedHashMap<String, String> value = map.get(groupId);
+        return get( groupId, artifactId );
+    }
+
+    /**
+     * @param key the groupId:artifactId key which is split to index purely
+     * by groupId.
+     * @return the value to which the specified key is mapped,
+     * or {@code null} if this map contains no mapping for the key.
+     */
+    public T get(ProjectRef key)
+    {
+        String groupId = key.getGroupId();
+        String artifactId = key.getArtifactId();
+
+        return get( groupId, artifactId );
+    }
+
+    private T get(String groupId, String artifactId)
+    {
+        T result = null;
+
+        LinkedHashMap<String, T> value = map.get(groupId);
         if (value != null)
         {
             logger.debug("Retrieved value map of " + value);
@@ -157,6 +197,15 @@ public class WildcardMap
         logger.debug("Returning result of " + result);
 
         return result;
+    }
+
+
+    /**
+     * @return Returns true if the underlying map is empty.
+     */
+    public boolean isEmpty()
+    {
+        return map.isEmpty();
     }
 
     @Override

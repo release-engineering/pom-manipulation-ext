@@ -231,7 +231,7 @@ public class DependencyManipulator implements Manipulator
                     throws ManipulationException
     {
         // Map of Group : Map of artifactId [ may be wildcard ] : value
-        final WildcardMap explicitOverrides = new WildcardMap();
+        final WildcardMap<String> explicitOverrides = new WildcardMap<String>();
         final String projectGA = ga( project );
         final DependencyState state = session.getState( DependencyState.class );
 
@@ -429,7 +429,7 @@ public class DependencyManipulator implements Manipulator
      * @throws ManipulationException
      */
     private void applyExplicitOverrides( final Map<String, String> versionPropertyUpdateMap,
-                                         final WildcardMap explicitOverrides, final List<Dependency> dependencies )
+                                         final WildcardMap<String> explicitOverrides, final List<Dependency> dependencies )
                     throws ManipulationException
     {
         // Apply matching overrides to dependencies

@@ -15,11 +15,9 @@
  */
 package org.commonjava.maven.ext.manip.util;
 
-import static org.junit.Assert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-
-import junit.framework.TestCase;
-
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.read.ListAppender;
 import org.commonjava.maven.atlas.ident.ref.ProjectRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleProjectRef;
 import org.junit.After;
@@ -27,13 +25,14 @@ import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.LoggerFactory;
 
-import ch.qos.logback.classic.Logger;
-import ch.qos.logback.classic.spi.ILoggingEvent;
-import ch.qos.logback.core.read.ListAppender;
+import static org.hamcrest.Matchers.containsString;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
-public class WildcardMapTest extends TestCase
+public class WildcardMapTest
 {
-    private WildcardMap map;
+    private WildcardMap<String> map;
     private ListAppender<ILoggingEvent> m_listAppender;
 
     @Before
@@ -45,7 +44,7 @@ public class WildcardMapTest extends TestCase
         Logger root = (Logger) LoggerFactory.getLogger(WildcardMap.class);
         root.addAppender(m_listAppender);
 
-        map = new WildcardMap();
+        map = new WildcardMap<String>();
     }
 
     @After
