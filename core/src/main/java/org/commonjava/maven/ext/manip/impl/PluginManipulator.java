@@ -355,6 +355,6 @@ public class PluginManipulator
     @Override
     public int getExecutionIndex()
     {
-        return 60;
+        return 35;
     }
 }

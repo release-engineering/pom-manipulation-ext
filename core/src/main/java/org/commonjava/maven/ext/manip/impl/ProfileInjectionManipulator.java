@@ -161,6 +161,6 @@ public class ProfileInjectionManipulator
     @Override
     public int getExecutionIndex()
     {
-        return 50;
+        return 45;
     }
 }

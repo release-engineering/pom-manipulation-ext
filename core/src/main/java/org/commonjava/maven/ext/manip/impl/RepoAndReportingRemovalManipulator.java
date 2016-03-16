@@ -230,6 +230,6 @@ public class RepoAndReportingRemovalManipulator
     @Override
     public int getExecutionIndex()
     {
-        return 45;
+        return 50;
     }
 }

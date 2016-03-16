@@ -146,6 +146,6 @@ public class ProjectVersionEnforcingManipulator
     @Override
     public int getExecutionIndex()
     {
-        return 55;
+        return 75;
     }
 }
