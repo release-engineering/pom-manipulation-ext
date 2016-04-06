@@ -15,6 +15,7 @@
  */
 package org.commonjava.maven.ext.manip.impl;
 
+import static org.commonjava.maven.ext.manip.impl.Version.findHighestMatchingBuildNumber;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertThat;
 
@@ -266,7 +267,7 @@ public class VersionTest
         Version version = new Version("1.2.0.Final-foo");
         versionSet.add( "1.2.0.Final-foo-1" );
         versionSet.add( "1.2.0.Final-foo-2" );
-        assertThat( version.findHighestMatchingBuildNumber( version, versionSet ), equalTo( 2 ) );
+        assertThat( findHighestMatchingBuildNumber( version, versionSet ), equalTo( 2 ) );
         versionSet.clear();
 
         version = new Version("0.0.4");
@@ -276,12 +277,12 @@ public class VersionTest
         versionSet.add( "0.0.3" );
         versionSet.add( "0.0.4" );
         versionSet.add( "0.0.4.redhat-2" );
-        assertThat( version.findHighestMatchingBuildNumber( version, versionSet ), equalTo( 2 ) );
+        assertThat( findHighestMatchingBuildNumber( version, versionSet ), equalTo( 2 ) );
         versionSet.clear();
 
         version = new Version("1.2-foo-1");
         versionSet.add( "1.2-foo-4" );
-        assertThat( version.findHighestMatchingBuildNumber( version, versionSet ), equalTo( 4 ) );
+        assertThat( findHighestMatchingBuildNumber( version, versionSet ), equalTo( 4 ) );
         versionSet.clear();
     }
 
@@ -293,14 +294,14 @@ public class VersionTest
         majorOnlyVersion.appendQualifierSuffix( "redhat" );
         System.out.println("OSGi version: " + majorOnlyVersion.getOSGiVersionString());
         versionSet.add( "7.0.0.redhat-2" );
-        assertThat( majorOnlyVersion.findHighestMatchingBuildNumber( majorOnlyVersion, versionSet ), equalTo( 2 ) );
+        assertThat( findHighestMatchingBuildNumber( majorOnlyVersion, versionSet ), equalTo( 2 ) );
         versionSet.clear();
 
         final Version majorMinorVersion = new Version( "7.1" );
         majorMinorVersion.appendQualifierSuffix( "redhat" );
         System.out.println("OSGi version: " + majorMinorVersion.getOSGiVersionString());
         versionSet.add( "7.1.0.redhat-2" );
-        assertThat( majorMinorVersion.findHighestMatchingBuildNumber( majorMinorVersion, versionSet ), equalTo( 2 ) );
+        assertThat( findHighestMatchingBuildNumber( majorMinorVersion, versionSet ), equalTo( 2 ) );
         versionSet.clear();
     }
     

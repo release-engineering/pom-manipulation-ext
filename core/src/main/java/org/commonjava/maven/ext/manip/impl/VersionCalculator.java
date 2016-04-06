@@ -37,6 +37,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import static org.commonjava.maven.ext.manip.impl.Version.findHighestMatchingBuildNumber;
 import static org.commonjava.maven.ext.manip.util.IdUtils.gav;
 
 /**
@@ -122,7 +123,7 @@ public class VersionCalculator
             // This also fixes the problem where there is a single version and leading zeros.
             if (versionSet.size() > 1)
             {
-                int buildNumber = modifiedVersion.findHighestMatchingBuildNumber( modifiedVersion, versionSet );
+                int buildNumber = findHighestMatchingBuildNumber( modifiedVersion, versionSet );
 
                 // If the buildNumber is greater than zero, it means we found a match and have to
                 // set the build number to avoid version conflicts.
@@ -222,7 +223,7 @@ public class VersionCalculator
                 versionCandidates.addAll( getMetadataVersions( groupId, artifactId ) );
             }
             versionObj.appendQualifierSuffix( incrementalSuffix );
-            int highestRemoteBuildNum = versionObj.findHighestMatchingBuildNumber( versionObj, versionCandidates );
+            int highestRemoteBuildNum = findHighestMatchingBuildNumber( versionObj, versionCandidates );
             ++highestRemoteBuildNum;
 
             if ( highestRemoteBuildNum > versionObj.getIntegerBuildNumber() )
