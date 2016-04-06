@@ -13,15 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.commonjava.maven.ext.versioning.test;
 
-def pomFile = new File( basedir, 'pom.xml' )
-System.out.println( "Slurping POM: ${pomFile.getAbsolutePath()}" )
-
-def pom = new XmlSlurper().parse( pomFile )
-
-// We should have two profiles after injection
-assert pom.profiles.children().size() == 2
-
-// Check the 3.8 version of junit has been overridden
-def junit = pom.depthFirst().findAll { it.name() == 'version.junit' }
-assert junit[0] == '4.1'
+/**
+ * Hello world!
+ *
+ */
+public class App 
+{
+    public static void main( String[] args )
+    {
+        System.out.println( "Hello World!" );
+    }
+}

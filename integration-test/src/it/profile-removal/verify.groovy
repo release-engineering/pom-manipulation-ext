@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2012 Red Hat, Inc. (jcasey@redhat.com)
+ * Copyright (C) 2016 Red Hat, Inc. (jcasey@redhat.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,15 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 def pomFile = new File( basedir, 'pom.xml' )
 System.out.println( "Slurping POM: ${pomFile.getAbsolutePath()}" )
 
 def pom = new XmlSlurper().parse( pomFile )
+System.out.println( "POM Version: ${pom.version.text()}" )
 
-// We should have two profiles after injection
-assert pom.profiles.children().size() == 2
+def jar = new File(basedir, "target/${pom.artifactId.text()}-${pom.version.text()}.jar" )
+System.out.println( "Checking for jar: ${jar.getAbsolutePath()}")
+assert jar.exists()
 
-// Check the 3.8 version of junit has been overridden
-def junit = pom.depthFirst().findAll { it.name() == 'version.junit' }
-assert junit[0] == '4.1'
+assert pom.profiles.children().size() == 0
