@@ -21,7 +21,7 @@ Multiple remote dependency-management poms can be specified using a comma separa
 
 #### REST Endpoint
 
-Alternatively, rather than using a remote BOM file as a source, it is possible to instruct PME to prescan the project, collect up all group:artifact:version's used and call a REST endpoint using the property `-DrestURL` (provided by https://github.com/project-ncl/dependency-analysis) which will then return a list of possible new versions.
+Alternatively, rather than using a remote BOM file as a source, it is possible to instruct PME to prescan the project, collect up all group:artifact:version's used and call a REST endpoint using the property `-DrestURL` (provided by https://github.com/project-ncl/dependency-analysis) which will then return a list of possible new versions. By default it will pass *all* GAVs to the endpoint. It is possible to batch the requests by passing `-DrestMaxSize=<value>`.
 
 The REST endpoint should follow:
 
