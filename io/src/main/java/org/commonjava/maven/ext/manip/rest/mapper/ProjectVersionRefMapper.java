@@ -47,7 +47,13 @@ public class ProjectVersionRefMapper implements ObjectMapper
         // Workaround for https://github.com/Mashape/unirest-java/issues/122
         // Rather than throwing an exception we return an empty body which allows
         // DefaultVersionTranslator to examine the status codes.
-        if (s.startsWith( "<" ))
+
+        if (s.length() == 0)
+        {
+            logger.error( "No content to read.");
+            return result;
+        }
+        else if (s.startsWith( "<" ))
         {
             // Read an HTML string.
             logger.error( "Read HTML string '{}' rather than a JSON stream.", s );
@@ -61,6 +67,7 @@ public class ProjectVersionRefMapper implements ObjectMapper
         }
         catch ( IOException e )
         {
+            logger.error( "Failed to decode map when reading string {}", s );
             throw new RestException( "Failed to read list-of-maps response from version server: " + e.getMessage(), e );
         }
 
