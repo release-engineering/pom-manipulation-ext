@@ -19,11 +19,15 @@ import com.mashape.unirest.http.HttpResponse;
 import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
+import org.commonjava.maven.ext.manip.ListUtils;
 import org.commonjava.maven.ext.manip.rest.exception.ClientException;
 import org.commonjava.maven.ext.manip.rest.exception.RestException;
 import org.commonjava.maven.ext.manip.rest.exception.ServerException;
 import org.commonjava.maven.ext.manip.rest.mapper.ProjectVersionRefMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -33,51 +37,68 @@ import java.util.Map;
 public class DefaultVersionTranslator
     implements VersionTranslator
 {
-    private String endpointUrl;
+    protected final Logger logger = LoggerFactory.getLogger( getClass() );
 
-    public DefaultVersionTranslator( String endpointUrl )
+    private final String endpointUrl;
+
+    /**
+     * If 0 - no limit.
+     * Otherwise loop in batches of maxRestSize.
+     */
+    private final int maxRestSize;
+
+    public DefaultVersionTranslator( String endpointUrl, int maxRestSize )
     {
         this.endpointUrl = endpointUrl;
+        this.maxRestSize = maxRestSize;
+
         Unirest.setObjectMapper( new ProjectVersionRefMapper() );
         // According to https://github.com/Mashape/unirest-java the default connection timeout is 10000
         // and the default socketTimeout is 60000. We have increased that to 10 minutes.
         Unirest.setTimeouts( 10000, 600000 );
     }
 
-    public Map<ProjectVersionRef, String> translateVersions( List<ProjectVersionRef> projects )
+    public Map<ProjectVersionRef, String> translateVersions( List<ProjectVersionRef> allProjects )
     {
+        final List<List<ProjectVersionRef>> partition = ListUtils.partition( allProjects, (maxRestSize == 0 ? allProjects.size() : maxRestSize) );
+        final Map<ProjectVersionRef, String> result = new HashMap<ProjectVersionRef, String>(  );
+
         // Execute request to get translated versions
         HttpResponse<Map> r;
-        try
+
+        for (List<ProjectVersionRef> projects : partition )
         {
-            r = Unirest.post( this.endpointUrl )
-                       .header( "accept", "application/json" )
-                       .header( "Content-Type", "application/json" )
-                       .body( projects )
-                       .asObject( Map.class );
-        }
-        catch ( UnirestException e )
-        {
-            throw new RestException(
-                String.format( "Request to server '%s' failed. Exception message: %s", this.endpointUrl,
-                               e.getMessage() ), e );
+            logger.debug ("REST call batching in {} ", projects.size());
+            try
+            {
+                r = Unirest.post( this.endpointUrl )
+                           .header( "accept", "application/json" )
+                           .header( "Content-Type", "application/json" )
+                           .body( projects )
+                           .asObject( Map.class );
+            }
+            catch ( UnirestException e )
+            {
+                throw new RestException( String.format( "Request to server '%s' failed. Exception message: %s", this.endpointUrl,
+                                                        e.getMessage() ), e );
+            }
+
+            // Handle some corner cases (5xx, 4xx)
+            if ( r.getStatus() / 100 == 5 )
+            {
+                throw new ServerException(
+                                String.format( "Server at '%s' failed to translate versions. HTTP status code %s.", this.endpointUrl, r.getStatus() ) );
+            }
+            else if ( r.getStatus() / 100 == 4 )
+            {
+                throw new ClientException(
+                                String.format( "Server at '%s' could not translate versions. HTTP status code %s.", this.endpointUrl, r.getStatus() ) );
+            }
+
+            result.putAll( r.getBody() );
         }
 
-        // Handle some corner cases (5xx, 4xx)
-        if ( r.getStatus() / 100 == 5 )
-        {
-            throw new ServerException(
-                String.format( "Server at '%s' failed to translate versions. HTTP status code %s.",
-                               this.endpointUrl, r.getStatus() ) );
-        }
-        else if ( r.getStatus() / 100 == 4 )
-        {
-            throw new ClientException(
-                String.format( "Server at '%s' could not translate versions. HTTP status code %s.",
-                               this.endpointUrl, r.getStatus() ) );
-        }
-
-        return r.getBody();
+        return result;
     }
 
     public String getEndpointUrl()

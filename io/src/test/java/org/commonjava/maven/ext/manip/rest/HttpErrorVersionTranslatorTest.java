@@ -91,7 +91,7 @@ public class HttpErrorVersionTranslatorTest
     {
         LoggerFactory.getLogger( DefaultVersionTranslator.class ).info ("Executing test " + testName.getMethodName());
 
-        this.versionTranslator = new DefaultVersionTranslator( mockServer.getUrl() );
+        this.versionTranslator = new DefaultVersionTranslator( mockServer.getUrl(), 0 );
     }
 
     @Test

@@ -25,6 +25,9 @@ import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef;
 import org.commonjava.maven.ext.manip.rest.exception.RestException;
 import org.commonjava.maven.ext.manip.rest.handler.AddSuffixJettyHandler;
 import org.commonjava.maven.ext.manip.rest.rule.MockServer;
+import org.jboss.byteman.contrib.bmunit.BMRule;
+import org.jboss.byteman.contrib.bmunit.BMUnitRunner;
+import org.jboss.byteman.rule.helper.Helper;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
@@ -32,6 +35,7 @@ import org.junit.FixMethodOrder;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestName;
+import org.junit.runner.RunWith;
 import org.junit.runners.MethodSorters;
 import org.slf4j.LoggerFactory;
 
@@ -50,6 +54,7 @@ import static org.junit.Assert.fail;
  * @author vdedik@redhat.com
  */
 @FixMethodOrder( MethodSorters.NAME_ASCENDING)
+@RunWith(BMUnitRunner.class)
 public class DefaultVersionTranslatorTest
 {
     private static List<ProjectVersionRef> aLotOfGavs;
@@ -60,22 +65,22 @@ public class DefaultVersionTranslatorTest
     public TestName testName = new TestName();
 
     @ClassRule
-    public static MockServer mockServer = new MockServer(new AddSuffixJettyHandler());
+    public static MockServer mockServer = new MockServer( new AddSuffixJettyHandler() );
 
     @BeforeClass
     public static void startUp()
-        throws IOException
+                    throws IOException
     {
         aLotOfGavs = new ArrayList<ProjectVersionRef>();
         String longJsonFile = readFileFromClasspath( "example-response-performance-test.json" );
 
         ObjectMapper objectMapper = new ObjectMapper();
-        List<Map<String, String>> gavs = objectMapper.readValue(
-            longJsonFile, new TypeReference<List<Map<String, String>>>() {} );
+        List<Map<String, String>> gavs = objectMapper.readValue( longJsonFile, new TypeReference<List<Map<String, String>>>()
+        {
+        } );
         for ( Map<String, String> gav : gavs )
         {
-            ProjectVersionRef project =
-                new SimpleProjectVersionRef( gav.get( "groupId" ), gav.get( "artifactId" ), gav.get( "version" ) );
+            ProjectVersionRef project = new SimpleProjectVersionRef( gav.get( "groupId" ), gav.get( "artifactId" ), gav.get( "version" ) );
             aLotOfGavs.add( project );
         }
     }
@@ -83,9 +88,9 @@ public class DefaultVersionTranslatorTest
     @Before
     public void before()
     {
-        LoggerFactory.getLogger( DefaultVersionTranslator.class ).info ("Executing test " + testName.getMethodName());
+        LoggerFactory.getLogger( DefaultVersionTranslator.class ).info( "Executing test " + testName.getMethodName() );
 
-        this.versionTranslator = new DefaultVersionTranslator( mockServer.getUrl() );
+        this.versionTranslator = new DefaultVersionTranslator( mockServer.getUrl(), 0 );
     }
 
     @Test
@@ -106,20 +111,20 @@ public class DefaultVersionTranslatorTest
     {
         List<ProjectVersionRef> gavs = new ArrayList<ProjectVersionRef>()
         {{
-                add( new SimpleProjectVersionRef( "com.example", "example", "1.0" ) );
-                add( new SimpleProjectVersionRef( "com.example", "example-dep", "2.0" ) );
-                add( new SimpleProjectVersionRef( "org.commonjava", "example", "1.0" ) );
-                add( new SimpleProjectVersionRef( "org.commonjava", "example", "1.1" ) );
-            }};
+            add( new SimpleProjectVersionRef( "com.example", "example", "1.0" ) );
+            add( new SimpleProjectVersionRef( "com.example", "example-dep", "2.0" ) );
+            add( new SimpleProjectVersionRef( "org.commonjava", "example", "1.0" ) );
+            add( new SimpleProjectVersionRef( "org.commonjava", "example", "1.1" ) );
+        }};
 
         Map<ProjectVersionRef, String> actualResult = versionTranslator.translateVersions( gavs );
         Map<ProjectVersionRef, String> expectedResult = new HashMap<ProjectVersionRef, String>()
         {{
-                put( new SimpleProjectVersionRef( "com.example", "example", "1.0" ), "1.0-redhat-1" );
-                put( new SimpleProjectVersionRef( "com.example", "example-dep", "2.0" ), "2.0-redhat-1" );
-                put( new SimpleProjectVersionRef( "org.commonjava", "example", "1.0" ), "1.0-redhat-1" );
-                put( new SimpleProjectVersionRef( "org.commonjava", "example", "1.1" ), "1.1-redhat-1" );
-            }};
+            put( new SimpleProjectVersionRef( "com.example", "example", "1.0" ), "1.0-redhat-1" );
+            put( new SimpleProjectVersionRef( "com.example", "example-dep", "2.0" ), "2.0-redhat-1" );
+            put( new SimpleProjectVersionRef( "org.commonjava", "example", "1.0" ), "1.0-redhat-1" );
+            put( new SimpleProjectVersionRef( "org.commonjava", "example", "1.1" ), "1.1-redhat-1" );
+        }};
 
         assertThat( actualResult, is( expectedResult ) );
     }
@@ -128,12 +133,12 @@ public class DefaultVersionTranslatorTest
     public void testTranslateVersionsFailNoResponse()
     {
         // Some url that doesn't exist used here
-        VersionTranslator versionTranslator = new DefaultVersionTranslator( "http://127.0.0.2" );
+        VersionTranslator versionTranslator = new DefaultVersionTranslator( "http://127.0.0.2", 0 );
 
         List<ProjectVersionRef> gavs = new ArrayList<ProjectVersionRef>()
         {{
-                add( new SimpleProjectVersionRef( "com.example", "example", "1.0" ) );
-            }};
+            add( new SimpleProjectVersionRef( "com.example", "example", "1.0" ) );
+        }};
 
         try
         {
@@ -142,7 +147,7 @@ public class DefaultVersionTranslatorTest
         }
         catch ( RestException ex )
         {
-            System.out.println ("Caught ex" + ex);
+            System.out.println( "Caught ex" + ex );
             // Pass
         }
         catch ( Exception ex )
@@ -156,7 +161,24 @@ public class DefaultVersionTranslatorTest
     public void testTranslateVersionsPerformance()
     {
         // Disable logging for this test as impacts timing.
-        ((Logger)LoggerFactory.getLogger( Logger.ROOT_LOGGER_NAME)).setLevel( Level.WARN );
+        ( (Logger) LoggerFactory.getLogger( Logger.ROOT_LOGGER_NAME ) ).setLevel( Level.WARN );
+
+        versionTranslator.translateVersions( aLotOfGavs );
+    }
+
+    private static final int restSize = 250;
+    @Test
+    @BMRule( name = "check-size",
+                    helper = "org.commonjava.maven.ext.manip.rest.HttpRequestWithBodyBytemanHelper",
+                    targetClass = "HttpRequestWithBody",
+                    targetMethod = "body(java.lang.Object)",
+                    targetLocation = "AT ENTRY",
+                    binding = "otherClassObject = asOtherClass($1)",
+                    condition = "otherClassObject.size() != " + restSize,
+                    action = "throw new RuntimeException ()" )
+    public void testTranslateVersionsLimitSize()
+    {
+        this.versionTranslator = new DefaultVersionTranslator( mockServer.getUrl(), restSize );
 
         versionTranslator.translateVersions( aLotOfGavs );
     }
@@ -171,7 +193,7 @@ public class DefaultVersionTranslatorTest
         {
             while ( scanner.hasNextLine() )
             {
-                fileContents.append( scanner.nextLine() + lineSeparator );
+                fileContents.append( scanner.nextLine() ).append( lineSeparator );
             }
             return fileContents.toString();
         }

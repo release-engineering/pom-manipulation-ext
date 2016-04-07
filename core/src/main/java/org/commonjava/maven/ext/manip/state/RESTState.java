@@ -28,12 +28,18 @@ public class RESTState implements State
 {
     private final String restURL;
 
+    /**
+     * Limit on maximum count to make in the REST call.
+     */
+    private final int maxRestSize;
+
     private final VersionTranslator restEndpoint;
 
     public RESTState( final Properties userProps )
     {
         restURL = userProps.getProperty( "restURL" );
-        restEndpoint = new DefaultVersionTranslator( restURL );
+        maxRestSize = Integer.parseInt( userProps.getProperty( "restMaxSize", "0" ) );
+        restEndpoint = new DefaultVersionTranslator( restURL, maxRestSize );
     }
 
     /**
