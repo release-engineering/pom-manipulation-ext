@@ -52,6 +52,12 @@ The extension will, for every profile in the remote POM file, replace or add it 
 
 **Note:** for any existing profile in the modified POM that specifies `activeByDefault`, this activation option will be removed so profiles are not accidentally disabled due to its exclusive semantics.
 
+#### Profile Removal
+
+PME supports removal of profiles as indicated by a comma separated list of profile IDs.
+
+    mvn install -DprofileRemoval=profileOne,profileTwo
+
 #### Repository Injection
 
 PME supports injection of remote repositories. Supply a remote repository management POM:
