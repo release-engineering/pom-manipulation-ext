@@ -20,10 +20,8 @@ import org.apache.maven.eventspy.AbstractEventSpy;
 import org.apache.maven.eventspy.EventSpy;
 import org.apache.maven.execution.ExecutionEvent;
 import org.apache.maven.execution.ExecutionEvent.Type;
-import org.apache.maven.model.building.ModelBuilder;
 import org.codehaus.plexus.component.annotations.Component;
 import org.codehaus.plexus.component.annotations.Requirement;
-import org.commonjava.maven.ext.manip.io.PomIO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,13 +44,7 @@ public class ManipulatingEventSpy
     private ManipulationManager manipulationManager;
 
     @Requirement
-    private ModelBuilder modelBuilder;
-
-    @Requirement
     private ManipulationSession session;
-
-    @Requirement
-    private PomIO pomIO;
 
     @Override
     public void onEvent( final Object event )

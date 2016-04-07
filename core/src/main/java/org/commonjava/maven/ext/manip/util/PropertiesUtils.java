@@ -26,6 +26,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -153,13 +154,13 @@ public final class PropertiesUtils
             return false;
         }
 
+        final DependencyState dState = session.getState( DependencyState.class );
+        final boolean ignoreSuffix = dState.getStrictIgnoreSuffix();
+
         // New value might be e.g. 3.1-rebuild-1 or 3.1.0.rebuild-1 (i.e. it *might* be OSGi compliant).
         final VersioningState state = session.getState( VersioningState.class );
-        final Version v = new Version( oldValue );
-
         String newVersion = newValue;
         String suffix = null;
-        String osgiVersion = v.getOSGiVersionString();
 
         if ( state.getIncrementalSerialSuffix() != null && !state.getIncrementalSerialSuffix().isEmpty())
         {
@@ -169,6 +170,36 @@ public final class PropertiesUtils
         {
             suffix = state.getSuffix().substring( 0, state.getSuffix().indexOf( '-' ) );
         }
+
+
+        Version v = new Version( oldValue );
+        String osgiVersion = v.getOSGiVersionString();
+
+        HashSet<String> s = new HashSet<String>(  );
+        s.add( oldValue );
+        s.add( newValue );
+
+        if (ignoreSuffix)
+        {
+            String x = String.valueOf( Version.findHighestMatchingBuildNumber( v, s ) );
+
+            // If the new value has the higher matching build number strip the old suffix to allow for strict
+            // matching.
+            if ( newValue.endsWith( x ) )
+            {
+                oldValue = oldValue.substring( 0, oldValue.indexOf( suffix ) - 1 );
+                v = new Version( oldValue );
+                osgiVersion = v.getOSGiVersionString();
+                logger.debug( "Updating version to {} and osgiVersion {} for oldValue {} ", v, osgiVersion, oldValue );
+
+            }
+            else
+            {
+                logger.warn ("strictIgnoreSuffix set but unable to align from {} to {}", oldValue, newValue);
+            }
+        }
+
+
 
         // We only need to dummy up and add a suffix if there is no qualifier. This allows us
         // to work out the OSGi version.

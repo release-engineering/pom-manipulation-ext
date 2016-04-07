@@ -53,6 +53,12 @@ public class DependencyState
     public static final String STRICT_VIOLATION_FAILS = "strictViolationFails";
 
     /**
+     * When true, it will ignore any suffix ( e.g. rebuild-2 ) on the source version during comparisons. Further, it will
+     * only allow alignment to a higher incrementing suffix (e.g. rebuild-3 ).
+     */
+    public static final String STRICT_ALIGNMENT_IGNORE_SUFFIX = "strictAlignmentIgnoreSuffix";
+
+    /**
      * The name of the property which contains the GAV of the remote pom from which to retrieve dependency management
      * information.
      * <pre>
@@ -69,6 +75,8 @@ public class DependencyState
 
     private final boolean failOnStrictViolation;
 
+    private final boolean ignoreSuffix;
+
     private final List<ProjectVersionRef> remoteBOMdepMgmt;
 
     private final Map<String, String> dependencyExclusions;
@@ -81,6 +89,7 @@ public class DependencyState
         overrideTransitive = Boolean.valueOf( userProps.getProperty( "overrideTransitive", "true" ) );
         overrideDependencies = Boolean.valueOf( userProps.getProperty( "overrideDependencies", "true" ) );
         strict = Boolean.valueOf( userProps.getProperty( STRICT_DEPENDENCIES, "false" ) );
+        ignoreSuffix = Boolean.valueOf( userProps.getProperty( STRICT_ALIGNMENT_IGNORE_SUFFIX, "false" ) );
         failOnStrictViolation = Boolean.valueOf( userProps.getProperty( STRICT_VIOLATION_FAILS, "false" ) );
         remoteBOMdepMgmt = IdUtils.parseGAVs( userProps.getProperty( DEPENDENCY_MANAGEMENT_POM_PROPERTY ) );
         dependencyExclusions = PropertiesUtils.getPropertiesByPrefix( userProps, DEPENDENCY_EXCLUSION_PREFIX );
@@ -124,6 +133,11 @@ public class DependencyState
     public boolean getStrict()
     {
         return strict;
+    }
+
+    public boolean getStrictIgnoreSuffix()
+    {
+        return ignoreSuffix;
     }
 
     public boolean getFailOnStrictViolation()

@@ -32,6 +32,7 @@ import java.util.regex.Pattern;
  */
 public class Version
 {
+    private static final Logger logger = LoggerFactory.getLogger( Version.class );
 
     private final static Character[] DEFAULT_DELIMITERS = { '.', '-', '_' };
 
@@ -105,8 +106,6 @@ public class Version
     private String buildNumber;
 
     private String snapshot;
-
-    private final Logger logger = LoggerFactory.getLogger( getClass() );
 
     /**
      * Represents whether the major, minor, micro versions are valid integers. This will be false if the version string
@@ -608,14 +607,14 @@ public class Version
      * @param versionSet a collection of versions to compare to.
      * @return the highest build number, or 0 if no matching build numbers are found.
      */
-    public int findHighestMatchingBuildNumber( Version version, Set<String> versionSet )
+    public static int findHighestMatchingBuildNumber( Version version, Set<String> versionSet )
     {
         int highestBuildNum = 0;
 
         // Build version pattern regex, matches something like "<mmm>.<qualifier>.<buildnum>".
         StringBuffer versionPatternBuf = new StringBuffer();
         versionPatternBuf.append( '(' )
-                .append( Pattern.quote( getOriginalMMM() ) ).append('(').append( DELIMITER_REGEX).append("0)*") // Match zeros appended to a major only version
+                .append( Pattern.quote( version.getOriginalMMM() ) ).append('(').append( DELIMITER_REGEX).append("0)*") // Match zeros appended to a major only version
                 .append( ")?" )
                 .append( DELIMITER_REGEX );
         if ( version.getQualifierBase() != null )
