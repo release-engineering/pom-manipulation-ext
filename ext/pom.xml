@@ -153,6 +153,10 @@
       <groupId>org.codehaus.groovy</groupId>
       <artifactId>groovy-json</artifactId>
     </dependency>
+    <dependency>
+      <groupId>org.codehaus.groovy</groupId>
+      <artifactId>groovy-xml</artifactId>
+    </dependency>
   </dependencies>
 
 
@@ -199,6 +203,7 @@
                   <include>com.fasterxml.jackson.core:*</include>
                   <include>org.codehaus.groovy:groovy</include>
                   <include>org.codehaus.groovy:groovy-json</include>
+                  <include>org.codehaus.groovy:groovy-xml</include>
                 </includes>
               </artifactSet>
               <relocations>
