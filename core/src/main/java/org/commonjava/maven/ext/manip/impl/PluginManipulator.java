@@ -23,13 +23,11 @@ import org.apache.maven.model.PluginExecution;
 import org.apache.maven.model.PluginManagement;
 import org.codehaus.plexus.component.annotations.Component;
 import org.codehaus.plexus.component.annotations.Requirement;
-import org.codehaus.plexus.util.CollectionUtils;
 import org.codehaus.plexus.util.xml.Xpp3Dom;
 import org.codehaus.plexus.util.xml.Xpp3DomUtils;
 import org.commonjava.maven.atlas.ident.ref.ProjectRef;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleProjectRef;
-import org.commonjava.maven.atlas.ident.ref.VersionlessArtifactRef;
 import org.commonjava.maven.ext.manip.ManipulationException;
 import org.commonjava.maven.ext.manip.ManipulationSession;
 import org.commonjava.maven.ext.manip.io.ModelIO;
@@ -41,7 +39,6 @@ import org.commonjava.maven.ext.manip.util.PropertiesUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -335,7 +332,7 @@ public class PluginManipulator
                 // one in build/plugins section.
                 if ( override.getVersion() != null && !override.getVersion().isEmpty())
                 {
-                    if ( ! PropertiesUtils.cacheProperty( pluginState.getVersionPropertyOverrides(), oldVersion, override.getVersion(), plugin ))
+                    if ( ! PropertiesUtils.cacheProperty( pluginState.getVersionPropertyOverrides(), oldVersion, override.getVersion(), plugin, false ))
                     {
                         plugin.setVersion( override.getVersion() );
                         logger.info( "Altered plugin version: " + groupIdArtifactId + "=" + override.getVersion() );

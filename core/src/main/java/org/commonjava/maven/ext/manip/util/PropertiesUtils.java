@@ -17,7 +17,6 @@ package org.commonjava.maven.ext.manip.util;
 
 import org.commonjava.maven.ext.manip.ManipulationException;
 import org.commonjava.maven.ext.manip.ManipulationSession;
-import org.commonjava.maven.ext.manip.impl.RESTManipulator;
 import org.commonjava.maven.ext.manip.impl.Version;
 import org.commonjava.maven.ext.manip.model.Project;
 import org.commonjava.maven.ext.manip.state.DependencyState;
@@ -171,7 +170,6 @@ public final class PropertiesUtils
             suffix = state.getSuffix().substring( 0, state.getSuffix().indexOf( '-' ) );
         }
 
-
         Version v = new Version( oldValue );
         String osgiVersion = v.getOSGiVersionString();
 
@@ -198,8 +196,6 @@ public final class PropertiesUtils
                 logger.warn ("strictIgnoreSuffix set but unable to align from {} to {}", oldValue, newValue);
             }
         }
-
-
 
         // We only need to dummy up and add a suffix if there is no qualifier. This allows us
         // to work out the OSGi version.
@@ -229,15 +225,17 @@ public final class PropertiesUtils
     /**
      * This will check if the old version (e.g. in a plugin or dependency) is a property and if so
      * store the mapping in a map.
+     *
      * @param versionPropertyUpdateMap the map to store any updates in
      * @param oldVersion original property value
      * @param newVersion new property value
      * @param originalType that this property is used in (i.e. a plugin or a dependency)
+     * @param force Whether to check for an existing property or force the insertion
      * @return true if a property was found and cached.
      * @throws ManipulationException
      */
-    public static boolean cacheProperty( Map<String, String> versionPropertyUpdateMap, String oldVersion,
-                                         String newVersion, Object originalType )
+    public static boolean cacheProperty( Map<String, String> versionPropertyUpdateMap, String oldVersion, String newVersion, Object originalType,
+                                         boolean force )
                     throws ManipulationException
     {
         boolean result = false;
@@ -263,6 +261,28 @@ public final class PropertiesUtils
                               originalType, oldProperty, newVersion );
 
                 final String oldVersionProp = oldVersion.substring( 2, oldVersion.length() - 1 );
+
+                // We check if we are replacing a property and there is already a mapping. While we don't allow
+                // a property to be updated to two different versions, if a dependencyExclusion (i.e. a force override)
+                // has been specified this will bypass the check.
+                String existingPropertyMapping = versionPropertyUpdateMap.get( oldVersionProp );
+
+                if ( existingPropertyMapping != null && !existingPropertyMapping.equals( newVersion ) )
+                {
+                    if ( force )
+                    {
+                        logger.debug( "Override property replacement of {} with force version override {}",
+                                      existingPropertyMapping, newVersion );
+                    }
+                    else
+                    {
+                        logger.error( "Replacing property with a suffix but the suffix does not match. Old value is {} and new is {}",
+                                      existingPropertyMapping, newVersion );
+                        throw new ManipulationException(
+                                        "Property replacement clash - updating property to both {} and {} ",
+                                        existingPropertyMapping, newVersion );
+                    }
+                }
 
                 versionPropertyUpdateMap.put( oldVersionProp, newVersion );
             }
@@ -315,4 +335,5 @@ public final class PropertiesUtils
         }
         return result;
     }
+
 }
