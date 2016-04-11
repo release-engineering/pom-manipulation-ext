@@ -37,10 +37,10 @@ public class PropertiesUtilsTest extends TestCase
     public void testCacheProperty() throws Exception
     {
         Map propertyMap = new HashMap();
-        
-        assertFalse(PropertiesUtils.cacheProperty(propertyMap, null, "2.0", null));
-        assertFalse(PropertiesUtils.cacheProperty(propertyMap, "1.0", "2.0", null));
-        assertTrue(PropertiesUtils.cacheProperty(propertyMap, "${version.org.jboss}", "2.0", null));
+
+        assertFalse(PropertiesUtils.cacheProperty( propertyMap, null, "2.0", null, false ));
+        assertFalse(PropertiesUtils.cacheProperty( propertyMap, "1.0", "2.0", null, false ));
+        assertTrue(PropertiesUtils.cacheProperty( propertyMap, "${version.org.jboss}", "2.0", null, false ));
     }
 
 }

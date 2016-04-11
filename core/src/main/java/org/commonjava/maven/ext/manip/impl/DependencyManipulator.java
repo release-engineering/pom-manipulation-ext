@@ -53,7 +53,6 @@ import static org.apache.commons.lang.StringUtils.isEmpty;
 import static org.apache.commons.lang.StringUtils.join;
 import static org.commonjava.maven.ext.manip.util.IdUtils.ga;
 import static org.commonjava.maven.ext.manip.util.IdUtils.gav;
-import static org.commonjava.maven.ext.manip.util.PropertiesUtils.getPropertiesByPrefix;
 
 /**
  * {@link Manipulator} implementation that can alter dependency (and dependency management) sections in a project's pom file.
@@ -423,6 +422,7 @@ public class DependencyManipulator implements Manipulator
      * dependencyExclusion. However they have to be separated out from standard overrides so we can easily
      * ignore any property references (and overwrite them).
      *
+     *
      * @param versionPropertyUpdateMap properties to update
      * @param explicitOverrides
      * @param dependencies dependencies to check
@@ -459,7 +459,7 @@ public class DependencyManipulator implements Manipulator
                 {
                     logger.debug( "Explicit overrides : force aligning {} to {}.", groupIdArtifactId, overrideVersion );
 
-                    if ( ! PropertiesUtils.cacheProperty( versionPropertyUpdateMap, oldVersion, overrideVersion, dependency ))
+                    if ( ! PropertiesUtils.cacheProperty( versionPropertyUpdateMap, oldVersion, overrideVersion, dependency, true ))
                     {
                         // Not checking strict version alignment here as explicit overrides take priority.
                         dependency.setVersion( overrideVersion );
@@ -523,7 +523,7 @@ public class DependencyManipulator implements Manipulator
                     }
                     else
                     {
-                        if ( ! PropertiesUtils.cacheProperty( versionPropertyUpdateMap, oldVersion, overrideVersion, ar ))
+                        if ( ! PropertiesUtils.cacheProperty( versionPropertyUpdateMap, oldVersion, overrideVersion, ar, false ))
                         {
                             if ( strict && ! PropertiesUtils.checkStrictValue( session, oldVersion, overrideVersion) )
                             {
