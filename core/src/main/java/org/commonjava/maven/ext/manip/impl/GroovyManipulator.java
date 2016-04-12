@@ -110,7 +110,7 @@ public class GroovyManipulator
                     {
                         script = shell.parse( groovyScript );
 
-                        script.invokeMethod( "setValues", new Object[] { projects, project } );
+                        script.invokeMethod( "setValues", new Object[] { session.getUserProperties(), projects, project } );
                     }
                     catch (MissingMethodException e)
                     {

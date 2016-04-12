@@ -26,3 +26,13 @@ System.out.println( "Slurping JSON: ${jsonFile.getAbsolutePath()}" )
 def jsonString = jsonFile.text
 
 assert !jsonString.contains ("resolved:")
+
+def buildLog = new File( basedir, 'build.log' )
+def message = 0
+buildLog.eachLine {
+   if (it.contains( "groovyScripts org.commonjava.maven.ext:depMgmt1:groovy:1.0")) {
+      message++
+   }
+}
+
+assert message == 1

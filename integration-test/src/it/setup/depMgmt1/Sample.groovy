@@ -9,6 +9,7 @@ import groovy.util.logging.Slf4j
 @Slf4j
 public class Processor {
     File basedir
+    Properties props
 
     private void parseDeps(Map n) {
         def iterator = n.iterator()
@@ -26,7 +27,8 @@ public class Processor {
     }
 
     def execute() {
-        log.info("Running ShrinkwrapProcessor...")
+        log.info("Running ShrinkwrapProcessor..." )
+        log.info("groovyScripts " + props.get("groovyScripts"))
 
         def shrinkwrap = new File (basedir.toString() + File.separator + "shrink.json")
 
@@ -57,7 +59,8 @@ println pme.getProject().getClass().getName()
 println pme.getProjects()
 println pme.getProject().getClass().getName()
 println "#### BASESCRIPT END"
+
 // End...
 
-def Processor sp = new Processor(basedir:pme.getBaseDir())
+def Processor sp = new Processor(basedir:pme.getBaseDir(), props:pme.getUserProperties())
 sp.execute()
