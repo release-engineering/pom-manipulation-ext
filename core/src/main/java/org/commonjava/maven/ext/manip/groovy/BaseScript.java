@@ -21,6 +21,7 @@ import org.commonjava.maven.ext.manip.model.Project;
 
 import java.io.File;
 import java.util.List;
+import java.util.Properties;
 
 /**
  * Abstract class that should be used by developers wishing to implement groovy scripts
@@ -35,6 +36,8 @@ public abstract class BaseScript extends Script
     protected ProjectVersionRef gav;
 
     protected File basedir;
+
+    protected Properties userProperties;
 
     /**
      * Return the current Project
@@ -73,18 +76,28 @@ public abstract class BaseScript extends Script
     }
 
     /**
+     * Get the user properties
+     * @return a {@link java.util.Properties} reference.
+     */
+    public Properties getUserProperties()
+    {
+        return userProperties;
+    }
+
+    /**
      * Internal use only - the {@link org.commonjava.maven.ext.manip.impl.GroovyManipulator} uses this to
      * initialise the values
      * @param projects ArrayList of Project instances
      * @param project Current project
      */
-    public void setValues(List<Project> projects, Project project)
+    public void setValues(Properties userProperties, List<Project> projects, Project project)
     {
         this.projects = projects;
         this.project = project;
         this.gav = project.getKey();
         this.basedir = project.getPom().getParentFile();
+        this.userProperties = userProperties;
 
-        System.out.println ("Injecting values. Project is " + project + " with basedir " + basedir);
+        System.out.println ("Injecting values. Project is " + project + " with basedir " + basedir + " and properties " + userProperties);
     }
 }
