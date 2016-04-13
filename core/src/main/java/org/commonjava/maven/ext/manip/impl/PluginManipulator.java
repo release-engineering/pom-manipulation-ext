@@ -62,7 +62,7 @@ public class PluginManipulator
     private final Logger logger = LoggerFactory.getLogger( getClass() );
 
     @Requirement
-    protected ModelIO effectiveModelBuilder;
+    private ModelIO effectiveModelBuilder;
 
     /**
      * Initialize the {@link PluginState} state holder in the {@link ManipulationSession}. This state holder detects
@@ -100,7 +100,7 @@ public class PluginManipulator
             return Collections.emptySet();
         }
 
-        final Set<Project> changed = new HashSet<Project>();
+        final Set<Project> changed = new HashSet<>();
 
         final Map<ProjectRef, Plugin> overrides = loadRemoteBOM( state, session );
 
@@ -146,10 +146,10 @@ public class PluginManipulator
     }
 
 
-    protected Map<ProjectRef, Plugin> loadRemoteBOM( final State state, final ManipulationSession session )
+    private Map<ProjectRef, Plugin> loadRemoteBOM( final State state, final ManipulationSession session )
         throws ManipulationException
     {
-        final Map<ProjectRef, Plugin> overrides = new LinkedHashMap<ProjectRef, Plugin>();
+        final Map<ProjectRef, Plugin> overrides = new LinkedHashMap<>();
         final List<ProjectVersionRef> gavs = ( (PluginState) state ).getRemotePluginMgmt();
 
         if ( gavs == null || gavs.isEmpty() )
@@ -172,8 +172,8 @@ public class PluginManipulator
         return overrides;
     }
 
-    protected void apply( final ManipulationSession session, final Project project, final Model model,
-                          final Map<ProjectRef, Plugin> override )
+    private void apply( final ManipulationSession session, final Project project, final Model model,
+                        final Map<ProjectRef, Plugin> override )
         throws ManipulationException
     {
         logger.info( "Applying plugin changes to: " + ga( project ) );
@@ -228,8 +228,8 @@ public class PluginManipulator
      * @param pluginVersionOverrides The list of version overrides to apply to the plugins
      * @throws ManipulationException if an error occurs.
      */
-    protected void applyOverrides( final boolean pluginMgmt, final List<Plugin> plugins,
-                                   final Map<ProjectRef, Plugin> pluginVersionOverrides, PluginState pluginState ) throws ManipulationException
+    private void applyOverrides( final boolean pluginMgmt, final List<Plugin> plugins,
+                                 final Map<ProjectRef, Plugin> pluginVersionOverrides, PluginState pluginState ) throws ManipulationException
     {
         if ( plugins == null)
         {

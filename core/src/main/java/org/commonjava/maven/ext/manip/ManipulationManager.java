@@ -55,11 +55,11 @@ import java.util.Set;
 public class ManipulationManager
 {
 
-    static final String MARKER_PATH = "target";
+    private static final String MARKER_PATH = "target";
 
     static final String MARKER_FILE =  MARKER_PATH + File.separatorChar + "pom-manip-ext-marker.txt";
 
-    protected final Logger logger = LoggerFactory.getLogger( getClass() );
+    private final Logger logger = LoggerFactory.getLogger( getClass() );
 
     @Requirement
     private ProjectBuilder projectBuilder;
@@ -94,13 +94,13 @@ public class ManipulationManager
                         session.getSettings(), session.getActiveProfiles() );
         }
 
-        final HashMap<Manipulator, String> revMap = new HashMap<Manipulator, String>();
+        final HashMap<Manipulator, String> revMap = new HashMap<>();
         for ( final Map.Entry<String, Manipulator> entry : manipulators.entrySet() )
         {
             revMap.put( entry.getValue(), entry.getKey() );
         }
 
-        orderedManipulators = new ArrayList<Manipulator>( revMap.keySet() );
+        orderedManipulators = new ArrayList<>( revMap.keySet() );
         Collections.sort( orderedManipulators, new ManipulatorPriorityComparator() );
 
         for ( final Manipulator manipulator : orderedManipulators )
@@ -165,7 +165,7 @@ public class ManipulationManager
      * @param session the container session for manipulation.
      * @throws ManipulationException if an error occurs.
      */
-    public void scan( final List<Project> projects, final ManipulationSession session )
+    private void scan( final List<Project> projects, final ManipulationSession session )
         throws ManipulationException
     {
         session.setProjects( projects );
@@ -188,10 +188,10 @@ public class ManipulationManager
      * @return collection of the changed projects.
      * @throws ManipulationException if an error occurs.
      */
-    public Set<Project> applyManipulations( final List<Project> projects, final ManipulationSession session )
+    private Set<Project> applyManipulations( final List<Project> projects, final ManipulationSession session )
         throws ManipulationException
     {
-        final Set<Project> changed = new HashSet<Project>();
+        final Set<Project> changed = new HashSet<>();
         for ( final Manipulator manipulator : orderedManipulators )
         {
             final Set<Project> mChanged = manipulator.applyChanges( projects, session );

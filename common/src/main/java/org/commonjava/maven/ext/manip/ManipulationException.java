@@ -51,33 +51,21 @@ public class ManipulationException
             }
             else
             {
-                final String original = format;
                 try
                 {
                     formattedMessage = String.format( format.replaceAll( "\\{\\}", "%s" ), params );
                 }
-                catch ( final Error e )
-                {
-                }
-                catch ( final RuntimeException e )
-                {
-                }
-                catch ( final Exception e )
+                catch ( final Error | Exception e )
                 {
                 }
 
-                if ( formattedMessage == null || original == formattedMessage )
+                if ( formattedMessage == null || format == formattedMessage )
                 {
                     try
                     {
                         formattedMessage = MessageFormat.format( format, params );
                     }
-                    catch ( final Error e )
-                    {
-                        formattedMessage = format;
-                        throw e;
-                    }
-                    catch ( final RuntimeException e )
+                    catch ( final Error | RuntimeException e )
                     {
                         formattedMessage = format;
                         throw e;

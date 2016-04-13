@@ -87,7 +87,7 @@ public class GroovyManipulator
             return Collections.emptySet();
         }
 
-        final Set<Project> changed = new HashSet<Project>();
+        final Set<Project> changed = new HashSet<>();
         final List<ArtifactRef> scripts = state.getGroovyScripts();
 
         for (ArtifactRef ar : scripts)
@@ -98,7 +98,7 @@ public class GroovyManipulator
             final File groovyScript = modelBuilder.resolveRawFile( ar );
 
             GroovyShell shell = new GroovyShell( );
-            Script script = null;
+            Script script;
 
             for ( final Project project : projects )
             {

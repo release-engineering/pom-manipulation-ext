@@ -72,7 +72,6 @@ public class Project
     private boolean executionRoot;
 
     public Project( final ProjectVersionRef key, final File pom, final Model model )
-        throws ManipulationException
     {
         this.pom = pom;
         this.model = model;
@@ -230,13 +229,13 @@ public class Project
 
         if ( build == null )
         {
-            return Collections.<String, Plugin> emptyMap();
+            return Collections.emptyMap();
         }
 
         final Map<String, Plugin> result = build.getPluginsAsMap();
         if ( result == null )
         {
-            return Collections.<String, Plugin> emptyMap();
+            return Collections.emptyMap();
         }
 
         return result;
@@ -249,7 +248,7 @@ public class Project
 
     public BuildBase getBuild( final ModelBase base )
     {
-        BuildBase build = null;
+        BuildBase build;
         if ( base instanceof Model )
         {
             build = ( (Model) base ).getBuild();
@@ -311,25 +310,25 @@ public class Project
             final Build build = ( (Model) base ).getBuild();
             if ( build == null )
             {
-                return Collections.<String, Plugin> emptyMap();
+                return Collections.emptyMap();
             }
 
             final PluginManagement pm = build.getPluginManagement();
             if ( pm == null )
             {
-                return Collections.<String, Plugin> emptyMap();
+                return Collections.emptyMap();
             }
 
             final Map<String, Plugin> result = pm.getPluginsAsMap();
             if ( result == null )
             {
-                return Collections.<String, Plugin> emptyMap();
+                return Collections.emptyMap();
             }
 
             return result;
         }
 
-        return Collections.<String, Plugin> emptyMap();
+        return Collections.emptyMap();
     }
 
     public List<ReportPlugin> getReportPlugins()
@@ -476,7 +475,7 @@ public class Project
         return new SimpleProjectVersionRef( g, a, v );
     }
 
-    public void setExecutionRoot( boolean b )
+    public void setExecutionRoot()
     {
         executionRoot = true;
     }

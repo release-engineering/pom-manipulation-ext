@@ -27,7 +27,6 @@ import java.io.File;
 import java.net.URL;
 import java.util.HashSet;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
@@ -66,7 +65,7 @@ public class PomIOTest
         model.setModelVersion( "4.0.0" );
 
         Project p = new Project( targetFile, model );
-        HashSet<Project> changed = new HashSet<Project>();
+        HashSet<Project> changed = new HashSet<>();
         changed.add( p );
 
         pomIO.rewritePOMs( changed );

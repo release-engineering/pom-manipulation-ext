@@ -89,7 +89,7 @@ public class ProjectVersionEnforcingManipulator
             return Collections.emptySet();
         }
 
-        final Set<Project> changed = new HashSet<Project>();
+        final Set<Project> changed = new HashSet<>();
 
         for ( final Project project : projects )
         {

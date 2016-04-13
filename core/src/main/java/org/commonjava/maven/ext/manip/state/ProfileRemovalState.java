@@ -20,7 +20,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
 
@@ -39,7 +38,7 @@ public class ProfileRemovalState
     /**
      * Suffix to enable this modder
      */
-    public static final String PROFILE_REMOVAL_PROPERTY = "profileRemoval";
+    private static final String PROFILE_REMOVAL_PROPERTY = "profileRemoval";
 
     private final List<String> profiles;
 

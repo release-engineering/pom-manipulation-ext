@@ -106,11 +106,7 @@ public class ModelIO
             in = transfer.openInputStream();
             return new MavenXpp3Reader().read( in );
         }
-        catch ( final IOException e )
-        {
-            throw new ManipulationException( "Failed to build model for POM: %s.\n--> %s", e, ref, e.getMessage() );
-        }
-        catch ( final XmlPullParserException e )
+        catch ( final IOException | XmlPullParserException e )
         {
             throw new ManipulationException( "Failed to build model for POM: %s.\n--> %s", e, ref, e.getMessage() );
         }
@@ -153,7 +149,7 @@ public class ModelIO
     {
         logger.debug( "Resolving dependency management GAV: " + ref );
 
-        final Map<ArtifactRef, String> versionOverrides = new LinkedHashMap<ArtifactRef, String>();
+        final Map<ArtifactRef, String> versionOverrides = new LinkedHashMap<>();
         try
         {
             final MavenPomView pomView = galleyWrapper.readPomView( ref );
@@ -205,8 +201,8 @@ public class ModelIO
                     throws ManipulationException
     {
         logger.debug( "Resolving remote plugin management POM: " + ref );
-        final Map<ProjectRef, Plugin> pluginOverrides = new HashMap<ProjectRef, Plugin>();
-        final Map<ProjectRef, ProjectVersionRef> pluginOverridesPomView = new HashMap<ProjectRef, ProjectVersionRef>();
+        final Map<ProjectRef, Plugin> pluginOverrides = new HashMap<>();
+        final Map<ProjectRef, ProjectVersionRef> pluginOverridesPomView = new HashMap<>();
 
         final Model m = resolveRawModel( ref );
 

@@ -65,7 +65,7 @@ public class Version
 
     private final static Pattern osgiPattern = Pattern.compile( OSGI_VERSION_REGEX );
 
-    private List<Character> versionStringDelimiters = Arrays.asList( DEFAULT_DELIMITERS );
+    private final List<Character> versionStringDelimiters = Arrays.asList( DEFAULT_DELIMITERS );
 
     /**
      * The original version string before any modifications
@@ -132,7 +132,7 @@ public class Version
      * @param version
      * @return
      */
-    private final void parseVersion( String version )
+    private void parseVersion( String version )
     {
         int qualifierIndex = getQualifierIndex( version );
 
@@ -404,7 +404,7 @@ public class Version
             return getQualifier();
         }
 
-        StringBuffer versionString = new StringBuffer();
+        StringBuilder versionString = new StringBuilder();
         versionString.append( originalMMM );
         if ( isEmpty( originalMMMDelimiter ) )
         {
@@ -449,7 +449,7 @@ public class Version
      */
     private String getThreePartMMM()
     {
-        StringBuffer mmm = new StringBuffer();
+        StringBuilder mmm = new StringBuilder();
         mmm.append( getMajorVersion() );
         if ( !isEmpty( getMinorVersion() ) )
         {
@@ -612,7 +612,7 @@ public class Version
         int highestBuildNum = 0;
 
         // Build version pattern regex, matches something like "<mmm>.<qualifier>.<buildnum>".
-        StringBuffer versionPatternBuf = new StringBuffer();
+        StringBuilder versionPatternBuf = new StringBuilder();
         versionPatternBuf.append( '(' )
                 .append( Pattern.quote( version.getOriginalMMM() ) ).append('(').append( DELIMITER_REGEX).append("0)*") // Match zeros appended to a major only version
                 .append( ")?" )
@@ -663,7 +663,7 @@ public class Version
     @Override
     public String toString()
     {
-        StringBuffer buffer = new StringBuffer();
+        StringBuilder buffer = new StringBuilder();
         buffer.append( "Version: " );
         buffer.append( getVersionString() );
         buffer.append( ", OSGi Version: " );

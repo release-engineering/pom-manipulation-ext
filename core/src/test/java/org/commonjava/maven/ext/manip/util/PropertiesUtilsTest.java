@@ -15,16 +15,17 @@
  */
 package org.commonjava.maven.ext.manip.util;
 
-import junit.framework.TestCase;
 import org.commonjava.maven.ext.manip.ManipulationSession;
 import org.junit.Test;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public class PropertiesUtilsTest extends TestCase
-{
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
+public class PropertiesUtilsTest
+{
     @Test
     public void testCheckStrictValue() throws Exception
     {

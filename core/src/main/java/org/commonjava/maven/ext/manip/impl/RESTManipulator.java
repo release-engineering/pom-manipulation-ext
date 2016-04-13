@@ -38,7 +38,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -82,7 +81,7 @@ public class RESTManipulator implements Manipulator
             return;
         }
 
-        final ArrayList<ProjectVersionRef> restParam = new ArrayList<ProjectVersionRef>();
+        final ArrayList<ProjectVersionRef> restParam = new ArrayList<>();
         for ( final Project project : projects )
         {
             // TODO: Check this : For the rest API I think we need to check every project GA not just inheritance root.
@@ -118,7 +117,7 @@ public class RESTManipulator implements Manipulator
 
         // Parse the rest result for the project GAs and store them in versioning state for use
         // there by incremental suffix calculation.
-        Map<ProjectRef, Set<String>> versionStates = new HashMap<ProjectRef, Set<String>>();
+        Map<ProjectRef, Set<String>> versionStates = new HashMap<>();
         for ( final Project p : projects )
         {
             if ( restResult.containsKey( p.getKey() ) )
@@ -127,7 +126,7 @@ public class RESTManipulator implements Manipulator
                 Set<String> versions = versionStates.get( p.getKey().asProjectRef() );
                 if (versions == null)
                 {
-                    versions = new HashSet<String>();
+                    versions = new HashSet<>();
                     versionStates.put( p.getKey().asProjectRef(), versions );
                 }
                 versions.add( restResult.get( p.getKey() ) );
@@ -138,7 +137,7 @@ public class RESTManipulator implements Manipulator
         vs.setRESTMetadata (versionStates);
 
         final DependencyState ds = session.getState( DependencyState.class );
-        final Map<ArtifactRef, String> overrides = new HashMap<ArtifactRef, String>( );
+        final Map<ArtifactRef, String> overrides = new HashMap<>();
 
         // Convert the loaded remote ProjectVersionRefs to the original ArtifactRefs
         for (ArtifactRef a : localDeps )
@@ -179,8 +178,8 @@ public class RESTManipulator implements Manipulator
      */
     public static Set<ArtifactRef> establishDependencies( final List<Project> projects, Set<String> activeProfiles ) throws ManipulationException
     {
-        Set<ArtifactRef> localDeps = new TreeSet<ArtifactRef>();
-        Set<String> activeModules = new HashSet<String>();
+        Set<ArtifactRef> localDeps = new TreeSet<>();
+        Set<String> activeModules = new HashSet<>();
         boolean scanAll = false;
 
         if (activeProfiles != null && !activeProfiles.isEmpty())
@@ -197,7 +196,7 @@ public class RESTManipulator implements Manipulator
                     {
                         for ( Profile p : profiles )
                         {
-                            if ( activeProfiles != null && !activeProfiles.isEmpty() && activeProfiles.contains(p.getId() ) )
+                            if (activeProfiles.contains( p.getId() ) )
                             {
                                 activeModules.addAll( p.getModules() );
                             }

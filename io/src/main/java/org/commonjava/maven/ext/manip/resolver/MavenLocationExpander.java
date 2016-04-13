@@ -76,7 +76,7 @@ public class MavenLocationExpander
                                   final Settings settings, final List<String> activeProfiles )
         throws MalformedURLException
     {
-        final Set<Location> locs = new LinkedHashSet<Location>();
+        final Set<Location> locs = new LinkedHashSet<>();
 
         if ( localRepository != null )
         {
@@ -93,7 +93,7 @@ public class MavenLocationExpander
         addRequestRepositoriesTo( locs, artifactRepositories, settings, mirrorSelector );
 
         logger.debug( "Configured to use Maven locations:\n  {}", new JoinString( "\n  ", locs ) );
-        this.locations = new ArrayList<Location>( locs );
+        this.locations = new ArrayList<>( locs );
     }
 
     private void addRequestRepositoriesTo( final Set<Location> locs,
@@ -129,9 +129,10 @@ public class MavenLocationExpander
                     final ArtifactRepositoryPolicy releases = repo.getReleases();
                     final ArtifactRepositoryPolicy snapshots = repo.getSnapshots();
 
-                    SimpleHttpLocation addition = new SimpleHttpLocation( id, url, snapshots == null ? false : snapshots.isEnabled(),
-                                                      releases == null ? true : releases.isEnabled(), true, false,
-                                                      null );
+                    SimpleHttpLocation addition = new SimpleHttpLocation( id, url,
+                                                                          snapshots != null && snapshots.isEnabled(),
+                                                                          releases == null || releases.isEnabled(), true, false,
+                                                                          null );
 
                     addition.setAttribute(Location.CONNECTION_TIMEOUT_SECONDS, 60);
 
@@ -151,7 +152,7 @@ public class MavenLocationExpander
             final Map<String, Profile> profiles = settings.getProfilesAsMap();
             if ( profiles != null && activeProfiles != null && !activeProfiles.isEmpty() )
             {
-                final LinkedHashSet<String> active = new LinkedHashSet<String>( activeProfiles );
+                final LinkedHashSet<String> active = new LinkedHashSet<>( activeProfiles );
 
                 final List<String> settingsActiveProfiles = settings.getActiveProfiles();
                 if ( settingsActiveProfiles != null && !settingsActiveProfiles.isEmpty() )
@@ -191,9 +192,7 @@ public class MavenLocationExpander
                                         url = mirror.getUrl();
                                     }
 
-                                    SimpleHttpLocation addition = new SimpleHttpLocation( id, url, snapshots == null ? false
-                                                    : snapshots.isEnabled(), releases == null ? true
-                                                    : releases.isEnabled(), true, false, null );
+                                    SimpleHttpLocation addition = new SimpleHttpLocation( id, url, snapshots.isEnabled(), releases.isEnabled(), true, false, null );
 
                                     addition.setAttribute(Location.CONNECTION_TIMEOUT_SECONDS, 60);
 
@@ -222,7 +221,7 @@ public class MavenLocationExpander
     public List<Location> expand( final Location... locations )
         throws TransferException
     {
-        final List<Location> result = new ArrayList<Location>();
+        final List<Location> result = new ArrayList<>();
         for ( final Location loc : locations )
         {
             expandSingle( loc, result );
@@ -236,7 +235,7 @@ public class MavenLocationExpander
     public <T extends Location> List<Location> expand( final Collection<T> locations )
         throws TransferException
     {
-        final List<Location> result = new ArrayList<Location>();
+        final List<Location> result = new ArrayList<>();
         for ( final Location loc : locations )
         {
             expandSingle( loc, result );
@@ -250,7 +249,7 @@ public class MavenLocationExpander
     public VirtualResource expand( final Resource resource )
         throws TransferException
     {
-        final List<ConcreteResource> result = new ArrayList<ConcreteResource>();
+        final List<ConcreteResource> result = new ArrayList<>();
         if ( resource instanceof ConcreteResource )
         {
             expandSingle( (ConcreteResource) resource, result );
@@ -270,7 +269,7 @@ public class MavenLocationExpander
     private void expandSingle( final ConcreteResource cr, final List<ConcreteResource> result )
     {
         final Location loc = cr.getLocation();
-        final List<Location> expanded = new ArrayList<Location>();
+        final List<Location> expanded = new ArrayList<>();
         expandSingle( loc, expanded );
 
         final String path = cr.getPath();

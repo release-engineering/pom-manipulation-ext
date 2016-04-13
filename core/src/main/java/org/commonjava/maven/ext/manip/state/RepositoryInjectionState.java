@@ -31,13 +31,12 @@ import java.util.Properties;
 public class RepositoryInjectionState
     implements State
 {
-
     private final Logger logger = LoggerFactory.getLogger( getClass() );
 
     /**
      * Suffix to enable this modder
      */
-    public static final String REPOSITORY_INJECTION_PROPERTY = "repositoryInjection";
+    private static final String REPOSITORY_INJECTION_PROPERTY = "repositoryInjection";
 
     private final ProjectVersionRef repoMgmt;
 

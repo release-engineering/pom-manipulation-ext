@@ -61,7 +61,7 @@ public final class ListUtils
         {
             throw new IllegalArgumentException( "Size must be greater than 0" );
         }
-        return new Partition<T>( list, size );
+        return new Partition<>( list, size );
     }
 
     /**

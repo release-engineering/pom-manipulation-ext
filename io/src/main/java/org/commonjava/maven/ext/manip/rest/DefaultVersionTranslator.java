@@ -37,7 +37,7 @@ import java.util.Map;
 public class DefaultVersionTranslator
     implements VersionTranslator
 {
-    protected final Logger logger = LoggerFactory.getLogger( getClass() );
+    private final Logger logger = LoggerFactory.getLogger( getClass() );
 
     private final String endpointUrl;
 
@@ -61,7 +61,7 @@ public class DefaultVersionTranslator
     public Map<ProjectVersionRef, String> translateVersions( List<ProjectVersionRef> allProjects )
     {
         final List<List<ProjectVersionRef>> partition = ListUtils.partition( allProjects, (maxRestSize == 0 ? allProjects.size() : maxRestSize) );
-        final Map<ProjectVersionRef, String> result = new HashMap<ProjectVersionRef, String>(  );
+        final Map<ProjectVersionRef, String> result = new HashMap<>();
 
         // Execute request to get translated versions
         HttpResponse<Map> r;

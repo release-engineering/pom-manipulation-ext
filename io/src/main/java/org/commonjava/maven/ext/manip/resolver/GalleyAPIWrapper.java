@@ -59,6 +59,7 @@ public class GalleyAPIWrapper
     @Requirement( role = ExtensionInfrastructure.class, hint = "galley" )
     private GalleyInfrastructure infra;
 
+    // For Guice
     protected GalleyAPIWrapper()
     {
     }
@@ -82,7 +83,7 @@ public class GalleyAPIWrapper
                                        .parseDocument( xml, new ByteArrayInputStream( xml.getBytes() ) );
 
         final DocRef<ProjectRef> ref = new DocRef<ProjectRef>( new SimpleProjectRef( "unknown", "unknown" ), xml, document );
-        return new MavenXmlView<ProjectRef>( Collections.singletonList( ref ), infra.getXPath(), infra.getXml() );
+        return new MavenXmlView<>( Collections.singletonList( ref ), infra.getXPath(), infra.getXml() );
     }
 
     public MavenPomView readPomView( final ProjectVersionRef ref )

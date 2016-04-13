@@ -79,7 +79,7 @@ public class AddSuffixJettyHandler
             LOGGER.info( "Handling with AddSuffixJettyHandler" );
 
             // Get Request Body
-            StringBuffer jb = new StringBuffer();
+            StringBuilder jb = new StringBuilder();
             try
             {
                 String line;
@@ -99,11 +99,11 @@ public class AddSuffixJettyHandler
             List<Map<String, Object>> requestBody = objectMapper.readValue( jb.toString(), List.class );
 
             // Prepare Response
-            List<Map<String, Object>> responseBody = new ArrayList<Map<String, Object>>();
+            List<Map<String, Object>> responseBody = new ArrayList<>();
             for ( Map<String, Object> gav : requestBody)
             {
                 String version = (String) gav.get( "version" );
-                List<String> availableVersions = new ArrayList<String>();
+                List<String> availableVersions = new ArrayList<>();
                 String bestMatchVersion = version + "-" + this.suffix;
                 availableVersions.add( bestMatchVersion );
 

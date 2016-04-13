@@ -84,8 +84,6 @@ public class GalleyInfrastructure
 
     private MavenPomReader pomReader;
 
-    private LocationExpander locationExpander;
-
     private ArtifactManager artifactManager;
 
     private MavenMetadataReader metadataReader;
@@ -134,6 +132,7 @@ public class GalleyInfrastructure
                        final Transport customTransport, File cacheDir )
         throws ManipulationException
     {
+        LocationExpander locationExpander;
         try
         {
             final List<Location> custom =

@@ -57,7 +57,7 @@ public class VersioningState
      * Record the versions to change. Essentially this contains a mapping of original
      * project GAV to new version to change.
      */
-    private final Map<ProjectVersionRef, String> versionsByGAV = new HashMap<ProjectVersionRef, String>();
+    private final Map<ProjectVersionRef, String> versionsByGAV = new HashMap<>();
 
     /**
      * Store preprocessed metadata from the REST call in order to use for incremental lookup.

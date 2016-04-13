@@ -733,7 +733,7 @@ public class VersioningCalculatorTest
         final Properties props = new Properties();
 
         props.setProperty( VersioningState.INCREMENT_SERIAL_SUFFIX_SYSPROP, "foo-0" );
-        final Map<ProjectRef, String[]> versionMap = new HashMap<ProjectRef, String[]>();
+        final Map<ProjectRef, String[]> versionMap = new HashMap<>();
 
         versionMap.put( new SimpleProjectRef( p1.getGroupId(), p1.getArtifactId() ), new String[] { "1.2.0.GA-foo-3",
             "1.2.0.GA-foo-2", "1.2.0.GA-foo-9" } );
@@ -839,7 +839,7 @@ public class VersioningCalculatorTest
         final VersioningState state = new VersioningState( properties );
         session.setState( state );
 
-        final Map<String, byte[]> dataMap = new HashMap<String, byte[]>();
+        final Map<String, byte[]> dataMap = new HashMap<>();
         if ( versionMap != null && !versionMap.isEmpty() )
         {
             for ( final Map.Entry<ProjectRef, String[]> entry : versionMap.entrySet() )

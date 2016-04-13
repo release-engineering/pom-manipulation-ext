@@ -31,13 +31,12 @@ import java.util.Properties;
 public class ProfileInjectionState
     implements State
 {
-
     private final Logger logger = LoggerFactory.getLogger( getClass() );
 
     /**
      * Suffix to enable this modder
      */
-    public static final String PROFILE_INJECTION_PROPERTY = "profileInjection";
+    private static final String PROFILE_INJECTION_PROPERTY = "profileInjection";
 
     private final ProjectVersionRef profileMgmt;
 

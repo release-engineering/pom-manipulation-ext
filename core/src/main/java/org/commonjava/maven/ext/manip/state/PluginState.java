@@ -23,7 +23,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.Set;
 
 /**
  * Captures configuration relating to plugin alignment from the POMs. Used by {@link PluginManipulator}.
@@ -48,10 +47,10 @@ public class PluginState
      * </pre>
      * Configured by the property <code>-DpluginManagementPrecedence=[REMOTE|LOCAL]</code>
      */
-    public static enum Precedence
+    public enum Precedence
     {
         REMOTE,
-        LOCAL;
+        LOCAL
     }
 
     private final List<ProjectVersionRef> pluginMgmt;
@@ -61,7 +60,7 @@ public class PluginState
     /**
      * Used to store mappings of old property to new version.
      */
-    private final Map<String, String> versionPropertyUpdateMap = new HashMap<String, String>();
+    private final Map<String, String> versionPropertyUpdateMap = new HashMap<>();
 
     public PluginState( final Properties userProps )
     {

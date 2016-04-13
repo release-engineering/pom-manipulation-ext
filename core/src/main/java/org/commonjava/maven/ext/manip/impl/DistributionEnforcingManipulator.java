@@ -49,8 +49,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import static org.apache.commons.lang.StringUtils.isNotEmpty;
 import static org.commonjava.maven.ext.manip.util.IdUtils.ga;
-import static org.commonjava.maven.ext.manip.util.PropertiesUtils.getPropertiesByPrefix;
 
 /**
  * {@link Manipulator} implementation that looks for the deploy- and install-plugin &lt;skip/&gt; options, and enforces one of a couple scenarios:
@@ -87,14 +87,14 @@ public class DistributionEnforcingManipulator
 
     public static final String MAVEN_DEPLOY_ARTIFACTID = "maven-deploy-plugin";
 
-    public static final String SKIP_NODE = "skip";
+    private static final String SKIP_NODE = "skip";
 
-    public static final String DEFAULT_INSTALL_EXEC = "default-install";
+    private static final String DEFAULT_INSTALL_EXEC = "default-install";
 
     private final Logger logger = LoggerFactory.getLogger( getClass() );
 
     @Requirement
-    protected GalleyAPIWrapper galleyWrapper;
+    private GalleyAPIWrapper galleyWrapper;
 
     protected DistributionEnforcingManipulator()
     {
@@ -155,7 +155,7 @@ public class DistributionEnforcingManipulator
         }
 
         final Map<String, String> excluded = state.getExcludedProjects();
-        final Set<Project> changed = new HashSet<Project>();
+        final Set<Project> changed = new HashSet<>();
 
         for ( final Project project : projects )
         {
@@ -228,15 +228,11 @@ public class DistributionEnforcingManipulator
                 {
                     String textVal = ref.getNode()
                                         .getTextContent();
-                    if ( textVal != null )
+
+                    if ( isNotEmpty (textVal) )
                     {
                         textVal = textVal.trim();
-                    }
-
-                    if (!textVal.isEmpty())
-                    {
                         skipSetting = Boolean.parseBoolean( textVal );
-                        baseSkipSetting = skipSetting;
                     }
                 }
             }
@@ -303,13 +299,7 @@ public class DistributionEnforcingManipulator
         {
             return Xpp3DomBuilder.build( new StringReader( config ) );
         }
-        catch ( final XmlPullParserException e )
-        {
-            throw new ManipulationException(
-                                             "Failed to re-parse plugin configuration into Xpp3Dom: %s\nConfig was:\n%s",
-                                             e, e.getMessage(), config );
-        }
-        catch ( final IOException e )
+        catch ( final XmlPullParserException | IOException e )
         {
             throw new ManipulationException(
                                              "Failed to re-parse plugin configuration into Xpp3Dom: %s\nConfig was:\n%s",
@@ -326,7 +316,7 @@ public class DistributionEnforcingManipulator
     {
         final String key = ga( MAVEN_PLUGIN_GROUPID, pluginArtifactId );
 
-        final List<SkipReference> result = new ArrayList<SkipReference>();
+        final List<SkipReference> result = new ArrayList<>();
 
         Map<String, Plugin> pluginMap = project.getManagedPluginMap( base );
         Plugin plugin = pluginMap.get( key );
@@ -351,7 +341,7 @@ public class DistributionEnforcingManipulator
             return Collections.emptyList();
         }
 
-        final Map<ConfigurationContainer, String> configs = new LinkedHashMap<ConfigurationContainer, String>();
+        final Map<ConfigurationContainer, String> configs = new LinkedHashMap<>();
         Object configuration = plugin.getConfiguration();
         if ( configuration != null )
         {
@@ -371,7 +361,7 @@ public class DistributionEnforcingManipulator
             }
         }
 
-        final List<SkipReference> result = new ArrayList<SkipReference>();
+        final List<SkipReference> result = new ArrayList<>();
         for ( final Map.Entry<ConfigurationContainer, String> entry : configs.entrySet() )
         {
             try

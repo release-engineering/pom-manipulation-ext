@@ -26,7 +26,7 @@ public class ProjectVersionEnforcingState
     /**
      * Property used to set the enforcement mode.
      */
-    public static final String ENFORCE_PROJECT_VERSION = "enforce-project-version";
+    private static final String ENFORCE_PROJECT_VERSION = "enforce-project-version";
 
     static
     {

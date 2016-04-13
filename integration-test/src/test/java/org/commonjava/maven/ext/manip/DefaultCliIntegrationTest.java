@@ -42,7 +42,7 @@ public class DefaultCliIntegrationTest
     @Parameters( name = "{0}" )
     public static Collection<Object[]> getFiles()
     {
-        Collection<Object[]> params = new ArrayList<Object[]>();
+        Collection<Object[]> params = new ArrayList<>();
         // Hack to allow a single parameterized test to be run.
         if ( System.getProperties().containsKey( "test-cli" ) )
         {

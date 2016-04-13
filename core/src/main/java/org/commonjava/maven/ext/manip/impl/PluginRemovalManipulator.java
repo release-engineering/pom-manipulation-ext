@@ -85,7 +85,7 @@ public class PluginRemovalManipulator
             return Collections.emptySet();
         }
 
-        final Set<Project> changed = new HashSet<Project>();
+        final Set<Project> changed = new HashSet<>();
 
         for ( final Project project : projects )
         {
@@ -100,8 +100,7 @@ public class PluginRemovalManipulator
         return changed;
     }
 
-    protected boolean apply( final ManipulationSession session, final Project project, final Model model )
-            throws ManipulationException
+    private boolean apply( final ManipulationSession session, final Project project, final Model model )
     {
         final PluginRemovalState state = session.getState( PluginRemovalState.class );
 
@@ -127,20 +126,18 @@ public class PluginRemovalManipulator
     private boolean scanPlugins( List<ProjectRef> pluginsToRemove, List<Plugin> plugins )
     {
         boolean result = false;
-        if ( plugins == null )
+        if ( plugins != null )
         {
-            return result;
-        }
-
-        Iterator<Plugin> it = plugins.iterator();
-        while ( it.hasNext() )
-        {
-            Plugin p = it.next();
-            if ( pluginsToRemove.contains( SimpleProjectRef.parse( p.getKey() ) ) )
+            Iterator<Plugin> it = plugins.iterator();
+            while ( it.hasNext() )
             {
-                logger.debug( "Removing {} ", p.toString() );
-                it.remove();
-                result = true;
+                Plugin p = it.next();
+                if ( pluginsToRemove.contains( SimpleProjectRef.parse( p.getKey() ) ) )
+                {
+                    logger.debug( "Removing {} ", p.toString() );
+                    it.remove();
+                    result = true;
+                }
             }
         }
         return result;

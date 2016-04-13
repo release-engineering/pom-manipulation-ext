@@ -82,8 +82,8 @@
     <projectOwner>Red Hat, Inc.</projectOwner>
     <projectEmail>jcasey@redhat.com</projectEmail>
 
-    <javaVersion>1.6</javaVersion>
-    <javaTestVersion>1.7</javaTestVersion>
+    <javaVersion>1.7</javaVersion>
+    <javaTestVersion>${javaVersion}</javaTestVersion>
 
     <mavenVersion>3.0.4</mavenVersion>
     <atlasVersion>0.16.0</atlasVersion>
@@ -474,13 +474,14 @@
               <signature>
                 <groupId>org.codehaus.mojo.signature
                 </groupId>
-                <artifactId>java16</artifactId>
-                <version>1.1</version>
+                <artifactId>java17</artifactId>
+                <version>1.0</version>
               </signature>
             </configuration>
           </execution>
         </executions>
       </plugin>
+
     </plugins>
 
   </build>

@@ -286,7 +286,7 @@ public class DistributionEnforcingManipulatorTest
         manipulator.init( session );
 
         final Project project = new Project( model );
-        final List<Project> projects = new ArrayList<Project>();
+        final List<Project> projects = new ArrayList<>();
         projects.add( project );
 
         final Set<Project> changed = manipulator.applyChanges( projects, session );
@@ -306,8 +306,8 @@ public class DistributionEnforcingManipulatorTest
     private void applyTest( final Set<Model> models, final Set<Model> expectChanged )
         throws Exception
     {
-        final List<Project> projects = new ArrayList<Project>();
-        final Map<String, Model> manipulatedModels = new HashMap<String, Model>();
+        final List<Project> projects = new ArrayList<>();
+        final Map<String, Model> manipulatedModels = new HashMap<>();
         for ( final Model model : models )
         {
             final Project project = new Project( model );
