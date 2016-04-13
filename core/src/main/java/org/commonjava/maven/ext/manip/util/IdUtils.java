@@ -62,7 +62,7 @@ public final class IdUtils
         else
         {
             final String[] gavs = value.split( "," );
-            final List<ProjectVersionRef> refs = new ArrayList<ProjectVersionRef>();
+            final List<ProjectVersionRef> refs = new ArrayList<>();
             for ( final String gav : gavs )
             {
                 try
@@ -96,7 +96,7 @@ public final class IdUtils
         else
         {
             final String[] gavs = value.split( "," );
-            final List<ArtifactRef> refs = new ArrayList<ArtifactRef>();
+            final List<ArtifactRef> refs = new ArrayList<>();
             for ( final String gav : gavs )
             {
                 try
@@ -130,7 +130,7 @@ public final class IdUtils
         else
         {
             final String[] gavs = value.split( "," );
-            final List<ProjectRef> refs = new ArrayList<ProjectRef>();
+            final List<ProjectRef> refs = new ArrayList<>();
             for ( final String gav : gavs )
             {
                 try

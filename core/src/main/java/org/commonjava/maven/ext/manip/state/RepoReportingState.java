@@ -30,11 +30,9 @@ public class RepoReportingState
     /**
      * Suffix to enable this modder
      */
-    public static final String RR_SUFFIX_SYSPROP = "repo-reporting-removal";
+    private static final String RR_SUFFIX_SYSPROP = "repo-reporting-removal";
 
-    public static final String RR_SETTINGS_SFX_SYSPROP = "removal-backup-settings";
-
-    public static final String RR_SUFFIX_IGNORELOCAL = "repo-removal-ignorelocalhost";
+    private static final String RR_SETTINGS_SFX_SYSPROP = "removal-backup-settings";
 
     private final boolean removal;
 
@@ -67,7 +65,7 @@ public class RepoReportingState
     @Override
     public boolean isEnabled()
     {
-        return removal == true;
+        return removal;
     }
 
     public File getRemovalBackupSettings()

@@ -34,10 +34,10 @@ public interface State
     /**
      * Contains list of manipulations that are active by default for checking in applyChanges.
      */
-    ArrayList<Class<? extends State>> activeByDefault = new ArrayList<Class<? extends State>>();
+    ArrayList<Class<? extends State>> activeByDefault = new ArrayList<>();
 
     /**
      * @return true if this State is enabled.
      */
-    public abstract boolean isEnabled();
+    boolean isEnabled();
 }

@@ -80,7 +80,7 @@ public class ProfileRemovalManipulator
         }
 
         final List<String> profilesToRemove = state.getProfileRemoval();
-        final Set<Project> changed = new HashSet<Project>();
+        final Set<Project> changed = new HashSet<>();
 
         for ( final Project project : projects )
         {

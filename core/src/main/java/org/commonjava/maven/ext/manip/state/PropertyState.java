@@ -37,7 +37,7 @@ public class PropertyState
      * <code>-DpropertyManagement:org.foo:bar-property-mgmt:1.0</code>
      * </pre>
      */
-    public static final String PROPERTY_MANAGEMENT_POM_PROPERTY = "propertyManagement";
+    private static final String PROPERTY_MANAGEMENT_POM_PROPERTY = "propertyManagement";
 
     private final List<ProjectVersionRef> propertyMgmt;
 

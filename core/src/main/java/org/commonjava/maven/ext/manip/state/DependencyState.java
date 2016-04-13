@@ -38,19 +38,19 @@ public class DependencyState
      * <code>-DdependencyExclusion.junit:junit@org.groupId:artifactId</code>
      * </pre>
      */
-    public static final String DEPENDENCY_EXCLUSION_PREFIX = "dependencyExclusion.";
+    private static final String DEPENDENCY_EXCLUSION_PREFIX = "dependencyExclusion.";
 
     /**
      * Enables strict checking of non-exclusion dependency versions before aligning to the given BOM dependencies.
      * For example, <code>1.1</code> will match <code>1.1-rebuild-1</code> in strict mode, but <code>1.2</code> will not.
      */
-    public static final String STRICT_DEPENDENCIES = "strictAlignment";
+    private static final String STRICT_DEPENDENCIES = "strictAlignment";
 
     /**
      * When false, strict version-alignment violations will be reported in the warning log-level, but WILL NOT FAIL THE BUILD. When true, the build
      * will fail if such a violation is detected. Default value is false.
      */
-    public static final String STRICT_VIOLATION_FAILS = "strictViolationFails";
+    private static final String STRICT_VIOLATION_FAILS = "strictViolationFails";
 
     /**
      * When true, it will ignore any suffix ( e.g. rebuild-2 ) on the source version during comparisons. Further, it will
@@ -65,7 +65,7 @@ public class DependencyState
      * <code>-DdependencyManagement:org.foo:bar-dep-mgmt:1.0</code>
      * </pre>
      */
-    public static final String DEPENDENCY_MANAGEMENT_POM_PROPERTY = "dependencyManagement";
+    private static final String DEPENDENCY_MANAGEMENT_POM_PROPERTY = "dependencyManagement";
 
     private final boolean overrideTransitive;
 

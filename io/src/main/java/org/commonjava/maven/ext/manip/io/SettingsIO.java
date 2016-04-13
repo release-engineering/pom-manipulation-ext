@@ -40,11 +40,7 @@ public class SettingsIO
     protected final Logger logger = LoggerFactory.getLogger( getClass() );
 
     @Requirement
-    protected SettingsBuilder settingsBuilder;
-
-    protected SettingsIO()
-    {
-    }
+    private SettingsBuilder settingsBuilder;
 
     public void write( Settings settings, File settingsFile )
         throws ManipulationException

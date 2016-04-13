@@ -51,7 +51,7 @@ public final class PropertiesUtils
      */
     public static Map<String, String> getPropertiesByPrefix( final Properties properties, final String prefix )
     {
-        final Map<String, String> matchedProperties = new HashMap<String, String>();
+        final Map<String, String> matchedProperties = new HashMap<>();
         final int prefixLength = prefix.length();
 
         for ( final String propertyName : properties.stringPropertyNames() )
@@ -173,7 +173,7 @@ public final class PropertiesUtils
         Version v = new Version( oldValue );
         String osgiVersion = v.getOSGiVersionString();
 
-        HashSet<String> s = new HashSet<String>(  );
+        HashSet<String> s = new HashSet<>();
         s.add( oldValue );
         s.add( newValue );
 

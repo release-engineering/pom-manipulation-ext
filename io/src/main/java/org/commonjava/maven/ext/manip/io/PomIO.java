@@ -15,25 +15,6 @@
  */
 package org.commonjava.maven.ext.manip.io;
 
-import static org.apache.commons.io.IOUtils.closeQuietly;
-
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Enumeration;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
-import java.util.jar.Manifest;
-
-import org.apache.commons.io.IOUtils;
 import org.apache.maven.io.util.DocumentModifier;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.io.ModelWriter;
@@ -55,6 +36,24 @@ import org.jdom2.output.LineSeparator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
+import java.util.jar.Manifest;
+
+import static org.apache.commons.io.IOUtils.closeQuietly;
+
 /**
  * Utility class used to read raw models for POMs, and rewrite any project POMs that were changed.
  *
@@ -63,10 +62,9 @@ import org.slf4j.LoggerFactory;
 @Component( role = PomIO.class )
 public class PomIO
 {
-
     private static final String MODIFIED_BY = "[Comment: <!-- Modified by POM Manipulation Extension for Maven";
 
-    protected final Logger logger = LoggerFactory.getLogger( getClass() );
+    private final Logger logger = LoggerFactory.getLogger( getClass() );
 
     protected PomIO()
     {
@@ -90,7 +88,7 @@ public class PomIO
     private List<Project> readModelsForManipulation( File executionRoot, final List<PomPeek> peeked )
         throws ManipulationException
     {
-        final List<Project> projects = new ArrayList<Project>();
+        final List<Project> projects = new ArrayList<>();
 
         for ( final PomPeek peek : peeked )
         {
@@ -110,11 +108,7 @@ public class PomIO
                 in = new FileInputStream( pom );
                 raw = new MavenXpp3Reader().read( in );
             }
-            catch ( final IOException e )
-            {
-                throw new ManipulationException( "Failed to build model for POM: %s.\n--> %s", e, pom, e.getMessage() );
-            }
-            catch ( final XmlPullParserException e )
+            catch ( final IOException | XmlPullParserException e )
             {
                 throw new ManipulationException( "Failed to build model for POM: %s.\n--> %s", e, pom, e.getMessage() );
             }
@@ -135,7 +129,7 @@ public class PomIO
             {
                 logger.debug( "Setting execution root to {} with file {}" +
                       (project.isInheritanceRoot() ? " and is the inheritance root. ": ""), project, pom );
-                project.setExecutionRoot (true);
+                project.setExecutionRoot ();
             }
 
             projects.add( project );
@@ -216,8 +210,9 @@ public class PomIO
                             }
                         }
 
-                        doc.addContent( Arrays.<Content> asList( new Comment("\nModified by POM Manipulation Extension for Maven "
-                                                                                  + manifestInformation + "\n" ) ) );
+                        doc.addContent( Collections.<Content>singletonList(
+                                        new Comment( "\nModified by POM Manipulation Extension for Maven "
+                                                                     + manifestInformation + "\n" ) ) );
                     }
                 }
             });
@@ -275,16 +270,16 @@ public class PomIO
     private List<PomPeek> peekAtPomHierarchy(final File topPom)
         throws ManipulationException
     {
-        final List<PomPeek> peeked = new ArrayList<PomPeek>();
+        final List<PomPeek> peeked = new ArrayList<>();
 
         try
         {
-            final LinkedList<File> pendingPoms = new LinkedList<File>();
+            final LinkedList<File> pendingPoms = new LinkedList<>();
             pendingPoms.add( topPom.getCanonicalFile() );
 
             final String topDir = topPom.getAbsoluteFile().getParentFile().getCanonicalPath();
 
-            final Set<File> seen = new HashSet<File>();
+            final Set<File> seen = new HashSet<>();
 
             File topLevelParent = topPom;
 
@@ -361,7 +356,7 @@ public class PomIO
                 }
             }
 
-            final HashSet<ProjectVersionRef> projectrefs = new HashSet<ProjectVersionRef>();
+            final HashSet<ProjectVersionRef> projectrefs = new HashSet<>();
 
             for ( final PomPeek p : peeked )
             {
@@ -419,13 +414,8 @@ public class PomIO
     private static LineSeparator determineEOL( File pom )
         throws ManipulationException
     {
-        FileInputStream fileIn = null;
-        BufferedInputStream bufferIn = null;
-
-        try
+        try (  BufferedInputStream bufferIn = new BufferedInputStream( new FileInputStream( pom ) ) )
         {
-            fileIn = new FileInputStream( pom );
-            bufferIn = new BufferedInputStream( fileIn );
             int prev = -1;
             int ch;
             while ( ( ch = bufferIn.read() ) != -1 )
@@ -452,11 +442,6 @@ public class PomIO
         catch ( IOException ioe )
         {
             throw new ManipulationException( "Could not determine end-of-line marker mode", ioe );
-        }
-        finally
-        {
-            // Clean up:
-            IOUtils.closeQuietly( bufferIn );
         }
     }
 }

@@ -50,7 +50,7 @@ public class ProfileInjectionManipulator
     private final Logger logger = LoggerFactory.getLogger( getClass() );
 
     @Requirement
-    protected ModelIO modelBuilder;
+    private ModelIO modelBuilder;
 
     /**
      * No prescanning required for Profile injection.
@@ -87,7 +87,7 @@ public class ProfileInjectionManipulator
             return Collections.emptySet();
         }
 
-        final Set<Project> changed = new HashSet<Project>();
+        final Set<Project> changed = new HashSet<>();
 
         final Model remoteModel = modelBuilder.resolveRawModel( state.getRemoteProfileInjectionMgmt() );
         final List<Profile> remoteProfiles = remoteModel.getProfiles();

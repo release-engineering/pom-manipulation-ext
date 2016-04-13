@@ -55,7 +55,7 @@ public class RelocationState
 
     private static final Logger logger = LoggerFactory.getLogger( RelocationState.class );
 
-    private final WildcardMap<ProjectVersionRef> dependencyRelocations = new WildcardMap<ProjectVersionRef>();
+    private final WildcardMap<ProjectVersionRef> dependencyRelocations = new WildcardMap<>();
 
     public RelocationState( final Properties userProps )
                     throws ManipulationException

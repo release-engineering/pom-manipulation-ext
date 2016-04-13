@@ -52,7 +52,7 @@ public class RepoAndReportingRemovalManipulator
     private final Logger logger = LoggerFactory.getLogger( getClass() );
 
     @Requirement
-    protected SettingsIO settingsWriter;
+    private SettingsIO settingsWriter;
 
     /**
      * No prescanning required for Repository and Reporting Removal.
@@ -89,7 +89,7 @@ public class RepoAndReportingRemovalManipulator
             return Collections.emptySet();
         }
 
-        final Set<Project> changed = new HashSet<Project>();
+        final Set<Project> changed = new HashSet<>();
 
         Settings backupSettings = new Settings();
         Profile backupProfile = new Profile();

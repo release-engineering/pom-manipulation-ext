@@ -69,7 +69,7 @@ public class ProjectVersioningManipulator
     private final Logger logger = LoggerFactory.getLogger( getClass() );
 
     @Requirement
-    protected VersionCalculator calculator;
+    private VersionCalculator calculator;
 
     protected ProjectVersioningManipulator()
     {
@@ -129,7 +129,7 @@ public class ProjectVersioningManipulator
             return Collections.emptySet();
         }
 
-        final Set<Project> changed = new HashSet<Project>();
+        final Set<Project> changed = new HashSet<>();
 
         for ( final Project project : projects )
         {
@@ -209,7 +209,7 @@ public class ProjectVersioningManipulator
                 logger.info( "Changed parent version to: " + newVersion + " in " + parent );
                 if (parentGAV.getVersionString().startsWith( "${" ))
                 {
-                    PropertiesUtils.updateProperties( session, new HashSet<Project>( projects ), false, extractPropertyName( parentGAV.getVersionString() ), newVersion );
+                    PropertiesUtils.updateProperties( session, new HashSet<>( projects ), false, extractPropertyName( parentGAV.getVersionString() ), newVersion );
                 }
                 else
                 {
@@ -228,7 +228,7 @@ public class ProjectVersioningManipulator
             {
                 if (gav.getVersionString().startsWith( "${" ))
                 {
-                    PropertiesUtils.updateProperties( session, new HashSet<Project>( projects ), false, extractPropertyName( gav.getVersionString() ), newVersion );
+                    PropertiesUtils.updateProperties( session, new HashSet<>( projects ), false, extractPropertyName( gav.getVersionString() ), newVersion );
                 }
                 else
                 {
@@ -252,7 +252,7 @@ public class ProjectVersioningManipulator
             }
         }
 
-        final Set<ModelBase> bases = new HashSet<ModelBase>();
+        final Set<ModelBase> bases = new HashSet<>();
         bases.add( model );
 
         final List<Profile> profiles = model.getProfiles();
@@ -294,7 +294,7 @@ public class ProjectVersioningManipulator
                         {
                             if (gav.getVersionString().startsWith( "${" ))
                             {
-                                PropertiesUtils.updateProperties( session, new HashSet<Project>( projects ), false, extractPropertyName( gav.getVersionString() ), newVersion );
+                                PropertiesUtils.updateProperties( session, new HashSet<>( projects ), false, extractPropertyName( gav.getVersionString() ), newVersion );
                             }
                             else
                             {
@@ -333,7 +333,7 @@ public class ProjectVersioningManipulator
                         {
                             if (gav.getVersionString().startsWith( "${" ))
                             {
-                                PropertiesUtils.updateProperties( session, new HashSet<Project>( projects ), false, extractPropertyName( gav.getVersionString() ), newVersion );
+                                PropertiesUtils.updateProperties( session, new HashSet<>( projects ), false, extractPropertyName( gav.getVersionString() ), newVersion );
                             }
                             else
                             {

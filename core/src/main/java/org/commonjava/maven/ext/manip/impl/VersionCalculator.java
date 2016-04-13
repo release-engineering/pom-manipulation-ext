@@ -56,8 +56,9 @@ public class VersionCalculator
 
     // Used by getMetadataVersions
     @Requirement
-    protected GalleyAPIWrapper readerWrapper;
+    private GalleyAPIWrapper readerWrapper;
 
+    // For Guice
     protected VersionCalculator()
     {
     }
@@ -82,9 +83,9 @@ public class VersionCalculator
         throws ManipulationException
     {
         final VersioningState state = session.getState( VersioningState.class );
-        final Map<ProjectVersionRef, String> versionsByGAV = new HashMap<ProjectVersionRef, String>();
-        final Map<ProjectVersionRef, Version> versionObjsByGAV = new HashMap<ProjectVersionRef, Version>();
-        final Set<String> versionSet = new HashSet<String>();
+        final Map<ProjectVersionRef, String> versionsByGAV = new HashMap<>();
+        final Map<ProjectVersionRef, Version> versionObjsByGAV = new HashMap<>();
+        final Set<String> versionSet = new HashSet<>();
 
         for ( final Project project : projects )
         {
@@ -202,7 +203,7 @@ public class VersionCalculator
         {
             // Find matching version strings in the remote repo and increment to the next
             // available version
-            final Set<String> versionCandidates = new HashSet<String>();
+            final Set<String> versionCandidates = new HashSet<>();
 
             Map<ProjectRef, Set<String>> rm = state.getRESTMetadata();
             if ( rm != null)
@@ -259,7 +260,7 @@ public class VersionCalculator
             final List<String> versions =
                 metadataView.resolveXPathToAggregatedStringList( "/metadata/versioning/versions/version", true, -1 );
 
-            return new HashSet<String>( versions );
+            return new HashSet<>( versions );
         }
         catch ( final GalleyMavenException e )
         {

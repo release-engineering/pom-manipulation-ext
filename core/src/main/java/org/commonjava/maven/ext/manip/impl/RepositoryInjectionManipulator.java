@@ -48,7 +48,7 @@ public class RepositoryInjectionManipulator
     private final Logger logger = LoggerFactory.getLogger( getClass() );
 
     @Requirement
-    protected ModelIO modelBuilder;
+    private ModelIO modelBuilder;
 
     /**
      * No prescanning required for Repository injection.
@@ -85,7 +85,7 @@ public class RepositoryInjectionManipulator
             return Collections.emptySet();
         }
 
-        final Set<Project> changed = new HashSet<Project>();
+        final Set<Project> changed = new HashSet<>();
 
         final Model remoteModel = modelBuilder.resolveRawModel(state.getRemoteRepositoryInjectionMgmt());
         final List<Repository> remoteRepositories = remoteModel.getRepositories();

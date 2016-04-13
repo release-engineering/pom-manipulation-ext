@@ -27,7 +27,6 @@ import org.commonjava.maven.ext.manip.rest.handler.AddSuffixJettyHandler;
 import org.commonjava.maven.ext.manip.rest.rule.MockServer;
 import org.jboss.byteman.contrib.bmunit.BMRule;
 import org.jboss.byteman.contrib.bmunit.BMUnitRunner;
-import org.jboss.byteman.rule.helper.Helper;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
@@ -71,7 +70,7 @@ public class DefaultVersionTranslatorTest
     public static void startUp()
                     throws IOException
     {
-        aLotOfGavs = new ArrayList<ProjectVersionRef>();
+        aLotOfGavs = new ArrayList<>();
         String longJsonFile = readFileFromClasspath( "example-response-performance-test.json" );
 
         ObjectMapper objectMapper = new ObjectMapper();
@@ -186,20 +185,15 @@ public class DefaultVersionTranslatorTest
     private static String readFileFromClasspath( String filename )
     {
         StringBuilder fileContents = new StringBuilder();
-        Scanner scanner = new Scanner( DefaultVersionTranslatorTest.class.getResourceAsStream( filename ) );
         String lineSeparator = System.getProperty( "line.separator" );
 
-        try
+        try (Scanner scanner = new Scanner( DefaultVersionTranslatorTest.class.getResourceAsStream( filename ) ))
         {
             while ( scanner.hasNextLine() )
             {
                 fileContents.append( scanner.nextLine() ).append( lineSeparator );
             }
             return fileContents.toString();
-        }
-        finally
-        {
-            scanner.close();
         }
     }
 }

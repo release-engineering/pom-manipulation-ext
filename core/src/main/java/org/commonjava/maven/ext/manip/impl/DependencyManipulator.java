@@ -61,19 +61,19 @@ import static org.commonjava.maven.ext.manip.util.IdUtils.gav;
 @Component( role = Manipulator.class, hint = "project-dependency-manipulator" )
 public class DependencyManipulator implements Manipulator
 {
-    protected final Logger logger = LoggerFactory.getLogger( getClass() );
+    private final Logger logger = LoggerFactory.getLogger( getClass() );
 
     /**
      * Used to store mappings of old property to new version for explicit overrides.
      */
-    protected final HashMap<String, String> explicitVersionPropertyUpdateMap = new HashMap<String, String>();
+    private final HashMap<String, String> explicitVersionPropertyUpdateMap = new HashMap<>();
     /**
      * Used to store mappings of old property to new version.
      */
-    protected final HashMap<String, String> versionPropertyUpdateMap = new HashMap<String, String>();
+    private final HashMap<String, String> versionPropertyUpdateMap = new HashMap<>();
 
     @Requirement
-    protected ModelIO effectiveModelBuilder;
+    private ModelIO effectiveModelBuilder;
 
 
     /**
@@ -129,7 +129,7 @@ public class DependencyManipulator implements Manipulator
 
         if ( overrides == null)
         {
-            overrides = new LinkedHashMap<ArtifactRef, String>();
+            overrides = new LinkedHashMap<>();
             final List<ProjectVersionRef> gavs = state.getRemoteBOMDepMgmt();
 
             if ( gavs == null || gavs.isEmpty() )
@@ -154,12 +154,12 @@ public class DependencyManipulator implements Manipulator
         return 40;
     }
 
-    protected Set<Project> internalApplyChanges( final List<Project> projects, final ManipulationSession session,
-                                                 Map<ArtifactRef, String> overrides )
+    private Set<Project> internalApplyChanges( final List<Project> projects, final ManipulationSession session,
+                                               Map<ArtifactRef, String> overrides )
                     throws ManipulationException
     {
         final DependencyState state = session.getState( DependencyState.class );
-        final Set<Project> result = new HashSet<Project>();
+        final Set<Project> result = new HashSet<>();
 
         for ( final Project project : projects )
         {
@@ -230,11 +230,11 @@ public class DependencyManipulator implements Manipulator
                     throws ManipulationException
     {
         // Map of Group : Map of artifactId [ may be wildcard ] : value
-        final WildcardMap<String> explicitOverrides = new WildcardMap<String>();
+        final WildcardMap<String> explicitOverrides = new WildcardMap<>();
         final String projectGA = ga( project );
         final DependencyState state = session.getState( DependencyState.class );
 
-        Map<ArtifactRef, String> moduleOverrides = new LinkedHashMap<ArtifactRef, String>( overrides );
+        Map<ArtifactRef, String> moduleOverrides = new LinkedHashMap<>( overrides );
         moduleOverrides = removeReactorGAs( session, moduleOverrides );
 
         try
@@ -291,7 +291,7 @@ public class DependencyManipulator implements Manipulator
 
                 // Apply any explicit overrides to the top level parent. Convert it to a simulated
                 // dependency so we can reuse applyExplicitOverrides.
-                ArrayList<Dependency> pDeps = new ArrayList<Dependency>();
+                ArrayList<Dependency> pDeps = new ArrayList<>();
                 Dependency d = new Dependency();
                 d.setGroupId( project.getParent().getGroupId() );
                 d.setArtifactId( project.getParent().getArtifactId() );
@@ -321,15 +321,14 @@ public class DependencyManipulator implements Manipulator
                 final Map<ArtifactRef, String> nonMatchingVersionOverrides =
                                 applyOverrides( session, dependencies, moduleOverrides );
 
-                final Map<ArtifactRef, String> matchedOverrides =
-                                new LinkedHashMap<ArtifactRef, String>( moduleOverrides );
+                final Map<ArtifactRef, String> matchedOverrides = new LinkedHashMap<>( moduleOverrides );
                 matchedOverrides.keySet().removeAll( nonMatchingVersionOverrides.keySet() );
 
                 applyExplicitOverrides( explicitVersionPropertyUpdateMap, explicitOverrides, dependencies );
 
                 if ( session.getState( DependencyState.class ).getOverrideTransitive() )
                 {
-                    final List<Dependency> extraDeps = new ArrayList<Dependency>();
+                    final List<Dependency> extraDeps = new ArrayList<>();
 
                     // Add dependencies to Dependency Management which did not match any existing dependency
                     for ( final ArtifactRef var : overrides.keySet() )
@@ -483,7 +482,7 @@ public class DependencyManipulator implements Manipulator
                     throws ManipulationException
     {
         // Duplicate the override map so unused overrides can be easily recorded
-        final Map<ArtifactRef, String> unmatchedVersionOverrides = new LinkedHashMap<ArtifactRef, String>();
+        final Map<ArtifactRef, String> unmatchedVersionOverrides = new LinkedHashMap<>();
         unmatchedVersionOverrides.putAll( overrides );
 
         if ( dependencies == null )
@@ -566,8 +565,7 @@ public class DependencyManipulator implements Manipulator
     private Map<ArtifactRef, String> removeReactorGAs( final ManipulationSession session,
                                                        final Map<ArtifactRef, String> versionOverrides )
     {
-        final Map<ArtifactRef, String> reducedVersionOverrides =
-                        new LinkedHashMap<ArtifactRef, String>( versionOverrides );
+        final Map<ArtifactRef, String> reducedVersionOverrides = new LinkedHashMap<>( versionOverrides );
         for ( final Project project : session.getProjects() )
         {
             final String reactorGA = gav( project.getModel() );
@@ -594,7 +592,7 @@ public class DependencyManipulator implements Manipulator
                                                                   final WildcardMap explicitOverrides )
                     throws ManipulationException
     {
-        final Map<ArtifactRef, String> remainingOverrides = new LinkedHashMap<ArtifactRef, String>( originalOverrides );
+        final Map<ArtifactRef, String> remainingOverrides = new LinkedHashMap<>( originalOverrides );
 
         logger.debug( "Calculating module-specific version overrides. Starting with:\n  {}",
                       join( remainingOverrides.entrySet(), "\n  " ) );
@@ -603,13 +601,13 @@ public class DependencyManipulator implements Manipulator
         // 1. Module-specific: Don't process wildcard overrides here, allow module-specific settings to take precedence.
         // 2. Wildcards: Add these IF there is no corresponding module-specific override.
         final boolean wildcardMode[] = { false, true };
-        for ( int i = 0; i < wildcardMode.length; i++ )
+        for ( boolean aWildcardMode : wildcardMode )
         {
-            for ( final String currentKey : new HashSet<String>( moduleOverrides.keySet() ) )
+            for ( final String currentKey : new HashSet<>( moduleOverrides.keySet() ) )
             {
                 final String currentValue = moduleOverrides.get( currentKey );
 
-                logger.debug( "Processing key {} for override with value {}", currentKey,  currentValue);
+                logger.debug( "Processing key {} for override with value {}", currentKey, currentValue );
 
                 if ( !currentKey.contains( "@" ) )
                 {
@@ -621,7 +619,7 @@ public class DependencyManipulator implements Manipulator
                 logger.debug( "Is wildcard? {}", isWildcard );
 
                 // process module-specific overrides (first)
-                if ( !wildcardMode[i] )
+                if ( !aWildcardMode )
                 {
                     // skip wildcard overrides in this mode
                     if ( isWildcard )
@@ -643,7 +641,7 @@ public class DependencyManipulator implements Manipulator
 
                     if ( moduleGA.equals( projectGA ) )
                     {
-                        if ( currentValue != null && !currentValue.isEmpty())
+                        if ( currentValue != null && !currentValue.isEmpty() )
                         {
                             explicitOverrides.put( SimpleProjectRef.parse( artifactGA ), currentValue );
                             logger.debug( "Overriding module dependency for {} with {} : {}", moduleGA, artifactGA,
@@ -678,7 +676,7 @@ public class DependencyManipulator implements Manipulator
                     }
 
                     // I think this is only used for e.g. dependencyExclusion.groupId:artifactId@*=<explicitVersion>
-                    if ( currentValue != null && !currentValue.isEmpty())
+                    if ( currentValue != null && !currentValue.isEmpty() )
                     {
                         logger.debug( "Overriding module dependency for {} with {} : {}", projectGA, artifactGA,
                                       currentValue );

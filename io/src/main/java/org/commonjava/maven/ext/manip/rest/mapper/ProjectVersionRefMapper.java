@@ -36,13 +36,13 @@ public class ProjectVersionRefMapper implements ObjectMapper
 {
     private final Logger logger = LoggerFactory.getLogger( getClass() );
 
-    private com.fasterxml.jackson.databind.ObjectMapper objectMapper
+    private final com.fasterxml.jackson.databind.ObjectMapper objectMapper
         = new com.fasterxml.jackson.databind.ObjectMapper();
 
     @Override
     public Map<ProjectVersionRef, String> readValue( String s )
     {
-        Map<ProjectVersionRef, String> result = new HashMap<ProjectVersionRef, String>();
+        Map<ProjectVersionRef, String> result = new HashMap<>();
 
         // Workaround for https://github.com/Mashape/unirest-java/issues/122
         // Rather than throwing an exception we return an empty body which allows
@@ -101,7 +101,7 @@ public class ProjectVersionRefMapper implements ObjectMapper
         List requestBody = new ArrayList();
         for ( ProjectVersionRef project : projects )
         {
-            Map<String, Object> gav = new HashMap<String, Object>();
+            Map<String, Object> gav = new HashMap<>();
             gav.put( "groupId", project.getGroupId() );
             gav.put( "artifactId", project.getArtifactId() );
             gav.put( "version", project.getVersionString() );

@@ -72,7 +72,7 @@ public class HttpErrorVersionTranslatorTest
     public static void startUp()
         throws IOException
     {
-        aLotOfGavs = new ArrayList<ProjectVersionRef>();
+        aLotOfGavs = new ArrayList<>();
         String longJsonFile = readFileFromClasspath( "example-response-performance-test.json" );
 
         ObjectMapper objectMapper = new ObjectMapper();
@@ -117,20 +117,15 @@ public class HttpErrorVersionTranslatorTest
     private static String readFileFromClasspath( String filename )
     {
         StringBuilder fileContents = new StringBuilder();
-        Scanner scanner = new Scanner( HttpErrorVersionTranslatorTest.class.getResourceAsStream( filename ) );
         String lineSeparator = System.getProperty( "line.separator" );
 
-        try
+        try (Scanner scanner = new Scanner( HttpErrorVersionTranslatorTest.class.getResourceAsStream( filename ) ))
         {
             while ( scanner.hasNextLine() )
             {
                 fileContents.append( scanner.nextLine() + lineSeparator );
             }
             return fileContents.toString();
-        }
-        finally
-        {
-            scanner.close();
         }
     }
 }

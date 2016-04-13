@@ -44,7 +44,7 @@ public class WildcardMap<T>
      * </p>
      * artifactId may be a wildcard '*'.
      */
-    private final TreeMap<String, LinkedHashMap<String,T>> map = new TreeMap<String, LinkedHashMap<String, T>>();
+    private final TreeMap<String, LinkedHashMap<String,T>> map = new TreeMap<>();
 
     /**
      * @param key the key to look for
@@ -110,7 +110,7 @@ public class WildcardMap<T>
         LinkedHashMap<String,T> vMap = map.get(groupId);
         if ( vMap == null)
         {
-            vMap = new LinkedHashMap<String,T>();
+            vMap = new LinkedHashMap<>();
         }
         boolean wildcard = false;
 

@@ -263,7 +263,7 @@ public class VersionTest
     @Test
     public void testFindHighestMatchingBuildNumber()
     {
-        final Set<String> versionSet = new HashSet<String>();
+        final Set<String> versionSet = new HashSet<>();
         Version version = new Version("1.2.0.Final-foo");
         versionSet.add( "1.2.0.Final-foo-1" );
         versionSet.add( "1.2.0.Final-foo-2" );
@@ -289,7 +289,7 @@ public class VersionTest
     @Test
     public void testZeroFill_FindHighestMatchingBuildNumber()
     {
-        final Set<String> versionSet = new HashSet<String>();
+        final Set<String> versionSet = new HashSet<>();
         final Version majorOnlyVersion = new Version( "7" );
         majorOnlyVersion.appendQualifierSuffix( "redhat" );
         System.out.println("OSGi version: " + majorOnlyVersion.getOSGiVersionString());

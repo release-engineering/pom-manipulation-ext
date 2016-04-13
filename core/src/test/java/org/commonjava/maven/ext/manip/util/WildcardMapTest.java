@@ -38,13 +38,13 @@ public class WildcardMapTest
     @Before
     public void setUp() throws Exception
     {
-        m_listAppender = new ListAppender<ILoggingEvent>();
+        m_listAppender = new ListAppender<>();
         m_listAppender.start();
 
         Logger root = (Logger) LoggerFactory.getLogger(WildcardMap.class);
         root.addAppender(m_listAppender);
 
-        map = new WildcardMap<String>();
+        map = new WildcardMap<>();
     }
 
     @After

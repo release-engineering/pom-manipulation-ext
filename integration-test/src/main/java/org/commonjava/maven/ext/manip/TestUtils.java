@@ -90,7 +90,7 @@ public class TestUtils
                 e.getJavaParams().put( REST_URL_PROPERTY, restURL );
             }
 
-            List<String> args = new ArrayList<String>();
+            List<String> args = new ArrayList<>();
             args.add( "-s" );
             args.add( getDefaultTestLocation( "settings.xml" ) );
             args.add( "-d" );
@@ -100,7 +100,7 @@ public class TestUtils
 
             logger.info ("Returned {} from running {} ", cliExitValue, args);
             // Run Maven
-            Map<String, String> mavenParams = new HashMap<String, String>();
+            Map<String, String> mavenParams = new HashMap<>();
             mavenParams.putAll( DEFAULT_MVN_PARAMS );
             mavenParams.putAll( e.getJavaParams() );
             Integer mavenExitValue = runMaven( e.getMvnCommand(), mavenParams, e.getLocation() );
@@ -134,7 +134,7 @@ public class TestUtils
     private static Integer runCli( List<String> args, Map<String, String> params, String workingDir )
         throws Exception
     {
-        ArrayList<String> arguments = new ArrayList<String>( args );
+        ArrayList<String> arguments = new ArrayList<>( args );
         Collections.addAll( arguments, toJavaParams( params ).split( "\\s+" ) );
         arguments.add( "--log=" + workingDir + File.separator + "build.log" );
         arguments.add( "--file=" + workingDir + File.separator + "pom.xml" );
@@ -155,7 +155,7 @@ public class TestUtils
         ple.setContext( loggerContext );
         ple.start();
 
-        ConsoleAppender<ILoggingEvent> consoleAppender = new ConsoleAppender<ILoggingEvent>();
+        ConsoleAppender<ILoggingEvent> consoleAppender = new ConsoleAppender<>();
         consoleAppender.setEncoder( ple );
         consoleAppender.setContext( loggerContext );
         consoleAppender.start();
@@ -163,7 +163,7 @@ public class TestUtils
         root.addAppender( consoleAppender );
         root.setLevel( Level.INFO );
 
-        return new Integer( result );
+        return result;
     }
 
     /**
@@ -311,7 +311,7 @@ public class TestUtils
 
     public static Map<String, String> propsToMap( Properties props )
     {
-        Map<String, String> map = new HashMap<String, String>();
+        Map<String, String> map = new HashMap<>();
         for ( Object p : props.keySet() )
         {
             map.put( (String) p, props.getProperty( (String) p ) );

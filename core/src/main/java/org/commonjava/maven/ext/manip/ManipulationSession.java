@@ -43,12 +43,12 @@ import java.util.Properties;
 public class ManipulationSession
 {
 
-    public static final String MANIPULATIONS_DISABLED_PROP = "manipulation.disable";
+    private static final String MANIPULATIONS_DISABLED_PROP = "manipulation.disable";
 
     @Requirement( role = Manipulator.class )
     private Map<String, Manipulator> manipulators;
 
-    private final Map<Class<?>, State> states = new HashMap<Class<?>, State>();
+    private final Map<Class<?>, State> states = new HashMap<>();
 
     private MavenSession mavenSession;
 

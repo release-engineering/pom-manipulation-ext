@@ -45,10 +45,10 @@ import static org.commonjava.maven.ext.manip.util.IdUtils.ga;
 public class PropertyManipulator
     implements Manipulator
 {
-    protected final Logger logger = LoggerFactory.getLogger( getClass() );
+    private final Logger logger = LoggerFactory.getLogger( getClass() );
 
     @Requirement
-    protected ModelIO effectiveModelBuilder;
+    private ModelIO effectiveModelBuilder;
 
     @Override
     public void init( final ManipulationSession session )
@@ -81,8 +81,8 @@ public class PropertyManipulator
             return Collections.emptySet();
         }
 
-        final Properties overrides = loadRemotePOMProperties( state.getRemotePropertyMgmt(), session );
-        final Set<Project> changed = new HashSet<Project>();
+        final Properties overrides = loadRemotePOMProperties( state.getRemotePropertyMgmt() );
+        final Set<Project> changed = new HashSet<>();
 
         for ( final Project project : projects )
         {
@@ -127,8 +127,7 @@ public class PropertyManipulator
     }
 
 
-    private Properties loadRemotePOMProperties( final List<ProjectVersionRef> remoteMgmt,
-                                                final ManipulationSession session )
+    private Properties loadRemotePOMProperties( final List<ProjectVersionRef> remoteMgmt )
         throws ManipulationException
     {
         final Properties overrides = new Properties();

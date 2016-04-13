@@ -88,7 +88,7 @@ public class RelocationManipulator
             return Collections.emptySet();
         }
 
-        final Set<Project> changed = new HashSet<Project>();
+        final Set<Project> changed = new HashSet<>();
 
         for ( final Project project : projects )
         {
@@ -103,8 +103,7 @@ public class RelocationManipulator
         return changed;
     }
 
-    protected boolean apply( final ManipulationSession session, final Project project, final Model model )
-            throws ManipulationException
+    private boolean apply( final ManipulationSession session, final Project project, final Model model )
     {
         boolean result = false;
         final RelocationState state = session.getState( RelocationState.class );

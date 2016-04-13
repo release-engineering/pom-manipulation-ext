@@ -16,7 +16,6 @@
 package org.commonjava.maven.ext.manip.state;
 
 import org.commonjava.maven.atlas.ident.ref.ProjectRef;
-import org.commonjava.maven.ext.manip.impl.PluginManipulator;
 import org.commonjava.maven.ext.manip.util.IdUtils;
 
 import java.util.List;

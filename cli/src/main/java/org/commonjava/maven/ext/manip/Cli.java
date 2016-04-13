@@ -61,7 +61,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -71,7 +70,7 @@ import java.util.Set;
 
 public class Cli
 {
-    public static final File DEFAULT_GLOBAL_SETTINGS_FILE =
+    private static final File DEFAULT_GLOBAL_SETTINGS_FILE =
         new File( System.getProperty( "maven.home", System.getProperty( "user.dir", "" ) ), "conf/settings.xml" );
 
     private final Logger logger = LoggerFactory.getLogger( getClass() );
@@ -196,7 +195,7 @@ public class Cli
             ple.setContext( loggerContext );
             ple.start();
 
-            FileAppender<ILoggingEvent> fileAppender = new FileAppender<ILoggingEvent>();
+            FileAppender<ILoggingEvent> fileAppender = new FileAppender<>();
             fileAppender.setEncoder( ple );
             fileAppender.setContext( loggerContext );
             fileAppender.setName( "fileLogging" );
@@ -244,7 +243,7 @@ public class Cli
                 Set<String> activeProfiles = null;
                 if ( cmd.hasOption( 'P' ) )
                 {
-                    activeProfiles = new HashSet<String>();
+                    activeProfiles = new HashSet<>();
                     Collections.addAll( activeProfiles, cmd.getOptionValue( 'P' ).split( "," ) );
                 }
                 Set<ArtifactRef> ts = RESTManipulator.establishDependencies( pomIO.parseProject( session.getPom() ), activeProfiles );
@@ -387,7 +386,7 @@ public class Cli
         ProfileSelector profileSelector = container.lookup( ProfileSelector.class );
         ProfileActivationContext profileActivationContext =
             new DefaultProfileActivationContext().setActiveProfileIds( effectiveSettings.getActiveProfiles() );
-        List<org.apache.maven.model.Profile> modelProfiles = new ArrayList<org.apache.maven.model.Profile>();
+        List<org.apache.maven.model.Profile> modelProfiles = new ArrayList<>();
         for ( Profile profile : effectiveSettings.getProfiles() )
         {
             modelProfiles.add( SettingsUtils.convertFromSettingsProfile( profile ) );
@@ -403,7 +402,7 @@ public class Cli
                     // do nothing
                 }
             } );
-        List<String> activeProfiles = new ArrayList<String>();
+        List<String> activeProfiles = new ArrayList<>();
         for ( org.apache.maven.model.Profile profile : activeModelProfiles )
         {
             activeProfiles.add( profile.getId() );

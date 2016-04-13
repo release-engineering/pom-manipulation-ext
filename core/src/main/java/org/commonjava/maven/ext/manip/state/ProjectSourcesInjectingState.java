@@ -34,21 +34,21 @@ public class ProjectSourcesInjectingState
 {
 
     /** Set this property to true using <code>-Dproject.src.skip=true</code> in order to turn off injection of the project-sources plugin. */
-    public static final String PROJECT_SOURCES_SKIP_PROPERTY = "project.src.skip";
+    private static final String PROJECT_SOURCES_SKIP_PROPERTY = "project.src.skip";
 
     /** Set this property to true using <code>-Dproject.meta.skip=true</code> in order to turn off injection of the project-sources plugin. */
-    public static final String BMMP_SKIP_PROPERTY = "project.meta.skip";
+    private static final String BMMP_SKIP_PROPERTY = "project.meta.skip";
 
     /** Set this property to control the version of the project-sources plugin to be injected. */
-    public static final String PROJECT_SOURCES_PLUGIN_VERSION_PROPERTY = "project.src.version";
+    private static final String PROJECT_SOURCES_PLUGIN_VERSION_PROPERTY = "project.src.version";
 
     /** The default plugin version to use in case no alternative version is specified on the command line. */
-    public static final String DEFAULT_PROJECT_SOURCES_PLUGIN_VERSION = "0.3";
+    private static final String DEFAULT_PROJECT_SOURCES_PLUGIN_VERSION = "0.3";
 
     /** Set this property to control the version of the build-metadata plugin to be injected. */
-    public static final String BMMP_VERSION_PROPERTY = "project.meta.version";
+    private static final String BMMP_VERSION_PROPERTY = "project.meta.version";
 
-    public static final String DEFAULT_BMMP_VERSION = "1.7.0";
+    private static final String DEFAULT_BMMP_VERSION = "1.7.0";
 
     private final boolean projectsourcesEnabled;
 

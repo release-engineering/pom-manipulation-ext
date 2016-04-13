@@ -145,7 +145,7 @@ public class ProjectSourcesInjectingManipulator
 
                         final Xpp3Dom xml = new Xpp3Dom( "configuration" );
 
-                        final Map<String, Object> config = new HashMap<String, Object>();
+                        final Map<String, Object> config = new HashMap<>();
                         config.put( "createPropertiesReport", true );
                         config.put( "hideCommandLineInfo", false );
                         config.put( "hideJavaOptsInfo", false );

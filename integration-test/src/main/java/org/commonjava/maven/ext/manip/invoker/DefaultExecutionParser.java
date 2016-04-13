@@ -48,7 +48,7 @@ public class DefaultExecutionParser
     public Collection<Execution> parse( String workingDir )
     {
         final Properties invokerProperties = TestUtils.loadProps( workingDir + "/invoker.properties" );
-        Map<Integer, Execution> executions = new TreeMap<Integer, Execution>();
+        Map<Integer, Execution> executions = new TreeMap<>();
 
         for ( Object rawKey : invokerProperties.keySet() )
         {
