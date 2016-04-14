@@ -276,7 +276,7 @@ public final class PropertiesUtils
                     }
                     else
                     {
-                        logger.error( "Replacing property with a suffix but the suffix does not match. Old value is {} and new is {}",
+                        logger.error( "Replacing property with a new version but the existing version does not match. Old value is {} and new is {}",
                                       existingPropertyMapping, newVersion );
                         throw new ManipulationException(
                                         "Property replacement clash - updating property to both {} and {} ",

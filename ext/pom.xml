@@ -204,6 +204,9 @@
                   <include>org.codehaus.groovy:groovy</include>
                   <include>org.codehaus.groovy:groovy-json</include>
                   <include>org.codehaus.groovy:groovy-xml</include>
+                  <include>com.jayway.jsonpath:json-path</include>
+                  <include>net.minidev:*</include>
+                  <include>org.ow2.asm:asm</include>
                 </includes>
               </artifactSet>
               <relocations>

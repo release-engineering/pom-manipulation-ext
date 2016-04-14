@@ -31,4 +31,6 @@
 
   <logger name="org.apache" level="WARN" />
   <logger name="httpclient.wire" level="WARN" />
+  <logger name="com.jayway.jsonpath.internal.JsonContext" level="WARN" />
+
 </configuration>
