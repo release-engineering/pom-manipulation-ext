@@ -85,17 +85,17 @@ public class JSONManipulator
         final Set<Project> changed = new HashSet<>();
         final List<JSONState.JSONOperation> scripts = state.getJSONOperations();
 
-        for (JSONState.JSONOperation operation : scripts)
+        for ( final Project project : projects )
         {
-            for ( final Project project : projects )
+            if ( project.isExecutionRoot() )
             {
-                if ( project.isExecutionRoot() )
+                for ( JSONState.JSONOperation operation : scripts )
                 {
                     File target = new File( project.getPom().getParentFile(), operation.getFile() );
                     DocumentContext dc = null;
 
-                    logger.info ("Attempting to start JSON update to file {} with xpath {} and replacement '{}' ",
-                                 target, operation.getXPath(), operation.getUpdate());
+                    logger.info( "Attempting to start JSON update to file {} with xpath {} and replacement '{}' ",
+                                 target, operation.getXPath(), operation.getUpdate() );
 
                     try
                     {
@@ -107,10 +107,11 @@ public class JSONManipulator
 
                         dc = jsonIO.parseJSON( target );
 
-                        List o = dc.read ( operation.getXPath() );
-                        if ( o.size() == 0)
+                        List o = dc.read( operation.getXPath() );
+                        if ( o.size() == 0 )
                         {
-                            logger.error( "XPath {} did not find any expressions within {} ", operation.getXPath(), operation.getFile() );
+                            logger.error( "XPath {} did not find any expressions within {} ", operation.getXPath(),
+                                          operation.getFile() );
                             throw new ManipulationException( "XPath did not resolve to a valid value" );
                         }
 
@@ -137,6 +138,8 @@ public class JSONManipulator
                         throw new ManipulationException( "Caught JsonPath", e );
                     }
                 }
+
+                break;
             }
         }
         return changed;
