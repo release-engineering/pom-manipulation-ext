@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2016 Red Hat, Inc (jcasey@redhat.com)
+ *  Copyright (C) 2012 Red Hat, Inc (jcasey@redhat.com)
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 package org.commonjava.maven.ext.manip.state;
 
 import org.commonjava.maven.ext.manip.ManipulationException;
-import org.commonjava.maven.ext.manip.impl.JSONManipulator;
+import org.commonjava.maven.ext.manip.impl.XMLManipulator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,34 +27,34 @@ import java.util.Properties;
 import static org.apache.commons.lang.StringUtils.isNotEmpty;
 
 /**
- * Captures configuration relating to JSON manipulation. Used by {@link JSONManipulator}.
+ * Captures configuration relating to XML manipulation. Used by {@link XMLManipulator}.
  */
-public class JSONState
+public class XMLState
     implements State
 {
     private final Logger logger = LoggerFactory.getLogger( getClass() );
 
    /**
-     * Property on the command line that handles modifying JSON files. The format is
+     * Property on the command line that handles modifying XML files. The format is
      *
-     * -DjsonUpdate=<file>:<json-xpath-expression>:[<replacement-value>] [,....]
+     * -DxmlUpdate=<file>:<xml-xpath-expression>:[<replacement-value>] [,....]
      *
      * 1. If replacement-value is blank it becomes a delete instead of replace.
      * 2. Multiple operations may be fed in via comma separator.
      *
      * TODO: If <file> is blank this should be a wildcard for all files.
      */
-    private static final String JSON_PROPERTY = "jsonUpdate";
+    private static final String XML_PROPERTY = "xmlUpdate";
 
     /**
      * Used to store mappings of old property to new version.
      */
-    private final List<JSONOperation> jsonOperations = new ArrayList<>();
+    private final List<XMLOperation> xmlOperations = new ArrayList<>();
 
-    public JSONState( final Properties userProps )
+    public XMLState( final Properties userProps )
                     throws ManipulationException
     {
-        String property = userProps.getProperty( JSON_PROPERTY );
+        String property = userProps.getProperty( XML_PROPERTY );
 
         if ( isNotEmpty( property ) )
         {
@@ -67,9 +67,9 @@ public class JSONState
                 {
                     throw new ManipulationException( "Unable to parse property " + property );
                 }
-                jsonOperations.add( new JSONOperation( components[0], components[1], components[2] ) );
+                xmlOperations.add( new XMLOperation( components[0], components[1], components[2] ) );
             }
-            logger.debug ("Found jsonOperations {} ", jsonOperations);
+            logger.debug ( "Found xmlOperations {} ", xmlOperations );
         }
     }
 
@@ -81,22 +81,22 @@ public class JSONState
     @Override
     public boolean isEnabled()
     {
-        return jsonOperations != null && !jsonOperations.isEmpty();
+        return xmlOperations != null && !xmlOperations.isEmpty();
     }
 
-    public List<JSONOperation> getJSONOperations()
+    public List<XMLOperation> getXMLOperations()
     {
-        return jsonOperations;
+        return xmlOperations;
     }
 
 
-    public final static class JSONOperation
+    public final static class XMLOperation
     {
         String file;
         String xpath;
         String update;
 
-        public JSONOperation ( String file, String xpath, String update)
+        public XMLOperation ( String file, String xpath, String update)
         {
             this.file = file;
             this.xpath = xpath;

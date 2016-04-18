@@ -95,16 +95,7 @@ public class DistributionEnforcingManipulator
 
     @Requirement
     private GalleyAPIWrapper galleyWrapper;
-
-    protected DistributionEnforcingManipulator()
-    {
-    }
-
-    public DistributionEnforcingManipulator( final GalleyAPIWrapper galleyWrapper )
-    {
-        this.galleyWrapper = galleyWrapper;
-    }
-
+    
     /**
      * Sets the mode to on, off, detect (from install plugin), or none (disabled) based on user properties.
      * @see DistributionEnforcingState

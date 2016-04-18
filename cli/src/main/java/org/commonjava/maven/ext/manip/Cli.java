@@ -56,10 +56,17 @@ import org.codehaus.plexus.component.repository.exception.ComponentLookupExcepti
 import org.commonjava.maven.atlas.ident.ref.ArtifactRef;
 import org.commonjava.maven.ext.manip.impl.RESTManipulator;
 import org.commonjava.maven.ext.manip.io.PomIO;
+import org.commonjava.maven.ext.manip.io.XMLIO;
 import org.commonjava.maven.ext.manip.model.SimpleScopedArtifactRef;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathFactory;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -145,6 +152,11 @@ public class Cli
                                  .numberOfArgs( 2 )
                                  .valueSeparator( '=' )
                                  .desc( "Java Properties" )
+                                 .build() );
+        options.addOption( Option.builder( "x" )
+                                 .hasArgs()
+                                 .numberOfArgs( 2 )
+                                 .desc( "XPath tester ( file : xpath )" )
                                  .build() );
 
         CommandLineParser parser = new DefaultParser();
@@ -238,7 +250,27 @@ public class Cli
         {
             manipulationManager.init( session );
 
-            if ( cmd.hasOption( 'p' ) || cmd.hasOption( "printGAVTC" ) )
+            if ( cmd.hasOption( 'x' ) )
+            {
+                String []params = cmd.getOptionValues( 'x' );
+                if ( params.length != 2)
+                {
+                    throw new ManipulationException( "Invalid number of parameters (" + params.length + "); should be <file> <xpath>" );
+                }
+                XMLIO xmlIO = new XMLIO();
+
+                Document doc = xmlIO.parseXML( new File ( params[0] ) );
+                XPath xPath = XPathFactory.newInstance().newXPath();
+                NodeList nodeList = (NodeList) xPath.evaluate( params[1], doc, XPathConstants.NODESET);
+                logger.info ("Found {} node", nodeList.getLength());
+
+                for ( int i = 0; i < nodeList.getLength(); i++)
+                {
+                    Node node = nodeList.item( i );
+                    logger.info  ("Found node {} and value {} ", node.getNodeName(), node.getTextContent());
+                }
+            }
+            else if ( cmd.hasOption( 'p' ) || cmd.hasOption( "printGAVTC" ) )
             {
                 Set<String> activeProfiles = null;
                 if ( cmd.hasOption( 'P' ) )

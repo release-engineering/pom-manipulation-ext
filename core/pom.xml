@@ -138,6 +138,17 @@
       <artifactId>byteman-bmunit</artifactId>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>org.xmlunit</groupId>
+      <artifactId>xmlunit-core</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.commonjava.maven.ext</groupId>
+      <artifactId>pom-manipulation-io</artifactId>
+      <type>test-jar</type>
+      <scope>test</scope>
+    </dependency>
 
   </dependencies>
 
