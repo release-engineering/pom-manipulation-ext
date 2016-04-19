@@ -1,5 +1,12 @@
-Slate
-=====
+
+# GH-Pages Branch
+
+This branch contains the github pages content for https://github.com/release-engineering/pom-manipulation-ext and the pages are hosted at https://release-engineering.github.io/pom-manipulation-ext
+
+It is possible to use Jekyll (https://help.github.com/articles/using-jekyll-with-pages) to preview the changes. Jekyll can be run with `jekyll serve --watch -V`
+
+
+## Slate
 Slate is responsive theme for GitHub Pages. [Fork it](https://github.com/jsncostello/slate/fork_select) and use it on your own site or generate one automatically using [GitHub Pages](http://pages.github.com).
 
 Slate in use:
