@@ -134,7 +134,7 @@ public class ProjectVersioningManipulator
         for ( final Project project : projects )
         {
             final String ga = ga( project );
-            logger.info( getClass().getSimpleName() + " applying changes to: " + ga );
+            logger.info( "Applying changes to: " + ga );
             if ( applyVersioningChanges( session, projects, project, state ) )
             {
                 changed.add( project );

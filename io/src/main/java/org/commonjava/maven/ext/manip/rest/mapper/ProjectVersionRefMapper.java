@@ -61,7 +61,7 @@ public class ProjectVersionRefMapper implements ObjectMapper
         }
         else if (s.startsWith( "{\\\"message\\\":" ) )
         {
-            logger.error( "Read string {}", s );
+            logger.error( "Read message string {}", s );
             return result;
         }
 

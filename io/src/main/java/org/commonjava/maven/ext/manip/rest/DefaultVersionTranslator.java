@@ -18,6 +18,8 @@ package org.commonjava.maven.ext.manip.rest;
 import com.mashape.unirest.http.HttpResponse;
 import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
+import org.apache.commons.codec.binary.Base32;
+import org.apache.commons.lang.math.RandomUtils;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.ext.manip.ListUtils;
 import org.commonjava.maven.ext.manip.rest.exception.ClientException;
@@ -26,10 +28,14 @@ import org.commonjava.maven.ext.manip.rest.exception.ServerException;
 import org.commonjava.maven.ext.manip.rest.mapper.ProjectVersionRefMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
+
+import static org.apache.commons.lang.StringUtils.isNotEmpty;
 
 /**
  * @author vdedik@redhat.com
@@ -37,6 +43,10 @@ import java.util.Map;
 public class DefaultVersionTranslator
     implements VersionTranslator
 {
+    private static final Random RANDOM = new Random();
+
+    private final Base32 codec = new Base32( );
+
     private final Logger logger = LoggerFactory.getLogger( getClass() );
 
     private final String endpointUrl;
@@ -65,6 +75,20 @@ public class DefaultVersionTranslator
 
         // Execute request to get translated versions
         HttpResponse<Map> r;
+        String headerContext;
+
+        if ( isNotEmpty (MDC.get("LOG-CONTEXT") ) )
+        {
+            headerContext = MDC.get( "LOG-CONTEXT" );
+        }
+        else
+        {
+            // If we have no MDC PME has been used as the entry point. Dummy one up for DA.
+            byte[] randomBytes = new byte[20];
+            RANDOM.nextBytes( randomBytes );
+            headerContext = "pme-" + codec.encodeAsString( randomBytes );
+        }
+        logger.debug ("Using log-ctx {} ", headerContext);
 
         for (List<ProjectVersionRef> projects : partition )
         {
@@ -74,6 +98,7 @@ public class DefaultVersionTranslator
                 r = Unirest.post( this.endpointUrl )
                            .header( "accept", "application/json" )
                            .header( "Content-Type", "application/json" )
+                           .header( "Log-Context", headerContext)
                            .body( projects )
                            .asObject( Map.class );
             }

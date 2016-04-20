@@ -99,7 +99,7 @@ public class RepoAndReportingRemovalManipulator
         for ( final Project project : projects )
         {
             final String ga = ga( project );
-            logger.info( getClass().getSimpleName() + " applying changes to: " + ga );
+            logger.info( "Applying changes to: " + ga );
             final Model model = project.getModel();
 
             Iterator<Repository> it = model.getRepositories().iterator();

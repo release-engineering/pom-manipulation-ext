@@ -66,9 +66,6 @@ public class PomIO
 
     private final Logger logger = LoggerFactory.getLogger( getClass() );
 
-    protected PomIO()
-    {
-    }
 
     public List<Project> parseProject (final File pom) throws ManipulationException
     {

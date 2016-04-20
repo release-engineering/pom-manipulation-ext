@@ -16,16 +16,12 @@
 
 package org.commonjava.maven.ext.manip.io;
 
-import com.sun.org.apache.xalan.internal.xsltc.compiler.util.Type;
-import com.sun.org.apache.xml.internal.serializer.OutputPropertiesFactory;
 import org.apache.commons.io.FileUtils;
 import org.codehaus.plexus.component.annotations.Component;
 import org.commonjava.maven.ext.manip.ManipulationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
-import org.w3c.dom.NodeList;
-import org.w3c.dom.Node;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -39,7 +35,6 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.StringWriter;
 

@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2016 Red Hat, Inc (jcasey@redhat.com)
+ *  Copyright (C) 2012 Red Hat, Inc (jcasey@redhat.com)
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.contrib.java.lang.system.SystemOutRule;
 import org.junit.rules.TestName;
 import org.slf4j.LoggerFactory;
 
@@ -33,14 +34,18 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.List;
 
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-public class HttpMessageVersionTranslatorTest
+public class HttpHeaderHeaderTest
 {
     private DefaultVersionTranslator versionTranslator;
+
+    @Rule
+    public final SystemOutRule systemOutRule = new SystemOutRule().enableLog();
 
     @Rule
     public TestName testName = new TestName();
@@ -53,9 +58,19 @@ public class HttpMessageVersionTranslatorTest
                             HttpServletResponse response )
                         throws IOException, ServletException
         {
-            response.setStatus(HttpServletResponse.SC_BAD_GATEWAY);
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+
+            Enumeration<String> names = request.getHeaderNames();
+            while ( names.hasMoreElements() )
+            {
+                String name = names.nextElement();
+
+                if ( name.equals( "Log-Context" ) )
+                {
+                    response.getWriter().println( "{\\\"message\\\":\\\"" + request.getHeader( name ) + "\\\"}");
+                }
+            }
             baseRequest.setHandled( true );
-            response.getWriter().println( "{\\\"message\\\":\\\"Communication with remote repository failed\\\"}");
         }
     } );
 
@@ -68,7 +83,7 @@ public class HttpMessageVersionTranslatorTest
     }
 
     @Test
-    public void testTranslateVersionsWithMessage()
+    public void testVerifyContentHeaderMessage()
     {
         List<ProjectVersionRef> gavs = new ArrayList<ProjectVersionRef>()
         {{
@@ -78,11 +93,11 @@ public class HttpMessageVersionTranslatorTest
         try
         {
             versionTranslator.translateVersions( gavs );
-            fail( "Failed to throw RestException when server failed to respond." );
+            fail( "Failed to throw RestException." );
         }
         catch ( RestException ex )
         {
-            assertTrue( ex.getMessage().contains( "502" ) );
+            assertTrue( systemOutRule.getLog().contains( "message" ) );
         }
     }
 }

@@ -97,7 +97,7 @@ public class ProfileInjectionManipulator
             if ( project.isInheritanceRoot())
             {
                 final String ga = ga( project );
-                logger.info( getClass().getSimpleName() + " applying changes to: " + ga );
+                logger.info( "Applying changes to: " + ga );
                 final Model model = project.getModel();
                 final List<Profile> profiles = model.getProfiles();
 

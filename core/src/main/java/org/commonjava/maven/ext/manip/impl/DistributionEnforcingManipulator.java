@@ -95,7 +95,7 @@ public class DistributionEnforcingManipulator
 
     @Requirement
     private GalleyAPIWrapper galleyWrapper;
-    
+
     /**
      * Sets the mode to on, off, detect (from install plugin), or none (disabled) based on user properties.
      * @see DistributionEnforcingState
@@ -166,7 +166,7 @@ public class DistributionEnforcingManipulator
                 continue;
             }
 
-            logger.info( getClass().getSimpleName() + " applying skip-flag enforment mode of: " + mode + " to: " + ga );
+            logger.info( "Applying skip-flag enforcement mode of: " + mode + " to: " + ga );
 
             final Model model = project.getModel();
 

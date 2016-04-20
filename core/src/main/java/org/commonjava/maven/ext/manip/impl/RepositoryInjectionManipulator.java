@@ -94,7 +94,7 @@ public class RepositoryInjectionManipulator
         for ( final Project project : projects )
         {
             final String ga = ga( project );
-            logger.info( getClass().getSimpleName() + " applying changes to: " + ga );
+            logger.info( "Applying changes to: " + ga );
             final Model model = project.getModel();
 
             if ( project.isInheritanceRoot() )

@@ -59,22 +59,11 @@ import static org.apache.commons.lang.StringUtils.isEmpty;
 @Component( role = ModelIO.class )
 public class ModelIO
 {
-
     private final Logger logger = LoggerFactory.getLogger( getClass() );
-
-    @Requirement
-    private ModelBuilder modelBuilder;
 
     @Requirement
     private GalleyAPIWrapper galleyWrapper;
 
-    /**
-     * Protected constructor for component instantiation/injection
-     */
-    protected ModelIO()
-    {
-
-    }
 
     /**
      * Read the raw model (equivalent to the pom file on disk) from a given GAV.

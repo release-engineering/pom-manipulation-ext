@@ -21,7 +21,7 @@
     <!-- encoders are assigned the type
          ch.qos.logback.classic.encoder.PatternLayoutEncoder by default -->
     <encoder>
-      <pattern>[%thread] %-5level %logger{36} - %msg%n</pattern>
+      <pattern>%mdc{LOG-CONTEXT}%level %logger{36} - %msg%n</pattern>
     </encoder>
   </appender>
 
