@@ -15,6 +15,7 @@
  */
 package org.commonjava.maven.ext.manip.io;
 
+import org.apache.commons.lang.reflect.FieldUtils;
 import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef;
 import org.commonjava.maven.ext.manip.ManipulationException;
 import org.commonjava.maven.ext.manip.ManipulationSession;
@@ -26,8 +27,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
-
-import java.lang.reflect.Field;
 
 @RunWith(BMUnitRunner.class)
 public class ModelResolverTest
@@ -52,9 +51,7 @@ public class ModelResolverTest
                             "cache-dir" ) );
         final GalleyAPIWrapper wrapper = new GalleyAPIWrapper( galleyInfra );
         final ModelIO model = new ModelIO();
-        final Field f = ModelIO.class.getDeclaredField( "galleyWrapper" );
-        f.setAccessible( true );
-        f.set(model, wrapper);
+        FieldUtils.writeField( model, "galleyWrapper", wrapper, true );
 
         model.resolveRawModel( SimpleProjectVersionRef.parse( "org.commonjava:commonjava:5"  ) );
     }

@@ -40,6 +40,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
+import org.apache.commons.lang.reflect.FieldUtils;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.execution.DefaultMavenExecutionRequest;
 import org.apache.maven.execution.DefaultMavenExecutionResult;
@@ -147,7 +148,7 @@ public class DistributionEnforcingManipulatorTest
         model.setBuild( build );
 
         applyTest( off, model, model );
-        assertSkip( model, null, false, true, Boolean.FALSE );
+        assertSkip( model, null, true, Boolean.FALSE );
     }
 
     @Test
@@ -157,7 +158,7 @@ public class DistributionEnforcingManipulatorTest
         final Model model = parseModelResource( "simple-deploy-skip.pom" );
 
         applyTest( off, model, model );
-        assertSkip( model, null, false, true, Boolean.FALSE );
+        assertSkip( model, null, true, Boolean.FALSE );
     }
 
     @Test
@@ -167,7 +168,7 @@ public class DistributionEnforcingManipulatorTest
         final Model model = parseModelResource( "simple-deploy-skip.pom" );
 
         applyTest( detect, model, model );
-        assertSkip( model, null, false, true, Boolean.FALSE );
+        assertSkip( model, null, true, Boolean.FALSE );
     }
 
     @Test
@@ -177,7 +178,7 @@ public class DistributionEnforcingManipulatorTest
         final Model model = parseModelResource( "simple-detect-skip.pom" );
 
         applyTest( detect, model, model );
-        assertSkip( model, null, false, true, Boolean.FALSE );
+        assertSkip( model, null, true, Boolean.FALSE );
     }
 
     @Test
@@ -187,7 +188,7 @@ public class DistributionEnforcingManipulatorTest
         final Model model = parseModelResource( "exec-detect-skip.pom" );
 
         applyTest( detect, model, model );
-        assertSkip( model, null, false, true, Boolean.FALSE );
+        assertSkip( model, null, true, Boolean.FALSE );
     }
 
     @Test
@@ -197,7 +198,7 @@ public class DistributionEnforcingManipulatorTest
         final Model model = parseModelResource( "profile-deploy-skip.pom" );
 
         applyTest( off, model, model );
-        assertSkip( model, "test", false, true, Boolean.FALSE );
+        assertSkip( model, "test", true, Boolean.FALSE );
     }
 
     private void initTest( final EnforcingMode mode, final boolean enabled )
@@ -240,8 +241,7 @@ public class DistributionEnforcingManipulatorTest
 
     }
 
-    private void assertSkip( final Model model, final String profileId, final boolean managed, final boolean deploy,
-                             final boolean state )
+    private void assertSkip( final Model model, final String profileId, final boolean deploy, final boolean state )
     {
         BuildBase build = null;
         if ( profileId != null )
@@ -366,7 +366,7 @@ public class DistributionEnforcingManipulatorTest
 
         final GalleyAPIWrapper wrapper = new GalleyAPIWrapper( galleyInfra );
 
-        manipulator = new DistributionEnforcingManipulator( wrapper );
+        manipulator = new DistributionEnforcingManipulator( );
+        FieldUtils.writeField (manipulator, "galleyWrapper", wrapper, true);
     }
-
 }

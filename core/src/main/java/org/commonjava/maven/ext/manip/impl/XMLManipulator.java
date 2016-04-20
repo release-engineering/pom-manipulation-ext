@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2016 Red Hat, Inc (jcasey@redhat.com)
+ *  Copyright (C) 2012 Red Hat, Inc (jcasey@redhat.com)
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -15,18 +15,23 @@
  */
 package org.commonjava.maven.ext.manip.impl;
 
-import com.jayway.jsonpath.DocumentContext;
-import com.jayway.jsonpath.JsonPathException;
 import org.codehaus.plexus.component.annotations.Component;
 import org.codehaus.plexus.component.annotations.Requirement;
 import org.commonjava.maven.ext.manip.ManipulationException;
 import org.commonjava.maven.ext.manip.ManipulationSession;
-import org.commonjava.maven.ext.manip.io.JSONIO;
+import org.commonjava.maven.ext.manip.io.XMLIO;
 import org.commonjava.maven.ext.manip.model.Project;
-import org.commonjava.maven.ext.manip.state.JSONState;
+import org.commonjava.maven.ext.manip.state.XMLState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpressionException;
+import javax.xml.xpath.XPathFactory;
 import java.io.File;
 import java.util.Collections;
 import java.util.HashSet;
@@ -37,17 +42,19 @@ import java.util.Set;
 import static org.apache.commons.lang.StringUtils.isEmpty;
 
 /**
- * {@link Manipulator} implementation that can modify JSON files. Configuration
- * is stored in a {@link JSONState} instance, which is in turn stored in the {@link ManipulationSession}.
+ * {@link Manipulator} implementation that can modify XML files. Configuration
+ * is stored in a {@link XMLState} instance, which is in turn stored in the {@link ManipulationSession}.
  */
-@Component( role = Manipulator.class, hint = "json-manipulator" )
-public class JSONManipulator
+@Component( role = Manipulator.class, hint = "xml-manipulator" )
+public class XMLManipulator
     implements Manipulator
 {
     private final Logger logger = LoggerFactory.getLogger( getClass() );
 
+    private XPath xPath = XPathFactory.newInstance().newXPath();
+
     @Requirement
-    private JSONIO jsonIO;
+    private XMLIO xmlIO;
 
     @Override
     public void scan( final List<Project> projects, final ManipulationSession session )
@@ -56,16 +63,16 @@ public class JSONManipulator
     }
 
     /**
-     * Initialize the {@link JSONState} state holder in the {@link ManipulationSession}. This state holder detects
+     * Initialize the {@link XMLState} state holder in the {@link ManipulationSession}. This state holder detects
      * configuration from the Maven user properties (-D properties from the CLI) and makes it available for
-     * later invocations of {@link JSONManipulator#scan(List, ManipulationSession)} and the apply* methods.
+     * later invocations of {@link XMLManipulator#scan(List, ManipulationSession)} and the apply* methods.
      */
     @Override
     public void init( final ManipulationSession session )
                     throws ManipulationException
     {
         final Properties userProps = session.getUserProperties();
-        session.setState( new JSONState( userProps ) );
+        session.setState( new XMLState( userProps ) );
     }
 
     /**
@@ -75,7 +82,7 @@ public class JSONManipulator
     public Set<Project> applyChanges( final List<Project> projects, final ManipulationSession session )
         throws ManipulationException
     {
-        final JSONState state = session.getState( JSONState.class );
+        final XMLState state = session.getState( XMLState.class );
         if ( !session.isEnabled() || !state.isEnabled() )
         {
             logger.debug( getClass().getSimpleName() + ": Nothing to do!" );
@@ -83,17 +90,17 @@ public class JSONManipulator
         }
 
         final Set<Project> changed = new HashSet<>();
-        final List<JSONState.JSONOperation> scripts = state.getJSONOperations();
+        final List<XMLState.XMLOperation> scripts = state.getXMLOperations();
 
         for ( final Project project : projects )
         {
             if ( project.isExecutionRoot() )
             {
-                for ( JSONState.JSONOperation operation : scripts )
+                for ( XMLState.XMLOperation operation : scripts )
                 {
                     File target = new File( project.getPom().getParentFile(), operation.getFile() );
 
-                    logger.info( "Attempting to start JSON update to file {} with xpath {} and replacement '{}' ",
+                    logger.info( "Attempting to start XML update to file {} with xpath {} and replacement '{}' ",
                                  target, operation.getXPath(), operation.getUpdate() );
 
                     internalApplyChanges (target, operation);
@@ -107,47 +114,41 @@ public class JSONManipulator
         return changed;
     }
 
-    // Package accessible so tests can use it.
-    void internalApplyChanges( File target, JSONState.JSONOperation operation ) throws ManipulationException
+    void internalApplyChanges( File target, XMLState.XMLOperation operation ) throws ManipulationException
     {
-        DocumentContext dc = null;
+        Document doc = xmlIO.parseXML( target );
+
         try
         {
-            if ( !target.exists() )
+            NodeList nodeList = (NodeList) xPath.evaluate( operation.getXPath(), doc, XPathConstants.NODESET );
+
+            if ( nodeList.getLength() == 0 )
             {
-                logger.error( "Unable to locate JSON file {} ", target );
-                throw new ManipulationException( "Unable to locate JSON file " + target );
+                throw new ManipulationException( "Did not locate XML using XPath " + xPath );
             }
 
-            dc = jsonIO.parseJSON( target );
-
-            List o = dc.read( operation.getXPath() );
-            if ( o.size() == 0 )
+            for ( int i = 0; i < nodeList.getLength(); i++ )
             {
-                logger.error( "XPath {} did not find any expressions within {} ", operation.getXPath(),
-                              operation.getFile() );
-                throw new ManipulationException( "XPath did not resolve to a valid value" );
+                Node node = nodeList.item( i );
+
+                if ( isEmpty( operation.getUpdate() ) )
+                {
+                    // Delete
+                    node.getParentNode().removeChild( node );
+                }
+                else
+                {
+                    // Update
+                    node.setTextContent( operation.getUpdate() );
+                }
             }
 
-            if ( isEmpty( operation.getUpdate() ) )
-            {
-                // Delete
-                logger.info( "Deleting {} on {}", operation.getXPath(), dc.toString() );
-                dc.delete( operation.getXPath() );
-            }
-            else
-            {
-                // Update
-                logger.info( "Updating {} on {}", operation.getXPath(), dc.toString() );
-                dc.set( operation.getXPath(), operation.getUpdate() );
-            }
-
-            jsonIO.writeJSON( target, dc.jsonString() );
+            xmlIO.writeXML( target, doc );
         }
-        catch ( JsonPathException e )
+        catch ( XPathExpressionException e )
         {
-            logger.error( "Caught JSON exception processing file {}, document context {} ", target, dc, e );
-            throw new ManipulationException( "Caught JsonPath", e );
+            logger.error( "Caught XML exception processing file {}, document context {} ", target, doc, e );
+            throw new ManipulationException( "Caught XML exception processing file", e );
         }
     }
 

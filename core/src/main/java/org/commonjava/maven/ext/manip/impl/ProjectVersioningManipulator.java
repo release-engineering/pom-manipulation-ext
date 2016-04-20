@@ -75,7 +75,7 @@ public class ProjectVersioningManipulator
     {
     }
 
-    public ProjectVersioningManipulator( final VersionCalculator calculator )
+    protected ProjectVersioningManipulator( final VersionCalculator calculator )
     {
         this.calculator = calculator;
     }

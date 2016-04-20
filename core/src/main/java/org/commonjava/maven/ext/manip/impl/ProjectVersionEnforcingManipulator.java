@@ -50,10 +50,6 @@ public class ProjectVersionEnforcingManipulator
 
     private final Logger logger = LoggerFactory.getLogger( getClass() );
 
-    protected ProjectVersionEnforcingManipulator()
-    {
-    }
-
     /**
      * Sets the mode based on user properties and defaults.
      * @see ProjectVersionEnforcingState
