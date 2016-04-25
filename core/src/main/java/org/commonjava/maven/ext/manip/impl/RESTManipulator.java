@@ -24,6 +24,7 @@ import org.commonjava.maven.atlas.ident.ref.ProjectRef;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleTypeAndClassifier;
+import org.commonjava.maven.atlas.ident.version.VersionSpec;
 import org.commonjava.maven.ext.manip.ManipulationException;
 import org.commonjava.maven.ext.manip.ManipulationSession;
 import org.commonjava.maven.ext.manip.model.Project;
@@ -81,21 +82,9 @@ public class RESTManipulator implements Manipulator
             return;
         }
 
-        final ArrayList<ProjectVersionRef> restParam = new ArrayList<>();
-        for ( final Project project : projects )
-        {
-            // TODO: Check this : For the rest API I think we need to check every project GA not just inheritance root.
-            restParam.add( project.getKey() );
-        }
-
         Set<ArtifactRef> localDeps = establishDependencies( projects, null );
 
-        // Ok we now have a defined list of top level project plus a unique list of all possible dependencies.
-        // Need to send that to the rest interface to get a translation.
-        for ( ArtifactRef p : localDeps )
-        {
-            restParam.add( p.asProjectVersionRef() );
-        }
+        final List<ProjectVersionRef> restParam = getRestParam(projects, session, localDeps);
 
         // Call the REST to populate the result.
         logger.debug ("Passing the following into the REST client api {} ", restParam);
@@ -117,19 +106,24 @@ public class RESTManipulator implements Manipulator
 
         // Parse the rest result for the project GAs and store them in versioning state for use
         // there by incremental suffix calculation.
+        VersioningState vstate = session.getState(VersioningState.class);
         Map<ProjectRef, Set<String>> versionStates = new HashMap<>();
         for ( final Project p : projects )
         {
-            if ( restResult.containsKey( p.getKey() ) )
+            ProjectRef projectKey = p.getKey().asProjectRef();
+            // ".asProjectRef()" must be there, even if ProjectRef
+            // is a supertype of ProjectVersionRef, equals does not respect this
+            ProjectVersionRef restKey = tryOmitSnapshotFromVersion(vstate, p.getKey());
+            if ( restResult.containsKey( restKey ) )
             {
                 // Found part of the current project to store in Versioning State
-                Set<String> versions = versionStates.get( p.getKey().asProjectRef() );
+                Set<String> versions = versionStates.get( projectKey );
                 if (versions == null)
                 {
                     versions = new HashSet<>();
-                    versionStates.put( p.getKey().asProjectRef(), versions );
+                    versionStates.put( projectKey, versions );
                 }
-                versions.add( restResult.get( p.getKey() ) );
+                versions.add( restResult.get( restKey ) );
             }
         }
         logger.info ("Added the following ProjectRef:Version from REST call into VersionState {}", versionStates);
@@ -140,15 +134,55 @@ public class RESTManipulator implements Manipulator
         final Map<ArtifactRef, String> overrides = new HashMap<>();
 
         // Convert the loaded remote ProjectVersionRefs to the original ArtifactRefs
-        for (ArtifactRef a : localDeps )
+        for (ArtifactRef artifactKey : localDeps )
         {
-            if (restResult.containsKey( a.asProjectVersionRef() ))
+            ProjectVersionRef restKey = tryOmitSnapshotFromVersion(vstate, artifactKey);
+            if (restResult.containsKey( restKey ))
             {
-                overrides.put( a, restResult.get( a.asProjectVersionRef()));
+                overrides.put( artifactKey, restResult.get( restKey ));
             }
         }
         logger.debug( "Setting REST Overrides {} ", overrides );
         ds.setRemoteRESTOverrides( overrides );
+    }
+
+    private static ProjectVersionRef tryOmitSnapshotFromVersion(VersioningState vstate, ProjectVersionRef projectKey)
+            throws ManipulationException {
+        return vstate.preserveSnapshot() ? projectKey : omitSnapshotFromVersion(projectKey);
+    }
+
+    private static List<ProjectVersionRef> getRestParam(List<Project> projects, ManipulationSession session, Set<ArtifactRef> localDeps)
+            throws ManipulationException
+    {
+        final List<ProjectVersionRef> restParam = new ArrayList<>();
+        final VersioningState vstate = session.getState(VersioningState.class);
+        for ( final Project project : projects )
+        {
+            // TODO: Check this : For the rest API I think we need to check every project GA not just inheritance root.
+            restParam.add( tryOmitSnapshotFromVersion(vstate, project.getKey()) );
+        }
+
+        // Ok we now have a defined list of top level project plus a unique list of all possible dependencies.
+        // Need to send that to the rest interface to get a translation.
+        for ( ArtifactRef p : localDeps )
+        {
+            ProjectVersionRef ref = p.asProjectVersionRef();
+            restParam.add(tryOmitSnapshotFromVersion(vstate, ref));
+        }
+        return restParam;
+    }
+
+    private static ProjectVersionRef omitSnapshotFromVersion(ProjectVersionRef original)
+            throws ManipulationException
+    {
+        ProjectVersionRef res = original;
+        if(original.isSnapshot()) {
+            VersionSpec versionSpec = original.getVersionSpec();
+            if(!versionSpec.isSingle())
+                throw new ManipulationException("Version spec cannot be a range.");
+            res = original.selectVersion(versionSpec.renderStandard().replace("-SNAPSHOT", ""), true);
+        }
+        return res;
     }
 
     /**
