@@ -74,6 +74,7 @@ public class RESTManipulator implements Manipulator
                     throws ManipulationException
     {
         final RESTState state = session.getState( RESTState.class );
+        final VersioningState vs = session.getState( VersioningState.class );
 
         if ( !session.isEnabled() || !state.isEnabled() )
         {
@@ -87,15 +88,22 @@ public class RESTManipulator implements Manipulator
         {
             // TODO: Check this : For the rest API I think we need to check every project GA not just inheritance root.
             // Strip SNAPSHOT from the version for matching. DA will handle OSGi conversion.
-            ProjectVersionRef newKey;
-            if ( project.getKey().getVersionString().endsWith( "-SNAPSHOT" ))
+            ProjectVersionRef newKey = new SimpleProjectVersionRef( project.getKey() );
+            if ( project.getKey().getVersionString().endsWith( "-SNAPSHOT" ) )
             {
-                newKey = new SimpleProjectVersionRef( project.getKey().asProjectRef(),
-                    project.getKey().getVersionString().substring( 0, project.getKey().getVersionString().indexOf( "-SNAPSHOT" ) ) );
-            }
-            else
-            {
-                newKey = new SimpleProjectVersionRef( project.getKey() );
+                if ( !vs.preserveSnapshot() )
+                {
+                    newKey = new SimpleProjectVersionRef( project.getKey().asProjectRef(), project.getKey()
+                                                                                                  .getVersionString()
+                                                                                                  .substring( 0, project
+                                                                                                                  .getKey()
+                                                                                                                  .getVersionString()
+                                                                                                                  .indexOf( "-SNAPSHOT" ) ) );
+                }
+                else
+                {
+                    logger.warn( "SNAPSHOT detected for REST call but preserve-snapshots is enabled." );
+                }
             }
             newProjectKeys.add( newKey );
         }
@@ -146,7 +154,6 @@ public class RESTManipulator implements Manipulator
             }
         }
         logger.info ("Added the following ProjectRef:Version from REST call into VersionState {}", versionStates);
-        final VersioningState vs = session.getState( VersioningState.class );
         vs.setRESTMetadata (versionStates);
 
         final DependencyState ds = session.getState( DependencyState.class );
