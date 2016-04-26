@@ -47,6 +47,8 @@ public class AddSuffixJettyHandler
 
     private static final String DEFAULT_SUFFIX = "redhat-1";
 
+    private static final String EXTENDED_SUFFIX = "redhat-2";
+
     private final String endpoint;
 
     private final String method;
@@ -102,9 +104,23 @@ public class AddSuffixJettyHandler
             List<Map<String, Object>> responseBody = new ArrayList<>();
             for ( Map<String, Object> gav : requestBody)
             {
-                String version = (String) gav.get( "version" );
                 List<String> availableVersions = new ArrayList<>();
-                String bestMatchVersion = version + "-" + this.suffix;
+
+                String version = (String) gav.get( "version" );
+                String bestMatchVersion;
+
+                // Specific to certain integration tests. For the SNAPSHOT test we want to verify it can handle
+                // a already built version. The PME code should remove SNAPSHOT before sending it.
+                if ( ((String)gav.get ("artifactId")).startsWith( "rest-dependency-version-manip-child-module" ) )
+                {
+                    bestMatchVersion = version + "-" + EXTENDED_SUFFIX;
+                }
+                else
+                {
+                    bestMatchVersion = version + "-" + this.suffix;
+                }
+                LOGGER.info ("For GA {}, requesting version {} and got bestMatch {} ", gav,  version, bestMatchVersion);
+
                 availableVersions.add( bestMatchVersion );
 
                 gav.put( "bestMatchVersion", bestMatchVersion );

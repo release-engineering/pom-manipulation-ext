@@ -74,6 +74,7 @@ public class RESTManipulator implements Manipulator
                     throws ManipulationException
     {
         final RESTState state = session.getState( RESTState.class );
+        final VersioningState vs = session.getState( VersioningState.class );
 
         if ( !session.isEnabled() || !state.isEnabled() )
         {
@@ -82,11 +83,31 @@ public class RESTManipulator implements Manipulator
         }
 
         final ArrayList<ProjectVersionRef> restParam = new ArrayList<>();
+        final ArrayList<ProjectVersionRef> newProjectKeys = new ArrayList<>();
         for ( final Project project : projects )
         {
             // TODO: Check this : For the rest API I think we need to check every project GA not just inheritance root.
-            restParam.add( project.getKey() );
+            // Strip SNAPSHOT from the version for matching. DA will handle OSGi conversion.
+            ProjectVersionRef newKey = new SimpleProjectVersionRef( project.getKey() );
+            if ( project.getKey().getVersionString().endsWith( "-SNAPSHOT" ) )
+            {
+                if ( !vs.preserveSnapshot() )
+                {
+                    newKey = new SimpleProjectVersionRef( project.getKey().asProjectRef(), project.getKey()
+                                                                                                  .getVersionString()
+                                                                                                  .substring( 0, project
+                                                                                                                  .getKey()
+                                                                                                                  .getVersionString()
+                                                                                                                  .indexOf( "-SNAPSHOT" ) ) );
+                }
+                else
+                {
+                    logger.warn( "SNAPSHOT detected for REST call but preserve-snapshots is enabled." );
+                }
+            }
+            newProjectKeys.add( newKey );
         }
+        restParam.addAll( newProjectKeys );
 
         Set<ArtifactRef> localDeps = establishDependencies( projects, null );
 
@@ -118,22 +139,21 @@ public class RESTManipulator implements Manipulator
         // Parse the rest result for the project GAs and store them in versioning state for use
         // there by incremental suffix calculation.
         Map<ProjectRef, Set<String>> versionStates = new HashMap<>();
-        for ( final Project p : projects )
+        for ( final ProjectVersionRef p : newProjectKeys )
         {
-            if ( restResult.containsKey( p.getKey() ) )
+            if ( restResult.containsKey( p ) )
             {
                 // Found part of the current project to store in Versioning State
-                Set<String> versions = versionStates.get( p.getKey().asProjectRef() );
+                Set<String> versions = versionStates.get( p.asProjectRef() );
                 if (versions == null)
                 {
                     versions = new HashSet<>();
-                    versionStates.put( p.getKey().asProjectRef(), versions );
+                    versionStates.put( p.asProjectRef(), versions );
                 }
-                versions.add( restResult.get( p.getKey() ) );
+                versions.add( restResult.get( p ) );
             }
         }
         logger.info ("Added the following ProjectRef:Version from REST call into VersionState {}", versionStates);
-        final VersioningState vs = session.getState( VersioningState.class );
         vs.setRESTMetadata (versionStates);
 
         final DependencyState ds = session.getState( DependencyState.class );
