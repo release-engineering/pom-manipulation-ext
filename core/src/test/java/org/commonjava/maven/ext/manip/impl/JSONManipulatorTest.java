@@ -32,6 +32,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.Properties;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -86,5 +87,25 @@ public class JSONManipulatorTest
                                                                                    "https://maven.repository.redhat.com/ga/" ) );
         assertTrue( FileUtils.readFileToString( target ).contains( "https://maven.repository.redhat.com/ga/" ) );
         assertFalse( FileUtils.contentEquals( pluginFile, target ) );
+    }
+
+    @Test(expected = ManipulationException.class)
+    public void testStateConstructionNoEscape() throws ManipulationException
+    {
+        Properties p = new Properties();
+        p.put ("jsonUpdate",
+               "amg-plugin-registry.json:$..plugins[0].description:CORS,and:controlling");
+
+        new JSONState( p );
+    }
+    @Test
+    public void testStateConstructionEscaping() throws ManipulationException
+    {
+        Properties p = new Properties();
+        p.put ("jsonUpdate",
+               "amg-plugin-registry.json:$xpath-with\\:and\\,:replace with space and \\,\\:controlling\\:access_to_resources_outside_of_an_originating_domain\\,and_to_this_domain.");
+
+
+        JSONState js = new JSONState( p );
     }
 }

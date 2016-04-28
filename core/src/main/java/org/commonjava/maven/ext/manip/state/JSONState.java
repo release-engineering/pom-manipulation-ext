@@ -58,18 +58,26 @@ public class JSONState
 
         if ( isNotEmpty( property ) )
         {
-            final String[] ops = property.split( "," );
+            final String[] ops = property.split( "(?<!\\\\)," );
+            for ( int i=0; i<ops.length; i++)
+            {
+                ops[i] = ops[i].replaceAll( "\\\\,", "," );
+            }
 
             for ( String operation : ops)
             {
-                String []components = operation.split( ":", 3 );
+                String []components = operation.split( "(?<!\\\\):", 3 );
+                for ( int i=0; i<components.length; i++)
+                {
+                    components[i] = components[i].replaceAll( "\\\\:", ":" );
+                }
                 if ( components.length != 3 )
                 {
-                    throw new ManipulationException( "Unable to parse property " + property );
+                    throw new ManipulationException( "Unable to parse command " + operation + " from property " + property );
                 }
+                logger.debug ("Adding JSONOperation with file {}, xpath {} and update {}", components[0], components[1], components[2] );
                 jsonOperations.add( new JSONOperation( components[0], components[1], components[2] ) );
             }
-            logger.debug ("Found jsonOperations {} ", jsonOperations);
         }
     }
 
@@ -116,6 +124,12 @@ public class JSONState
         public String getUpdate()
         {
             return update;
+        }
+
+        @Override
+        public String toString ()
+        {
+            return "File " + file + " xpath '" + xpath + "' update " + update;
         }
     }
 }
