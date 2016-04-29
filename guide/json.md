@@ -16,7 +16,7 @@ Multiple comma separated values may be supplied. If the replacement-value is **n
 
 The format for the _xpath-style_ expression is specified in the JSON-Path project [here](https://github.com/jayway/JsonPath).
 
-**Note**: Any ',' or ':' in the path expression or replacement value should be escaped with '\'.
+**Note**: Any ',' or ':' in the path expression or replacement value should be escaped with '\\'.
 
 As an example:
 
