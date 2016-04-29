@@ -57,6 +57,7 @@ import org.commonjava.maven.atlas.ident.ref.ArtifactRef;
 import org.commonjava.maven.ext.manip.impl.RESTManipulator;
 import org.commonjava.maven.ext.manip.io.PomIO;
 import org.commonjava.maven.ext.manip.io.XMLIO;
+import org.commonjava.maven.ext.manip.io.ConfigIO;
 import org.commonjava.maven.ext.manip.model.SimpleScopedArtifactRef;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -204,7 +205,7 @@ public class Cli
         if ( cmd.hasOption( "log-context" ) )
         {
             String mdc = cmd.getOptionValue( "log-context" );
-            if ( isNotEmpty (mdc) )
+            if ( isNotEmpty( mdc ) )
             {
                 // Append a space to split up level and log-context markers.
                 MDC.put( "LOG-CONTEXT", mdc + ' ' );
@@ -262,6 +263,17 @@ public class Cli
             logger.info( "Skipping manipulation as previous execution found." );
             return 0;
         }
+        try
+        {
+            Properties config = new ConfigIO().parse( target.getParentFile() );
+            session.getUserProperties().putAll( config );
+        }
+        catch ( ManipulationException e )
+        {
+            logger.error( "POM Manipulation failed: Unable to read config file ", e );
+            return 1;
+        }
+
 
         try
         {

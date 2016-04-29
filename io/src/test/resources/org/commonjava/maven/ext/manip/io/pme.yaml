@@ -1,0 +1,11 @@
+da:
+  configKey: value
+  configHierarchy:
+    configKey1: value1
+
+pme:
+  version.suffix: redhat-1
+  dependencyExclusion.com.google.guava:guava@*: 18.0
+  repo-reporting-removal: true
+  jsonUpdate: >
+    distro/data/src/main/resources/data/basic-settings.apiman.json:$$..apimanVersion:${apiman:version}\,manager/ui/war/npm-shrinkwrap.json:$$..resolved:

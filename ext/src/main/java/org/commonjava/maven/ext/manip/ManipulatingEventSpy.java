@@ -22,10 +22,12 @@ import org.apache.maven.execution.ExecutionEvent;
 import org.apache.maven.execution.ExecutionEvent.Type;
 import org.codehaus.plexus.component.annotations.Component;
 import org.codehaus.plexus.component.annotations.Requirement;
+import org.commonjava.maven.ext.manip.io.ConfigIO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.util.Properties;
 
 /**
  * Implements hooks necessary to apply modificationprojectBs in the Maven bootstrap, before the build starts.
@@ -45,6 +47,9 @@ public class ManipulatingEventSpy
 
     @Requirement
     private ManipulationSession session;
+
+    @Requirement
+    private ConfigIO configIO;
 
     @Override
     public void onEvent( final Object event )
@@ -68,14 +73,16 @@ public class ManipulatingEventSpy
                 {
                     if ( ee.getSession() != null )
                     {
-                        if ( ee.getSession()
-                               .getRequest()
-                               .getLoggingLevel() == 0 )
+                        if ( ee.getSession().getRequest().getLoggingLevel() == 0 )
                         {
                             final ch.qos.logback.classic.Logger root =
-                                (ch.qos.logback.classic.Logger) LoggerFactory.getLogger( org.slf4j.Logger.ROOT_LOGGER_NAME );
+                                            (ch.qos.logback.classic.Logger) LoggerFactory.getLogger( org.slf4j.Logger.ROOT_LOGGER_NAME );
                             root.setLevel( Level.DEBUG );
                         }
+
+                        Properties config = configIO.parse( ee.getSession().getRequest().getPom().getParentFile() );
+                        ee.getSession().getRequest().getUserProperties().putAll( config );
+
                         session.setMavenSession( ee.getSession() );
                         manipulationManager.init( session );
                     }
@@ -95,13 +102,14 @@ public class ManipulatingEventSpy
                         logger.info( "Manipulation engine disabled. No project found." );
                         return;
                     }
-                    else if ( new File ( ee.getSession().getRequest().getPom().getParentFile(), ManipulationManager.MARKER_FILE).exists() )
+                    else if ( new File( ee.getSession().getRequest().getPom().getParentFile(),
+                                        ManipulationManager.MARKER_FILE ).exists() )
                     {
                         logger.info( "Skipping manipulation as previous execution found." );
                         return;
                     }
 
-                    manipulationManager.scanAndApply ( session );
+                    manipulationManager.scanAndApply( session );
                 }
             }
         }
