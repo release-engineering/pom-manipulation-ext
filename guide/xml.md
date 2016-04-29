@@ -9,7 +9,6 @@ PME offers the ability to modify one or many xml files in the repository prior t
 **This should not be used to modify XML POM files within the Maven Model but for e.g. assembly files**
 
 
-
 ### Configuration
 
 The manipulator is controlled by the `xmlUpdate` property. The format is
@@ -19,6 +18,8 @@ The manipulator is controlled by the `xmlUpdate` property. The format is
 Multiple comma separated values may be supplied. If the replacement-value is **not** specified the operation becomes a _delete_ rather than an _update_.
 
 The format for the _xpath-style_ expression is as used in [XPath](https://docs.oracle.com/javase/7/docs/api/javax/xml/xpath/XPath.html) and in the specification [here](https://www.w3.org/TR/xpath).
+
+**Note**: Any ',' or ':' in the path expression or replacement value should be escaped with '\'.
 
 As an example:
 

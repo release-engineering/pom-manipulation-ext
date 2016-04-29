@@ -16,6 +16,8 @@ Multiple comma separated values may be supplied. If the replacement-value is **n
 
 The format for the _xpath-style_ expression is specified in the JSON-Path project [here](https://github.com/jayway/JsonPath).
 
+**Note**: Any ',' or ':' in the path expression or replacement value should be escaped with '\'.
+
 As an example:
 
     -DjsonUpdate='manager/ui/war/npm-shrinkwrap.json:$..resolved:,distro/data/src/main/resources/data/basic-settings.json:$..version:1.3.1.rebuild-1'
