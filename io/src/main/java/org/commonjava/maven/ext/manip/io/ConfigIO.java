@@ -37,7 +37,8 @@ public class ConfigIO
     private final Logger logger = LoggerFactory.getLogger( ConfigIO.class );
 
     private final static String propertyFileString = "pme.properties";
-    private final static String yamlFileString = "pme.yaml";
+    private final static String yamlPMEFileString = "pme.yaml";
+    private final static String yamlPNCFileString = "pnc.yaml";
 
     public Properties parse ( final String workingDir) throws ManipulationException
     {
@@ -46,23 +47,33 @@ public class ConfigIO
 
     public Properties parse ( final File workingDir) throws ManipulationException
     {
-        Properties result = new Properties( );
+        Properties result = new Properties();
         File propertyFile = new File( workingDir, propertyFileString );
-        File yamlFile = new File( workingDir, yamlFileString );
+        File yamlPMEFile = new File( workingDir, yamlPMEFileString );
+        File yamlPNCFile = new File( workingDir, yamlPNCFileString );
 
-        if ( propertyFile.exists() && yamlFile.exists() )
+        if ( propertyFile.exists() && ( yamlPMEFile.exists() || yamlPNCFile.exists() ) )
         {
             throw new ManipulationException( "Cannot have both yaml and property configuration files." );
         }
-        if ( yamlFile.exists())
+        else if ( yamlPMEFile.exists() && yamlPNCFile.exists() )
         {
-            result = loadYamlFile( yamlFile );
-            logger.debug ("Read yaml file containing {}.", result);
+            throw new ManipulationException( "Cannot have both yaml configuration file formats." );
+        }
+        if ( yamlPMEFile.exists() )
+        {
+            result = loadYamlFile( yamlPMEFile );
+            logger.debug( "Read yaml file containing {}.", result );
+        }
+        else if ( yamlPNCFile.exists() )
+        {
+            result = loadYamlFile( yamlPNCFile );
+            logger.debug( "Read yaml file containing {}.", result );
         }
         else if ( propertyFile.exists() )
         {
             result = loadPropertiesFile( propertyFile );
-            logger.debug ("Read properties file containing {}.", result);
+            logger.debug( "Read properties file containing {}.", result );
         }
         return result;
     }
