@@ -11,7 +11,7 @@ Normally all configuration is passed in via command line properties e.g.
 However, PME also offers the ability to read a local configuration file. This file may be in either YAML or Java Properties format.
 
 * Only one configuration file must exist.
-* The file must be named either `pme.yaml` or `pme.properties`.
+* The file must be named either `pme.yaml`, `pnc.yaml` or `pme.properties`.
 * The file must be placed at the execution root (i.e. the root directory of the SCM checkout).
 
 ### Yaml
