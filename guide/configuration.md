@@ -14,6 +14,8 @@ However, PME also offers the ability to read a local configuration file. This fi
 * The file must be named either `pme.yaml`, `pnc.yaml` or `pme.properties`.
 * The file must be placed at the execution root (i.e. the root directory of the SCM checkout).
 
+**Note**: The configuration will _override_ any command line properties.
+
 ### Yaml
 
 The format is as follows
