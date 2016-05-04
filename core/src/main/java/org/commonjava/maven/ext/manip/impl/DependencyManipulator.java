@@ -456,7 +456,7 @@ public class DependencyManipulator implements Manipulator
                 }
                 else
                 {
-                    logger.debug( "Explicit overrides : force aligning {} to {}.", groupIdArtifactId, overrideVersion );
+                    logger.info( "Explicit overrides : force aligning {} to {}.", groupIdArtifactId, overrideVersion );
 
                     if ( ! PropertiesUtils.cacheProperty( versionPropertyUpdateMap, oldVersion, overrideVersion, dependency, true ))
                     {
