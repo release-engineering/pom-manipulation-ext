@@ -6,7 +6,13 @@ title: "XML Manipulation"
 
 PME offers the ability to modify one or many xml files in the repository prior to running the build.
 
-**This should not be used to modify XML POM files within the Maven Model but for e.g. assembly files**
+<table bgcolor="red">
+<tr>
+<td>
+<b>Warning : This should not be used to modify XML POM files within the Maven Model (as they will get overwriten by the POM Manipulator) but for e.g. assembly files.</b>
+</td>
+</tr>
+</table>
 
 
 ### Configuration
