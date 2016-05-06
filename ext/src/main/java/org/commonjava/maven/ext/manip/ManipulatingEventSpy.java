@@ -79,10 +79,11 @@ public class ManipulatingEventSpy
                                             (ch.qos.logback.classic.Logger) LoggerFactory.getLogger( org.slf4j.Logger.ROOT_LOGGER_NAME );
                             root.setLevel( Level.DEBUG );
                         }
-
-                        Properties config = configIO.parse( ee.getSession().getRequest().getPom().getParentFile() );
-                        ee.getSession().getRequest().getUserProperties().putAll( config );
-
+                        if ( ee.getSession().getRequest().getPom() != null )
+                        {
+                            Properties config = configIO.parse( ee.getSession().getRequest().getPom().getParentFile() );
+                            ee.getSession().getRequest().getUserProperties().putAll( config );
+                        }
                         session.setMavenSession( ee.getSession() );
                         manipulationManager.init( session );
                     }
