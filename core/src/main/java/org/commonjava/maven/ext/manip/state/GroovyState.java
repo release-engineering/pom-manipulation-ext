@@ -34,7 +34,7 @@ public class GroovyState
     /**
      * The name of the property which contains a comma separated list of remote groovy scripts to load.
      * <pre>
-     * <code>-DpluginRemoval=org.foo:bar-plugin,....</code>
+     * <code>-DgroovyScripts=org.foo:bar-script,....</code>
      * </pre>
      */
     private static final String GROOVY_SCRIPT = "groovyScripts";

@@ -74,7 +74,8 @@ public class XMLIO
     {
         if ( xmlFile == null || !xmlFile.exists() )
         {
-            throw new ManipulationException( "JSON File not found");
+            logger.error( "Unable to locate XML File {} ", xmlFile );
+            throw new ManipulationException( "XML file (" + xmlFile + ") not found.");
         }
         Document doc;
         try
@@ -84,7 +85,7 @@ public class XMLIO
         catch ( SAXException | IOException e )
         {
             logger.error( "Unable to parse XML File {} ", e );
-            throw new ManipulationException( "Unable to parse JSON File", e );
+            throw new ManipulationException( "Unable to parse XML File", e );
         }
         return doc;
     }
