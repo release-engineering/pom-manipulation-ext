@@ -16,6 +16,7 @@
 
 package org.commonjava.maven.ext.manip.io;
 
+import com.jayway.jsonpath.JsonPath;
 import org.codehaus.plexus.component.annotations.Component;
 import org.commonjava.maven.ext.manip.ManipulationException;
 import org.commonjava.maven.ext.manip.model.YamlFile;
@@ -29,6 +30,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Map;
 import java.util.Properties;
 
 @Component( role = ConfigIO.class )
@@ -39,6 +41,7 @@ public class ConfigIO
     private final static String propertyFileString = "pme.properties";
     private final static String yamlPMEFileString = "pme.yaml";
     private final static String yamlPNCFileString = "pnc.yaml";
+    private final static String jsonPNCFileString = "pnc.json";
 
     public Properties parse ( final String workingDir) throws ManipulationException
     {
@@ -51,14 +54,19 @@ public class ConfigIO
         File propertyFile = new File( workingDir, propertyFileString );
         File yamlPMEFile = new File( workingDir, yamlPMEFileString );
         File yamlPNCFile = new File( workingDir, yamlPNCFileString );
+        File jsonPNCFile = new File( workingDir, jsonPNCFileString );
 
-        if ( propertyFile.exists() && ( yamlPMEFile.exists() || yamlPNCFile.exists() ) )
+        if ( propertyFile.exists() && ( yamlPMEFile.exists() || yamlPNCFile.exists() || jsonPNCFile.exists() ) )
         {
-            throw new ManipulationException( "Cannot have both yaml and property configuration files." );
+            throw new ManipulationException( "Cannot have both yaml, json and property configuration files." );
         }
         else if ( yamlPMEFile.exists() && yamlPNCFile.exists() )
         {
             throw new ManipulationException( "Cannot have both yaml configuration file formats." );
+        }
+        else if ( ( yamlPMEFile.exists() || yamlPNCFile.exists() ) && jsonPNCFile.exists() )
+        {
+            throw new ManipulationException( "Cannot have yaml and json configuration file formats." );
         }
         if ( yamlPMEFile.exists() )
         {
@@ -69,6 +77,18 @@ public class ConfigIO
         {
             result = loadYamlFile( yamlPNCFile );
             logger.debug( "Read yaml file containing {}.", result );
+        }
+        else if ( jsonPNCFile.exists() )
+        {
+            try
+            {
+                result.putAll( JsonPath.parse( jsonPNCFile ).read ( "$.pme", Map.class ) );
+            }
+            catch ( IOException e )
+            {
+                throw new ManipulationException( "Caught exception processing JSON file.", e );
+            }
+            logger.debug( "Read json file containing {}.", result );
         }
         else if ( propertyFile.exists() )
         {

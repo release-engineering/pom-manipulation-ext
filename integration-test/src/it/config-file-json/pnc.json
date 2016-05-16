@@ -1,0 +1,11 @@
+{
+    da: {
+        "configKey" : "value",
+        "configKey1" : "value1"
+    },
+
+    pme: {
+        "repo-reporting-removal" : "true",
+        "version.suffix" : "redhat-1"
+    }
+}
