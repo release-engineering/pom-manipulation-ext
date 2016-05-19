@@ -295,45 +295,21 @@ public final class PropertiesUtils
      * This recursively checks the supplied version and recursively resolves it if its a property.
      *
      * @param projects set of projects
-     * @param version version to check
+     * @param value value to check
      * @return the version string
      * @throws ManipulationException
      */
-    public static String resolveProperties( List<Project> projects, String version )
+    public static String resolveProperties( List<Project> projects, String value )
                     throws ManipulationException
     {
-        String result = version;
+        final Properties amalgamated = new Properties();
 
-        if (version.startsWith( "${" ) )
+        // Reverse order so execution root ends up overwriting everything.
+        for ( int i = projects.size() - 1; i >= 0; i-- )
         {
-            final int endIndex = version.indexOf( '}' );
-
-            if ( endIndex != version.length() - 1 )
-            {
-                throw new ManipulationException( "NYI : handling for versions (" + version
-                                                                 + ") with multiple embedded properties is NYI. " );
-            }
-
-            final String property = version.substring( 2, endIndex );
-            for ( Project p : projects)
-            {
-                logger.trace( "Scanning {} for property {} and found {} ", p, property, p.getModel().getProperties() );
-                if ( property.equals( "project.version" ))
-                {
-                    result = p.getVersion();
-                }
-                else if ( p.getModel().getProperties().containsKey (property) )
-                {
-                    result = p.getModel().getProperties().getProperty( property );
-
-                    if ( result.startsWith( "${" ))
-                    {
-                        result = resolveProperties( projects, result );
-                    }
-                }
-            }
+            amalgamated.putAll( projects.get( i ).getModel().getProperties() );
         }
-        return result;
+        PropertyInterpolator pi = new PropertyInterpolator( amalgamated, projects.get( 0 ) );
+        return pi.interp( value );
     }
-
 }

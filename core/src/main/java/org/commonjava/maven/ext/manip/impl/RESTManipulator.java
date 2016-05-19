@@ -33,6 +33,7 @@ import org.commonjava.maven.ext.manip.state.DependencyState;
 import org.commonjava.maven.ext.manip.state.RESTState;
 import org.commonjava.maven.ext.manip.state.VersioningState;
 import org.commonjava.maven.ext.manip.util.PropertiesUtils;
+import org.commonjava.maven.ext.manip.util.PropertyInterpolator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -290,9 +291,15 @@ public class RESTManipulator implements Manipulator
             }
             else
             {
+                PropertyInterpolator pi = new PropertyInterpolator( project.getModel().getProperties(), project );
+
+                logger.info ("### For {} Group interp version {} ", project.getKey(), pi.interp( d.getGroupId().equals( "${project.groupId}" ) ? project.getGroupId() : d.getGroupId() ));
+                logger.info ("### For {} Artifact interp version {} ", project.getKey(), pi.interp( d.getArtifactId().equals( "${project.artifactId}" ) ? project.getArtifactId() : d.getArtifactId() ));
+                logger.info ("### ProJversion: located {} and interp version {} ", d.getVersion(), PropertiesUtils.resolveProperties( projects, d.getVersion() ));
+
                 deps.add( new SimpleScopedArtifactRef( new SimpleProjectVersionRef(
-                                d.getGroupId().equals( "${project.groupId}" ) ? project.getGroupId() : d.getGroupId(),
-                                d.getArtifactId().equals( "${project.artifactId}" ) ? project.getArtifactId() : d.getArtifactId(),
+                                pi.interp( d.getGroupId().equals( "${project.groupId}" ) ? project.getGroupId() : d.getGroupId() ),
+                                pi.interp( d.getArtifactId().equals( "${project.artifactId}" ) ? project.getArtifactId() : d.getArtifactId() ),
                                 PropertiesUtils.resolveProperties( projects, d.getVersion() ) ),
                                                        new SimpleTypeAndClassifier( d.getType(), d.getClassifier() ),
                                                        // TODO: Should atlas handle default scope?

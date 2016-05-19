@@ -13,17 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.commonjava.maven.ext.manip.util;
 
 import org.apache.commons.lang.reflect.FieldUtils;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.artifact.repository.DefaultArtifactRepository;
 import org.apache.maven.artifact.repository.layout.DefaultRepositoryLayout;
+import org.apache.maven.model.Dependency;
 import org.apache.maven.model.Model;
-import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 import org.apache.maven.settings.Settings;
 import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef;
-import org.commonjava.maven.ext.manip.ManipulationSession;
 import org.commonjava.maven.ext.manip.io.ModelIO;
 import org.commonjava.maven.ext.manip.model.Project;
 import org.commonjava.maven.ext.manip.resolver.GalleyAPIWrapper;
@@ -32,71 +32,59 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
-import java.io.File;
-import java.io.FileReader;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.Properties;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-public class PropertiesUtilsTest
+public class PropertyInterpolatorTest
 {
     @Rule
     public TemporaryFolder temp = new TemporaryFolder();
 
     @Test
-    public void testCheckStrictValue() throws Exception
+    public void testInteropolateProperties() throws Exception
     {
-        ManipulationSession session = new ManipulationSession();
-        assertFalse( PropertiesUtils.checkStrictValue( session, null, "1.0" ) );
-        assertFalse( PropertiesUtils.checkStrictValue( session, "1.0", null ) );
+        final Model model = resolveRemoteModel( "org.infinispan:infinispan-bom:8.2.0.Final" );
+
+        Project p = new Project( model );
+
+        Properties props = p.getModel().getProperties();
+        boolean containsProperty = false;
+        for ( Object o : props.values() )
+        {
+            if ( ( (String) o ).contains( "${" ) )
+            {
+                containsProperty = true;
+            }
+        }
+        assertTrue( containsProperty );
+        PropertyInterpolator pi = new PropertyInterpolator( props, p );
+        assertTrue( pi.interp( "${version.hibernate.osgi}" ).equals( "5.0.4.Final" ) );
     }
 
     @Test
-    public void testCacheProperty() throws Exception
+    public void testInteropolateDependencies() throws Exception
     {
-        Map propertyMap = new HashMap();
+        final Model model = resolveRemoteModel( "org.infinispan:infinispan-bom:8.2.0.Final" );
+        Project project = new Project( model );
+        PropertyInterpolator pi = new PropertyInterpolator( project.getModel().getProperties(), project );
 
-        assertFalse( PropertiesUtils.cacheProperty( propertyMap, null, "2.0", null, false ) );
-        assertFalse( PropertiesUtils.cacheProperty( propertyMap, "1.0", "2.0", null, false ) );
-        assertTrue( PropertiesUtils.cacheProperty( propertyMap, "${version.org.jboss}", "2.0", null, false ) );
-    }
+        String nonInterp ="" , interp = "";
+        for ( Dependency d : project.getManagedDependencies())
+        {
+            nonInterp += ( d.getGroupId().equals( "${project.groupId}" ) ? project.getGroupId() : d.getGroupId() ) + ":" +
+                            ( d.getArtifactId().equals( "${project.artifactId}" ) ? project.getArtifactId() : d.getArtifactId() ) + System.lineSeparator();
 
-    @Test
-    public void testResolveProperties() throws Exception
-    {
-        final Model modelChild = resolveModelResource( "inherited-properties.pom" );
-        final Model modelParent = resolveRemoteModel( "org.infinispan:infinispan-bom:8.2.0.Final" );
+            interp += pi.interp( d.getGroupId().equals( "${project.groupId}" ) ? project.getGroupId() : d.getGroupId() ) + ":" +
+                                pi.interp( d.getArtifactId().equals( "${project.artifactId}" ) ? project.getArtifactId() : d.getArtifactId() ) + System.lineSeparator();
 
-        Project pP = new Project( modelParent );
-        Project pC = new Project( modelChild );
-        List<Project> al = new ArrayList<>();
-        al.add( pC );
-        al.add( pP );
-
-        String result = PropertiesUtils.resolveProperties( al, "${version.scala.major}.${version.scala.minor}" );
-        assertTrue( result.equals( "2.11.7" ) );
-
-        result = PropertiesUtils.resolveProperties( al,
-                                                    "TestSTART.and.${version.scala.major}.now.${version.scala.minor}" );
-        assertTrue( result.equals( "TestSTART.and.2.11.now.7" ) );
-
-        result = PropertiesUtils.resolveProperties( al, "${project.version}" );
-        assertTrue( result.equals( "1" ) );
-   }
-
-    private Model resolveModelResource( final String resourceName ) throws Exception
-    {
-        final URL resource = Thread.currentThread().getContextClassLoader().getResource( resourceName );
-
-        assertTrue( resource != null );
-
-        return new MavenXpp3Reader().read( new FileReader( new File( resource.getPath() ) ) );
+        }
+        assertTrue ( nonInterp.contains( "${" ) );
+        assertFalse ( interp.contains( "${" ) );
     }
 
     private Model resolveRemoteModel( final String resourceName ) throws Exception
