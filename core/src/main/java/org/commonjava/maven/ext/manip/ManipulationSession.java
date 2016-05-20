@@ -59,7 +59,7 @@ public class ManipulationSession
 
     private ManipulationException error;
 
-    public ManipulationSession()
+    public  ManipulationSession()
     {
         System.out.println( "[INFO] Maven-Manipulation-Extension " + getClass().getPackage()
                                                                                .getImplementationVersion() );

@@ -15,6 +15,7 @@
  */
 package org.commonjava.maven.ext.manip.impl;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.DependencyManagement;
 import org.apache.maven.model.Model;
@@ -460,6 +461,11 @@ public class DependencyManipulator implements Manipulator
 
                     if ( ! PropertiesUtils.cacheProperty( versionPropertyUpdateMap, oldVersion, overrideVersion, dependency, true ))
                     {
+                        if ( oldVersion.contains( "${" ))
+                        {
+                            logger.warn( "Overriding version with {} when old version contained a property {} ", overrideVersion, oldVersion );
+                            // TODO: Should this throw an exception?
+                        }
                         // Not checking strict version alignment here as explicit overrides take priority.
                         dependency.setVersion( overrideVersion );
                     }
@@ -524,7 +530,9 @@ public class DependencyManipulator implements Manipulator
                     {
                         if ( ! PropertiesUtils.cacheProperty( versionPropertyUpdateMap, oldVersion, overrideVersion, ar, false ))
                         {
-                            if ( strict && ! PropertiesUtils.checkStrictValue( session, oldVersion, overrideVersion) )
+                            String resolvedValue = PropertiesUtils.resolveProperties( session.getProjects(), oldVersion);
+
+                            if ( strict && ! PropertiesUtils.checkStrictValue( session, resolvedValue, overrideVersion) )
                             {
                                 if ( state.getFailOnStrictViolation() )
                                 {
@@ -542,7 +550,18 @@ public class DependencyManipulator implements Manipulator
                             {
                                 logger.debug( "Altered dependency {} {} -> {}", groupIdArtifactId, oldVersion,
                                               overrideVersion );
-                                dependency.setVersion( overrideVersion );
+                                //TODO: Handle case where oldVersion contains ${
+                                if ( oldVersion.contains( "${" ) )
+                                {
+                                    logger.debug ( "Resolved value is {} and appended is {} ", resolvedValue,
+                                                   StringUtils.removeStart( overrideVersion, resolvedValue ));
+
+                                    dependency.setVersion( oldVersion + StringUtils.removeStart( overrideVersion, resolvedValue ) );
+                                }
+                                else
+                                {
+                                    dependency.setVersion( overrideVersion );
+                                }
                             }
                         }
                         unmatchedVersionOverrides.remove( ar );

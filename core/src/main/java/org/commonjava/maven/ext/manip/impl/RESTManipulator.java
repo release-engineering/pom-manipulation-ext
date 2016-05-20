@@ -293,10 +293,6 @@ public class RESTManipulator implements Manipulator
             {
                 PropertyInterpolator pi = new PropertyInterpolator( project.getModel().getProperties(), project );
 
-                logger.info ("### For {} Group interp version {} ", project.getKey(), pi.interp( d.getGroupId().equals( "${project.groupId}" ) ? project.getGroupId() : d.getGroupId() ));
-                logger.info ("### For {} Artifact interp version {} ", project.getKey(), pi.interp( d.getArtifactId().equals( "${project.artifactId}" ) ? project.getArtifactId() : d.getArtifactId() ));
-                logger.info ("### ProJversion: located {} and interp version {} ", d.getVersion(), PropertiesUtils.resolveProperties( projects, d.getVersion() ));
-
                 deps.add( new SimpleScopedArtifactRef( new SimpleProjectVersionRef(
                                 pi.interp( d.getGroupId().equals( "${project.groupId}" ) ? project.getGroupId() : d.getGroupId() ),
                                 pi.interp( d.getArtifactId().equals( "${project.artifactId}" ) ? project.getArtifactId() : d.getArtifactId() ),

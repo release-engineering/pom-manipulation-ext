@@ -16,11 +16,6 @@
 
 package org.commonjava.maven.ext.manip.model;
 
-import java.io.File;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-
 import org.apache.maven.model.Build;
 import org.apache.maven.model.BuildBase;
 import org.apache.maven.model.Dependency;
@@ -31,12 +26,14 @@ import org.apache.maven.model.Parent;
 import org.apache.maven.model.Plugin;
 import org.apache.maven.model.PluginManagement;
 import org.apache.maven.model.Profile;
-import org.apache.maven.model.ReportPlugin;
-import org.apache.maven.model.Reporting;
-import org.apache.maven.model.building.ModelBuildingResult;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef;
 import org.commonjava.maven.ext.manip.ManipulationException;
+
+import java.io.File;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Provides a convenient way of passing around related information about a Maven
@@ -88,14 +85,6 @@ public class Project
         throws ManipulationException
     {
         this( modelKey( model ), model.getPomFile(), model );
-    }
-
-    public Project( final Model raw, final ModelBuildingResult mbResult, final File pom )
-        throws ManipulationException
-    {
-        this.pom = pom;
-        this.model = raw;
-        this.key = modelKey( raw );
     }
 
     public File getPom()

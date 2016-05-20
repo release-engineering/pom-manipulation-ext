@@ -344,7 +344,7 @@ public class ProjectVersioningManipulator
         // TODO: Handle the scenario where the version might be ${....}${....}
         final int endIndex = version.indexOf( '}' );
 
-        if ( endIndex != version.length() - 1 )
+        if ( version.indexOf( "${" ) != 0 || endIndex != version.length() - 1 )
         {
             throw new ManipulationException( "NYI : handling for versions (" + version
                                                              + ") with multiple embedded properties is NYI. " );

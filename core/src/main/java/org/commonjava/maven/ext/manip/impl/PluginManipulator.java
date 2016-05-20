@@ -334,6 +334,10 @@ public class PluginManipulator
                 {
                     if ( ! PropertiesUtils.cacheProperty( pluginState.getVersionPropertyOverrides(), oldVersion, override.getVersion(), plugin, false ))
                     {
+                        if ( oldVersion != null && oldVersion.contains( "${" ) )
+                        {
+                            throw new ManipulationException( "NYI : Multiple embedded properties for plugins." );
+                        }
                         plugin.setVersion( override.getVersion() );
                         logger.info( "Altered plugin version: " + groupIdArtifactId + "=" + override.getVersion() );
                     }
