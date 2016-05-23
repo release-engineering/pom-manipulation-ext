@@ -283,23 +283,19 @@ public final class PropertiesUtils
                     throws ManipulationException
     {
         boolean result = false;
-        // TODO: Handle the scenario where the version might be ${....}${....}
         if ( oldVersion != null && oldVersion.contains( "${" ) )
         {
             final int endIndex = oldVersion.indexOf( '}' );
             final String oldProperty = oldVersion.substring( 2, endIndex );
 
+            // We don't attempt to cache any value that contains more than one property or contains a property
+            // combined with a hardcoded value.
             if ( oldVersion.contains( "${" ) &&
                    ! ( oldVersion.startsWith( "${" ) && oldVersion.endsWith( "}" ) ) ||
                                     ( StringUtils.countMatches( oldVersion, "${" ) > 1 ) )
             {
                 logger.debug ("For {} ; original version contains hardcoded value or multiple embedded properties. Not caching value ( {} -> {} )",
                               originalType, oldVersion, newVersion );
-            }
-            else if ( oldVersion.indexOf( "${" ) != 0 || endIndex != oldVersion.length() - 1 )
-            {
-                throw new ManipulationException( "NYI : cache handling for versions (" + oldVersion
-                                                                 + ") with multiple embedded properties is NYI. " );
             }
             else if ( "project.version".equals( oldProperty ) )
             {

@@ -550,13 +550,16 @@ public class DependencyManipulator implements Manipulator
                             {
                                 logger.debug( "Altered dependency {} {} -> {}", groupIdArtifactId, oldVersion,
                                               overrideVersion );
-                                //TODO: Handle case where oldVersion contains ${
+
                                 if ( oldVersion.contains( "${" ) )
                                 {
-                                    logger.debug ( "Resolved value is {} and appended is {} ", resolvedValue,
-                                                   StringUtils.removeStart( overrideVersion, resolvedValue ));
+                                    String appendValue = StringUtils.removeStart( overrideVersion, resolvedValue );
+                                    logger.debug ( "Resolved value is {} and appended is {} ", resolvedValue, appendValue );
 
-                                    dependency.setVersion( oldVersion + StringUtils.removeStart( overrideVersion, resolvedValue ) );
+                                    // In this case the previous value couldn't be cached even though it contained a property
+                                    // as it was either multiple properties or a property combined with a hardcoded value. Therefore
+                                    // just append the suffix.
+                                    dependency.setVersion( oldVersion + appendValue );
                                 }
                                 else
                                 {
