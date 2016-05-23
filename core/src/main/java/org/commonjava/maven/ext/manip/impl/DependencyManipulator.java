@@ -15,6 +15,7 @@
  */
 package org.commonjava.maven.ext.manip.impl;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.DependencyManagement;
 import org.apache.maven.model.Model;
@@ -460,6 +461,11 @@ public class DependencyManipulator implements Manipulator
 
                     if ( ! PropertiesUtils.cacheProperty( versionPropertyUpdateMap, oldVersion, overrideVersion, dependency, true ))
                     {
+                        if ( oldVersion.contains( "${" ))
+                        {
+                            logger.warn( "Overriding version with {} when old version contained a property {} ", overrideVersion, oldVersion );
+                            // TODO: Should this throw an exception?
+                        }
                         // Not checking strict version alignment here as explicit overrides take priority.
                         dependency.setVersion( overrideVersion );
                     }
@@ -499,7 +505,7 @@ public class DependencyManipulator implements Manipulator
             ProjectRef depPr = new SimpleProjectRef( dependency.getGroupId(), dependency.getArtifactId() );
 
             // We might have junit:junit:3.8.2 and junit:junit:4.1 for differing override scenarios within the
-            // overrides list. If strict mode alignment is enabled, using parentmultiple overrides will work with
+            // overrides list. If strict mode alignment is enabled, using multiple overrides will work with
             // different modules. It is currently undefined what will happen if non-strict mode is enabled and
             // multiple versions are in the remote override list (be it from a bom or rest call). Actually, what
             // will most likely happen is last-wins.
@@ -524,7 +530,9 @@ public class DependencyManipulator implements Manipulator
                     {
                         if ( ! PropertiesUtils.cacheProperty( versionPropertyUpdateMap, oldVersion, overrideVersion, ar, false ))
                         {
-                            if ( strict && ! PropertiesUtils.checkStrictValue( session, oldVersion, overrideVersion) )
+                            String resolvedValue = PropertiesUtils.resolveProperties( session.getProjects(), oldVersion);
+
+                            if ( strict && ! PropertiesUtils.checkStrictValue( session, resolvedValue, overrideVersion) )
                             {
                                 if ( state.getFailOnStrictViolation() )
                                 {
@@ -542,7 +550,21 @@ public class DependencyManipulator implements Manipulator
                             {
                                 logger.debug( "Altered dependency {} {} -> {}", groupIdArtifactId, oldVersion,
                                               overrideVersion );
-                                dependency.setVersion( overrideVersion );
+
+                                if ( oldVersion.contains( "${" ) )
+                                {
+                                    String appendValue = StringUtils.removeStart( overrideVersion, resolvedValue );
+                                    logger.debug ( "Resolved value is {} and appended is {} ", resolvedValue, appendValue );
+
+                                    // In this case the previous value couldn't be cached even though it contained a property
+                                    // as it was either multiple properties or a property combined with a hardcoded value. Therefore
+                                    // just append the suffix.
+                                    dependency.setVersion( oldVersion + appendValue );
+                                }
+                                else
+                                {
+                                    dependency.setVersion( overrideVersion );
+                                }
                             }
                         }
                         unmatchedVersionOverrides.remove( ar );

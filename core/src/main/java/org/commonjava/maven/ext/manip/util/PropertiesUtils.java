@@ -15,6 +15,7 @@
  */
 package org.commonjava.maven.ext.manip.util;
 
+import org.apache.commons.lang.StringUtils;
 import org.commonjava.maven.ext.manip.ManipulationException;
 import org.commonjava.maven.ext.manip.ManipulationSession;
 import org.commonjava.maven.ext.manip.impl.Version;
@@ -24,6 +25,7 @@ import org.commonjava.maven.ext.manip.state.VersioningState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -80,7 +82,8 @@ public final class PropertiesUtils
      * @param projects the current set of projects we are scanning.
      * @param ignoreStrict whether to ignore strict alignment.
      * @param key a key to look for.
-     * @param newValue a value to look for.   @return true if changes were made.
+     * @param newValue a value to look for.
+     * @return true if changes were made.
      * @throws ManipulationException
      */
     public static boolean updateProperties( ManipulationSession session, Set<Project> projects, boolean ignoreStrict,
@@ -89,6 +92,15 @@ public final class PropertiesUtils
     {
         final DependencyState state = session.getState( DependencyState.class );
         boolean found = false;
+
+        final String resolvedValue = resolveProperties( new ArrayList<>( projects ) , "${" + key + '}');
+        logger.debug ("Fully resolvedValue is {} for {} ", resolvedValue, key);
+
+        if ( resolvedValue.equals( newValue ) )
+        {
+            logger.warn( "Nothing to update as original key {} value matches new value {} ", key, newValue);
+            return false;
+        }
 
         for ( final Project p : projects )
         {
@@ -100,9 +112,19 @@ public final class PropertiesUtils
 
                 found = true;
 
-                if ( oldValue != null && oldValue.startsWith( "${" ) )
+                // We'll only recursively resolve the property if its a single >${foo}<. If its one of
+                // >${foo}value${foo}<
+                // >${foo}${foo}<
+                // >value${foo}<
+                // >${foo}value<
+                // it becomes hairy to verify strict compliance and to correctly split the old value and
+                // update it with a portion of the new value.
+                if ( oldValue != null && oldValue.startsWith( "${" ) && oldValue.endsWith( "}" ) &&
+                    ! ( StringUtils.countMatches( oldValue, "${" ) > 1 ) )
                 {
-                    if ( !updateProperties( session, projects, ignoreStrict, oldValue.substring( 2, oldValue.indexOf( '}' ) ),
+                    logger.debug ("Recursively resolving {} ", oldValue.substring( 2, oldValue.length() -1 ) );
+
+                    if ( !updateProperties( session, projects, ignoreStrict, oldValue.substring( 2, oldValue.length() -1 ),
                                             newValue ) )
                     {
                         logger.error( "Recursive property not found for {} with {} ", oldValue, newValue );
@@ -113,13 +135,13 @@ public final class PropertiesUtils
                 {
                     if ( state.getStrict() && !ignoreStrict )
                     {
-                        if ( ! checkStrictValue( session, oldValue, newValue ) )
+                        if ( ! checkStrictValue( session, resolvedValue, newValue ) )
                         {
                             if ( state.getFailOnStrictViolation() )
                             {
                                 throw new ManipulationException(
-                                                "Replacing original property version {} with new version {} for {} violates the strict version-alignment rule!",
-                                                 oldValue, newValue, key );
+                                                "Replacing original property version {} (fully resolved: {} ) with new version {} for {} violates the strict version-alignment rule!",
+                                                oldValue, resolvedValue, newValue, key );
                             }
                             else
                             {
@@ -130,6 +152,28 @@ public final class PropertiesUtils
                                 continue;
                             }
                         }
+                    }
+
+                    // TODO: Does not handle explicit overrides.
+                    if ( oldValue != null && oldValue.contains( "${" ) &&
+                                    ! ( oldValue.startsWith( "${" ) && oldValue.endsWith( "}" ) ) ||
+                                    ( StringUtils.countMatches( oldValue, "${" ) > 1 ) )
+                    {
+                        // This block handles
+                        // >${foo}value${foo}<
+                        // >${foo}${foo}<
+                        // >value${foo}<
+                        // >${foo}value<
+                        // We don't attempt to recursively resolve those as tracking the split of the variables, combined
+                        // with the update and strict version checking becomes overly fragile.
+
+                        if ( ignoreStrict )
+                        {
+                            throw new ManipulationException( "NYI : handling for versions with explicit overrides (" + oldValue
+                                                                             + ") with multiple embedded properties is NYI. " );
+                        }
+                        newValue  = oldValue + StringUtils.removeStart( newValue, resolvedValue );
+                        logger.info ("Ignoring new value due to embedded property {} and appending {} ", oldValue, newValue);
                     }
 
                     p.getModel().getProperties().setProperty( key, newValue );
@@ -239,16 +283,19 @@ public final class PropertiesUtils
                     throws ManipulationException
     {
         boolean result = false;
-        // TODO: Handle the scenario where the version might be ${....}${....}
-        if ( oldVersion != null && oldVersion.startsWith( "${" ) )
+        if ( oldVersion != null && oldVersion.contains( "${" ) )
         {
             final int endIndex = oldVersion.indexOf( '}' );
             final String oldProperty = oldVersion.substring( 2, endIndex );
 
-            if ( endIndex != oldVersion.length() - 1 )
+            // We don't attempt to cache any value that contains more than one property or contains a property
+            // combined with a hardcoded value.
+            if ( oldVersion.contains( "${" ) &&
+                   ! ( oldVersion.startsWith( "${" ) && oldVersion.endsWith( "}" ) ) ||
+                                    ( StringUtils.countMatches( oldVersion, "${" ) > 1 ) )
             {
-                throw new ManipulationException( "NYI : handling for versions (" + oldVersion
-                                                                 + ") with multiple embedded properties is NYI. " );
+                logger.debug ("For {} ; original version contains hardcoded value or multiple embedded properties. Not caching value ( {} -> {} )",
+                              originalType, oldVersion, newVersion );
             }
             else if ( "project.version".equals( oldProperty ) )
             {
@@ -285,8 +332,9 @@ public final class PropertiesUtils
                 }
 
                 versionPropertyUpdateMap.put( oldVersionProp, newVersion );
+
+                result = true;
             }
-            result = true;
         }
         return result;
     }
@@ -295,45 +343,21 @@ public final class PropertiesUtils
      * This recursively checks the supplied version and recursively resolves it if its a property.
      *
      * @param projects set of projects
-     * @param version version to check
+     * @param value value to check
      * @return the version string
      * @throws ManipulationException
      */
-    public static String resolveProperties( List<Project> projects, String version )
+    public static String resolveProperties( List<Project> projects, String value )
                     throws ManipulationException
     {
-        String result = version;
+        final Properties amalgamated = new Properties();
 
-        if (version.startsWith( "${" ) )
+        // Reverse order so execution root ends up overwriting everything.
+        for ( int i = projects.size() - 1; i >= 0; i-- )
         {
-            final int endIndex = version.indexOf( '}' );
-
-            if ( endIndex != version.length() - 1 )
-            {
-                throw new ManipulationException( "NYI : handling for versions (" + version
-                                                                 + ") with multiple embedded properties is NYI. " );
-            }
-
-            final String property = version.substring( 2, endIndex );
-            for ( Project p : projects)
-            {
-                logger.trace( "Scanning {} for property {} and found {} ", p, property, p.getModel().getProperties() );
-                if ( property.equals( "project.version" ))
-                {
-                    result = p.getVersion();
-                }
-                else if ( p.getModel().getProperties().containsKey (property) )
-                {
-                    result = p.getModel().getProperties().getProperty( property );
-
-                    if ( result.startsWith( "${" ))
-                    {
-                        result = resolveProperties( projects, result );
-                    }
-                }
-            }
+            amalgamated.putAll( projects.get( i ).getModel().getProperties() );
         }
-        return result;
+        PropertyInterpolator pi = new PropertyInterpolator( amalgamated, projects.get( 0 ) );
+        return pi.interp( value );
     }
-
 }

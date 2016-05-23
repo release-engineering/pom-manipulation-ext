@@ -23,12 +23,6 @@ import org.apache.maven.model.Parent;
 import org.apache.maven.model.Profile;
 import org.codehaus.plexus.component.annotations.Component;
 import org.codehaus.plexus.component.annotations.Requirement;
-import org.codehaus.plexus.interpolation.InterpolationException;
-import org.codehaus.plexus.interpolation.PrefixAwareRecursionInterceptor;
-import org.codehaus.plexus.interpolation.PrefixedObjectValueSource;
-import org.codehaus.plexus.interpolation.PropertiesBasedValueSource;
-import org.codehaus.plexus.interpolation.RecursionInterceptor;
-import org.codehaus.plexus.interpolation.StringSearchInterpolator;
 import org.commonjava.maven.atlas.ident.ref.InvalidRefException;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef;
@@ -37,10 +31,10 @@ import org.commonjava.maven.ext.manip.ManipulationSession;
 import org.commonjava.maven.ext.manip.model.Project;
 import org.commonjava.maven.ext.manip.state.VersioningState;
 import org.commonjava.maven.ext.manip.util.PropertiesUtils;
+import org.commonjava.maven.ext.manip.util.PropertyInterpolator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -157,7 +151,7 @@ public class ProjectVersioningManipulator
      * @param session the current session
      * @param projects list of all projects
      * @param project Project undergoing modification.
-     * @param state
+     * @param state the VersioningState
      * @return whether any changes have been applied.
      * @throws ManipulationException if an error occurs.
      */
@@ -261,16 +255,7 @@ public class ProjectVersioningManipulator
             bases.addAll( profiles );
         }
 
-        final StringSearchInterpolator interp = new StringSearchInterpolator();
-        if ( model.getProperties() != null )
-        {
-            interp.addValueSource( new PropertiesBasedValueSource( model.getProperties() ) );
-        }
-
-        final List<String> prefixes = Arrays.asList( "pom", "project" );
-        interp.addValueSource( new PrefixedObjectValueSource( prefixes, model, true ) );
-
-        final RecursionInterceptor ri = new PrefixAwareRecursionInterceptor( prefixes, true );
+        final PropertyInterpolator pi = new PropertyInterpolator( model.getProperties(), project );
 
         for ( final ModelBase base : bases )
         {
@@ -279,16 +264,16 @@ public class ProjectVersioningManipulator
             {
                 for ( final Dependency d : dm.getDependencies() )
                 {
-                    if ( isEmpty (interpolate( d.getVersion(), ri, interp )))
+                    if ( isEmpty (pi.interp( d.getVersion() )))
                     {
                         logger.trace( "Skipping dependency " + d + " as empty version." );
                         continue;
                     }
                     try
                     {
-                        gav = new SimpleProjectVersionRef( interpolate( d.getGroupId(), ri, interp ),
-                                                           interpolate( d.getArtifactId(), ri, interp ),
-                                                           interpolate( d.getVersion(), ri, interp ) );
+                        gav = new SimpleProjectVersionRef( pi.interp( d.getGroupId() ),
+                                                           pi.interp( d.getArtifactId() ),
+                                                           pi.interp( d.getVersion() ) );
                         final String newVersion = versionsByGAV.get( gav );
                         if ( newVersion != null )
                         {
@@ -317,15 +302,15 @@ public class ProjectVersioningManipulator
                 {
                     try
                     {
-                        if ( isEmpty (interpolate( d.getVersion(), ri, interp )))
+                        if ( isEmpty (pi.interp( d.getVersion() )))
                         {
                             logger.trace( "Skipping dependency " + d + " as empty version." );
                             continue;
                         }
 
-                        gav = new SimpleProjectVersionRef( interpolate( d.getGroupId(), ri, interp ),
-                                                           interpolate( d.getArtifactId(), ri, interp ),
-                                                           interpolate( d.getVersion(), ri, interp ) );
+                        gav = new SimpleProjectVersionRef( pi.interp( d.getGroupId() ),
+                                                           pi.interp( d.getArtifactId() ),
+                                                           pi.interp( d.getVersion() ) );
 
                         final String newVersion = versionsByGAV.get( gav );
 
@@ -354,28 +339,12 @@ public class ProjectVersioningManipulator
         return changed;
     }
 
-    /**
-     * Simple wrapper around the plexus-interpolation call to clean up exception translation in the event of an error.
-     */
-    private String interpolate( final String src, final RecursionInterceptor ri, final StringSearchInterpolator interp )
-        throws ManipulationException
-    {
-        try
-        {
-            return interp.interpolate( src, ri );
-        }
-        catch ( final InterpolationException e )
-        {
-            throw new ManipulationException( "Failed to interpolate: %s. Reason: %s", e, src, e.getMessage() );
-        }
-    }
-
     private String extractPropertyName (String version) throws ManipulationException
     {
         // TODO: Handle the scenario where the version might be ${....}${....}
         final int endIndex = version.indexOf( '}' );
 
-        if ( endIndex != version.length() - 1 )
+        if ( version.indexOf( "${" ) != 0 || endIndex != version.length() - 1 )
         {
             throw new ManipulationException( "NYI : handling for versions (" + version
                                                              + ") with multiple embedded properties is NYI. " );

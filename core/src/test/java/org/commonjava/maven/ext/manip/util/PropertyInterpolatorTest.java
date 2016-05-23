@@ -1,0 +1,81 @@
+/**
+ * Copyright (C) 2012 Red Hat, Inc. (jcasey@redhat.com)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *         http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.commonjava.maven.ext.manip.util;
+
+import org.apache.maven.model.Dependency;
+import org.apache.maven.model.Model;
+import org.commonjava.maven.ext.manip.fixture.TestUtils;
+import org.commonjava.maven.ext.manip.model.Project;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
+
+import java.util.Properties;
+
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
+public class PropertyInterpolatorTest
+{
+    private static final String RESOURCE_BASE = "properties/";
+
+    @Rule
+    public TemporaryFolder temp = new TemporaryFolder();
+
+    @Test
+    public void testInteropolateProperties() throws Exception
+    {
+        final Model model = TestUtils.resolveModelResource( RESOURCE_BASE, "infinispan-bom-8.2.0.Final.pom" );
+
+        Project p = new Project( model );
+
+        Properties props = p.getModel().getProperties();
+        boolean containsProperty = false;
+        for ( Object o : props.values() )
+        {
+            if ( ( (String) o ).contains( "${" ) )
+            {
+                containsProperty = true;
+            }
+        }
+        assertTrue( containsProperty );
+        PropertyInterpolator pi = new PropertyInterpolator( props, p );
+        assertTrue( pi.interp( "${version.hibernate.osgi}" ).equals( "5.0.4.Final" ) );
+    }
+
+    @Test
+    public void testInteropolateDependencies() throws Exception
+    {
+        final Model model = TestUtils.resolveModelResource( RESOURCE_BASE, "infinispan-bom-8.2.0.Final.pom" );
+
+        Project project = new Project( model );
+        PropertyInterpolator pi = new PropertyInterpolator( project.getModel().getProperties(), project );
+
+        String nonInterp ="" , interp = "";
+        for ( Dependency d : project.getManagedDependencies())
+        {
+            nonInterp += ( d.getGroupId().equals( "${project.groupId}" ) ? project.getGroupId() : d.getGroupId() ) + ":" +
+                            ( d.getArtifactId().equals( "${project.artifactId}" ) ? project.getArtifactId() : d.getArtifactId() ) + System.lineSeparator();
+
+            interp += pi.interp( d.getGroupId().equals( "${project.groupId}" ) ? project.getGroupId() : d.getGroupId() ) + ":" +
+                                pi.interp( d.getArtifactId().equals( "${project.artifactId}" ) ? project.getArtifactId() : d.getArtifactId() ) + System.lineSeparator();
+
+        }
+        assertTrue ( nonInterp.contains( "${" ) );
+        assertFalse ( interp.contains( "${" ) );
+    }
+}

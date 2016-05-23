@@ -16,11 +16,6 @@
 
 package org.commonjava.maven.ext.manip.model;
 
-import java.io.File;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-
 import org.apache.maven.model.Build;
 import org.apache.maven.model.BuildBase;
 import org.apache.maven.model.Dependency;
@@ -31,12 +26,14 @@ import org.apache.maven.model.Parent;
 import org.apache.maven.model.Plugin;
 import org.apache.maven.model.PluginManagement;
 import org.apache.maven.model.Profile;
-import org.apache.maven.model.ReportPlugin;
-import org.apache.maven.model.Reporting;
-import org.apache.maven.model.building.ModelBuildingResult;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef;
 import org.commonjava.maven.ext.manip.ManipulationException;
+
+import java.io.File;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Provides a convenient way of passing around related information about a Maven
@@ -88,14 +85,6 @@ public class Project
         throws ManipulationException
     {
         this( modelKey( model ), model.getPomFile(), model );
-    }
-
-    public Project( final Model raw, final ModelBuildingResult mbResult, final File pom )
-        throws ManipulationException
-    {
-        this.pom = pom;
-        this.model = raw;
-        this.key = modelKey( raw );
     }
 
     public File getPom()
@@ -167,11 +156,13 @@ public class Project
         return model.getParent();
     }
 
+    // Used by Interpolator
     public String getGroupId()
     {
         return key.getGroupId();
     }
 
+    // Used by Interpolator
     public String getArtifactId()
     {
         return key.getArtifactId();
@@ -182,6 +173,7 @@ public class Project
         return model.getId();
     }
 
+    // Used by Interpolator
     public String getVersion()
     {
         return key.getVersionString();
@@ -261,11 +253,6 @@ public class Project
         return build;
     }
 
-    public List<Plugin> getManagedPlugins()
-    {
-        return getManagedPlugins( model );
-    }
-
     public List<Plugin> getManagedPlugins( final ModelBase base )
     {
         BuildBase build;
@@ -298,10 +285,6 @@ public class Project
         return result;
     }
 
-    public Map<String, Plugin> getManagedPluginMap()
-    {
-        return getManagedPluginMap( model );
-    }
 
     public Map<String, Plugin> getManagedPluginMap( final ModelBase base )
     {
@@ -331,21 +314,6 @@ public class Project
         return Collections.emptyMap();
     }
 
-    public List<ReportPlugin> getReportPlugins()
-    {
-        return getReportPlugins( model );
-    }
-
-    public List<ReportPlugin> getReportPlugins( final ModelBase base )
-    {
-        final Reporting reporting = base.getReporting();
-        if ( reporting == null )
-        {
-            return Collections.emptyList();
-        }
-
-        return reporting.getPlugins();
-    }
 
     public Iterable<Dependency> getDependencies()
     {
@@ -377,63 +345,6 @@ public class Project
         }
 
         return dm.getDependencies();
-    }
-
-    /**
-     * In the event the groupId or version changes in the model being modified
-     * (represented by this Project instance), this method will update the stored
-     * key with the new coordinate information.
-     *
-     * This can be important if the model doesn't specify a groupId and its
-     * parent reference is relocated (which will result in this project's
-     * groupId changing, since it's inherited under these circumstances).
-     */
-    public void updateCoord() throws ManipulationException
-    {
-        key = modelKey( model );
-    }
-
-    /**
-     * In cases where plugin configuration has been injected or removed, this
-     * method will update the map of plugin keys to plugin instances within the
-     * modified {@link Model} instance itself to reflect the changes.
-     *
-     * This may be necessary to make the updates available to other
-     * instances that will run after the one making the
-     * change.
-     */
-    public void flushPluginMaps()
-    {
-        flushPluginMaps( model );
-        final List<Profile> profiles = model.getProfiles();
-        if ( profiles != null )
-        {
-            for ( final Profile profile : profiles )
-            {
-                flushPluginMaps( profile );
-            }
-        }
-    }
-
-    public void flushPluginMaps( final ModelBase base )
-    {
-        final BuildBase build = getBuild( base );
-        if ( build != null )
-        {
-            build.flushPluginMap();
-
-            final PluginManagement pm = build.getPluginManagement();
-            if ( pm != null )
-            {
-                pm.flushPluginMap();
-            }
-        }
-
-        final Reporting reporting = model.getReporting();
-        if ( reporting != null )
-        {
-            reporting.flushReportPluginMap();
-        }
     }
 
     public void setInheritanceRoot( final boolean inheritanceRoot )
