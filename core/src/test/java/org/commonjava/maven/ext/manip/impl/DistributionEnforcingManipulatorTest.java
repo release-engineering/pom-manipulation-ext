@@ -28,10 +28,7 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
 
-import java.io.File;
-import java.io.FileReader;
 import java.io.StringReader;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -51,11 +48,11 @@ import org.apache.maven.model.BuildBase;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Plugin;
 import org.apache.maven.model.Profile;
-import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 import org.codehaus.plexus.DefaultPlexusContainer;
 import org.codehaus.plexus.PlexusContainer;
 import org.codehaus.plexus.util.xml.Xpp3DomBuilder;
 import org.commonjava.maven.ext.manip.ManipulationSession;
+import org.commonjava.maven.ext.manip.fixture.TestUtils;
 import org.commonjava.maven.ext.manip.model.Project;
 import org.commonjava.maven.ext.manip.resolver.GalleyAPIWrapper;
 import org.commonjava.maven.ext.manip.resolver.GalleyInfrastructure;
@@ -68,6 +65,7 @@ import org.junit.rules.TemporaryFolder;
 
 public class DistributionEnforcingManipulatorTest
 {
+    private static final String RESOURCE_BASE = "enforce-skip/";
 
     @Test
     public void stateIsEnabledWhenModeIsUnspecified()
@@ -155,7 +153,7 @@ public class DistributionEnforcingManipulatorTest
     public void projectDeploySkipTurnedOffWhenModeIsOff_ParsedPom()
         throws Exception
     {
-        final Model model = parseModelResource( "simple-deploy-skip.pom" );
+        final Model model = TestUtils.resolveModelResource( RESOURCE_BASE, "simple-deploy-skip.pom" );
 
         applyTest( off, model, model );
         assertSkip( model, null, true, Boolean.FALSE );
@@ -165,7 +163,7 @@ public class DistributionEnforcingManipulatorTest
     public void projectDeploySkipTurnedOffWhenNoModeIsDetected_ParsedPom()
         throws Exception
     {
-        final Model model = parseModelResource( "simple-deploy-skip.pom" );
+        final Model model = TestUtils.resolveModelResource( RESOURCE_BASE, "simple-deploy-skip.pom" );
 
         applyTest( detect, model, model );
         assertSkip( model, null, true, Boolean.FALSE );
@@ -175,7 +173,7 @@ public class DistributionEnforcingManipulatorTest
     public void projectDeploySkipTurnedOffWhenOffModeIsDetected_ParsedPom()
         throws Exception
     {
-        final Model model = parseModelResource( "simple-detect-skip.pom" );
+        final Model model = TestUtils.resolveModelResource( RESOURCE_BASE, "simple-detect-skip.pom" );
 
         applyTest( detect, model, model );
         assertSkip( model, null, true, Boolean.FALSE );
@@ -185,7 +183,7 @@ public class DistributionEnforcingManipulatorTest
     public void projectDeploySkipTurnedOffWhenOffModeIsDetected_InPluginExecution_ParsedPom()
         throws Exception
     {
-        final Model model = parseModelResource( "exec-detect-skip.pom" );
+        final Model model = TestUtils.resolveModelResource( RESOURCE_BASE, "exec-detect-skip.pom" );
 
         applyTest( detect, model, model );
         assertSkip( model, null, true, Boolean.FALSE );
@@ -195,7 +193,7 @@ public class DistributionEnforcingManipulatorTest
     public void projectDeploySkipTurnedOff_InProfile_ModeIsOff_ParsedPom()
         throws Exception
     {
-        final Model model = parseModelResource( "profile-deploy-skip.pom" );
+        final Model model = TestUtils.resolveModelResource( RESOURCE_BASE, "profile-deploy-skip.pom" );
 
         applyTest( off, model, model );
         assertSkip( model, "test", true, Boolean.FALSE );
@@ -330,18 +328,6 @@ public class DistributionEnforcingManipulatorTest
             assertThat( changed.isEmpty(), equalTo( true ) );
         }
     }
-
-    private Model parseModelResource( final String resourceName )
-        throws Exception
-    {
-        final URL resource = Thread.currentThread()
-                                   .getContextClassLoader()
-                                   .getResource( RESOURCE_BASE + resourceName );
-
-        return new MavenXpp3Reader().read( new FileReader( new File( resource.getPath() ) ) );
-    }
-
-    private static final String RESOURCE_BASE = "enforce-skip/";
 
     @Rule
     public TemporaryFolder temp = new TemporaryFolder();

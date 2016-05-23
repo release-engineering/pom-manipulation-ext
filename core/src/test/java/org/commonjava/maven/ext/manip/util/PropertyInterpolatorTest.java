@@ -16,25 +16,14 @@
 
 package org.commonjava.maven.ext.manip.util;
 
-import org.apache.commons.lang.reflect.FieldUtils;
-import org.apache.maven.artifact.repository.ArtifactRepository;
-import org.apache.maven.artifact.repository.DefaultArtifactRepository;
-import org.apache.maven.artifact.repository.layout.DefaultRepositoryLayout;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.Model;
-import org.apache.maven.settings.Settings;
-import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef;
-import org.commonjava.maven.ext.manip.io.ModelIO;
+import org.commonjava.maven.ext.manip.fixture.TestUtils;
 import org.commonjava.maven.ext.manip.model.Project;
-import org.commonjava.maven.ext.manip.resolver.GalleyAPIWrapper;
-import org.commonjava.maven.ext.manip.resolver.GalleyInfrastructure;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 import java.util.Properties;
 
 import static org.junit.Assert.assertFalse;
@@ -42,13 +31,15 @@ import static org.junit.Assert.assertTrue;
 
 public class PropertyInterpolatorTest
 {
+    private static final String RESOURCE_BASE = "properties/";
+
     @Rule
     public TemporaryFolder temp = new TemporaryFolder();
 
     @Test
     public void testInteropolateProperties() throws Exception
     {
-        final Model model = resolveRemoteModel( "org.infinispan:infinispan-bom:8.2.0.Final" );
+        final Model model = TestUtils.resolveModelResource( RESOURCE_BASE, "infinispan-bom-8.2.0.Final.pom" );
 
         Project p = new Project( model );
 
@@ -69,7 +60,8 @@ public class PropertyInterpolatorTest
     @Test
     public void testInteropolateDependencies() throws Exception
     {
-        final Model model = resolveRemoteModel( "org.infinispan:infinispan-bom:8.2.0.Final" );
+        final Model model = TestUtils.resolveModelResource( RESOURCE_BASE, "infinispan-bom-8.2.0.Final.pom" );
+
         Project project = new Project( model );
         PropertyInterpolator pi = new PropertyInterpolator( project.getModel().getProperties(), project );
 
@@ -85,22 +77,5 @@ public class PropertyInterpolatorTest
         }
         assertTrue ( nonInterp.contains( "${" ) );
         assertFalse ( interp.contains( "${" ) );
-    }
-
-    private Model resolveRemoteModel( final String resourceName ) throws Exception
-    {
-        List<ArtifactRepository> artifactRepos = new ArrayList<>();
-        @SuppressWarnings( "deprecation" ) ArtifactRepository ar =
-                        new DefaultArtifactRepository( "central", "http://central.maven.org/maven2/", new DefaultRepositoryLayout() );
-        artifactRepos.add( ar );
-
-        final GalleyInfrastructure galleyInfra =
-                        new GalleyInfrastructure( temp.newFolder(), artifactRepos, null, new Settings(), Collections.<String>emptyList(), null, null, null,
-                                                  temp.newFolder( "cache-dir" ) );
-        final GalleyAPIWrapper wrapper = new GalleyAPIWrapper( galleyInfra );
-        final ModelIO model = new ModelIO();
-        FieldUtils.writeField( model, "galleyWrapper", wrapper, true );
-
-        return model.resolveRawModel( SimpleProjectVersionRef.parse( resourceName ) );
     }
 }

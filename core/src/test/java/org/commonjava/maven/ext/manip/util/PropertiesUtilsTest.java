@@ -15,31 +15,18 @@
  */
 package org.commonjava.maven.ext.manip.util;
 
-import org.apache.commons.lang.reflect.FieldUtils;
-import org.apache.maven.artifact.repository.ArtifactRepository;
-import org.apache.maven.artifact.repository.DefaultArtifactRepository;
-import org.apache.maven.artifact.repository.layout.DefaultRepositoryLayout;
 import org.apache.maven.model.Model;
-import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
-import org.apache.maven.settings.Settings;
-import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef;
 import org.commonjava.maven.ext.manip.ManipulationException;
 import org.commonjava.maven.ext.manip.ManipulationSession;
-import org.commonjava.maven.ext.manip.io.ModelIO;
+import org.commonjava.maven.ext.manip.fixture.TestUtils;
 import org.commonjava.maven.ext.manip.model.Project;
-import org.commonjava.maven.ext.manip.resolver.GalleyAPIWrapper;
-import org.commonjava.maven.ext.manip.resolver.GalleyInfrastructure;
 import org.commonjava.maven.ext.manip.state.DependencyState;
 import org.commonjava.maven.ext.manip.state.VersioningState;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
-import java.io.File;
-import java.io.FileReader;
-import java.net.URL;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -53,6 +40,8 @@ import static org.junit.Assert.assertTrue;
 
 public class PropertiesUtilsTest
 {
+    private static final String RESOURCE_BASE = "properties/";
+
     @Rule
     public TemporaryFolder temp = new TemporaryFolder();
 
@@ -67,7 +56,7 @@ public class PropertiesUtilsTest
     @Test
     public void testCacheProperty() throws Exception
     {
-        Map propertyMap = new HashMap();
+        Map<String,String> propertyMap = new HashMap<>();
 
         assertFalse( PropertiesUtils.cacheProperty( null, "${foobar}${foobar2}", null, null, false ) );
         assertFalse( PropertiesUtils.cacheProperty( null, "suffix.${foobar}", null, null, false ) );
@@ -113,7 +102,7 @@ public class PropertiesUtilsTest
     @Test
     public void testUpdateNestedProperties() throws Exception
     {
-        final Model modelParent = resolveRemoteModel( "org.infinispan:infinispan-bom:8.2.0.Final" );
+        final Model modelParent = TestUtils.resolveModelResource( RESOURCE_BASE, "infinispan-bom-8.2.0.Final.pom" );
         Project pP = new Project( modelParent );
         Set<Project> sp = new HashSet<>();
         sp.add( pP );
@@ -136,7 +125,7 @@ public class PropertiesUtilsTest
     @Test
     public void testUpdateNestedProperties2() throws Exception
     {
-        final Model modelParent = resolveRemoteModel( "org.infinispan:infinispan-bom:8.2.0.Final" );
+        final Model modelParent = TestUtils.resolveModelResource(  RESOURCE_BASE, "infinispan-bom-8.2.0.Final.pom" );
         Project pP = new Project( modelParent );
         Set<Project> sp = new HashSet<>();
         sp.add( pP );
@@ -151,7 +140,8 @@ public class PropertiesUtilsTest
     @Test
     public void testUpdateNestedProperties3() throws Exception
     {
-        final Model modelParent = resolveRemoteModel( "io.hawt:project:1.4.9" );
+        // io.hawt:project:1.4.9
+        final Model modelParent = TestUtils.resolveModelResource( RESOURCE_BASE, "project-1.4.9.pom" );
         Project pP = new Project( modelParent );
         Set<Project> sp = new HashSet<>();
         sp.add( pP );
@@ -178,15 +168,13 @@ public class PropertiesUtilsTest
             e.printStackTrace();
             // Pass.
         }
-
     }
-
 
     @Test
     public void testResolveProperties() throws Exception
     {
-        final Model modelChild = resolveModelResource( "inherited-properties.pom" );
-        final Model modelParent = resolveRemoteModel( "org.infinispan:infinispan-bom:8.2.0.Final" );
+        final Model modelChild = TestUtils.resolveModelResource( RESOURCE_BASE, "inherited-properties.pom" );
+        final Model modelParent = TestUtils.resolveModelResource( RESOURCE_BASE, "infinispan-bom-8.2.0.Final.pom" );
 
         Project pP = new Project( modelParent );
         Project pC = new Project( modelChild );
@@ -204,30 +192,4 @@ public class PropertiesUtilsTest
         result = PropertiesUtils.resolveProperties( al, "${project.version}" );
         assertTrue( result.equals( "1" ) );
    }
-
-    private Model resolveModelResource( final String resourceName ) throws Exception
-    {
-        final URL resource = Thread.currentThread().getContextClassLoader().getResource( resourceName );
-
-        assertTrue( resource != null );
-
-        return new MavenXpp3Reader().read( new FileReader( new File( resource.getPath() ) ) );
-    }
-
-    private Model resolveRemoteModel( final String resourceName ) throws Exception
-    {
-        List<ArtifactRepository> artifactRepos = new ArrayList<>();
-        @SuppressWarnings( "deprecation" ) ArtifactRepository ar =
-                        new DefaultArtifactRepository( "central", "http://central.maven.org/maven2/", new DefaultRepositoryLayout() );
-        artifactRepos.add( ar );
-
-        final GalleyInfrastructure galleyInfra =
-                        new GalleyInfrastructure( temp.newFolder(), artifactRepos, null, new Settings(), Collections.<String>emptyList(), null, null, null,
-                                                  temp.newFolder( "cache-dir" ) );
-        final GalleyAPIWrapper wrapper = new GalleyAPIWrapper( galleyInfra );
-        final ModelIO model = new ModelIO();
-        FieldUtils.writeField( model, "galleyWrapper", wrapper, true );
-
-        return model.resolveRawModel( SimpleProjectVersionRef.parse( resourceName ) );
-    }
 }
