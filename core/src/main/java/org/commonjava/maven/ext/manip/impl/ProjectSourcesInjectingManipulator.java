@@ -149,12 +149,11 @@ public class ProjectSourcesInjectingManipulator
                         config.put( "createPropertiesReport", true );
                         config.put( "hideCommandLineInfo", false );
                         config.put( "hideJavaOptsInfo", false );
-                        config.put( "activateOutputFileMapping", false );
+                        config.put( "activateOutputFileMapping", true );
                         config.put( "addJavaRuntimeInfo", true );
 
                         // Default name is build.properties but we currently prefer build.metadata.
-                        config.put( "propertiesOutputFile",
-                                    "${project.build.outputDirectory}/META-INF/build.metadata" );
+                        config.put( "propertiesOutputFile", "build.metadata" );
                         // Deactivate features we don't want.
                         config.put( "createXmlReport", false );
                         config.put( "addLocallyModifiedTagToFullVersion", false );
