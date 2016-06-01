@@ -362,7 +362,7 @@ public class DependencyManipulator implements Manipulator
             }
             else
             {
-                logger.debug( "NOT applying overrides to managed dependencies for Top-pom: {}\n{}", projectGA,
+                logger.debug( "NOT applying overrides to managed dependencies for top-pom: {}\n{}", projectGA,
                               moduleOverrides );
             }
         }
@@ -421,7 +421,6 @@ public class DependencyManipulator implements Manipulator
      * Apply explicit overrides to a set of dependencies from a project. The explicit overrides come from
      * dependencyExclusion. However they have to be separated out from standard overrides so we can easily
      * ignore any property references (and overwrite them).
-     *
      *
      * @param versionPropertyUpdateMap properties to update
      * @param explicitOverrides
@@ -517,6 +516,7 @@ public class DependencyManipulator implements Manipulator
                 {
                     final String oldVersion = dependency.getVersion();
                     final String overrideVersion = overrides.get( ar );
+                    final String resolvedValue = PropertiesUtils.resolveProperties( session.getProjects(), oldVersion);
 
                     if ( isEmpty( overrideVersion ) )
                     {
@@ -526,12 +526,18 @@ public class DependencyManipulator implements Manipulator
                     {
                         logger.debug( "Dependency is a managed version for " + groupIdArtifactId + "; ignoring" );
                     }
+                    // If we're doing strict matching with properties, then the original parts should match
+                    // ${foo} (resolves to 1.2) and the new version mapping is 1.3 : 1.3.redhat-1
+                    // This extra check avoids an erroneous "Property replacement clash" error.
+                    else if ( strict && oldVersion.contains( "$" ) && ! resolvedValue.equals( ar.getVersionString() ) )
+                    {
+                        logger.debug ("Original version {} of {} does not match override version {} : {} so ignoring",
+                                      resolvedValue, dependency, ar.getVersionString(), overrideVersion);
+                    }
                     else
                     {
                         if ( ! PropertiesUtils.cacheProperty( versionPropertyUpdateMap, oldVersion, overrideVersion, ar, false ))
                         {
-                            String resolvedValue = PropertiesUtils.resolveProperties( session.getProjects(), oldVersion);
-
                             if ( strict && ! PropertiesUtils.checkStrictValue( session, resolvedValue, overrideVersion) )
                             {
                                 if ( state.getFailOnStrictViolation() )

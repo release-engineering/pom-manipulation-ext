@@ -278,8 +278,8 @@ public final class PropertiesUtils
      * @return true if a property was found and cached.
      * @throws ManipulationException
      */
-    public static boolean cacheProperty( Map<String, String> versionPropertyUpdateMap, String oldVersion, String newVersion, Object originalType,
-                                         boolean force )
+    public static boolean cacheProperty( Map<String, String> versionPropertyUpdateMap, String oldVersion,
+                                         String newVersion, Object originalType, boolean force )
                     throws ManipulationException
     {
         boolean result = false;
@@ -323,11 +323,11 @@ public final class PropertiesUtils
                     }
                     else
                     {
-                        logger.error( "Replacing property with a new version but the existing version does not match. Old value is {} and new is {}",
-                                      existingPropertyMapping, newVersion );
+                        logger.error( "Replacing property '{}' with a new version but the existing version does not match. Old value is {} and new is {}",
+                                      oldVersionProp, existingPropertyMapping, newVersion );
                         throw new ManipulationException(
-                                        "Property replacement clash - updating property to both {} and {} ",
-                                        existingPropertyMapping, newVersion );
+                                        "Property replacement clash - updating property '{}' to both {} and {} ",
+                                        oldVersionProp, existingPropertyMapping, newVersion );
                     }
                 }
 
