@@ -21,6 +21,7 @@ import org.apache.maven.settings.Settings;
 import org.codehaus.plexus.component.annotations.Component;
 import org.codehaus.plexus.component.annotations.Requirement;
 import org.commonjava.maven.ext.manip.impl.Manipulator;
+import org.commonjava.maven.ext.manip.io.PomIO;
 import org.commonjava.maven.ext.manip.model.Project;
 import org.commonjava.maven.ext.manip.state.State;
 import org.commonjava.maven.ext.manip.state.VersioningState;
@@ -61,8 +62,13 @@ public class ManipulationSession
 
     public  ManipulationSession()
     {
-        System.out.println( "[INFO] Maven-Manipulation-Extension " + getClass().getPackage()
-                                                                               .getImplementationVersion() );
+        try
+        {
+            System.out.println( "[INFO] Maven-Manipulation-Extension " + PomIO.getManifestInformation() );
+        }
+        catch ( ManipulationException e )
+        {
+        }
     }
 
     /**

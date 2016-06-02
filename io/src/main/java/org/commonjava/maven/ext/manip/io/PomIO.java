@@ -64,7 +64,7 @@ public class PomIO
 {
     private static final String MODIFIED_BY = "[Comment: <!-- Modified by POM Manipulation Extension for Maven";
 
-    private final Logger logger = LoggerFactory.getLogger( getClass() );
+    private static final Logger logger = LoggerFactory.getLogger( PomIO.class );
 
 
     public List<Project> parseProject (final File pom) throws ManipulationException
@@ -230,7 +230,7 @@ public class PomIO
      * @return the GIT sha of this codebase.
      * @throws ManipulationException if an error occurs.
      */
-    private String getManifestInformation()
+    public static String getManifestInformation()
         throws ManipulationException
     {
         String result = "";
