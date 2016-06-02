@@ -59,7 +59,7 @@ public class ProjectVersionRefMapper implements ObjectMapper
             logger.error( "Read HTML string '{}' rather than a JSON stream.", s );
             return result;
         }
-        else if (s.startsWith( "{\\\"message\\\":" ) )
+        else if (s.startsWith( "{\\\"message\\\":" ) || s.startsWith( "{\"message\":" ))
         {
             logger.error( "Read message string {}", s );
             return result;
