@@ -180,9 +180,9 @@ public class DependencyManipulator implements Manipulator
             logger.info ("Iterating for standard overrides...");
             for ( final String key : versionPropertyUpdateMap.keySet() )
             {
-                boolean found = PropertiesUtils.updateProperties( session, result, false, key, versionPropertyUpdateMap.get( key ) );
+                PropertiesUtils.PropertyUpdate found = PropertiesUtils.updateProperties( session, result, false, key, versionPropertyUpdateMap.get( key ) );
 
-                if ( !found )
+                if ( found == PropertiesUtils.PropertyUpdate.NOTFOUND )
                 {
                     // Problem in this scenario is that we know we have a property update map but we have not found a
                     // property to update. Its possible this property has been inherited from a parent. Override in the
@@ -201,9 +201,9 @@ public class DependencyManipulator implements Manipulator
             logger.info ("Iterating for explicit overrides...");
             for ( final String key : explicitVersionPropertyUpdateMap.keySet() )
             {
-                boolean found = PropertiesUtils.updateProperties( session, result, true, key, explicitVersionPropertyUpdateMap.get( key ) );
+                PropertiesUtils.PropertyUpdate found = PropertiesUtils.updateProperties( session, result, true, key, explicitVersionPropertyUpdateMap.get( key ) );
 
-                if ( !found )
+                if ( found == PropertiesUtils.PropertyUpdate.NOTFOUND )
                 {
                     // Problem in this scenario is that we know we have a property update map but we have not found a
                     // property to update. Its possible this property has been inherited from a parent. Override in the

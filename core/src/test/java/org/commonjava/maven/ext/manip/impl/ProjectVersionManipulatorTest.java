@@ -617,7 +617,7 @@ public class ProjectVersionManipulatorTest
         return new TestVersioningModifier( new ManipulationSession() );
     }
 
-    public static final class TestVersioningModifier
+    private static final class TestVersioningModifier
         extends ProjectVersioningManipulator
     {
 
@@ -625,7 +625,7 @@ public class ProjectVersionManipulatorTest
 
         private final ManipulationSession session;
 
-        public TestVersioningModifier( final ManipulationSession session )
+        TestVersioningModifier( final ManipulationSession session )
             throws ManipulationException
         {
             super( new VersionCalculator( new GalleyAPIWrapper( new GalleyInfrastructure( session.getTargetDir(), session.getRemoteRepositories(),
@@ -633,8 +633,8 @@ public class ProjectVersionManipulatorTest
             this.session = session;
         }
 
-        public Set<MavenProject> applyVersioningChanges( final Collection<MavenProject> projects,
-                                                         final Map<ProjectVersionRef, String> _versionsByGAV )
+        Set<MavenProject> applyVersioningChanges( final Collection<MavenProject> projects,
+                                                  final Map<ProjectVersionRef, String> _versionsByGAV )
             throws ManipulationException
         {
             final VersioningState state = new VersioningState( session.getUserProperties() );

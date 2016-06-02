@@ -109,9 +109,9 @@ public class PropertiesUtilsTest
 
         ManipulationSession session = createUpdateSession();
 
-        assertTrue( updateProperties( session, sp, false, "version.hibernate.core", "5.0.4.Final-redhat-1" ) );
+        assertTrue( updateProperties( session, sp, false, "version.hibernate.core", "5.0.4.Final-redhat-1" ) == PropertiesUtils.PropertyUpdate.FOUND);
 
-        assertTrue( updateProperties( session, sp, false, "version.scala", "2.11.7.redhat-1" ) );
+        assertTrue( updateProperties( session, sp, false, "version.scala", "2.11.7.redhat-1" ) == PropertiesUtils.PropertyUpdate.FOUND);
         try
         {
             updateProperties( session, sp, false, "version.scala", "3.11.7-redhat-1" );
@@ -132,9 +132,9 @@ public class PropertiesUtilsTest
 
         ManipulationSession session = createUpdateSession();
 
-        assertTrue( updateProperties( session, sp, false, "version.hibernate.osgi", "5.0.4.Final-redhat-1" ) );
+        assertTrue( updateProperties( session, sp, false, "version.hibernate.osgi", "5.0.4.Final-redhat-1" ) == PropertiesUtils.PropertyUpdate.FOUND);
 
-        assertFalse( updateProperties( session, sp, false, "version.scala", "2.11.7" ) );
+        assertFalse( updateProperties( session, sp, false, "version.scala", "2.11.7" ) == PropertiesUtils.PropertyUpdate.FOUND);
     }
 
     @Test
@@ -148,11 +148,11 @@ public class PropertiesUtilsTest
 
         ManipulationSession session = createUpdateSession();
 
-        assertTrue( updateProperties( session, sp, false, "perfectus-build", "610379.redhat-1" ) );
+        assertTrue( updateProperties( session, sp, false, "perfectus-build", "610379.redhat-1" ) == PropertiesUtils.PropertyUpdate.FOUND);
 
         try
         {
-            assertTrue( updateProperties( session, sp, false, "perfectus-build", "610.NOTTHEVALUE.redhat-1" ) );
+            assertTrue( updateProperties( session, sp, false, "perfectus-build", "610.NOTTHEVALUE.redhat-1" ) == PropertiesUtils.PropertyUpdate.FOUND);
         }
         catch ( ManipulationException e )
         {
@@ -161,7 +161,7 @@ public class PropertiesUtilsTest
         }
         try
         {
-            assertTrue( updateProperties( session, sp, true, "perfectus-build", "610.NOTTHEVALUE.redhat-1" ) );
+            assertTrue( updateProperties( session, sp, true, "perfectus-build", "610.NOTTHEVALUE.redhat-1" ) == PropertiesUtils.PropertyUpdate.FOUND);
         }
         catch ( ManipulationException e )
         {
@@ -192,4 +192,17 @@ public class PropertiesUtilsTest
         result = PropertiesUtils.resolveProperties( al, "${project.version}" );
         assertTrue( result.equals( "1" ) );
    }
+
+    @Test
+    public void testUpdateProjectVersionProperty() throws Exception
+    {
+        final Model modelParent = TestUtils.resolveModelResource( RESOURCE_BASE, "infinispan-bom-8.2.0.Final.pom" );
+        Project pP = new Project( modelParent );
+        Set<Project> sp = new HashSet<>();
+        sp.add( pP );
+
+        ManipulationSession session = createUpdateSession();
+
+        assertFalse( updateProperties( session, sp, false, "project.version", "5.0.4.Final-redhat-1" ) == PropertiesUtils.PropertyUpdate.FOUND);
+    }
 }

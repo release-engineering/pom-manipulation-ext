@@ -123,9 +123,9 @@ public class PluginManipulator
             {
                 // Ignore strict alignment for plugins ; if we're attempting to use a differing plugin
                 // its unlikely to be an exact match.
-                boolean found = PropertiesUtils.updateProperties( session, changed, true, key, state.getVersionPropertyOverride( key ) );
+                PropertiesUtils.PropertyUpdate found = PropertiesUtils.updateProperties( session, changed, true, key, state.getVersionPropertyOverride( key ) );
 
-                if ( !found )
+                if ( found == PropertiesUtils.PropertyUpdate.NOTFOUND )
                 {
                     // Problem in this scenario is that we know we have a property update map but we have not found a
                     // property to update. Its possible this property has been inherited from a parent. Override in the

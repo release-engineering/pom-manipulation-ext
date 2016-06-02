@@ -83,23 +83,27 @@ public final class PropertiesUtils
      * @param ignoreStrict whether to ignore strict alignment.
      * @param key a key to look for.
      * @param newValue a value to look for.
-     * @return true if changes were made.
+     * @return {@code PropertyUpdate} enumeration showing status of any changes.
      * @throws ManipulationException
      */
-    public static boolean updateProperties( ManipulationSession session, Set<Project> projects, boolean ignoreStrict,
-                                            String key, String newValue )
-                    throws ManipulationException
+    public static PropertyUpdate updateProperties( ManipulationSession session, Set<Project> projects, boolean ignoreStrict,
+                                                   String key, String newValue ) throws ManipulationException
     {
         final DependencyState state = session.getState( DependencyState.class );
-        boolean found = false;
+        PropertyUpdate found = PropertyUpdate.NOTFOUND;
 
-        final String resolvedValue = resolveProperties( new ArrayList<>( projects ) , "${" + key + '}');
-        logger.debug ("Fully resolvedValue is {} for {} ", resolvedValue, key);
+        final String resolvedValue = resolveProperties( new ArrayList<>( projects ), "${" + key + '}' );
+        logger.debug( "Fully resolvedValue is {} for {} ", resolvedValue, key );
 
         if ( resolvedValue.equals( newValue ) )
         {
-            logger.warn( "Nothing to update as original key {} value matches new value {} ", key, newValue);
-            return false;
+            logger.warn( "Nothing to update as original key {} value matches new value {} ", key, newValue );
+            return PropertyUpdate.IGNORE;
+        }
+        else if ( "project.version".equals( key ) )
+        {
+            logger.warn( "Not updating key {} with {} ", key, newValue );
+            return PropertyUpdate.IGNORE;
         }
 
         for ( final Project p : projects )
@@ -110,7 +114,7 @@ public final class PropertiesUtils
 
                 logger.info( "Updating property {} / {} with {} ", key, oldValue, newValue );
 
-                found = true;
+                found = PropertyUpdate.FOUND;
 
                 // We'll only recursively resolve the property if its a single >${foo}<. If its one of
                 // >${foo}value${foo}<
@@ -120,22 +124,22 @@ public final class PropertiesUtils
                 // it becomes hairy to verify strict compliance and to correctly split the old value and
                 // update it with a portion of the new value.
                 if ( oldValue != null && oldValue.startsWith( "${" ) && oldValue.endsWith( "}" ) &&
-                    ! ( StringUtils.countMatches( oldValue, "${" ) > 1 ) )
+                                !( StringUtils.countMatches( oldValue, "${" ) > 1 ) )
                 {
-                    logger.debug ("Recursively resolving {} ", oldValue.substring( 2, oldValue.length() -1 ) );
+                    logger.debug( "Recursively resolving {} ", oldValue.substring( 2, oldValue.length() - 1 ) );
 
-                    if ( !updateProperties( session, projects, ignoreStrict, oldValue.substring( 2, oldValue.length() -1 ),
-                                            newValue ) )
+                    if ( updateProperties( session, projects, ignoreStrict,
+                                            oldValue.substring( 2, oldValue.length() - 1 ), newValue ) == PropertyUpdate.NOTFOUND )
                     {
                         logger.error( "Recursive property not found for {} with {} ", oldValue, newValue );
-                        return false;
+                        return PropertyUpdate.NOTFOUND;
                     }
                 }
                 else
                 {
                     if ( state.getStrict() && !ignoreStrict )
                     {
-                        if ( ! checkStrictValue( session, resolvedValue, newValue ) )
+                        if ( !checkStrictValue( session, resolvedValue, newValue ) )
                         {
                             if ( state.getFailOnStrictViolation() )
                             {
@@ -146,7 +150,7 @@ public final class PropertiesUtils
                             else
                             {
                                 logger.warn( "Replacing original property version {} with new version {} for {} violates the strict version-alignment rule!",
-                                                                   oldValue, newValue, key );
+                                             oldValue, newValue, key );
                                 // Ignore the dependency override. As found has been set to true it won't inject
                                 // a new property either.
                                 continue;
@@ -156,8 +160,8 @@ public final class PropertiesUtils
 
                     // TODO: Does not handle explicit overrides.
                     if ( oldValue != null && oldValue.contains( "${" ) &&
-                                    ! ( oldValue.startsWith( "${" ) && oldValue.endsWith( "}" ) ) ||
-                                    ( StringUtils.countMatches( oldValue, "${" ) > 1 ) )
+                                    !( oldValue.startsWith( "${" ) && oldValue.endsWith( "}" ) ) || (
+                                    StringUtils.countMatches( oldValue, "${" ) > 1 ) )
                     {
                         // This block handles
                         // >${foo}value${foo}<
@@ -169,11 +173,12 @@ public final class PropertiesUtils
 
                         if ( ignoreStrict )
                         {
-                            throw new ManipulationException( "NYI : handling for versions with explicit overrides (" + oldValue
-                                                                             + ") with multiple embedded properties is NYI. " );
+                            throw new ManipulationException(
+                                            "NYI : handling for versions with explicit overrides (" + oldValue + ") with multiple embedded properties is NYI. " );
                         }
-                        newValue  = oldValue + StringUtils.removeStart( newValue, resolvedValue );
-                        logger.info ("Ignoring new value due to embedded property {} and appending {} ", oldValue, newValue);
+                        newValue = oldValue + StringUtils.removeStart( newValue, resolvedValue );
+                        logger.info( "Ignoring new value due to embedded property {} and appending {} ", oldValue,
+                                     newValue );
                     }
 
                     p.getModel().getProperties().setProperty( key, newValue );
@@ -193,7 +198,8 @@ public final class PropertiesUtils
      */
     public static boolean checkStrictValue( ManipulationSession session, String oldValue, String newValue )
     {
-        if (oldValue == null || newValue == null) {
+        if ( oldValue == null || newValue == null )
+        {
             return false;
         }
 
@@ -205,11 +211,11 @@ public final class PropertiesUtils
         String newVersion = newValue;
         String suffix = null;
 
-        if ( state.getIncrementalSerialSuffix() != null && !state.getIncrementalSerialSuffix().isEmpty())
+        if ( state.getIncrementalSerialSuffix() != null && !state.getIncrementalSerialSuffix().isEmpty() )
         {
             suffix = state.getIncrementalSerialSuffix();
         }
-        else if ( state.getSuffix() != null && !state.getSuffix().isEmpty())
+        else if ( state.getSuffix() != null && !state.getSuffix().isEmpty() )
         {
             suffix = state.getSuffix().substring( 0, state.getSuffix().indexOf( '-' ) );
         }
@@ -221,7 +227,7 @@ public final class PropertiesUtils
         s.add( oldValue );
         s.add( newValue );
 
-        if (ignoreSuffix)
+        if ( ignoreSuffix )
         {
             String x = String.valueOf( Version.findHighestMatchingBuildNumber( v, s ) );
 
@@ -237,29 +243,29 @@ public final class PropertiesUtils
             }
             else
             {
-                logger.warn ("strictIgnoreSuffix set but unable to align from {} to {}", oldValue, newValue);
+                logger.warn( "strictIgnoreSuffix set but unable to align from {} to {}", oldValue, newValue );
             }
         }
 
         // We only need to dummy up and add a suffix if there is no qualifier. This allows us
         // to work out the OSGi version.
-        if ( suffix != null && !v.hasQualifier())
+        if ( suffix != null && !v.hasQualifier() )
         {
             v.appendQualifierSuffix( suffix );
             osgiVersion = v.getOSGiVersionString();
             osgiVersion = osgiVersion.substring( 0, osgiVersion.indexOf( suffix ) - 1 );
         }
-        if (suffix != null && newValue.contains( suffix ) )
+        if ( suffix != null && newValue.contains( suffix ) )
         {
             newVersion = newValue.substring( 0, newValue.indexOf( suffix ) - 1 );
         }
-        logger.debug ( "Comparing original version {} and OSGi variant {} with new version {} and suffix removed {} " ,
-                                             oldValue, osgiVersion, newValue, newVersion);
+        logger.debug( "Comparing original version {} and OSGi variant {} with new version {} and suffix removed {} ",
+                      oldValue, osgiVersion, newValue, newVersion );
 
         // We compare both an OSGi'ied oldVersion and the non-OSGi version against the possible new version (which has
         // had its suffix stripped) in order to check whether its a valid change.
         boolean result = false;
-        if ( oldValue.equals( newVersion ) || osgiVersion.equals( newVersion ))
+        if ( oldValue.equals( newVersion ) || osgiVersion.equals( newVersion ) )
         {
             result = true;
         }
@@ -290,11 +296,10 @@ public final class PropertiesUtils
 
             // We don't attempt to cache any value that contains more than one property or contains a property
             // combined with a hardcoded value.
-            if ( oldVersion.contains( "${" ) &&
-                   ! ( oldVersion.startsWith( "${" ) && oldVersion.endsWith( "}" ) ) ||
-                                    ( StringUtils.countMatches( oldVersion, "${" ) > 1 ) )
+            if ( oldVersion.contains( "${" ) && !( oldVersion.startsWith( "${" ) && oldVersion.endsWith( "}" ) ) || (
+                            StringUtils.countMatches( oldVersion, "${" ) > 1 ) )
             {
-                logger.debug ("For {} ; original version contains hardcoded value or multiple embedded properties. Not caching value ( {} -> {} )",
+                logger.debug( "For {} ; original version contains hardcoded value or multiple embedded properties. Not caching value ( {} -> {} )",
                               originalType, oldVersion, newVersion );
             }
             else if ( "project.version".equals( oldProperty ) )
@@ -347,8 +352,7 @@ public final class PropertiesUtils
      * @return the version string
      * @throws ManipulationException
      */
-    public static String resolveProperties( List<Project> projects, String value )
-                    throws ManipulationException
+    public static String resolveProperties( List<Project> projects, String value ) throws ManipulationException
     {
         final Properties amalgamated = new Properties();
 
@@ -359,5 +363,16 @@ public final class PropertiesUtils
         }
         PropertyInterpolator pi = new PropertyInterpolator( amalgamated, projects.get( 0 ) );
         return pi.interp( value );
+    }
+
+    /*
+     * Used to determine whether any property updates were successful of not. In the case of detecting that no properties are
+     * needed IGNORE is returned. Effectively this is a slightly more explicit tri-state.
+     */
+    public enum PropertyUpdate
+    {
+        FOUND,
+        NOTFOUND,
+        IGNORE
     }
 }

@@ -203,7 +203,10 @@ public class ProjectVersioningManipulator
                 logger.info( "Changed parent version to: " + newVersion + " in " + parent );
                 if (parentGAV.getVersionString().startsWith( "${" ))
                 {
-                    PropertiesUtils.updateProperties( session, new HashSet<>( projects ), false, extractPropertyName( parentGAV.getVersionString() ), newVersion );
+                    if ( PropertiesUtils.updateProperties( session, new HashSet<>( projects ), false, extractPropertyName( parentGAV.getVersionString() ), newVersion ) == PropertiesUtils.PropertyUpdate.NOTFOUND )
+                    {
+                        logger.error( "Unable to find property {} to update with version {}", parentGAV.getVersionString(), newVersion );
+                    }
                 }
                 else
                 {
@@ -222,7 +225,10 @@ public class ProjectVersioningManipulator
             {
                 if (gav.getVersionString().startsWith( "${" ))
                 {
-                    PropertiesUtils.updateProperties( session, new HashSet<>( projects ), false, extractPropertyName( gav.getVersionString() ), newVersion );
+                    if ( PropertiesUtils.updateProperties( session, new HashSet<>( projects ), false, extractPropertyName( gav.getVersionString() ), newVersion ) == PropertiesUtils.PropertyUpdate.NOTFOUND )
+                    {
+                        logger.error( "Unable to find property {} to update with version {}", gav.getVersionString(), newVersion );
+                    }
                 }
                 else
                 {
@@ -277,9 +283,12 @@ public class ProjectVersioningManipulator
                         final String newVersion = versionsByGAV.get( gav );
                         if ( newVersion != null )
                         {
-                            if (gav.getVersionString().startsWith( "${" ))
+                            if (d.getVersion().startsWith( "${" ))
                             {
-                                PropertiesUtils.updateProperties( session, new HashSet<>( projects ), false, extractPropertyName( gav.getVersionString() ), newVersion );
+                                if ( PropertiesUtils.updateProperties( session, new HashSet<>( projects ), false, extractPropertyName( d.getVersion() ), newVersion ) == PropertiesUtils.PropertyUpdate.NOTFOUND )
+                                {
+                                    logger.error( "Unable to find property {} to update with version {}", d.getVersion(), newVersion );
+                                }
                             }
                             else
                             {
@@ -316,9 +325,12 @@ public class ProjectVersioningManipulator
 
                         if ( newVersion != null && d.getVersion() != null )
                         {
-                            if (gav.getVersionString().startsWith( "${" ))
+                            if (d.getVersion().startsWith( "${" ))
                             {
-                                PropertiesUtils.updateProperties( session, new HashSet<>( projects ), false, extractPropertyName( gav.getVersionString() ), newVersion );
+                                if ( PropertiesUtils.updateProperties( session, new HashSet<>( projects ), false, extractPropertyName( d.getVersion() ), newVersion ) == PropertiesUtils.PropertyUpdate.NOTFOUND )
+                                {
+                                    logger.error( "Unable to find property {} to update with version {}", d.getVersion(), newVersion );
+                                }
                             }
                             else
                             {
