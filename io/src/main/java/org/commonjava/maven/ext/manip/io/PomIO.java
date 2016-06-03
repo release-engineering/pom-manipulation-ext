@@ -243,11 +243,11 @@ public class PomIO
             {
                 final URL jarUrl = resources.nextElement();
 
-                logger.debug( "Processing jar resource " + jarUrl );
                 if ( jarUrl.getFile()
-                           .contains( "pom-manipulation-ext" ) )
+                           .contains( "pom-manipulation-" ) )
                 {
                     final Manifest manifest = new Manifest( jarUrl.openStream() );
+
                     result = manifest.getMainAttributes()
                                      .getValue( "Implementation-Version" );
                     result += " ( SHA: " + manifest.getMainAttributes()
