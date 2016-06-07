@@ -100,9 +100,9 @@ public class JSONState
 
     public final static class JSONOperation
     {
-        String file;
-        String xpath;
-        String update;
+        private String file;
+        private String xpath;
+        private String update;
 
         public JSONOperation ( String file, String xpath, String update)
         {
