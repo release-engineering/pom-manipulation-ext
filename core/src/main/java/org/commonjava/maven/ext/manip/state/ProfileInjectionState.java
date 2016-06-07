@@ -38,10 +38,19 @@ public class ProfileInjectionState
      */
     private static final String PROFILE_INJECTION_PROPERTY = "profileInjection";
 
+    /**
+     * Group:artifact to inject
+     */
+    private static final String PROFILE_INJECTION_GA = "profileInjectionGA";
+
     private final ProjectVersionRef profileMgmt;
+
+    private final String groupArtifact;
 
     public ProfileInjectionState( final Properties userProps )
     {
+        groupArtifact = userProps.getProperty( PROFILE_INJECTION_GA );
+
         final String gav = userProps.getProperty( PROFILE_INJECTION_PROPERTY );
         ProjectVersionRef ref = null;
         if ( gav != null && !gav.isEmpty())
@@ -72,6 +81,10 @@ public class ProfileInjectionState
         return profileMgmt != null;
     }
 
+    public String getRemoteProfileInjectionTarget()
+    {
+        return groupArtifact;
+    }
 
     public ProjectVersionRef getRemoteProfileInjectionMgmt()
     {
