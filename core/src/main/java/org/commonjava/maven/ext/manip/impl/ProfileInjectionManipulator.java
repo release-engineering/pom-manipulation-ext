@@ -36,6 +36,7 @@ import java.util.List;
 import java.util.Properties;
 import java.util.Set;
 
+import static org.apache.commons.lang.StringUtils.isNotEmpty;
 import static org.commonjava.maven.ext.manip.util.IdUtils.ga;
 
 /**
@@ -94,10 +95,9 @@ public class ProfileInjectionManipulator
 
         for ( final Project project : projects )
         {
-            if ( project.isInheritanceRoot())
+            if ( checkProject( state, project ) )
             {
-                final String ga = ga( project );
-                logger.info( "Applying changes to: " + ga );
+                logger.info( "Applying changes to: {} ", ga( project ) );
                 final Model model = project.getModel();
                 final List<Profile> profiles = model.getProfiles();
 
@@ -110,6 +110,8 @@ public class ProfileInjectionManipulator
                     }
                     changed.add( project );
                 }
+
+                break;
             }
         }
 
@@ -120,8 +122,8 @@ public class ProfileInjectionManipulator
      * Add the profile to the list of profiles. If an existing profile has the same
      * id it is removed first.
      *
-     * @param profiles
-     * @param profile
+     * @param profiles Existing profiles
+     * @param profile Target profile to add
      */
     private void addProfile( final List<Profile> profiles, final Profile profile )
     {
@@ -156,6 +158,25 @@ public class ProfileInjectionManipulator
 
         logger.debug( "Adding profile {}", profile );
         profiles.add( profile );
+    }
+
+
+    private boolean checkProject ( ProfileInjectionState state, Project project )
+    {
+        boolean result = false;
+
+        if ( isNotEmpty( state.getRemoteProfileInjectionTarget() ) )
+        {
+            if ( state.getRemoteProfileInjectionTarget().equals( ga( project ) ) )
+            {
+                result = true;
+            }
+        }
+        else if ( project.isInheritanceRoot() )
+        {
+            result = true;
+        }
+        return result;
     }
 
     @Override
