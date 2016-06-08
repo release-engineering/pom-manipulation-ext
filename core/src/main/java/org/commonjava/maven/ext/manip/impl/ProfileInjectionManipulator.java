@@ -21,6 +21,8 @@ import org.apache.maven.model.Model;
 import org.apache.maven.model.Profile;
 import org.codehaus.plexus.component.annotations.Component;
 import org.codehaus.plexus.component.annotations.Requirement;
+import org.commonjava.maven.atlas.ident.ref.ProjectRef;
+import org.commonjava.maven.atlas.ident.ref.SimpleProjectRef;
 import org.commonjava.maven.ext.manip.ManipulationException;
 import org.commonjava.maven.ext.manip.ManipulationSession;
 import org.commonjava.maven.ext.manip.io.ModelIO;
@@ -165,9 +167,10 @@ public class ProfileInjectionManipulator
     {
         boolean result = false;
 
-        if ( isNotEmpty( state.getRemoteProfileInjectionTarget() ) )
+        List<ProjectRef> gaToApply = state.getRemoteProfileInjectionTargets();
+        if ( gaToApply != null )
         {
-            if ( state.getRemoteProfileInjectionTarget().equals( ga( project ) ) )
+            if ( gaToApply.contains( project.getKey().asProjectRef() ) )
             {
                 result = true;
             }

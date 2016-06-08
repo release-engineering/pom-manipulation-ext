@@ -16,12 +16,15 @@
 package org.commonjava.maven.ext.manip.state;
 
 import org.commonjava.maven.atlas.ident.ref.InvalidRefException;
+import org.commonjava.maven.atlas.ident.ref.ProjectRef;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef;
 import org.commonjava.maven.ext.manip.impl.ProfileInjectionManipulator;
+import org.commonjava.maven.ext.manip.util.IdUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.List;
 import java.util.Properties;
 
 /**
@@ -39,17 +42,16 @@ public class ProfileInjectionState
     private static final String PROFILE_INJECTION_PROPERTY = "profileInjection";
 
     /**
-     * Group:artifact to inject
      */
-    private static final String PROFILE_INJECTION_GA = "profileInjectionGA";
+    private static final String PROFILE_INJECTION_GA = "profileInjectionPoms";
 
     private final ProjectVersionRef profileMgmt;
 
-    private final String groupArtifact;
+    private final List<ProjectRef> groupArtifact;
 
     public ProfileInjectionState( final Properties userProps )
     {
-        groupArtifact = userProps.getProperty( PROFILE_INJECTION_GA );
+        groupArtifact = IdUtils.parseGAs( userProps.getProperty( PROFILE_INJECTION_GA ) );
 
         final String gav = userProps.getProperty( PROFILE_INJECTION_PROPERTY );
         ProjectVersionRef ref = null;
@@ -81,7 +83,7 @@ public class ProfileInjectionState
         return profileMgmt != null;
     }
 
-    public String getRemoteProfileInjectionTarget()
+    public List<ProjectRef> getRemoteProfileInjectionTargets()
     {
         return groupArtifact;
     }
