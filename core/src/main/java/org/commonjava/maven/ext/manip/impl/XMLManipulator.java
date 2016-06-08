@@ -76,7 +76,7 @@ public class XMLManipulator
     }
 
     /**
-     * Apply the json changes to the specified file(s).
+     * Apply the xml changes to the specified file(s).
      */
     @Override
     public Set<Project> applyChanges( final List<Project> projects, final ManipulationSession session )
@@ -100,7 +100,7 @@ public class XMLManipulator
                 {
                     File target = new File( project.getPom().getParentFile(), operation.getFile() );
 
-                    logger.info( "Attempting to start XML update to file {} with xpath {} and replacement '{}' ",
+                    logger.info( "Attempting to start XML update to file {} with xpath {} and replacement {}",
                                  target, operation.getXPath(), operation.getUpdate() );
 
                     internalApplyChanges (target, operation);
@@ -124,7 +124,7 @@ public class XMLManipulator
 
             if ( nodeList.getLength() == 0 )
             {
-                throw new ManipulationException( "Did not locate XML using XPath " + xPath );
+                throw new ManipulationException( "Did not locate XML using XPath " + operation.getXPath() );
             }
 
             for ( int i = 0; i < nodeList.getLength(); i++ )
