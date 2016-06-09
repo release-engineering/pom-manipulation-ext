@@ -48,7 +48,7 @@ PME supports injection of profiles declared in a remote POM file. Simply supply 
 
     mvn install -DprofileInjection=org.foo:profile-injection:1.0
 
-The extension will, for every profile in the remote POM file, replace or add it to either the local top level POM file or the POM specified by the property `profileInjectionGA` (which should be in the form of e.g. `org.myproject:mychild`).
+The extension will, for every profile in the remote POM file, replace or add it to either the local top level POM file or the POM(s) specified by the property `profileInjectionPoms` (which should be in the form of a comma separated list e.g. `org.myproject:mychild`).
 
 **Note:** for any existing profile in the modified POM that specifies `activeByDefault`, this activation option will be removed so profiles are not accidentally disabled due to its exclusive semantics.
 
