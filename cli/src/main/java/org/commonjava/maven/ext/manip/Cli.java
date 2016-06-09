@@ -266,7 +266,21 @@ public class Cli
         try
         {
             Properties config = new ConfigIO().parse( target.getParentFile() );
-            session.getUserProperties().putAll( config );
+            String value = session.getUserProperties().getProperty( "allowConfigFilePrecedence" );
+            if ( isNotEmpty( value ) && "true".equalsIgnoreCase( value ) )
+            {
+                session.getUserProperties().putAll( config );
+            }
+            else
+            {
+                for ( String key : config.stringPropertyNames() )
+                {
+                    if ( ! session.getUserProperties().containsKey( key ) )
+                    {
+                        session.getUserProperties().setProperty( key, config.getProperty(key) );
+                    }
+                }
+            }
         }
         catch ( ManipulationException e )
         {

@@ -29,6 +29,8 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.util.Properties;
 
+import static org.apache.commons.lang.StringUtils.isNotEmpty;
+
 /**
  * Implements hooks necessary to apply modificationprojectBs in the Maven bootstrap, before the build starts.
  * @author jdcasey
@@ -79,12 +81,29 @@ public class ManipulatingEventSpy
                                             (ch.qos.logback.classic.Logger) LoggerFactory.getLogger( org.slf4j.Logger.ROOT_LOGGER_NAME );
                             root.setLevel( Level.DEBUG );
                         }
+
+                        session.setMavenSession( ee.getSession() );
+
                         if ( ee.getSession().getRequest().getPom() != null )
                         {
                             Properties config = configIO.parse( ee.getSession().getRequest().getPom().getParentFile() );
-                            ee.getSession().getRequest().getUserProperties().putAll( config );
+                            String value = session.getUserProperties().getProperty( "allowConfigFilePrecedence" );
+                            if ( isNotEmpty( value ) && "true".equalsIgnoreCase( value ) )
+                            {
+                                session.getUserProperties().putAll( config );
+                            }
+                            else
+                            {
+                                for ( String key : config.stringPropertyNames() )
+                                {
+                                    if ( ! session.getUserProperties().containsKey( key ) )
+                                    {
+                                        session.getUserProperties().setProperty( key, config.getProperty( key ) );
+                                    }
+                                }
+                            }
                         }
-                        session.setMavenSession( ee.getSession() );
+
                         manipulationManager.init( session );
                     }
                     else

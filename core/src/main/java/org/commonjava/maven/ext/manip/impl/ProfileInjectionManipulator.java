@@ -22,7 +22,6 @@ import org.apache.maven.model.Profile;
 import org.codehaus.plexus.component.annotations.Component;
 import org.codehaus.plexus.component.annotations.Requirement;
 import org.commonjava.maven.atlas.ident.ref.ProjectRef;
-import org.commonjava.maven.atlas.ident.ref.SimpleProjectRef;
 import org.commonjava.maven.ext.manip.ManipulationException;
 import org.commonjava.maven.ext.manip.ManipulationSession;
 import org.commonjava.maven.ext.manip.io.ModelIO;
@@ -38,7 +37,6 @@ import java.util.List;
 import java.util.Properties;
 import java.util.Set;
 
-import static org.apache.commons.lang.StringUtils.isNotEmpty;
 import static org.commonjava.maven.ext.manip.util.IdUtils.ga;
 
 /**
