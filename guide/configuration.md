@@ -14,7 +14,7 @@ However, PME also offers the ability to read a local configuration file. This fi
 * The file must be named either `pme.yaml`, `pnc.yaml`, `pnc.json` or `pme.properties`.
 * The file must be placed at the execution root (i.e. the root directory of the SCM checkout).
 
-**Note**: The configuration will _override_ any command line properties.
+**Note**: The command line will _override_ any configuration properties _unless_ the property `allowConfigFilePrecedence` is passed in and set to true.
 
 ### Yaml
 
@@ -34,13 +34,15 @@ Any other configuration sections are ignored by PME.
 The format is as follows
 
     {
-        pme: {
-            key : value,
-            key2 : value2
-        }
-        other-configuration:
+        "pme": {
+            "key" : "value",
+            "key2" : "value2"
+            },
+        other-configuration: {
             ....
+        }
     }
+
 
 Any other configuration sections are ignored by PME.
 
