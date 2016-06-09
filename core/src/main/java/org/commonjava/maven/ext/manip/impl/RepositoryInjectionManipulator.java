@@ -102,7 +102,6 @@ public class RepositoryInjectionManipulator
             {
                 // inject repositories
                 final List<Repository> repositories = model.getRepositories();
-
                 if ( !remoteRepositories.isEmpty() )
                 {
                     final Iterator<Repository> i1 = remoteRepositories.iterator();
@@ -135,8 +134,8 @@ public class RepositoryInjectionManipulator
      * Add the repository to the list of repositories. If an existing repository has the same
      * id it is removed first.
      *
-     * @param repositories
-     * @param repository
+     * @param repositories the current list of repositories
+     * @param repository the repository to add
      */
     private void addRepository( final List<Repository> repositories, final Repository repository )
     {
@@ -145,8 +144,7 @@ public class RepositoryInjectionManipulator
         {
             final Repository r = i.next();
 
-            if ( repository.getId()
-                    .equals( r.getId() ) )
+            if ( repository.getId().equals( r.getId() ) )
             {
                 logger.debug("Removing local repository {} ", r);
                 i.remove();
@@ -169,6 +167,7 @@ public class RepositoryInjectionManipulator
             {
                 result = true;
             }
+            logger.debug ("Checking project {} against possible GAs {} and found match {}", project.getKey().asProjectRef(), gaToApply, result);
         }
         else if ( project.isInheritanceRoot() )
         {

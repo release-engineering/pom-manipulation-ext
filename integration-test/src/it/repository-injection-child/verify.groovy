@@ -32,5 +32,9 @@ System.out.println( "Slurping POM: ${pomFile.getAbsolutePath()}" )
 
 pom = new XmlSlurper().parse( pomFile )
 
-assert pom.repositories.children().size() == 1
-assert pom.pluginRepositories.children().size() == 1
+assert pom.repositories.children().size() == 2
+assert pom.pluginRepositories.children().size() == 2
+
+// Check the releases of jboss-public-repository-group repository has been enabled (overwritten after injection)
+repository = pom.repositories.repository.find { it.id.text() == 'jboss-public-repository-group' }
+assert repository.releases.enabled.text() == 'true'
