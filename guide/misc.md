@@ -48,7 +48,7 @@ PME supports injection of profiles declared in a remote POM file. Simply supply 
 
     mvn install -DprofileInjection=org.foo:profile-injection:1.0
 
-The extension will, for every profile in the remote POM file, replace or add it to either the local top level POM file or the POM(s) specified by the property `profileInjectionPoms` (which should be in the form of a comma separated list e.g. `org.myproject:mychild`).
+The extension will, for every profile in the remote POM file, replace or add it to the local top level POM file.
 
 **Note:** for any existing profile in the modified POM that specifies `activeByDefault`, this activation option will be removed so profiles are not accidentally disabled due to its exclusive semantics.
 
@@ -64,7 +64,7 @@ PME supports injection of remote repositories. Supply a remote repository manage
 
 	mvn install -DrepositoryInjection=org.foo:repository-injection:1.0
 
-The extension will resolve a remote POM file and inject remote repositories to the local top level POM file. If there is a local repository with id identical to the injected one, it is overwritten.
+The extension will resolve a remote POM file and inject remote repositories to either the local top level POM file or the POM(s) specified by the property `repositoryInjectionPoms` (which should be in the form of a comma separated list e.g. `org.myproject:mychild`). If there is a local repository with id identical to the injected one, it is overwritten.
 
 #### Property Override
 
