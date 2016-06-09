@@ -38,7 +38,7 @@ The format is as follows
             "key" : "value",
             "key2" : "value2"
             },
-        other-configuration: {
+        "other-configuration": {
             ....
         }
     }
