@@ -19,6 +19,7 @@ import org.apache.maven.model.Model;
 import org.apache.maven.model.Repository;
 import org.codehaus.plexus.component.annotations.Component;
 import org.codehaus.plexus.component.annotations.Requirement;
+import org.commonjava.maven.atlas.ident.ref.ProjectRef;
 import org.commonjava.maven.ext.manip.ManipulationException;
 import org.commonjava.maven.ext.manip.ManipulationSession;
 import org.commonjava.maven.ext.manip.io.ModelIO;
@@ -97,7 +98,7 @@ public class RepositoryInjectionManipulator
             logger.info( "Applying changes to: " + ga );
             final Model model = project.getModel();
 
-            if ( project.isInheritanceRoot() )
+            if ( checkProject( state, project ) )
             {
                 // inject repositories
                 final List<Repository> repositories = model.getRepositories();
@@ -125,7 +126,6 @@ public class RepositoryInjectionManipulator
                     changed.add( project );
                 }
             }
-
         }
 
         return changed;
@@ -157,6 +157,26 @@ public class RepositoryInjectionManipulator
         logger.debug( "Adding repository {}", repository );
         repositories.add(repository);
     }
+
+    private boolean checkProject ( RepositoryInjectionState state, Project project )
+    {
+        boolean result = false;
+
+        List<ProjectRef> gaToApply = state.getRemoteRepositoryInjectionTargets();
+        if ( gaToApply != null )
+        {
+            if ( gaToApply.contains( project.getKey().asProjectRef() ) )
+            {
+                result = true;
+            }
+        }
+        else if ( project.isInheritanceRoot() )
+        {
+            result = true;
+        }
+        return result;
+    }
+
 
     @Override
     public int getExecutionIndex()

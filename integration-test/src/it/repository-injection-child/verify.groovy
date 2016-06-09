@@ -19,17 +19,18 @@ System.out.println( "Slurping POM: ${pomFile.getAbsolutePath()}" )
 
 def pom = new XmlSlurper().parse( pomFile )
 
-// We should have two profiles after injection
-assert pom.profiles.children().size() == 2
+// We should have two repositories after injection
+assert pom.repositories.children().size() == 2
+assert pom.pluginRepositories.children().size() == 2
 
-// Check the 3.8 version of junit has been overridden
-def junit = pom.depthFirst().findAll { it.name() == 'version.junit' }
-assert junit[0] == '4.1'
+// Check the releases of jboss-public-repository-group repository has been enabled (overwritten after injection)
+def repository = pom.repositories.repository.find { it.id.text() == 'jboss-public-repository-group' }
+assert repository.releases.enabled.text() == 'true'
 
 pomFile = new File( basedir, 'pom.xml' )
 System.out.println( "Slurping POM: ${pomFile.getAbsolutePath()}" )
 
 pom = new XmlSlurper().parse( pomFile )
 
-// We should have two profiles after injection
-assert pom.profiles.children().size() == 0
+assert pom.repositories.children().size() == 1
+assert pom.pluginRepositories.children().size() == 1

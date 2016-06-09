@@ -21,7 +21,6 @@ import org.apache.maven.model.Model;
 import org.apache.maven.model.Profile;
 import org.codehaus.plexus.component.annotations.Component;
 import org.codehaus.plexus.component.annotations.Requirement;
-import org.commonjava.maven.atlas.ident.ref.ProjectRef;
 import org.commonjava.maven.ext.manip.ManipulationException;
 import org.commonjava.maven.ext.manip.ManipulationSession;
 import org.commonjava.maven.ext.manip.io.ModelIO;
@@ -95,7 +94,7 @@ public class ProfileInjectionManipulator
 
         for ( final Project project : projects )
         {
-            if ( checkProject( state, project ) )
+            if ( project.isInheritanceRoot() )
             {
                 logger.info( "Applying changes to: {} ", ga( project ) );
                 final Model model = project.getModel();
@@ -160,25 +159,6 @@ public class ProfileInjectionManipulator
         profiles.add( profile );
     }
 
-
-    private boolean checkProject ( ProfileInjectionState state, Project project )
-    {
-        boolean result = false;
-
-        List<ProjectRef> gaToApply = state.getRemoteProfileInjectionTargets();
-        if ( gaToApply != null )
-        {
-            if ( gaToApply.contains( project.getKey().asProjectRef() ) )
-            {
-                result = true;
-            }
-        }
-        else if ( project.isInheritanceRoot() )
-        {
-            result = true;
-        }
-        return result;
-    }
 
     @Override
     public int getExecutionIndex()

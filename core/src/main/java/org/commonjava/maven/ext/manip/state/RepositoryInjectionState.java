@@ -16,12 +16,15 @@
 package org.commonjava.maven.ext.manip.state;
 
 import org.commonjava.maven.atlas.ident.ref.InvalidRefException;
+import org.commonjava.maven.atlas.ident.ref.ProjectRef;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef;
 import org.commonjava.maven.ext.manip.impl.RepositoryInjectionManipulator;
+import org.commonjava.maven.ext.manip.util.IdUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.List;
 import java.util.Properties;
 
 /**
@@ -38,11 +41,17 @@ public class RepositoryInjectionState
      */
     private static final String REPOSITORY_INJECTION_PROPERTY = "repositoryInjection";
 
+    private static final String REPOSITORY_INJECTION_POMS = "repositoryInjectionPoms";
+
     private final ProjectVersionRef repoMgmt;
+
+    private final List<ProjectRef> groupArtifact;
 
     public RepositoryInjectionState( final Properties userProps )
     {
         final String gav = userProps.getProperty( REPOSITORY_INJECTION_PROPERTY );
+        groupArtifact = IdUtils.parseGAs( userProps.getProperty( REPOSITORY_INJECTION_POMS ) );
+
         ProjectVersionRef ref = null;
         if ( gav != null )
         {
@@ -72,6 +81,10 @@ public class RepositoryInjectionState
         return repoMgmt != null;
     }
 
+    public List<ProjectRef> getRemoteRepositoryInjectionTargets()
+    {
+        return groupArtifact;
+    }
 
     public ProjectVersionRef getRemoteRepositoryInjectionMgmt()
     {

@@ -41,18 +41,10 @@ public class ProfileInjectionState
      */
     private static final String PROFILE_INJECTION_PROPERTY = "profileInjection";
 
-    /**
-     */
-    private static final String PROFILE_INJECTION_GA = "profileInjectionPoms";
-
     private final ProjectVersionRef profileMgmt;
-
-    private final List<ProjectRef> groupArtifact;
 
     public ProfileInjectionState( final Properties userProps )
     {
-        groupArtifact = IdUtils.parseGAs( userProps.getProperty( PROFILE_INJECTION_GA ) );
-
         final String gav = userProps.getProperty( PROFILE_INJECTION_PROPERTY );
         ProjectVersionRef ref = null;
         if ( gav != null && !gav.isEmpty())
@@ -81,11 +73,6 @@ public class ProfileInjectionState
     public boolean isEnabled()
     {
         return profileMgmt != null;
-    }
-
-    public List<ProjectRef> getRemoteProfileInjectionTargets()
-    {
-        return groupArtifact;
     }
 
     public ProjectVersionRef getRemoteProfileInjectionMgmt()
