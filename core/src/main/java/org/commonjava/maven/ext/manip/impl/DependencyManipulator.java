@@ -526,13 +526,31 @@ public class DependencyManipulator implements Manipulator
                     {
                         logger.debug( "Dependency is a managed version for " + groupIdArtifactId + "; ignoring" );
                     }
-                    // If we're doing strict matching with properties, then the original parts should match
-                    // ${foo} (resolves to 1.2) and the new version mapping is 1.3 : 1.3.redhat-1
+                    // If we're doing strict matching with properties, then the original parts should match.
+                    // i.e. assuming original resolved value is 1.2 and potential new value is 1.2.rebuild-1
+                    // then this is fine to continue. If the original is 1.2 and potential new value is 1.3.rebuild-1
+                    // then don't bother to attempt to cache the property as the strict check would fail.
                     // This extra check avoids an erroneous "Property replacement clash" error.
-                    else if ( strict && oldVersion.contains( "$" ) && ! resolvedValue.equals( ar.getVersionString() ) )
+
+                    // Can't blindly compare resolvedValue [original] against ar as ar / overrideVersion is the new GAV. We don't
+                    // have immediate access to the original property so the closest thats feasible is verify strict matching.
+
+                    else if ( strict && oldVersion.contains( "$" ) &&
+                                    ! PropertiesUtils.checkStrictValue( session, resolvedValue, overrideVersion) )
                     {
-                        logger.debug ("Original version {} of {} does not match override version {} : {} so ignoring",
-                                      resolvedValue, dependency, ar.getVersionString(), overrideVersion);
+                        logger.debug ("Original fully resolved version {} of {} does not match override version {} -> {} so ignoring",
+                                      resolvedValue, dependency, ar, overrideVersion);
+                        if ( state.getFailOnStrictViolation() )
+                        {
+                            throw new ManipulationException(
+                                            "Replacing original property version {} (fully resolved: {} ) with new version {} for {} violates the strict version-alignment rule!",
+                                            dependency.getVersion(), resolvedValue, ar.getVersionString(), ar.asProjectRef().toString());
+                        }
+                        else
+                        {
+                            logger.warn( "Replacing original property version {} with new version {} for {} violates the strict version-alignment rule!",
+                                         resolvedValue, overrideVersion, dependency.getVersion() );
+                        }
                     }
                     else
                     {

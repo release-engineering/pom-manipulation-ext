@@ -23,44 +23,52 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>org.commonjava.maven.ext</groupId>
-  <artifactId>depMgmt2</artifactId>
-  <version>1.0</version>
+  <artifactId>remote-dependency-management-embedded-props</artifactId>
+  <version>1.0-SNAPSHOT</version>
 
-  <name>Dependency Management POM to use with integration tests</name>
+  <name>Test override dependency versions that have multiple embedded props</name>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+    <jetty.major>8</jetty.major>
+    <jetty.qualifier>v20150415</jetty.qualifier>
+
+    <commons.lang.major>2</commons.lang.major>
+    <commons.httpclient.minor>1</commons.httpclient.minor>
+
+    <junit>3.8.2</junit>
+
+    <jetty>${jetty.major}.1.17.${jetty.qualifier}</jetty>
   </properties>
+
 
   <dependencyManagement>
     <dependencies>
       <dependency>
-        <groupId>junit</groupId>
-        <artifactId>junit</artifactId>
-        <version>4.1</version>
-      </dependency>
-      <dependency>
-        <groupId>commons-httpclient</groupId>
-        <artifactId>commons-httpclient</artifactId>
-        <version>3.1-redhat-1</version>
-      </dependency>
-      <dependency>
         <groupId>commons-lang</groupId>
         <artifactId>commons-lang</artifactId>
-        <version>2.6.0.redhat-4</version>
-      </dependency>
-      <dependency>
-        <groupId>commons-net</groupId>
-        <artifactId>commons-net</artifactId>
-        <version>3.1-redhat-4</version>
-      </dependency>
-
-      <dependency>
-        <groupId>org.eclipse.jetty</groupId>
-        <artifactId>jetty-server</artifactId>
-        <version>8.1.17.v20150415-redhat-1</version>
-      </dependency>
+        <version>${commons.lang.major}.6.0</version>
+    </dependency>
     </dependencies>
   </dependencyManagement>
+
+  <dependencies>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>${junit}</version>
+    </dependency>
+    <dependency>
+      <groupId>commons-httpclient</groupId>
+      <artifactId>commons-httpclient</artifactId>
+      <version>3.${commons.httpclient.minor}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.jetty</groupId>
+      <artifactId>jetty-server</artifactId>
+      <version>${jetty}</version>
+    </dependency>
+  </dependencies>
 
 </project>

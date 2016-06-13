@@ -202,6 +202,11 @@ public final class PropertiesUtils
         {
             return false;
         }
+        else if ( oldValue.equals( newValue ) )
+        {
+            // The old version and new version matches. So technically it can be changed (even if its a bit pointless).
+            return true;
+        }
 
         final DependencyState dState = session.getState( DependencyState.class );
         final boolean ignoreSuffix = dState.getStrictIgnoreSuffix();
