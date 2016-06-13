@@ -556,7 +556,12 @@ public class DependencyManipulator implements Manipulator
                     {
                         if ( ! PropertiesUtils.cacheProperty( versionPropertyUpdateMap, oldVersion, overrideVersion, ar, false ))
                         {
-                            if ( strict && ! PropertiesUtils.checkStrictValue( session, resolvedValue, overrideVersion) )
+                            if ( oldVersion.equals( "${project.version}" ) )
+                            {
+                                logger.debug( "For dependency {} ; version is built in {} so skipping inlining {}", groupIdArtifactId, oldVersion,
+                                              overrideVersion );
+                            }
+                            else if ( strict && ! PropertiesUtils.checkStrictValue( session, resolvedValue, overrideVersion) )
                             {
                                 if ( state.getFailOnStrictViolation() )
                                 {

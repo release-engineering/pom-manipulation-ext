@@ -60,14 +60,14 @@
               <mainClass>org.apache.camel.manual.ManualGenerator</mainClass>
               <arguments>
                 <argument>http://camel.apache.org/book-in-one-page.html</argument>
-                <argument>${project.build.directory}/site/manual/camel-manual-${project.version}.html</argument>
-                <argument>${project.version}</argument>
+                <argument>${project.build.directory}/site/manual/camel-manual-\${project.version}.html</argument>
+                <argument>\${project.version}</argument>
                 <argument><![CDATA[
                 <link href="http://camel.apache.org/styles/camel-manual.css" rel="stylesheet" type="text/css" />
                 <style type="text/css">
                 @page :left {
                 @top-left {
-                content: "Apache Camel ${project.version} Developer's Manual";
+                content: "Apache Camel \${project.version} Developer's Manual";
                 }
                 }
                 </style>
