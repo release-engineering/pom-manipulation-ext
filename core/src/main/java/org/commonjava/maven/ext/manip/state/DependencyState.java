@@ -67,6 +67,10 @@ public class DependencyState
      */
     private static final String DEPENDENCY_MANAGEMENT_POM_PROPERTY = "dependencyManagement";
 
+    /**
+     * Whether to override transitive as well. Note: this uses the same name (overrideTransitive)
+     * as {@link PluginState#overrideTransitive }
+     */
     private final boolean overrideTransitive;
 
     private final boolean overrideDependencies;
