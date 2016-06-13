@@ -16,6 +16,12 @@ This will inject all `<pluginManagement/>` versions, executions and configuratio
 
     mvn install -DpluginManagement=org.company:pluginMgrA:1.0,org.company:pluginMgrB:2.0
 
+By default the extension will inject _all_ plugins declared in the remote BOM. If the option `overrideTransitive` is set to `false` to then only plugins used will be overridden.
+
+    mvn install -DpluginManagement=org.foo:my-dep-pom:1.0 -DoverrideTransitive=false
+
+**Note**: overrideTransitive is also used by the Dependency Manipulator.
+
 If there is an existing local configuration then it will be merged with the remote. The following configuration controls the precedence:
 
     -DpluginManagementPrecedence=[LOCAL|REMOTE]
