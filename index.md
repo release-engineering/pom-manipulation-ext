@@ -33,6 +33,8 @@ It supports the following arguments
     --printGAVTC              Print all project dependencies in
                               group:artifact:version:type:classifier with
                               scope information
+    --printUnusedDepMgmt      Print unused managed dependencies in
+                              group:artifact:version format
     -s,--settings <arg>       Optional settings.xml file
     -x <arg> <arg>            XPath tester ( file : xpath )
 
