@@ -62,9 +62,16 @@ public class PluginState
      */
     private final Map<String, String> versionPropertyUpdateMap = new HashMap<>();
 
+    /**
+     * Whether to override transitive as well. Note: this uses the same name (overrideTransitive)
+     * as {@link DependencyState#overrideTransitive }
+     */
+    private final boolean overrideTransitive;
+
     public PluginState( final Properties userProps )
     {
         pluginMgmt = IdUtils.parseGAVs( userProps.getProperty( PLUGIN_MANAGEMENT_POM_PROPERTY ) );
+        overrideTransitive = Boolean.valueOf( userProps.getProperty( "overrideTransitive", "true" ) );
         switch ( Precedence.valueOf( userProps.getProperty( "pluginManagementPrecedence",
                                                             Precedence.REMOTE.toString() ).toUpperCase() ) )
         {
@@ -98,11 +105,6 @@ public class PluginState
         return pluginMgmt;
     }
 
-    public void addVersionPropertyOverride( String oldVersionProp, String version )
-    {
-        versionPropertyUpdateMap.put( oldVersionProp, version );
-    }
-
     public String getVersionPropertyOverride( String prop )
     {
         return versionPropertyUpdateMap.get( prop );
@@ -118,4 +120,12 @@ public class PluginState
         return configPrecedence;
     }
 
+    /**
+     * @return whether to override unmanaged transitive plugins in the build. Has the effect of adding (or not) new entries
+     * to dependency management when no matching dependency is found in the pom. Defaults to true.
+     */
+    public boolean getOverrideTransitive()
+    {
+        return overrideTransitive;
+    }
 }

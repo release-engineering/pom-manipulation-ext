@@ -13,26 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-def pomFile = new File( basedir, 'pom.xml' )
-System.out.println( "Slurping POM: ${pomFile.getAbsolutePath()}" )
+package test;
 
-def pom = new XmlSlurper().parse( pomFile )
+import org.junit.Test;
 
-def plugin = pom.build.plugins.plugin.find { it.artifactId.text() == "maven-compiler-plugin" }
-assert plugin != null
-assert plugin.version.text() == "3.1"
+public class HelloWorldwithJUnit
+{
+    public static void main (String [] args)
+    {
+        System.out.println("hello");
+    }
 
-def message = 0
-pomFile.eachLine {
-   if (it.contains( "maven-compiler-plugin")) {
-      message++
-   }
-   if (it.contains( "maven-jar-plugin")) {
-      message++
-   }
-   if (it.contains( "{java.version}")) {
-      message++
-   }
+    @Test
+    public void test()
+    {
+        // Just a dummy method to verify that we can compile again JUnit 4
+    }
 }
-
-assert message == 3

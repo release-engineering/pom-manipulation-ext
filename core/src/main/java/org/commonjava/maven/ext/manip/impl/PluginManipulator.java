@@ -345,7 +345,9 @@ public class PluginManipulator
             }
             // If the plugin doesn't exist but has a configuration section in the remote inject it so we
             // get the correct config.
-            else if ( pluginMgmt && ( override.getConfiguration() != null || override.getExecutions() != null ) )
+            else if ( pluginMgmt &&
+                            pluginState.getOverrideTransitive() &&
+                            ( override.getConfiguration() != null || override.getExecutions().size() > 0 ) )
             {
                 plugins.add( override );
                 logger.info( "Added plugin version: " + override.getKey() + "=" + override.getVersion());
