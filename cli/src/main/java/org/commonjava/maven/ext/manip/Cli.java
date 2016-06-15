@@ -54,6 +54,7 @@ import org.codehaus.plexus.PlexusContainer;
 import org.codehaus.plexus.PlexusContainerException;
 import org.codehaus.plexus.component.repository.exception.ComponentLookupException;
 import org.commonjava.maven.atlas.ident.ref.ArtifactRef;
+import org.commonjava.maven.atlas.ident.ref.ProjectRef;
 import org.commonjava.maven.ext.manip.impl.RESTManipulator;
 import org.commonjava.maven.ext.manip.io.PomIO;
 import org.commonjava.maven.ext.manip.io.XMLIO;
@@ -76,6 +77,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
+import java.util.TreeSet;
 
 import static org.apache.commons.lang.StringUtils.isNotEmpty;
 
@@ -155,6 +157,10 @@ public class Cli
         options.addOption( Option.builder()
                                  .longOpt( "printGAVTC" )
                                  .desc( "Print all project dependencies in group:artifact:version:type:classifier with scope information" )
+                                 .build() );
+        options.addOption( Option.builder()
+                                 .longOpt( "printUnusedDepMgmt" )
+                                 .desc( "Print unused managed dependencies in group:artifact:version format" )
                                  .build() );
         options.addOption( Option.builder( "D" )
                                  .hasArgs()
@@ -313,7 +319,7 @@ public class Cli
                     logger.info  ("Found node {} and value {} ", node.getNodeName(), node.getTextContent());
                 }
             }
-            else if ( cmd.hasOption( 'p' ) || cmd.hasOption( "printGAVTC" ) )
+            else if ( cmd.hasOption( 'p' ) || cmd.hasOption( "printGAVTC" ) || cmd.hasOption( "printUnusedDepMgmt" ))
             {
                 Set<String> activeProfiles = null;
                 if ( cmd.hasOption( 'P' ) )
@@ -321,7 +327,7 @@ public class Cli
                     activeProfiles = new HashSet<>();
                     Collections.addAll( activeProfiles, cmd.getOptionValue( 'P' ).split( "," ) );
                 }
-                Set<ArtifactRef> ts = RESTManipulator.establishDependencies( pomIO.parseProject( session.getPom() ), activeProfiles );
+                Set<ArtifactRef> ts = RESTManipulator.establishAllDependencies( pomIO.parseProject( session.getPom() ), activeProfiles );
                 logger.info( "Found {} dependencies.", ts.size() );
                 File output = null;
 
@@ -330,33 +336,65 @@ public class Cli
                     output = new File( cmd.getOptionValue( 'o' ) );
                     output.delete();
                 }
-                for ( ArtifactRef a : ts )
+                if ( cmd.hasOption( "printUnusedDepMgmt" ) )
                 {
-                    String scope = null;
-                    if ( a instanceof SimpleScopedArtifactRef )
+                    Set<ArtifactRef> nonMangedDeps = RESTManipulator.establishNonManagedDependencies( pomIO.parseProject( session.getPom() ), activeProfiles );
+                    logger.info( "Found {} non-managed dependencies.", nonMangedDeps.size() );
+                    // As the managed dependencies may have versions versus the non-managed strip off the versions to see what is left.
+                    Set<ProjectRef> tsNoV = new TreeSet<>(  );
+                    for ( ArtifactRef ar : ts)
                     {
-                        scope = ( (SimpleScopedArtifactRef) a ).getScope();
+                        tsNoV.add( ar.asProjectRef() );
                     }
-                    if ( cmd.hasOption( 'o' ) )
+                    Set<ProjectRef> nonManagedNoV = new TreeSet<>(  );
+                    for ( ArtifactRef ar : nonMangedDeps)
                     {
-                        if ( cmd.hasOption( "printGAVTC" ) )
+                        nonManagedNoV.add( ar.asProjectRef() );
+                    }
+                    tsNoV.removeAll( nonManagedNoV );
+
+                    for ( ProjectRef pr : tsNoV)
+                    {
+                        if ( cmd.hasOption( 'o' ) )
                         {
-                            FileUtils.writeStringToFile( output, String.format( "%-80s%10s\n", a, scope ), true );
+                            FileUtils.writeStringToFile( output, pr.toString(), true );
                         }
                         else
                         {
-                            FileUtils.writeStringToFile( output, a.asProjectVersionRef().toString() + '\n', true );
+                            System.out.println( pr.toString() );
                         }
                     }
-                    else
+                }
+                else
+                {
+                    for ( ArtifactRef a : ts )
                     {
-                        if ( cmd.hasOption( "printGAVTC" ) )
+                        String scope = null;
+                        if ( a instanceof SimpleScopedArtifactRef )
                         {
-                            System.out.format( "%-80s%10s\n", a, scope );
+                            scope = ( (SimpleScopedArtifactRef) a ).getScope();
+                        }
+                        if ( cmd.hasOption( 'o' ) )
+                        {
+                            if ( cmd.hasOption( "printGAVTC" ) )
+                            {
+                                FileUtils.writeStringToFile( output, String.format( "%-80s%10s\n", a, scope ), true );
+                            }
+                            else
+                            {
+                                FileUtils.writeStringToFile( output, a.asProjectVersionRef().toString() + '\n', true );
+                            }
                         }
                         else
                         {
-                            System.out.println( a.asProjectVersionRef() );
+                            if ( cmd.hasOption( "printGAVTC" ) )
+                            {
+                                System.out.format( "%-80s%10s\n", a, scope );
+                            }
+                            else
+                            {
+                                System.out.println( a.asProjectVersionRef() );
+                            }
                         }
                     }
                 }

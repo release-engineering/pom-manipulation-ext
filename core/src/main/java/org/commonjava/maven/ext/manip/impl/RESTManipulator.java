@@ -49,6 +49,8 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.TimeUnit;
 
+import static org.apache.commons.lang.StringUtils.isEmpty;
+
 /**
  * This Manipulator runs first. It makes a REST call to an external service to loadRemoteOverrides the GAVs to align the project version
  * and dependencies to. It will prepopulate Project GA versions into the VersioningState in case the VersioningManipulator has been activated
@@ -110,7 +112,7 @@ public class RESTManipulator implements Manipulator
         }
         restParam.addAll( newProjectKeys );
 
-        Set<ArtifactRef> localDeps = establishDependencies( projects, null );
+        Set<ArtifactRef> localDeps = establishAllDependencies( projects, null );
 
         // Ok we now have a defined list of top level project plus a unique list of all possible dependencies.
         // Need to send that to the rest interface to get a translation.
@@ -191,13 +193,34 @@ public class RESTManipulator implements Manipulator
 
 
     /**
+     * Scans a list of projects and accumulates all non managed dependencies and returns them. Currently only used by the CLI tool to establish
+     * a list of non-managed dependencies.
+     * @param projects the projects to scan.
+     * @param activeProfiles
+     * @return an unsorted set of ArtifactRefs used.
+     * @throws ManipulationException
+     */
+    public static Set<ArtifactRef> establishNonManagedDependencies( final List<Project> projects, Set<String> activeProfiles ) throws ManipulationException
+    {
+        return establishDependencies( projects, activeProfiles, false );
+    }
+
+
+    /**
      * Scans a list of projects and accumulates all dependencies and returns them.
      * @param projects the projects to scan.
      * @param activeProfiles
      * @return an unsorted set of ArtifactRefs used.
      * @throws ManipulationException
      */
-    public static Set<ArtifactRef> establishDependencies( final List<Project> projects, Set<String> activeProfiles ) throws ManipulationException
+    public static Set<ArtifactRef> establishAllDependencies( final List<Project> projects, Set<String> activeProfiles ) throws ManipulationException
+    {
+        return establishDependencies( projects, activeProfiles, true );
+    }
+
+
+    private static Set<ArtifactRef> establishDependencies( final List<Project> projects, Set<String> activeProfiles,
+                                                             boolean includeManaged ) throws ManipulationException
     {
         Set<ArtifactRef> localDeps = new TreeSet<>();
         Set<String> activeModules = new HashSet<>();
@@ -237,8 +260,11 @@ public class RESTManipulator implements Manipulator
         {
             if ( project.isInheritanceRoot() || scanAll || activeModules.contains( project.getPom().getParentFile().getName() ) )
             {
-                recordDependencies( projects, project, localDeps, project.getManagedDependencies() );
-                recordDependencies( projects, project, localDeps, project.getDependencies() );
+                if (includeManaged)
+                {
+                    recordDependencies( projects, project, localDeps, project.getManagedDependencies(), includeManaged );
+                }
+                recordDependencies( projects, project, localDeps, project.getDependencies(), includeManaged );
 
                 List<Profile> profiles = project.getModel().getProfiles();
                 if ( profiles != null )
@@ -249,11 +275,12 @@ public class RESTManipulator implements Manipulator
                         {
                             continue;
                         }
-                        if ( p.getDependencyManagement() != null )
+                        if ( p.getDependencyManagement() != null && includeManaged )
                         {
-                            recordDependencies( projects, project, localDeps, p.getDependencyManagement().getDependencies() );
+                            recordDependencies( projects, project, localDeps, p.getDependencyManagement().getDependencies(),
+                                                includeManaged );
                         }
-                        recordDependencies( projects, project, localDeps, p.getDependencies() );
+                        recordDependencies( projects, project, localDeps, p.getDependencies(), includeManaged );
                     }
                 }
             }
@@ -270,8 +297,10 @@ public class RESTManipulator implements Manipulator
      * @param project currently scanned project
      * @param deps Set of ProjectVersionRef to store the results in.
      * @param dependencies dependencies to examine
+     * @param excludeEmptyVersions if true, exclude empty versions
      */
-    private static void recordDependencies( List<Project> projects, Project project, Set<ArtifactRef> deps, Iterable<Dependency> dependencies )
+    private static void recordDependencies( List<Project> projects, Project project, Set<ArtifactRef> deps,
+                                            Iterable<Dependency> dependencies, boolean excludeEmptyVersions )
                     throws ManipulationException
     {
         if ( dependencies == null )
@@ -285,18 +314,26 @@ public class RESTManipulator implements Manipulator
         {
             Dependency d = iterator.next();
 
-            if ( d.getVersion() == null )
+            if ( excludeEmptyVersions && isEmpty( d.getVersion() ) )
             {
                 logger.trace( "Skipping dependency " + d + " as empty version." );
             }
             else
             {
                 PropertyInterpolator pi = new PropertyInterpolator( project.getModel().getProperties(), project );
+                String version = PropertiesUtils.resolveProperties( projects, d.getVersion() );
+
+                if ( isEmpty ( version ) )
+                {
+                    // Hack for non-managed versions to be stored in this set. Only used by CLI codepath
+                    logger.trace( "Version for " + d + " is empty." );
+                    version = "<unknown>";
+                }
 
                 deps.add( new SimpleScopedArtifactRef( new SimpleProjectVersionRef(
                                 pi.interp( d.getGroupId().equals( "${project.groupId}" ) ? project.getGroupId() : d.getGroupId() ),
                                 pi.interp( d.getArtifactId().equals( "${project.artifactId}" ) ? project.getArtifactId() : d.getArtifactId() ),
-                                PropertiesUtils.resolveProperties( projects, d.getVersion() ) ),
+                                version ),
                                                        new SimpleTypeAndClassifier( d.getType(), d.getClassifier() ),
                                                        // TODO: Should atlas handle default scope?
                                                        d.getScope() == null ? DependencyScope.compile.realName() : d.getScope()));
