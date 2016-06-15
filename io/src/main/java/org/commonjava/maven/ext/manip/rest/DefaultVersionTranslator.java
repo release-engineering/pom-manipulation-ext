@@ -64,7 +64,8 @@ public class DefaultVersionTranslator
 
         Unirest.setObjectMapper( new ProjectVersionRefMapper() );
         // According to https://github.com/Mashape/unirest-java the default connection timeout is 10000
-        // and the default socketTimeout is 60000. We have increased that to 10 minutes.
+        // and the default socketTimeout is 60000.
+        // We have increased the first to 30 seconds and the second to 10 minutes.
         Unirest.setTimeouts( 30000, 600000 );
     }
 
