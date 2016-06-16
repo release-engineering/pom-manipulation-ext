@@ -59,6 +59,32 @@ import static org.commonjava.maven.ext.manip.util.IdUtils.ga;
 public class PluginManipulator
     implements Manipulator
 {
+    private enum PluginType
+    {
+        RemotePM,
+        RemoteP,
+        LocalPM,
+        LocalP;
+
+        @Override
+        public String toString()
+        {
+            switch ( this )
+            {
+                case RemotePM:
+                    return "RemotePluginManagement";
+                case RemoteP:
+                    return "Plugins";
+                case LocalPM:
+                    return "LocalPluginManagement";
+                case LocalP:
+                    return "LocalPlugins";
+                default:
+                    throw new IllegalArgumentException();
+            }
+        }
+    }
+
     private final Logger logger = LoggerFactory.getLogger( getClass() );
 
     @Requirement
@@ -102,15 +128,22 @@ public class PluginManipulator
 
         final Set<Project> changed = new HashSet<>();
 
-        final Map<ProjectRef, Plugin> overrides = loadRemoteBOM( state, session );
+        final Map<ProjectRef, Plugin> mgmtOverrides = loadRemoteBOM( PluginType.RemotePM, state, session );
+        final Map<ProjectRef, Plugin> pluginOverrides = loadRemoteBOM( PluginType.RemoteP, state, session );
 
         for ( final Project project : projects )
         {
             final Model model = project.getModel();
 
-            if (!overrides.isEmpty())
+            if (!mgmtOverrides.isEmpty())
             {
-                apply( session, project, model, overrides );
+                apply( session, project, model, PluginType.RemotePM, mgmtOverrides );
+
+                changed.add( project );
+            }
+            if (!pluginOverrides.isEmpty())
+            {
+                apply( session, project, model, PluginType.RemoteP, pluginOverrides );
 
                 changed.add( project );
             }
@@ -146,7 +179,7 @@ public class PluginManipulator
     }
 
 
-    private Map<ProjectRef, Plugin> loadRemoteBOM( final State state, final ManipulationSession session )
+    private Map<ProjectRef, Plugin> loadRemoteBOM( PluginType type, final State state, final ManipulationSession session )
         throws ManipulationException
     {
         final Map<ProjectRef, Plugin> overrides = new LinkedHashMap<>();
@@ -166,17 +199,24 @@ public class PluginManipulator
         while ( iter.hasPrevious() )
         {
             final ProjectVersionRef ref = iter.previous();
-            overrides.putAll( effectiveModelBuilder.getRemotePluginVersionOverrides( ref, exclusions ) );
+            if ( type == PluginType.RemotePM )
+            {
+                overrides.putAll( effectiveModelBuilder.getRemotePluginManagementVersionOverrides( ref, exclusions ) );
+            }
+            else
+            {
+                overrides.putAll( effectiveModelBuilder.getRemotePluginVersionOverrides( ref, exclusions ) );
+            }
         }
 
         return overrides;
     }
 
     private void apply( final ManipulationSession session, final Project project, final Model model,
-                        final Map<ProjectRef, Plugin> override )
+                        PluginType type, final Map<ProjectRef, Plugin> override )
         throws ManipulationException
     {
-        logger.info( "Applying plugin changes to: " + ga( project ) );
+        logger.info( "Applying plugin changes for {} to: {} ", type, ga( project ) );
 
         PluginState state = session.getState( PluginState.class );
 
@@ -204,7 +244,7 @@ public class PluginManipulator
             }
 
             // Override plugin management versions
-            applyOverrides( true, pluginManagement.getPlugins(), override, state );
+            applyOverrides( type, PluginType.LocalPM, pluginManagement.getPlugins(), override, state );
         }
 
         if ( model.getBuild() != null )
@@ -215,21 +255,22 @@ public class PluginManipulator
 
             // We can't wipe out the versions as we can't guarantee that the plugins are listed
             // in the top level pluginManagement block.
-            applyOverrides( false, projectPlugins, override, state );
+            applyOverrides( type, PluginType.LocalP, projectPlugins, override, state );
         }
-
     }
 
     /**
      * Set the versions of any plugins which match the contents of the list of plugin overrides
      *
-     * @param pluginMgmt Denote whether we are modifying the pluginMgmt block
+     *
+     * @param remotePluginType The type of the remote plugin (mgmt or plugins)
+     * @param localPluginType The type of local block (mgmt or plugins).
      * @param plugins The list of plugins to modify
      * @param pluginVersionOverrides The list of version overrides to apply to the plugins
      * @throws ManipulationException if an error occurs.
      */
-    private void applyOverrides( final boolean pluginMgmt, final List<Plugin> plugins,
-                                 final Map<ProjectRef, Plugin> pluginVersionOverrides, PluginState pluginState ) throws ManipulationException
+    private void applyOverrides( PluginType remotePluginType, final PluginType localPluginType, final List<Plugin> plugins, final Map<ProjectRef, Plugin> pluginVersionOverrides,
+                                 PluginState pluginState ) throws ManipulationException
     {
         if ( plugins == null)
         {
@@ -239,7 +280,7 @@ public class PluginManipulator
         for ( final Plugin override : pluginVersionOverrides.values())
         {
             final int index = plugins.indexOf( override );
-            logger.debug( "plugin override" + override + " and index " + index );
+            logger.debug( "Plugin override {} with index {} with remotePluginType {} / localPluginType {}", override, index, remotePluginType, localPluginType );
 
             if ( index != -1 )
             {
@@ -249,12 +290,12 @@ public class PluginManipulator
                 if ( override.getConfiguration() != null)
                 {
                     logger.debug ("Injecting plugin configuration" + override.getConfiguration());
-                    if (pluginMgmt && plugin.getConfiguration() == null)
+                    if (localPluginType == PluginType.LocalPM && plugin.getConfiguration() == null)
                     {
                         plugin.setConfiguration( override.getConfiguration() );
                         logger.debug( "Altered plugin configuration: " + groupIdArtifactId + "=" + plugin.getConfiguration());
                     }
-                    else if (pluginMgmt && plugin.getConfiguration() != null)
+                    else if (localPluginType == PluginType.LocalPM && plugin.getConfiguration() != null)
                     {
                         logger.debug( "Existing plugin configuration: " + plugin.getConfiguration());
 
@@ -345,12 +386,23 @@ public class PluginManipulator
             }
             // If the plugin doesn't exist but has a configuration section in the remote inject it so we
             // get the correct config.
-            else if ( pluginMgmt &&
+            else if ( remotePluginType == PluginType.RemotePM &&
+                            localPluginType == PluginType.LocalPM &&
                             pluginState.getOverrideTransitive() &&
                             ( override.getConfiguration() != null || override.getExecutions().size() > 0 ) )
             {
                 plugins.add( override );
                 logger.info( "Added plugin version: " + override.getKey() + "=" + override.getVersion());
+            }
+            // If the plugin in <plugins> doesn't exist but has a configuration section in the remote inject it so we
+            // get the correct config.
+            else if ( remotePluginType == PluginType.RemoteP &&
+                            localPluginType == PluginType.LocalP &&
+                            pluginState.getInjectRemotePlugins() &&
+                            ( override.getConfiguration() != null || override.getExecutions().size() > 0 ) )
+            {
+                plugins.add( override );
+                logger.info( "For non-pluginMgmt, added plugin version : " + override.getKey() + "=" + override.getVersion());
             }
         }
     }

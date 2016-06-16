@@ -19,7 +19,6 @@ import org.apache.maven.model.Dependency;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Plugin;
 import org.apache.maven.model.PluginExecution;
-import org.apache.maven.model.building.ModelBuilder;
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 import org.codehaus.plexus.component.annotations.Component;
 import org.codehaus.plexus.component.annotations.Requirement;
@@ -59,6 +58,25 @@ import static org.apache.commons.lang.StringUtils.isEmpty;
 @Component( role = ModelIO.class )
 public class ModelIO
 {
+    private enum PluginType
+    {
+        PluginMgmt, Plugins;
+
+        @Override
+        public String toString()
+        {
+            switch ( this )
+            {
+                case PluginMgmt:
+                    return "pluginManagement";
+                case Plugins:
+                    return "plugins";
+                default:
+                    throw new IllegalArgumentException();
+            }
+        }
+    }
+
     private final Logger logger = LoggerFactory.getLogger( getClass() );
 
     @Requirement
@@ -179,17 +197,39 @@ public class ModelIO
     }
 
     /**
-     * Return remote Plugins to override
+     * Return remote pluginManagements to override
+     * @param ref the remote reference to resolve.
+     * @param userProperties a collection of properties to ignore when resolving the remote plugin property expressions.
+     * @return a map containing ProjectRef to Plugins
+     * @throws ManipulationException if an error occurs
+     */
+    public Map<ProjectRef, Plugin> getRemotePluginManagementVersionOverrides( final ProjectVersionRef ref,
+                                                                              Properties userProperties )
+                    throws ManipulationException
+    {
+        return getRemotePluginVersionOverrides( PluginType.PluginMgmt, ref, userProperties );
+    }
+
+    /**
+     * Return remote plugins to override
      * @param ref the remote reference to resolve.
      * @param userProperties a collection of properties to ignore when resolving the remote plugin property expressions.
      * @return a map containing ProjectRef to Plugins
      * @throws ManipulationException if an error occurs
      */
     public Map<ProjectRef, Plugin> getRemotePluginVersionOverrides( final ProjectVersionRef ref,
-                                                                    Properties userProperties )
+                                                                              Properties userProperties )
                     throws ManipulationException
     {
-        logger.debug( "Resolving remote plugin management POM: " + ref );
+        return getRemotePluginVersionOverrides( PluginType.Plugins, ref, userProperties );
+    }
+
+
+    private Map<ProjectRef, Plugin> getRemotePluginVersionOverrides( final PluginType type, final ProjectVersionRef ref,
+                                                                     Properties userProperties )
+                    throws ManipulationException
+    {
+        logger.debug( "Resolving remote {} POM: {}", type, ref );
         final Map<ProjectRef, Plugin> pluginOverrides = new HashMap<>();
         final Map<ProjectRef, ProjectVersionRef> pluginOverridesPomView = new HashMap<>();
 
@@ -198,8 +238,15 @@ public class ModelIO
         try
         {
             final MavenPomView pomView = galleyWrapper.readPomView( ref );
-            final List<PluginView> deps = pomView.getAllManagedBuildPlugins();
-
+            final List<PluginView> deps;
+            if (type == PluginType.PluginMgmt )
+            {
+                deps = pomView.getAllManagedBuildPlugins();
+            }
+            else
+            {
+                deps = pomView.getAllBuildPlugins();
+            }
             for ( final PluginView p : deps )
             {
                 pluginOverridesPomView.put( p.asProjectRef(), p.asProjectVersionRef() );
@@ -229,11 +276,20 @@ public class ModelIO
         // TODO: active profiles!
         if ( m.getBuild() != null && m.getBuild().getPluginManagement() != null )
         {
-            logger.debug( "Returning override of " + m.getBuild().getPluginManagement().getPlugins() );
+            Iterator<Plugin> plit = null;
 
-            Iterator<Plugin> plit = m.getBuild().getPluginManagement().getPlugins().iterator();
+            if ( type == PluginType.PluginMgmt && m.getBuild().getPluginManagement() != null )
+            {
+                logger.debug( "Returning override of " + m.getBuild().getPluginManagement().getPlugins() );
+                plit = m.getBuild().getPluginManagement().getPlugins().iterator();
+            }
+            else if ( type == PluginType.Plugins && m.getBuild().getPlugins() != null)
+            {
+                logger.debug( "Returning override of " + m.getBuild().getPlugins() );
+                plit = m.getBuild().getPlugins().iterator();
+            }
 
-            while ( plit.hasNext() )
+            while ( plit != null && plit.hasNext() )
             {
                 Plugin p = plit.next();
                 ProjectRef pr = new SimpleProjectRef( p.getGroupId(), p.getArtifactId() );
@@ -298,7 +354,7 @@ public class ModelIO
         else
         {
             throw new ManipulationException(
-                            "Attempting to align to a BOM that does not have a pluginManagement section" );
+                            "Attempting to align to a BOM that does not have a " + type.toString() + " section" );
         }
         return pluginOverrides;
     }

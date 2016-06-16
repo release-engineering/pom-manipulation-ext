@@ -68,10 +68,13 @@ public class PluginState
      */
     private final boolean overrideTransitive;
 
+    private final boolean injectRemotePlugins;
+
     public PluginState( final Properties userProps )
     {
         pluginMgmt = IdUtils.parseGAVs( userProps.getProperty( PLUGIN_MANAGEMENT_POM_PROPERTY ) );
         overrideTransitive = Boolean.valueOf( userProps.getProperty( "overrideTransitive", "true" ) );
+        injectRemotePlugins = Boolean.valueOf( userProps.getProperty( "injectRemotePlugins", "true" ) );
         switch ( Precedence.valueOf( userProps.getProperty( "pluginManagementPrecedence",
                                                             Precedence.REMOTE.toString() ).toUpperCase() ) )
         {
@@ -127,5 +130,13 @@ public class PluginState
     public boolean getOverrideTransitive()
     {
         return overrideTransitive;
+    }
+
+    /**
+     * @return whether to inject plugins found in the remote pom.
+     */
+    public boolean getInjectRemotePlugins()
+    {
+        return injectRemotePlugins;
     }
 }
