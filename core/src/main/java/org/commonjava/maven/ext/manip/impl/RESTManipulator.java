@@ -133,10 +133,12 @@ public class RESTManipulator implements Manipulator
         }
         catch (RestException e)
         {
-            printFinishTime( start );
             throw e;
         }
-        printFinishTime( start );
+        finally
+        {
+            printFinishTime( start );
+        }
         logger.debug ("REST Client returned {} ", restResult);
 
         // Parse the rest result for the project GAs and store them in versioning state for use

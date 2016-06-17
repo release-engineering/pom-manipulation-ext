@@ -243,6 +243,7 @@ public class DependencyManipulator implements Manipulator
             moduleOverrides = applyModuleVersionOverrides( projectGA,
                                                            state.getDependencyExclusions(),
                                                            moduleOverrides, explicitOverrides );
+            logger.debug( "Module overrides are:\n{}", moduleOverrides );
         }
         catch ( InvalidRefException e )
         {
@@ -316,8 +317,7 @@ public class DependencyManipulator implements Manipulator
                 // Apply overrides to project dependency management
                 final List<Dependency> dependencies = dependencyManagement.getDependencies();
 
-                logger.debug( "Applying overrides to managed dependencies for top-pom: {}\n{}", projectGA,
-                              moduleOverrides );
+                logger.debug( "Applying overrides to managed dependencies for top-pom: {}", projectGA );
 
                 final Map<ArtifactRef, String> nonMatchingVersionOverrides =
                                 applyOverrides( session, dependencies, moduleOverrides );
@@ -362,8 +362,7 @@ public class DependencyManipulator implements Manipulator
             }
             else
             {
-                logger.debug( "NOT applying overrides to managed dependencies for top-pom: {}\n{}", projectGA,
-                              moduleOverrides );
+                logger.debug( "NOT applying overrides to managed dependencies for top-pom: {}", projectGA );
             }
         }
         else
@@ -372,21 +371,20 @@ public class DependencyManipulator implements Manipulator
             final DependencyManagement dependencyManagement = model.getDependencyManagement();
             if ( session.getState( DependencyState.class ).getOverrideDependencies() && dependencyManagement != null )
             {
-                logger.debug( "Applying overrides to managed dependencies for: {}\n{}", projectGA, moduleOverrides );
+                logger.debug( "Applying overrides to managed dependencies for: {}", projectGA );
                 applyOverrides( session, dependencyManagement.getDependencies(), moduleOverrides );
                 applyExplicitOverrides( explicitVersionPropertyUpdateMap, explicitOverrides,
                                         dependencyManagement.getDependencies() );
             }
             else
             {
-                logger.debug( "NOT applying overrides to managed dependencies for: {}\n{}", projectGA,
-                              moduleOverrides );
+                logger.debug( "NOT applying overrides to managed dependencies for: {}", projectGA );
             }
         }
 
         if ( session.getState( DependencyState.class ).getOverrideDependencies() )
         {
-            logger.debug( "Applying overrides to concrete dependencies for: {}\n{}", projectGA, moduleOverrides );
+            logger.debug( "Applying overrides to concrete dependencies for: {}", projectGA );
             // Apply overrides to project direct dependencies
             final List<Dependency> projectDependencies = model.getDependencies();
             applyOverrides( session, projectDependencies, moduleOverrides );
@@ -398,7 +396,6 @@ public class DependencyManipulator implements Manipulator
             {
                 for ( Profile p : profiles )
                 {
-                    logger.debug( "Iterating profile {} " , p.getId() );
                     if ( p.getDependencyManagement() != null )
                     {
                         applyOverrides( session, p.getDependencyManagement().getDependencies(), moduleOverrides );
@@ -413,7 +410,7 @@ public class DependencyManipulator implements Manipulator
         }
         else
         {
-            logger.debug( "NOT applying overrides to concrete dependencies for: {}\n{}", projectGA, moduleOverrides );
+            logger.debug( "NOT applying overrides to concrete dependencies for: {}", projectGA );
         }
     }
 

@@ -91,8 +91,6 @@ public class PomIO
         {
             final File pom = peek.getPom();
 
-            logger.debug( "Reading raw model for: " + pom );
-
             // Sucks, but we have to brute-force reading in the raw model.
             // The effective-model building, below, has a tantalizing getRawModel()
             // method on the result, BUT this seems to return models that have
