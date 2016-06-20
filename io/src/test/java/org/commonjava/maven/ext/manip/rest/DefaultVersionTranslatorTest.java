@@ -53,7 +53,6 @@ import static org.junit.Assert.fail;
  * @author vdedik@redhat.com
  */
 @FixMethodOrder( MethodSorters.NAME_ASCENDING)
-@RunWith(BMUnitRunner.class)
 public class DefaultVersionTranslatorTest
 {
     private static List<ProjectVersionRef> aLotOfGavs;
@@ -70,18 +69,7 @@ public class DefaultVersionTranslatorTest
     public static void startUp()
                     throws IOException
     {
-        aLotOfGavs = new ArrayList<>();
-        String longJsonFile = readFileFromClasspath( "example-response-performance-test.json" );
-
-        ObjectMapper objectMapper = new ObjectMapper();
-        List<Map<String, String>> gavs = objectMapper.readValue( longJsonFile, new TypeReference<List<Map<String, String>>>()
-        {
-        } );
-        for ( Map<String, String> gav : gavs )
-        {
-            ProjectVersionRef project = new SimpleProjectVersionRef( gav.get( "groupId" ), gav.get( "artifactId" ), gav.get( "version" ) );
-            aLotOfGavs.add( project );
-        }
+        aLotOfGavs = loadALotOfGAVs();
     }
 
     @Before
@@ -89,7 +77,7 @@ public class DefaultVersionTranslatorTest
     {
         LoggerFactory.getLogger( DefaultVersionTranslator.class ).info( "Executing test " + testName.getMethodName() );
 
-        this.versionTranslator = new DefaultVersionTranslator( mockServer.getUrl(), 0 );
+        this.versionTranslator = new DefaultVersionTranslator( mockServer.getUrl() );
     }
 
     @Test
@@ -132,7 +120,7 @@ public class DefaultVersionTranslatorTest
     public void testTranslateVersionsFailNoResponse()
     {
         // Some url that doesn't exist used here
-        VersionTranslator versionTranslator = new DefaultVersionTranslator( "http://127.0.0.2", 0 );
+        VersionTranslator versionTranslator = new DefaultVersionTranslator( "http://127.0.0.2" );
 
         List<ProjectVersionRef> gavs = new ArrayList<ProjectVersionRef>()
         {{
@@ -165,22 +153,6 @@ public class DefaultVersionTranslatorTest
         versionTranslator.translateVersions( aLotOfGavs );
     }
 
-    private static final int restSize = 250;
-    @Test
-    @BMRule( name = "check-size",
-                    helper = "org.commonjava.maven.ext.manip.rest.HttpRequestWithBodyBytemanHelper",
-                    targetClass = "HttpRequestWithBody",
-                    targetMethod = "body(java.lang.Object)",
-                    targetLocation = "AT ENTRY",
-                    binding = "otherClassObject = asOtherClass($1)",
-                    condition = "otherClassObject.size() != " + restSize,
-                    action = "throw new RuntimeException ()" )
-    public void testTranslateVersionsLimitSize()
-    {
-        this.versionTranslator = new DefaultVersionTranslator( mockServer.getUrl(), restSize );
-
-        versionTranslator.translateVersions( aLotOfGavs );
-    }
 
     private static String readFileFromClasspath( String filename )
     {
@@ -195,5 +167,22 @@ public class DefaultVersionTranslatorTest
             }
             return fileContents.toString();
         }
+    }
+
+
+    public static List<ProjectVersionRef> loadALotOfGAVs() throws IOException {
+        List<ProjectVersionRef> result = new ArrayList<>();
+        String longJsonFile = readFileFromClasspath( "example-response-performance-test.json" );
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        List<Map<String, String>> gavs = objectMapper
+                .readValue( longJsonFile, new TypeReference<List<Map<String, String>>>() {} );
+
+        for ( Map<String, String> gav : gavs )
+        {
+            ProjectVersionRef project = new SimpleProjectVersionRef( gav.get( "groupId" ), gav.get( "artifactId" ), gav.get( "version" ) );
+            result.add( project );
+        }
+        return result;
     }
 }
