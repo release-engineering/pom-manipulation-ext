@@ -375,12 +375,20 @@ public class PluginManipulator
                 {
                     if ( ! PropertiesUtils.cacheProperty( pluginState.getVersionPropertyOverrides(), oldVersion, override.getVersion(), plugin, false ))
                     {
-                        if ( oldVersion != null && oldVersion.contains( "${" ) )
+                        if ( oldVersion != null && oldVersion.equals( "${project.version}" ) )
+                        {
+                            logger.debug( "For plugin {} ; version is built in {} so skipping inlining {}", plugin,
+                                          oldVersion, override.getVersion() );
+                        }
+                        else if ( oldVersion != null && oldVersion.contains( "${" ) )
                         {
                             throw new ManipulationException( "NYI : Multiple embedded properties for plugins." );
                         }
-                        plugin.setVersion( override.getVersion() );
-                        logger.info( "Altered plugin version: " + groupIdArtifactId + "=" + override.getVersion() );
+                        else
+                        {
+                            plugin.setVersion( override.getVersion() );
+                            logger.info( "Altered plugin version: " + groupIdArtifactId + "=" + override.getVersion() );
+                        }
                     }
                 }
             }
