@@ -79,7 +79,7 @@ public class HttpHeaderHeaderTest
     {
         LoggerFactory.getLogger( DefaultVersionTranslator.class ).info ("Executing test " + testName.getMethodName());
 
-        this.versionTranslator = new DefaultVersionTranslator( mockServer.getUrl(), 0 );
+        this.versionTranslator = new DefaultVersionTranslator( mockServer.getUrl() );
     }
 
     @Test
