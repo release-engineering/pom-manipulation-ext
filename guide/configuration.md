@@ -48,4 +48,4 @@ Any other configuration sections are ignored by PME.
 
 ### Properties
 
-The file should be in a standard [java properties file format](https://docs.oracle.com/javase/tutorial/essential/environment/properties.html). Note that certain characters may need to be escaped (See [here](https://docs.oracle.com/javase/8/docs/api/java/util/Properties.html#load(java.io.Reader))).
+The file should be in a standard [java properties file format](https://docs.oracle.com/javase/tutorial/essential/environment/properties.html). Note that certain characters may need to be escaped (See [here](https://docs.oracle.com/javase/8/docs/api/java/util/Properties.html#load-java.io.Reader-)).
