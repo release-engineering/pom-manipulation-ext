@@ -60,6 +60,7 @@ import org.commonjava.maven.ext.manip.io.PomIO;
 import org.commonjava.maven.ext.manip.io.XMLIO;
 import org.commonjava.maven.ext.manip.io.ConfigIO;
 import org.commonjava.maven.ext.manip.model.SimpleScopedArtifactRef;
+import org.commonjava.maven.ext.manip.rest.exception.RestException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -408,6 +409,12 @@ public class Cli
         catch ( ManipulationException e )
         {
             logger.error( "POM Manipulation failed: Unable to parse projects ", e );
+            return 1;
+        }
+        catch ( RestException e )
+        {
+            logger.error ( "POM Manipulation failed with message {} ", e.getMessage () );
+            logger.trace ( "Exception trace is", e);
             return 1;
         }
         catch ( Exception e )
