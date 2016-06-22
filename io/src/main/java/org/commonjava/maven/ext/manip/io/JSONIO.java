@@ -30,8 +30,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.io.FileWriter;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.nio.charset.StandardCharsets;
 
 @Component( role = JSONIO.class )
 public class JSONIO
@@ -70,7 +72,8 @@ public class JSONIO
         {
             String pretty = mapper.writer(dpp).writeValueAsString( mapper.readValue( contents, Object.class ) );
 
-            try ( FileWriter p = new FileWriter( target ) )
+            FileOutputStream fileOutputStream = new FileOutputStream(target);
+            try (OutputStreamWriter p = new OutputStreamWriter(fileOutputStream, StandardCharsets.UTF_8) )
             {
                 p.write( pretty );
                 p.append( '\n' );
