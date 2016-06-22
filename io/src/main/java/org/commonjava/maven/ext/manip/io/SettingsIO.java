@@ -47,7 +47,7 @@ public class SettingsIO
     {
         try
         {
-            PrintWriter printWriter = new PrintWriter( settingsFile );
+            PrintWriter printWriter = new PrintWriter( settingsFile, "UTF-8" );
             new SettingsXpp3Writer().write( printWriter, settings );
         }
         catch ( IOException e )

@@ -16,6 +16,7 @@
 package org.commonjava.maven.ext.manip.resolver;
 
 import java.io.ByteArrayInputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -73,14 +74,14 @@ public class GalleyAPIWrapper
         throws GalleyMavenXMLException
     {
         return infra.getXml()
-                    .parseDocument( xml, new ByteArrayInputStream( xml.getBytes() ) );
+                    .parseDocument( xml, new ByteArrayInputStream( xml.getBytes(StandardCharsets.UTF_8) ) );
     }
 
     public MavenXmlView<ProjectRef> parseXmlView( final String xml )
         throws GalleyMavenXMLException
     {
         final Document document = infra.getXml()
-                                       .parseDocument( xml, new ByteArrayInputStream( xml.getBytes() ) );
+                                       .parseDocument( xml, new ByteArrayInputStream( xml.getBytes(StandardCharsets.UTF_8) ) );
 
         final DocRef<ProjectRef> ref = new DocRef<ProjectRef>( new SimpleProjectRef( "unknown", "unknown" ), xml, document );
         return new MavenXmlView<>( Collections.singletonList( ref ), infra.getXPath(), infra.getXml() );
