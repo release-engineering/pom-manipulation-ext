@@ -19,49 +19,44 @@ import com.mashape.unirest.http.HttpResponse;
 import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
 import org.apache.commons.codec.binary.Base32;
-import org.apache.commons.lang.math.RandomUtils;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
-import org.commonjava.maven.ext.manip.ListUtils;
-import org.commonjava.maven.ext.manip.rest.exception.ClientException;
 import org.commonjava.maven.ext.manip.rest.exception.RestException;
-import org.commonjava.maven.ext.manip.rest.exception.ServerException;
 import org.commonjava.maven.ext.manip.rest.mapper.ProjectVersionRefMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
+import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
 import java.util.Random;
 
 import static org.apache.commons.lang.StringUtils.isNotEmpty;
 
 /**
  * @author vdedik@redhat.com
+ * @author jsenko@redhat.com
  */
 public class DefaultVersionTranslator
     implements VersionTranslator
 {
     private static final Random RANDOM = new Random();
 
-    private final Base32 codec = new Base32( );
+    private static final Base32 CODEC = new Base32();
 
     private final Logger logger = LoggerFactory.getLogger( getClass() );
 
     private final String endpointUrl;
 
-    /**
-     * If 0 - no limit.
-     * Otherwise loop in batches of maxRestSize.
-     */
-    private final int maxRestSize;
+    private final int chunkSplitCount;
 
-    public DefaultVersionTranslator( String endpointUrl, int maxRestSize )
+    public DefaultVersionTranslator( String endpointUrl )
     {
         this.endpointUrl = endpointUrl;
-        this.maxRestSize = maxRestSize;
-
+        this.chunkSplitCount = 4;
         Unirest.setObjectMapper( new ProjectVersionRefMapper() );
         // According to https://github.com/Mashape/unirest-java the default connection timeout is 10000
         // and the default socketTimeout is 60000.
@@ -69,62 +64,163 @@ public class DefaultVersionTranslator
         Unirest.setTimeouts( 30000, 600000 );
     }
 
-    public Map<ProjectVersionRef, String> translateVersions( List<ProjectVersionRef> allProjects )
+    /**
+     * Translate the versions.
+     * There may be a lot of them, possibly causing timeouts or other issues.
+     * This is mitigated by splitting them into smaller chunks when an error occurs and retrying.
+     */
+    public Map<ProjectVersionRef, String> translateVersions( List<ProjectVersionRef> projects )
     {
-        final List<List<ProjectVersionRef>> partition = ListUtils.partition( allProjects, (maxRestSize == 0 ? allProjects.size() : maxRestSize) );
         final Map<ProjectVersionRef, String> result = new HashMap<>();
+        logger.debug( "Translating versions: " + projects );
+        final Queue<Task> queue = new ArrayDeque<>();
+        queue.add( new Task( projects, chunkSplitCount, endpointUrl ) );
 
-        // Execute request to get translated versions
-        HttpResponse<Map> r;
-        String headerContext;
-
-        if ( isNotEmpty (MDC.get("LOG-CONTEXT") ) )
+        while ( !queue.isEmpty() )
         {
-            headerContext = MDC.get( "LOG-CONTEXT" );
+            Task task = queue.remove();
+            task.executeTranslate();
+            if ( task.isSuccess() )
+            {
+                result.putAll( task.getResult() );
+            }
+            else
+            {
+                if ( task.canSplit() )
+                {
+                    List<Task> tasks = task.split();
+                    logger.debug( "Failed to translate versions, splitting and retrying. " +
+                                                  "Chunk was: " + task + ", new chunks are: " + tasks );
+                    queue.addAll( tasks );
+                }
+                else
+                {
+                    if ( task.getStatus() > 0 )
+                        throw new RestException(
+                                        "Cannot split and retry anymore. Last status was " + task.getStatus() );
+                    else
+                        throw new RestException( "Cannot split and retry anymore. Cause: " + task.getException(),
+                                                 task.getException() );
+                }
+            }
         }
-        else
-        {
-            // If we have no MDC PME has been used as the entry point. Dummy one up for DA.
-            byte[] randomBytes = new byte[20];
-            RANDOM.nextBytes( randomBytes );
-            headerContext = "pme-" + codec.encodeAsString( randomBytes );
-        }
-        logger.debug ("Using log-ctx {} ", headerContext);
+        return result;
+    }
 
-        for (List<ProjectVersionRef> projects : partition )
+    private static class Task
+    {
+
+        private List<ProjectVersionRef> chunk;
+
+        private final int chunkSplitCount;
+
+        private Map<ProjectVersionRef, String> result = null;
+
+        private int status = -1;
+
+        private Exception exception;
+
+        private String endpointUrl;
+
+        public Task( List<ProjectVersionRef> chunk, int chunkSplitCount, String endpointUrl )
         {
-            logger.debug ("REST call batching in {} ", projects.size());
+            this.chunk = chunk;
+            if ( chunkSplitCount < 1 )
+            {
+                throw new IllegalArgumentException( "Cannot split into " + chunkSplitCount + " chunks!" );
+            }
+            this.chunkSplitCount = chunkSplitCount;
+            this.endpointUrl = endpointUrl;
+        }
+
+        public void executeTranslate()
+        {
+            HttpResponse<Map> r = null;
+            String headerContext;
+            if ( isNotEmpty( MDC.get( "LOG-CONTEXT" ) ) )
+            {
+                headerContext = MDC.get( "LOG-CONTEXT" );
+            }
+            else
+            {
+                // If we have no MDC PME has been used as the entry point. Dummy one up for DA.
+                byte[] randomBytes = new byte[20];
+                RANDOM.nextBytes( randomBytes );
+                headerContext = "pme-" + CODEC.encodeAsString( randomBytes );
+            }
             try
             {
                 r = Unirest.post( this.endpointUrl )
                            .header( "accept", "application/json" )
                            .header( "Content-Type", "application/json" )
-                           .header( "Log-Context", headerContext)
-                           .body( projects )
+                           .header( "Log-Context", headerContext )
+                           .body( chunk )
                            .asObject( Map.class );
+
+                status = r.getStatus();
+                if ( status == 200 )
+                {
+                    this.result = r.getBody();
+                }
             }
             catch ( UnirestException e )
             {
-                throw new RestException( String.format( "Request to server '%s' failed. Exception message: %s", this.endpointUrl,
-                                                        e.getMessage() ), e );
+                exception = new RestException(
+                                String.format( "Request to server '%s' failed. Exception message: %s", this.endpointUrl,
+                                               e.getMessage() ), e );
+                this.status = -1;
             }
-
-            // Handle some corner cases (5xx, 4xx)
-            if ( r.getStatus() / 100 == 5 )
-            {
-                throw new ServerException(
-                                String.format( "Server at '%s' failed to translate versions. HTTP status code %s.", this.endpointUrl, r.getStatus() ) );
-            }
-            else if ( r.getStatus() / 100 == 4 )
-            {
-                throw new ClientException(
-                                String.format( "Server at '%s' could not translate versions. HTTP status code %s.", this.endpointUrl, r.getStatus() ) );
-            }
-
-            result.putAll( r.getBody() );
         }
 
-        return result;
+        public List<Task> split()
+        {
+            if ( !canSplit() )
+            {
+                throw new IllegalArgumentException( "Can't split anymore!" );
+            }
+            List<Task> res = new ArrayList<>( chunkSplitCount );
+            // To KISS, overflow the remainder into the last chunk
+            int chunkSize = chunk.size() / chunkSplitCount;
+            for ( int i = 0; i < ( chunkSplitCount - 1 ); i++ )
+            {
+                res.add( new Task( chunk.subList( i * chunkSize, ( i + 1 ) * chunkSize ), chunkSplitCount,
+                                   endpointUrl ) );
+            }
+            // Last chunk may have different size
+            res.add( new Task( chunk.subList( ( chunkSplitCount - 1 ) * chunkSize, chunk.size() ), chunkSplitCount,
+                               endpointUrl ) );
+            return res;
+        }
+
+        public boolean canSplit()
+        {
+            return ( chunk.size() / chunkSplitCount ) > 0;
+        }
+
+        public int getStatus()
+        {
+            return status;
+        }
+
+        public boolean isSuccess()
+        {
+            return status == 200;
+        }
+
+        public Map<ProjectVersionRef, String> getResult()
+        {
+            return result;
+        }
+
+        public Exception getException()
+        {
+            return exception;
+        }
+
+        @Override public String toString()
+        {
+            return "(Chunk of size " + chunk.size() + " containing " + chunk + ')';
+        }
     }
 
     public String getEndpointUrl()

@@ -33,11 +33,8 @@ public class RESTState implements State
     public RESTState( final Properties userProps )
     {
         restURL = userProps.getProperty( "restURL" );
-        /*
-      Limit on maximum count to make in the REST call.
-     */
-        int maxRestSize = Integer.parseInt( userProps.getProperty( "restMaxSize", "0" ) );
-        restEndpoint = new DefaultVersionTranslator( restURL, maxRestSize );
+
+        restEndpoint = new DefaultVersionTranslator(restURL);
     }
 
     /**
