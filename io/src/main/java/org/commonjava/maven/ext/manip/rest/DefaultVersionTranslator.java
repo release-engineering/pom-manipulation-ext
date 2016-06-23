@@ -47,16 +47,15 @@ public class DefaultVersionTranslator
 
     private static final Base32 CODEC = new Base32();
 
+    private static final int CHUNK_SPLIT_COUNT = 4;
+
     private final Logger logger = LoggerFactory.getLogger( getClass() );
 
     private final String endpointUrl;
 
-    private final int chunkSplitCount;
-
     public DefaultVersionTranslator( String endpointUrl )
     {
         this.endpointUrl = endpointUrl;
-        this.chunkSplitCount = 4;
         Unirest.setObjectMapper( new ProjectVersionRefMapper() );
         // According to https://github.com/Mashape/unirest-java the default connection timeout is 10000
         // and the default socketTimeout is 60000.
@@ -74,7 +73,7 @@ public class DefaultVersionTranslator
         final Map<ProjectVersionRef, String> result = new HashMap<>();
         logger.debug( "Translating versions: " + projects );
         final Queue<Task> queue = new ArrayDeque<>();
-        queue.add( new Task( projects, chunkSplitCount, endpointUrl ) );
+        queue.add( new Task( projects, endpointUrl ) );
 
         while ( !queue.isEmpty() )
         {
@@ -89,18 +88,22 @@ public class DefaultVersionTranslator
                 if ( task.canSplit() )
                 {
                     List<Task> tasks = task.split();
-                    logger.debug( "Failed to translate versions, splitting and retrying. " +
-                                                  "Chunk was: " + task + ", new chunks are: " + tasks );
+                    logger.warn( "Failed to translate versions for task @{}, splitting and retrying. Chunk size was: {} and new chunk size {} in {} segments.",
+                                 task.hashCode(), task.getChunkSize(), tasks.get( 0 ).getChunkSize(), tasks.size());
                     queue.addAll( tasks );
                 }
                 else
                 {
                     if ( task.getStatus() > 0 )
+                    {
                         throw new RestException(
                                         "Cannot split and retry anymore. Last status was " + task.getStatus() );
+                    }
                     else
+                    {
                         throw new RestException( "Cannot split and retry anymore. Cause: " + task.getException(),
                                                  task.getException() );
+                    }
                 }
             }
         }
@@ -109,10 +112,7 @@ public class DefaultVersionTranslator
 
     private static class Task
     {
-
         private List<ProjectVersionRef> chunk;
-
-        private final int chunkSplitCount;
 
         private Map<ProjectVersionRef, String> result = null;
 
@@ -122,21 +122,17 @@ public class DefaultVersionTranslator
 
         private String endpointUrl;
 
-        public Task( List<ProjectVersionRef> chunk, int chunkSplitCount, String endpointUrl )
+        Task( List<ProjectVersionRef> chunk, String endpointUrl )
         {
             this.chunk = chunk;
-            if ( chunkSplitCount < 1 )
-            {
-                throw new IllegalArgumentException( "Cannot split into " + chunkSplitCount + " chunks!" );
-            }
-            this.chunkSplitCount = chunkSplitCount;
             this.endpointUrl = endpointUrl;
         }
 
-        public void executeTranslate()
+        void executeTranslate()
         {
-            HttpResponse<Map> r = null;
+            HttpResponse<Map> r;
             String headerContext;
+
             if ( isNotEmpty( MDC.get( "LOG-CONTEXT" ) ) )
             {
                 headerContext = MDC.get( "LOG-CONTEXT" );
@@ -178,31 +174,29 @@ public class DefaultVersionTranslator
             {
                 throw new IllegalArgumentException( "Can't split anymore!" );
             }
-            List<Task> res = new ArrayList<>( chunkSplitCount );
+            List<Task> res = new ArrayList<>( CHUNK_SPLIT_COUNT );
             // To KISS, overflow the remainder into the last chunk
-            int chunkSize = chunk.size() / chunkSplitCount;
-            for ( int i = 0; i < ( chunkSplitCount - 1 ); i++ )
+            int chunkSize = chunk.size() / CHUNK_SPLIT_COUNT;
+            for ( int i = 0; i < ( CHUNK_SPLIT_COUNT - 1 ); i++ )
             {
-                res.add( new Task( chunk.subList( i * chunkSize, ( i + 1 ) * chunkSize ), chunkSplitCount,
-                                   endpointUrl ) );
+                res.add( new Task( chunk.subList( i * chunkSize, ( i + 1 ) * chunkSize ), endpointUrl ) );
             }
             // Last chunk may have different size
-            res.add( new Task( chunk.subList( ( chunkSplitCount - 1 ) * chunkSize, chunk.size() ), chunkSplitCount,
-                               endpointUrl ) );
+            res.add( new Task( chunk.subList( ( CHUNK_SPLIT_COUNT - 1 ) * chunkSize, chunk.size() ), endpointUrl ) );
             return res;
         }
 
-        public boolean canSplit()
+        boolean canSplit()
         {
-            return ( chunk.size() / chunkSplitCount ) > 0;
+            return ( chunk.size() / CHUNK_SPLIT_COUNT ) > 0;
         }
 
-        public int getStatus()
+        int getStatus()
         {
             return status;
         }
 
-        public boolean isSuccess()
+        boolean isSuccess()
         {
             return status == 200;
         }
@@ -217,14 +211,9 @@ public class DefaultVersionTranslator
             return exception;
         }
 
-        @Override public String toString()
+        int getChunkSize()
         {
-            return "(Chunk of size " + chunk.size() + " containing " + chunk + ')';
+            return chunk.size();
         }
-    }
-
-    public String getEndpointUrl()
-    {
-        return endpointUrl;
     }
 }

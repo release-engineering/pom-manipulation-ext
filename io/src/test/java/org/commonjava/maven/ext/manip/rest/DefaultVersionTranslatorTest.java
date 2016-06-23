@@ -82,7 +82,7 @@ public class DefaultVersionTranslatorTest
     {
         try
         {
-            Unirest.post( this.versionTranslator.getEndpointUrl() ).asString();
+            Unirest.post( mockServer.getUrl() ).asString();
         }
         catch ( Exception e )
         {
