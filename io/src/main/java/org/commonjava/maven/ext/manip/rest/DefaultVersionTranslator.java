@@ -35,6 +35,7 @@ import java.util.Queue;
 import java.util.Random;
 
 import static org.apache.commons.lang.StringUtils.isNotEmpty;
+import static org.apache.http.HttpStatus.SC_OK;
 
 /**
  * @author vdedik@redhat.com
@@ -71,7 +72,6 @@ public class DefaultVersionTranslator
     public Map<ProjectVersionRef, String> translateVersions( List<ProjectVersionRef> projects )
     {
         final Map<ProjectVersionRef, String> result = new HashMap<>();
-        logger.debug( "Translating versions: " + projects );
         final Queue<Task> queue = new ArrayDeque<>();
         queue.add( new Task( projects, endpointUrl ) );
 
@@ -87,7 +87,17 @@ public class DefaultVersionTranslator
             {
                 if ( task.canSplit() )
                 {
+                    if ( task.getStatus() < 0 )
+                    {
+                        logger.debug ("Caught exception calling server with message {}", task.getException().getMessage());
+                    }
+                    else
+                    {
+                        logger.debug ("Did not get status {} but received {}", SC_OK, task.getStatus());
+                    }
+
                     List<Task> tasks = task.split();
+
                     logger.warn( "Failed to translate versions for task @{}, splitting and retrying. Chunk size was: {} and new chunk size {} in {} segments.",
                                  task.hashCode(), task.getChunkSize(), tasks.get( 0 ).getChunkSize(), tasks.size());
                     queue.addAll( tasks );
@@ -154,7 +164,7 @@ public class DefaultVersionTranslator
                            .asObject( Map.class );
 
                 status = r.getStatus();
-                if ( status == 200 )
+                if ( status == SC_OK )
                 {
                     this.result = r.getBody();
                 }
@@ -198,7 +208,7 @@ public class DefaultVersionTranslator
 
         boolean isSuccess()
         {
-            return status == 200;
+            return status == SC_OK;
         }
 
         public Map<ProjectVersionRef, String> getResult()

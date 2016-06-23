@@ -122,7 +122,7 @@ public class RESTManipulator implements Manipulator
         }
 
         // Call the REST to populate the result.
-        logger.debug ("Passing the following into the REST client api {} ", restParam);
+        logger.debug ("Passing {} GAVs following into the REST client api {} ", restParam.size(), restParam);
         logger.info ("Calling REST client...");
         long start = System.nanoTime();
         Map<ProjectVersionRef, String> restResult;
