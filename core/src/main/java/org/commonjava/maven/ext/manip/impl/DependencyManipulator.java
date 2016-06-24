@@ -178,43 +178,43 @@ public class DependencyManipulator implements Manipulator
         if (!result.isEmpty())
         {
             logger.info ("Iterating for standard overrides...");
-            for ( final String key : versionPropertyUpdateMap.keySet() )
+            for ( final Map.Entry<String, String> entry : versionPropertyUpdateMap.entrySet() )
             {
-                PropertiesUtils.PropertyUpdate found = PropertiesUtils.updateProperties( session, result, false, key, versionPropertyUpdateMap.get( key ) );
+                PropertiesUtils.PropertyUpdate found = PropertiesUtils.updateProperties( session, result, false, entry.getKey(), entry.getValue());
 
                 if ( found == PropertiesUtils.PropertyUpdate.NOTFOUND )
                 {
                     // Problem in this scenario is that we know we have a property update map but we have not found a
                     // property to update. Its possible this property has been inherited from a parent. Override in the
                     // top pom for safety.
-                    logger.info( "Unable to find a property for {} to update", key );
+                    logger.info( "Unable to find a property for {} to update", entry.getKey());
                     for ( final Project p : result )
                     {
                         if ( p.isInheritanceRoot() )
                         {
-                            logger.info( "Adding property {} with {} ", key, versionPropertyUpdateMap.get( key ) );
-                            p.getModel().getProperties().setProperty( key, versionPropertyUpdateMap.get( key ) );
+                            logger.info( "Adding property {} with {} ", entry.getKey(), entry.getValue() );
+                            p.getModel().getProperties().setProperty( entry.getKey(), entry.getValue() );
                         }
                     }
                 }
             }
             logger.info ("Iterating for explicit overrides...");
-            for ( final String key : explicitVersionPropertyUpdateMap.keySet() )
+            for ( final Map.Entry<String, String> entry : explicitVersionPropertyUpdateMap.entrySet() )
             {
-                PropertiesUtils.PropertyUpdate found = PropertiesUtils.updateProperties( session, result, true, key, explicitVersionPropertyUpdateMap.get( key ) );
+                PropertiesUtils.PropertyUpdate found = PropertiesUtils.updateProperties( session, result, true, entry.getKey(), entry.getValue() );
 
                 if ( found == PropertiesUtils.PropertyUpdate.NOTFOUND )
                 {
                     // Problem in this scenario is that we know we have a property update map but we have not found a
                     // property to update. Its possible this property has been inherited from a parent. Override in the
                     // top pom for safety.
-                    logger.info( "Unable to find a property for {} to update for explicit overrides", key );
+                    logger.info( "Unable to find a property for {} to update for explicit overrides", entry.getKey());
                     for ( final Project p : result )
                     {
                         if ( p.isInheritanceRoot() )
                         {
-                            logger.info( "Adding property {} with {} ", key, explicitVersionPropertyUpdateMap.get( key ) );
-                            p.getModel().getProperties().setProperty( key, explicitVersionPropertyUpdateMap.get( key ) );
+                            logger.info( "Adding property {} with {} ", entry.getKey(), entry.getValue() );
+                            p.getModel().getProperties().setProperty( entry.getKey(), entry.getValue() );
                         }
                     }
                 }
@@ -256,12 +256,12 @@ public class DependencyManipulator implements Manipulator
             // Handle the situation where the top level parent refers to a prior build that is in the BOM.
             if ( project.getParent() != null)
             {
-                for ( ArtifactRef ar : moduleOverrides.keySet() )
+                for ( Map.Entry<ArtifactRef, String> entry : moduleOverrides.entrySet() )
                 {
                     String oldValue = project.getParent().getVersion();
-                    String newValue = moduleOverrides.get( ar );
+                    String newValue = entry.getValue();
 
-                    if ( ar.asProjectRef().equals( SimpleProjectRef.parse( ga(project.getParent()) ) ))
+                    if ( entry.getKey().asProjectRef().equals( SimpleProjectRef.parse( ga(project.getParent()) ) ))
                     {
                         if ( state.getStrict() )
                         {
@@ -505,14 +505,14 @@ public class DependencyManipulator implements Manipulator
             // different modules. It is currently undefined what will happen if non-strict mode is enabled and
             // multiple versions are in the remote override list (be it from a bom or rest call). Actually, what
             // will most likely happen is last-wins.
-            for ( final ArtifactRef ar : overrides.keySet() )
+            for ( final Map.Entry<ArtifactRef, String> entry : overrides.entrySet() )
             {
-                ProjectRef groupIdArtifactId = ar.asProjectRef();
+                ProjectRef groupIdArtifactId = entry.getKey().asProjectRef();
 
                 if ( depPr.equals( groupIdArtifactId ) )
                 {
                     final String oldVersion = dependency.getVersion();
-                    final String overrideVersion = overrides.get( ar );
+                    final String overrideVersion = entry.getValue();
                     final String resolvedValue = PropertiesUtils.resolveProperties( session.getProjects(), oldVersion);
 
                     if ( isEmpty( overrideVersion ) )
@@ -536,12 +536,12 @@ public class DependencyManipulator implements Manipulator
                                     ! PropertiesUtils.checkStrictValue( session, resolvedValue, overrideVersion) )
                     {
                         logger.debug ("Original fully resolved version {} of {} does not match override version {} -> {} so ignoring",
-                                      resolvedValue, dependency, ar, overrideVersion);
+                                      resolvedValue, dependency, entry.getKey(), overrideVersion);
                         if ( state.getFailOnStrictViolation() )
                         {
                             throw new ManipulationException(
                                             "Replacing original property version {} (fully resolved: {} ) with new version {} for {} violates the strict version-alignment rule!",
-                                            dependency.getVersion(), resolvedValue, ar.getVersionString(), ar.asProjectRef().toString());
+                                            dependency.getVersion(), resolvedValue, entry.getKey().getVersionString(), entry.getKey().asProjectRef().toString());
                         }
                         else
                         {
@@ -551,7 +551,7 @@ public class DependencyManipulator implements Manipulator
                     }
                     else
                     {
-                        if ( ! PropertiesUtils.cacheProperty( versionPropertyUpdateMap, oldVersion, overrideVersion, ar, false ))
+                        if ( ! PropertiesUtils.cacheProperty( versionPropertyUpdateMap, oldVersion, overrideVersion, entry.getKey(), false ))
                         {
                             if ( oldVersion.equals( "${project.version}" ) )
                             {
@@ -593,7 +593,7 @@ public class DependencyManipulator implements Manipulator
                                 }
                             }
                         }
-                        unmatchedVersionOverrides.remove( ar );
+                        unmatchedVersionOverrides.remove( entry.getKey() );
                     }
                 }
             }
