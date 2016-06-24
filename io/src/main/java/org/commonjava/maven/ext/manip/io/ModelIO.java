@@ -261,16 +261,16 @@ public class ModelIO
 
         // The list of pluginOverridesPomView may be larger than those in current model pluginMgtm. Dummy up an extra
         // set of plugins with versions to handle those.
-        for (ProjectRef pr : pluginOverridesPomView.keySet())
+        for ( Map.Entry<ProjectRef, ProjectVersionRef> entry : pluginOverridesPomView.entrySet() )
         {
             Plugin p = new Plugin();
-            p.setArtifactId( pr.getArtifactId() );
-            p.setGroupId( pr.getGroupId() );
-            p.setVersion( pluginOverridesPomView.get( pr ).getVersionString() );
+            p.setArtifactId( entry.getKey().getArtifactId() );
+            p.setGroupId( entry.getKey().getGroupId() );
+            p.setVersion( entry.getValue().getVersionString() );
 
-            pluginOverrides.put( pr, p );
+            pluginOverrides.put( entry.getKey(), p );
 
-            logger.debug( "Added plugin override for: " + pr.toString() + ":" + p.getVersion() );
+            logger.debug( "Added plugin override for: " + entry.getKey().toString() + ":" + p.getVersion() );
         }
 
         // TODO: active profiles!

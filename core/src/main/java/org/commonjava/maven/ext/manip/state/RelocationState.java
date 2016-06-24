@@ -64,9 +64,9 @@ public class RelocationState
         // post-process this into something useful i.e. establish whether we are relocating groupIds and artifactIds.
         Map<String,String> propRelocs = PropertiesUtils.getPropertiesByPrefix( userProps, DEPENDENCY_RELOCATIONS );
 
-        for (String key : propRelocs.keySet())
+        for ( Map.Entry<String, String> entry : propRelocs.entrySet() )
         {
-            String[] split = key.split( ":", 3 );
+            String[] split = entry.getKey().split( ":", 3 );
             if ( split.length != 3 )
             {
                 throw new ManipulationException(
@@ -108,7 +108,7 @@ public class RelocationState
                                 groupId, newGroupId );
             }
 
-            String version = ( isEmpty( propRelocs.get( key ) ) ? WildcardMap.WILDCARD : propRelocs.get( key ) );
+            String version = ( isEmpty( entry.getValue() ) ? WildcardMap.WILDCARD : entry.getValue() );
 
             logger.debug( "Relocation found oldGroupId '{}' : oldArtifactId '{}' -> newGroupId '{}' : newArtifactId '{}' and version '{}' ",
                           groupId, artifactId, newGroupId, newArtifactId, version );
