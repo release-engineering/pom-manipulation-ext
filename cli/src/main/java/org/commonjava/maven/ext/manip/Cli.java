@@ -188,14 +188,14 @@ public class Cli
 
             HelpFormatter formatter = new HelpFormatter();
             formatter.printHelp( "...", options );
-            return 1;
+            return 100;
         }
 
         if ( cmd.hasOption( 'h' ) )
         {
             HelpFormatter formatter = new HelpFormatter();
             formatter.printHelp( "...", options );
-            System.exit( 1 );
+            System.exit( 0 );
         }
         if ( cmd.hasOption( 'D' ) )
         {
@@ -257,12 +257,12 @@ public class Cli
         if ( !session.isEnabled() )
         {
             logger.info( "Manipulation engine disabled via command-line option" );
-            return 1;
+            return 100;
         }
         if ( !target.exists() )
         {
             logger.info( "Manipulation engine disabled. No project found." );
-            return 1;
+            return 100;
         }
         // Don't bother skipping if we're just trying to analyse deps.
         else if ( new File( target.getParentFile(), ManipulationManager.MARKER_FILE ).exists() && !cmd.hasOption( 'p' ) )
@@ -292,7 +292,7 @@ public class Cli
         catch ( ManipulationException e )
         {
             logger.error( "POM Manipulation failed: Unable to read config file ", e );
-            return 1;
+            return 100;
         }
 
 
@@ -404,23 +404,23 @@ public class Cli
             {
                 manipulationManager.scanAndApply( session );
             }
-
         }
         catch ( ManipulationException e )
         {
-            logger.error( "POM Manipulation failed: Unable to parse projects ", e );
-            return 1;
+            logger.error( "POM Manipulation failed: Unable to parse projects. Original error is {}", e.getMessage() );
+            logger.debug( "POM Manipulation error trace is", e );
+            return 10;
         }
         catch ( RestException e )
         {
             logger.error ( "POM Manipulation failed with message {} ", e.getMessage () );
             logger.trace ( "Exception trace is", e);
-            return 1;
+            return 100;
         }
         catch ( Exception e )
         {
             logger.error( "POM Manipulation failed.", e );
-            return 1;
+            return 100;
         }
         return 0;
     }

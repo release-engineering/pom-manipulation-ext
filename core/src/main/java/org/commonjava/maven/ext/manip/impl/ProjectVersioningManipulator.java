@@ -172,8 +172,6 @@ public class ProjectVersioningManipulator
             return false;
         }
 
-        logger.info( "Looking for applicable versioning changes in: " + gav( model ) );
-
         String g = model.getGroupId();
         String v = model.getVersion();
         final Parent parent = model.getParent();
