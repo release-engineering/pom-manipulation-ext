@@ -407,7 +407,7 @@ public class Cli
         }
         catch ( ManipulationException e )
         {
-            logger.error( "POM Manipulation failed: Unable to parse projects. Original error is {}", e.getMessage() );
+            logger.error( "POM Manipulation failed; original error is {}", e.getMessage() );
             logger.debug( "POM Manipulation error trace is", e );
             return 10;
         }
