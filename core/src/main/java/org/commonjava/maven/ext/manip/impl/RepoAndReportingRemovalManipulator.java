@@ -49,7 +49,7 @@ public class RepoAndReportingRemovalManipulator
     implements Manipulator
 {
 
-    private final Logger logger = LoggerFactory.getLogger( getClass() );
+    private static final Logger LOGGER = LoggerFactory.getLogger( RepoAndReportingRemovalManipulator.class );
 
     @Requirement
     private SettingsIO settingsWriter;
@@ -85,7 +85,7 @@ public class RepoAndReportingRemovalManipulator
         final RepoReportingState state = session.getState( RepoReportingState.class );
         if ( !session.isEnabled() || !state.isEnabled() )
         {
-            logger.debug( getClass().getSimpleName() + ": Nothing to do!" );
+            LOGGER.debug( getClass().getSimpleName() + ": Nothing to do!" );
             return Collections.emptySet();
         }
 
@@ -99,7 +99,7 @@ public class RepoAndReportingRemovalManipulator
         for ( final Project project : projects )
         {
             final String ga = ga( project );
-            logger.info( "Applying changes to: " + ga );
+            LOGGER.info( "Applying changes to: " + ga );
             final Model model = project.getModel();
 
             Iterator<Repository> it = model.getRepositories().iterator();

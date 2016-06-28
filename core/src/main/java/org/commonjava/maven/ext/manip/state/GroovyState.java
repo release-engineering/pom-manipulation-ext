@@ -29,7 +29,7 @@ import java.util.Properties;
 public class GroovyState
     implements State
 {
-    private final Logger logger = LoggerFactory.getLogger( getClass() );
+    private static final Logger LOGGER = LoggerFactory.getLogger( GroovyState.class );
 
     /**
      * The name of the property which contains a comma separated list of remote groovy scripts to load.

@@ -32,7 +32,7 @@ import java.util.regex.Pattern;
  */
 public class Version
 {
-    private static final Logger logger = LoggerFactory.getLogger( Version.class );
+    private static final Logger LOGGER = LoggerFactory.getLogger( Version.class );
 
     private final static Character[] DEFAULT_DELIMITERS = { '.', '-', '_' };
 
@@ -117,11 +117,11 @@ public class Version
     public Version( String version )
     {
         originalVersion = version;
-        logger.debug( "Parsing version: " + originalVersion );
+        LOGGER.debug( "Parsing version: " + originalVersion );
         parseVersion( originalVersion );
-        logger.debug( "Major: " + getMajorVersion() + ", Minor: " + getMinorVersion() + ",  Micro: " +
+        LOGGER.debug( "Major: " + getMajorVersion() + ", Minor: " + getMinorVersion() + ",  Micro: " +
             getMicroVersion() );
-        logger.debug( "Qualifier: " + getQualifier() + ", Base: " + getQualifierBase() + ", BuildNum: " +
+        LOGGER.debug( "Qualifier: " + getQualifier() + ", Base: " + getQualifierBase() + ", BuildNum: " +
             getBuildNumber() );
     }
 
@@ -512,7 +512,7 @@ public class Version
             return;
         }
 
-        logger.debug( "Applying suffix: " + suffix + " to version " + getVersionString() );
+        LOGGER.debug( "Applying suffix: " + suffix + " to version " + getVersionString() );
         Matcher suffixMatcher = qualifierPattern.matcher( suffix );
         if ( !suffixMatcher.matches() )
         {
@@ -563,7 +563,7 @@ public class Version
         }
 
         updateQualifier();
-        logger.debug( "New version string: " + getVersionString() );
+        LOGGER.debug( "New version string: " + getVersionString() );
     }
 
     /**
@@ -625,7 +625,7 @@ public class Version
         versionPatternBuf.append( "(\\d+)" );
         String candidatePatternStr = versionPatternBuf.toString();
 
-        logger.debug( "Using pattern: '{}' to find compatible versions from metadata.", candidatePatternStr );
+        LOGGER.debug( "Using pattern: '{}' to find compatible versions from metadata.", candidatePatternStr );
         final Pattern candidateSuffixPattern = Pattern.compile( candidatePatternStr );
 
         for ( final String compareVersion : versionSet )
@@ -641,7 +641,7 @@ public class Version
                 }
             }
         }
-        logger.debug ("Found highest matching build number {} from set {} ", highestBuildNum, versionSet);
+        LOGGER.debug ("Found highest matching build number {} from set {} ", highestBuildNum, versionSet);
 
         return highestBuildNum;
     }

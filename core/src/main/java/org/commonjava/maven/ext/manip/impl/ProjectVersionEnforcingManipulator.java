@@ -48,7 +48,7 @@ public class ProjectVersionEnforcingManipulator
 
     private static final String PROJVER = "${project.version}";
 
-    private final Logger logger = LoggerFactory.getLogger( getClass() );
+    private static final Logger LOGGER = LoggerFactory.getLogger( ProjectVersionEnforcingManipulator.class );
 
     /**
      * Sets the mode based on user properties and defaults.
@@ -81,7 +81,7 @@ public class ProjectVersionEnforcingManipulator
                         !session.anyStateEnabled( State.activeByDefault ) ||
                         state == null || !state.isEnabled() )
         {
-            logger.debug( "Project version enforcement is disabled." );
+            LOGGER.debug( "Project version enforcement is disabled." );
             return Collections.emptySet();
         }
 
@@ -117,7 +117,7 @@ public class ProjectVersionEnforcingManipulator
         }
         if (!changed.isEmpty())
         {
-            logger.warn( "Using ${project.version} in pom files may lead to unexpected errors with inheritance." );
+            LOGGER.warn( "Using ${project.version} in pom files may lead to unexpected errors with inheritance." );
         }
         return changed;
     }
@@ -131,7 +131,7 @@ public class ProjectVersionEnforcingManipulator
                 String newVersion =  project.getModel().getVersion() == null ?
                                 project.getModel().getParent ().getVersion () : project.getModel().getVersion ();
 
-                logger.debug( "Replacing project.version within {} for project {} with {}", d, project, newVersion);
+                LOGGER.debug( "Replacing project.version within {} for project {} with {}", d, project, newVersion);
 
                 d.setVersion( newVersion );
                 changed.add( project );

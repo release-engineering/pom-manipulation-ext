@@ -34,7 +34,7 @@ import java.util.Properties;
 public class ProfileInjectionState
     implements State
 {
-    private final Logger logger = LoggerFactory.getLogger( getClass() );
+    private static final Logger LOGGER = LoggerFactory.getLogger( ProfileInjectionState.class );
 
     /**
      * Suffix to enable this modder
@@ -55,7 +55,7 @@ public class ProfileInjectionState
             }
             catch ( final InvalidRefException e )
             {
-                logger.error( "Skipping profile injection! Got invalid profileInjection GAV: {}", gav );
+                LOGGER.error( "Skipping profile injection! Got invalid profileInjection GAV: {}", gav );
                 throw e;
             }
         }

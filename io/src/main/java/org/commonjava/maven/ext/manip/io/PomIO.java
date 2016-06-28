@@ -64,7 +64,7 @@ public class PomIO
 {
     private static final String MODIFIED_BY = "[Comment: <!-- Modified by POM Manipulation Extension for Maven";
 
-    private static final Logger logger = LoggerFactory.getLogger( PomIO.class );
+    private static final Logger LOGGER = LoggerFactory.getLogger( PomIO.class );
 
 
     public List<Project> parseProject (final File pom) throws ManipulationException
@@ -122,7 +122,7 @@ public class PomIO
 
             if ( executionRoot.equals( pom ))
             {
-                logger.debug( "Setting execution root to {} with file {}" +
+                LOGGER.debug( "Setting execution root to {} with file {}" +
                       (project.isInheritanceRoot() ? " and is the inheritance root. ": ""), project, pom );
                 project.setExecutionRoot ();
             }
@@ -145,11 +145,11 @@ public class PomIO
     {
         for ( final Project project : changed )
         {
-            logger.info( String.format( "%s modified! Rewriting.", project ) );
+            LOGGER.info( String.format( "%s modified! Rewriting.", project ) );
             File pom = project.getPom();
 
             final Model model = project.getModel();
-            logger.trace( "Rewriting: " + model.toString() + " in place of: " + project.getId()
+            LOGGER.trace( "Rewriting: " + model.toString() + " in place of: " + project.getId()
                          + "\n       to POM: " + pom );
 
             write( project, pom, model );
@@ -283,7 +283,7 @@ public class PomIO
                 final File pom = pendingPoms.removeFirst();
                 seen.add( pom );
 
-                logger.debug( "PEEK: " + pom );
+                LOGGER.debug( "PEEK: " + pom );
 
                 final PomPeek peek = new PomPeek( pom );
                 final ProjectVersionRef key = peek.getKey();
@@ -296,7 +296,7 @@ public class PomIO
                     final String relPath = peek.getParentRelativePath();
                     if ( relPath != null )
                     {
-                        logger.debug( "Found parent relativePath: " + relPath + " in pom: " + pom );
+                        LOGGER.debug( "Found parent relativePath: " + relPath + " in pom: " + pom );
                         File parent = new File( dir, relPath );
                         if ( parent.isDirectory() )
                         {
@@ -310,12 +310,12 @@ public class PomIO
                             && !pendingPoms.contains( parent ) )
                         {
                             topLevelParent = parent;
-                            logger.debug( "Possible top level parent " + parent );
+                            LOGGER.debug( "Possible top level parent " + parent );
                             pendingPoms.add( parent );
                         }
                         else
                         {
-                            logger.debug( "Skipping reference to non-existent parent relativePath: '" + relPath
+                            LOGGER.debug( "Skipping reference to non-existent parent relativePath: '" + relPath
                                 + "' in: " + pom );
                         }
                     }
@@ -325,7 +325,7 @@ public class PomIO
                     {
                         for ( final String module : modules )
                         {
-                            logger.debug( "Found module: " + module + " in pom: " + pom );
+                            LOGGER.debug( "Found module: " + module + " in pom: " + pom );
 
                             File modPom = new File( dir, module );
                             if ( modPom.isDirectory() )
@@ -340,14 +340,14 @@ public class PomIO
                             }
                             else
                             {
-                                logger.debug( "Skipping reference to non-existent module: '" + module + "' in: " + pom );
+                                LOGGER.debug( "Skipping reference to non-existent module: '" + module + "' in: " + pom );
                             }
                         }
                     }
                 }
                 else
                 {
-                    logger.debug( "Skipping " + pom + " as its a template file." );
+                    LOGGER.debug( "Skipping " + pom + " as its a template file." );
                 }
             }
 
@@ -360,19 +360,19 @@ public class PomIO
                 if ( p.getPom()
                       .equals( topLevelParent ) )
                 {
-                    logger.debug( "Setting top level parent to " + p.getPom() + " :: " + p.getKey() );
+                    LOGGER.debug( "Setting top level parent to " + p.getPom() + " :: " + p.getKey() );
                     p.setInheritanceRoot( true );
                 }
             }
 
-            logger.debug( "Searching pom list " + projectrefs.toString() + " for standalone poms..." );
+            LOGGER.debug( "Searching pom list " + projectrefs.toString() + " for standalone poms..." );
 
             for ( final PomPeek p : peeked )
             {
                 if ( p.getParentKey() == null ||
                      ! seenThisParent(projectrefs, p.getParentKey()))
                 {
-                    logger.debug( "Found a standalone pom " + p.getPom() + " :: " + p.getKey() );
+                    LOGGER.debug( "Found a standalone pom " + p.getPom() + " :: " + p.getKey() );
                     p.setInheritanceRoot( true );
                 }
             }

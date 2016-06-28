@@ -50,7 +50,7 @@ public class DefaultVersionTranslator
 
     private static final int CHUNK_SPLIT_COUNT = 4;
 
-    private final Logger logger = LoggerFactory.getLogger( getClass() );
+    private static final Logger LOGGER = LoggerFactory.getLogger( DefaultVersionTranslator.class );
 
     private final String endpointUrl;
 
@@ -89,16 +89,16 @@ public class DefaultVersionTranslator
                 {
                     if ( task.getStatus() < 0 )
                     {
-                        logger.debug ("Caught exception calling server with message {}", task.getException().getMessage());
+                        LOGGER.debug ("Caught exception calling server with message {}", task.getException().getMessage());
                     }
                     else
                     {
-                        logger.debug ("Did not get status {} but received {}", SC_OK, task.getStatus());
+                        LOGGER.debug ("Did not get status {} but received {}", SC_OK, task.getStatus());
                     }
 
                     List<Task> tasks = task.split();
 
-                    logger.warn( "Failed to translate versions for task @{}, splitting and retrying. Chunk size was: {} and new chunk size {} in {} segments.",
+                    LOGGER.warn( "Failed to translate versions for task @{}, splitting and retrying. Chunk size was: {} and new chunk size {} in {} segments.",
                                  task.hashCode(), task.getChunkSize(), tasks.get( 0 ).getChunkSize(), tasks.size());
                     queue.addAll( tasks );
                 }

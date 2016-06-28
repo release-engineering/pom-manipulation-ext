@@ -38,7 +38,7 @@ import java.nio.charset.StandardCharsets;
 @Component( role = JSONIO.class )
 public class JSONIO
 {
-    private final Logger logger = LoggerFactory.getLogger( getClass() );
+    private static final Logger LOGGER = LoggerFactory.getLogger( JSONIO.class );
 
     private ObjectMapper mapper = new ObjectMapper( );
 
@@ -59,7 +59,7 @@ public class JSONIO
         }
         catch ( IOException e )
         {
-            logger.error( "Unable to parse JSON File {} ", e );
+            LOGGER.error( "Unable to parse JSON File {} ", e );
             throw new ManipulationException( "Unable to parse JSON File", e );
         }
         return doc;
@@ -81,7 +81,7 @@ public class JSONIO
         }
         catch ( IOException e )
         {
-            logger.error( "Unable to write JSON string:  ", e );
+            LOGGER.error( "Unable to write JSON string:  ", e );
             throw new ManipulationException( "Unable to write JSON string", e );
         }
     }

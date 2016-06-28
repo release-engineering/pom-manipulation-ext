@@ -62,7 +62,7 @@ import static org.commonjava.maven.ext.manip.util.IdUtils.gav;
 @Component( role = Manipulator.class, hint = "project-dependency-manipulator" )
 public class DependencyManipulator implements Manipulator
 {
-    private final Logger logger = LoggerFactory.getLogger( getClass() );
+    private static final Logger LOGGER = LoggerFactory.getLogger( DependencyManipulator.class );
 
     /**
      * Used to store mappings of old property to new version for explicit overrides.
@@ -109,7 +109,7 @@ public class DependencyManipulator implements Manipulator
 
         if ( !session.isEnabled() || !state.isEnabled() )
         {
-            logger.debug( getClass().getSimpleName() + ": Nothing to do!" );
+            LOGGER.debug( getClass().getSimpleName() + ": Nothing to do!" );
             return Collections.emptySet();
         }
         return internalApplyChanges( projects, session, loadRemoteOverrides( state ) );
@@ -177,7 +177,7 @@ public class DependencyManipulator implements Manipulator
         // If we've changed something now update any old properties with the new values.
         if (!result.isEmpty())
         {
-            logger.info ("Iterating for standard overrides...");
+            LOGGER.info ("Iterating for standard overrides...");
             for ( final Map.Entry<String, String> entry : versionPropertyUpdateMap.entrySet() )
             {
                 PropertiesUtils.PropertyUpdate found = PropertiesUtils.updateProperties( session, result, false, entry.getKey(), entry.getValue());
@@ -187,18 +187,18 @@ public class DependencyManipulator implements Manipulator
                     // Problem in this scenario is that we know we have a property update map but we have not found a
                     // property to update. Its possible this property has been inherited from a parent. Override in the
                     // top pom for safety.
-                    logger.info( "Unable to find a property for {} to update", entry.getKey());
+                    LOGGER.info( "Unable to find a property for {} to update", entry.getKey());
                     for ( final Project p : result )
                     {
                         if ( p.isInheritanceRoot() )
                         {
-                            logger.info( "Adding property {} with {} ", entry.getKey(), entry.getValue() );
+                            LOGGER.info( "Adding property {} with {} ", entry.getKey(), entry.getValue() );
                             p.getModel().getProperties().setProperty( entry.getKey(), entry.getValue() );
                         }
                     }
                 }
             }
-            logger.info ("Iterating for explicit overrides...");
+            LOGGER.info ("Iterating for explicit overrides...");
             for ( final Map.Entry<String, String> entry : explicitVersionPropertyUpdateMap.entrySet() )
             {
                 PropertiesUtils.PropertyUpdate found = PropertiesUtils.updateProperties( session, result, true, entry.getKey(), entry.getValue() );
@@ -208,12 +208,12 @@ public class DependencyManipulator implements Manipulator
                     // Problem in this scenario is that we know we have a property update map but we have not found a
                     // property to update. Its possible this property has been inherited from a parent. Override in the
                     // top pom for safety.
-                    logger.info( "Unable to find a property for {} to update for explicit overrides", entry.getKey());
+                    LOGGER.info( "Unable to find a property for {} to update for explicit overrides", entry.getKey());
                     for ( final Project p : result )
                     {
                         if ( p.isInheritanceRoot() )
                         {
-                            logger.info( "Adding property {} with {} ", entry.getKey(), entry.getValue() );
+                            LOGGER.info( "Adding property {} with {} ", entry.getKey(), entry.getValue() );
                             p.getModel().getProperties().setProperty( entry.getKey(), entry.getValue() );
                         }
                     }
@@ -243,11 +243,11 @@ public class DependencyManipulator implements Manipulator
             moduleOverrides = applyModuleVersionOverrides( projectGA,
                                                            state.getDependencyExclusions(),
                                                            moduleOverrides, explicitOverrides );
-            logger.debug( "Module overrides are:\n{}", moduleOverrides );
+            LOGGER.debug( "Module overrides are:\n{}", moduleOverrides );
         }
         catch ( InvalidRefException e )
         {
-            logger.error( "Invalid module exclusion override {} : {} ", moduleOverrides, explicitOverrides );
+            LOGGER.error( "Invalid module exclusion override {} : {} ", moduleOverrides, explicitOverrides );
             throw e;
         }
 
@@ -275,7 +275,7 @@ public class DependencyManipulator implements Manipulator
                                 }
                                 else
                                 {
-                                    logger.warn( "Parent reference {} replacement: {} of original version: {} violates the strict version-alignment rule!",
+                                    LOGGER.warn( "Parent reference {} replacement: {} of original version: {} violates the strict version-alignment rule!",
                                                  ga( project.getParent() ), newValue, oldValue );
                                     // Ignore the dependency override. As found has been set to true it won't inject
                                     // a new property either.
@@ -284,7 +284,7 @@ public class DependencyManipulator implements Manipulator
                             }
                         }
 
-                        logger.debug( " Modifying parent reference from {} to {} for {} ",
+                        LOGGER.debug( " Modifying parent reference from {} to {} for {} ",
                                       model.getParent().getVersion(), newValue, ga( project.getParent() ) );
                         model.getParent().setVersion( newValue );
                         break;
@@ -311,13 +311,13 @@ public class DependencyManipulator implements Manipulator
                 {
                     dependencyManagement = new DependencyManagement();
                     model.setDependencyManagement( dependencyManagement );
-                    logger.debug( "Added <DependencyManagement/> for current project" );
+                    LOGGER.debug( "Added <DependencyManagement/> for current project" );
                 }
 
                 // Apply overrides to project dependency management
                 final List<Dependency> dependencies = dependencyManagement.getDependencies();
 
-                logger.debug( "Applying overrides to managed dependencies for top-pom: {}", projectGA );
+                LOGGER.debug( "Applying overrides to managed dependencies for top-pom: {}", projectGA );
 
                 final Map<ArtifactRef, String> nonMatchingVersionOverrides =
                                 applyOverrides( session, dependencies, moduleOverrides );
@@ -350,19 +350,19 @@ public class DependencyManipulator implements Manipulator
                         newDependency.setVersion( artifactVersion );
 
                         extraDeps.add( newDependency );
-                        logger.debug( "New entry added to <DependencyManagement/> - {} : {} ", var, artifactVersion );
+                        LOGGER.debug( "New entry added to <DependencyManagement/> - {} : {} ", var, artifactVersion );
                     }
 
                     dependencyManagement.getDependencies().addAll( 0, extraDeps );
                 }
                 else
                 {
-                    logger.debug( "Non-matching dependencies ignored." );
+                    LOGGER.debug( "Non-matching dependencies ignored." );
                 }
             }
             else
             {
-                logger.debug( "NOT applying overrides to managed dependencies for top-pom: {}", projectGA );
+                LOGGER.debug( "NOT applying overrides to managed dependencies for top-pom: {}", projectGA );
             }
         }
         else
@@ -371,20 +371,20 @@ public class DependencyManipulator implements Manipulator
             final DependencyManagement dependencyManagement = model.getDependencyManagement();
             if ( session.getState( DependencyState.class ).getOverrideDependencies() && dependencyManagement != null )
             {
-                logger.debug( "Applying overrides to managed dependencies for: {}", projectGA );
+                LOGGER.debug( "Applying overrides to managed dependencies for: {}", projectGA );
                 applyOverrides( session, dependencyManagement.getDependencies(), moduleOverrides );
                 applyExplicitOverrides( explicitVersionPropertyUpdateMap, explicitOverrides,
                                         dependencyManagement.getDependencies() );
             }
             else
             {
-                logger.debug( "NOT applying overrides to managed dependencies for: {}", projectGA );
+                LOGGER.debug( "NOT applying overrides to managed dependencies for: {}", projectGA );
             }
         }
 
         if ( session.getState( DependencyState.class ).getOverrideDependencies() )
         {
-            logger.debug( "Applying overrides to concrete dependencies for: {}", projectGA );
+            LOGGER.debug( "Applying overrides to concrete dependencies for: {}", projectGA );
             // Apply overrides to project direct dependencies
             final List<Dependency> projectDependencies = model.getDependencies();
             applyOverrides( session, projectDependencies, moduleOverrides );
@@ -410,7 +410,7 @@ public class DependencyManipulator implements Manipulator
         }
         else
         {
-            logger.debug( "NOT applying overrides to concrete dependencies for: {}", projectGA );
+            LOGGER.debug( "NOT applying overrides to concrete dependencies for: {}", projectGA );
         }
     }
 
@@ -442,24 +442,24 @@ public class DependencyManipulator implements Manipulator
                 {
                     if ( isEmpty( oldVersion ) )
                     {
-                        logger.warn( "Unable to force align as no existing version field to update for "
+                        LOGGER.warn( "Unable to force align as no existing version field to update for "
                                                      + groupIdArtifactId + "; ignoring" );
                     }
                     else
                     {
-                        logger.warn( "Unable to force align as override version is empty for " + groupIdArtifactId
+                        LOGGER.warn( "Unable to force align as override version is empty for " + groupIdArtifactId
                                                      + "; ignoring" );
                     }
                 }
                 else
                 {
-                    logger.info( "Explicit overrides : force aligning {} to {}.", groupIdArtifactId, overrideVersion );
+                    LOGGER.info( "Explicit overrides : force aligning {} to {}.", groupIdArtifactId, overrideVersion );
 
                     if ( ! PropertiesUtils.cacheProperty( versionPropertyUpdateMap, oldVersion, overrideVersion, dependency, true ))
                     {
                         if ( oldVersion.contains( "${" ))
                         {
-                            logger.warn( "Overriding version with {} when old version contained a property {} ", overrideVersion, oldVersion );
+                            LOGGER.warn( "Overriding version with {} when old version contained a property {} ", overrideVersion, oldVersion );
                             // TODO: Should this throw an exception?
                         }
                         // Not checking strict version alignment here as explicit overrides take priority.
@@ -517,11 +517,11 @@ public class DependencyManipulator implements Manipulator
 
                     if ( isEmpty( overrideVersion ) )
                     {
-                        logger.warn( "Unable to align with an empty override version for " + groupIdArtifactId + "; ignoring" );
+                        LOGGER.warn( "Unable to align with an empty override version for " + groupIdArtifactId + "; ignoring" );
                     }
                     else if ( isEmpty( oldVersion ) )
                     {
-                        logger.debug( "Dependency is a managed version for " + groupIdArtifactId + "; ignoring" );
+                        LOGGER.debug( "Dependency is a managed version for " + groupIdArtifactId + "; ignoring" );
                     }
                     // If we're doing strict matching with properties, then the original parts should match.
                     // i.e. assuming original resolved value is 1.2 and potential new value is 1.2.rebuild-1
@@ -535,7 +535,7 @@ public class DependencyManipulator implements Manipulator
                     else if ( strict && oldVersion.contains( "$" ) &&
                                     ! PropertiesUtils.checkStrictValue( session, resolvedValue, overrideVersion) )
                     {
-                        logger.debug ("Original fully resolved version {} of {} does not match override version {} -> {} so ignoring",
+                        LOGGER.debug ("Original fully resolved version {} of {} does not match override version {} -> {} so ignoring",
                                       resolvedValue, dependency, entry.getKey(), overrideVersion);
                         if ( state.getFailOnStrictViolation() )
                         {
@@ -545,7 +545,7 @@ public class DependencyManipulator implements Manipulator
                         }
                         else
                         {
-                            logger.warn( "Replacing original property version {} with new version {} for {} violates the strict version-alignment rule!",
+                            LOGGER.warn( "Replacing original property version {} with new version {} for {} violates the strict version-alignment rule!",
                                          resolvedValue, overrideVersion, dependency.getVersion() );
                         }
                     }
@@ -555,7 +555,7 @@ public class DependencyManipulator implements Manipulator
                         {
                             if ( oldVersion.equals( "${project.version}" ) )
                             {
-                                logger.debug( "For dependency {} ; version is built in {} so skipping inlining {}", groupIdArtifactId, oldVersion,
+                                LOGGER.debug( "For dependency {} ; version is built in {} so skipping inlining {}", groupIdArtifactId, oldVersion,
                                               overrideVersion );
                             }
                             else if ( strict && ! PropertiesUtils.checkStrictValue( session, resolvedValue, overrideVersion) )
@@ -568,19 +568,19 @@ public class DependencyManipulator implements Manipulator
                                 }
                                 else
                                 {
-                                    logger.warn( "Replacing original version {} in dependency {} with new version {} violates the strict version-alignment rule!",
+                                    LOGGER.warn( "Replacing original version {} in dependency {} with new version {} violates the strict version-alignment rule!",
                                                  oldVersion, groupIdArtifactId, overrideVersion );
                                 }
                             }
                             else
                             {
-                                logger.debug( "Altered dependency {} {} -> {}", groupIdArtifactId, oldVersion,
+                                LOGGER.debug( "Altered dependency {} {} -> {}", groupIdArtifactId, oldVersion,
                                               overrideVersion );
 
                                 if ( oldVersion.contains( "${" ) )
                                 {
                                     String appendValue = StringUtils.removeStart( overrideVersion, resolvedValue );
-                                    logger.debug ( "Resolved value is {} and appended is {} ", resolvedValue, appendValue );
+                                    LOGGER.debug ( "Resolved value is {} and appended is {} ", resolvedValue, appendValue );
 
                                     // In this case the previous value couldn't be cached even though it contained a property
                                     // as it was either multiple properties or a property combined with a hardcoded value. Therefore
@@ -642,7 +642,7 @@ public class DependencyManipulator implements Manipulator
     {
         final Map<ArtifactRef, String> remainingOverrides = new LinkedHashMap<>( originalOverrides );
 
-        logger.debug( "Calculating module-specific version overrides. Starting with:\n  {}",
+        LOGGER.debug( "Calculating module-specific version overrides. Starting with:\n  {}",
                       join( remainingOverrides.entrySet(), "\n  " ) );
 
         // These modes correspond to two different kinds of passes over the available override properties:
@@ -655,16 +655,16 @@ public class DependencyManipulator implements Manipulator
             {
                 final String currentValue = moduleOverrides.get( currentKey );
 
-                logger.debug( "Processing key {} for override with value {}", currentKey, currentValue );
+                LOGGER.debug( "Processing key {} for override with value {}", currentKey, currentValue );
 
                 if ( !currentKey.contains( "@" ) )
                 {
-                    logger.debug( "Not an override. Skip." );
+                    LOGGER.debug( "Not an override. Skip." );
                     continue;
                 }
 
                 final boolean isWildcard = currentKey.endsWith( "@*" );
-                logger.debug( "Is wildcard? {}", isWildcard );
+                LOGGER.debug( "Is wildcard? {}", isWildcard );
 
                 // process module-specific overrides (first)
                 if ( !aWildcardMode )
@@ -672,7 +672,7 @@ public class DependencyManipulator implements Manipulator
                     // skip wildcard overrides in this mode
                     if ( isWildcard )
                     {
-                        logger.debug( "Not currently in wildcard mode. Skip." );
+                        LOGGER.debug( "Not currently in wildcard mode. Skip." );
                         continue;
                     }
 
@@ -684,7 +684,7 @@ public class DependencyManipulator implements Manipulator
                     final String artifactGA = artifactAndModule[0];
                     final String moduleGA = artifactAndModule[1];
 
-                    logger.debug( "For artifact override: {}, comparing parsed module: {} to current project: {}",
+                    LOGGER.debug( "For artifact override: {}, comparing parsed module: {} to current project: {}",
                                   artifactGA, moduleGA, projectGA );
 
                     if ( moduleGA.equals( projectGA ) )
@@ -692,13 +692,13 @@ public class DependencyManipulator implements Manipulator
                         if ( currentValue != null && !currentValue.isEmpty() )
                         {
                             explicitOverrides.put( SimpleProjectRef.parse( artifactGA ), currentValue );
-                            logger.debug( "Overriding module dependency for {} with {} : {}", moduleGA, artifactGA,
+                            LOGGER.debug( "Overriding module dependency for {} with {} : {}", moduleGA, artifactGA,
                                           currentValue );
                         }
                         else
                         {
                             removeGA( remainingOverrides, SimpleProjectRef.parse( artifactGA ) );
-                            logger.debug( "Ignoring module dependency override for {} " + moduleGA );
+                            LOGGER.debug( "Ignoring module dependency override for {} " + moduleGA );
                         }
                     }
                 }
@@ -708,17 +708,17 @@ public class DependencyManipulator implements Manipulator
                     // skip module-specific overrides in this mode
                     if ( !isWildcard )
                     {
-                        logger.debug( "Currently in wildcard mode. Skip." );
+                        LOGGER.debug( "Currently in wildcard mode. Skip." );
                         continue;
                     }
 
                     final String artifactGA = currentKey.substring( 0, currentKey.length() - 2 );
-                    logger.debug( "For artifact override: {}, checking if current overrides already contain a module-specific version.",
+                    LOGGER.debug( "For artifact override: {}, checking if current overrides already contain a module-specific version.",
                                   artifactGA );
 
                     if ( explicitOverrides.containsKey( SimpleProjectRef.parse( artifactGA ) ) )
                     {
-                        logger.debug( "For artifact override: {}, current overrides already contain a module-specific version. Skip.",
+                        LOGGER.debug( "For artifact override: {}, current overrides already contain a module-specific version. Skip.",
                                       artifactGA );
                         continue;
                     }
@@ -726,7 +726,7 @@ public class DependencyManipulator implements Manipulator
                     // I think this is only used for e.g. dependencyExclusion.groupId:artifactId@*=<explicitVersion>
                     if ( currentValue != null && !currentValue.isEmpty() )
                     {
-                        logger.debug( "Overriding module dependency for {} with {} : {}", projectGA, artifactGA,
+                        LOGGER.debug( "Overriding module dependency for {} with {} : {}", projectGA, artifactGA,
                                       currentValue );
                         explicitOverrides.put( SimpleProjectRef.parse( artifactGA ), currentValue );
                     }
@@ -743,7 +743,7 @@ public class DependencyManipulator implements Manipulator
                                 final ArtifactRef pr = it.next();
                                 if ( artifactGAPr.getGroupId().equals( pr.getGroupId() ) )
                                 {
-                                    logger.debug( "Removing artifactGA " + pr + " from overrides" );
+                                    LOGGER.debug( "Removing artifactGA " + pr + " from overrides" );
                                     it.remove();
                                 }
                             }
@@ -751,9 +751,9 @@ public class DependencyManipulator implements Manipulator
                         else
                         {
                             removeGA( remainingOverrides, SimpleProjectRef.parse( artifactGA ) );
-                            logger.debug( "Removing artifactGA " + artifactGA + " from overrides" );
+                            LOGGER.debug( "Removing artifactGA " + artifactGA + " from overrides" );
                         }
-                        logger.debug( "Ignoring module dependency override for {} " + projectGA );
+                        LOGGER.debug( "Ignoring module dependency override for {} " + projectGA );
                     }
                 }
             }

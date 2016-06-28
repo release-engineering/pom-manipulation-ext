@@ -34,7 +34,7 @@ import java.util.Properties;
 public class RepositoryInjectionState
     implements State
 {
-    private final Logger logger = LoggerFactory.getLogger( getClass() );
+    private static final Logger LOGGER = LoggerFactory.getLogger( RepositoryInjectionState.class );
 
     /**
      * Suffix to enable this modder
@@ -61,7 +61,7 @@ public class RepositoryInjectionState
             }
             catch ( final InvalidRefException e )
             {
-                logger.error( "Skipping repository injection! Got invalid repositoryInjection GAV: {}", gav );
+                LOGGER.error( "Skipping repository injection! Got invalid repositoryInjection GAV: {}", gav );
                 throw e;
             }
         }

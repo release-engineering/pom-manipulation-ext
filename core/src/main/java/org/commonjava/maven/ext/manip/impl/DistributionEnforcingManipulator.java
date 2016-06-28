@@ -91,7 +91,7 @@ public class DistributionEnforcingManipulator
 
     private static final String DEFAULT_INSTALL_EXEC = "default-install";
 
-    private final Logger logger = LoggerFactory.getLogger( getClass() );
+    private static final Logger LOGGER = LoggerFactory.getLogger( DistributionEnforcingManipulator.class );
 
     @Requirement
     private GalleyAPIWrapper galleyWrapper;
@@ -141,7 +141,7 @@ public class DistributionEnforcingManipulator
         final DistributionEnforcingState state = session.getState( DistributionEnforcingState.class );
         if ( state == null || !state.isEnabled() )
         {
-            logger.debug( "Distribution skip-flag enforcement is disabled." );
+            LOGGER.debug( "Distribution skip-flag enforcement is disabled." );
             return Collections.emptySet();
         }
 
@@ -162,11 +162,11 @@ public class DistributionEnforcingManipulator
 
             if ( mode == EnforcingMode.none )
             {
-                logger.info( "Install/Deploy skip-flag enforcement is disabled for: {}.", ga );
+                LOGGER.info( "Install/Deploy skip-flag enforcement is disabled for: {}.", ga );
                 continue;
             }
 
-            logger.info( "Applying skip-flag enforcement mode of: " + mode + " to: " + ga );
+            LOGGER.info( "Applying skip-flag enforcement mode of: " + mode + " to: " + ga );
 
             final Model model = project.getModel();
 
@@ -235,7 +235,7 @@ public class DistributionEnforcingManipulator
 
         if ( skipSetting == null )
         {
-            logger.warn( "No setting to enforce for skip-flag! Aborting enforcement..." );
+            LOGGER.warn( "No setting to enforce for skip-flag! Aborting enforcement..." );
             return null;
         }
 

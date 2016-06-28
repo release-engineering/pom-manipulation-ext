@@ -59,7 +59,7 @@ import static org.apache.commons.lang.StringUtils.isEmpty;
 @Component( role = Manipulator.class, hint = "rest-manipulator" )
 public class RESTManipulator implements Manipulator
 {
-    private static final Logger logger = LoggerFactory.getLogger( RESTManipulator.class );
+    private static final Logger LOGGER = LoggerFactory.getLogger( RESTManipulator.class );
 
     @Override
     public void init( final ManipulationSession session )
@@ -81,7 +81,7 @@ public class RESTManipulator implements Manipulator
 
         if ( !session.isEnabled() || !state.isEnabled() )
         {
-            logger.debug( getClass().getSimpleName() + ": Nothing to do!" );
+            LOGGER.debug( getClass().getSimpleName() + ": Nothing to do!" );
             return;
         }
 
@@ -105,7 +105,7 @@ public class RESTManipulator implements Manipulator
                 }
                 else
                 {
-                    logger.warn( "SNAPSHOT detected for REST call but preserve-snapshots is enabled." );
+                    LOGGER.warn( "SNAPSHOT detected for REST call but preserve-snapshots is enabled." );
                 }
             }
             newProjectKeys.add( newKey );
@@ -122,8 +122,8 @@ public class RESTManipulator implements Manipulator
         }
 
         // Call the REST to populate the result.
-        logger.debug ("Passing {} GAVs following into the REST client api {} ", restParam.size(), restParam);
-        logger.info ("Calling REST client...");
+        LOGGER.debug ("Passing {} GAVs following into the REST client api {} ", restParam.size(), restParam);
+        LOGGER.info ("Calling REST client...");
         long start = System.nanoTime();
         Map<ProjectVersionRef, String> restResult;
 
@@ -139,7 +139,7 @@ public class RESTManipulator implements Manipulator
         {
             printFinishTime( start );
         }
-        logger.debug ("REST Client returned {} ", restResult);
+        LOGGER.debug ("REST Client returned {} ", restResult);
 
         // Parse the rest result for the project GAs and store them in versioning state for use
         // there by incremental suffix calculation.
@@ -158,7 +158,7 @@ public class RESTManipulator implements Manipulator
                 versions.add( restResult.get( p ) );
             }
         }
-        logger.info ("Added the following ProjectRef:Version from REST call into VersionState {}", versionStates);
+        LOGGER.info ("Added the following ProjectRef:Version from REST call into VersionState {}", versionStates);
         vs.setRESTMetadata (versionStates);
 
         final DependencyState ds = session.getState( DependencyState.class );
@@ -172,7 +172,7 @@ public class RESTManipulator implements Manipulator
                 overrides.put( a, restResult.get( a.asProjectVersionRef()));
             }
         }
-        logger.debug( "Setting REST Overrides {} ", overrides );
+        LOGGER.debug( "Setting REST Overrides {} ", overrides );
         ds.setRemoteRESTOverrides( overrides );
     }
 
@@ -250,7 +250,7 @@ public class RESTManipulator implements Manipulator
                     }
                 }
             }
-            logger.debug ("Found {} active modules with {} active profiles.", activeModules, activeProfiles);
+            LOGGER.debug ("Found {} active modules with {} active profiles.", activeModules, activeProfiles);
         }
         else
         {
@@ -318,7 +318,7 @@ public class RESTManipulator implements Manipulator
 
             if ( excludeEmptyVersions && isEmpty( d.getVersion() ) )
             {
-                logger.trace( "Skipping dependency " + d + " as empty version." );
+                LOGGER.trace( "Skipping dependency " + d + " as empty version." );
             }
             else
             {
@@ -328,7 +328,7 @@ public class RESTManipulator implements Manipulator
                 if ( isEmpty ( version ) )
                 {
                     // Hack for non-managed versions to be stored in this set. Only used by CLI codepath
-                    logger.trace( "Version for " + d + " is empty." );
+                    LOGGER.trace( "Version for " + d + " is empty." );
                     version = "<unknown>";
                 }
 
@@ -349,7 +349,7 @@ public class RESTManipulator implements Manipulator
         long finish = System.nanoTime();
         long minutes = TimeUnit.NANOSECONDS.toMinutes( finish - start );
         long seconds = TimeUnit.NANOSECONDS.toSeconds( finish - start ) - ( minutes * 60 );
-        logger.info ( "REST client finished... (took {} min, {} sec, {} millisec)", minutes, seconds,
+        LOGGER.info ( "REST client finished... (took {} min, {} sec, {} millisec)", minutes, seconds,
                       (TimeUnit.NANOSECONDS.toMillis( finish - start ) - ( minutes * 60 * 1000 ) - ( seconds * 1000) ));
     }
 }

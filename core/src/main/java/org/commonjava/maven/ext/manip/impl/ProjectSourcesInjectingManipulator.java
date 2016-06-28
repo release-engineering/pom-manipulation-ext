@@ -72,7 +72,7 @@ public class ProjectSourcesInjectingManipulator
 
     private static final String INITIALIZE_PHASE = "initialize";
 
-    private final Logger logger = LoggerFactory.getLogger( getClass() );
+    private static final Logger LOGGER = LoggerFactory.getLogger( ProjectSourcesInjectingManipulator.class );
 
     @Override
     public void init( final ManipulationSession session )
@@ -106,7 +106,7 @@ public class ProjectSourcesInjectingManipulator
             {
                 if ( project.isExecutionRoot() )
                 {
-                    logger.info( "Examining {} to apply sources/metadata plugins.", project );
+                    LOGGER.info( "Examining {} to apply sources/metadata plugins.", project );
 
                     final Model model = project.getModel();
                     Build build = model.getBuild();

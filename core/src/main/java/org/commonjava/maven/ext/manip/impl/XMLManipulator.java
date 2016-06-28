@@ -49,7 +49,7 @@ import static org.apache.commons.lang.StringUtils.isEmpty;
 public class XMLManipulator
     implements Manipulator
 {
-    private final Logger logger = LoggerFactory.getLogger( getClass() );
+    private static final Logger LOGGER = LoggerFactory.getLogger( XMLManipulator.class );
 
     private XPath xPath = XPathFactory.newInstance().newXPath();
 
@@ -85,7 +85,7 @@ public class XMLManipulator
         final XMLState state = session.getState( XMLState.class );
         if ( !session.isEnabled() || !state.isEnabled() )
         {
-            logger.debug( getClass().getSimpleName() + ": Nothing to do!" );
+            LOGGER.debug( getClass().getSimpleName() + ": Nothing to do!" );
             return Collections.emptySet();
         }
 
@@ -100,7 +100,7 @@ public class XMLManipulator
                 {
                     File target = new File( project.getPom().getParentFile(), operation.getFile() );
 
-                    logger.info( "Attempting to start XML update to file {} with xpath {} and replacement {}",
+                    LOGGER.info( "Attempting to start XML update to file {} with xpath {} and replacement {}",
                                  target, operation.getXPath(), operation.getUpdate() );
 
                     internalApplyChanges (target, operation);
@@ -147,7 +147,7 @@ public class XMLManipulator
         }
         catch ( XPathExpressionException e )
         {
-            logger.error( "Caught XML exception processing file {}, document context {} ", target, doc, e );
+            LOGGER.error( "Caught XML exception processing file {}, document context {} ", target, doc, e );
             throw new ManipulationException( "Caught XML exception processing file", e );
         }
     }

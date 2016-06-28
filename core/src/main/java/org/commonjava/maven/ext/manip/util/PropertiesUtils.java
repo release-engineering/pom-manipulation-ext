@@ -38,7 +38,7 @@ import java.util.Set;
  */
 public final class PropertiesUtils
 {
-    private final static Logger logger = LoggerFactory.getLogger( PropertiesUtils.class );
+    private static final Logger LOGGER = LoggerFactory.getLogger( PropertiesUtils.class );
 
     private PropertiesUtils()
     {
@@ -64,7 +64,7 @@ public final class PropertiesUtils
                 String value = properties.getProperty( propertyName );
                 if ( value != null && value.equals( "true" ) )
                 {
-                    logger.warn( "Work around Brew/Maven bug - removing erroneous 'true' value for {}.",
+                    LOGGER.warn( "Work around Brew/Maven bug - removing erroneous 'true' value for {}.",
                                  trimmedPropertyName );
                     value = "";
                 }
@@ -93,16 +93,16 @@ public final class PropertiesUtils
         PropertyUpdate found = PropertyUpdate.NOTFOUND;
 
         final String resolvedValue = resolveProperties( new ArrayList<>( projects ), "${" + key + '}' );
-        logger.debug( "Fully resolvedValue is {} for {} ", resolvedValue, key );
+        LOGGER.debug( "Fully resolvedValue is {} for {} ", resolvedValue, key );
 
         if ( resolvedValue.equals( newValue ) )
         {
-            logger.warn( "Nothing to update as original key {} value matches new value {} ", key, newValue );
+            LOGGER.warn( "Nothing to update as original key {} value matches new value {} ", key, newValue );
             return PropertyUpdate.IGNORE;
         }
         else if ( "project.version".equals( key ) )
         {
-            logger.warn( "Not updating key {} with {} ", key, newValue );
+            LOGGER.warn( "Not updating key {} with {} ", key, newValue );
             return PropertyUpdate.IGNORE;
         }
 
@@ -112,7 +112,7 @@ public final class PropertiesUtils
             {
                 final String oldValue = p.getModel().getProperties().getProperty( key );
 
-                logger.info( "Updating property {} / {} with {} ", key, oldValue, newValue );
+                LOGGER.info( "Updating property {} / {} with {} ", key, oldValue, newValue );
 
                 found = PropertyUpdate.FOUND;
 
@@ -126,12 +126,12 @@ public final class PropertiesUtils
                 if ( oldValue != null && oldValue.startsWith( "${" ) && oldValue.endsWith( "}" ) &&
                                 !( StringUtils.countMatches( oldValue, "${" ) > 1 ) )
                 {
-                    logger.debug( "Recursively resolving {} ", oldValue.substring( 2, oldValue.length() - 1 ) );
+                    LOGGER.debug( "Recursively resolving {} ", oldValue.substring( 2, oldValue.length() - 1 ) );
 
                     if ( updateProperties( session, projects, ignoreStrict,
                                             oldValue.substring( 2, oldValue.length() - 1 ), newValue ) == PropertyUpdate.NOTFOUND )
                     {
-                        logger.error( "Recursive property not found for {} with {} ", oldValue, newValue );
+                        LOGGER.error( "Recursive property not found for {} with {} ", oldValue, newValue );
                         return PropertyUpdate.NOTFOUND;
                     }
                 }
@@ -149,7 +149,7 @@ public final class PropertiesUtils
                             }
                             else
                             {
-                                logger.warn( "Replacing original property version {} with new version {} for {} violates the strict version-alignment rule!",
+                                LOGGER.warn( "Replacing original property version {} with new version {} for {} violates the strict version-alignment rule!",
                                              oldValue, newValue, key );
                                 // Ignore the dependency override. As found has been set to true it won't inject
                                 // a new property either.
@@ -177,7 +177,7 @@ public final class PropertiesUtils
                                             "NYI : handling for versions with explicit overrides (" + oldValue + ") with multiple embedded properties is NYI. " );
                         }
                         newValue = oldValue + StringUtils.removeStart( newValue, resolvedValue );
-                        logger.info( "Ignoring new value due to embedded property {} and appending {} ", oldValue,
+                        LOGGER.info( "Ignoring new value due to embedded property {} and appending {} ", oldValue,
                                      newValue );
                     }
 
@@ -243,12 +243,12 @@ public final class PropertiesUtils
                 oldValue = oldValue.substring( 0, oldValue.indexOf( suffix ) - 1 );
                 v = new Version( oldValue );
                 osgiVersion = v.getOSGiVersionString();
-                logger.debug( "Updating version to {} and osgiVersion {} for oldValue {} ", v, osgiVersion, oldValue );
+                LOGGER.debug( "Updating version to {} and osgiVersion {} for oldValue {} ", v, osgiVersion, oldValue );
 
             }
             else
             {
-                logger.warn( "strictIgnoreSuffix set but unable to align from {} to {}", oldValue, newValue );
+                LOGGER.warn( "strictIgnoreSuffix set but unable to align from {} to {}", oldValue, newValue );
             }
         }
 
@@ -264,7 +264,7 @@ public final class PropertiesUtils
         {
             newVersion = newValue.substring( 0, newValue.indexOf( suffix ) - 1 );
         }
-        logger.debug( "Comparing original version {} and OSGi variant {} with new version {} and suffix removed {} ",
+        LOGGER.debug( "Comparing original version {} and OSGi variant {} with new version {} and suffix removed {} ",
                       oldValue, osgiVersion, newValue, newVersion );
 
         // We compare both an OSGi'ied oldVersion and the non-OSGi version against the possible new version (which has
@@ -304,17 +304,17 @@ public final class PropertiesUtils
             if ( oldVersion.contains( "${" ) && !( oldVersion.startsWith( "${" ) && oldVersion.endsWith( "}" ) ) || (
                             StringUtils.countMatches( oldVersion, "${" ) > 1 ) )
             {
-                logger.debug( "For {} ; original version contains hardcoded value or multiple embedded properties. Not caching value ( {} -> {} )",
+                LOGGER.debug( "For {} ; original version contains hardcoded value or multiple embedded properties. Not caching value ( {} -> {} )",
                               originalType, oldVersion, newVersion );
             }
             else if ( "project.version".equals( oldProperty ) )
             {
-                logger.debug( "For {} ; original version was a property mapping. Not caching value as property is built-in ( {} -> {} )",
+                LOGGER.debug( "For {} ; original version was a property mapping. Not caching value as property is built-in ( {} -> {} )",
                               originalType, oldProperty, newVersion );
             }
             else
             {
-                logger.debug( "For {} ; original version was a property mapping; caching new value for update {} -> {}",
+                LOGGER.debug( "For {} ; original version was a property mapping; caching new value for update {} -> {}",
                               originalType, oldProperty, newVersion );
 
                 final String oldVersionProp = oldVersion.substring( 2, oldVersion.length() - 1 );
@@ -328,12 +328,12 @@ public final class PropertiesUtils
                 {
                     if ( force )
                     {
-                        logger.debug( "Override property replacement of {} with force version override {}",
+                        LOGGER.debug( "Override property replacement of {} with force version override {}",
                                       existingPropertyMapping, newVersion );
                     }
                     else
                     {
-                        logger.error( "Replacing property '{}' with a new version but the existing version does not match. Old value is {} and new is {}",
+                        LOGGER.error( "Replacing property '{}' with a new version but the existing version does not match. Old value is {} and new is {}",
                                       oldVersionProp, existingPropertyMapping, newVersion );
                         throw new ManipulationException(
                                         "Property replacement clash - updating property '{}' to both {} and {} ",

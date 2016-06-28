@@ -49,7 +49,7 @@ import static org.commonjava.maven.ext.manip.util.IdUtils.ga;
 public class RelocationManipulator
         implements Manipulator
 {
-    private final Logger logger = LoggerFactory.getLogger( getClass() );
+    private static final Logger LOGGER = LoggerFactory.getLogger( RelocationManipulator.class );
 
     /**
      * Initialize the {@link PluginState} state holder in the {@link ManipulationSession}. This state holder detects
@@ -84,7 +84,7 @@ public class RelocationManipulator
 
         if ( !session.isEnabled() || !state.isEnabled() )
         {
-            logger.debug( getClass().getSimpleName() + ": Nothing to do!" );
+            LOGGER.debug( getClass().getSimpleName() + ": Nothing to do!" );
             return Collections.emptySet();
         }
 
@@ -109,7 +109,7 @@ public class RelocationManipulator
         final RelocationState state = session.getState( RelocationState.class );
         final WildcardMap<ProjectVersionRef> relocations = state.getDependencyRelocations();
 
-        logger.info( "Applying relocation changes to: " + ga( project ) );
+        LOGGER.info( "Applying relocation changes to: " + ga( project ) );
 
         DependencyManagement dependencyManagement = model.getDependencyManagement();
         if ( dependencyManagement != null )
@@ -143,7 +143,7 @@ public class RelocationManipulator
                 ProjectVersionRef pvr = relocations.get( d );
                 updateDependencyExclusion(session, pvr, d);
 
-                logger.info ("Replacing groupId {} by {} and artifactId {} with {}",
+                LOGGER.info ("Replacing groupId {} by {} and artifactId {} with {}",
                              d.getGroupId(), pvr.getGroupId(), d.getArtifactId(), pvr.getGroupId() );
 
                 if ( ! pvr.getArtifactId().equals( WildcardMap.WILDCARD ))
@@ -169,7 +169,7 @@ public class RelocationManipulator
 
         if (projectVersionRef.getVersionString().equals( WildcardMap.WILDCARD ) )
         {
-            logger.debug ("No version alignment to perform for relocations");
+            LOGGER.debug ("No version alignment to perform for relocations");
         }
         else
         {
@@ -179,7 +179,7 @@ public class RelocationManipulator
                 artifact = projectVersionRef.getArtifactId();
             }
 
-            logger.debug ("Adding dependencyExclusion {} & {}", projectVersionRef.getGroupId() + ':' + artifact + "@*",
+            LOGGER.debug ("Adding dependencyExclusion {} & {}", projectVersionRef.getGroupId() + ':' + artifact + "@*",
                           projectVersionRef.getVersionString() );
             state.updateExclusions( projectVersionRef.getGroupId() + ':' + artifact + "@*", projectVersionRef.getVersionString() );
         }
