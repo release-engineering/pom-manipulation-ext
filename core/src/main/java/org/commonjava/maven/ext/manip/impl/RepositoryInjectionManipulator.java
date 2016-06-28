@@ -46,7 +46,7 @@ import static org.commonjava.maven.ext.manip.util.IdUtils.ga;
 public class RepositoryInjectionManipulator
         implements Manipulator
 {
-    private final Logger logger = LoggerFactory.getLogger( getClass() );
+    private static final Logger LOGGER = LoggerFactory.getLogger( RepositoryInjectionManipulator.class );
 
     @Requirement
     private ModelIO modelBuilder;
@@ -82,7 +82,7 @@ public class RepositoryInjectionManipulator
         final RepositoryInjectionState state = session.getState( RepositoryInjectionState.class );
         if ( !session.isEnabled() || !state.isEnabled() )
         {
-            logger.debug( getClass().getSimpleName() + ": Nothing to do!" );
+            LOGGER.debug( getClass().getSimpleName() + ": Nothing to do!" );
             return Collections.emptySet();
         }
 
@@ -95,7 +95,7 @@ public class RepositoryInjectionManipulator
         for ( final Project project : projects )
         {
             final String ga = ga( project );
-            logger.info( "Applying changes to: " + ga );
+            LOGGER.info( "Applying changes to: " + ga );
             final Model model = project.getModel();
 
             if ( checkProject( state, project ) )
@@ -146,13 +146,13 @@ public class RepositoryInjectionManipulator
 
             if ( repository.getId().equals( r.getId() ) )
             {
-                logger.debug("Removing local repository {} ", r);
+                LOGGER.debug("Removing local repository {} ", r);
                 i.remove();
                 break;
             }
         }
 
-        logger.debug( "Adding repository {}", repository );
+        LOGGER.debug( "Adding repository {}", repository );
         repositories.add(repository);
     }
 
@@ -167,7 +167,7 @@ public class RepositoryInjectionManipulator
             {
                 result = true;
             }
-            logger.debug ("Checking project {} against possible GAs {} and found match {}", project.getKey().asProjectRef(), gaToApply, result);
+            LOGGER.debug ("Checking project {} against possible GAs {} and found match {}", project.getKey().asProjectRef(), gaToApply, result);
         }
         else if ( project.isInheritanceRoot() )
         {

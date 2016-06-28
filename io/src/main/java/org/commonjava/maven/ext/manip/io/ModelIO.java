@@ -77,7 +77,7 @@ public class ModelIO
         }
     }
 
-    private final Logger logger = LoggerFactory.getLogger( getClass() );
+    private static final Logger LOGGER = LoggerFactory.getLogger( ModelIO.class );
 
     @Requirement
     private GalleyAPIWrapper galleyWrapper;
@@ -154,7 +154,7 @@ public class ModelIO
     public Map<ArtifactRef, String> getRemoteDependencyVersionOverrides( final ProjectVersionRef ref )
                     throws ManipulationException
     {
-        logger.debug( "Resolving dependency management GAV: " + ref );
+        LOGGER.debug( "Resolving dependency management GAV: " + ref );
 
         final Map<ArtifactRef, String> versionOverrides = new LinkedHashMap<>();
         try
@@ -165,14 +165,14 @@ public class ModelIO
             final List<DependencyView> deps = pomView.getAllManagedDependencies();
             if ( deps == null || deps.isEmpty() )
             {
-                logger.warn( "Attempting to align to a BOM that does not have a dependencyManagement section" );
+                LOGGER.warn( "Attempting to align to a BOM that does not have a dependencyManagement section" );
             }
             else
             {
                 for ( final DependencyView dep : deps )
                 {
                     versionOverrides.put( dep.asArtifactRef(), dep.getVersion() );
-                    logger.debug( "Added version override for: " + dep.asProjectRef().toString() + ":" + dep.getVersion() );
+                    LOGGER.debug( "Added version override for: " + dep.asProjectRef().toString() + ":" + dep.getVersion() );
                 }
             }
         }
@@ -187,11 +187,11 @@ public class ModelIO
     public Properties getRemotePropertyMappingOverrides( final ProjectVersionRef ref )
                     throws ManipulationException
     {
-        logger.debug( "Resolving remote property mapping POM: " + ref );
+        LOGGER.debug( "Resolving remote property mapping POM: " + ref );
 
         final Model m = resolveRawModel( ref );
 
-        logger.debug( "Returning override of " + m.getProperties() );
+        LOGGER.debug( "Returning override of " + m.getProperties() );
 
         return m.getProperties();
     }
@@ -229,7 +229,7 @@ public class ModelIO
                                                                      Properties userProperties )
                     throws ManipulationException
     {
-        logger.debug( "Resolving remote {} POM: {}", type, ref );
+        LOGGER.debug( "Resolving remote {} POM: {}", type, ref );
         final Map<ProjectRef, Plugin> pluginOverrides = new HashMap<>();
         final Map<ProjectRef, ProjectVersionRef> pluginOverridesPomView = new HashMap<>();
 
@@ -257,7 +257,7 @@ public class ModelIO
             throw new ManipulationException( "Unable to resolve: %s", e, ref );
         }
 
-        logger.debug( "Found pluginOverridesResolvedVersions {} " + pluginOverridesPomView );
+        LOGGER.debug( "Found pluginOverridesResolvedVersions {} " + pluginOverridesPomView );
 
         // The list of pluginOverridesPomView may be larger than those in current model pluginMgtm. Dummy up an extra
         // set of plugins with versions to handle those.
@@ -270,7 +270,7 @@ public class ModelIO
 
             pluginOverrides.put( entry.getKey(), p );
 
-            logger.debug( "Added plugin override for: " + entry.getKey().toString() + ":" + p.getVersion() );
+            LOGGER.debug( "Added plugin override for: " + entry.getKey().toString() + ":" + p.getVersion() );
         }
 
         // TODO: active profiles!
@@ -280,12 +280,12 @@ public class ModelIO
 
             if ( type == PluginType.PluginMgmt && m.getBuild().getPluginManagement() != null )
             {
-                logger.debug( "Returning override of " + m.getBuild().getPluginManagement().getPlugins() );
+                LOGGER.debug( "Returning override of " + m.getBuild().getPluginManagement().getPlugins() );
                 plit = m.getBuild().getPluginManagement().getPlugins().iterator();
             }
             else if ( type == PluginType.Plugins && m.getBuild().getPlugins() != null)
             {
-                logger.debug( "Returning override of " + m.getBuild().getPlugins() );
+                LOGGER.debug( "Returning override of " + m.getBuild().getPlugins() );
                 plit = m.getBuild().getPlugins().iterator();
             }
 
@@ -306,7 +306,7 @@ public class ModelIO
                         newVersion = pluginOverridesPomView.get( pr ).getVersionString();
                     }
 
-                    logger.debug( "Replacing plugin override version " + p.getVersion() +
+                    LOGGER.debug( "Replacing plugin override version " + p.getVersion() +
                                                   " with " + newVersion );
                      p.setVersion( newVersion );
                 }
@@ -338,7 +338,7 @@ public class ModelIO
                     {
                         if ( ! isEmpty(d.getVersion()) && d.getVersion().startsWith( "${" ) )
                         {
-                            logger.debug( "Processing dependency {} and updating with {} ", d,
+                            LOGGER.debug( "Processing dependency {} and updating with {} ", d,
                                           resolveProperty( userProperties, m.getProperties(), d.getVersion() ) );
                             d.setVersion( resolveProperty( userProperties, m.getProperties(), d.getVersion() ) );
 
@@ -346,7 +346,7 @@ public class ModelIO
                     }
                 }
 
-                logger.debug( "Added plugin override for: " + pr.toString() + ":" + p.getVersion() +
+                LOGGER.debug( "Added plugin override for: " + pr.toString() + ":" + p.getVersion() +
                                               " with configuration\n" + p.getConfiguration() + " and executions "
                                               + p.getExecutions() );
             }
@@ -381,7 +381,7 @@ public class ModelIO
 
                 if ( replacement != null && !replacement.isEmpty() )
                 {
-                    logger.debug( "Replacing child value " + child.getValue() + " with " + replacement );
+                    LOGGER.debug( "Replacing child value " + child.getValue() + " with " + replacement );
                     child.setValue( replacement );
                 }
             }

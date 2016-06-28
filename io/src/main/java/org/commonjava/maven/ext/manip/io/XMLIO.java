@@ -40,7 +40,7 @@ import java.io.StringWriter;
 @Component( role = XMLIO.class )
 public class XMLIO
 {
-    private final Logger logger = LoggerFactory.getLogger( getClass() );
+    private static final Logger LOGGER = LoggerFactory.getLogger( XMLIO.class );
 
     private final DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
     private final DocumentBuilder builder;
@@ -59,12 +59,12 @@ public class XMLIO
         }
         catch ( ParserConfigurationException e )
         {
-            logger.error( "Unable to create new DocumentBuilder", e );
+            LOGGER.error( "Unable to create new DocumentBuilder", e );
             throw new RuntimeException("Unable to create new DocumentBuilder" );
         }
         catch ( TransformerConfigurationException e )
         {
-            logger.error( "Unable to create new Transformer", e );
+            LOGGER.error( "Unable to create new Transformer", e );
             throw new RuntimeException("Unable to create new Transformer" );
         }
     }
@@ -74,7 +74,7 @@ public class XMLIO
     {
         if ( xmlFile == null || !xmlFile.exists() )
         {
-            logger.error( "Unable to locate XML File {} ", xmlFile );
+            LOGGER.error( "Unable to locate XML File {} ", xmlFile );
             throw new ManipulationException( "XML file (" + xmlFile + ") not found.");
         }
         Document doc;
@@ -84,7 +84,7 @@ public class XMLIO
         }
         catch ( SAXException | IOException e )
         {
-            logger.error( "Unable to parse XML File {} ", e );
+            LOGGER.error( "Unable to parse XML File {} ", e );
             throw new ManipulationException( "Unable to parse XML File", e );
         }
         return doc;
@@ -106,7 +106,7 @@ public class XMLIO
         }
         catch ( IOException e )
         {
-            logger.error( "XML transformer failure", e );
+            LOGGER.error( "XML transformer failure", e );
             throw new ManipulationException( "XML transformer failure", e );
         }
     }
@@ -121,7 +121,7 @@ public class XMLIO
         }
         catch ( TransformerException e )
         {
-            logger.error( "XML transformer failure", e );
+            LOGGER.error( "XML transformer failure", e );
             throw new ManipulationException( "XML transformer failure", e );
         }
         return outWriter.toString();

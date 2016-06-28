@@ -59,7 +59,7 @@ public class ManipulationManager
 
     static final String MARKER_FILE =  MARKER_PATH + File.separatorChar + "pom-manip-ext-marker.txt";
 
-    private final Logger logger = LoggerFactory.getLogger( getClass() );
+    private static final Logger LOGGER = LoggerFactory.getLogger( ManipulationManager.class );
 
     @Requirement
     private ProjectBuilder projectBuilder;
@@ -105,7 +105,7 @@ public class ManipulationManager
 
         for ( final Manipulator manipulator : orderedManipulators )
         {
-            logger.debug( "Initialising manipulator " + manipulator.getClass()
+            LOGGER.debug( "Initialising manipulator " + manipulator.getClass()
                                                                    .getSimpleName() );
             manipulator.init( session );
         }
@@ -126,7 +126,7 @@ public class ManipulationManager
 
         for ( final Project project : projects )
         {
-            logger.debug( "Got " + project + " (POM: " + project.getPom() + ")" );
+            LOGGER.debug( "Got " + project + " (POM: " + project.getPom() + ")" );
         }
 
         Set<Project> changed = applyManipulations( projects, session );
@@ -134,7 +134,7 @@ public class ManipulationManager
         // Create a marker file if we made some changes to prevent duplicate runs.
         if ( !changed.isEmpty() )
         {
-            logger.info( "Maven-Manipulation-Extension: Rewrite changed: " + projects );
+            LOGGER.info( "Maven-Manipulation-Extension: Rewrite changed: " + projects );
             pomIO.rewritePOMs( changed );
 
             try
@@ -155,7 +155,7 @@ public class ManipulationManager
         {
             e.finish();
         }
-        logger.info( "Maven-Manipulation-Extension: Finished." );
+        LOGGER.info( "Maven-Manipulation-Extension: Finished." );
     }
 
     /**
@@ -204,7 +204,7 @@ public class ManipulationManager
 
         if ( changed.isEmpty() )
         {
-            logger.info( "Maven-Manipulation-Extension: No changes." );
+            LOGGER.info( "Maven-Manipulation-Extension: No changes." );
         }
 
         return changed;

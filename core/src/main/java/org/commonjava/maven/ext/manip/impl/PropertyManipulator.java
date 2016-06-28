@@ -45,7 +45,7 @@ import static org.commonjava.maven.ext.manip.util.IdUtils.ga;
 public class PropertyManipulator
     implements Manipulator
 {
-    private final Logger logger = LoggerFactory.getLogger( getClass() );
+    private static final Logger LOGGER = LoggerFactory.getLogger( PropertyManipulator.class );
 
     @Requirement
     private ModelIO effectiveModelBuilder;
@@ -77,7 +77,7 @@ public class PropertyManipulator
 
         if ( !session.isEnabled() || !state.isEnabled() )
         {
-            logger.debug( getClass().getSimpleName() + ": Nothing to do!" );
+            LOGGER.debug( getClass().getSimpleName() + ": Nothing to do!" );
             return Collections.emptySet();
         }
 
@@ -93,7 +93,7 @@ public class PropertyManipulator
                 // Only inject the new properties at the top level.
                 if ( project.isInheritanceRoot() )
                 {
-                    logger.info( "Applying property changes to: " + ga( project ) + " with " + overrides );
+                    LOGGER.info( "Applying property changes to: " + ga( project ) + " with " + overrides );
 
                     model.getProperties().putAll( overrides );
 
@@ -113,7 +113,7 @@ public class PropertyManipulator
                         while (keys.hasNext())
                         {
                             final String matchingKey = keys.next();
-                            logger.info( "Overwriting property (" + matchingKey + " in: " + ga( project ) + " with value " + overrides.get( matchingKey ) );
+                            LOGGER.info( "Overwriting property (" + matchingKey + " in: " + ga( project ) + " with value " + overrides.get( matchingKey ) );
                             model.getProperties().put( matchingKey, overrides.get( matchingKey ) );
 
                             changed.add( project );

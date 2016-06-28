@@ -42,7 +42,7 @@ import static org.commonjava.maven.ext.manip.util.IdUtils.ga;
 public class ProfileRemovalManipulator
     implements Manipulator
 {
-    private final Logger logger = LoggerFactory.getLogger( getClass() );
+    private static final Logger LOGGER = LoggerFactory.getLogger( ProfileRemovalManipulator.class );
 
     /**
      * No prescanning required for Profile removal.
@@ -75,7 +75,7 @@ public class ProfileRemovalManipulator
         final ProfileRemovalState state = session.getState( ProfileRemovalState.class );
         if ( !session.isEnabled() || !state.isEnabled() )
         {
-            logger.debug( getClass().getSimpleName() + ": Nothing to do!" );
+            LOGGER.debug( getClass().getSimpleName() + ": Nothing to do!" );
             return Collections.emptySet();
         }
 
@@ -85,7 +85,7 @@ public class ProfileRemovalManipulator
         for ( final Project project : projects )
         {
             final String ga = ga( project );
-            logger.info( "Applying changes to: " + ga );
+            LOGGER.info( "Applying changes to: " + ga );
 
             final Model model = project.getModel();
             final List<Profile> profiles = model.getProfiles();
@@ -99,7 +99,7 @@ public class ProfileRemovalManipulator
                 {
                     if (p.getId().equals( id ))
                     {
-                        logger.debug ("Removing profile {}", p.getId());
+                        LOGGER.debug ("Removing profile {}", p.getId());
                         i.remove();
                         break;
                     }

@@ -85,7 +85,7 @@ public class PluginManipulator
         }
     }
 
-    private final Logger logger = LoggerFactory.getLogger( getClass() );
+    private static final Logger LOGGER = LoggerFactory.getLogger( PluginManipulator.class );
 
     @Requirement
     private ModelIO effectiveModelBuilder;
@@ -122,7 +122,7 @@ public class PluginManipulator
 
         if ( !session.isEnabled() || !state.isEnabled() )
         {
-            logger.debug( getClass().getSimpleName() + ": Nothing to do!" );
+            LOGGER.debug( getClass().getSimpleName() + ": Nothing to do!" );
             return Collections.emptySet();
         }
 
@@ -151,7 +151,7 @@ public class PluginManipulator
         // If we've changed something now update any old properties with the new values.
         if (!changed.isEmpty())
         {
-            logger.info( "Iterating for standard overrides..." );
+            LOGGER.info( "Iterating for standard overrides..." );
             for ( final String key : state.getVersionPropertyOverrides().keySet() )
             {
                 // Ignore strict alignment for plugins ; if we're attempting to use a differing plugin
@@ -163,12 +163,12 @@ public class PluginManipulator
                     // Problem in this scenario is that we know we have a property update map but we have not found a
                     // property to update. Its possible this property has been inherited from a parent. Override in the
                     // top pom for safety.
-                    logger.info( "Unable to find a property for {} to update", key );
+                    LOGGER.info( "Unable to find a property for {} to update", key );
                     for ( final Project p : changed )
                     {
                         if ( p.isInheritanceRoot() )
                         {
-                            logger.info( "Adding property {} with {} ", key, state.getVersionPropertyOverride( key ) );
+                            LOGGER.info( "Adding property {} with {} ", key, state.getVersionPropertyOverride( key ) );
                             p.getModel().getProperties().setProperty( key, state.getVersionPropertyOverride( key ) );
                         }
                     }
@@ -216,7 +216,7 @@ public class PluginManipulator
                         PluginType type, final Map<ProjectRef, Plugin> override )
         throws ManipulationException
     {
-        logger.info( "Applying plugin changes for {} to: {} ", type, ga( project ) );
+        LOGGER.info( "Applying plugin changes for {} to: {} ", type, ga( project ) );
 
         PluginState state = session.getState( PluginState.class );
 
@@ -229,7 +229,7 @@ public class PluginManipulator
             {
                 build = new Build();
                 model.setBuild( build );
-                logger.info( "Created new Build for model " + model.getId() );
+                LOGGER.info( "Created new Build for model " + model.getId() );
             }
 
             PluginManagement pluginManagement = model.getBuild()
@@ -240,7 +240,7 @@ public class PluginManipulator
                 pluginManagement = new PluginManagement();
                 model.getBuild()
                      .setPluginManagement( pluginManagement );
-                logger.info( "Created new Plugin Management for model " + model.getId() );
+                LOGGER.info( "Created new Plugin Management for model " + model.getId() );
             }
 
             // Override plugin management versions
@@ -280,7 +280,7 @@ public class PluginManipulator
         for ( final Plugin override : pluginVersionOverrides.values())
         {
             final int index = plugins.indexOf( override );
-            logger.debug( "Plugin override {} with index {} with remotePluginType {} / localPluginType {}", override, index, remotePluginType, localPluginType );
+            LOGGER.debug( "Plugin override {} with index {} with remotePluginType {} / localPluginType {}", override, index, remotePluginType, localPluginType );
 
             if ( index != -1 )
             {
@@ -289,15 +289,15 @@ public class PluginManipulator
 
                 if ( override.getConfiguration() != null)
                 {
-                    logger.debug ("Injecting plugin configuration" + override.getConfiguration());
+                    LOGGER.debug ("Injecting plugin configuration" + override.getConfiguration());
                     if (localPluginType == PluginType.LocalPM && plugin.getConfiguration() == null)
                     {
                         plugin.setConfiguration( override.getConfiguration() );
-                        logger.debug( "Altered plugin configuration: " + groupIdArtifactId + "=" + plugin.getConfiguration());
+                        LOGGER.debug( "Altered plugin configuration: " + groupIdArtifactId + "=" + plugin.getConfiguration());
                     }
                     else if (localPluginType == PluginType.LocalPM && plugin.getConfiguration() != null)
                     {
-                        logger.debug( "Existing plugin configuration: " + plugin.getConfiguration());
+                        LOGGER.debug( "Existing plugin configuration: " + plugin.getConfiguration());
 
                         if ( ! (plugin.getConfiguration() instanceof Xpp3Dom) || ! (override.getConfiguration() instanceof Xpp3Dom))
                         {
@@ -315,12 +315,12 @@ public class PluginManipulator
                             plugin.setConfiguration ( Xpp3DomUtils.mergeXpp3Dom
                                                       ((Xpp3Dom)plugin.getConfiguration(), (Xpp3Dom)override.getConfiguration() ) );
                         }
-                        logger.debug( "Altered plugin configuration: " + groupIdArtifactId + "=" + plugin.getConfiguration());
+                        LOGGER.debug( "Altered plugin configuration: " + groupIdArtifactId + "=" + plugin.getConfiguration());
                     }
                 }
                 else
                 {
-                    logger.debug ("No remote configuration to inject from " + override.toString());
+                    LOGGER.debug ("No remote configuration to inject from " + override.toString());
                 }
 
                 if (override.getExecutions() != null)
@@ -332,11 +332,11 @@ public class PluginManipulator
                     {
                         if (originalExecutions.containsKey( pe.getId() ) )
                         {
-                            logger.warn ("Unable to inject execution " + pe.getId() + " as it clashes with an existing execution");
+                            LOGGER.warn ("Unable to inject execution " + pe.getId() + " as it clashes with an existing execution");
                         }
                         else
                         {
-                            logger.debug ("Injecting execution {} ", pe);
+                            LOGGER.debug ("Injecting execution {} ", pe);
                             plugin.getExecutions().add (pe);
                         }
                     }
@@ -344,7 +344,7 @@ public class PluginManipulator
 
                 if (!override.getDependencies().isEmpty())
                 {
-                    logger.debug( "Checking original plugin dependencies versus override" );
+                    LOGGER.debug( "Checking original plugin dependencies versus override" );
                     // First, remove any Dependency from the original Plugin if the GA exists in the override.
                     Iterator<Dependency> originalIt = plugin.getDependencies().iterator();
                     while (originalIt.hasNext())
@@ -357,14 +357,14 @@ public class PluginManipulator
                             if (originalD.getGroupId().equals( newD.getGroupId() ) &&
                                 originalD.getArtifactId().equals( newD.getArtifactId() ) )
                             {
-                                logger.debug( "Removing original dependency {} in favour of {} ", originalD, newD );
+                                LOGGER.debug( "Removing original dependency {} in favour of {} ", originalD, newD );
                                 originalIt.remove();
                                 break;
                             }
                         }
                     }
                     // Now merge them together.
-                    logger.debug( "Adding in plugin dependencies {}", override.getDependencies() );
+                    LOGGER.debug( "Adding in plugin dependencies {}", override.getDependencies() );
                     plugin.getDependencies().addAll( override.getDependencies() );
                 }
 
@@ -377,7 +377,7 @@ public class PluginManipulator
                     {
                         if ( oldVersion != null && oldVersion.equals( "${project.version}" ) )
                         {
-                            logger.debug( "For plugin {} ; version is built in {} so skipping inlining {}", plugin,
+                            LOGGER.debug( "For plugin {} ; version is built in {} so skipping inlining {}", plugin,
                                           oldVersion, override.getVersion() );
                         }
                         else if ( oldVersion != null && oldVersion.contains( "${" ) )
@@ -387,7 +387,7 @@ public class PluginManipulator
                         else
                         {
                             plugin.setVersion( override.getVersion() );
-                            logger.info( "Altered plugin version: " + groupIdArtifactId + "=" + override.getVersion() );
+                            LOGGER.info( "Altered plugin version: " + groupIdArtifactId + "=" + override.getVersion() );
                         }
                     }
                 }
@@ -400,7 +400,7 @@ public class PluginManipulator
                             ( override.getConfiguration() != null || override.getExecutions().size() > 0 ) )
             {
                 plugins.add( override );
-                logger.info( "Added plugin version: " + override.getKey() + "=" + override.getVersion());
+                LOGGER.info( "Added plugin version: " + override.getKey() + "=" + override.getVersion());
             }
             // If the plugin in <plugins> doesn't exist but has a configuration section in the remote inject it so we
             // get the correct config.
@@ -410,7 +410,7 @@ public class PluginManipulator
                             ( override.getConfiguration() != null || override.getExecutions().size() > 0 ) )
             {
                 plugins.add( override );
-                logger.info( "For non-pluginMgmt, added plugin version : " + override.getKey() + "=" + override.getVersion());
+                LOGGER.info( "For non-pluginMgmt, added plugin version : " + override.getKey() + "=" + override.getVersion());
             }
         }
     }

@@ -52,7 +52,7 @@ import static org.commonjava.maven.ext.manip.util.IdUtils.gav;
 @Component( role = VersionCalculator.class )
 public class VersionCalculator
 {
-    private final Logger logger = LoggerFactory.getLogger( getClass() );
+    private static final Logger LOGGER = LoggerFactory.getLogger( VersionCalculator.class );
 
     // Used by getMetadataVersions
     @Requirement
@@ -144,7 +144,7 @@ public class VersionCalculator
             }
 
             versionSet.add( modifiedVersionString );
-            logger.debug( gav( project ) + " has updated version: {}. Marking for rewrite.", modifiedVersionString );
+            LOGGER.debug( gav( project ) + " has updated version: {}. Marking for rewrite.", modifiedVersionString );
 
             if ( !originalVersion.equals( modifiedVersionString ) )
             {
@@ -175,10 +175,10 @@ public class VersionCalculator
         final String staticSuffix = state.getSuffix();
         final String override = state.getOverride();
 
-        logger.debug( "Got the following version:\n  Original version: " + version );
-        logger.debug( "Got the following version suffixes:\n  Static: " + staticSuffix + "\n  Incremental: " +
+        LOGGER.debug( "Got the following version:\n  Original version: " + version );
+        LOGGER.debug( "Got the following version suffixes:\n  Static: " + staticSuffix + "\n  Incremental: " +
             incrementalSuffix );
-        logger.debug( "Got the following override:\n  Version: " + override);
+        LOGGER.debug( "Got the following override:\n  Version: " + override);
 
         Version versionObj;
 
@@ -250,7 +250,7 @@ public class VersionCalculator
     private Set<String> getMetadataVersions( final String groupId, final String artifactId )
         throws ManipulationException
     {
-        logger.debug( "Reading available versions from repository metadata for: " + groupId + ":" + artifactId );
+        LOGGER.debug( "Reading available versions from repository metadata for: " + groupId + ":" + artifactId );
 
         try
         {

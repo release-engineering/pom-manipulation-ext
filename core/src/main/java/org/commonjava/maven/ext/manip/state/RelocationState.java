@@ -53,7 +53,7 @@ public class RelocationState
      */
     public static final String DEPENDENCY_RELOCATIONS = "dependencyRelocations.";
 
-    private static final Logger logger = LoggerFactory.getLogger( RelocationState.class );
+    private static final Logger LOGGER = LoggerFactory.getLogger( RelocationState.class );
 
     private final WildcardMap<ProjectVersionRef> dependencyRelocations = new WildcardMap<>();
 
@@ -110,7 +110,7 @@ public class RelocationState
 
             String version = ( isEmpty( entry.getValue() ) ? WildcardMap.WILDCARD : entry.getValue() );
 
-            logger.debug( "Relocation found oldGroupId '{}' : oldArtifactId '{}' -> newGroupId '{}' : newArtifactId '{}' and version '{}' ",
+            LOGGER.debug( "Relocation found oldGroupId '{}' : oldArtifactId '{}' -> newGroupId '{}' : newArtifactId '{}' and version '{}' ",
                           groupId, artifactId, newGroupId, newArtifactId, version );
 
             ProjectRef sp = new SimpleProjectRef( groupId, artifactId );
@@ -118,7 +118,7 @@ public class RelocationState
             dependencyRelocations.put( sp, new SimpleProjectVersionRef( newGroupId, newArtifactId, version ) );
         }
 
-        logger.trace ("Wildcard map {} ", dependencyRelocations);
+        LOGGER.trace ("Wildcard map {} ", dependencyRelocations);
     }
 
     /**

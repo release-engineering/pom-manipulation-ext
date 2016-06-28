@@ -41,7 +41,7 @@ import static org.apache.commons.lang.StringUtils.isEmpty;
  */
 public final class IdUtils
 {
-    private static final Logger logger = LoggerFactory.getLogger( IdUtils.class );
+    private static final Logger LOGGER = LoggerFactory.getLogger( IdUtils.class );
 
     private IdUtils()
     {
@@ -72,7 +72,7 @@ public final class IdUtils
                 }
                 catch ( final InvalidRefException e )
                 {
-                    logger.error( "Skipping invalid remote management GAV: " + gav );
+                    LOGGER.error( "Skipping invalid remote management GAV: " + gav );
                     throw e;
                 }
             }
@@ -106,7 +106,7 @@ public final class IdUtils
                 }
                 catch ( final InvalidRefException e )
                 {
-                    logger.error( "Skipping invalid remote management GAV: " + gav );
+                    LOGGER.error( "Skipping invalid remote management GAV: " + gav );
                     throw e;
                 }
             }
@@ -140,7 +140,7 @@ public final class IdUtils
                 }
                 catch ( final InvalidRefException e )
                 {
-                    logger.error( "Skipping invalid remote management GAV: " + gav );
+                    LOGGER.error( "Skipping invalid remote management GAV: " + gav );
                     throw e;
                 }
             }

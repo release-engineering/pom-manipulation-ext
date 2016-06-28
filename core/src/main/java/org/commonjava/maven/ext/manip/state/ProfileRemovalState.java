@@ -33,7 +33,7 @@ public class ProfileRemovalState
     implements State
 {
 
-    private final Logger logger = LoggerFactory.getLogger( getClass() );
+    private static final Logger LOGGER = LoggerFactory.getLogger( ProfileRemovalState.class );
 
     /**
      * Suffix to enable this modder

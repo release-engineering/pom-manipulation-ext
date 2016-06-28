@@ -60,7 +60,7 @@ import static org.commonjava.maven.ext.manip.util.IdUtils.gav;
 public class ProjectVersioningManipulator
     implements Manipulator
 {
-    private final Logger logger = LoggerFactory.getLogger( getClass() );
+    private static final Logger LOGGER = LoggerFactory.getLogger( ProjectVersioningManipulator.class );
 
     @Requirement
     private VersionCalculator calculator;
@@ -86,11 +86,11 @@ public class ProjectVersioningManipulator
         final VersioningState state = session.getState( VersioningState.class );
         if ( !session.isEnabled() || !state.isEnabled() )
         {
-            logger.debug( "Version Manipulator: Nothing to do!" );
+            LOGGER.debug( "Version Manipulator: Nothing to do!" );
             return;
         }
 
-        logger.info( "Version Manipulator: Calculating the necessary versioning changes." );
+        LOGGER.info( "Version Manipulator: Calculating the necessary versioning changes." );
         state.setVersionsByGAVMap( calculator.calculateVersioningChanges( projects, session ) );
     }
 
@@ -119,7 +119,7 @@ public class ProjectVersioningManipulator
 
         if ( !session.isEnabled() || state == null || !state.isEnabled() )
         {
-            logger.debug( getClass().getSimpleName() + ": Nothing to do!" );
+            LOGGER.debug( getClass().getSimpleName() + ": Nothing to do!" );
             return Collections.emptySet();
         }
 
@@ -128,7 +128,7 @@ public class ProjectVersioningManipulator
         for ( final Project project : projects )
         {
             final String ga = ga( project );
-            logger.info( "Applying changes to: " + ga );
+            LOGGER.info( "Applying changes to: " + ga );
             if ( applyVersioningChanges( session, projects, project, state ) )
             {
                 changed.add( project );
@@ -172,7 +172,7 @@ public class ProjectVersioningManipulator
             return false;
         }
 
-        logger.info( "Looking for applicable versioning changes in: " + gav( model ) );
+        LOGGER.info( "Looking for applicable versioning changes in: " + gav( model ) );
 
         String g = model.getGroupId();
         String v = model.getVersion();
@@ -200,12 +200,12 @@ public class ProjectVersioningManipulator
             if ( versionsByGAV.containsKey( parentGAV ) )
             {
                 final String newVersion = versionsByGAV.get( parentGAV );
-                logger.info( "Changed parent version to: " + newVersion + " in " + parent );
+                LOGGER.info( "Changed parent version to: " + newVersion + " in " + parent );
                 if (parentGAV.getVersionString().startsWith( "${" ))
                 {
                     if ( PropertiesUtils.updateProperties( session, new HashSet<>( projects ), false, extractPropertyName( parentGAV.getVersionString() ), newVersion ) == PropertiesUtils.PropertyUpdate.NOTFOUND )
                     {
-                        logger.error( "Unable to find property {} to update with version {}", parentGAV.getVersionString(), newVersion );
+                        LOGGER.error( "Unable to find property {} to update with version {}", parentGAV.getVersionString(), newVersion );
                     }
                 }
                 else
@@ -220,21 +220,21 @@ public class ProjectVersioningManipulator
         if ( model.getVersion() != null )
         {
             final String newVersion = versionsByGAV.get( gav );
-            logger.info( "Looking for new version: " + gav + " (found: " + newVersion + ")" );
+            LOGGER.info( "Looking for new version: " + gav + " (found: " + newVersion + ")" );
             if ( newVersion != null && model.getVersion() != null )
             {
                 if (gav.getVersionString().startsWith( "${" ))
                 {
                     if ( PropertiesUtils.updateProperties( session, new HashSet<>( projects ), false, extractPropertyName( gav.getVersionString() ), newVersion ) == PropertiesUtils.PropertyUpdate.NOTFOUND )
                     {
-                        logger.error( "Unable to find property {} to update with version {}", gav.getVersionString(), newVersion );
+                        LOGGER.error( "Unable to find property {} to update with version {}", gav.getVersionString(), newVersion );
                     }
                 }
                 else
                 {
                     model.setVersion( newVersion );
                 }
-                logger.info( "Changed main version in " + gav( model ) );
+                LOGGER.info( "Changed main version in " + gav( model ) );
                 changed = true;
             }
         }
@@ -244,7 +244,7 @@ public class ProjectVersioningManipulator
         else if ( changed == false && model.getVersion() == null && project.isInheritanceRoot())
         {
             final String newVersion = versionsByGAV.get( gav );
-            logger.info( "Looking to force inject new version for : " + gav + " (found: " + newVersion + ")" );
+            LOGGER.info( "Looking to force inject new version for : " + gav + " (found: " + newVersion + ")" );
             if (newVersion != null)
             {
                 model.setVersion( newVersion );
@@ -272,7 +272,7 @@ public class ProjectVersioningManipulator
                 {
                     if ( isEmpty (pi.interp( d.getVersion() )))
                     {
-                        logger.trace( "Skipping dependency " + d + " as empty version." );
+                        LOGGER.trace( "Skipping dependency " + d + " as empty version." );
                         continue;
                     }
                     try
@@ -287,20 +287,20 @@ public class ProjectVersioningManipulator
                             {
                                 if ( PropertiesUtils.updateProperties( session, new HashSet<>( projects ), false, extractPropertyName( d.getVersion() ), newVersion ) == PropertiesUtils.PropertyUpdate.NOTFOUND )
                                 {
-                                    logger.error( "Unable to find property {} to update with version {}", d.getVersion(), newVersion );
+                                    LOGGER.error( "Unable to find property {} to update with version {}", d.getVersion(), newVersion );
                                 }
                             }
                             else
                             {
                                 d.setVersion( newVersion );
                             }
-                            logger.info( "Changed managed: " + d + " in " + base + " to " + newVersion + " from " + gav.getVersionString() );
+                            LOGGER.info( "Changed managed: " + d + " in " + base + " to " + newVersion + " from " + gav.getVersionString() );
                             changed = true;
                         }
                     }
                     catch ( InvalidRefException ire)
                     {
-                        logger.debug( "Unable to change version for dependency {} due to {} ", d.toString(), ire );
+                        LOGGER.debug( "Unable to change version for dependency {} due to {} ", d.toString(), ire );
                     }
                 }
             }
@@ -313,7 +313,7 @@ public class ProjectVersioningManipulator
                     {
                         if ( isEmpty (pi.interp( d.getVersion() )))
                         {
-                            logger.trace( "Skipping dependency " + d + " as empty version." );
+                            LOGGER.trace( "Skipping dependency " + d + " as empty version." );
                             continue;
                         }
 
@@ -329,20 +329,20 @@ public class ProjectVersioningManipulator
                             {
                                 if ( PropertiesUtils.updateProperties( session, new HashSet<>( projects ), false, extractPropertyName( d.getVersion() ), newVersion ) == PropertiesUtils.PropertyUpdate.NOTFOUND )
                                 {
-                                    logger.error( "Unable to find property {} to update with version {}", d.getVersion(), newVersion );
+                                    LOGGER.error( "Unable to find property {} to update with version {}", d.getVersion(), newVersion );
                                 }
                             }
                             else
                             {
                                 d.setVersion( newVersion );
                             }
-                            logger.info( "Changed: " + d + " in " + base + " to " + newVersion + " from " + gav.getVersionString());
+                            LOGGER.info( "Changed: " + d + " in " + base + " to " + newVersion + " from " + gav.getVersionString());
                             changed = true;
                         }
                     }
                     catch ( InvalidRefException ire)
                     {
-                        logger.debug( "Unable to change version for dependency {} due to {} ", d.toString(), ire );
+                        LOGGER.debug( "Unable to change version for dependency {} due to {} ", d.toString(), ire );
                     }
                 }
             }

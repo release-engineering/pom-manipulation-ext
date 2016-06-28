@@ -32,7 +32,7 @@ import static org.apache.commons.lang.StringUtils.isNotEmpty;
 public class JSONState
     implements State
 {
-    private final Logger logger = LoggerFactory.getLogger( getClass() );
+    private static final Logger LOGGER = LoggerFactory.getLogger( JSONState.class );
 
    /**
      * Property on the command line that handles modifying JSON files. The format is
@@ -75,7 +75,7 @@ public class JSONState
                 {
                     throw new ManipulationException( "Unable to parse command " + operation + " from property " + property );
                 }
-                logger.debug ("Adding JSONOperation with file {}, xpath {} and update {}", components[0], components[1], components[2] );
+                LOGGER.debug ("Adding JSONOperation with file {}, xpath {} and update {}", components[0], components[1], components[2] );
                 jsonOperations.add( new JSONOperation( components[0], components[1], components[2] ) );
             }
         }

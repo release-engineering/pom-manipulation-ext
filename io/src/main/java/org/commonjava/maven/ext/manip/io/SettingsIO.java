@@ -37,7 +37,7 @@ import java.util.Iterator;
 @Component( role = SettingsIO.class )
 public class SettingsIO
 {
-    protected final Logger logger = LoggerFactory.getLogger( getClass() );
+    private static final Logger LOGGER = LoggerFactory.getLogger( SettingsIO.class );
 
     @Requirement
     private SettingsBuilder settingsBuilder;

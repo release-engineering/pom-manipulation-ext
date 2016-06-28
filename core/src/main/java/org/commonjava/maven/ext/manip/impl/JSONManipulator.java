@@ -44,7 +44,7 @@ import static org.apache.commons.lang.StringUtils.isEmpty;
 public class JSONManipulator
     implements Manipulator
 {
-    private final Logger logger = LoggerFactory.getLogger( getClass() );
+    private static final Logger LOGGER = LoggerFactory.getLogger( JSONManipulator.class );
 
     @Requirement
     private JSONIO jsonIO;
@@ -78,7 +78,7 @@ public class JSONManipulator
         final JSONState state = session.getState( JSONState.class );
         if ( !session.isEnabled() || !state.isEnabled() )
         {
-            logger.debug( getClass().getSimpleName() + ": Nothing to do!" );
+            LOGGER.debug( getClass().getSimpleName() + ": Nothing to do!" );
             return Collections.emptySet();
         }
 
@@ -93,7 +93,7 @@ public class JSONManipulator
                 {
                     File target = new File( project.getPom().getParentFile(), operation.getFile() );
 
-                    logger.info( "Attempting to start JSON update to file {} with xpath {} and replacement '{}' ",
+                    LOGGER.info( "Attempting to start JSON update to file {} with xpath {} and replacement '{}' ",
                                  target, operation.getXPath(), operation.getUpdate() );
 
                     internalApplyChanges (target, operation);
@@ -115,7 +115,7 @@ public class JSONManipulator
         {
             if ( !target.exists() )
             {
-                logger.error( "Unable to locate JSON file {} ", target );
+                LOGGER.error( "Unable to locate JSON file {} ", target );
                 throw new ManipulationException( "Unable to locate JSON file " + target );
             }
 
@@ -124,7 +124,7 @@ public class JSONManipulator
             List o = dc.read( operation.getXPath() );
             if ( o.size() == 0 )
             {
-                logger.error( "XPath {} did not find any expressions within {} ", operation.getXPath(),
+                LOGGER.error( "XPath {} did not find any expressions within {} ", operation.getXPath(),
                               operation.getFile() );
                 throw new ManipulationException( "XPath did not resolve to a valid value" );
             }
@@ -132,13 +132,13 @@ public class JSONManipulator
             if ( isEmpty( operation.getUpdate() ) )
             {
                 // Delete
-                logger.info( "Deleting {} on {}", operation.getXPath(), dc.toString() );
+                LOGGER.info( "Deleting {} on {}", operation.getXPath(), dc.toString() );
                 dc.delete( operation.getXPath() );
             }
             else
             {
                 // Update
-                logger.info( "Updating {} on {}", operation.getXPath(), dc.toString() );
+                LOGGER.info( "Updating {} on {}", operation.getXPath(), dc.toString() );
                 dc.set( operation.getXPath(), operation.getUpdate() );
             }
 
@@ -146,7 +146,7 @@ public class JSONManipulator
         }
         catch ( JsonPathException e )
         {
-            logger.error( "Caught JSON exception processing file {}, document context {} ", target, dc, e );
+            LOGGER.error( "Caught JSON exception processing file {}, document context {} ", target, dc, e );
             throw new ManipulationException( "Caught JsonPath", e );
         }
     }

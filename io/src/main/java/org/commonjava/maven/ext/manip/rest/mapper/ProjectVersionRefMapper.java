@@ -34,7 +34,7 @@ import java.util.Map;
  */
 public class ProjectVersionRefMapper implements ObjectMapper
 {
-    private final Logger logger = LoggerFactory.getLogger( getClass() );
+    private static final Logger LOGGER = LoggerFactory.getLogger( ProjectVersionRefMapper.class );
 
     private final com.fasterxml.jackson.databind.ObjectMapper objectMapper
         = new com.fasterxml.jackson.databind.ObjectMapper();
@@ -50,18 +50,18 @@ public class ProjectVersionRefMapper implements ObjectMapper
 
         if (s.length() == 0)
         {
-            logger.error( "No content to read.");
+            LOGGER.error( "No content to read.");
             return result;
         }
         else if (s.startsWith( "<" ))
         {
             // Read an HTML string.
-            logger.error( "Read HTML string '{}' rather than a JSON stream.", s );
+            LOGGER.error( "Read HTML string '{}' rather than a JSON stream.", s );
             return result;
         }
         else if (s.startsWith( "{\\\"message\\\":" ) || s.startsWith( "{\"message\":" ))
         {
-            logger.error( "Read message string {}", s );
+            LOGGER.error( "Read message string {}", s );
             return result;
         }
 
@@ -72,7 +72,7 @@ public class ProjectVersionRefMapper implements ObjectMapper
         }
         catch ( IOException e )
         {
-            logger.error( "Failed to decode map when reading string {}", s );
+            LOGGER.error( "Failed to decode map when reading string {}", s );
             throw new RestException( "Failed to read list-of-maps response from version server: " + e.getMessage(), e );
         }
 

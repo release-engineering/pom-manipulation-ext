@@ -47,7 +47,7 @@ import java.util.Set;
 public class GroovyManipulator
     implements Manipulator
 {
-    private final Logger logger = LoggerFactory.getLogger( getClass() );
+    private static final Logger LOGGER = LoggerFactory.getLogger( GroovyManipulator.class );
 
     @Requirement
     protected ModelIO modelBuilder;
@@ -83,7 +83,7 @@ public class GroovyManipulator
         final GroovyState state = session.getState( GroovyState.class );
         if ( !session.isEnabled() || !state.isEnabled() )
         {
-            logger.debug( getClass().getSimpleName() + ": Nothing to do!" );
+            LOGGER.debug( getClass().getSimpleName() + ": Nothing to do!" );
             return Collections.emptySet();
         }
 
@@ -92,7 +92,7 @@ public class GroovyManipulator
 
         for (ArtifactRef ar : scripts)
         {
-            logger.info ("Attempting to read GAV {} with classifier {} and type {} ",
+            LOGGER.info ("Attempting to read GAV {} with classifier {} and type {} ",
                          ar.asProjectVersionRef(), ar.getClassifier(), ar.getType());
 
             final File groovyScript = modelBuilder.resolveRawFile( ar );
@@ -104,7 +104,7 @@ public class GroovyManipulator
             {
                 if ( project.isExecutionRoot() )
                 {
-                    logger.info ("Executing {} on {}", groovyScript, project);
+                    LOGGER.info ("Executing {} on {}", groovyScript, project);
 
                     try
                     {
@@ -116,11 +116,11 @@ public class GroovyManipulator
                     {
                         try
                         {
-                            logger.debug ( "Failure when injecting into script {} ", FileUtils.readFileToString( groovyScript ) );
+                            LOGGER.debug ( "Failure when injecting into script {} ", FileUtils.readFileToString( groovyScript ) );
                         }
                         catch ( IOException e1 )
                         {
-                            logger.debug ("Unable to read script file {} for debugging! {} ", groovyScript, e1);
+                            LOGGER.debug ("Unable to read script file {} for debugging! {} ", groovyScript, e1);
                         }
                         throw new ManipulationException( "Unable to inject values into base script", e );
                     }
@@ -128,11 +128,11 @@ public class GroovyManipulator
                     {
                         try
                         {
-                            logger.debug ( "Failure when parsing script {} ", FileUtils.readFileToString( groovyScript ) );
+                            LOGGER.debug ( "Failure when parsing script {} ", FileUtils.readFileToString( groovyScript ) );
                         }
                         catch ( IOException e1 )
                         {
-                            logger.debug ("Unable to read script file {} for debugging! {} ", groovyScript, e1);
+                            LOGGER.debug ("Unable to read script file {} for debugging! {} ", groovyScript, e1);
                         }
                         throw new ManipulationException( "Unable to parse script", e );
                     }

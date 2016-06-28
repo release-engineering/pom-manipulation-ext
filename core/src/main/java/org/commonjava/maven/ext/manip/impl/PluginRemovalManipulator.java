@@ -47,7 +47,7 @@ import static org.commonjava.maven.ext.manip.util.IdUtils.ga;
 public class PluginRemovalManipulator
         implements Manipulator
 {
-    private final Logger logger = LoggerFactory.getLogger( getClass() );
+    private static final Logger LOGGER = LoggerFactory.getLogger( PluginRemovalManipulator.class );
 
     /**
      * Initialize the {@link PluginState} state holder in the {@link ManipulationSession}. This state holder detects
@@ -81,7 +81,7 @@ public class PluginRemovalManipulator
 
         if ( !session.isEnabled() || !state.isEnabled() )
         {
-            logger.debug( getClass().getSimpleName() + ": Nothing to do!" );
+            LOGGER.debug( getClass().getSimpleName() + ": Nothing to do!" );
             return Collections.emptySet();
         }
 
@@ -104,7 +104,7 @@ public class PluginRemovalManipulator
     {
         final PluginRemovalState state = session.getState( PluginRemovalState.class );
 
-        logger.info( "Applying plugin changes to: " + ga( project ) );
+        LOGGER.info( "Applying plugin changes to: " + ga( project ) );
 
         boolean result = false;
         List<ProjectRef> pluginsToRemove = state.getPluginRemoval();
@@ -134,7 +134,7 @@ public class PluginRemovalManipulator
                 Plugin p = it.next();
                 if ( pluginsToRemove.contains( SimpleProjectRef.parse( p.getKey() ) ) )
                 {
-                    logger.debug( "Removing {} ", p.toString() );
+                    LOGGER.debug( "Removing {} ", p.toString() );
                     it.remove();
                     result = true;
                 }

@@ -42,7 +42,7 @@ public class ManipulatingEventSpy
 
     private static final String REQUIRE_EXTENSION = "manipulation.required";
 
-    private final Logger logger = LoggerFactory.getLogger( getClass() );
+    private static final Logger LOGGER = LoggerFactory.getLogger( ManipulatingEventSpy.class );
 
     @Requirement
     private ManipulationManager manipulationManager;
@@ -108,24 +108,24 @@ public class ManipulatingEventSpy
                     }
                     else
                     {
-                        logger.error( "Null session ; unable to continue" );
+                        LOGGER.error( "Null session ; unable to continue" );
                         return;
                     }
 
                     if ( !session.isEnabled() )
                     {
-                        logger.info( "Manipulation engine disabled via command-line option" );
+                        LOGGER.info( "Manipulation engine disabled via command-line option" );
                         return;
                     }
                     else if ( ee.getSession().getRequest().getPom() == null )
                     {
-                        logger.info( "Manipulation engine disabled. No project found." );
+                        LOGGER.info( "Manipulation engine disabled. No project found." );
                         return;
                     }
                     else if ( new File( ee.getSession().getRequest().getPom().getParentFile(),
                                         ManipulationManager.MARKER_FILE ).exists() )
                     {
-                        logger.info( "Skipping manipulation as previous execution found." );
+                        LOGGER.info( "Skipping manipulation as previous execution found." );
                         return;
                     }
 
@@ -135,7 +135,7 @@ public class ManipulatingEventSpy
         }
         catch ( final ManipulationException e )
         {
-            logger.error( "Extension failure", e );
+            LOGGER.error( "Extension failure", e );
             if ( required )
             {
                 throw e;
@@ -148,7 +148,7 @@ public class ManipulatingEventSpy
         // Catch any runtime exceptions and mark them to fail the build as well.
         catch ( final RuntimeException e )
         {
-            logger.error( "Extension failure", e );
+            LOGGER.error( "Extension failure", e );
             if ( required )
             {
                 throw e;

@@ -87,7 +87,7 @@ public class Cli
     private static final File DEFAULT_GLOBAL_SETTINGS_FILE =
         new File( System.getProperty( "maven.home", System.getProperty( "user.dir", "" ) ), "conf/settings.xml" );
 
-    private final Logger logger = LoggerFactory.getLogger( getClass() );
+    private static final Logger LOGGER = LoggerFactory.getLogger( Cli.class );
 
     private ManipulationSession session;
 
@@ -183,7 +183,7 @@ public class Cli
         }
         catch ( ParseException e )
         {
-            logger.debug( "Caught problem parsing ", e );
+            LOGGER.debug( "Caught problem parsing ", e );
             System.err.println( e.getMessage() );
 
             HelpFormatter formatter = new HelpFormatter();
@@ -256,18 +256,18 @@ public class Cli
 
         if ( !session.isEnabled() )
         {
-            logger.info( "Manipulation engine disabled via command-line option" );
+            LOGGER.info( "Manipulation engine disabled via command-line option" );
             return 1;
         }
         if ( !target.exists() )
         {
-            logger.info( "Manipulation engine disabled. No project found." );
+            LOGGER.info( "Manipulation engine disabled. No project found." );
             return 1;
         }
         // Don't bother skipping if we're just trying to analyse deps.
         else if ( new File( target.getParentFile(), ManipulationManager.MARKER_FILE ).exists() && !cmd.hasOption( 'p' ) )
         {
-            logger.info( "Skipping manipulation as previous execution found." );
+            LOGGER.info( "Skipping manipulation as previous execution found." );
             return 0;
         }
         try
@@ -291,7 +291,7 @@ public class Cli
         }
         catch ( ManipulationException e )
         {
-            logger.error( "POM Manipulation failed: Unable to read config file ", e );
+            LOGGER.error( "POM Manipulation failed: Unable to read config file ", e );
             return 1;
         }
 
@@ -312,12 +312,12 @@ public class Cli
                 Document doc = xmlIO.parseXML( new File ( params[0] ) );
                 XPath xPath = XPathFactory.newInstance().newXPath();
                 NodeList nodeList = (NodeList) xPath.evaluate( params[1], doc, XPathConstants.NODESET);
-                logger.info ("Found {} node", nodeList.getLength());
+                LOGGER.info ("Found {} node", nodeList.getLength());
 
                 for ( int i = 0; i < nodeList.getLength(); i++)
                 {
                     Node node = nodeList.item( i );
-                    logger.info  ("Found node {} and value {} ", node.getNodeName(), node.getTextContent());
+                    LOGGER.info  ("Found node {} and value {} ", node.getNodeName(), node.getTextContent());
                 }
             }
             else if ( cmd.hasOption( 'p' ) || cmd.hasOption( "printGAVTC" ) || cmd.hasOption( "printUnusedDepMgmt" ))
@@ -329,7 +329,7 @@ public class Cli
                     Collections.addAll( activeProfiles, cmd.getOptionValue( 'P' ).split( "," ) );
                 }
                 Set<ArtifactRef> ts = RESTManipulator.establishAllDependencies( pomIO.parseProject( session.getPom() ), activeProfiles );
-                logger.info( "Found {} dependencies.", ts.size() );
+                LOGGER.info( "Found {} dependencies.", ts.size() );
                 File output = null;
 
                 if ( cmd.hasOption( 'o' ) )
@@ -340,7 +340,7 @@ public class Cli
                 if ( cmd.hasOption( "printUnusedDepMgmt" ) )
                 {
                     Set<ArtifactRef> nonMangedDeps = RESTManipulator.establishNonManagedDependencies( pomIO.parseProject( session.getPom() ), activeProfiles );
-                    logger.info( "Found {} non-managed dependencies.", nonMangedDeps.size() );
+                    LOGGER.info( "Found {} non-managed dependencies.", nonMangedDeps.size() );
                     // As the managed dependencies may have versions versus the non-managed strip off the versions to see what is left.
                     Set<ProjectRef> tsNoV = new TreeSet<>(  );
                     for ( ArtifactRef ar : ts)
@@ -408,18 +408,18 @@ public class Cli
         }
         catch ( ManipulationException e )
         {
-            logger.error( "POM Manipulation failed: Unable to parse projects ", e );
+            LOGGER.error( "POM Manipulation failed: Unable to parse projects ", e );
             return 1;
         }
         catch ( RestException e )
         {
-            logger.error ( "POM Manipulation failed with message {} ", e.getMessage () );
-            logger.trace ( "Exception trace is", e);
+            LOGGER.error ( "POM Manipulation failed with message {} ", e.getMessage () );
+            LOGGER.trace ( "Exception trace is", e);
             return 1;
         }
         catch ( Exception e )
         {
-            logger.error( "POM Manipulation failed.", e );
+            LOGGER.error( "POM Manipulation failed.", e );
             return 1;
         }
         return 0;
@@ -466,26 +466,26 @@ public class Cli
         }
         catch ( ComponentLookupException e )
         {
-            logger.debug( "Caught problem instantiating ", e );
+            LOGGER.debug( "Caught problem instantiating ", e );
             System.err.println( "Unable to start Cli subsystem" );
             System.exit( 1 );
             e.printStackTrace();
         }
         catch ( PlexusContainerException e )
         {
-            logger.debug( "Caught problem instantiating ", e );
+            LOGGER.debug( "Caught problem instantiating ", e );
             System.err.println( "Unable to start Cli subsystem" );
             System.exit( 1 );
         }
         catch ( SettingsBuildingException e )
         {
-            logger.debug( "Caught problem parsing settings file ", e );
+            LOGGER.debug( "Caught problem parsing settings file ", e );
             System.err.println( "Unable to parse settings.xml file" );
             System.exit( 1 );
         }
         catch ( MavenExecutionRequestPopulationException e )
         {
-            logger.debug( "Caught problem populating maven request from settings file ", e );
+            LOGGER.debug( "Caught problem populating maven request from settings file ", e );
             System.err.println( "Unable to create maven execution request from settings.xml file" );
             System.exit( 1 );
         }

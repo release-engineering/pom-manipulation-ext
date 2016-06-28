@@ -36,7 +36,7 @@ import java.util.Properties;
 @Component( role = ConfigIO.class )
 public class ConfigIO
 {
-    private final Logger logger = LoggerFactory.getLogger( ConfigIO.class );
+    private static final Logger LOGGER = LoggerFactory.getLogger( ConfigIO.class );
 
     private final static String propertyFileString = "pme.properties";
     private final static String yamlPMEFileString = "pme.yaml";
@@ -71,12 +71,12 @@ public class ConfigIO
         if ( yamlPMEFile.exists() )
         {
             result = loadYamlFile( yamlPMEFile );
-            logger.debug( "Read yaml file containing {}.", result );
+            LOGGER.debug( "Read yaml file containing {}.", result );
         }
         else if ( yamlPNCFile.exists() )
         {
             result = loadYamlFile( yamlPNCFile );
-            logger.debug( "Read yaml file containing {}.", result );
+            LOGGER.debug( "Read yaml file containing {}.", result );
         }
         else if ( jsonPNCFile.exists() )
         {
@@ -88,12 +88,12 @@ public class ConfigIO
             {
                 throw new ManipulationException( "Caught exception processing JSON file.", e );
             }
-            logger.debug( "Read json file containing {}.", result );
+            LOGGER.debug( "Read json file containing {}.", result );
         }
         else if ( propertyFile.exists() )
         {
             result = loadPropertiesFile( propertyFile );
-            logger.debug( "Read properties file containing {}.", result );
+            LOGGER.debug( "Read properties file containing {}.", result );
         }
         return result;
     }

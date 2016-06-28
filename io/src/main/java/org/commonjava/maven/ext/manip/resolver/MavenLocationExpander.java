@@ -68,7 +68,7 @@ public class MavenLocationExpander
 
     private final List<Location> locations;
 
-    private final Logger logger = LoggerFactory.getLogger( getClass() );
+    private static final Logger LOGGER = LoggerFactory.getLogger( MavenLocationExpander.class );
 
     public MavenLocationExpander( final List<Location> customLocations,
                                   final List<ArtifactRepository> artifactRepositories,
@@ -92,7 +92,7 @@ public class MavenLocationExpander
         addSettingsProfileRepositoriesTo( locs, settings, activeProfiles, mirrorSelector );
         addRequestRepositoriesTo( locs, artifactRepositories, settings, mirrorSelector );
 
-        logger.debug( "Configured to use Maven locations:\n  {}", new JoinString( "\n  ", locs ) );
+        LOGGER.debug( "Configured to use Maven locations:\n  {}", new JoinString( "\n  ", locs ) );
         this.locations = new ArrayList<>( locs );
     }
 
@@ -227,7 +227,7 @@ public class MavenLocationExpander
             expandSingle( loc, result );
         }
 
-        logger.debug( "Expanded to:\n {}", new JoinString( "\n  ", result ) );
+        LOGGER.debug( "Expanded to:\n {}", new JoinString( "\n  ", result ) );
         return result;
     }
 
@@ -241,7 +241,7 @@ public class MavenLocationExpander
             expandSingle( loc, result );
         }
 
-        logger.debug( "Expanded to:\n {}", new JoinString( "\n  ", result ) );
+        LOGGER.debug( "Expanded to:\n {}", new JoinString( "\n  ", result ) );
         return result;
     }
 
@@ -262,7 +262,7 @@ public class MavenLocationExpander
             }
         }
 
-        logger.debug( "Expanded to:\n {}", new JoinString( "\n  ", result ) );
+        LOGGER.debug( "Expanded to:\n {}", new JoinString( "\n  ", result ) );
         return new VirtualResource( result );
     }
 
@@ -281,15 +281,15 @@ public class MavenLocationExpander
 
     private void expandSingle( final Location loc, final List<Location> result )
     {
-        logger.debug( "Expanding: {}", loc );
+        LOGGER.debug( "Expanding: {}", loc );
         if ( EXPANSION_TARGET.equals( loc ) )
         {
-            logger.debug( "Expanding..." );
+            LOGGER.debug( "Expanding..." );
             result.addAll( this.locations );
         }
         else
         {
-            logger.debug( "No expansion available." );
+            LOGGER.debug( "No expansion available." );
             result.add( loc );
         }
     }

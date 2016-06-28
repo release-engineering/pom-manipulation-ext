@@ -35,7 +35,7 @@ public class WildcardMap<T>
 {
     public static final String WILDCARD = "*";
 
-    private final Logger logger = LoggerFactory.getLogger(getClass());
+    private static final Logger LOGGER = LoggerFactory.getLogger(WildcardMap.class);
 
     /**
      * This map represents:
@@ -119,7 +119,7 @@ public class WildcardMap<T>
             // Erase any previous mappings.
             if (!vMap.isEmpty())
             {
-                logger.warn ("Emptying map with keys " + vMap.keySet() + " as replacing with wildcard mapping " + key);
+                LOGGER.warn ("Emptying map with keys " + vMap.keySet() + " as replacing with wildcard mapping " + key);
             }
             vMap.clear();
         }
@@ -136,12 +136,12 @@ public class WildcardMap<T>
         }
         if ( wildcard )
         {
-            logger.warn ("Unable to add " + key + " with value " + value +
+            LOGGER.warn ("Unable to add " + key + " with value " + value +
                     " as wildcard mapping for " + groupId + " already exists.");
         }
         else
         {
-            logger.debug ("Entering artifact of " + artifactId + " and value " + value);
+            LOGGER.debug ("Entering artifact of " + artifactId + " and value " + value);
             vMap.put(artifactId, value);
 
             map.put(groupId, vMap);
@@ -184,7 +184,7 @@ public class WildcardMap<T>
         LinkedHashMap<String, T> value = map.get(groupId);
         if (value != null)
         {
-            logger.debug("Retrieved value map of " + value);
+            LOGGER.debug("Retrieved value map of " + value);
             if ( value.get(WILDCARD) != null)
             {
                 result = value.get(WILDCARD);
@@ -194,7 +194,7 @@ public class WildcardMap<T>
                 result = value.get(artifactId);
             }
         }
-        logger.debug("Returning result of " + result);
+        LOGGER.debug("Returning result of " + result);
 
         return result;
     }

@@ -47,7 +47,7 @@ import static org.commonjava.maven.ext.manip.util.IdUtils.ga;
 public class ProfileInjectionManipulator
     implements Manipulator
 {
-    private final Logger logger = LoggerFactory.getLogger( getClass() );
+    private static final Logger LOGGER = LoggerFactory.getLogger( ProfileInjectionManipulator.class );
 
     @Requirement
     private ModelIO modelBuilder;
@@ -83,7 +83,7 @@ public class ProfileInjectionManipulator
         final ProfileInjectionState state = session.getState( ProfileInjectionState.class );
         if ( !session.isEnabled() || !state.isEnabled() )
         {
-            logger.debug( getClass().getSimpleName() + ": Nothing to do!" );
+            LOGGER.debug( getClass().getSimpleName() + ": Nothing to do!" );
             return Collections.emptySet();
         }
 
@@ -96,7 +96,7 @@ public class ProfileInjectionManipulator
         {
             if ( project.isInheritanceRoot() )
             {
-                logger.info( "Applying changes to: {} ", ga( project ) );
+                LOGGER.info( "Applying changes to: {} ", ga( project ) );
                 final Model model = project.getModel();
                 final List<Profile> profiles = model.getProfiles();
 
@@ -134,7 +134,7 @@ public class ProfileInjectionManipulator
             if ( profile.getId()
                         .equals( p.getId() ) )
             {
-                logger.debug( "Removing local profile {} ", p );
+                LOGGER.debug( "Removing local profile {} ", p );
                 i.remove();
                 // Don't break out of the loop so we can check for active profiles
             }
@@ -144,7 +144,7 @@ public class ProfileInjectionManipulator
             // of activeByDefault. Therefore replace the activation.
             if (p.getActivation() != null && p.getActivation().isActiveByDefault())
             {
-                logger.warn( "Profile {} is activeByDefault", p );
+                LOGGER.warn( "Profile {} is activeByDefault", p );
 
                 final Activation replacement = new Activation();
                 final ActivationProperty replacementProp = new ActivationProperty();
@@ -155,7 +155,7 @@ public class ProfileInjectionManipulator
             }
         }
 
-        logger.debug( "Adding profile {}", profile );
+        LOGGER.debug( "Adding profile {}", profile );
         profiles.add( profile );
     }
 
