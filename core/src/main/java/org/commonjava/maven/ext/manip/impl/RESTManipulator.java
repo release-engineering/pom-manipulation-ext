@@ -50,6 +50,7 @@ import java.util.TreeSet;
 import java.util.concurrent.TimeUnit;
 
 import static org.apache.commons.lang.StringUtils.isEmpty;
+import static org.apache.commons.lang.StringUtils.isNotEmpty;
 
 /**
  * This Manipulator runs first. It makes a REST call to an external service to loadRemoteOverrides the GAVs to align the project version
@@ -244,6 +245,7 @@ public class RESTManipulator implements Manipulator
                         {
                             if (activeProfiles.contains( p.getId() ) )
                             {
+                                logger.debug ("Adding modules for profile {}", p.getId());
                                 activeModules.addAll( p.getModules() );
                             }
                         }
@@ -324,6 +326,8 @@ public class RESTManipulator implements Manipulator
             {
                 PropertyInterpolator pi = new PropertyInterpolator( project.getModel().getProperties(), project );
                 String version = PropertiesUtils.resolveProperties( projects, d.getVersion() );
+                String groupId = pi.interp( d.getGroupId().equals( "${project.groupId}" ) ? project.getGroupId() : d.getGroupId() );
+                String artifactId = pi.interp( d.getArtifactId().equals( "${project.artifactId}" ) ? project.getArtifactId() : d.getArtifactId() );
 
                 if ( isEmpty ( version ) )
                 {
@@ -332,13 +336,17 @@ public class RESTManipulator implements Manipulator
                     version = "<unknown>";
                 }
 
-                deps.add( new SimpleScopedArtifactRef( new SimpleProjectVersionRef(
-                                pi.interp( d.getGroupId().equals( "${project.groupId}" ) ? project.getGroupId() : d.getGroupId() ),
-                                pi.interp( d.getArtifactId().equals( "${project.artifactId}" ) ? project.getArtifactId() : d.getArtifactId() ),
-                                version ),
-                                                       new SimpleTypeAndClassifier( d.getType(), d.getClassifier() ),
-                                                       // TODO: Should atlas handle default scope?
-                                                       d.getScope() == null ? DependencyScope.compile.realName() : d.getScope()));
+                if ( isNotEmpty( groupId ) && isNotEmpty( artifactId ) )
+                {
+                    deps.add( new SimpleScopedArtifactRef( new SimpleProjectVersionRef( groupId, artifactId, version ),
+                                                           new SimpleTypeAndClassifier( d.getType(), d.getClassifier() ),
+                                                           // TODO: Should atlas handle default scope?
+                                                           d.getScope() == null ? DependencyScope.compile.realName() : d.getScope()));
+                }
+                else
+                {
+                    logger.warn( "Skipping dependency {} [ {}:{}:{} ]", d, groupId, artifactId, version );
+                }
             }
         }
     }
