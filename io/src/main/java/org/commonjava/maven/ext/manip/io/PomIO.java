@@ -365,8 +365,6 @@ public class PomIO
                 }
             }
 
-            logger.debug( "Searching pom list " + projectrefs.toString() + " for standalone poms..." );
-
             for ( final PomPeek p : peeked )
             {
                 if ( p.getParentKey() == null ||

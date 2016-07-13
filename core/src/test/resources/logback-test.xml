@@ -24,9 +24,13 @@
       <pattern>[%thread] %-5level %logger{36} - %msg%n</pattern>
     </encoder>
   </appender>
-  
+
+  <logger name="org.commonjava.maven.ext" level="DEBUG">
+    <appender-ref ref="STDOUT" />
+  </logger>
+
   <root level="DEBUG">
     <appender-ref ref="STDOUT" />
   </root>
-  
+
 </configuration>

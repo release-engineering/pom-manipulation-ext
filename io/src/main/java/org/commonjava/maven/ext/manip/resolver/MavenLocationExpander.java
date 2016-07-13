@@ -92,7 +92,8 @@ public class MavenLocationExpander
         addSettingsProfileRepositoriesTo( locs, settings, activeProfiles, mirrorSelector );
         addRequestRepositoriesTo( locs, artifactRepositories, settings, mirrorSelector );
 
-        logger.debug( "Configured to use Maven locations:\n  {}", new JoinString( "\n  ", locs ) );
+        if ( locs.size() > 0 )
+            logger.debug( "Configured to use Maven locations:\n  {}", new JoinString( "\n  ", locs ) );
         this.locations = new ArrayList<>( locs );
     }
 

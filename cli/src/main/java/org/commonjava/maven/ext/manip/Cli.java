@@ -413,7 +413,7 @@ public class Cli
         }
         catch ( RestException e )
         {
-            logger.error ( "POM Manipulation failed with message {} ", e.getMessage () );
+            logger.error ( "REST communication with {} failed. {}", userProps.getProperty( "restURL" ), e.getMessage () );
             logger.trace ( "Exception trace is", e);
             return 100;
         }

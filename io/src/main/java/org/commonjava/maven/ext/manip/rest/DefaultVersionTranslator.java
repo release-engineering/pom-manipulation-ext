@@ -54,10 +54,12 @@ public class DefaultVersionTranslator
 
     private final String endpointUrl;
 
+    private final ProjectVersionRefMapper pvrm = new ProjectVersionRefMapper();
+
     public DefaultVersionTranslator( String endpointUrl )
     {
         this.endpointUrl = endpointUrl;
-        Unirest.setObjectMapper( new ProjectVersionRefMapper() );
+        Unirest.setObjectMapper( pvrm );
         // According to https://github.com/Mashape/unirest-java the default connection timeout is 10000
         // and the default socketTimeout is 60000.
         // We have increased the first to 30 seconds and the second to 10 minutes.
@@ -73,7 +75,7 @@ public class DefaultVersionTranslator
     {
         final Map<ProjectVersionRef, String> result = new HashMap<>();
         final Queue<Task> queue = new ArrayDeque<>();
-        queue.add( new Task( projects, endpointUrl ) );
+        queue.add( new Task( pvrm, projects, endpointUrl ) );
 
         while ( !queue.isEmpty() )
         {
@@ -89,7 +91,7 @@ public class DefaultVersionTranslator
                 {
                     if ( task.getStatus() < 0 )
                     {
-                        logger.debug ("Caught exception calling server with message {}", task.getException().getMessage());
+                        logger.debug ("Caught exception calling server with message {}", task.getErrorMessage());
                     }
                     else
                     {
@@ -104,15 +106,15 @@ public class DefaultVersionTranslator
                 }
                 else
                 {
+                    logger.debug ("Cannot split and retry anymore.");
                     if ( task.getStatus() > 0 )
                     {
                         throw new RestException(
-                                        "Cannot split and retry anymore. Last status was " + task.getStatus() );
+                                        "Received response status " + task.getStatus() + " with message: " + task.getErrorMessage());
                     }
                     else
                     {
-                        throw new RestException( "Cannot split and retry anymore. Cause: " + task.getException(),
-                                                 task.getException() );
+                        throw new RestException( "Received response status " + task.getStatus() + " with message " + task.getErrorMessage() );
                     }
                 }
             }
@@ -130,10 +132,15 @@ public class DefaultVersionTranslator
 
         private Exception exception;
 
+        private String errorString;
+
         private String endpointUrl;
 
-        Task( List<ProjectVersionRef> chunk, String endpointUrl )
+        private ProjectVersionRefMapper pvrm;
+
+        Task( ProjectVersionRefMapper pvrm, List<ProjectVersionRef> chunk, String endpointUrl )
         {
+            this.pvrm = pvrm;
             this.chunk = chunk;
             this.endpointUrl = endpointUrl;
         }
@@ -168,12 +175,14 @@ public class DefaultVersionTranslator
                 {
                     this.result = r.getBody();
                 }
+                else
+                {
+                    errorString = pvrm.getErrorString();
+                }
             }
             catch ( UnirestException e )
             {
-                exception = new RestException(
-                                String.format( "Request to server '%s' failed. Exception message: %s", this.endpointUrl,
-                                               e.getMessage() ), e );
+                exception = e;
                 this.status = -1;
             }
         }
@@ -189,10 +198,10 @@ public class DefaultVersionTranslator
             int chunkSize = chunk.size() / CHUNK_SPLIT_COUNT;
             for ( int i = 0; i < ( CHUNK_SPLIT_COUNT - 1 ); i++ )
             {
-                res.add( new Task( chunk.subList( i * chunkSize, ( i + 1 ) * chunkSize ), endpointUrl ) );
+                res.add( new Task( pvrm, chunk.subList( i * chunkSize, ( i + 1 ) * chunkSize ), endpointUrl ) );
             }
             // Last chunk may have different size
-            res.add( new Task( chunk.subList( ( CHUNK_SPLIT_COUNT - 1 ) * chunkSize, chunk.size() ), endpointUrl ) );
+            res.add( new Task( pvrm, chunk.subList( ( CHUNK_SPLIT_COUNT - 1 ) * chunkSize, chunk.size() ), endpointUrl ) );
             return res;
         }
 
@@ -216,9 +225,9 @@ public class DefaultVersionTranslator
             return result;
         }
 
-        public Exception getException()
+        public String getErrorMessage()
         {
-            return exception;
+            return (exception != null ? exception.getMessage() + ' ' : "" ) + ( errorString != null ? errorString : "" );
         }
 
         int getChunkSize()

@@ -28,6 +28,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * @author vdedik@redhat.com
@@ -38,6 +40,8 @@ public class ProjectVersionRefMapper implements ObjectMapper
 
     private final com.fasterxml.jackson.databind.ObjectMapper objectMapper
         = new com.fasterxml.jackson.databind.ObjectMapper();
+
+    private String errorString;
 
     @Override
     public Map<ProjectVersionRef, String> readValue( String s )
@@ -50,18 +54,25 @@ public class ProjectVersionRefMapper implements ObjectMapper
 
         if (s.length() == 0)
         {
-            logger.error( "No content to read.");
+            errorString = "No content to read.";
             return result;
         }
         else if (s.startsWith( "<" ))
         {
             // Read an HTML string.
-            logger.error( "Read HTML string '{}' rather than a JSON stream.", s );
+            String stripped = s.replaceFirst( ".*</h1>\n", "").replaceFirst( "\n</body></html>", "" );
+            logger.debug( "Read HTML string '{}' rather than a JSON stream; stripping message to {}", s, stripped );
+
+            errorString = stripped;
             return result;
         }
         else if (s.startsWith( "{\\\"message\\\":" ) || s.startsWith( "{\"message\":" ))
         {
-            logger.error( "Read message string {}", s );
+            String endStripped = s.replace( "\\\"}", "" ).replace( "\"}", "" );
+            errorString = endStripped.substring( endStripped.lastIndexOf( "\"" ) + 1 );
+
+            logger.debug( "Read message string {}, processed to {} ", s, errorString );
+
             return result;
         }
 
@@ -117,5 +128,10 @@ public class ProjectVersionRefMapper implements ObjectMapper
         {
             throw new RestException( "Failed to serialize version request: " + e.getMessage(), e );
         }
+    }
+
+    public String getErrorString()
+    {
+        return errorString;
     }
 }

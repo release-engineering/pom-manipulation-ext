@@ -22,7 +22,6 @@ import org.commonjava.maven.ext.manip.rest.rule.MockServer;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.handler.AbstractHandler;
 import org.junit.Before;
-import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.contrib.java.lang.system.SystemOutRule;
@@ -48,10 +47,10 @@ public class HttpHeaderHeaderTest
     public final SystemOutRule systemOutRule = new SystemOutRule().enableLog();
 
     @Rule
-    public TestName testName = new TestName();
+    public final TestName testName = new TestName();
 
-    @ClassRule
-    public static MockServer mockServer = new MockServer( new AbstractHandler()
+    @Rule
+    public final MockServer mockServer = new MockServer( new AbstractHandler()
     {
         @Override
         public void handle( String target, Request baseRequest, HttpServletRequest request,
@@ -67,7 +66,7 @@ public class HttpHeaderHeaderTest
 
                 if ( name.equals( "Log-Context" ) )
                 {
-                    response.getWriter().println( "{\\\"message\\\":\\\"" + request.getHeader( name ) + "\\\"}");
+                    response.getWriter().print( HttpHeaderHeaderTest.this.generateResponse( request.getHeader( name ) ) );
                 }
             }
             baseRequest.setHandled( true );
@@ -81,6 +80,14 @@ public class HttpHeaderHeaderTest
 
         this.versionTranslator = new DefaultVersionTranslator( mockServer.getUrl() );
     }
+
+    private String generateResponse( String header )
+    {
+        return testResponseStart + (testResponseEnd == null ? "" : header + testResponseEnd);
+    }
+
+    private String testResponseStart = "{\\\"message\\\":\\\"";
+    private String testResponseEnd = "\\\"}";
 
     @Test
     public void testVerifyContentHeaderMessage()
@@ -98,6 +105,74 @@ public class HttpHeaderHeaderTest
         catch ( RestException ex )
         {
             assertTrue( systemOutRule.getLog().contains( "message" ) );
+        }
+    }
+
+    @Test
+    public void testVerifyContentHeaderMessageNoEscape()
+    {
+        testResponseStart = "{\"message\":\"";
+        testResponseEnd = "\"}";
+
+        List<ProjectVersionRef> gavs = new ArrayList<ProjectVersionRef>()
+        {{
+            add( new SimpleProjectVersionRef( "com.example", "example", "1.0" ) );
+        }};
+
+        try
+        {
+            versionTranslator.translateVersions( gavs );
+            fail( "Failed to throw RestException." );
+        }
+        catch ( RestException ex )
+        {
+            assertTrue( systemOutRule.getLog().contains( "message" ) );
+        }
+    }
+
+    @Test
+    public void testVerifyContentHeaderMessageContents()
+    {
+        testResponseStart = "{\"message\":\"";
+        testResponseEnd = "\"}";
+
+        List<ProjectVersionRef> gavs = new ArrayList<ProjectVersionRef>()
+        {{
+            add( new SimpleProjectVersionRef( "com.example", "example", "1.0" ) );
+        }};
+
+        try
+        {
+            versionTranslator.translateVersions( gavs );
+            fail( "Failed to throw RestException." );
+        }
+        catch ( RestException ex )
+        {
+            assertTrue( ex.getMessage().contains( "pme-" ) );
+        }
+    }
+
+    @Test
+    public void testVerifyContentHeaderMessageContentsHTML()
+    {
+        testResponseStart = "<html><body><h1>504 Gateway Time-out</h1>\n" +
+            "The server didn't respond in time.\n" +
+            "</body></html>";
+        testResponseEnd = null;
+
+        List<ProjectVersionRef> gavs = new ArrayList<ProjectVersionRef>()
+        {{
+            add( new SimpleProjectVersionRef( "com.example", "example", "1.0" ) );
+        }};
+
+        try
+        {
+            versionTranslator.translateVersions( gavs );
+            fail( "Failed to throw RestException." );
+        }
+        catch ( RestException ex )
+        {
+            assertTrue( systemOutRule.getLog().contains( "The server didn't respond in time" ) );
         }
     }
 }
