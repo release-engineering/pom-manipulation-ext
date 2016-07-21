@@ -126,7 +126,7 @@ public class RESTManipulator implements Manipulator
         logger.debug ("Passing {} GAVs following into the REST client api {} ", restParam.size(), restParam);
         logger.info ("Calling REST client...");
         long start = System.nanoTime();
-        Map<ProjectVersionRef, String> restResult;
+        Map<ProjectVersionRef, String> restResult = null;
 
         try
         {
@@ -138,7 +138,7 @@ public class RESTManipulator implements Manipulator
         }
         finally
         {
-            printFinishTime( start );
+            printFinishTime( start, (restResult != null));
         }
         logger.debug ("REST Client returned {} ", restResult);
 
@@ -352,12 +352,13 @@ public class RESTManipulator implements Manipulator
     }
 
 
-    private void printFinishTime(long start)
+    private void printFinishTime( long start, boolean finished )
     {
         long finish = System.nanoTime();
         long minutes = TimeUnit.NANOSECONDS.toMinutes( finish - start );
         long seconds = TimeUnit.NANOSECONDS.toSeconds( finish - start ) - ( minutes * 60 );
-        logger.info ( "REST client finished... (took {} min, {} sec, {} millisec)", minutes, seconds,
+        logger.info ( "REST client finished {}... (took {} min, {} sec, {} millisec)",
+                      (finished == true ? "successfully" : "with failures"), minutes, seconds,
                       (TimeUnit.NANOSECONDS.toMillis( finish - start ) - ( minutes * 60 * 1000 ) - ( seconds * 1000) ));
     }
 }
