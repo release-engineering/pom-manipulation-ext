@@ -17,6 +17,7 @@
 package org.commonjava.maven.ext.manip.io;
 
 import com.jayway.jsonpath.JsonPath;
+import com.jayway.jsonpath.JsonPathException;
 import org.codehaus.plexus.component.annotations.Component;
 import org.commonjava.maven.ext.manip.ManipulationException;
 import org.commonjava.maven.ext.manip.model.YamlFile;
@@ -84,7 +85,7 @@ public class ConfigIO
             {
                 result.putAll( JsonPath.parse( jsonPNCFile ).read ( "$.pme", Map.class ) );
             }
-            catch ( IOException e )
+            catch ( IOException | JsonPathException e)
             {
                 throw new ManipulationException( "Caught exception processing JSON file.", e );
             }
