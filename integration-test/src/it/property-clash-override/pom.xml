@@ -20,21 +20,20 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>org.commonjava.maven.ext.versioning.test</groupId>
-  <artifactId>property-clash-force</artifactId>
+  <artifactId>property-clash-override</artifactId>
   <version>1.0</version>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
     <myprop>1.0</myprop>
-    <junit>3</junit>
   </properties>
 
   <dependencyManagement>
     <dependencies>
       <dependency>
-        <groupId>commons-io</groupId>
-        <artifactId>commons-io</artifactId>
+        <groupId>junit</groupId>
+        <artifactId>junit</artifactId>
         <version>${myprop}</version>
       </dependency>
       <dependency>
@@ -49,11 +48,6 @@
     <dependency>
       <groupId>commons-lang</groupId>
       <artifactId>commons-lang</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>${junit}</version>
     </dependency>
   </dependencies>
 
