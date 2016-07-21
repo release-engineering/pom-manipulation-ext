@@ -188,7 +188,7 @@ public class Cli
 
             HelpFormatter formatter = new HelpFormatter();
             formatter.printHelp( "...", options );
-            return 100;
+            return 10;
         }
 
         if ( cmd.hasOption( 'h' ) )
@@ -257,12 +257,12 @@ public class Cli
         if ( !session.isEnabled() )
         {
             logger.info( "Manipulation engine disabled via command-line option" );
-            return 100;
+            return 10;
         }
         if ( !target.exists() )
         {
             logger.info( "Manipulation engine disabled. No project found." );
-            return 100;
+            return 10;
         }
         // Don't bother skipping if we're just trying to analyse deps.
         else if ( new File( target.getParentFile(), ManipulationManager.MARKER_FILE ).exists() && !cmd.hasOption( 'p' ) )
@@ -292,7 +292,7 @@ public class Cli
         catch ( ManipulationException e )
         {
             logger.error( "POM Manipulation failed: Unable to read config file ", e );
-            return 100;
+            return 10;
         }
 
 
@@ -468,26 +468,26 @@ public class Cli
         {
             logger.debug( "Caught problem instantiating ", e );
             System.err.println( "Unable to start Cli subsystem" );
-            System.exit( 1 );
+            System.exit( 100 );
             e.printStackTrace();
         }
         catch ( PlexusContainerException e )
         {
             logger.debug( "Caught problem instantiating ", e );
             System.err.println( "Unable to start Cli subsystem" );
-            System.exit( 1 );
+            System.exit( 100 );
         }
         catch ( SettingsBuildingException e )
         {
             logger.debug( "Caught problem parsing settings file ", e );
             System.err.println( "Unable to parse settings.xml file" );
-            System.exit( 1 );
+            System.exit( 100 );
         }
         catch ( MavenExecutionRequestPopulationException e )
         {
             logger.debug( "Caught problem populating maven request from settings file ", e );
             System.err.println( "Unable to create maven execution request from settings.xml file" );
-            System.exit( 1 );
+            System.exit( 100 );
         }
     }
 
