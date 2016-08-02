@@ -33,6 +33,7 @@ import org.commonjava.maven.ext.manip.ManipulationSession;
 import org.commonjava.maven.ext.manip.io.ModelIO;
 import org.commonjava.maven.ext.manip.model.Project;
 import org.commonjava.maven.ext.manip.state.DependencyState;
+import org.commonjava.maven.ext.manip.state.VersioningState;
 import org.commonjava.maven.ext.manip.util.PropertiesUtils;
 import org.commonjava.maven.ext.manip.util.WildcardMap;
 import org.slf4j.Logger;
@@ -52,6 +53,7 @@ import java.util.Set;
 
 import static org.apache.commons.lang.StringUtils.isEmpty;
 import static org.apache.commons.lang.StringUtils.join;
+import static org.apache.commons.lang.StringUtils.substringAfter;
 import static org.commonjava.maven.ext.manip.util.IdUtils.ga;
 import static org.commonjava.maven.ext.manip.util.IdUtils.gav;
 
@@ -584,18 +586,29 @@ public class DependencyManipulator implements Manipulator
                             }
                             else
                             {
-                                logger.debug( "Altered dependency {} {} -> {}", groupIdArtifactId, oldVersion,
+                                logger.debug( "Altered dependency {} : {} -> {}", groupIdArtifactId, oldVersion,
                                               overrideVersion );
 
                                 if ( oldVersion.contains( "${" ) )
                                 {
-                                    String appendValue = StringUtils.removeStart( overrideVersion, resolvedValue );
-                                    logger.debug ( "Resolved value is {} and appended is {} ", resolvedValue, appendValue );
+                                    String suffix = PropertiesUtils.getSuffix( session );
+                                    String replaceVersion;
+
+                                    if ( state.getStrictIgnoreSuffix() && oldVersion.contains( suffix ) )
+                                    {
+                                        replaceVersion = StringUtils.substringBefore( oldVersion, suffix );
+                                        replaceVersion += suffix + StringUtils.substringAfter( overrideVersion, suffix );
+                                    }
+                                    else
+                                    {
+                                        replaceVersion = oldVersion + StringUtils.removeStart( overrideVersion, resolvedValue );
+                                    }
+                                    logger.debug ( "Resolved value is {} and replacement version is {} ", resolvedValue, replaceVersion );
 
                                     // In this case the previous value couldn't be cached even though it contained a property
                                     // as it was either multiple properties or a property combined with a hardcoded value. Therefore
                                     // just append the suffix.
-                                    dependency.setVersion( oldVersion + appendValue );
+                                    dependency.setVersion( replaceVersion );
                                 }
                                 else
                                 {

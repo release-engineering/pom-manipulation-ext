@@ -50,4 +50,4 @@ assert dependency.version.text() == "2.6.0.redhat-4"
 
 dependency = pomChild.dependencyManagement.dependencies.dependency.find { it.artifactId.text() == "junit" }
 assert dependency != null
-assert dependency.version.text() == "4.1"
+assert dependency.version.text() == "4.1.0"

@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.commonjava.maven.ext.manip.util;
 
 import org.apache.commons.lang.StringUtils;
@@ -189,6 +190,28 @@ public final class PropertiesUtils
     }
 
     /**
+     * Retrieve any configured rebuild suffix.
+     * @param session
+     * @return string suffix.
+     */
+    public static String getSuffix (ManipulationSession session)
+    {
+        final VersioningState versioningState = session.getState( VersioningState.class );
+        String suffix = null;
+
+        if ( versioningState.getIncrementalSerialSuffix() != null && !versioningState.getIncrementalSerialSuffix().isEmpty() )
+        {
+            suffix = versioningState.getIncrementalSerialSuffix();
+        }
+        else if ( versioningState.getSuffix() != null && !versioningState.getSuffix().isEmpty() )
+        {
+            suffix = versioningState.getSuffix().substring( 0, versioningState.getSuffix().indexOf( '-' ) );
+        }
+
+        return suffix;
+    }
+
+    /**
      * Check the version change is valid in strict mode.
      *
      * @param session the manipulation session
@@ -212,38 +235,31 @@ public final class PropertiesUtils
         final boolean ignoreSuffix = dState.getStrictIgnoreSuffix();
 
         // New value might be e.g. 3.1-rebuild-1 or 3.1.0.rebuild-1 (i.e. it *might* be OSGi compliant).
-        final VersioningState state = session.getState( VersioningState.class );
         String newVersion = newValue;
-        String suffix = null;
-
-        if ( state.getIncrementalSerialSuffix() != null && !state.getIncrementalSerialSuffix().isEmpty() )
-        {
-            suffix = state.getIncrementalSerialSuffix();
-        }
-        else if ( state.getSuffix() != null && !state.getSuffix().isEmpty() )
-        {
-            suffix = state.getSuffix().substring( 0, state.getSuffix().indexOf( '-' ) );
-        }
+        String suffix = getSuffix( session );
 
         Version v = new Version( oldValue );
         String osgiVersion = v.getOSGiVersionString();
 
-        HashSet<String> s = new HashSet<>();
-        s.add( oldValue );
-        s.add( newValue );
-
-        if ( ignoreSuffix )
+        // If we have been configured to ignore the suffix (e.g. rebuild-n) then, assuming that
+        // the oldValue actually contains the suffix process it.
+        if ( ignoreSuffix && oldValue.contains( suffix ))
         {
+            HashSet<String> s = new HashSet<>();
+            s.add( oldValue );
+            s.add( newValue );
+
             String x = String.valueOf( Version.findHighestMatchingBuildNumber( v, s ) );
 
             // If the new value has the higher matching build number strip the old suffix to allow for strict
             // matching.
             if ( newValue.endsWith( x ) )
             {
+                String oldValueCache = oldValue;
                 oldValue = oldValue.substring( 0, oldValue.indexOf( suffix ) - 1 );
                 v = new Version( oldValue );
                 osgiVersion = v.getOSGiVersionString();
-                logger.debug( "Updating version to {} and osgiVersion {} for oldValue {} ", v, osgiVersion, oldValue );
+                logger.debug( "Updating version to {} and for oldValue {} with newValue {} ", v, oldValueCache, newValue );
 
             }
             else
@@ -287,7 +303,7 @@ public final class PropertiesUtils
      * @param originalType that this property is used in (i.e. a plugin or a dependency)
      * @param force Whether to check for an existing property or force the insertion
      * @return true if a property was found and cached.
-     * @throws ManipulationException
+     * @throws ManipulationException if an error occurs.
      */
     public static boolean cacheProperty( Map<String, String> versionPropertyUpdateMap, String oldVersion,
                                          String newVersion, Object originalType, boolean force )
@@ -355,7 +371,7 @@ public final class PropertiesUtils
      * @param projects set of projects
      * @param value value to check
      * @return the version string
-     * @throws ManipulationException
+     * @throws ManipulationException if an error occurs
      */
     public static String resolveProperties( List<Project> projects, String value ) throws ManipulationException
     {
@@ -370,7 +386,7 @@ public final class PropertiesUtils
         return pi.interp( value );
     }
 
-    /*
+    /**
      * Used to determine whether any property updates were successful of not. In the case of detecting that no properties are
      * needed IGNORE is returned. Effectively this is a slightly more explicit tri-state.
      */
