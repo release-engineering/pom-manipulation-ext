@@ -20,6 +20,7 @@ import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
 import org.apache.commons.codec.binary.Base32;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
+import org.commonjava.maven.ext.manip.ManipulationException;
 import org.commonjava.maven.ext.manip.rest.exception.RestException;
 import org.commonjava.maven.ext.manip.rest.mapper.ProjectVersionRefMapper;
 import org.slf4j.Logger;
@@ -38,12 +39,47 @@ import static org.apache.commons.lang.StringUtils.isNotEmpty;
 import static org.apache.http.HttpStatus.SC_OK;
 
 /**
+ * @author ncross@redhat.com
  * @author vdedik@redhat.com
  * @author jsenko@redhat.com
  */
 public class DefaultVersionTranslator
     implements VersionTranslator
 {
+    public enum RestProtocol
+    {
+        /**
+         * Current DependencyAnalyser is not versioning its protocols. To work around this
+         * label the original protocol as deprecated and the new, development version, as current.
+         */
+        DEPRECATED( "deprecated" ), CURRENT( "current" );
+
+        private String name;
+
+        RestProtocol( String name )
+        {
+            this.name = name;
+        }
+
+        @Override
+        public String toString()
+        {
+            return name;
+        }
+
+        public static RestProtocol parse( String protocol ) throws ManipulationException
+        {
+            for ( RestProtocol r : RestProtocol.values() )
+            {
+                if ( r.toString().equals( protocol ) )
+                {
+                    return r;
+                }
+            }
+            throw new ManipulationException( "Unknown protocol " + protocol );
+        }
+    }
+
     private static final Random RANDOM = new Random();
 
     private static final Base32 CODEC = new Base32();
@@ -54,10 +90,37 @@ public class DefaultVersionTranslator
 
     private final String endpointUrl;
 
-    private final ProjectVersionRefMapper pvrm = new ProjectVersionRefMapper();
+    private final ProjectVersionRefMapper pvrm;
 
-    public DefaultVersionTranslator( String endpointUrl )
+    /**
+     * @param endpointUrl is the URL to talk to.
+     * @param protocol determines what REST format PME should use. The two formats
+     *                 currently available are:
+     * <pre>{@code
+     * [ {
+     *     "groupId": "com.google.guava",
+     *     "artifactId": "guava",
+     *     "version": "13.0.1"
+     * } }
+     * }</pre>
+     * This equates to a List of ProjectVersionRef.
+     *
+     * <pre>{@code
+     * {
+     *     "productNames": [],
+     *     "productVersionIds": [],
+     *     "gavs": [
+     *     {
+     *         "groupId": "com.google.guava",
+     *         "artifactId": "guava",
+     *         "version": "13.0.1"
+     *     } ]
+     * }
+     * }</pre>
+     */
+    public DefaultVersionTranslator( String endpointUrl, RestProtocol protocol )
     {
+        this.pvrm = new ProjectVersionRefMapper(protocol);
         this.endpointUrl = endpointUrl;
         Unirest.setObjectMapper( pvrm );
         // According to https://github.com/Mashape/unirest-java the default connection timeout is 10000

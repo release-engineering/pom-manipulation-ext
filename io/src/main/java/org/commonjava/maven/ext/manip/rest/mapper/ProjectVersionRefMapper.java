@@ -19,6 +19,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.mashape.unirest.http.ObjectMapper;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef;
+import org.commonjava.maven.ext.manip.rest.DefaultVersionTranslator.RestProtocol;
 import org.commonjava.maven.ext.manip.rest.exception.RestException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,8 +29,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * @author vdedik@redhat.com
@@ -42,6 +41,13 @@ public class ProjectVersionRefMapper implements ObjectMapper
         = new com.fasterxml.jackson.databind.ObjectMapper();
 
     private String errorString;
+
+    private RestProtocol protocol;
+
+    public ProjectVersionRefMapper( RestProtocol protocol )
+    {
+        this.protocol = protocol;
+    }
 
     @Override
     public Map<ProjectVersionRef, String> readValue( String s )
@@ -108,8 +114,10 @@ public class ProjectVersionRefMapper implements ObjectMapper
     public String writeValue( Object value )
     {
         List<ProjectVersionRef> projects = (List<ProjectVersionRef>) value;
+        Object request;
 
-        List requestBody = new ArrayList();
+        List<Map<String, Object>> requestBody = new ArrayList<>();
+
         for ( ProjectVersionRef project : projects )
         {
             Map<String, Object> gav = new HashMap<>();
@@ -120,9 +128,23 @@ public class ProjectVersionRefMapper implements ObjectMapper
             requestBody.add( gav );
         }
 
+        if ( protocol == RestProtocol.DEPRECATED )
+        {
+            request = requestBody;
+        }
+        else if ( protocol == RestProtocol.CURRENT )
+        {
+            request = new DAMapper( new String[]{}, new String[]{}, requestBody );
+        }
+        else
+        {
+            throw new RestException( "Unknown protocol value " + protocol );
+        }
+        logger.debug ("Writing stream using protocol type '{}'" , protocol);
+
         try
         {
-            return objectMapper.writeValueAsString( requestBody );
+            return objectMapper.writeValueAsString( request );
         }
         catch ( JsonProcessingException e )
         {

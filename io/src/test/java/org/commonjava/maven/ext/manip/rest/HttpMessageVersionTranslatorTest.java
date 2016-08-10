@@ -36,6 +36,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.commonjava.maven.ext.manip.rest.DefaultVersionTranslator.*;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -65,7 +66,7 @@ public class HttpMessageVersionTranslatorTest
     {
         LoggerFactory.getLogger( DefaultVersionTranslator.class ).info ("Executing test " + testName.getMethodName());
 
-        this.versionTranslator = new DefaultVersionTranslator( mockServer.getUrl() );
+        this.versionTranslator = new DefaultVersionTranslator( mockServer.getUrl(), RestProtocol.DEPRECATED );
     }
 
     @Test

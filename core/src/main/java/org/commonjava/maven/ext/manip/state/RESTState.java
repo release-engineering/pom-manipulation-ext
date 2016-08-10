@@ -15,8 +15,10 @@
  */
 package org.commonjava.maven.ext.manip.state;
 
+import org.commonjava.maven.ext.manip.ManipulationException;
 import org.commonjava.maven.ext.manip.impl.DependencyManipulator;
 import org.commonjava.maven.ext.manip.rest.DefaultVersionTranslator;
+import org.commonjava.maven.ext.manip.rest.DefaultVersionTranslator.RestProtocol;
 import org.commonjava.maven.ext.manip.rest.VersionTranslator;
 
 import java.util.Properties;
@@ -30,11 +32,12 @@ public class RESTState implements State
 
     private final VersionTranslator restEndpoint;
 
-    public RESTState( final Properties userProps )
+    public RESTState( final Properties userProps ) throws ManipulationException
     {
         restURL = userProps.getProperty( "restURL" );
-
-        restEndpoint = new DefaultVersionTranslator(restURL);
+        // See DefaultVersionTranslator for protocol description.
+        restEndpoint = new DefaultVersionTranslator
+                        ( restURL, RestProtocol.parse( userProps.getProperty( "restProtocol", RestProtocol.CURRENT.toString() ) ) );
     }
 
     /**
