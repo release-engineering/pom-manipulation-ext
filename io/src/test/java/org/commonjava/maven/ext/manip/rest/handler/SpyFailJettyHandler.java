@@ -17,6 +17,7 @@
 package org.commonjava.maven.ext.manip.rest.handler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.commonjava.maven.ext.manip.rest.mapper.DAMapper;
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.handler.AbstractHandler;
@@ -79,7 +80,19 @@ public class SpyFailJettyHandler extends AbstractHandler implements Handler
                 return;
             }
 
-            List<Map<String, Object>> requestBody = objectMapper.readValue( jb.toString(), List.class );
+            List<Map<String, Object>> requestBody;
+
+            // Protocol analysis
+            if ( jb.toString().startsWith( "{\"productNames" ))
+            {
+                DAMapper daMapper = objectMapper.readValue( jb.toString(), DAMapper.class );
+                requestBody = daMapper.gavs;
+            }
+            else
+            {
+                requestBody = objectMapper.readValue( jb.toString(), List.class );
+            }
+
             requestData.add(requestBody);
 
             response.setStatus( HttpServletResponse.SC_GATEWAY_TIMEOUT );

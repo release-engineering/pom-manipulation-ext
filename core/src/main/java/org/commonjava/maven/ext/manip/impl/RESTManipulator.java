@@ -63,7 +63,7 @@ public class RESTManipulator implements Manipulator
     private static final Logger logger = LoggerFactory.getLogger( RESTManipulator.class );
 
     @Override
-    public void init( final ManipulationSession session )
+    public void init( final ManipulationSession session ) throws ManipulationException
     {
         final Properties userProps = session.getUserProperties();
         RESTState state = new RESTState( userProps );

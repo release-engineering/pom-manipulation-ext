@@ -16,6 +16,7 @@
 package org.commonjava.maven.ext.manip.rest.handler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.commonjava.maven.ext.manip.rest.mapper.DAMapper;
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.handler.AbstractHandler;
@@ -97,8 +98,20 @@ public class AddSuffixJettyHandler
                 LOGGER.warn( "Error reading request body. {}", e.getMessage() );
                 return;
             }
+            LOGGER.info( "Read request body {}", jb );
 
-            List<Map<String, Object>> requestBody = objectMapper.readValue( jb.toString(), List.class );
+            List<Map<String, Object>> requestBody;
+
+            // Protocol analysis
+            if ( jb.toString().startsWith( "{\"productNames" ))
+            {
+                DAMapper daMapper = objectMapper.readValue( jb.toString(), DAMapper.class );
+                requestBody = daMapper.gavs;
+            }
+            else
+            {
+                requestBody = objectMapper.readValue( jb.toString(), List.class );
+            }
 
             // Prepare Response
             List<Map<String, Object>> responseBody = new ArrayList<>();

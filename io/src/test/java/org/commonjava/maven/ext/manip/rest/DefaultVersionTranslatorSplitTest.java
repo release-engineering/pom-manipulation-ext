@@ -17,54 +17,77 @@ package org.commonjava.maven.ext.manip.rest;
 
 import com.mashape.unirest.http.Unirest;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
+import org.commonjava.maven.ext.manip.rest.DefaultVersionTranslator.RestProtocol;
 import org.commonjava.maven.ext.manip.rest.exception.RestException;
 import org.commonjava.maven.ext.manip.rest.handler.SpyFailJettyHandler;
 import org.commonjava.maven.ext.manip.rest.rule.MockServer;
 import org.junit.*;
 import org.junit.rules.TestName;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import static org.commonjava.maven.ext.manip.rest.DefaultVersionTranslator.RestProtocol.CURRENT;
+import static org.commonjava.maven.ext.manip.rest.DefaultVersionTranslator.RestProtocol.DEPRECATED;
 import static org.commonjava.maven.ext.manip.rest.DefaultVersionTranslatorTest.loadALotOfGAVs;
 import static org.junit.Assert.*;
 
 /**
  * @author Jakub Senko <jsenko@redhat.com>
  */
+@RunWith( Parameterized.class)
 public class DefaultVersionTranslatorSplitTest
 {
-
     private static List<ProjectVersionRef> aLotOfGavs;
 
     private DefaultVersionTranslator versionTranslator;
 
-    @Rule public TestName testName = new TestName();
+    private RestProtocol protocol;
+
+    @Parameterized.Parameters()
+    public static Collection<Object[]> data()
+    {
+        return Arrays.asList( new Object[][] { { DEPRECATED }, { CURRENT } } );
+    }
+
+    @Rule
+    public TestName testName = new TestName();
 
     private static SpyFailJettyHandler handler = new SpyFailJettyHandler();
 
-    @ClassRule public static MockServer mockServer = new MockServer( handler );
+    @Rule
+    public MockServer mockServer = new MockServer( handler );
 
     private static final Logger LOG = LoggerFactory.getLogger( DefaultVersionTranslatorSplitTest.class );
 
-    @BeforeClass public static void startUp()
-                    throws IOException
+    @BeforeClass
+    public static void startUp() throws IOException
     {
         aLotOfGavs = loadALotOfGAVs();
         assertTrue( aLotOfGavs.size() >= 37 );
     }
 
-    @Before public void before()
+    @Before
+    public void before()
     {
 
         LOG.info( "Executing test " + testName.getMethodName() );
 
-        this.versionTranslator = new DefaultVersionTranslator( mockServer.getUrl() );
+        this.versionTranslator = new DefaultVersionTranslator( mockServer.getUrl(), protocol );
+    }
+
+    public DefaultVersionTranslatorSplitTest( RestProtocol protocol )
+    {
+        this.protocol = protocol;
     }
 
     @Test
@@ -80,7 +103,8 @@ public class DefaultVersionTranslatorSplitTest
         }
     }
 
-    @Test public void testTranslateVersionsCorrectSplit()
+    @Test
+    public void testTranslateVersionsCorrectSplit()
     {
         List<ProjectVersionRef> data = aLotOfGavs.subList( 0, 37 );
         handler.getRequestData().clear();
@@ -119,7 +143,8 @@ public class DefaultVersionTranslatorSplitTest
         assertEquals( original, chunks );
     }
 
-    @Test public void testTranslateVersionsCorrectSplit2()
+    @Test
+    public void testTranslateVersionsCorrectSplit2()
     {
         List<ProjectVersionRef> data = aLotOfGavs.subList( 0, 36 );
         handler.getRequestData().clear();

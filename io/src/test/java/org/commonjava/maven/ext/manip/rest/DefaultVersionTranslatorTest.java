@@ -27,21 +27,25 @@ import org.commonjava.maven.ext.manip.rest.handler.AddSuffixJettyHandler;
 import org.commonjava.maven.ext.manip.rest.rule.MockServer;
 import org.junit.Before;
 import org.junit.BeforeClass;
-import org.junit.ClassRule;
 import org.junit.FixMethodOrder;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestName;
+import org.junit.runner.RunWith;
 import org.junit.runners.MethodSorters;
+import org.junit.runners.Parameterized;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 
+import static org.commonjava.maven.ext.manip.rest.DefaultVersionTranslator.*;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
@@ -50,17 +54,26 @@ import static org.junit.Assert.fail;
  * @author vdedik@redhat.com
  */
 @FixMethodOrder( MethodSorters.NAME_ASCENDING)
+@RunWith( Parameterized.class)
 public class DefaultVersionTranslatorTest
 {
     private static List<ProjectVersionRef> aLotOfGavs;
 
     private DefaultVersionTranslator versionTranslator;
 
+    private RestProtocol protocol;
+
+    @Parameterized.Parameters()
+    public static Collection<Object[]> data()
+    {
+        return Arrays.asList( new Object[][] { { RestProtocol.DEPRECATED }, { RestProtocol.CURRENT } } );
+    }
+
     @Rule
     public TestName testName = new TestName();
 
-    @ClassRule
-    public static MockServer mockServer = new MockServer( new AddSuffixJettyHandler() );
+    @Rule
+    public MockServer mockServer = new MockServer( new AddSuffixJettyHandler() );
 
     @BeforeClass
     public static void startUp()
@@ -74,7 +87,12 @@ public class DefaultVersionTranslatorTest
     {
         LoggerFactory.getLogger( DefaultVersionTranslator.class ).info( "Executing test " + testName.getMethodName() );
 
-        this.versionTranslator = new DefaultVersionTranslator( mockServer.getUrl() );
+        this.versionTranslator = new DefaultVersionTranslator( mockServer.getUrl(), protocol );
+    }
+
+    public DefaultVersionTranslatorTest(RestProtocol protocol)
+    {
+        this.protocol = protocol;
     }
 
     @Test
@@ -117,7 +135,7 @@ public class DefaultVersionTranslatorTest
     public void testTranslateVersionsFailNoResponse()
     {
         // Some url that doesn't exist used here
-        VersionTranslator versionTranslator = new DefaultVersionTranslator( "http://127.0.0.2" );
+        VersionTranslator versionTranslator = new DefaultVersionTranslator( "http://127.0.0.2", RestProtocol.DEPRECATED );
 
         List<ProjectVersionRef> gavs = new ArrayList<ProjectVersionRef>()
         {{
