@@ -33,7 +33,6 @@ import org.commonjava.maven.ext.manip.ManipulationSession;
 import org.commonjava.maven.ext.manip.io.ModelIO;
 import org.commonjava.maven.ext.manip.model.Project;
 import org.commonjava.maven.ext.manip.state.DependencyState;
-import org.commonjava.maven.ext.manip.state.VersioningState;
 import org.commonjava.maven.ext.manip.util.PropertiesUtils;
 import org.commonjava.maven.ext.manip.util.WildcardMap;
 import org.slf4j.Logger;
@@ -53,7 +52,6 @@ import java.util.Set;
 
 import static org.apache.commons.lang.StringUtils.isEmpty;
 import static org.apache.commons.lang.StringUtils.join;
-import static org.apache.commons.lang.StringUtils.substringAfter;
 import static org.commonjava.maven.ext.manip.util.IdUtils.ga;
 import static org.commonjava.maven.ext.manip.util.IdUtils.gav;
 
@@ -62,7 +60,8 @@ import static org.commonjava.maven.ext.manip.util.IdUtils.gav;
  * Configuration is stored in a {@link DependencyState} instance, which is in turn stored in the {@link ManipulationSession}.
  */
 @Component( role = Manipulator.class, hint = "project-dependency-manipulator" )
-public class DependencyManipulator implements Manipulator
+public class DependencyManipulator
+                extends AbstractNoopManipulator
 {
     private final Logger logger = LoggerFactory.getLogger( getClass() );
 
@@ -89,15 +88,6 @@ public class DependencyManipulator implements Manipulator
     {
         final Properties userProps = session.getUserProperties();
         session.setState( new DependencyState( userProps ) );
-    }
-
-    /**
-     * No prescanning required for BOM manipulation.
-     */
-    @Override
-    public void scan( final List<Project> projects, final ManipulationSession session )
-        throws ManipulationException
-    {
     }
 
     /**

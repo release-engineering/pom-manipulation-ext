@@ -45,21 +45,12 @@ import java.util.Set;
  */
 @Component( role = Manipulator.class, hint = "groovy-injection" )
 public class GroovyManipulator
-    implements Manipulator
+                extends AbstractNoopManipulator
 {
     private final Logger logger = LoggerFactory.getLogger( getClass() );
 
     @Requirement
     protected ModelIO modelBuilder;
-
-    /**
-     * No prescanning required for Profile injection.
-     */
-    @Override
-    public void scan( final List<Project> projects, final ManipulationSession session )
-        throws ManipulationException
-    {
-    }
 
     /**
      * Initialize the {@link GroovyState} state holder in the {@link ManipulationSession}. This state holder detects
@@ -161,6 +152,6 @@ public class GroovyManipulator
     @Override
     public int getExecutionIndex()
     {
-        return 99;
+        return 98;
     }
 }

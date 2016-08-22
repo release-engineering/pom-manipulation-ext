@@ -15,13 +15,6 @@
  */
 package org.commonjava.maven.ext.manip.resolver;
 
-import java.io.File;
-import java.net.MalformedURLException;
-import java.util.Collections;
-import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.repository.MirrorSelector;
 import org.apache.maven.settings.Settings;
@@ -69,6 +62,13 @@ import org.commonjava.maven.galley.spi.transport.TransportManager;
 import org.commonjava.maven.galley.transport.TransportManagerImpl;
 import org.commonjava.maven.galley.transport.htcli.HttpClientTransport;
 import org.commonjava.maven.galley.transport.htcli.HttpImpl;
+
+import java.io.File;
+import java.net.MalformedURLException;
+import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * Manager component responsible for setting up and managing the Galley API instances used to resolve POMs and metadata.

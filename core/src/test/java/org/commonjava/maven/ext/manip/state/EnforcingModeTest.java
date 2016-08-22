@@ -15,10 +15,10 @@
  */
 package org.commonjava.maven.ext.manip.state;
 
+import org.junit.Test;
+
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertThat;
-
-import org.junit.Test;
 
 public class EnforcingModeTest
 {

@@ -15,9 +15,6 @@
  */
 package org.commonjava.maven.ext.manip.fixture;
 
-import java.util.Arrays;
-import java.util.Collections;
-
 import org.codehaus.plexus.DefaultContainerConfiguration;
 import org.codehaus.plexus.DefaultPlexusContainer;
 import org.codehaus.plexus.PlexusConstants;
@@ -28,6 +25,9 @@ import org.sonatype.guice.bean.reflect.ClassSpace;
 import org.sonatype.guice.bean.reflect.URLClassSpace;
 import org.sonatype.guice.plexus.binders.PlexusAnnotatedBeanModule;
 import org.sonatype.guice.plexus.config.PlexusBeanModule;
+
+import java.util.Arrays;
+import java.util.Collections;
 
 public class PlexusTestRunner
     extends BlockJUnit4ClassRunner

@@ -36,7 +36,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.commonjava.maven.ext.manip.rest.DefaultVersionTranslator.*;
+import static org.commonjava.maven.ext.manip.rest.DefaultVersionTranslator.RestProtocol;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 

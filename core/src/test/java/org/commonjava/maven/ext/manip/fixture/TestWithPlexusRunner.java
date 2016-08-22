@@ -15,13 +15,13 @@
  */
 package org.commonjava.maven.ext.manip.fixture;
 
-import static org.junit.Assert.assertNotNull;
-
 import org.apache.maven.settings.building.SettingsBuilder;
 import org.codehaus.plexus.component.annotations.Component;
 import org.codehaus.plexus.component.annotations.Requirement;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
+import static org.junit.Assert.assertNotNull;
 
 @RunWith( PlexusTestRunner.class )
 @Component( role = TestWithPlexusRunner.class )

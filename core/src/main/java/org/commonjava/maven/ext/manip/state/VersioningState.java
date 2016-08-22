@@ -15,9 +15,11 @@
  */
 package org.commonjava.maven.ext.manip.state;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.commonjava.maven.atlas.ident.ref.ProjectRef;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.ext.manip.impl.ProjectVersioningManipulator;
+import org.commonjava.maven.ext.manip.model.GAV;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -52,6 +54,9 @@ public class VersioningState
     private final boolean osgi;
 
     private final String override;
+
+    @JsonProperty
+    private GAV executionRootModified;
 
     /**
      * Record the versions to change. Essentially this contains a mapping of original
@@ -140,6 +145,11 @@ public class VersioningState
     public void setVersionsByGAVMap( Map<ProjectVersionRef, String> versionsByGAV )
     {
         this.versionsByGAV.putAll( versionsByGAV );
+    }
+
+    public void setExecutionRootModified( GAV executionRootModified )
+    {
+        this.executionRootModified = executionRootModified;
     }
 
     public boolean hasVersionsByGAVMap()

@@ -42,18 +42,12 @@ import static org.apache.commons.lang.StringUtils.isEmpty;
  */
 @Component( role = Manipulator.class, hint = "json-manipulator" )
 public class JSONManipulator
-    implements Manipulator
+                extends AbstractNoopManipulator
 {
     private final Logger logger = LoggerFactory.getLogger( getClass() );
 
     @Requirement
     private JSONIO jsonIO;
-
-    @Override
-    public void scan( final List<Project> projects, final ManipulationSession session )
-        throws ManipulationException
-    {
-    }
 
     /**
      * Initialize the {@link JSONState} state holder in the {@link ManipulationSession}. This state holder detects

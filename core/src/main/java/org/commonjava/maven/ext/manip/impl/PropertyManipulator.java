@@ -42,8 +42,7 @@ import static org.commonjava.maven.ext.manip.util.IdUtils.ga;
  * Configuration is stored in a {@link PropertyState} instance, which is in turn stored in the {@link ManipulationSession}.
  */
 @Component( role = Manipulator.class, hint = "property-manipulator" )
-public class PropertyManipulator
-    implements Manipulator
+public class PropertyManipulator extends AbstractNoopManipulator
 {
     private final Logger logger = LoggerFactory.getLogger( getClass() );
 
@@ -55,15 +54,6 @@ public class PropertyManipulator
     {
         final Properties userProps = session.getUserProperties();
         session.setState( new PropertyState( userProps ) );
-    }
-
-    /**
-     * No prescanning required for Property manipulation.
-     */
-    @Override
-    public void scan( final List<Project> projects, final ManipulationSession session )
-        throws ManipulationException
-    {
     }
 
     /**

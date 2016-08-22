@@ -15,12 +15,6 @@
  */
 package org.commonjava.maven.ext.manip.fixture;
 
-import static org.apache.commons.io.IOUtils.closeQuietly;
-
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.Map;
-
 import org.commonjava.maven.ext.manip.resolver.MavenLocationExpander;
 import org.commonjava.maven.galley.TransferException;
 import org.commonjava.maven.galley.event.EventMetadata;
@@ -33,6 +27,12 @@ import org.commonjava.maven.galley.spi.transport.ExistenceJob;
 import org.commonjava.maven.galley.spi.transport.ListingJob;
 import org.commonjava.maven.galley.spi.transport.PublishJob;
 import org.commonjava.maven.galley.spi.transport.Transport;
+
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.Map;
+
+import static org.apache.commons.io.IOUtils.closeQuietly;
 
 public class StubTransport
     implements Transport

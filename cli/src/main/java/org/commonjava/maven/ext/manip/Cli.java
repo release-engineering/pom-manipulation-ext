@@ -56,9 +56,9 @@ import org.codehaus.plexus.component.repository.exception.ComponentLookupExcepti
 import org.commonjava.maven.atlas.ident.ref.ArtifactRef;
 import org.commonjava.maven.atlas.ident.ref.ProjectRef;
 import org.commonjava.maven.ext.manip.impl.RESTManipulator;
+import org.commonjava.maven.ext.manip.io.ConfigIO;
 import org.commonjava.maven.ext.manip.io.PomIO;
 import org.commonjava.maven.ext.manip.io.XMLIO;
-import org.commonjava.maven.ext.manip.io.ConfigIO;
 import org.commonjava.maven.ext.manip.model.SimpleScopedArtifactRef;
 import org.commonjava.maven.ext.manip.rest.exception.RestException;
 import org.slf4j.Logger;

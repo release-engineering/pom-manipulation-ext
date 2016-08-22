@@ -28,9 +28,11 @@ import org.commonjava.maven.ext.manip.state.VersioningState;
 
 import java.io.File;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
 
 /**
@@ -88,6 +90,10 @@ public class ManipulationSession
     public void setState( final State state )
     {
         states.put( state.getClass(), state );
+    }
+
+    public HashSet<Entry<Class<?>, State>> getStatesCopy() {
+        return new HashSet<Entry<Class<?>, State>>( states.entrySet() );
     }
 
     public <T extends State> T getState( final Class<T> stateType )

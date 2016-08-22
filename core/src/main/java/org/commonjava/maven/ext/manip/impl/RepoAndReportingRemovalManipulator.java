@@ -45,23 +45,13 @@ import static org.commonjava.maven.ext.manip.util.IdUtils.ga;
  * Configuration is stored in a {@link RepoReportingState} instance, which is in turn stored in the {@link ManipulationSession}.
  */
 @Component( role = Manipulator.class, hint = "enforce-repo-reporting-removal" )
-public class RepoAndReportingRemovalManipulator
-    implements Manipulator
+public class RepoAndReportingRemovalManipulator extends AbstractNoopManipulator
 {
 
     private final Logger logger = LoggerFactory.getLogger( getClass() );
 
     @Requirement
     private SettingsIO settingsWriter;
-
-    /**
-     * No prescanning required for Repository and Reporting Removal.
-     */
-    @Override
-    public void scan( final List<Project> projects, final ManipulationSession session )
-        throws ManipulationException
-    {
-    }
 
     /**
      * Initialize the {@link RepoReportingState} state holder in the {@link ManipulationSession}. This state holder detects

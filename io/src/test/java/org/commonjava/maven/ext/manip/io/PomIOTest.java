@@ -15,8 +15,8 @@
  */
 package org.commonjava.maven.ext.manip.io;
 
-import org.apache.maven.model.Model;
 import org.apache.commons.io.FileUtils;
+import org.apache.maven.model.Model;
 import org.commonjava.maven.ext.manip.model.Project;
 import org.junit.Before;
 import org.junit.Rule;

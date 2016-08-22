@@ -21,7 +21,10 @@ import org.commonjava.maven.ext.manip.rest.DefaultVersionTranslator.RestProtocol
 import org.commonjava.maven.ext.manip.rest.exception.RestException;
 import org.commonjava.maven.ext.manip.rest.handler.SpyFailJettyHandler;
 import org.commonjava.maven.ext.manip.rest.rule.MockServer;
-import org.junit.*;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Rule;
+import org.junit.Test;
 import org.junit.rules.TestName;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -39,7 +42,9 @@ import java.util.Set;
 import static org.commonjava.maven.ext.manip.rest.DefaultVersionTranslator.RestProtocol.CURRENT;
 import static org.commonjava.maven.ext.manip.rest.DefaultVersionTranslator.RestProtocol.DEPRECATED;
 import static org.commonjava.maven.ext.manip.rest.DefaultVersionTranslatorTest.loadALotOfGAVs;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  * @author Jakub Senko <jsenko@redhat.com>

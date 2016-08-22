@@ -46,8 +46,7 @@ import static org.commonjava.maven.ext.manip.util.IdUtils.ga;
  * Configuration is stored in a {@link PluginState} instance, which is in turn stored in the {@link ManipulationSession}.
  */
 @Component( role = Manipulator.class, hint = "relocations-manipulator" )
-public class RelocationManipulator
-        implements Manipulator
+public class RelocationManipulator extends AbstractNoopManipulator
 {
     private final Logger logger = LoggerFactory.getLogger( getClass() );
 
@@ -62,15 +61,6 @@ public class RelocationManipulator
     {
         final Properties userProps = session.getUserProperties();
         session.setState( new RelocationState( userProps ) );
-    }
-
-    /**
-     * No prescanning required for relocations.
-     */
-    @Override
-    public void scan( final List<Project> projects, final ManipulationSession session )
-            throws ManipulationException
-    {
     }
 
     /**

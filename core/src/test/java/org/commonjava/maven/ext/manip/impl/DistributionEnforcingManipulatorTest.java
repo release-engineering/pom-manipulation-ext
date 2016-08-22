@@ -15,28 +15,6 @@
  */
 package org.commonjava.maven.ext.manip.impl;
 
-import static org.commonjava.maven.ext.manip.impl.DistributionEnforcingManipulator.MAVEN_DEPLOY_ARTIFACTID;
-import static org.commonjava.maven.ext.manip.impl.DistributionEnforcingManipulator.MAVEN_INSTALL_ARTIFACTID;
-import static org.commonjava.maven.ext.manip.impl.DistributionEnforcingManipulator.MAVEN_PLUGIN_GROUPID;
-import static org.commonjava.maven.ext.manip.state.DistributionEnforcingState.ENFORCE_SYSPROP;
-import static org.commonjava.maven.ext.manip.state.EnforcingMode.detect;
-import static org.commonjava.maven.ext.manip.state.EnforcingMode.none;
-import static org.commonjava.maven.ext.manip.state.EnforcingMode.off;
-import static org.commonjava.maven.ext.manip.state.EnforcingMode.on;
-import static org.commonjava.maven.ext.manip.util.IdUtils.ga;
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.junit.Assert.assertThat;
-
-import java.io.StringReader;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
-
 import org.apache.commons.lang.reflect.FieldUtils;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.execution.DefaultMavenExecutionRequest;
@@ -62,6 +40,28 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
+
+import java.io.StringReader;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
+
+import static org.commonjava.maven.ext.manip.impl.DistributionEnforcingManipulator.MAVEN_DEPLOY_ARTIFACTID;
+import static org.commonjava.maven.ext.manip.impl.DistributionEnforcingManipulator.MAVEN_INSTALL_ARTIFACTID;
+import static org.commonjava.maven.ext.manip.impl.DistributionEnforcingManipulator.MAVEN_PLUGIN_GROUPID;
+import static org.commonjava.maven.ext.manip.state.DistributionEnforcingState.ENFORCE_SYSPROP;
+import static org.commonjava.maven.ext.manip.state.EnforcingMode.detect;
+import static org.commonjava.maven.ext.manip.state.EnforcingMode.none;
+import static org.commonjava.maven.ext.manip.state.EnforcingMode.off;
+import static org.commonjava.maven.ext.manip.state.EnforcingMode.on;
+import static org.commonjava.maven.ext.manip.util.IdUtils.ga;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.junit.Assert.assertThat;
 
 public class DistributionEnforcingManipulatorTest
 {

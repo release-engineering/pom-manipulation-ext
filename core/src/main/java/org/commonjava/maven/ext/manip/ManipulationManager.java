@@ -15,6 +15,14 @@
  */
 package org.commonjava.maven.ext.manip;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.introspect.VisibilityChecker;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.project.ProjectBuilder;
 import org.codehaus.plexus.component.annotations.Component;
@@ -23,11 +31,13 @@ import org.commonjava.maven.ext.manip.impl.Manipulator;
 import org.commonjava.maven.ext.manip.io.PomIO;
 import org.commonjava.maven.ext.manip.model.Project;
 import org.commonjava.maven.ext.manip.resolver.ExtensionInfrastructure;
+import org.commonjava.maven.ext.manip.state.State;
 import org.commonjava.maven.ext.manip.util.ManipulatorPriorityComparator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -58,6 +68,8 @@ public class ManipulationManager
     private static final String MARKER_PATH = "target";
 
     static final String MARKER_FILE =  MARKER_PATH + File.separatorChar + "pom-manip-ext-marker.txt";
+
+    static final String RESULT_FILE = MARKER_PATH + File.separatorChar + "pom-manip-ext-result.json";
 
     private final Logger logger = LoggerFactory.getLogger( getClass() );
 
@@ -141,12 +153,19 @@ public class ManipulationManager
             {
                 new File( session.getTargetDir().getParentFile(),
                           ManipulationManager.MARKER_PATH ).mkdirs();
+
                 new File( session.getTargetDir().getParentFile(),
                           ManipulationManager.MARKER_FILE ).createNewFile();
+
+                try (FileWriter writer = new FileWriter( new File ( session.getTargetDir().getParentFile(), RESULT_FILE ) ) )
+                {
+                    writer.write( collectResults( session ) );
+                }
             }
             catch ( IOException e )
             {
-                throw new ManipulationException( "Marker file creation failed", e );
+                logger.error( "Unable to create marker or result file", e );
+                throw new ManipulationException( "Marker/result file creation failed", e );
             }
         }
 
@@ -157,6 +176,7 @@ public class ManipulationManager
         }
         logger.info( "Maven-Manipulation-Extension: Finished." );
     }
+
 
     /**
      * Scan the projects implied by the given POM file for modifications, and save the state in the session for later rewriting to apply it.
@@ -210,4 +230,53 @@ public class ManipulationManager
         return changed;
     }
 
+
+    private void applyAfterManipulations( List<Project> projects, ManipulationSession session )
+                    throws ManipulationException
+    {
+        for ( final Manipulator manipulator : orderedManipulators ) {
+            manipulator.afterApplyChanges( projects, session );
+        }
+    }
+
+    /**
+     * After the modifications are applied, it may be useful for manipulators
+     * to provide caller with a structured, computer-readable output or summary of the changes.
+     * This is done in the form of a JSON document stored in the root target
+     * directory.
+     * The output data are generated from the fields of the state objects,
+     * which must be actively marked by {@link JsonProperty} annotation
+     * to be processed.
+     * The result is a map from short state class names
+     * to the result of the state serialization.
+     * Keys with empty values are excluded.
+     *
+     * @param session the container session for manipulation.
+     * @throws ManipulationException if an error occurs.
+     */
+    private String collectResults( final ManipulationSession session )
+                    throws ManipulationException, JsonProcessingException
+    {
+        final ObjectMapper MAPPER = new ObjectMapper();
+        VisibilityChecker<?> vc = MAPPER.getSerializationConfig()
+                                        .getDefaultVisibilityChecker()
+                                        .withCreatorVisibility( JsonAutoDetect.Visibility.NONE )
+                                        .withFieldVisibility( JsonAutoDetect.Visibility.NONE )
+                                        .withGetterVisibility( JsonAutoDetect.Visibility.NONE )
+                                        .withIsGetterVisibility( JsonAutoDetect.Visibility.NONE )
+                                        .withSetterVisibility( JsonAutoDetect.Visibility.NONE );
+        MAPPER.setVisibility( vc );
+        MAPPER.configure( SerializationFeature.FAIL_ON_EMPTY_BEANS, false );
+        ObjectNode root = MAPPER.createObjectNode();
+        for ( final Map.Entry<Class<?>, State> stateEntry : session.getStatesCopy() )
+        {
+            JsonNode node = MAPPER.convertValue( stateEntry.getValue(), JsonNode.class );
+            if ( node.isObject() && node.size() != 0 )
+            {
+                root.set( stateEntry.getKey().getSimpleName(), node );
+            }
+        }
+
+        return MAPPER.writeValueAsString( root );
+    }
 }

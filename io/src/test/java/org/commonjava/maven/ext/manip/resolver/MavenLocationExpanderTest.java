@@ -15,14 +15,6 @@
  */
 package org.commonjava.maven.ext.manip.resolver;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.junit.Assert.assertThat;
-
-import java.io.File;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.artifact.repository.ArtifactRepositoryPolicy;
 import org.apache.maven.artifact.repository.MavenArtifactRepository;
@@ -35,6 +27,14 @@ import org.apache.maven.settings.Repository;
 import org.apache.maven.settings.Settings;
 import org.commonjava.maven.galley.model.Location;
 import org.junit.Test;
+
+import java.io.File;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.junit.Assert.assertThat;
 
 public class MavenLocationExpanderTest
 {

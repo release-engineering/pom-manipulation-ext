@@ -45,7 +45,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 
-import static org.commonjava.maven.ext.manip.rest.DefaultVersionTranslator.*;
+import static org.commonjava.maven.ext.manip.rest.DefaultVersionTranslator.RestProtocol;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
