@@ -72,20 +72,6 @@ public interface Manipulator
         throws ManipulationException;
 
     /**
-     * In some cases, manipulators may need to take a look
-     * at the final changes after they are applied.
-     * However, no further manipulation is allowed at this point.
-     * This is the counterpart to the {@link Manipulator#scan(List, ManipulationSession)}
-     * method.
-     *
-     * @param projects the Projects to apply the changes to.
-     * @param session the container session.
-     * @throws ManipulationException if an error occurs.
-     */
-    void afterApplyChanges( List<Project> projects, ManipulationSession session )
-                    throws ManipulationException;
-
-    /**
      * Determines the order in which manipulators are run, with the lowest number running first.
      * Uses a 100-point scale.
      * @return current index.

@@ -152,6 +152,6 @@ public class GroovyManipulator
     @Override
     public int getExecutionIndex()
     {
-        return 98;
+        return 99;
     }
 }

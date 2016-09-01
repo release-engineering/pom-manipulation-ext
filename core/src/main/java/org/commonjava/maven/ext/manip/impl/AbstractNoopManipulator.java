@@ -53,11 +53,5 @@ public abstract class AbstractNoopManipulator
         return emptySet();
     }
 
-    @Override public void afterApplyChanges( List<Project> projects, ManipulationSession session )
-                    throws ManipulationException
-    {
-        // noop
-    }
-
     @Override public abstract int getExecutionIndex();
 }

@@ -230,15 +230,6 @@ public class ManipulationManager
         return changed;
     }
 
-
-    private void applyAfterManipulations( List<Project> projects, ManipulationSession session )
-                    throws ManipulationException
-    {
-        for ( final Manipulator manipulator : orderedManipulators ) {
-            manipulator.afterApplyChanges( projects, session );
-        }
-    }
-
     /**
      * After the modifications are applied, it may be useful for manipulators
      * to provide caller with a structured, computer-readable output or summary of the changes.
