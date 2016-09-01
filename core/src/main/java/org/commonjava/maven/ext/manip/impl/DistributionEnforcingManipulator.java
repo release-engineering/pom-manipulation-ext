@@ -183,6 +183,11 @@ public class DistributionEnforcingManipulator
                     enforceSkipFlag( profile, baseSkipSetting, project, changed, false );
                 }
             }
+
+            if ( baseSkipSetting == Boolean.FALSE && model.getProperties().containsKey( "maven.deploy.skip" ) )
+            {
+                model.getProperties().setProperty( "maven.deploy.skip", "false" );
+            }
         }
 
         return changed;
