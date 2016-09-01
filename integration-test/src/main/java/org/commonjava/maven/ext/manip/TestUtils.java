@@ -144,7 +144,7 @@ public class TestUtils
      * @return Exit value
      * @throws Exception
      */
-    private static Integer runCli( List<String> args, Map<String, String> params, String workingDir )
+    public static Integer runCli( List<String> args, Map<String, String> params, String workingDir )
         throws Exception
     {
         ArrayList<String> arguments = new ArrayList<>( args );
