@@ -43,12 +43,22 @@ import static org.commonjava.maven.ext.manip.util.IdUtils.ga;
  * {@link RepositoryInjectionState} instance, which is in turn stored in the {@link ManipulationSession}.
  */
 @Component( role = Manipulator.class, hint = "repository-injection" )
-public class RepositoryInjectionManipulator extends AbstractNoopManipulator
+public class RepositoryInjectionManipulator
+        implements Manipulator
 {
     private final Logger logger = LoggerFactory.getLogger( getClass() );
 
     @Requirement
     private ModelIO modelBuilder;
+
+    /**
+     * No prescanning required for Repository injection.
+     */
+    @Override
+    public void scan( final List<Project> projects, final ManipulationSession session )
+            throws ManipulationException
+    {
+    }
 
     /**
      * Initialize the {@link RepositoryInjectionState} state holder in the {@link ManipulationSession}. This state holder detects

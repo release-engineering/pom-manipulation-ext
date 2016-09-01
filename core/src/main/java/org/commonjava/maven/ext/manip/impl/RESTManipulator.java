@@ -58,7 +58,7 @@ import static org.apache.commons.lang.StringUtils.isNotEmpty;
  * and the remote overrides into the DependencyState for those as well.
  */
 @Component( role = Manipulator.class, hint = "rest-manipulator" )
-public class RESTManipulator extends AbstractNoopManipulator
+public class RESTManipulator implements Manipulator
 {
     private static final Logger logger = LoggerFactory.getLogger( RESTManipulator.class );
 

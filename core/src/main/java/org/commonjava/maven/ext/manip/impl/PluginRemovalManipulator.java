@@ -44,7 +44,8 @@ import static org.commonjava.maven.ext.manip.util.IdUtils.ga;
  * Configuration is stored in a {@link PluginState} instance, which is in turn stored in the {@link ManipulationSession}.
  */
 @Component( role = Manipulator.class, hint = "plugin-removal-manipulator" )
-public class PluginRemovalManipulator extends AbstractNoopManipulator
+public class PluginRemovalManipulator
+        implements Manipulator
 {
     private final Logger logger = LoggerFactory.getLogger( getClass() );
 
@@ -58,6 +59,15 @@ public class PluginRemovalManipulator extends AbstractNoopManipulator
     {
         final Properties userProps = session.getUserProperties();
         session.setState( new PluginRemovalState( userProps ) );
+    }
+
+    /**
+     * No prescanning required for BOM manipulation.
+     */
+    @Override
+    public void scan( final List<Project> projects, final ManipulationSession session )
+            throws ManipulationException
+    {
     }
 
     /**

@@ -42,7 +42,8 @@ import java.util.Set;
  * Therefore this manipulator will automatically fix these unless it is explicitly disabled.
  */
 @Component( role = Manipulator.class, hint = "enforce-project-version" )
-public class ProjectVersionEnforcingManipulator extends AbstractNoopManipulator
+public class ProjectVersionEnforcingManipulator
+    implements Manipulator
 {
 
     private static final String PROJVER = "${project.version}";
@@ -57,6 +58,15 @@ public class ProjectVersionEnforcingManipulator extends AbstractNoopManipulator
     public void init( final ManipulationSession session )
     {
         session.setState( new ProjectVersionEnforcingState( session.getUserProperties() ) );
+    }
+
+    /**
+     * No pre-scanning necessary.
+     */
+    @Override
+    public void scan( final List<Project> projects, final ManipulationSession session )
+        throws ManipulationException
+    {
     }
 
     /**

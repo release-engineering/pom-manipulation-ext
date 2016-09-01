@@ -60,8 +60,7 @@ import static org.commonjava.maven.ext.manip.util.IdUtils.gav;
  * Configuration is stored in a {@link DependencyState} instance, which is in turn stored in the {@link ManipulationSession}.
  */
 @Component( role = Manipulator.class, hint = "project-dependency-manipulator" )
-public class DependencyManipulator
-                extends AbstractNoopManipulator
+public class DependencyManipulator implements Manipulator
 {
     private final Logger logger = LoggerFactory.getLogger( getClass() );
 
@@ -88,6 +87,15 @@ public class DependencyManipulator
     {
         final Properties userProps = session.getUserProperties();
         session.setState( new DependencyState( userProps ) );
+    }
+
+    /**
+     * No prescanning required for BOM manipulation.
+     */
+    @Override
+    public void scan( final List<Project> projects, final ManipulationSession session )
+        throws ManipulationException
+    {
     }
 
     /**

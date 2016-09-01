@@ -78,7 +78,7 @@ import static org.commonjava.maven.ext.manip.util.IdUtils.ga;
  */
 @Component( role = Manipulator.class, hint = "enforce-skip" )
 public class DistributionEnforcingManipulator
-    extends AbstractNoopManipulator
+    implements Manipulator
 {
 
     public static final String MAVEN_PLUGIN_GROUPID = "org.apache.maven.plugins";
@@ -105,6 +105,15 @@ public class DistributionEnforcingManipulator
         throws ManipulationException
     {
         session.setState( new DistributionEnforcingState( session.getUserProperties() ) );
+    }
+
+    /**
+     * No pre-scanning necessary.
+     */
+    @Override
+    public void scan( final List<Project> projects, final ManipulationSession session )
+        throws ManipulationException
+    {
     }
 
     /**

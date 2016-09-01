@@ -58,7 +58,8 @@ import static org.commonjava.maven.ext.manip.util.IdUtils.gav;
  * @author jdcasey
  */
 @Component( role = Manipulator.class, hint = "version-manipulator" )
-public class ProjectVersioningManipulator extends AbstractNoopManipulator
+public class ProjectVersioningManipulator
+    implements Manipulator
 {
     private final Logger logger = LoggerFactory.getLogger( getClass() );
 

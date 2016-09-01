@@ -46,7 +46,8 @@ import static org.apache.commons.lang.StringUtils.isEmpty;
  * is stored in a {@link XMLState} instance, which is in turn stored in the {@link ManipulationSession}.
  */
 @Component( role = Manipulator.class, hint = "xml-manipulator" )
-public class XMLManipulator extends AbstractNoopManipulator
+public class XMLManipulator
+    implements Manipulator
 {
     private final Logger logger = LoggerFactory.getLogger( getClass() );
 
@@ -54,6 +55,12 @@ public class XMLManipulator extends AbstractNoopManipulator
 
     @Requirement
     private XMLIO xmlIO;
+
+    @Override
+    public void scan( final List<Project> projects, final ManipulationSession session )
+        throws ManipulationException
+    {
+    }
 
     /**
      * Initialize the {@link XMLState} state holder in the {@link ManipulationSession}. This state holder detects
@@ -148,6 +155,6 @@ public class XMLManipulator extends AbstractNoopManipulator
     @Override
     public int getExecutionIndex()
     {
-        return 97;
+        return 98;
     }
 }

@@ -44,7 +44,8 @@ import static org.commonjava.maven.ext.manip.util.IdUtils.ga;
  * in {@link ProjectSourcesInjectingState}.
  */
 @Component( role = Manipulator.class, hint = "project-sources" )
-public class ProjectSourcesInjectingManipulator extends AbstractNoopManipulator
+public class ProjectSourcesInjectingManipulator
+    implements Manipulator
 {
 
     private static final String PROJECT_SOURCES_GID = "org.commonjava.maven.plugins";
@@ -78,6 +79,12 @@ public class ProjectSourcesInjectingManipulator extends AbstractNoopManipulator
         throws ManipulationException
     {
         session.setState( new ProjectSourcesInjectingState( session.getUserProperties() ) );
+    }
+
+    @Override
+    public void scan( final List<Project> projects, final ManipulationSession session )
+        throws ManipulationException
+    {
     }
 
     /**

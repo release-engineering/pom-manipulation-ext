@@ -44,12 +44,22 @@ import static org.commonjava.maven.ext.manip.util.IdUtils.ga;
  * {@link ProfileInjectionState} instance, which is in turn stored in the {@link ManipulationSession}.
  */
 @Component( role = Manipulator.class, hint = "profile-injection" )
-public class ProfileInjectionManipulator extends AbstractNoopManipulator
+public class ProfileInjectionManipulator
+    implements Manipulator
 {
     private final Logger logger = LoggerFactory.getLogger( getClass() );
 
     @Requirement
     private ModelIO modelBuilder;
+
+    /**
+     * No prescanning required for Profile injection.
+     */
+    @Override
+    public void scan( final List<Project> projects, final ManipulationSession session )
+        throws ManipulationException
+    {
+    }
 
     /**
      * Initialize the {@link ProfileInjectionState} state holder in the {@link ManipulationSession}. This state holder detects

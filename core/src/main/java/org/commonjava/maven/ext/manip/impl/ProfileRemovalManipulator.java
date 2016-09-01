@@ -39,9 +39,19 @@ import static org.commonjava.maven.ext.manip.util.IdUtils.ga;
  * {@link ProfileRemovalState} instance, which is in turn stored in the {@link ManipulationSession}.
  */
 @Component( role = Manipulator.class, hint = "profile-removal" )
-public class ProfileRemovalManipulator extends AbstractNoopManipulator
+public class ProfileRemovalManipulator
+    implements Manipulator
 {
     private final Logger logger = LoggerFactory.getLogger( getClass() );
+
+    /**
+     * No prescanning required for Profile removal.
+     */
+    @Override
+    public void scan( final List<Project> projects, final ManipulationSession session )
+        throws ManipulationException
+    {
+    }
 
     /**
      * Initialize the {@link ProfileRemovalState} state holder in the {@link ManipulationSession}. This state holder detects
