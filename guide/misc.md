@@ -64,7 +64,10 @@ PME supports injection of remote repositories. Supply a remote repository manage
 
 	mvn install -DrepositoryInjection=org.foo:repository-injection:1.0
 
-The extension will resolve a remote POM file and inject remote repositories to either the local top level POM file or the POM(s) specified by the property `repositoryInjectionPoms` (which should be in the form of a comma separated list e.g. `org.myproject:mychild`). If there is a local repository with id identical to the injected one, it is overwritten.
+The extension will resolve a remote POM file and inject remote repositories to either the local top level POM file or the POM(s) specified by the property `repositoryInjectionPoms` (which should be in the form of a comma separated list e.g. `org.myproject:mychild`). If there is a local repository with id identical to the injected one, it is overwritten. The `repositoryInjectionPoms` property supports wildcards on the _artifactId_ e.g.
+
+    repositoryInjectionPoms=org.commonjava.maven.ext.wildcard:*
+
 
 #### Property Override
 
