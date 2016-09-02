@@ -87,6 +87,7 @@ public abstract class BaseScript extends Script
     /**
      * Internal use only - the {@link org.commonjava.maven.ext.manip.impl.GroovyManipulator} uses this to
      * initialise the values
+     * @param userProperties User properties instance
      * @param projects ArrayList of Project instances
      * @param project Current project
      */

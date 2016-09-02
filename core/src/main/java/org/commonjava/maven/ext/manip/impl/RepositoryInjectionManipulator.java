@@ -163,9 +163,17 @@ public class RepositoryInjectionManipulator
         List<ProjectRef> gaToApply = state.getRemoteRepositoryInjectionTargets();
         if ( gaToApply != null )
         {
-            if ( gaToApply.contains( project.getKey().asProjectRef() ) )
+            // If ProjectRef component contains wildcard artifact treat it differently
+            for ( ProjectRef p : gaToApply)
             {
-                result = true;
+                if ( p.getArtifactId().contains( "*" ) && p.getGroupId().equals( project.getKey().getGroupId( ) ) )
+                {
+                    result = true;
+                }
+                else if ( p.equals( project.getKey().asProjectRef() ) )
+                {
+                    result = true;
+                }
             }
             logger.debug ("Checking project {} against possible GAs {} and found match {}", project.getKey().asProjectRef(), gaToApply, result);
         }

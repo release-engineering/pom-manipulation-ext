@@ -199,9 +199,9 @@ public class RESTManipulator implements Manipulator
      * Scans a list of projects and accumulates all non managed dependencies and returns them. Currently only used by the CLI tool to establish
      * a list of non-managed dependencies.
      * @param projects the projects to scan.
-     * @param activeProfiles
+     * @param activeProfiles which profiles to check
      * @return an unsorted set of ArtifactRefs used.
-     * @throws ManipulationException
+     * @throws ManipulationException if an error occurs
      */
     public static Set<ArtifactRef> establishNonManagedDependencies( final List<Project> projects, Set<String> activeProfiles ) throws ManipulationException
     {
@@ -212,9 +212,9 @@ public class RESTManipulator implements Manipulator
     /**
      * Scans a list of projects and accumulates all dependencies and returns them.
      * @param projects the projects to scan.
-     * @param activeProfiles
+     * @param activeProfiles which profiles to check
      * @return an unsorted set of ArtifactRefs used.
-     * @throws ManipulationException
+     * @throws ManipulationException if an error occurs
      */
     public static Set<ArtifactRef> establishAllDependencies( final List<Project> projects, Set<String> activeProfiles ) throws ManipulationException
     {

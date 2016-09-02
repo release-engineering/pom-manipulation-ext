@@ -85,7 +85,7 @@ public final class PropertiesUtils
      * @param key a key to look for.
      * @param newValue a value to look for.
      * @return {@code PropertyUpdate} enumeration showing status of any changes.
-     * @throws ManipulationException
+     * @throws ManipulationException if an error occurs
      */
     public static PropertyUpdate updateProperties( ManipulationSession session, Set<Project> projects, boolean ignoreStrict,
                                                    String key, String newValue ) throws ManipulationException
@@ -191,7 +191,7 @@ public final class PropertiesUtils
 
     /**
      * Retrieve any configured rebuild suffix.
-     * @param session
+     * @param session Current ManipulationSession
      * @return string suffix.
      */
     public static String getSuffix (ManipulationSession session)
