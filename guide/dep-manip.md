@@ -100,11 +100,22 @@ By default the extension will inject all dependencies declared in the remote BOM
 
     mvn install -DdependencyManagement=org.foo:my-dep-pom:1.0 -DoverrideTransitive=false
 
-### Exclusions and Per Module Overrides
+### Exclusions and Overrides
 
 In a multi-module build it is considered good practice to coordinate dependency version among the modules using dependency management.  In other words, if module A and B both use dependency X, both modules should use the same version of dependency X.  Therefore, the default behaviour of this extension is to use a single set of dependency versions applied to all modules.
 
-#### Per-Module Override
+#### Global Version Override
+
+Sometimes it is more convenient to use the command line rather than a BOM. Therefore extending the above it is possible to set the version of a dependency via:
+
+    mvn install -DdependencyExclusion.junit:junit@*=4.10-rebuild-10
+
+This will, throughout the entire project (due to the wildcard), apply the explicit 4.10-rebuild-10 version to the junit:junit dependency.
+
+**NOTE:** Explicit overrides like this will take precedence over strict alignment and the BOM.
+
+
+#### Per-Module Version Override
 
 However, there are certain cases where it is useful to use different versions of the same dependency in different modules.  For example, if the project includes integration code for multiple versions of a particular API. In that case it is possible to apply a version override to a specific module of a multi-module build using a property starting with `dependencyExclusion.` and having the following format:
 
@@ -114,7 +125,8 @@ For example to apply an explicit dependency override only to module B of project
 
     mvn install -DdependencyExclusion.junit:junit@org.foo:moduleB=4.10
 
-**NOTE:** Explicit overrides like this will take precedence over strict alignment.
+**NOTE:** Explicit overrides like this will take precedence over strict alignment and the BOM.
+
 
 #### Per-Module Prevention of Override
 
