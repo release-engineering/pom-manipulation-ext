@@ -17,6 +17,7 @@ package org.commonjava.maven.ext.manip.io;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.maven.model.Model;
+import org.commonjava.maven.ext.manip.model.GAV;
 import org.commonjava.maven.ext.manip.model.Project;
 import org.junit.Before;
 import org.junit.Rule;
@@ -68,7 +69,7 @@ public class PomIOTest
         HashSet<Project> changed = new HashSet<>();
         changed.add( p );
 
-        pomIO.rewritePOMs( changed );
+        pomIO.rewritePOMs( new GAV(), changed );
 
         assertTrue( FileUtils.contentEqualsIgnoreEOL( pom, targetFile, "UTF-8" ) );
         assertTrue( FileUtils.contentEquals( targetFile, pom ) );

@@ -25,6 +25,7 @@ import org.codehaus.plexus.component.annotations.Component;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.ext.manip.ManipulationException;
+import org.commonjava.maven.ext.manip.model.GAV;
 import org.commonjava.maven.ext.manip.model.Project;
 import org.commonjava.maven.galley.maven.parse.PomPeek;
 import org.jdom2.Comment;
@@ -137,14 +138,23 @@ public class PomIO
      * For any project listed as changed (tracked by GA in the session), write the modified model out to disk.
      * Uses JDOM {@link ModelWriter} and {@link MavenJDOMWriter} to preserve as much formatting as possible.
      *
+     *
+     * @param gav GAV to fill in.
      * @param changed the modified Projects to write out.
      * @throws ManipulationException if an error occurs.
      */
-    public void rewritePOMs(final Set<Project> changed)
+    public void rewritePOMs( GAV gav, final Set<Project> changed )
         throws ManipulationException
     {
         for ( final Project project : changed )
         {
+            if ( project.isExecutionRoot() )
+            {
+                Model m = project.getModel();
+                gav.setGroupId( m.getGroupId() == null ? project.getGroupId() : m.getGroupId() );
+                gav.setArtifactId( m.getArtifactId() == null ? project.getArtifactId() : m.getArtifactId() );
+                gav.setVersion( m.getVersion() == null ? project.getVersion() : m.getVersion() );
+            }
             logger.info( String.format( "%s modified! Rewriting.", project ) );
             File pom = project.getPom();
 

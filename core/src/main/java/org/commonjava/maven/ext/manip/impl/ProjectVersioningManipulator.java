@@ -28,7 +28,6 @@ import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef;
 import org.commonjava.maven.ext.manip.ManipulationException;
 import org.commonjava.maven.ext.manip.ManipulationSession;
-import org.commonjava.maven.ext.manip.model.GAV;
 import org.commonjava.maven.ext.manip.model.Project;
 import org.commonjava.maven.ext.manip.state.VersioningState;
 import org.commonjava.maven.ext.manip.util.PropertiesUtils;
@@ -133,15 +132,6 @@ public class ProjectVersioningManipulator
             if ( applyVersioningChanges( session, projects, project, state ) )
             {
                 changed.add( project );
-
-                if ( project.isExecutionRoot() )
-                {
-                    GAV gav = new GAV();
-                    gav.setGroupId( project.getModel().getGroupId() );
-                    gav.setArtifactId( project.getModel().getArtifactId() );
-                    gav.setVersion( project.getModel().getVersion() );
-                    state.setExecutionRootModified( gav );
-                }
             }
         }
 

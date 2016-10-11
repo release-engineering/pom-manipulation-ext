@@ -29,9 +29,11 @@ import org.codehaus.plexus.component.annotations.Component;
 import org.codehaus.plexus.component.annotations.Requirement;
 import org.commonjava.maven.ext.manip.impl.Manipulator;
 import org.commonjava.maven.ext.manip.io.PomIO;
+import org.commonjava.maven.ext.manip.model.GAV;
 import org.commonjava.maven.ext.manip.model.Project;
 import org.commonjava.maven.ext.manip.resolver.ExtensionInfrastructure;
 import org.commonjava.maven.ext.manip.state.State;
+import org.commonjava.maven.ext.manip.state.VersioningState;
 import org.commonjava.maven.ext.manip.util.ManipulatorPriorityComparator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -147,10 +149,16 @@ public class ManipulationManager
         if ( !changed.isEmpty() )
         {
             logger.info( "Maven-Manipulation-Extension: Rewrite changed: " + projects );
-            pomIO.rewritePOMs( changed );
+
+            GAV gav = new GAV();
+
+            pomIO.rewritePOMs( gav, changed );
 
             try
             {
+                final VersioningState state = session.getState( VersioningState.class );
+                state.setExecutionRootModified( gav );
+
                 new File( session.getTargetDir().getParentFile(),
                           ManipulationManager.MARKER_PATH ).mkdirs();
 

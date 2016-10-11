@@ -50,7 +50,8 @@ public class ResultJsonFileTest
 
     @Rule public TemporaryFolder tmpFolderRule = new TemporaryFolder();
 
-    @Test public void testVersioningStateOutputJsonFile()
+    @Test
+    public void testVersioningStateOutputJsonFile()
                     throws Exception
     {
         // given
@@ -92,6 +93,51 @@ public class ResultJsonFileTest
         assertEquals( "org.commonjava.maven.ext.versioning.test", groupId.textValue() );
         assertEquals( "project-version", artifactId.textValue() );
         assertEquals( "1.0.0.redhat-2", version.textValue() );
+    }
+
+    @Test
+    public void testNoVersioningChangeOutputJsonFile()
+                    throws Exception
+    {
+        // given
+
+        File baseDir = tmpFolderRule.newFolder();
+        File pomFile = getResourceFile( "result-json-test/pom.xml" );
+        copyFile( pomFile, new File( baseDir, "pom.xml" ) );
+
+        // when
+
+        Map<String, String> params = new HashMap<>();
+        params.put( "restURL", mockServer.getUrl() );
+        params.put( "repo-reporting-removal", "true" );
+
+        Integer exitValue = runCli( (List<String>) (List<?>) emptyList(), params, baseDir.getCanonicalPath() );
+
+        // then
+
+        assertEquals( (Integer) 0, exitValue );
+
+        File outputJsonFile = new File( baseDir, "/target/pom-manip-ext-result.json" );
+        assertTrue( outputJsonFile.exists() );
+
+        JsonNode rootNode = MAPPER.readTree( outputJsonFile );
+
+        JsonNode versioningState = rootNode.get( "VersioningState" );
+        assertNotNull( versioningState );
+
+        JsonNode executionRootModified = versioningState.get( "executionRootModified" );
+        assertNotNull( executionRootModified );
+
+        JsonNode groupId = executionRootModified.get( "groupId" );
+        JsonNode artifactId = executionRootModified.get( "artifactId" );
+        JsonNode version = executionRootModified.get( "version" );
+        assertNotNull( groupId );
+        assertNotNull( artifactId );
+        assertNotNull( version );
+
+        assertEquals( "org.commonjava.maven.ext.versioning.test", groupId.textValue() );
+        assertEquals( "project-version", artifactId.textValue() );
+        assertEquals( "1.0", version.textValue() );
     }
 
     private File getResourceFile( String path )
