@@ -72,6 +72,7 @@ import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathFactory;
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -295,9 +296,16 @@ public class Cli
             return 10;
         }
 
-
         try
         {
+            // Note : don't print out settings information earlier (like when we actually read it) as the logging
+            // isn't setup then.
+            if ( settings != null )
+            {
+                logger.debug( "Found settings file {} with contents \n{}", settings,
+                              settings.exists() ? FileUtils.readFileToString( settings ) : "** File does not exist **");
+            }
+
             manipulationManager.init( session );
 
             if ( cmd.hasOption( 'x' ) )
