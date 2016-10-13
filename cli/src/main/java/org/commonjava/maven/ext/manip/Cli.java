@@ -72,7 +72,6 @@ import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathFactory;
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -458,7 +457,9 @@ public class Cli
 
                 MavenExecutionRequestPopulator executionRequestPopulator =
                     container.lookup( MavenExecutionRequestPopulator.class );
+
                 executionRequestPopulator.populateFromSettings( req, parseSettings( settings ) );
+                executionRequestPopulator.populateDefaults( req );
             }
 
             final MavenSession mavenSession =
