@@ -321,7 +321,7 @@ public class DependencyManipulator implements Manipulator
                 logger.debug( "Applying overrides to managed dependencies for top-pom: {}", projectGA );
 
                 final Map<ArtifactRef, String> nonMatchingVersionOverrides =
-                                applyOverrides( session, dependencies, moduleOverrides, explicitOverrides );
+                                applyOverrides( session, project, dependencies, moduleOverrides, explicitOverrides );
 
                 final Map<ArtifactRef, String> matchedOverrides = new LinkedHashMap<>( moduleOverrides );
                 matchedOverrides.keySet().removeAll( nonMatchingVersionOverrides.keySet() );
@@ -373,7 +373,7 @@ public class DependencyManipulator implements Manipulator
             if ( session.getState( DependencyState.class ).getOverrideDependencies() && dependencyManagement != null )
             {
                 logger.debug( "Applying overrides to managed dependencies for: {}", projectGA );
-                applyOverrides( session, dependencyManagement.getDependencies(), moduleOverrides, explicitOverrides );
+                applyOverrides( session, project, dependencyManagement.getDependencies(), moduleOverrides, explicitOverrides );
                 applyExplicitOverrides( explicitVersionPropertyUpdateMap, explicitOverrides,
                                         dependencyManagement.getDependencies() );
             }
@@ -388,7 +388,7 @@ public class DependencyManipulator implements Manipulator
             logger.debug( "Applying overrides to concrete dependencies for: {}", projectGA );
             // Apply overrides to project direct dependencies
             final List<Dependency> projectDependencies = model.getDependencies();
-            applyOverrides( session, projectDependencies, moduleOverrides, explicitOverrides );
+            applyOverrides( session, project, projectDependencies, moduleOverrides, explicitOverrides );
             applyExplicitOverrides( explicitVersionPropertyUpdateMap, explicitOverrides, projectDependencies );
 
             // Now check all possible profiles and update them.
@@ -399,13 +399,13 @@ public class DependencyManipulator implements Manipulator
                 {
                     if ( p.getDependencyManagement() != null )
                     {
-                        applyOverrides( session, p.getDependencyManagement().getDependencies(), moduleOverrides,
+                        applyOverrides( session, project, p.getDependencyManagement().getDependencies(), moduleOverrides,
                                         explicitOverrides );
                         applyExplicitOverrides( explicitVersionPropertyUpdateMap, explicitOverrides,
                                                 p.getDependencyManagement().getDependencies() );
                     }
                     final List<Dependency> profileDependencies = p.getDependencies();
-                    applyOverrides( session, profileDependencies, moduleOverrides, explicitOverrides );
+                    applyOverrides( session, project, profileDependencies, moduleOverrides, explicitOverrides );
                     applyExplicitOverrides( explicitVersionPropertyUpdateMap, explicitOverrides, profileDependencies );
                 }
             }
@@ -422,9 +422,9 @@ public class DependencyManipulator implements Manipulator
      * ignore any property references (and overwrite them).
      *
      * @param versionPropertyUpdateMap properties to update
-     * @param explicitOverrides
+     * @param explicitOverrides a custom map to handle wildcard overrides
      * @param dependencies dependencies to check
-     * @throws ManipulationException
+     * @throws ManipulationException if an error occurs
      */
     private void applyExplicitOverrides( final Map<String, String> versionPropertyUpdateMap,
                                          final WildcardMap<String> explicitOverrides, final List<Dependency> dependencies )
@@ -476,13 +476,13 @@ public class DependencyManipulator implements Manipulator
      * Apply a set of version overrides to a list of dependencies. Return a set of the overrides which were not applied.
      *
      * @param session The ManipulationSession
+     * @param project The current Project
      * @param dependencies The list of dependencies
      * @param overrides The map of dependency version overrides
-     * @param explicitOverrides Any explicitOverrides to track for ignoring
-     * @return The map of overrides that were not matched in the dependencies
-     * @throws ManipulationException
+     * @param explicitOverrides Any explicitOverrides to track for ignoring    @return The map of overrides that were not matched in the dependencies
+     * @throws ManipulationException if an error occurs
      */
-    private Map<ArtifactRef, String> applyOverrides( final ManipulationSession session, final List<Dependency> dependencies,
+    private Map<ArtifactRef, String> applyOverrides( final ManipulationSession session, Project project, final List<Dependency> dependencies,
                                                      final Map<ArtifactRef, String> overrides,
                                                      WildcardMap<String> explicitOverrides )
                     throws ManipulationException
@@ -527,7 +527,7 @@ public class DependencyManipulator implements Manipulator
                     {
                         logger.debug( "Dependency is a managed version for " + groupIdArtifactId + "; ignoring" );
                     }
-                    // If we have an explicitOverride, this will always override the dependency changes make here.
+                    // If we have an explicitOverride, this will always override the dependency changes made here.
                     // By avoiding the potential duplicate work it also avoids a possible property clash problem.
                     else if ( explicitOverrides.containsKey( depPr ) )
                     {
@@ -541,7 +541,7 @@ public class DependencyManipulator implements Manipulator
                     // This extra check avoids an erroneous "Property replacement clash" error.
 
                     // Can't blindly compare resolvedValue [original] against ar as ar / overrideVersion is the new GAV. We don't
-                    // have immediate access to the original property so the closest thats feasible is verify strict matching.
+                    // have immediate access to the original property so the closest that is feasible is verify strict matching.
                     else if ( strict && oldVersion.contains( "$" ) &&
                                     ! PropertiesUtils.checkStrictValue( session, resolvedValue, overrideVersion) )
                     {
@@ -550,8 +550,8 @@ public class DependencyManipulator implements Manipulator
                         if ( state.getFailOnStrictViolation() )
                         {
                             throw new ManipulationException(
-                                            "Replacing original property version {} (fully resolved: {} ) with new version {} for {} violates the strict version-alignment rule!",
-                                            dependency.getVersion(), resolvedValue, entry.getKey().getVersionString(), entry.getKey().asProjectRef().toString());
+                                            "For {} replacing original property version {} (fully resolved: {} ) with new version {} for {} violates the strict version-alignment rule!",
+                                            depPr.toString(), dependency.getVersion(), resolvedValue, entry.getKey().getVersionString(), entry.getKey().asProjectRef().toString());
                         }
                         else
                         {
@@ -561,6 +561,12 @@ public class DependencyManipulator implements Manipulator
                     }
                     else
                     {
+                        // Too much spurious logging with project.version.
+                        if ( ! oldVersion.equals( "${project.version}" ) )
+                        {
+                            logger.info( "Updating version {} for dependency {} from {}.", overrideVersion, dependency, project.getPom() );
+                        }
+
                         if ( ! PropertiesUtils.cacheProperty( versionPropertyUpdateMap, oldVersion, overrideVersion, entry.getKey(), false ))
                         {
                             if ( oldVersion.equals( "${project.version}" ) )
@@ -651,9 +657,9 @@ public class DependencyManipulator implements Manipulator
      * @param projectGA the current project group : artifact
      * @param originalOverrides The full list of version overrides, both global and module specific
      * @param moduleOverrides are individual overrides e.g. group:artifact@groupId:artifactId :: value
-     * @param explicitOverrides
+     * @param explicitOverrides a custom map to handle wildcard overrides
      * @return The map of global and module specific overrides which apply to the given module
-     * @throws ManipulationException
+     * @throws ManipulationException if an error occurs
      */
     private Map<ArtifactRef, String> applyModuleVersionOverrides( final String projectGA,
                                                                   final Map<String, String> moduleOverrides,
