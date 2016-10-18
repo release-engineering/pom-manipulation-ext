@@ -261,6 +261,17 @@ public class VersionTest
     }
 
     @Test
+    public void testFindHighestMatchingOSGiBuildNumber()
+    {
+        final Set<String> versionSet = new HashSet<>();
+        Version version = new Version( "1.2.0.Final-foo" );
+        versionSet.add( "1.2.0.Final-foo-10" );
+        versionSet.add( "1.2.0.Final-foo-2" );
+        assertThat( findHighestMatchingBuildNumber( version, versionSet ), equalTo( 10 ) );
+        versionSet.clear();
+    }
+
+    @Test
     public void testFindHighestMatchingBuildNumber()
     {
         final Set<String> versionSet = new HashSet<>();

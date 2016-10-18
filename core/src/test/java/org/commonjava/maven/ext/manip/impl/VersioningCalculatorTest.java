@@ -342,7 +342,7 @@ public class VersioningCalculatorTest
 
     @Test
     public void applySerialSuffix_SimpleSuffixProperty()
-        throws Exception
+                    throws Exception
     {
         final Properties props = new Properties();
 
@@ -352,6 +352,24 @@ public class VersioningCalculatorTest
 
         final String originalVersion = "1.0.0.Final";
         final String calcdVersion = "1.0.0.Final-foo-1";
+
+        final String result = calculate( originalVersion );
+        assertThat( result, equalTo( calcdVersion ) );
+    }
+
+    @Test
+    public void applySerialSuffixWithPadding_SimpleSuffixProperty()
+                    throws Exception
+    {
+        final Properties props = new Properties();
+
+        final String s = "foo";
+        props.setProperty( VersioningState.INCREMENT_SERIAL_SUFFIX_SYSPROP, s );
+        props.setProperty( VersioningState.INCREMENT_SERIAL_SUFFIX_PADDING_SYSPROP, "3" );
+        setupSession( props );
+
+        final String originalVersion = "1.0.0.Final";
+        final String calcdVersion = "1.0.0.Final-foo-001";
 
         final String result = calculate( originalVersion );
         assertThat( result, equalTo( calcdVersion ) );
@@ -550,7 +568,7 @@ public class VersioningCalculatorTest
 
     @Test
     public void incrementExistingSerialSuffix3()
-        throws Exception
+                    throws Exception
     {
         final Properties props = new Properties();
 
@@ -592,6 +610,37 @@ public class VersioningCalculatorTest
 
         final String result = calculate( origVersion );
         assertThat( result, equalTo( newVersion ) );
+    }
+
+    @Test
+    public void incrementExistingSerialSuffix6()
+                    throws Exception
+    {
+        final Properties props = new Properties();
+
+        props.setProperty( VersioningState.INCREMENT_SERIAL_SUFFIX_SYSPROP, "foo" );
+        setupSession( props, "1.2.0-foo-8", "1.2.0-foo-9" );
+
+        final String v = "1.2.0.foo-10";
+
+        final String result = calculate( v );
+        assertThat( result, equalTo( v ) );
+    }
+
+    @Test
+    public void incrementExistingSerialSuffixWithPadding()
+                    throws Exception
+    {
+        final Properties props = new Properties();
+
+        props.setProperty( VersioningState.INCREMENT_SERIAL_SUFFIX_SYSPROP, "foo" );
+        props.setProperty( VersioningState.INCREMENT_SERIAL_SUFFIX_PADDING_SYSPROP, "3" );
+        setupSession( props, "1.2.0-foo-8", "1.2.0-foo-9" );
+
+        final String v = "1.2.0.foo-010";
+
+        final String result = calculate( v );
+        assertThat( result, equalTo( v ) );
     }
 
     @Test

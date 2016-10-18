@@ -15,6 +15,7 @@
  */
 package org.commonjava.maven.ext.manip.impl;
 
+import org.apache.commons.lang.StringUtils;
 import org.codehaus.plexus.component.annotations.Component;
 import org.codehaus.plexus.component.annotations.Requirement;
 import org.commonjava.maven.atlas.ident.ref.ProjectRef;
@@ -130,7 +131,7 @@ public class VersionCalculator
                 // set the build number to avoid version conflicts.
                 if ( buildNumber > 0 )
                 {
-                    modifiedVersion.setBuildNumber( Integer.toString( buildNumber ) );
+                    modifiedVersion.setBuildNumber( StringUtils.leftPad( Integer.toString( buildNumber ), state.getIncrementalSerialSuffixPadding(), '0' ) );
                 }
             }
 
@@ -229,7 +230,7 @@ public class VersionCalculator
 
             if ( highestRemoteBuildNum > versionObj.getIntegerBuildNumber() )
             {
-                versionObj.setBuildNumber( Integer.toString( highestRemoteBuildNum ) );
+                versionObj.setBuildNumber( StringUtils.leftPad( Integer.toString( highestRemoteBuildNum ), state.getIncrementalSerialSuffixPadding(), '0' ) );
             }
             if ( !state.preserveSnapshot() )
             {

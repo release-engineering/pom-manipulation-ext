@@ -39,6 +39,8 @@ public class VersioningState
 
     public static final String INCREMENT_SERIAL_SUFFIX_SYSPROP = "version.incremental.suffix";
 
+    public static final String INCREMENT_SERIAL_SUFFIX_PADDING_SYSPROP = "version.incremental.suffix.padding";
+
     public static final String VERSION_SUFFIX_SNAPSHOT_SYSPROP = "version.suffix.snapshot";
 
     public static final String VERSION_OSGI_SYSPROP = "version.osgi";
@@ -54,6 +56,8 @@ public class VersioningState
     private final boolean osgi;
 
     private final String override;
+
+    private final int incrementSerialSuffixPadding;
 
     @JsonProperty
     private GAV executionRootModified;
@@ -73,6 +77,7 @@ public class VersioningState
     {
         suffix = userProps.getProperty( VERSION_SUFFIX_SYSPROP );
         incrementSerialSuffix = userProps.getProperty( INCREMENT_SERIAL_SUFFIX_SYSPROP );
+        incrementSerialSuffixPadding = Integer.parseInt( userProps.getProperty( INCREMENT_SERIAL_SUFFIX_PADDING_SYSPROP, "0" ) );
         preserveSnapshot = Boolean.parseBoolean( userProps.getProperty( VERSION_SUFFIX_SNAPSHOT_SYSPROP ) );
         osgi = Boolean.parseBoolean( userProps.getProperty( VERSION_OSGI_SYSPROP, "true" ) );
         override = userProps.getProperty( VERSION_OVERRIDE_SYSPROP );
@@ -84,6 +89,14 @@ public class VersioningState
     public String getIncrementalSerialSuffix()
     {
         return incrementSerialSuffix;
+    }
+
+    /**
+     * @return the incremental suffix padding that will be appended to the project version i.e. whether to append 001 or 1.
+     */
+    public int getIncrementalSerialSuffixPadding()
+    {
+        return incrementSerialSuffixPadding;
     }
 
     /**
