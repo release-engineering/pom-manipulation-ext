@@ -41,6 +41,11 @@ public class DependencyState
     private static final String DEPENDENCY_EXCLUSION_PREFIX = "dependencyExclusion.";
 
     /**
+     * Merely an alias for {@link DependencyState#DEPENDENCY_EXCLUSION_PREFIX}
+     */
+    private static final String DEPENDENCY_OVERRIDE_PREFIX = "dependencyOverride.";
+
+    /**
      * Enables strict checking of non-exclusion dependency versions before aligning to the given BOM dependencies.
      * For example, <code>1.1</code> will match <code>1.1-rebuild-1</code> in strict mode, but <code>1.2</code> will not.
      */
@@ -83,7 +88,7 @@ public class DependencyState
 
     private final List<ProjectVersionRef> remoteBOMdepMgmt;
 
-    private final Map<String, String> dependencyExclusions;
+    private Map<String, String> dependencyExclusions;
 
     private Map<ArtifactRef, String> remoteRESTdepMgmt;
 
@@ -96,7 +101,13 @@ public class DependencyState
         ignoreSuffix = Boolean.valueOf( userProps.getProperty( STRICT_ALIGNMENT_IGNORE_SUFFIX, "false" ) );
         failOnStrictViolation = Boolean.valueOf( userProps.getProperty( STRICT_VIOLATION_FAILS, "false" ) );
         remoteBOMdepMgmt = IdUtils.parseGAVs( userProps.getProperty( DEPENDENCY_MANAGEMENT_POM_PROPERTY ) );
+
         dependencyExclusions = PropertiesUtils.getPropertiesByPrefix( userProps, DEPENDENCY_EXCLUSION_PREFIX );
+        // If dependencyExclusions have not been set via exclusion prefix attempt to set it via the override alias prefix.
+        if ( dependencyExclusions.isEmpty())
+        {
+            dependencyExclusions = PropertiesUtils.getPropertiesByPrefix( userProps, DEPENDENCY_OVERRIDE_PREFIX );
+        }
     }
 
     /**
