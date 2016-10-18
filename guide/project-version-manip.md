@@ -16,6 +16,10 @@ The extension is configured using the property `version.incremental.suffix`.
 
     mvn install -Dversion.incremental.suffix=rebuild
 
+#### Version increment padding
+
+When using the automatic increment it is also possible to configure padding for the increment. For instance, by setting `version.incremental.suffix.padding` to `3` the version will be `rebuild-003`.
+
 #### Version Increment Metadata
 
 The metadata to work out what the correct version of the increment should be can be sourced the one of two different locations.
