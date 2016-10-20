@@ -86,7 +86,7 @@ public class PropertiesUtilsTest
         }
     }
 
-    private ManipulationSession createUpdateSession()
+    private ManipulationSession createUpdateSession() throws ManipulationException
     {
         ManipulationSession session = new ManipulationSession();
         Properties p = new Properties();

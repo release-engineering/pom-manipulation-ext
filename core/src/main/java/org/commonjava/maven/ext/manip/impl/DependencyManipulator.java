@@ -83,7 +83,7 @@ public class DependencyManipulator implements Manipulator
      * later invocations of {@link Manipulator#scan(List, ManipulationSession)} and the apply* methods.
      */
     @Override
-    public void init( final ManipulationSession session )
+    public void init( final ManipulationSession session ) throws ManipulationException
     {
         final Properties userProps = session.getUserProperties();
         session.setState( new DependencyState( userProps ) );

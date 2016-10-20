@@ -17,6 +17,7 @@ package org.commonjava.maven.ext.manip.state;
 
 import org.commonjava.maven.atlas.ident.ref.ArtifactRef;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
+import org.commonjava.maven.ext.manip.ManipulationException;
 import org.commonjava.maven.ext.manip.impl.DependencyManipulator;
 import org.commonjava.maven.ext.manip.util.IdUtils;
 import org.commonjava.maven.ext.manip.util.PropertiesUtils;
@@ -24,6 +25,9 @@ import org.commonjava.maven.ext.manip.util.PropertiesUtils;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+
+import static org.bouncycastle.asn1.x500.style.RFC4519Style.o;
+import static org.commonjava.maven.ext.manip.util.PropertiesUtils.getPropertiesByPrefix;
 
 /**
  * Captures configuration relating to dependency alignment from the POMs. Used by {@link DependencyManipulator}.
@@ -93,7 +97,7 @@ public class DependencyState
     private Map<ArtifactRef, String> remoteRESTdepMgmt;
 
     
-    public DependencyState( final Properties userProps )
+    public DependencyState( final Properties userProps ) throws ManipulationException
     {
         overrideTransitive = Boolean.valueOf( userProps.getProperty( "overrideTransitive", "true" ) );
         overrideDependencies = Boolean.valueOf( userProps.getProperty( "overrideDependencies", "true" ) );
@@ -102,11 +106,14 @@ public class DependencyState
         failOnStrictViolation = Boolean.valueOf( userProps.getProperty( STRICT_VIOLATION_FAILS, "false" ) );
         remoteBOMdepMgmt = IdUtils.parseGAVs( userProps.getProperty( DEPENDENCY_MANAGEMENT_POM_PROPERTY ) );
 
-        dependencyExclusions = PropertiesUtils.getPropertiesByPrefix( userProps, DEPENDENCY_EXCLUSION_PREFIX );
-        // If dependencyExclusions have not been set via exclusion prefix attempt to set it via the override alias prefix.
-        if ( dependencyExclusions.isEmpty())
+        dependencyExclusions = getPropertiesByPrefix( userProps, DEPENDENCY_EXCLUSION_PREFIX );
+        Map<String, String> oP = PropertiesUtils.getPropertiesByPrefix( userProps, DEPENDENCY_OVERRIDE_PREFIX );
+        for ( String s : oP.keySet() )
         {
-            dependencyExclusions = PropertiesUtils.getPropertiesByPrefix( userProps, DEPENDENCY_OVERRIDE_PREFIX );
+            if ( dependencyExclusions.put( s, oP.get( s ) ) != null )
+            {
+                throw new ManipulationException( "Property clash between dependencyOverride and dependencyExclusion for " + s );
+            }
         }
     }
 
