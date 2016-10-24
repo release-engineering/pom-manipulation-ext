@@ -17,6 +17,7 @@ package org.commonjava.maven.ext.manip.state;
 
 import org.commonjava.maven.atlas.ident.ref.ArtifactRef;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
+import org.commonjava.maven.ext.manip.ManipulationException;
 import org.commonjava.maven.ext.manip.impl.DependencyManipulator;
 import org.commonjava.maven.ext.manip.util.IdUtils;
 import org.commonjava.maven.ext.manip.util.PropertiesUtils;
@@ -24,6 +25,9 @@ import org.commonjava.maven.ext.manip.util.PropertiesUtils;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+
+import static org.bouncycastle.asn1.x500.style.RFC4519Style.o;
+import static org.commonjava.maven.ext.manip.util.PropertiesUtils.getPropertiesByPrefix;
 
 /**
  * Captures configuration relating to dependency alignment from the POMs. Used by {@link DependencyManipulator}.
@@ -39,6 +43,11 @@ public class DependencyState
      * </pre>
      */
     private static final String DEPENDENCY_EXCLUSION_PREFIX = "dependencyExclusion.";
+
+    /**
+     * Merely an alias for {@link DependencyState#DEPENDENCY_EXCLUSION_PREFIX}
+     */
+    private static final String DEPENDENCY_OVERRIDE_PREFIX = "dependencyOverride.";
 
     /**
      * Enables strict checking of non-exclusion dependency versions before aligning to the given BOM dependencies.
@@ -83,12 +92,12 @@ public class DependencyState
 
     private final List<ProjectVersionRef> remoteBOMdepMgmt;
 
-    private final Map<String, String> dependencyExclusions;
+    private Map<String, String> dependencyExclusions;
 
     private Map<ArtifactRef, String> remoteRESTdepMgmt;
 
     
-    public DependencyState( final Properties userProps )
+    public DependencyState( final Properties userProps ) throws ManipulationException
     {
         overrideTransitive = Boolean.valueOf( userProps.getProperty( "overrideTransitive", "true" ) );
         overrideDependencies = Boolean.valueOf( userProps.getProperty( "overrideDependencies", "true" ) );
@@ -96,7 +105,16 @@ public class DependencyState
         ignoreSuffix = Boolean.valueOf( userProps.getProperty( STRICT_ALIGNMENT_IGNORE_SUFFIX, "false" ) );
         failOnStrictViolation = Boolean.valueOf( userProps.getProperty( STRICT_VIOLATION_FAILS, "false" ) );
         remoteBOMdepMgmt = IdUtils.parseGAVs( userProps.getProperty( DEPENDENCY_MANAGEMENT_POM_PROPERTY ) );
-        dependencyExclusions = PropertiesUtils.getPropertiesByPrefix( userProps, DEPENDENCY_EXCLUSION_PREFIX );
+
+        dependencyExclusions = getPropertiesByPrefix( userProps, DEPENDENCY_EXCLUSION_PREFIX );
+        Map<String, String> oP = PropertiesUtils.getPropertiesByPrefix( userProps, DEPENDENCY_OVERRIDE_PREFIX );
+        for ( String s : oP.keySet() )
+        {
+            if ( dependencyExclusions.put( s, oP.get( s ) ) != null )
+            {
+                throw new ManipulationException( "Property clash between dependencyOverride and dependencyExclusion for " + s );
+            }
+        }
     }
 
     /**

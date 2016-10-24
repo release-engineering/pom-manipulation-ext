@@ -15,6 +15,7 @@
  */
 package org.commonjava.maven.ext.manip.util;
 
+import org.commonjava.maven.ext.manip.ManipulationException;
 import org.commonjava.maven.ext.manip.ManipulationSession;
 import org.commonjava.maven.ext.manip.state.DependencyState;
 import org.commonjava.maven.ext.manip.state.VersioningState;
@@ -39,7 +40,7 @@ public class CheckStrictValueTest
     private static final Logger LOGGER = LoggerFactory.getLogger( CheckStrictValueTest.class );
 
     @Before
-    public void beforeTest()
+    public void beforeTest() throws ManipulationException
     {
         Properties user = new Properties();
         user.setProperty( VersioningState.VERSION_SUFFIX_SYSPROP, "redhat-5" );
