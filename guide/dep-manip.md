@@ -108,7 +108,7 @@ It is possible to flexibly override or exclude a dependency globally or on a per
 
     mvn install -DdependencyExclusion.[groupId]:[artifactId]@[moduleGroupId]:[moduleArtifactId]=[version]
 
-**NOTE:** `dependencyOverride` is an alias for `dependencyExclusion` and functions _exactly the same_.
+**NOTE:** `dependencyOverride` is an alias for `dependencyExclusion` and functions _exactly the same_. If both are set then they will be merged and an error thrown if they clash.
 
 
 #### Global Version Override
