@@ -104,6 +104,13 @@ By default the extension will inject all dependencies declared in the remote BOM
 
 In a multi-module build it is considered good practice to coordinate dependency version among the modules using dependency management.  In other words, if module A and B both use dependency X, both modules should use the same version of dependency X.  Therefore, the default behaviour of this extension is to use a single set of dependency versions applied to all modules.
 
+It is possible to flexibly override or exclude a dependency globally or on a per module basis. The property starts with `dependencyExclusion.` and has the following format:
+
+    mvn install -DdependencyExclusion.[groupId]:[artifactId]@[moduleGroupId]:[moduleArtifactId]=[version]
+
+**NOTE:** `dependencyOverride` is an alias for `dependencyExclusion` and functions _exactly the same_.
+
+
 #### Global Version Override
 
 Sometimes it is more convenient to use the command line rather than a BOM. Therefore extending the above it is possible to set the version of a dependency via:
@@ -117,11 +124,7 @@ This will, throughout the entire project (due to the wildcard), apply the explic
 
 #### Per-Module Version Override
 
-However, there are certain cases where it is useful to use different versions of the same dependency in different modules.  For example, if the project includes integration code for multiple versions of a particular API. In that case it is possible to apply a version override to a specific module of a multi-module build using a property starting with `dependencyExclusion.` and having the following format:
-
-    mvn install -DdependencyExclusion.[groupId]:[artifactId]@[moduleGroupId]:[moduleArtifactId]=[version]
-
-For example to apply an explicit dependency override only to module B of project foo.
+However, there are certain cases where it is useful to use different versions of the same dependency in different modules.  For example, if the project includes integration code for multiple versions of a particular API. In that case it is possible to apply a version override to a specific module of a multi-module build. For example to apply an explicit dependency override only to module B of project foo.
 
     mvn install -DdependencyExclusion.junit:junit@org.foo:moduleB=4.10
 
