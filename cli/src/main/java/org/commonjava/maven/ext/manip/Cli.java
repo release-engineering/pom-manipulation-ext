@@ -257,7 +257,7 @@ public class Cli
         if ( !session.isEnabled() )
         {
             logger.info( "Manipulation engine disabled via command-line option" );
-            return 10;
+            return 0;
         }
         if ( !target.exists() )
         {
