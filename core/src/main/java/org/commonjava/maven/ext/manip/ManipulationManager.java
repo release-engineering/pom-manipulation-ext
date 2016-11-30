@@ -102,6 +102,8 @@ public class ManipulationManager
     public void init( final ManipulationSession session )
         throws ManipulationException
     {
+        logger.debug( "Initialising ManipulationManager with user properties {}", session.getUserProperties() );
+
         for ( final ExtensionInfrastructure infra : infrastructure.values() )
         {
             infra.init( session.getTargetDir(), session.getRemoteRepositories(), session.getLocalRepository(),
