@@ -67,6 +67,8 @@ public class Project
      */
     private boolean executionRoot;
 
+    private boolean incrementalPME;
+
     public Project( final ProjectVersionRef key, final File pom, final Model model )
     {
         this.pom = pom;
@@ -397,5 +399,15 @@ public class Project
     public boolean isExecutionRoot()
     {
         return executionRoot;
+    }
+
+    public void setIncrementalPME( boolean incrementalPME )
+    {
+        this.incrementalPME = incrementalPME;
+    }
+
+    public boolean isIncrementalPME( )
+    {
+        return incrementalPME;
     }
 }

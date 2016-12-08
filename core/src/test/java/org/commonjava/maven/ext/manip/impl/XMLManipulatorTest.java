@@ -20,6 +20,7 @@ import org.apache.commons.lang.reflect.FieldUtils;
 import org.commonjava.maven.ext.manip.ManipulationException;
 import org.commonjava.maven.ext.manip.io.XMLIO;
 import org.commonjava.maven.ext.manip.io.XMLIOTest;
+import org.commonjava.maven.ext.manip.model.Project;
 import org.commonjava.maven.ext.manip.state.XMLState;
 import org.junit.Before;
 import org.junit.Rule;
@@ -70,7 +71,9 @@ public class XMLManipulatorTest
         File target = tf.newFile();
         FileUtils.copyFile( xmlFile, target );
 
-        xmlManipulator.internalApplyChanges( target, new XMLState.XMLOperation( null, path, null) );
+        Project p = new Project( null, target, null );
+
+        xmlManipulator.internalApplyChanges( p, new XMLState.XMLOperation( target.getName(), path, null) );
     }
 
 
@@ -82,8 +85,9 @@ public class XMLManipulatorTest
 
         File target = tf.newFile();
         FileUtils.copyFile( xmlFile, target );
+        Project project = new Project( null, target, null );
 
-        xmlManipulator.internalApplyChanges( target, new XMLState.XMLOperation( target.getPath(), tomcatPath, replacementGA) );
+        xmlManipulator.internalApplyChanges( project, new XMLState.XMLOperation( target.getName(), tomcatPath, replacementGA) );
 
         Diff diff = DiffBuilder.compare( fromFile( xmlFile ) ).withTest( fromFile( target ) ).build();
         assertTrue (diff.toString(), diff.hasDifferences());

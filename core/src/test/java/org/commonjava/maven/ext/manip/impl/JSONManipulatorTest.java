@@ -20,6 +20,7 @@ import org.apache.commons.lang.reflect.FieldUtils;
 import org.commonjava.maven.ext.manip.ManipulationException;
 import org.commonjava.maven.ext.manip.io.JSONIO;
 import org.commonjava.maven.ext.manip.io.JSONIOTest;
+import org.commonjava.maven.ext.manip.model.Project;
 import org.commonjava.maven.ext.manip.state.JSONState;
 import org.junit.Before;
 import org.junit.Rule;
@@ -71,8 +72,9 @@ public class JSONManipulatorTest
 
         File target = tf.newFile();
         FileUtils.copyFile( npmFile, target );
+        Project project = new Project( null, target, null );
 
-        jsonManipulator.internalApplyChanges( target, new JSONState.JSONOperation(null, modifyPath, null) );
+        jsonManipulator.internalApplyChanges( project, new JSONState.JSONOperation( target.getName(), modifyPath, null) );
     }
 
     @Test
@@ -82,9 +84,10 @@ public class JSONManipulatorTest
 
         File target = tf.newFile();
         FileUtils.copyFile( pluginFile, target );
+        Project project = new Project( null, target, null );
 
-        jsonManipulator.internalApplyChanges( target, new JSONState.JSONOperation( null, modifyPath,
-                                                                                   "https://maven.repository.redhat.com/ga/" ) );
+        jsonManipulator.internalApplyChanges( project, new JSONState.JSONOperation( target.getName(), modifyPath,
+                                                                                            "https://maven.repository.redhat.com/ga/" ) );
         assertTrue( FileUtils.readFileToString( target ).contains( "https://maven.repository.redhat.com/ga/" ) );
         assertFalse( FileUtils.contentEquals( pluginFile, target ) );
     }

@@ -98,12 +98,7 @@ public class XMLManipulator
             {
                 for ( XMLState.XMLOperation operation : scripts )
                 {
-                    File target = new File( project.getPom().getParentFile(), operation.getFile() );
-
-                    logger.info( "Attempting to start XML update to file {} with xpath {} and replacement {}",
-                                 target, operation.getXPath(), operation.getUpdate() );
-
-                    internalApplyChanges (target, operation);
+                    internalApplyChanges (project, operation);
 
                     changed.add( project );
                 }
@@ -114,8 +109,13 @@ public class XMLManipulator
         return changed;
     }
 
-    void internalApplyChanges( File target, XMLState.XMLOperation operation ) throws ManipulationException
+    void internalApplyChanges( Project project, XMLState.XMLOperation operation ) throws ManipulationException
     {
+        File target = new File( project.getPom().getParentFile(), operation.getFile() );
+
+        logger.info( "Attempting to start XML update to file {} with xpath {} and replacement {}",
+                     target, operation.getXPath(), operation.getUpdate() );
+
         Document doc = xmlIO.parseXML( target );
 
         try
@@ -124,7 +124,16 @@ public class XMLManipulator
 
             if ( nodeList.getLength() == 0 )
             {
-                throw new ManipulationException( "Did not locate XML using XPath " + operation.getXPath() );
+                if ( project.isIncrementalPME() )
+                {
+                    logger.warn ("Did not locate XML using XPath " + operation.getXPath() );
+                    return;
+                }
+                else
+                {
+                    logger.error( "XPath {} did not find any expressions within {} ", operation.getXPath(), operation.getFile() );
+                    throw new ManipulationException( "Did not locate XML using XPath " + operation.getXPath() );
+                }
             }
 
             for ( int i = 0; i < nodeList.getLength(); i++ )

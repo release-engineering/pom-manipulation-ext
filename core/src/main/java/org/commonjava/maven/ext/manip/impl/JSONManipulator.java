@@ -91,12 +91,7 @@ public class JSONManipulator
             {
                 for ( JSONState.JSONOperation operation : scripts )
                 {
-                    File target = new File( project.getPom().getParentFile(), operation.getFile() );
-
-                    logger.info( "Attempting to start JSON update to file {} with xpath {} and replacement '{}' ",
-                                 target, operation.getXPath(), operation.getUpdate() );
-
-                    internalApplyChanges (target, operation);
+                    internalApplyChanges( project, operation );
 
                     changed.add( project );
                 }
@@ -108,8 +103,13 @@ public class JSONManipulator
     }
 
     // Package accessible so tests can use it.
-    void internalApplyChanges( File target, JSONState.JSONOperation operation ) throws ManipulationException
+    void internalApplyChanges( Project project, JSONState.JSONOperation operation ) throws ManipulationException
     {
+        File target = new File( project.getPom().getParentFile(), operation.getFile() );
+
+        logger.info( "Attempting to start JSON update to file {} with xpath {} and replacement '{}' ",
+                     target, operation.getXPath(), operation.getUpdate() );
+
         DocumentContext dc = null;
         try
         {
@@ -124,9 +124,16 @@ public class JSONManipulator
             List o = dc.read( operation.getXPath() );
             if ( o.size() == 0 )
             {
-                logger.error( "XPath {} did not find any expressions within {} ", operation.getXPath(),
-                              operation.getFile() );
-                throw new ManipulationException( "XPath did not resolve to a valid value" );
+                if ( project.isIncrementalPME() )
+                {
+                    logger.warn ("Did not locate JSON using XPath " + operation.getXPath() );
+                    return;
+                }
+                else
+                {
+                    logger.error( "XPath {} did not find any expressions within {} ", operation.getXPath(), operation.getFile() );
+                    throw new ManipulationException( "XPath did not resolve to a valid value" );
+                }
             }
 
             if ( isEmpty( operation.getUpdate() ) )

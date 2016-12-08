@@ -15,6 +15,7 @@
  */
 package org.commonjava.maven.ext.manip.io;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.maven.io.util.DocumentModifier;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.io.ModelWriter;
@@ -63,7 +64,7 @@ import static org.apache.commons.io.IOUtils.closeQuietly;
 @Component( role = PomIO.class )
 public class PomIO
 {
-    private static final String MODIFIED_BY = "[Comment: <!-- Modified by POM Manipulation Extension for Maven";
+    private static final String MODIFIED_BY = "Modified by POM Manipulation Extension for Maven";
 
     private static final Logger logger = LoggerFactory.getLogger( PomIO.class );
 
@@ -126,6 +127,18 @@ public class PomIO
                 logger.debug( "Setting execution root to {} with file {}" +
                       (project.isInheritanceRoot() ? " and is the inheritance root. ": ""), project, pom );
                 project.setExecutionRoot ();
+
+                try
+                {
+                    if ( FileUtils.readFileToString( pom ).contains( MODIFIED_BY ) )
+                    {
+                        project.setIncrementalPME (true);
+                    }
+                }
+                catch ( final IOException e )
+                {
+                    throw new ManipulationException( "Failed to read POM: %s", e, pom );
+                }
             }
 
             projects.add( project );
@@ -198,7 +211,7 @@ public class PomIO
                 public void postProcess( final Document doc )
                 {
                     // Only add the modified by to the top level pom.
-                    if ( project.isInheritanceRoot() )
+                    if ( project.isExecutionRoot() )
                     {
                         final Iterator<Content> it = doc.getContent( new ContentFilter( ContentFilter.COMMENT ) )
                                                         .iterator();
@@ -206,12 +219,9 @@ public class PomIO
                         {
                             final Comment c = (Comment) it.next();
 
-                            if ( c.toString()
-                                  .startsWith( MODIFIED_BY ) )
+                            if ( c.toString().contains( MODIFIED_BY ) )
                             {
                                 it.remove();
-
-                                break;
                             }
                         }
 

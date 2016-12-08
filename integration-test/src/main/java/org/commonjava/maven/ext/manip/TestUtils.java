@@ -97,6 +97,9 @@ public class TestUtils
         // Execute
         for ( Execution e : executions )
         {
+            // Setup
+            runScript( workingDir, "setup" );
+
             if ( restURL != null )
             {
                 logger.info( "Resetting REST URL to: {}", restURL );
@@ -132,7 +135,7 @@ public class TestUtils
         }
 
         // Verify
-        verify( workingDir );
+        runScript( workingDir, "verify" );
     }
 
     /**
@@ -198,15 +201,16 @@ public class TestUtils
     }
 
     /**
-     * Run verify.groovy script in workingDir directory.
+     * Run runScript.groovy script in workingDir directory.
      *
-     * @param workingDir - Directory with verify.groovy script.
+     * @param workingDir - Directory with groovy script.
+     * @param file - groovy script to run
      * @throws Exception
      */
-    private static void verify( String workingDir )
+    private static void runScript( String workingDir, String file )
         throws Exception
     {
-        File verify = new File( workingDir + "/verify.groovy" );
+        File verify = new File( workingDir + "/" + file + ".groovy" );
         if ( !verify.isFile() )
         {
             return;
@@ -214,7 +218,7 @@ public class TestUtils
         Binding binding = new Binding();
         binding.setVariable( "basedir", workingDir );
         GroovyScriptEngine engine = new GroovyScriptEngine( workingDir );
-        engine.run( "verify.groovy", binding );
+        engine.run( file + ".groovy", binding );
     }
 
     /**
