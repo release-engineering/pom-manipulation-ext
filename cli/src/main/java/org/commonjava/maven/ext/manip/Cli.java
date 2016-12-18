@@ -73,6 +73,7 @@ import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathFactory;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -146,7 +147,7 @@ public class Cli
                                  .build() );
         options.addOption( Option.builder( "P" )
                                  .longOpt( "activeProfiles" )
-                                 .desc( "Comma separated list of active profiles. Only used with '-p' (Print all project dependencies)" )
+                                 .desc( "Comma separated list of active profiles." )
                                  .numberOfArgs( 1 )
                                  .build() );
         options.addOption( Option.builder( "o" )
@@ -307,6 +308,18 @@ public class Cli
 
             manipulationManager.init( session );
 
+            Set<String> activeProfiles = null;
+            if ( cmd.hasOption( 'P' ) )
+            {
+                activeProfiles = new HashSet<>();
+                Collections.addAll( activeProfiles, cmd.getOptionValue( 'P' ).trim().split( "," ) );
+
+                if ( session.getActiveProfiles() != null )
+                {
+                    session.getActiveProfiles().addAll( activeProfiles );
+                }
+            }
+
             if ( cmd.hasOption( 'x' ) )
             {
                 String []params = cmd.getOptionValues( 'x' );
@@ -329,12 +342,6 @@ public class Cli
             }
             else if ( cmd.hasOption( 'p' ) || cmd.hasOption( "printGAVTC" ) || cmd.hasOption( "printUnusedDepMgmt" ))
             {
-                Set<String> activeProfiles = null;
-                if ( cmd.hasOption( 'P' ) )
-                {
-                    activeProfiles = new HashSet<>();
-                    Collections.addAll( activeProfiles, cmd.getOptionValue( 'P' ).split( "," ) );
-                }
                 Set<ArtifactRef> ts = RESTManipulator.establishAllDependencies( pomIO.parseProject( session.getPom() ), activeProfiles );
                 logger.info( "Found {} dependencies.", ts.size() );
                 File output = null;

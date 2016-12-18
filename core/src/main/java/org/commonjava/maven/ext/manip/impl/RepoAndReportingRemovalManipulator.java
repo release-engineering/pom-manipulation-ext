@@ -27,6 +27,7 @@ import org.commonjava.maven.ext.manip.ManipulationSession;
 import org.commonjava.maven.ext.manip.io.SettingsIO;
 import org.commonjava.maven.ext.manip.model.Project;
 import org.commonjava.maven.ext.manip.state.RepoReportingState;
+import org.commonjava.maven.ext.manip.util.ProfileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -134,7 +135,7 @@ public class RepoAndReportingRemovalManipulator
             }
 
             // remove repositories in the profiles as well
-            final List<Profile> profiles = model.getProfiles();
+            final List<Profile> profiles = ProfileUtils.getProfiles( session, model );
 
             for ( final Profile profile : profiles )
             {

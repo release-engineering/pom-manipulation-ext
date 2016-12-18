@@ -32,6 +32,7 @@ import org.commonjava.maven.ext.manip.model.Project;
 import org.commonjava.maven.ext.manip.resolver.GalleyAPIWrapper;
 import org.commonjava.maven.ext.manip.state.DistributionEnforcingState;
 import org.commonjava.maven.ext.manip.state.EnforcingMode;
+import org.commonjava.maven.ext.manip.util.ProfileUtils;
 import org.commonjava.maven.galley.maven.parse.GalleyMavenXMLException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -175,10 +176,10 @@ public class DistributionEnforcingManipulator
 
             baseSkipSetting = enforceSkipFlag( model, baseSkipSetting, project, changed, true );
 
-            final List<Profile> profiles = model.getProfiles();
+            final List<Profile> profiles = ProfileUtils.getProfiles( session, model);
             if ( profiles != null )
             {
-                for ( final Profile profile : model.getProfiles() )
+                for ( final Profile profile :  ProfileUtils.getProfiles( session, model ) )
                 {
                     enforceSkipFlag( profile, baseSkipSetting, project, changed, false );
                 }

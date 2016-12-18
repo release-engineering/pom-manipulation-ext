@@ -28,6 +28,7 @@ import org.commonjava.maven.ext.manip.state.DependencyState;
 import org.commonjava.maven.ext.manip.state.PluginState;
 import org.commonjava.maven.ext.manip.state.RelocationState;
 import org.commonjava.maven.ext.manip.state.State;
+import org.commonjava.maven.ext.manip.util.ProfileUtils;
 import org.commonjava.maven.ext.manip.util.WildcardMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -118,7 +119,7 @@ public class RelocationManipulator
         }
         result |= updateDependencies( session, relocations, model.getDependencies() );
 
-        for ( final Profile profile : model.getProfiles() )
+        for ( final Profile profile : ProfileUtils.getProfiles( session, model) )
         {
             dependencyManagement = profile.getDependencyManagement();
             if ( dependencyManagement != null )

@@ -20,7 +20,6 @@ import org.apache.maven.model.DependencyManagement;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.ModelBase;
 import org.apache.maven.model.Parent;
-import org.apache.maven.model.Profile;
 import org.codehaus.plexus.component.annotations.Component;
 import org.codehaus.plexus.component.annotations.Requirement;
 import org.commonjava.maven.atlas.ident.ref.InvalidRefException;
@@ -30,6 +29,7 @@ import org.commonjava.maven.ext.manip.ManipulationException;
 import org.commonjava.maven.ext.manip.ManipulationSession;
 import org.commonjava.maven.ext.manip.model.Project;
 import org.commonjava.maven.ext.manip.state.VersioningState;
+import org.commonjava.maven.ext.manip.util.ProfileUtils;
 import org.commonjava.maven.ext.manip.util.PropertiesUtils;
 import org.commonjava.maven.ext.manip.util.PropertyInterpolator;
 import org.slf4j.Logger;
@@ -43,7 +43,6 @@ import java.util.Properties;
 import java.util.Set;
 
 import static org.apache.commons.lang.StringUtils.isEmpty;
-import static org.commonjava.maven.ext.manip.util.IdUtils.ga;
 import static org.commonjava.maven.ext.manip.util.IdUtils.gav;
 
 /**
@@ -188,6 +187,7 @@ public class ProjectVersioningManipulator
         Map<ProjectVersionRef, String> versionsByGAV = state.getVersionsByGAVMap();
         // If the parent version is defined, it might be necessary to change it
         // If the parent version is not defined, it will be taken automatically from the project version
+
         if ( parent != null && parent.getVersion() != null )
         {
             final ProjectVersionRef parentGAV =
@@ -250,15 +250,9 @@ public class ProjectVersioningManipulator
 
         final Set<ModelBase> bases = new HashSet<>();
         bases.add( model );
-
-        final List<Profile> profiles = model.getProfiles();
-        if ( profiles != null )
-        {
-            bases.addAll( profiles );
-        }
+        bases.addAll( ProfileUtils.getProfiles( session, model ) );
 
         final PropertyInterpolator pi = new PropertyInterpolator( model.getProperties(), project );
-
         for ( final ModelBase base : bases )
         {
             final DependencyManagement dm = base.getDependencyManagement();
@@ -279,6 +273,7 @@ public class ProjectVersioningManipulator
                         final String newVersion = versionsByGAV.get( gav );
                         if ( newVersion != null )
                         {
+                            logger.debug ("Examining dependency (from depMgmt) {} to change version to {} ", d, newVersion);
                             if (d.getVersion().startsWith( "${" ))
                             {
                                 if ( PropertiesUtils.updateProperties( session, new HashSet<>( projects ), false, extractPropertyName( d.getVersion() ), newVersion ) == PropertiesUtils.PropertyUpdate.NOTFOUND )
@@ -321,6 +316,7 @@ public class ProjectVersioningManipulator
 
                         if ( newVersion != null && d.getVersion() != null )
                         {
+                            logger.debug ("Examining dependency {} to change version to {} ", d, newVersion);
                             if (d.getVersion().startsWith( "${" ))
                             {
                                 if ( PropertiesUtils.updateProperties( session, new HashSet<>( projects ), false, extractPropertyName( d.getVersion() ), newVersion ) == PropertiesUtils.PropertyUpdate.NOTFOUND )

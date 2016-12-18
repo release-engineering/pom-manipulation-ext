@@ -33,10 +33,11 @@ public class DefaultExecutionParser
 {
     public static final List<ExecutionParserHandler> DEFAULT_HANDLERS = new ArrayList<ExecutionParserHandler>()
     {{
-            add( ExecutionParser.BUILD_HANDLER );
-            add( ExecutionParser.BUILD_RESULT_HANDLER );
-            add( ExecutionParser.SYSTEM_PROPERTIES_HANDLER );
-        }};
+        add( ExecutionParser.BUILD_HANDLER );
+        add( ExecutionParser.BUILD_RESULT_HANDLER );
+        add( ExecutionParser.BUILD_PROFILES_HANDLER );
+        add( ExecutionParser.SYSTEM_PROPERTIES_HANDLER );
+    }};
 
     private List<ExecutionParserHandler> handlers;
 

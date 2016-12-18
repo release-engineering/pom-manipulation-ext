@@ -30,9 +30,21 @@ public class Execution
 
     private Map<String, String> javaParams;
 
+    private Map<String, String> flags;
+
     public Map<String, String> getJavaParams()
     {
         return javaParams;
+    }
+
+    public Map<String, String> getFlags()
+    {
+        return flags;
+    }
+
+    public void setFlags( Map<String,String> flags )
+    {
+        this.flags = flags;
     }
 
     public void setJavaParams( Map<String, String> javaParams )

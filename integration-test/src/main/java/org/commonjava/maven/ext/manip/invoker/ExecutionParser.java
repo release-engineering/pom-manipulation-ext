@@ -18,6 +18,7 @@ package org.commonjava.maven.ext.manip.invoker;
 import org.commonjava.maven.ext.manip.TestUtils;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
@@ -45,6 +46,27 @@ public interface ExecutionParser
             else if ( !key.matches( "invoker\\..*" ) && value.isEmpty() )
             {
                 execution.setMvnCommand( key );
+            }
+        }
+    };
+
+    ExecutionParserHandler BUILD_PROFILES_HANDLER = new ExecutionParserHandler()
+    {
+        @Override
+        public void handle( Execution execution, Map<String, String> params )
+        {
+            String key = params.get( "key" );
+            String value = params.get( "value" );
+
+            if ( key.matches( "invoker\\.profiles.*" ) )
+            {
+                Map<String,String> flags = execution.getFlags();
+                if ( flags == null)
+                {
+                    flags = new HashMap<>(  );
+                }
+                flags.put( "activeProfiles", value );
+                execution.setFlags( flags );
             }
         }
     };

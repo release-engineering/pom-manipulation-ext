@@ -24,6 +24,7 @@ import org.commonjava.maven.ext.manip.ManipulationSession;
 import org.commonjava.maven.ext.manip.model.Project;
 import org.commonjava.maven.ext.manip.state.ProjectVersionEnforcingState;
 import org.commonjava.maven.ext.manip.state.State;
+import org.commonjava.maven.ext.manip.util.ProfileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -100,10 +101,10 @@ public class ProjectVersionEnforcingManipulator
                     enforceProjectVersion( project, model.getDependencyManagement().getDependencies(), changed );
                 }
 
-                final List<Profile> profiles = model.getProfiles();
+                final List<Profile> profiles = ProfileUtils.getProfiles( session, model);
                 if ( profiles != null )
                 {
-                    for ( final Profile profile : model.getProfiles() )
+                    for ( final Profile profile : profiles )
                     {
                         enforceProjectVersion( project, profile.getDependencies(), changed );
                         if ( profile.getDependencyManagement() != null )

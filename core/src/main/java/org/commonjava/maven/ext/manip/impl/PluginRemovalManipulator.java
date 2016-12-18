@@ -27,6 +27,7 @@ import org.commonjava.maven.ext.manip.model.Project;
 import org.commonjava.maven.ext.manip.state.PluginRemovalState;
 import org.commonjava.maven.ext.manip.state.PluginState;
 import org.commonjava.maven.ext.manip.state.State;
+import org.commonjava.maven.ext.manip.util.ProfileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -113,7 +114,7 @@ public class PluginRemovalManipulator
             result = scanPlugins( pluginsToRemove, model.getBuild().getPlugins() );
         }
 
-        for ( final Profile profile : model.getProfiles() )
+        for ( final Profile profile : ProfileUtils.getProfiles( session, model) )
         {
             if ( profile.getBuild() != null && scanPlugins( pluginsToRemove, profile.getBuild().getPlugins() ) )
             {

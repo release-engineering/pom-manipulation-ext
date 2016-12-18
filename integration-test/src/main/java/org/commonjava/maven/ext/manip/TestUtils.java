@@ -36,6 +36,7 @@ import java.io.FileWriter;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -86,7 +87,7 @@ public class TestUtils
      *
      * @param workingDir - Working directory where the invoker properties are.
      * @param restURL The URL to the REST server that manages versions, or null
-     * @throws Exception
+     * @throws Exception if an error occurs
      */
     public static void runLikeInvoker( String workingDir, String restURL )
         throws Exception
@@ -110,6 +111,7 @@ public class TestUtils
             args.add( "-s" );
             args.add( getDefaultTestLocation( "settings.xml" ) );
             args.add( "-d" );
+            args.add( toFlagsParams( e.getFlags() ) );
 
             // Run PME-Cli
             Integer cliExitValue = runCli( args, e.getJavaParams(), e.getLocation() );
@@ -253,6 +255,26 @@ public class TestUtils
         return stringParams;
     }
 
+    /**
+     * Convert string parameters in a Map to a String of -- arguments
+     *
+     * @param params - Map of java parameters
+     * @return - String of - arguments
+     */
+    private static String toFlagsParams( Map<String, String> params )
+    {
+        if ( params == null )
+        {
+            return "";
+        }
+
+        String stringParams = "";
+        for ( String key : params.keySet() )
+        {
+            stringParams += String.format( "--%s=%s ", key, params.get( key ) );
+        }
+        return stringParams;
+    }
 
     /**
      * Run command in another process and wait for it to finish.

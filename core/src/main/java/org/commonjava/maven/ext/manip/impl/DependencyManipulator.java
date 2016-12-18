@@ -33,6 +33,7 @@ import org.commonjava.maven.ext.manip.ManipulationSession;
 import org.commonjava.maven.ext.manip.io.ModelIO;
 import org.commonjava.maven.ext.manip.model.Project;
 import org.commonjava.maven.ext.manip.state.DependencyState;
+import org.commonjava.maven.ext.manip.util.ProfileUtils;
 import org.commonjava.maven.ext.manip.util.PropertiesUtils;
 import org.commonjava.maven.ext.manip.util.WildcardMap;
 import org.slf4j.Logger;
@@ -392,7 +393,7 @@ public class DependencyManipulator implements Manipulator
             applyExplicitOverrides( explicitVersionPropertyUpdateMap, explicitOverrides, projectDependencies );
 
             // Now check all possible profiles and update them.
-            List<Profile> profiles = project.getModel().getProfiles();
+            List<Profile> profiles = ProfileUtils.getProfiles( session, project.getModel());
             if ( profiles != null )
             {
                 for ( Profile p : profiles )
