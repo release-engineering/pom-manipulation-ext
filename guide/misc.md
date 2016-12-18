@@ -9,6 +9,10 @@ In addition to the main [project-version](project-version-manip.html), [dependen
 * POM Cleanup
 * Build Management
 
+### General
+
+PME will be default scan every profile in the project. To restrict scanning to only those profiles that are active set `scanActiveProfiles` to true.
+
 ### POM Cleanup
 
 #### Repository And Reporting Removal

@@ -26,9 +26,7 @@ It supports the following arguments
     -o,--outputFile <arg>     outputFile to output dependencies to. Only
                               used with '-p' (Print all project
                               dependencies)
-    -P,--activeProfiles <arg> Comma separated list of active profiles. Only
-                              used with '-p' (Print all project
-                              dependencies)
+    -P,--activeProfiles <arg> Comma separated list of active profiles.
     -p,--printDeps            Print all project dependencies
     --printGAVTC              Print all project dependencies in
                               group:artifact:version:type:classifier with
