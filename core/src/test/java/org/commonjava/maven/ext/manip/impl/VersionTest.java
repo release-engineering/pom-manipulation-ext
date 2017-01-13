@@ -236,7 +236,7 @@ public class VersionTest
 
         version = new Version("1.2beta11");
         version.setBuildNumber( "12" );
-        assertThat( version.getOSGiVersionString(), equalTo( "1.2.0.beta-12" ) );
+        assertThat( version.getOSGiVersionString(), equalTo( "1.2.0.beta12" ) );
 
         version = new Version("1.2.3.5");
         version.setBuildNumber( "8" );
