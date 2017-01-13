@@ -193,7 +193,7 @@ public class VersioningCalculatorTest
 
 
     @Test
-    public void indempotency()
+    public void idempotency()
         throws Exception
     {
         final Properties props = new Properties();
