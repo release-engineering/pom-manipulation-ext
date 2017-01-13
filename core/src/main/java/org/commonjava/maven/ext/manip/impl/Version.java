@@ -41,7 +41,7 @@ public class Version
     /**
      * Regular expression used to match version string delimiters
      */
-    private final static String DELIMITER_REGEX = "[\\.\\-_]?";
+    private final static String DELIMITER_REGEX = "[\\.\\-_]";
 
     /**
      * Regular expression used to match the major, minor, and micro versions
@@ -53,9 +53,9 @@ public class Version
     private final static String SNAPSHOT_SUFFIX = "SNAPSHOT";
 
     /**
-     * Regular expression used to match the parts of the qualifier
+     * Regular expression used to match the parts of the qualifier "base-buildnum-snapshot"
      */
-    private final static String QUALIFIER_REGEX = "(.*?)(\\d+)?(" + DELIMITER_REGEX + ")?((?i:" + SNAPSHOT_SUFFIX +
+    private final static String QUALIFIER_REGEX = "(.*?)(" + DELIMITER_REGEX + ")?(\\d+)?(" + DELIMITER_REGEX + ")?((?i:" + SNAPSHOT_SUFFIX +
         "))?$";
 
     private final static Pattern qualifierPattern = Pattern.compile( QUALIFIER_REGEX );
@@ -99,6 +99,10 @@ public class Version
     private String qualifier;
 
     private String qualifierBase;
+
+    private static final String DEFAULT_BUILD_NUMBER_DELIMITER = "-";
+
+    private String buildNumberDelimiter = DEFAULT_BUILD_NUMBER_DELIMITER;
 
     /**
      * Numeric string at the end of the qualifier
@@ -238,8 +242,17 @@ public class Version
         qualifierMatcher.matches();
 
         qualifierBase = qualifierMatcher.group( 1 );
-        buildNumber = qualifierMatcher.group( 2 );
-        snapshot = qualifierMatcher.group( 4 );
+        buildNumberDelimiter = qualifierMatcher.group( 2 );
+        if ( buildNumberDelimiter == null )
+        {
+            buildNumberDelimiter = "";
+        }
+        buildNumber = qualifierMatcher.group( 3 );
+        if ( buildNumber == null )
+        {
+            buildNumberDelimiter = DEFAULT_BUILD_NUMBER_DELIMITER;
+        }
+        snapshot = qualifierMatcher.group( 5 );
     }
 
     /**
@@ -337,7 +350,7 @@ public class Version
             if ( ( !isEmpty( getBuildNumber() ) || isSnapshot() ) &&
                 !versionStringDelimiters.contains( getQualifierBase().charAt( getQualifierBase().length() - 1 ) ) )
             {
-                updatedQualifier.append( '-' );
+                updatedQualifier.append( getBuildNumberDelimiter() );
             }
         }
 
@@ -488,6 +501,11 @@ public class Version
         return buildNumber;
     }
 
+    public String getBuildNumberDelimiter()
+    {
+        return buildNumberDelimiter;
+    }
+
     public boolean hasBuildNumber()
     {
         return !isEmpty( getBuildNumber() );
@@ -520,11 +538,20 @@ public class Version
         }
 
         String suffixBase = suffixMatcher.group( 1 );
-        String buildNumber = suffixMatcher.group( 2 );
-        String snapshot = suffixMatcher.group( 4 );
+        String buildNumberDelimiter = suffixMatcher.group( 2 );
+        if ( buildNumberDelimiter == null )
+        {
+            buildNumberDelimiter = "";
+        }
+        String buildNumber = suffixMatcher.group( 3 );
+        if ( buildNumber == null )
+        {
+            buildNumberDelimiter = DEFAULT_BUILD_NUMBER_DELIMITER;
+        }
+        String snapshot = suffixMatcher.group( 5 );
 
         String suffixBaseNoDelim = this.removeLastDelimiters( suffixBase );
-        String suffixMatchRegex = "(.*?)(" + Pattern.quote( suffixBaseNoDelim ) + ")(" + DELIMITER_REGEX + ")";
+        String suffixMatchRegex = "(.*?)(" + Pattern.quote( suffixBaseNoDelim ) + ")(" + DELIMITER_REGEX + "?)";
 
         String oldQualifierBase = getQualifierBase();
         if ( isEmpty( getQualifier() ) )
@@ -540,6 +567,7 @@ public class Version
             // e.g. "1.2.0.Beta-1" + "foo-2" = "1.2.0.Beta-1-foo-2"
             if ( !isEmpty( getBuildNumber() ) )
             {
+                newQualifierBase += getBuildNumberDelimiter();
                 newQualifierBase += getBuildNumber();
                 this.buildNumber = null;
             }
@@ -554,6 +582,7 @@ public class Version
 
         if ( !isEmpty( buildNumber ) )
         {
+            this.buildNumberDelimiter = buildNumberDelimiter;
             this.buildNumber = buildNumber;
         }
 
