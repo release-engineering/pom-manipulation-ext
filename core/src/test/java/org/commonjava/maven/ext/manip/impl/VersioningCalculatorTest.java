@@ -832,6 +832,61 @@ public class VersioningCalculatorTest
         assertThat( result, equalTo( v + "-" + ns ) );
     }
 
+    @Test
+    public void alphaNumericSuffixBase()
+            throws Exception
+    {
+        final Properties props = new Properties();
+
+        props.setProperty( VersioningState.VERSION_SUFFIX_SYSPROP, "test-jdk7" );
+        props.setProperty( VersioningState.VERSION_OSGI_SYSPROP, "false" );
+        setupSession( props );
+
+        final String v = "1.1";
+        final String os = "";
+        final String ns = ".test-jdk7";
+
+        final String result = calculate( v + os );
+        assertThat( result, equalTo( v + ns ) );
+    }
+
+    @Test
+    public void alphaNumericSuffixBaseOSGi()
+            throws Exception
+    {
+        final Properties props = new Properties();
+
+        props.setProperty( VersioningState.VERSION_SUFFIX_SYSPROP, "Beta1" );
+        props.setProperty( VersioningState.VERSION_OSGI_SYSPROP, "true" );
+        //props.setProperty( VersioningState.VERSION_SUFFIX_SNAPSHOT_SYSPROP, "true" );
+        setupSession( props );
+
+        final String v = "1";
+        final String os = "";
+        final String ns = ".Beta1";
+
+        final String result = calculate( v + os );
+        assertThat( result, equalTo( v + ".0.0" + ns ) );
+    }
+
+    @Test
+    public void alphaNumericSuffixBaseWithSnapshot()
+            throws Exception
+    {
+        final Properties props = new Properties();
+
+        props.setProperty( VersioningState.VERSION_SUFFIX_SYSPROP, "test_jdk7" );
+        props.setProperty( VersioningState.VERSION_OSGI_SYSPROP, "false" );
+        props.setProperty( VersioningState.VERSION_SUFFIX_SNAPSHOT_SYSPROP, "true" );
+        setupSession( props );
+
+        final String v = "1.1-SNAPSHOT";
+        final String os = "";
+        final String ns = "-test_jdk7-SNAPSHOT";
+
+        final String result = calculate( v + os );
+        assertThat( result, equalTo( "1.1" + ns ) );
+    }
 
     private byte[] setupMetadataVersions( final String... versions )
         throws IOException
