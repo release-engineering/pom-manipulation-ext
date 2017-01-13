@@ -262,7 +262,7 @@ public class Cli
         }
         if ( !target.exists() )
         {
-            logger.info( "Manipulation engine disabled. No project found." );
+            logger.info( "Manipulation engine disabled. Project {} cannot be found.", target );
             return 10;
         }
         // Don't bother skipping if we're just trying to analyse deps.
