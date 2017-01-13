@@ -172,7 +172,7 @@ public class Version
             {
                 ++delimiterCount;
             }
-            else if ( !isNumeric( Character.toString( version.charAt( qualifierIndex ) ) ) )
+            else if ( !Character.isDigit( version.charAt( qualifierIndex ) ) )
             {
                 return qualifierIndex;
             }
