@@ -106,7 +106,7 @@ In a multi-module build it is considered good practice to coordinate dependency 
 
 It is possible to flexibly override or exclude a dependency globally or on a per module basis. The property starts with `dependencyExclusion.` and has the following format:
 
-    mvn install -DdependencyExclusion.[groupId]:[artifactId]@[moduleGroupId]:[moduleArtifactId]=[version]
+    mvn install -DdependencyExclusion.[groupId]:[artifactId]@[moduleGroupId]:[moduleArtifactId]=[version] | ,+[group:artifact]...
 
 **NOTE:** `dependencyOverride` is an alias for `dependencyExclusion` and functions _exactly the same_. If both are set then they will be merged and an error thrown if they clash.
 
@@ -158,6 +158,30 @@ Or, you can prevent overriding a dependency version across the entire project wh
 For example:
 
     mvn install -DdependencyExclusion.junit:*@*=
+
+#### Dependency Exclusion Addition
+
+It is also possible to inject specific exclusions into a dependency. For instance
+
+    mvn install -DdependencyExclusion.junit:junit@*=4.10-rebuild-1,+slf4j:slf4j
+
+will, as per above, apply the explicit 4.10-rebuild-10 version to the junit:junit dependency but also add an exclusion e.g.
+
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>4.1</version>
+      <exclusions>
+        <exclusion>
+          <artifactId>slf4j</artifactId>
+          <groupId>slf4j</groupId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+
+Multiple exclusions may be added via comma separators e.g.
+
+    mvn install -DdependencyExclusion.junit:junit@*=+slf4j:slf4j,+commons-lang:commons-lang
 
 
 ### Strict Mode Version Alignment
