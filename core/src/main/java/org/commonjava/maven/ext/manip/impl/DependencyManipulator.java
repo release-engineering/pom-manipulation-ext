@@ -18,6 +18,7 @@ package org.commonjava.maven.ext.manip.impl;
 import org.apache.commons.lang.StringUtils;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.DependencyManagement;
+import org.apache.maven.model.Exclusion;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Profile;
 import org.codehaus.plexus.component.annotations.Component;
@@ -122,7 +123,7 @@ public class DependencyManipulator implements Manipulator
      *
      * @param state the dependency state
      * @return the loaded overrides
-     * @throws ManipulationException
+     * @throws ManipulationException if an error occurs.
      */
     private Map<ArtifactRef, String> loadRemoteOverrides( final DependencyState state )
         throws ManipulationException
@@ -456,17 +457,34 @@ public class DependencyManipulator implements Manipulator
                 }
                 else
                 {
-                    logger.info( "Explicit overrides : force aligning {} to {}.", groupIdArtifactId, overrideVersion );
-
-                    if ( ! PropertiesUtils.cacheProperty( versionPropertyUpdateMap, oldVersion, overrideVersion, dependency, true ))
+                    for ( String target : overrideVersion.split( "," ) )
                     {
-                        if ( oldVersion.contains( "${" ))
+                        if (target.startsWith( "+" ))
                         {
-                            logger.warn( "Overriding version with {} when old version contained a property {} ", overrideVersion, oldVersion );
-                            // TODO: Should this throw an exception?
+                            logger.info ("Adding dependency exclusion {} to dependency {} ", target.substring( 1 ), dependency);
+                            Exclusion e = new Exclusion();
+                            e.setGroupId( target.substring( 1 ).split( ":" )[0] );
+                            e.setArtifactId( target.split( ":" )[1] );
+                            dependency.addExclusion( e );
                         }
-                        // Not checking strict version alignment here as explicit overrides take priority.
-                        dependency.setVersion( overrideVersion );
+                        else
+                        {
+                            logger.info( "Explicit overrides : force aligning {} to {}.", groupIdArtifactId,
+                                         target );
+
+                            if ( !PropertiesUtils.cacheProperty( versionPropertyUpdateMap, oldVersion, target,
+                                                                 dependency, true ) )
+                            {
+                                if ( oldVersion.contains( "${" ) )
+                                {
+                                    logger.warn( "Overriding version with {} when old version contained a property {} ",
+                                                 target, oldVersion );
+                                    // TODO: Should this throw an exception?
+                                }
+                                // Not checking strict version alignment here as explicit overrides take priority.
+                                dependency.setVersion( target );
+                            }
+                        }
                     }
                 }
             }
