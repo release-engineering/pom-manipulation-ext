@@ -833,6 +833,22 @@ public class VersioningCalculatorTest
     }
 
     @Test
+    public void incrementExistingSerialSuffix_withEmptySuffixBase()
+            throws Exception
+    {
+        final Properties props = new Properties();
+
+        props.setProperty( VersioningState.INCREMENT_SERIAL_SUFFIX_SYSPROP, "" );
+        setupSession( props, "1.2.0.1", "1.2.0.2" );
+
+        final String v = "1.2.0";
+        final String ns = "3";
+
+        final String result = calculate( v );
+        assertThat( result, equalTo( v + "." + ns ) );
+    }
+
+    @Test
     public void alphaNumericSuffixBase()
             throws Exception
     {
