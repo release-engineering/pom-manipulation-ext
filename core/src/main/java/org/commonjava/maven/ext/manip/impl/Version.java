@@ -46,7 +46,7 @@ public class Version
     /**
      * Regular expression used to match the major, minor, and micro versions
      */
-    private final static String MMM_REGEX = "(\\d+)(" + DELIMITER_REGEX + "(\\d+)?(" + DELIMITER_REGEX + "(\\d+)?)?)?";
+    private final static String MMM_REGEX = "(\\d+)(" + DELIMITER_REGEX + "(\\d+)?(" + DELIMITER_REGEX + "(\\d+))?)?";
 
     private final static Pattern mmmPattern = Pattern.compile( MMM_REGEX );
 
@@ -55,12 +55,19 @@ public class Version
     /**
      * Regular expression used to match the parts of the qualifier "base-buildnum-snapshot"
      */
-    private final static String QUALIFIER_REGEX = "(.*?)(" + DELIMITER_REGEX + ")?(\\d+)?(" + DELIMITER_REGEX + ")?((?i:" + SNAPSHOT_SUFFIX +
-        "))?$";
+    private final static String QUALIFIER_REGEX = "(.*?)((" + DELIMITER_REGEX + ")?(\\d+))?(" + DELIMITER_REGEX
+            + ")?((?i:" + SNAPSHOT_SUFFIX + "))?$";
 
     private final static Pattern qualifierPattern = Pattern.compile( QUALIFIER_REGEX );
 
-    // Used to match valid osgi version
+    private final static String VERSION_REGEX = "(" + MMM_REGEX + ")?" + "(" + DELIMITER_REGEX + ")?"
+            + "(" + QUALIFIER_REGEX + ")";
+
+    private final static Pattern versionPattern = Pattern.compile( VERSION_REGEX );
+
+    /**
+     * Used to match valid OSGi version
+     */
     private final static String OSGI_VERSION_REGEX = "(\\d+)(\\.\\d+(\\.\\d+([\\.][\\p{Alnum}|\\-|_]+)?)?)?";
 
     private final static Pattern osgiPattern = Pattern.compile( OSGI_VERSION_REGEX );
@@ -101,7 +108,7 @@ public class Version
     /**
      * The original delimiter between the MMM version and the qualifier.
      */
-    private String originalMMMDelimiter;
+    private String qualifierStartDelimiter;
 
     private String qualifierBase;
 
@@ -142,57 +149,19 @@ public class Version
      * @param version
      * @return
      */
-    private void parseVersion( String version )
+    private void parseVersion( final String version )
     {
-        int qualifierIndex = getQualifierIndex( version );
-
-        // Check for a delimiter between the MMM and the qualifier
-        if ( qualifierIndex > 0 && versionStringDelimiters.contains( version.charAt( qualifierIndex - 1 ) ) )
+        Matcher versionMatcher = versionPattern.matcher( version );
+        if ( !versionMatcher.matches() )
         {
-            originalMMMDelimiter = Character.toString( version.charAt( qualifierIndex - 1 ) );
-            originalMMM = version.substring( 0, qualifierIndex - 1 );
+            return;
         }
-        else
-        {
-            originalMMM = version.substring( 0, qualifierIndex );
-        }
-
-        originalQualifier = version.substring( qualifierIndex );
+        originalMMM = versionMatcher.group( 1 );
+        qualifierStartDelimiter = versionMatcher.group( 7 );
+        originalQualifier = versionMatcher.group( 8 );
 
         parseMMM( originalMMM );
         parseQualifier( originalQualifier );
-    }
-
-    /**
-     * Attempt to find where the qualifier portion of the version string begins. Will return the location of either the
-     * first non-numeric char or the character after the third delimiter.
-     *
-     * @param version
-     * @return index of the start of the qualifier (version.length() if no qualifier was found)
-     */
-    private int getQualifierIndex( String version )
-    {
-        int qualifierIndex = 0;
-        int delimiterCount = 0;
-        while ( qualifierIndex < version.length() )
-        {
-            if ( versionStringDelimiters.contains( version.charAt( qualifierIndex ) ) )
-            {
-                ++delimiterCount;
-            }
-            else if ( !Character.isDigit( version.charAt( qualifierIndex ) ) )
-            {
-                return qualifierIndex;
-            }
-
-            ++qualifierIndex;
-
-            if ( delimiterCount == 3 )
-            {
-                return qualifierIndex;
-            }
-        }
-        return version.length();
     }
 
     /**
@@ -240,17 +209,17 @@ public class Version
         qualifierMatcher.matches();
 
         qualifierBase = qualifierMatcher.group( 1 );
-        buildNumberDelimiter = qualifierMatcher.group( 2 );
+        buildNumberDelimiter = qualifierMatcher.group( 3 );
         if ( buildNumberDelimiter == null )
         {
             buildNumberDelimiter = "";
         }
-        buildNumber = qualifierMatcher.group( 3 );
+        buildNumber = qualifierMatcher.group( 4 );
         if ( buildNumber == null )
         {
             buildNumberDelimiter = Character.toString( DEFAULT_QUALIFIER_DELIMITER );
         }
-        snapshot = qualifierMatcher.group( 5 );
+        snapshot = qualifierMatcher.group( 6 );
     }
 
     /**
@@ -363,6 +332,10 @@ public class Version
      */
     public String getOriginalMMM()
     {
+        if( originalMMM == null )
+        {
+            originalMMM = "";
+        }
         return originalMMM;
     }
 
@@ -424,13 +397,13 @@ public class Version
 
         StringBuilder versionString = new StringBuilder();
         versionString.append( originalMMM );
-        if ( isEmpty( originalMMMDelimiter ) )
+        if ( isEmpty( qualifierStartDelimiter ) )
         {
             versionString.append( DEFAULT_MMM_DELIMITER );
         }
         else
         {
-            versionString.append( originalMMMDelimiter );
+            versionString.append( qualifierStartDelimiter  );
         }
         versionString.append( getQualifier() );
         return versionString.toString();
@@ -542,9 +515,9 @@ public class Version
         }
 
         String suffixBase = suffixMatcher.group( 1 );
-        String suffixBuildNumberDelimiter = suffixMatcher.group( 2 );
-        String suffixBuildNumber = suffixMatcher.group( 3 );
-        String suffixSnapshot = suffixMatcher.group( 5 );
+        String suffixBuildNumberDelimiter = suffixMatcher.group( 3 );
+        String suffixBuildNumber = suffixMatcher.group( 4 );
+        String suffixSnapshot = suffixMatcher.group( 6 );
 
         String suffixBaseNoDelim = this.removeLastDelimiters( suffixBase );
         String suffixMatchRegex = "(.*?)(" + Pattern.quote( suffixBaseNoDelim ) + ")(" + DELIMITER_REGEX + "?)";
@@ -633,7 +606,7 @@ public class Version
         // Build version pattern regex, matches something like "<mmm>.<qualifier>.<buildnum>".
         StringBuilder versionPatternBuf = new StringBuilder();
         versionPatternBuf.append( '(' )
-                .append( Pattern.quote( version.getOriginalMMM() ) ).append('(').append( DELIMITER_REGEX).append("0)*") // Match zeros appended to a major only version
+                .append( Pattern.quote( version.getOriginalMMM() ) ).append('(').append( DELIMITER_REGEX ).append("0)*") // Match zeros appended to a major only version
                 .append( ")?" )
                 .append( DELIMITER_REGEX );
         if ( !isEmpty( version.getQualifierBase() ) )
