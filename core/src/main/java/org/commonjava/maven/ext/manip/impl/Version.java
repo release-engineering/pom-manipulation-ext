@@ -55,8 +55,7 @@ public class Version
     /**
      * Regular expression used to match the parts of the qualifier "base-buildnum-snapshot"
      */
-    private final static String QUALIFIER_REGEX = "(.*?)((" + DELIMITER_REGEX + ")?(\\d+))?(" + DELIMITER_REGEX
-            + ")?((?i:" + SNAPSHOT_SUFFIX + "))?$";
+    private final static String QUALIFIER_REGEX = "(.*?)((" + DELIMITER_REGEX + ")?(\\d+))?$";
 
     private final static Pattern qualifierPattern = Pattern.compile( QUALIFIER_REGEX );
 
@@ -64,6 +63,10 @@ public class Version
             + "(" + QUALIFIER_REGEX + ")";
 
     private final static Pattern versionPattern = Pattern.compile( VERSION_REGEX );
+
+    private final static String SNAPSHOT_REGEX = "(.*?)(" + DELIMITER_REGEX + ")?((?i:" + SNAPSHOT_SUFFIX + "))?$";
+
+    private final static Pattern snapshotPattern = Pattern.compile( SNAPSHOT_REGEX );
 
     /**
      * Used to match valid OSGi version
@@ -119,6 +122,8 @@ public class Version
      */
     private String buildNumber;
 
+    private String snapshotDelimiter;
+
     /**
      * The snapshot portion of the qualifier
      */
@@ -151,7 +156,13 @@ public class Version
      */
     private void parseVersion( final String version )
     {
-        Matcher versionMatcher = versionPattern.matcher( version );
+        Matcher snapshotMatcher = snapshotPattern.matcher( version );
+        snapshotMatcher.matches();
+        final String versionWithoutSnapshot = snapshotMatcher.group( 1 );
+        snapshotDelimiter = snapshotMatcher.group( 2 );
+        snapshot = snapshotMatcher.group( 3 );
+
+        Matcher versionMatcher = versionPattern.matcher( versionWithoutSnapshot );
         if ( !versionMatcher.matches() )
         {
             return;
@@ -219,7 +230,6 @@ public class Version
         {
             buildNumberDelimiter = Character.toString( DEFAULT_QUALIFIER_DELIMITER );
         }
-        snapshot = qualifierMatcher.group( 6 );
     }
 
     /**
@@ -332,7 +342,7 @@ public class Version
      */
     public String getOriginalMMM()
     {
-        if( originalMMM == null )
+        if ( originalMMM == null )
         {
             originalMMM = "";
         }
@@ -502,13 +512,26 @@ public class Version
      */
     public void appendQualifierSuffix( String suffix )
     {
+        logger.debug( "Applying suffix: " + suffix + " to version " + getVersionString() );
         if ( suffix == null )
         {
             return;
         }
 
-        logger.debug( "Applying suffix: " + suffix + " to version " + getVersionString() );
-        Matcher suffixMatcher = qualifierPattern.matcher( suffix );
+        // Remove snapshot portion first to make parsing simpler
+        Matcher snapshotMatcher = snapshotPattern.matcher( suffix );
+        snapshotMatcher.matches();
+        final String suffixWithoutSnapshot = snapshotMatcher.group( 1 );
+        final String suffixSnapshotDelimiter = snapshotMatcher.group( 2 );
+        final String suffixSnapshot = snapshotMatcher.group( 3 );
+        if ( !isEmpty( suffixSnapshot ) )
+        {
+            this.snapshotDelimiter = suffixSnapshotDelimiter;
+            this.snapshot = suffixSnapshot;
+        }
+
+        // Handle the non-snapshot portion of the new suffix
+        Matcher suffixMatcher = qualifierPattern.matcher( suffixWithoutSnapshot );
         if ( !suffixMatcher.matches() )
         {
             return;
@@ -517,15 +540,19 @@ public class Version
         String suffixBase = suffixMatcher.group( 1 );
         String suffixBuildNumberDelimiter = suffixMatcher.group( 3 );
         String suffixBuildNumber = suffixMatcher.group( 4 );
-        String suffixSnapshot = suffixMatcher.group( 6 );
 
         String suffixBaseNoDelim = this.removeLastDelimiters( suffixBase );
         String suffixMatchRegex = "(.*?)(" + Pattern.quote( suffixBaseNoDelim ) + ")(" + DELIMITER_REGEX + "?)";
 
         String oldQualifierBase = getQualifierBase();
         String oldQualifierBaseAndNum = getQualifierBaseAndBuildNum();
-        if ( isEmpty( getQualifier() ) )
+        if ( isEmpty( oldQualifierBaseAndNum ) )
         {
+            if ( suffixBase.length() > 0 && versionStringDelimiters.contains( suffixBase.charAt( 0 ) ) )
+            {
+                qualifierStartDelimiter = Character.toString( suffixBase.charAt( 0 ) );
+                suffixBase = suffixBase.substring( 1 );
+            }
             qualifierBase = suffixBase;
         }
         // Check if the new suffix matches the end of the existing qualifier
@@ -550,11 +577,6 @@ public class Version
         {
             buildNumberDelimiter = suffixBuildNumberDelimiter;
             buildNumber = suffixBuildNumber;
-        }
-
-        if ( SNAPSHOT_SUFFIX.equalsIgnoreCase( suffixSnapshot ) )
-        {
-            this.snapshot = suffixSnapshot;
         }
 
         logger.debug( "New version string: " + getVersionString() );

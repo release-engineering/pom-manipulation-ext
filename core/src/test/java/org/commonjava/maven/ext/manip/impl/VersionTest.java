@@ -161,6 +161,25 @@ public class VersionTest
         version = new Version("1.2");
         version.appendQualifierSuffix( "jboss-1-SNAPSHOT" );
         assertThat( version.getVersionString(), equalTo( "1.2.jboss-1-SNAPSHOT" ) );
+
+        version = new Version("1.2");
+        version.appendQualifierSuffix( "jboss1" );
+        version.setSnapshot(true);
+        assertThat( version.getVersionString(), equalTo( "1.2.jboss1-SNAPSHOT" ) );
+
+        version = new Version("1.2-SNAPSHOT");
+        version.appendQualifierSuffix( "jboss1" );
+        version.setSnapshot(false);
+        assertThat( version.getVersionString(), equalTo( "1.2.jboss1" ) );
+
+        version = new Version("1.2-SNAPSHOT");
+        version.appendQualifierSuffix( "jboss1" );
+        version.setSnapshot(true);
+        assertThat( version.getVersionString(), equalTo( "1.2.jboss1-SNAPSHOT" ) );
+
+        version = new Version("1.2");
+        version.appendQualifierSuffix( "-jboss1" );
+        assertThat( version.getVersionString(), equalTo( "1.2-jboss1" ) );
 }
     
     @Test

@@ -898,7 +898,7 @@ public class VersioningCalculatorTest
 
         final String v = "1.1-SNAPSHOT";
         final String os = "";
-        final String ns = "-test_jdk7-SNAPSHOT";
+        final String ns = ".test_jdk7-SNAPSHOT";
 
         final String result = calculate( v + os );
         assertThat( result, equalTo( "1.1" + ns ) );
