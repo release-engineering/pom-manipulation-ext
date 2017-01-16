@@ -221,3 +221,7 @@ If the property `strictAlignmentIgnoreSuffix` is set to true then the comparison
 In order to handle the situation where one GAV is changed to another (e.g. from community to product) the relocation manipulator can be used. Multiple relocations may be comma separated and an optional version component may be added; the version will override any prior version used in the dependency. Note this is akin to using the dependencyExclusion functionality with an explicit version. The artifact override is optional.
 
     -DdependencyRelocations.oldGroupId:[oldArtifact]@newGroupId:[newArtifactId]=[version],...
+
+### Dependency Removal
+
+If the property `-DdependencyRemoval=group:artifact,....` is set, PME will remove the specified dependency from the POM files. The argument should be a comma separate list of group:artifact.
