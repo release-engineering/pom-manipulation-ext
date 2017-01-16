@@ -103,11 +103,6 @@ public class Version
      */
     private String originalMMMDelimiter;
 
-    /**
-     * The current qualifier, after any modifications such as suffix or build number changes have been made.
-     */
-    private String qualifier;
-
     private String qualifierBase;
 
     private String buildNumberDelimiter = Character.toString( DEFAULT_QUALIFIER_DELIMITER );
@@ -163,7 +158,6 @@ public class Version
         }
 
         originalQualifier = version.substring( qualifierIndex );
-        qualifier = originalQualifier;
 
         parseMMM( originalMMM );
         parseQualifier( originalQualifier );
@@ -178,7 +172,6 @@ public class Version
      */
     private int getQualifierIndex( String version )
     {
-
         int qualifierIndex = 0;
         int delimiterCount = 0;
         while ( qualifierIndex < version.length() )
@@ -244,7 +237,6 @@ public class Version
         }
 
         Matcher qualifierMatcher = qualifierPattern.matcher( qualifier );
-
         qualifierMatcher.matches();
 
         qualifierBase = qualifierMatcher.group( 1 );
@@ -355,35 +347,6 @@ public class Version
     }
 
     /**
-     * Update the qualifier by combining the qualifierBase, qualifierSuffix, and build number
-     */
-    private void updateQualifier()
-    {
-        StringBuilder updatedQualifier = new StringBuilder();
-        updatedQualifier.append( getQualifierBase() );
-
-        if ( !isEmpty( getBuildNumber() ) )
-        {
-            if ( updatedQualifier.length() != 0 )
-            {
-                updatedQualifier.append( getBuildNumberDelimiter() );
-            }
-            updatedQualifier.append( getBuildNumber() );
-        }
-
-        if ( isSnapshot() )
-        {
-            if ( updatedQualifier.length() != 0 )
-            {
-                updatedQualifier.append( DEFAULT_QUALIFIER_DELIMITER );
-            }
-            updatedQualifier.append( this.snapshot );
-        }
-
-        qualifier = updatedQualifier.toString();
-    }
-
-    /**
      * Get the original version string that was used to create this version object.
      *
      * @return the original version string
@@ -410,7 +373,19 @@ public class Version
      */
     public String getQualifier()
     {
-        return qualifier;
+        StringBuilder qualifier = new StringBuilder();
+        qualifier.append( getQualifierBaseAndBuildNum() );
+
+        if ( isSnapshot() )
+        {
+            if ( qualifier.length() > 0 )
+            {
+                qualifier.append( DEFAULT_QUALIFIER_DELIMITER );
+            }
+            qualifier.append( this.snapshot );
+        }
+
+        return qualifier.toString();
     }
 
     public String getQualifierBase()
@@ -420,6 +395,20 @@ public class Version
             qualifierBase = "";
         }
         return qualifierBase;
+    }
+
+    public String getQualifierBaseAndBuildNum()
+    {
+        StringBuilder qualBaseAndNum = new StringBuilder( getQualifierBase() );
+        if ( !isEmpty( getBuildNumber() ) )
+        {
+            if ( qualBaseAndNum.length() > 0 )
+            {
+                qualBaseAndNum.append( getBuildNumberDelimiter() );
+            }
+            qualBaseAndNum.append( getBuildNumber() );
+        }
+        return qualBaseAndNum.toString();
     }
 
     public String getVersionString()
@@ -513,6 +502,10 @@ public class Version
 
     public String getBuildNumberDelimiter()
     {
+        if ( buildNumberDelimiter == null )
+        {
+            buildNumberDelimiter = "";
+        }
         return buildNumberDelimiter;
     }
 
@@ -549,60 +542,48 @@ public class Version
         }
 
         String suffixBase = suffixMatcher.group( 1 );
-        String buildNumberDelimiter = suffixMatcher.group( 2 );
-        if ( buildNumberDelimiter == null )
-        {
-            buildNumberDelimiter = "";
-        }
-        String buildNumber = suffixMatcher.group( 3 );
-        if ( buildNumber == null )
-        {
-            buildNumberDelimiter = Character.toString( DEFAULT_QUALIFIER_DELIMITER );
-        }
-        String snapshot = suffixMatcher.group( 5 );
+        String suffixBuildNumberDelimiter = suffixMatcher.group( 2 );
+        String suffixBuildNumber = suffixMatcher.group( 3 );
+        String suffixSnapshot = suffixMatcher.group( 5 );
 
         String suffixBaseNoDelim = this.removeLastDelimiters( suffixBase );
         String suffixMatchRegex = "(.*?)(" + Pattern.quote( suffixBaseNoDelim ) + ")(" + DELIMITER_REGEX + "?)";
 
         String oldQualifierBase = getQualifierBase();
+        String oldQualifierBaseAndNum = getQualifierBaseAndBuildNum();
         if ( isEmpty( getQualifier() ) )
         {
             qualifierBase = suffixBase;
         }
-        // Check if the new suffix matches the existing qualifier
+        // Check if the new suffix matches the end of the existing qualifier
         else if ( !Pattern.matches( suffixMatchRegex, oldQualifierBase ) )
         {
-            String newQualifierBase = oldQualifierBase;
             // If the suffix doesn't match, and there is an existing build number
             // the old build number becomes part of the qualifier base
             // e.g. "1.2.0.Beta-1" + "foo-2" = "1.2.0.Beta-1-foo-2"
-            if ( !isEmpty( getBuildNumber() ) )
+            StringBuilder newQualifierBase = new StringBuilder( oldQualifierBaseAndNum );
+            buildNumber = null;
+
+            if ( newQualifierBase.length() > 0 &&
+                    !versionStringDelimiters.contains( newQualifierBase.charAt( newQualifierBase.length() - 1 ) ) )
             {
-                newQualifierBase += getBuildNumberDelimiter();
-                newQualifierBase += getBuildNumber();
-                this.buildNumber = null;
+                newQualifierBase.append( DEFAULT_QUALIFIER_DELIMITER );
             }
-            if ( !isEmpty( newQualifierBase ) &&
-                !versionStringDelimiters.contains( newQualifierBase.charAt( newQualifierBase.length() - 1 ) ) )
-            {
-                newQualifierBase += "-";
-            }
-            newQualifierBase += suffixBase;
-            qualifierBase = newQualifierBase;
+            newQualifierBase.append(suffixBase);
+            qualifierBase = newQualifierBase.toString();
         }
 
-        if ( !isEmpty( buildNumber ) )
+        if ( !isEmpty( suffixBuildNumber ) )
         {
-            this.buildNumberDelimiter = buildNumberDelimiter;
-            this.buildNumber = buildNumber;
+            buildNumberDelimiter = suffixBuildNumberDelimiter;
+            buildNumber = suffixBuildNumber;
         }
 
-        if ( SNAPSHOT_SUFFIX.equalsIgnoreCase( snapshot ) )
+        if ( SNAPSHOT_SUFFIX.equalsIgnoreCase( suffixSnapshot ) )
         {
-            this.snapshot = SNAPSHOT_SUFFIX;
+            this.snapshot = suffixSnapshot;
         }
 
-        updateQualifier();
         logger.debug( "New version string: " + getVersionString() );
     }
 
@@ -617,7 +598,6 @@ public class Version
         if ( buildNumber == null || isNumeric( buildNumber ) )
         {
             this.buildNumber = buildNumber;
-            updateQualifier();
         }
     }
 
@@ -636,7 +616,6 @@ public class Version
         {
             this.snapshot = null;
         }
-        updateQualifier();
     }
 
     /**
