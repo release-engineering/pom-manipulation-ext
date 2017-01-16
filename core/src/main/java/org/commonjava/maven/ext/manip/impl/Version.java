@@ -71,7 +71,7 @@ public class Version
     /**
      * Used to match valid OSGi version
      */
-    private final static String OSGI_VERSION_REGEX = "(\\d+)(\\.\\d+(\\.\\d+([\\.][\\p{Alnum}|\\-|_]+)?)?)?";
+    private final static String OSGI_VERSION_REGEX = "(\\d+)(\\.\\d+(\\.\\d+([\\.][\\p{Alnum}|\\-_]+)?)?)?";
 
     private final static Pattern osgiPattern = Pattern.compile( OSGI_VERSION_REGEX );
 
