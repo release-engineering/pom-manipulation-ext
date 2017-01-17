@@ -833,6 +833,22 @@ public class VersioningCalculatorTest
     }
 
     @Test
+    public void incrementExistingSerialSuffix_withEmptySuffixBase()
+            throws Exception
+    {
+        final Properties props = new Properties();
+
+        props.setProperty( VersioningState.INCREMENT_SERIAL_SUFFIX_SYSPROP, "" );
+        setupSession( props, "1.2.0.1", "1.2.0.2" );
+
+        final String v = "1.2.0";
+        final String ns = "3";
+
+        final String result = calculate( v );
+        assertThat( result, equalTo( v + "." + ns ) );
+    }
+
+    @Test
     public void alphaNumericSuffixBase()
             throws Exception
     {
@@ -882,7 +898,7 @@ public class VersioningCalculatorTest
 
         final String v = "1.1-SNAPSHOT";
         final String os = "";
-        final String ns = "-test_jdk7-SNAPSHOT";
+        final String ns = ".test_jdk7-SNAPSHOT";
 
         final String result = calculate( v + os );
         assertThat( result, equalTo( "1.1" + ns ) );
