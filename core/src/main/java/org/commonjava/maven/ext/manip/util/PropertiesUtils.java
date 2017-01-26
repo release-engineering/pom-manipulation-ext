@@ -95,12 +95,7 @@ public final class PropertiesUtils
         final String resolvedValue = resolveProperties( new ArrayList<>( projects ), "${" + key + '}' );
         logger.debug( "Fully resolvedValue is {} for {} ", resolvedValue, key );
 
-        if ( resolvedValue.equals( newValue ) )
-        {
-            logger.warn( "Nothing to update as original key {} value matches new value {} ", key, newValue );
-            return PropertyUpdate.IGNORE;
-        }
-        else if ( "project.version".equals( key ) )
+        if ( "project.version".equals( key ) )
         {
             logger.warn( "Not updating key {} with {} ", key, newValue );
             return PropertyUpdate.IGNORE;
@@ -175,6 +170,13 @@ public final class PropertiesUtils
                         {
                             throw new ManipulationException(
                                             "NYI : handling for versions with explicit overrides (" + oldValue + ") with multiple embedded properties is NYI. " );
+                        }
+                        if ( resolvedValue.equals( newValue ))
+                        {
+                            logger.warn( "Nothing to update as original key {} value matches new value {} ", key,
+                                         newValue );
+                            found = PropertyUpdate.IGNORE;
+                            continue;
                         }
                         newValue = oldValue + StringUtils.removeStart( newValue, resolvedValue );
                         logger.info( "Ignoring new value due to embedded property {} and appending {} ", oldValue,
