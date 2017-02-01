@@ -106,7 +106,8 @@ public class DependencyRemovalManipulator
         List<ProjectRef> dependenciesToRemove = state.getDependencyRemoval();
         result = scanDependencies(dependenciesToRemove, model.getDependencies());
 
-        if ( scanDependencies(dependenciesToRemove, model.getDependencyManagement().getDependencies()))
+        if ( model.getDependencyManagement() != null &&
+             scanDependencies(dependenciesToRemove, model.getDependencyManagement().getDependencies()))
         {
             result = true;
         }
