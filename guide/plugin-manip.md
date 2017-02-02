@@ -49,7 +49,7 @@ Additionally, the feature supports per-module overrides, which can be specified 
 
 ### Plugin Removal
 
-If the property `-Dplugin-removal=group:artifact,....` is set, PME will remove the specified plugins from the POM files. The argument should be a comma separate list of group:artifact.
+If the property `-Dplugin-removal=group:artifact,....` is set, PME will remove the specified plugins from the POM files. The argument should be a comma separated list of group:artifact.
 
 ### Project Sources / Build Metadata Plugin Injection
 

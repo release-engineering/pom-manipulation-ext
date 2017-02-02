@@ -36,6 +36,8 @@ The version suffix to be appended to the current project can be manually selecte
 
 If the current version of the project is "1.2.0.GA", the new version set during the build will be "1.2.0.GA-release-1".
 
+**Note** `version.suffix` takes precedence over `version.incremental.suffix`.
+
 ### Version override
 
 The version can be forcibly overridden by using the property `version.override`
