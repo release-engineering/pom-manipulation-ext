@@ -28,6 +28,7 @@ import java.io.File;
 import java.net.URL;
 import java.util.HashSet;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
@@ -73,5 +74,38 @@ public class PomIOTest
 
         assertTrue( FileUtils.contentEqualsIgnoreEOL( pom, targetFile, "UTF-8" ) );
         assertTrue( FileUtils.contentEquals( targetFile, pom ) );
+    }
+
+
+    @Test
+    public void testWriteModel()
+                    throws Exception
+    {
+        // Thanks to http://www.buildmystring.com
+        String sb = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+                        + "<project xsi:schemaLocation=\"http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd\" xmlns=\"http://maven.apache.org/POM/4.0.0\"\n"
+                        + "    xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">\n"
+                        + "  <modelVersion>4.0.0</modelVersion>\n"
+                        + "  <groupId>org.commonjava.maven.ext.versioning.test</groupId>\n"
+                        + "  <artifactId>dospom</artifactId>\n" + "  <version>1.0</version>\n"
+                        + "  <packaging>pom</packaging>\n" + "</project>\n";
+
+        URL resource = PomIOTest.class.getResource( filename );
+        assertNotNull( resource );
+        File pom = new File( resource.getFile() );
+        assertTrue( pom.exists() );
+
+        File targetFile = folder.newFile( "target.xml" );
+
+        Model model = new Model();
+        model.setGroupId( "org.commonjava.maven.ext.versioning.test" );
+        model.setArtifactId( "dospom" );
+        model.setVersion( "1.0" );
+        model.setPackaging( "pom" );
+        model.setModelVersion( "4.0.0" );
+
+        pomIO.writeModel( model, targetFile );
+        assertTrue( targetFile.exists() );
+        assertEquals( sb, FileUtils.readFileToString( targetFile ) );
     }
 }
