@@ -22,3 +22,5 @@ System.out.println( "POM Version: ${pom.version.text()}" )
 assert pom.version.text().endsWith( '.redhat-1' )
 
 assert pomFile.text.contains("CDATA")
+
+assert pomFile.text.contains('org.springframework*;version="<![CDATA[$<range;[==,=+);${spring.version}>]]>",org.apache.commons.logging;version="[1.1,2)",*')
