@@ -110,6 +110,7 @@ It is possible to flexibly override or exclude a dependency globally or on a per
 
 **NOTE:** `dependencyOverride` is an alias for `dependencyExclusion` and functions _exactly the same_. If both are set then they will be merged and an error thrown if they clash.
 
+**NOTE:** Multiple exclusions may be added using multiple instances of `-DdependencyExclusion...`.
 
 #### Global Version Override
 
@@ -179,7 +180,7 @@ will, as per above, apply the explicit 4.10-rebuild-10 version to the junit:juni
       </exclusions>
     </dependency>
 
-Multiple exclusions may be added via comma separators e.g.
+Multiple exclusions to a dependency may be added using comma separators e.g.
 
     mvn install -DdependencyExclusion.junit:junit@*=+slf4j:slf4j,+commons-lang:commons-lang
 
@@ -218,9 +219,11 @@ If the property `strictAlignmentIgnoreSuffix` is set to true then the comparison
 
 ### Dependency Relocations
 
-In order to handle the situation where one GAV is changed to another (e.g. from community to product) the relocation manipulator can be used. Multiple relocations may be comma separated and an optional version component may be added; the version will override any prior version used in the dependency. Note this is akin to using the dependencyExclusion functionality with an explicit version. The artifact override is optional.
+In order to handle the situation where one GAV is changed to another (e.g. from community to product) the relocation manipulator can be used. An optional version component may be added; the version will override any prior version used in the dependency. Note this is akin to using the dependencyExclusion functionality with an explicit version. The artifact override is optional.
 
     -DdependencyRelocations.oldGroupId:[oldArtifact]@newGroupId:[newArtifactId]=[version],...
+
+**NOTE:** Multiple relocations may be added using multiple instances of `-DdependencyRelocation...`.
 
 ### Dependency Removal
 
