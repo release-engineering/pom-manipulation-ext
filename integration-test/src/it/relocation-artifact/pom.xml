@@ -43,6 +43,11 @@
       <artifactId>another-library</artifactId>
       <version>3.8.2</version>
     </dependency>
+    <dependency>
+      <groupId>slf4j</groupId>
+      <artifactId>slf4j-api10</artifactId>
+      <version>3.8.2</version>
+    </dependency>
   </dependencies>
 
 </project>

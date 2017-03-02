@@ -37,10 +37,11 @@ public class RelocationState
     implements State
 {
     /**
-     * The name of the property which contains a comma separated list of groupId and optional version relocations to perform.
+     * The name of the property which contains a groupId and optional version relocation to perform. Multiple can be
+     * passed using multiple dependencyRelocations arguments.
      *
      * <pre>
-     * <code>-DdependencyRelocations.oldGroupId:[oldArtifactId]@newGroupId:[newArtifactId]=[newVersion],....</code>
+     * <code>-DdependencyRelocations.oldGroupId:[oldArtifactId]@newGroupId:[newArtifactId]=[newVersion</code>
      * </pre>
      * <ul>
      * <li>If oldArtifactId and newArtifactId is specified we relocate artifactIds as well.</li>
@@ -63,7 +64,6 @@ public class RelocationState
         // This contains everything before the equals and a possibly null set of values. We now need to further
         // post-process this into something useful i.e. establish whether we are relocating groupIds and artifactIds.
         Map<String,String> propRelocs = PropertiesUtils.getPropertiesByPrefix( userProps, DEPENDENCY_RELOCATIONS );
-
         for ( Map.Entry<String, String> entry : propRelocs.entrySet() )
         {
             String[] split = entry.getKey().split( ":", 3 );
