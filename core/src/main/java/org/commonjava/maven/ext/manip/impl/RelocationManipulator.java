@@ -137,22 +137,27 @@ public class RelocationManipulator
     {
         boolean result = false;
 
-        for ( final Dependency d : dependencies )
+        // If we do a single pass over the dependencies that will handle the relocations *but* it will not handle
+        // where one relocation alters the dependency and a subsequent relocation alters it again. For instance, the
+        // first might wildcard alter the groupId and the second, more specifically alters one with the artifactId
+        for ( int i = 0 ; i < relocations.size(); i++ )
         {
-            if (relocations.containsKey( d ))
+            for ( final Dependency d : dependencies )
             {
-                ProjectVersionRef pvr = relocations.get( d );
-                updateDependencyExclusion(session, pvr, d);
-
-                logger.info ("Replacing groupId {} by {} and artifactId {} with {}",
-                             d.getGroupId(), pvr.getGroupId(), d.getArtifactId(), pvr.getGroupId() );
-
-                if ( ! pvr.getArtifactId().equals( WildcardMap.WILDCARD ))
+                if ( relocations.containsKey( d ) )
                 {
-                    d.setArtifactId( pvr.getArtifactId() );
+                    ProjectVersionRef pvr = relocations.get( d );
+                    updateDependencyExclusion( session, pvr, d );
+
+                    logger.info( "Replacing groupId {} by {} and artifactId {} with {}", d.getGroupId(), pvr.getGroupId(), d.getArtifactId(), pvr.getArtifactId() );
+
+                    if ( !pvr.getArtifactId().equals( WildcardMap.WILDCARD ) )
+                    {
+                        d.setArtifactId( pvr.getArtifactId() );
+                    }
+                    d.setGroupId( pvr.getGroupId() );
+                    result = true;
                 }
-                d.setGroupId( pvr.getGroupId() );
-                result = true;
             }
         }
         return result;

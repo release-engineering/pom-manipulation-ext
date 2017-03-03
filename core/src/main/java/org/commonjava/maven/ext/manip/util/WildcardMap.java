@@ -47,6 +47,15 @@ public class WildcardMap<T>
     private final TreeMap<String, LinkedHashMap<String,T>> map = new TreeMap<>();
 
     /**
+     * Size implementation
+     * @return the size of the wildcard map
+     */
+    public int size ()
+    {
+        return map.size();
+    }
+
+    /**
      * @param key the key to look for
      * @return <tt>true</tt> if this map contains a mapping for the specified
      * key.
@@ -143,7 +152,6 @@ public class WildcardMap<T>
         {
             logger.debug ("Entering artifact of " + artifactId + " and value " + value);
             vMap.put(artifactId, value);
-
             map.put(groupId, vMap);
         }
     }
