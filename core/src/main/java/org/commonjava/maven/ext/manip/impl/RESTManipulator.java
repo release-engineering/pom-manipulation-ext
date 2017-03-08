@@ -22,6 +22,7 @@ import org.commonjava.maven.atlas.ident.DependencyScope;
 import org.commonjava.maven.atlas.ident.ref.ArtifactRef;
 import org.commonjava.maven.atlas.ident.ref.ProjectRef;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
+import org.commonjava.maven.atlas.ident.ref.SimpleArtifactRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleTypeAndClassifier;
 import org.commonjava.maven.ext.manip.ManipulationException;
@@ -264,6 +265,14 @@ public class RESTManipulator implements Manipulator
         {
             if ( project.isInheritanceRoot() || scanAll || activeModules.contains( project.getPom().getParentFile().getName() ) )
             {
+                if ( project.getParent() != null )
+                {
+                    SimpleProjectVersionRef parent = new SimpleProjectVersionRef(
+                                    project.getParent().getGroupId(), project.getParent().getArtifactId(), project.getParent().getVersion() );
+                    localDeps.add( new SimpleArtifactRef(parent, new SimpleTypeAndClassifier( "pom", null )
+                    ) );
+                }
+
                 if (includeManaged)
                 {
                     recordDependencies( projects, project, localDeps, project.getManagedDependencies(), includeManaged );

@@ -353,6 +353,9 @@ public class Project
         this.inheritanceRoot = inheritanceRoot;
     }
 
+    /**
+     * @return true if this Project represents the top level POM of a build.
+     */
     public boolean isInheritanceRoot()
     {
         return inheritanceRoot;
