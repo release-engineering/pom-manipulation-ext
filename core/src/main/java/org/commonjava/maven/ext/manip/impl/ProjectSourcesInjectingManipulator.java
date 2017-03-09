@@ -68,8 +68,6 @@ public class ProjectSourcesInjectingManipulator
 
     private static final String PROJECT_SOURCES_EXEC_ID = "project-sources-archive";
 
-    private static final String VALIDATE_PHASE = "validate";
-
     private static final String INITIALIZE_PHASE = "initialize";
 
     private final Logger logger = LoggerFactory.getLogger( getClass() );
@@ -140,7 +138,7 @@ public class ProjectSourcesInjectingManipulator
                     {
                         final PluginExecution execution = new PluginExecution();
                         execution.setId( BMMP_EXEC_ID );
-                        execution.setPhase( VALIDATE_PHASE );
+                        execution.setPhase( INITIALIZE_PHASE );
                         execution.setGoals( Collections.singletonList( BMMP_GOAL ) );
 
                         final Xpp3Dom xml = new Xpp3Dom( "configuration" );
