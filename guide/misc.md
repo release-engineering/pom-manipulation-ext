@@ -2,6 +2,9 @@
 title: Miscellaneous PME Manipulations
 ---
 
+* Contents
+{:toc}
+
 ### Overview
 
 In addition to the main [project-version](project-version-manip.html), [dependency](dep-manip.html), and [plugin](plugin-manip.html) manipulations, PME offers several smaller features. These feaures fall into two main categories:

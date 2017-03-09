@@ -232,3 +232,9 @@ In order to handle the situation where one GAV is changed to another (e.g. from 
 ### Dependency Removal
 
 If the property `-DdependencyRemoval=group:artifact,....` is set, PME will remove the specified dependency from the POM files. The argument should be a comma separated list of group:artifact.
+
+### BOM Generation
+
+If the property `-DbomBuilder=true` is set, then the PME BOM Builder will be activated. This will deploy a new POM to the repository under the GAV `<project-top-level-groupId>:pme-bom:<version>` e.g. `org.projectOne:pme-bom:1.0.0`. It will contain a list of all adjusted modules and is suitable for use as a remote BOM. As it has a predictable name it may be used in a build of a subsequent project to align to this one e.g.
+
+    PWD=<project two> ; mvn -DdependencyManagement=org.projectOne:pme-bom:1.0.0 -Dversion.suffix=rebuild-1 clean install
