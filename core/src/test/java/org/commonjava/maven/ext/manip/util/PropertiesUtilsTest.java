@@ -48,9 +48,14 @@ public class PropertiesUtilsTest
     @Test
     public void testCheckStrictValue() throws Exception
     {
-        ManipulationSession session = new ManipulationSession();
+        ManipulationSession session = createUpdateSession();
         assertFalse( PropertiesUtils.checkStrictValue( session, null, "1.0" ) );
         assertFalse( PropertiesUtils.checkStrictValue( session, "1.0", null ) );
+        assertFalse ( PropertiesUtils.checkStrictValue( session, "1.0.0.Final", "1.0.0.redhat-1" ) );
+        assertTrue ( PropertiesUtils.checkStrictValue( session, "1.0.0", "1.0.0.redhat-1" ) );
+        assertTrue ( PropertiesUtils.checkStrictValue( session, "1.0.0-SNAPSHOT", "1.0.0.redhat-1" ) );
+        assertFalse ( PropertiesUtils.checkStrictValue( session, "1.0.Final-SNAPSHOT", "1.0.0.redhat-1" ) );
+        assertTrue ( PropertiesUtils.checkStrictValue( session, "1.0-SNAPSHOT", "1.0.0.redhat-1" ) );
     }
 
     @Test

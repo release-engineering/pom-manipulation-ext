@@ -233,6 +233,7 @@ public final class PropertiesUtils
         }
 
         final DependencyState dState = session.getState( DependencyState.class );
+        final VersioningState vState = session.getState( VersioningState.class );
         final boolean ignoreSuffix = dState.getStrictIgnoreSuffix();
 
         // New value might be e.g. 3.1-rebuild-1 or 3.1.0.rebuild-1 (i.e. it *might* be OSGi compliant).
@@ -240,6 +241,11 @@ public final class PropertiesUtils
         String suffix = getSuffix( session );
 
         Version v = new Version( oldValue );
+        if ( !vState.preserveSnapshot() )
+        {
+            v.setSnapshot( false );
+        }
+
         String osgiVersion = v.getOSGiVersionString();
 
         // If we have been configured to ignore the suffix (e.g. rebuild-n) then, assuming that
