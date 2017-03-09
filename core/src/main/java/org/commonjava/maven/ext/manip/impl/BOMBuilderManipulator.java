@@ -19,11 +19,9 @@ import org.apache.maven.model.Build;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.DependencyManagement;
 import org.apache.maven.model.Model;
-import org.apache.maven.model.Plugin;
-import org.apache.maven.model.PluginExecution;
+import org.apache.maven.model.Parent;
 import org.codehaus.plexus.component.annotations.Component;
 import org.codehaus.plexus.component.annotations.Requirement;
-import org.codehaus.plexus.util.xml.Xpp3Dom;
 import org.commonjava.maven.ext.manip.ManipulationException;
 import org.commonjava.maven.ext.manip.ManipulationSession;
 import org.commonjava.maven.ext.manip.io.PomIO;
@@ -36,10 +34,9 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
-import static org.commonjava.maven.ext.manip.util.IdUtils.ga;
+import static org.codehaus.plexus.util.StringUtils.isEmpty;
 
 /**
  * Simple manipulator that will look for all module artifacts and construct a BOM that is deployed with the root artifact. It has a predictable naming
@@ -52,22 +49,7 @@ public class BOMBuilderManipulator
     @Requirement
     private PomIO pomIO;
 
-    // http://www.mojohaus.org/build-helper-maven-plugin/attach-artifact-mojo.html
-    private static final String BUILD_HELPER_GID = "org.codehaus.mojo";
-
-    private static final String BUILD_HELPER_AID = "build-helper-maven-plugin";
-
-    private static final String BUILD_HELPER_VERSION = "3.0.0";
-
-    private static final String BUILD_HELPER_COORD = ga( BUILD_HELPER_GID, BUILD_HELPER_AID );
-
-    private static final String BUILD_HELPER_GOAL = "attach-artifact";
-
-    private static final String BOM_ARTIFACT = "generated-bom.xml";
-
-    private static final String ID = "pme-bom-builder";
-
-    private static final String PHASE = "package";
+    private static final String ID = "pme-bom";
 
     private final Logger logger = LoggerFactory.getLogger( getClass() );
 
@@ -101,7 +83,7 @@ public class BOMBuilderManipulator
             return Collections.emptySet();
         }
 
-        List<Dependency> projectArtifacts = getArtifacts( projects, session);
+        List<Dependency> projectArtifacts = getArtifacts( projects );
 
         for ( final Project project : projects )
         {
@@ -110,6 +92,7 @@ public class BOMBuilderManipulator
                 logger.info( "Examining {} to add BOM generation.", project );
 
                 final Model model = project.getModel();
+
                 Build build = model.getBuild();
                 if ( build == null )
                 {
@@ -118,71 +101,26 @@ public class BOMBuilderManipulator
                 }
 
                 final Model bomModel = new Model();
-                bomModel.setGroupId( model.getGroupId() );
-                bomModel.setVersion( model.getVersion() );
-                bomModel.setArtifactId( model.getArtifactId() );
+                bomModel.setModelVersion( project.getModel().getModelVersion() );
+                Parent parent = new Parent();
+                parent.setGroupId( model.getGroupId() );
+                parent.setVersion( model.getVersion() );
+                parent.setArtifactId( model.getArtifactId() );
+                bomModel.setParent( parent );
+                bomModel.setArtifactId( ID );
                 bomModel.setPackaging( "pom" );
+                bomModel.setDescription( "PME Generated BOM for other projects to use to align to." );
                 DependencyManagement dm = new DependencyManagement();
                 dm.setDependencies( projectArtifacts );
                 bomModel.setDependencyManagement( dm );
-                pomIO.writeModel( bomModel, new File( project.getPom().getParentFile(), BOM_ARTIFACT ) );
 
-                final Map<String, Plugin> pluginMap = build.getPluginsAsMap();
+                // Add the new pom file as a submodule
+                model.getModules().add( ID );
 
-                Plugin plugin;
-
-                // Add to the plugin if it already exists...
-                if ( pluginMap.containsKey( BUILD_HELPER_COORD ) )
-                {
-                    plugin = pluginMap.get( BUILD_HELPER_COORD );
-                }
-                else
-                {
-                    plugin = new Plugin();
-                    plugin.setGroupId( BUILD_HELPER_GID );
-                    plugin.setArtifactId( BUILD_HELPER_AID );
-                    plugin.setVersion( BUILD_HELPER_VERSION );
-                }
-
-                // ... except if we have already added it before and we are rerunning
-                if ( !( plugin.getExecutions() != null && plugin.getExecutions().contains( ID ) ) )
-                {
-                    final PluginExecution execution = new PluginExecution();
-                    execution.setId( ID );
-                    execution.setPhase( PHASE );
-                    execution.setGoals( Collections.singletonList( BUILD_HELPER_GOAL ) );
-
-                    final Xpp3Dom xml = new Xpp3Dom( "configuration" );
-                    final Xpp3Dom artifacts = new Xpp3Dom( "artifacts" );
-                    final Xpp3Dom artifact = new Xpp3Dom( "artifact" );
-                    final Xpp3Dom file = new Xpp3Dom( "file" );
-                    final Xpp3Dom type = new Xpp3Dom( "type" );
-                    final Xpp3Dom classifier = new Xpp3Dom( "classifier" );
-
-                    final Xpp3Dom runOnlyAtExecutionRoot = new Xpp3Dom( "runOnlyAtExecutionRoot" );
-                    runOnlyAtExecutionRoot.setValue( "true" );
-                    xml.addChild( runOnlyAtExecutionRoot );
-
-                    xml.addChild( artifacts );
-                    artifacts.addChild( artifact );
-                    artifact.addChild( file );
-                    artifact.addChild( type );
-                    artifact.addChild( classifier );
-
-                    file.setValue( BOM_ARTIFACT );
-                    // TODO: Should we deploy this as xml or pom?
-                    type.setValue( "pom" );
-                    classifier.setValue( "bom" );
-
-                    execution.setConfiguration( xml );
-                    plugin.addExecution( execution );
-
-                    build.addPlugin( plugin );
-                }
-                else
-                {
-                    logger.debug( "Plugin collection already contains plugin with execution of " + ID );
-                }
+                // Write it back out.
+                File pmebom = new File( project.getPom().getParentFile(), ID);
+                pmebom.mkdir();
+                pomIO.writeModel( bomModel, new File( pmebom, "pom.xml" ) );
 
                 return Collections.singleton( project );
             }
@@ -193,16 +131,27 @@ public class BOMBuilderManipulator
 
 
     // TODO: This will grab every module ; so those modules activated under profiles will also get included
-    public List<Dependency> getArtifacts( List<Project> projects, ManipulationSession session )
+    public List<Dependency> getArtifacts( List<Project> projects )
     {
         List<Dependency> results = new ArrayList<>(  );
 
         for ( Project p : projects )
         {
             Dependency d = new Dependency();
-            d.setArtifactId( p.getArtifactId() );
             d.setGroupId( p.getGroupId() );
-            d.setVersion( p.getVersion() );
+            d.setArtifactId( p.getArtifactId() );
+            if ( ! isEmpty ( p.getModel().getVersion() ) )
+            {
+                d.setVersion( p.getModel().getVersion() );
+            }
+            else if ( ! isEmpty ( p.getModel().getParent().getVersion() ) )
+            {
+                d.setVersion( p.getModel().getParent().getVersion() );
+            }
+            else
+            {
+                d.setVersion( p.getVersion() );
+            }
             d.setType( p.getModel().getPackaging() );
             results.add( d );
         }

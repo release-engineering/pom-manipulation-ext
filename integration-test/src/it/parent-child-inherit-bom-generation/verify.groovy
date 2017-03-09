@@ -22,24 +22,18 @@ def pom = new XmlSlurper().parse( pomFile )
 def v = pom.version.text()
 def g = pom.groupId.text()
 def a = pom.artifactId.text()
+def overallartifactid = pom.artifactId.text()
 
 System.out.println( "POM Version: ${v}" )
 assert v.endsWith( '.redhat-1' )
 
 def repodir = new File('@localRepositoryUrl@', "${g.replace('.', '/')}/${a}/${v}" )
 def repopom = new File( repodir, "${a}-${v}.pom" )
+System.out.println( "Using repodir: ${repodir}")
 System.out.println( "Checking for installed pom: ${repopom.getAbsolutePath()}")
 assert repopom.exists()
 
-pomFile = new File( basedir, 'generated-bom.xml' )
-assert pomFile.exists()
-
-repopom = new File( repodir, "${a}-${v}-bom.pom" )
-System.out.println( "Checking for installed bom: ${repopom.getAbsolutePath()}")
-assert repopom.exists()
-
 System.out.println( "Checking child output..." )
-
 pomFile = new File( basedir, 'child/pom.xml' )
 System.out.println( "Slurping POM: ${pomFile.getAbsolutePath()}" )
 
@@ -67,3 +61,10 @@ assert repopom.exists()
 def repojar = new File( repodir, "${a}-${v}.jar" )
 System.out.println( "Checking for installed jar: ${repojar.getAbsolutePath()}")
 assert repojar.exists()
+
+repopom = new File( repodir, "../../pme-bom/${v}/pme-bom-${v}.pom" )
+System.out.println( "Checking for installed pom: ${repopom.getAbsolutePath()}")
+assert repopom.exists()
+
+pmebom = new XmlSlurper().parse( repopom )
+assert pmebom.parent.artifactId.text().contains ('parent-child-inherit-bom-generation')
