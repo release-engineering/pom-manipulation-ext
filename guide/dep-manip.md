@@ -2,6 +2,9 @@
 title: "Dependency Manipulation"
 ---
 
+* Contents
+{:toc}
+
 ### Overview
 
 PME can override a set of dependency versions using a remote source which may be either a pom (BOM) file or a remote REST endpoint.
@@ -67,7 +70,22 @@ The REST endpoint should follow:
 
 **NOTE:** For existing dependencies that reference a property, PME will update this property with the new version. If the property can't be found (e.g. it was inherited), a new one will be injected at the top level. This update of the property's value **may** implicitly align other dependencies using the same property that were not explicitly requested to be aligned.
 
-#### Parent Version Override
+### Direct Dependencies
+
+By default the extension will override dependencies using declarations from the remote BOM. However, by setting the property `overrideDependencies` to `false`, the behavior can be disabled:
+
+    mvn install -DdependencyManagement=org.foo:my-dep-pom:1.0 -DoverrideDependencies=false
+
+Note that this will still alter any external parent references.
+
+### Direct/Transitive Dependencies
+
+By default the extension will inject all dependencies declared in the remote BOM. This will also override dependencies that are not directly specified in the project. If these transitive dependencies should not be overridden, the option `overrideTransitive` can be set to `false` to disable this feature.
+
+    mvn install -DdependencyManagement=org.foo:my-dep-pom:1.0 -DoverrideTransitive=false
+
+
+### Parent Version Override
 
 PME will also change any parent reference it finds that matches an entry in the remote BOM.
 
@@ -85,20 +103,6 @@ will change to:
          <artifactId>switchyard-parent</artifactId>
          <version>2.0.0.Alpha1-rebuild-1</version>
 
-
-### Direct Dependencies
-
-By default the extension will override dependencies using declarations from the remote BOM. However, by setting the property `overrideDependencies` to `false`, the behavior can be disabled:
-
-    mvn install -DdependencyManagement=org.foo:my-dep-pom:1.0 -DoverrideDependencies=false
-
-Note that this will still alter any external parent references.
-
-### Direct/Transitive Dependencies
-
-By default the extension will inject all dependencies declared in the remote BOM. This will also override dependencies that are not directly specified in the project. If these transitive dependencies should not be overridden, the option `overrideTransitive` can be set to `false` to disable this feature.
-
-    mvn install -DdependencyManagement=org.foo:my-dep-pom:1.0 -DoverrideTransitive=false
 
 ### Exclusions and Overrides
 
