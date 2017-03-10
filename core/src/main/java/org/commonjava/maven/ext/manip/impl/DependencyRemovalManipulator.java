@@ -15,9 +15,8 @@
  */
 package org.commonjava.maven.ext.manip.impl;
 
-import org.apache.maven.model.DependencyManagement;
-import org.apache.maven.model.Model;
 import org.apache.maven.model.Dependency;
+import org.apache.maven.model.Model;
 import org.apache.maven.model.Profile;
 import org.codehaus.plexus.component.annotations.Component;
 import org.commonjava.maven.atlas.ident.ref.ProjectRef;
@@ -32,7 +31,12 @@ import org.commonjava.maven.ext.manip.util.ProfileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Properties;
+import java.util.Set;
 
 import static org.commonjava.maven.ext.manip.util.IdUtils.ga;
 

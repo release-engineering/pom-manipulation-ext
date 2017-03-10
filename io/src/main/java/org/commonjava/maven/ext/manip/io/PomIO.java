@@ -21,6 +21,7 @@ import org.apache.maven.model.Model;
 import org.apache.maven.model.io.ModelWriter;
 import org.apache.maven.model.io.jdom.MavenJDOMWriter;
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
+import org.apache.maven.model.io.xpp3.MavenXpp3Writer;
 import org.apache.maven.project.MavenProject;
 import org.codehaus.plexus.component.annotations.Component;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
@@ -41,6 +42,7 @@ import org.slf4j.LoggerFactory;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -187,6 +189,27 @@ public class PomIO
 
                 write( project, pom, model );
             }
+        }
+    }
+
+
+    /**
+     * Writes out the Model to the selected target file.
+     *
+     * @param model the Model to write out.
+     * @param target the file to write to.
+     * @throws ManipulationException if an error occurs.
+     */
+    public void writeModel( final Model model, final File target)
+                    throws ManipulationException
+    {
+        try
+        {
+            new MavenXpp3Writer().write( new FileWriter( target ), model );
+        }
+        catch ( IOException e )
+        {
+            throw new ManipulationException( "Unable to write file", e );
         }
     }
 
