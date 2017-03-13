@@ -107,6 +107,7 @@ public class BOMBuilderManipulator
                 parent.setVersion( model.getVersion() );
                 parent.setArtifactId( model.getArtifactId() );
                 bomModel.setParent( parent );
+                bomModel.setGroupId( model.getGroupId() + '.' + model.getArtifactId() );
                 bomModel.setArtifactId( ID );
                 bomModel.setPackaging( "pom" );
                 bomModel.setDescription( "PME Generated BOM for other projects to use to align to." );
