@@ -52,8 +52,14 @@ def jar = new File(basedir, "child/target/${a}-${v}.jar" )
 System.out.println( "Checking for jar: ${jar.getAbsolutePath()}")
 assert jar.exists()
 
-repodir = new File('@localRepositoryUrl@', "${g.replace('.', '/')}/${a}/${v}" )
+repopom = new File( repodir, "../pme-bom/${v}/pme-bom-${v}.pom" )
+System.out.println( "Checking for installed pom: ${repopom.getAbsolutePath()}")
+assert repopom.exists()
 
+pmebom = new XmlSlurper().parse( repopom )
+assert pmebom.parent.artifactId.text().contains ('parent-child-inherit-bom-generation')
+
+repodir = new File('@localRepositoryUrl@', "${g.replace('.', '/')}/${a}/${v}" )
 repopom = new File( repodir, "${a}-${v}.pom" )
 System.out.println( "Checking for installed pom: ${repopom.getAbsolutePath()}")
 assert repopom.exists()
@@ -61,10 +67,3 @@ assert repopom.exists()
 def repojar = new File( repodir, "${a}-${v}.jar" )
 System.out.println( "Checking for installed jar: ${repojar.getAbsolutePath()}")
 assert repojar.exists()
-
-repopom = new File( repodir, "../../pme-bom/${v}/pme-bom-${v}.pom" )
-System.out.println( "Checking for installed pom: ${repopom.getAbsolutePath()}")
-assert repopom.exists()
-
-pmebom = new XmlSlurper().parse( repopom )
-assert pmebom.parent.artifactId.text().contains ('parent-child-inherit-bom-generation')
