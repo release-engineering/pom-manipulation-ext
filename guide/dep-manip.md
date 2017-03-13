@@ -235,6 +235,8 @@ If the property `-DdependencyRemoval=group:artifact,....` is set, PME will remov
 
 ### BOM Generation
 
-If the property `-DbomBuilder=true` is set, then the PME BOM Builder will be activated. This will deploy a new POM to the repository under the GAV `<project-top-level-groupId>:pme-bom:<version>` e.g. `org.projectOne:pme-bom:1.0.0`. It will contain a list of all adjusted modules and is suitable for use as a remote BOM. As it has a predictable name it may be used in a build of a subsequent project to align to this one e.g.
+If the property `-DbomBuilder=true` is set, then the PME BOM Builder will be activated. This will deploy a new POM to the repository under the GAV `<project-top-level-groupId>.<project-top-level-artifactId.:pme-bom:<version>` e.g. `org.projectOne.artifactOne:pme-bom:1.0.0`. It will contain a list of all adjusted modules and is suitable for use as a remote BOM. As it has a predictable name it may be used in a build of a subsequent project to align to this one e.g.
 
-    PWD=<project two> ; mvn -DdependencyManagement=org.projectOne:pme-bom:1.0.0 -Dversion.suffix=rebuild-1 clean install
+    PWD=<project two> ; mvn -DdependencyManagement=org.projectOne.artifactOne:pme-bom:1.0.0 -Dversion.suffix=rebuild-1 clean install
+
+**Note:** The new BOM will be added as a new module inside a profile named `pme-bom`. The profile will only be active if the property `bomBuilder` is present.
