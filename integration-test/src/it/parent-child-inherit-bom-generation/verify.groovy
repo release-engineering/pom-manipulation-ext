@@ -57,7 +57,6 @@ System.out.println( "Checking for installed pom: ${repopom.getAbsolutePath()}")
 assert repopom.exists()
 
 pmebom = new XmlSlurper().parse( repopom )
-assert pmebom.parent.artifactId.text().contains ('parent-child-inherit-bom-generation')
 
 repodir = new File('@localRepositoryUrl@', "${g.replace('.', '/')}/${a}/${v}" )
 repopom = new File( repodir, "${a}-${v}.pom" )

@@ -108,15 +108,13 @@ public class BOMBuilderManipulator
 
                 final Model bomModel = new Model();
                 bomModel.setModelVersion( project.getModel().getModelVersion() );
-                Parent parent = new Parent();
-                parent.setGroupId( model.getGroupId() );
-                parent.setVersion( model.getVersion() );
-                parent.setArtifactId( model.getArtifactId() );
-                bomModel.setParent( parent );
+
                 bomModel.setGroupId( model.getGroupId() + '.' + model.getArtifactId() );
                 bomModel.setArtifactId( ID );
+                bomModel.setVersion( model.getVersion() );
                 bomModel.setPackaging( "pom" );
                 bomModel.setDescription( "PME Generated BOM for other projects to use to align to." );
+
                 DependencyManagement dm = new DependencyManagement();
                 dm.setDependencies( projectArtifacts );
                 bomModel.setDependencyManagement( dm );
