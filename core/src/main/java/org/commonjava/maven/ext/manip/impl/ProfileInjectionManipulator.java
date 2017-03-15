@@ -124,7 +124,7 @@ public class ProfileInjectionManipulator
      * @param profiles Existing profiles
      * @param profile Target profile to add
      */
-    private void addProfile( final List<Profile> profiles, final Profile profile )
+    void addProfile( final List<Profile> profiles, final Profile profile )
     {
         final Iterator<Profile> i = profiles.iterator();
         while ( i.hasNext() )

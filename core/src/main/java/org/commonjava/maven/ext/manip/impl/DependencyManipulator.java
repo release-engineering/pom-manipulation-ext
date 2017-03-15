@@ -145,7 +145,28 @@ public class DependencyManipulator implements Manipulator
             while ( iter.hasPrevious() )
             {
                 final ProjectVersionRef ref = iter.previous();
-                overrides.putAll( effectiveModelBuilder.getRemoteDependencyVersionOverrides( ref ) );
+
+                // Firstly, purge out any pre-existing entries.
+                Map<ArtifactRef, String> rBom = effectiveModelBuilder.getRemoteDependencyVersionOverrides( ref );
+                Iterator<ArtifactRef> i = overrides.keySet().iterator();
+                while ( i.hasNext() )
+                {
+                    ArtifactRef ar = i.next();
+                    ProjectRef arp = ar.asProjectRef();
+
+                    for ( ArtifactRef ar2 : rBom.keySet() )
+                    {
+                        ProjectRef arp2 = ar2.asProjectRef();
+
+                        if ( !ar.equals( ar2 ) && arp.equals( arp2 ) )
+                        {
+                            logger.warn( "When processing {} removing existing artifact {} for dependency consideration as it clashes preferred artifact {} ", ref, ar, ar2 );
+                            i.remove();
+                            break;
+                        }
+                    }
+                }
+                overrides.putAll( rBom );
             }
         }
         return overrides;

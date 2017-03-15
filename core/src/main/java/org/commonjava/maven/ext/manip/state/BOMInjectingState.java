@@ -25,7 +25,7 @@ public class BOMInjectingState
 {
 
     /** Set this property to true using <code>-DbomBuilder=true</code> to activate BOM Builder Plugin */
-    private static final String BOM_BUILDER = "bomBuilder";
+    public static final String BOM_BUILDER = "bomBuilder";
 
     private final boolean builderEnabled;
 

@@ -15,11 +15,14 @@
  */
 package org.commonjava.maven.ext.manip.impl;
 
+import org.apache.maven.model.Activation;
+import org.apache.maven.model.ActivationProperty;
 import org.apache.maven.model.Build;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.DependencyManagement;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Parent;
+import org.apache.maven.model.Profile;
 import org.codehaus.plexus.component.annotations.Component;
 import org.codehaus.plexus.component.annotations.Requirement;
 import org.commonjava.maven.ext.manip.ManipulationException;
@@ -46,12 +49,15 @@ import static org.codehaus.plexus.util.StringUtils.isEmpty;
 public class BOMBuilderManipulator
     implements Manipulator
 {
-    @Requirement
-    private PomIO pomIO;
-
     private static final String ID = "pme-bom";
 
     private final Logger logger = LoggerFactory.getLogger( getClass() );
+
+    @Requirement
+    private PomIO pomIO;
+
+    @Requirement ( role=Manipulator.class, hint = "profile-injection")
+    private ProfileInjectionManipulator profileInjection;
 
     @Override
     public void init( final ManipulationSession session )
@@ -102,20 +108,27 @@ public class BOMBuilderManipulator
 
                 final Model bomModel = new Model();
                 bomModel.setModelVersion( project.getModel().getModelVersion() );
-                Parent parent = new Parent();
-                parent.setGroupId( model.getGroupId() );
-                parent.setVersion( model.getVersion() );
-                parent.setArtifactId( model.getArtifactId() );
-                bomModel.setParent( parent );
+
+                bomModel.setGroupId( model.getGroupId() + '.' + model.getArtifactId() );
                 bomModel.setArtifactId( ID );
+                bomModel.setVersion( model.getVersion() );
                 bomModel.setPackaging( "pom" );
                 bomModel.setDescription( "PME Generated BOM for other projects to use to align to." );
+
                 DependencyManagement dm = new DependencyManagement();
                 dm.setDependencies( projectArtifacts );
                 bomModel.setDependencyManagement( dm );
 
-                // Add the new pom file as a submodule
-                model.getModules().add( ID );
+                Profile bomProfile = new Profile();
+                Activation bomActivation = new Activation();
+                ActivationProperty bomActivationProperty = new ActivationProperty();
+                bomActivationProperty.setName( BOMInjectingState.BOM_BUILDER );
+                bomActivation.setProperty( bomActivationProperty );
+                bomProfile.setActivation( bomActivation );
+                bomProfile.setId( ID );
+                bomProfile.addModule( ID );
+
+                profileInjection.addProfile( model.getProfiles(), bomProfile );
 
                 // Write it back out.
                 File pmebom = new File( project.getPom().getParentFile(), ID);
