@@ -183,18 +183,7 @@ public final class IdUtils
 
     public static String ga( final Model model )
     {
-        String g = model.getGroupId();
-
-        final Parent p = model.getParent();
-        if ( p != null )
-        {
-            if ( g == null )
-            {
-                g = p.getGroupId();
-            }
-        }
-
-        return ga( g, model.getArtifactId() );
+        return ga( g( model ), model.getArtifactId() );
     }
 
     public static String ga( final MavenProject project )
@@ -220,6 +209,22 @@ public final class IdUtils
     public static String gav( final String g, final String a, final String v )
     {
         return String.format( "%s:%s:%s", g, a, v );
+    }
+
+    public static String g( final Model model )
+    {
+        String g = model.getGroupId();
+
+        final Parent p = model.getParent();
+        if ( p != null )
+        {
+            if ( g == null )
+            {
+                g = p.getGroupId();
+            }
+        }
+
+        return g;
     }
 
 }
