@@ -188,7 +188,7 @@ public class RepositoryInjectionManipulator
     @Override
     public int getExecutionIndex()
     {
-        return 90;
+        return 85;
     }
 }
 
