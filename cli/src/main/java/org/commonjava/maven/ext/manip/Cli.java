@@ -450,12 +450,13 @@ public class Cli
                                                   .setUserProperties( userProps )
                                                   .setRemoteRepositories( Collections.<ArtifactRepository>emptyList() );
 
+            ArtifactRepository ar = new MavenArtifactRepository(  );
+            ar.setUrl( "file://" + System.getProperty( "user.home" ) + "/.m2/repository");
             if (userProps != null && userProps.containsKey( "maven.repo.local" ))
             {
-                ArtifactRepository ar = new MavenArtifactRepository(  );
                 ar.setUrl( "file://" + userProps.getProperty( "maven.repo.local" ));
-                req.setLocalRepository( ar );
             }
+            req.setLocalRepository( ar );
 
             if ( settings != null )
             {
