@@ -73,7 +73,6 @@ import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathFactory;
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -86,7 +85,7 @@ import static org.apache.commons.lang.StringUtils.isNotEmpty;
 public class Cli
 {
     private static final File DEFAULT_GLOBAL_SETTINGS_FILE =
-        new File( System.getProperty( "maven.home", System.getProperty( "user.dir", "" ) ), "conf/settings.xml" );
+        new File( System.getenv( "M2_HOME" ), "conf/settings.xml" );
 
     private final Logger logger = LoggerFactory.getLogger( getClass() );
 
@@ -104,7 +103,7 @@ public class Cli
     /**
      * Optional settings.xml file.
      */
-    private File settings = null;
+    private File settings = new File(System.getProperty( "user.home"), ".m2/settings.xml" );
 
     /**
      * Properties a user may define on the command line.
@@ -300,11 +299,8 @@ public class Cli
         {
             // Note : don't print out settings information earlier (like when we actually read it) as the logging
             // isn't setup then.
-            if ( settings != null )
-            {
-                logger.debug( "Found settings file {} with contents \n{}", settings,
-                              settings.exists() ? FileUtils.readFileToString( settings ) : "** File does not exist **");
-            }
+            logger.debug( "Found global settings file in {} and user settings file in {} with contents \n{}", DEFAULT_GLOBAL_SETTINGS_FILE,
+                          settings, settings.exists() ? FileUtils.readFileToString( settings ) : "** File does not exist **");
 
             manipulationManager.init( session );
 
