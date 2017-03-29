@@ -32,6 +32,11 @@
     </properties>
 
     <repositories>
+      <repository>
+        <id>file-m2-repo</id>
+        <name>File M2 Repo</name>
+        <url>file:///tmp/maven2/</url>
+      </repository>
         <repository>
             <id>jboss-public-repository-group</id>
             <name>JBoss Public Maven Repository Group</name>

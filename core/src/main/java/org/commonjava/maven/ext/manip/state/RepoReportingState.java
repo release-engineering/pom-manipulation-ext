@@ -17,7 +17,6 @@ package org.commonjava.maven.ext.manip.state;
 
 import org.commonjava.maven.ext.manip.impl.RepoAndReportingRemovalManipulator;
 
-import java.io.File;
 import java.util.Properties;
 
 /**
@@ -27,16 +26,21 @@ import java.util.Properties;
 public class RepoReportingState
     implements State
 {
-    /**
-     * Suffix to enable this modder
-     */
     private static final String RR_SUFFIX_SYSPROP = "repo-reporting-removal";
 
-    private static final String RR_SETTINGS_SFX_SYSPROP = "removal-backup-settings";
+    private static final String RR_SUFFIX_SYSPROP_LOCAL = "repo-removal-ignorelocalhost";
+
+    /**
+     * Default value is settings.xml which implicitly means the current build directory.<br/>
+     * It can be overridden to:
+     * <br/>'' (empty) which means disabled
+     * <br/>'filename' which should be a valid path to write to
+     */
+    private static final String RR_SETTINGS_SFX_SYSPROP = "repo-removal-backup";
 
     private final boolean removal;
 
-    private final File settingsFile;
+    private final String settings;
 
     private final boolean ignoreLocal;
 
@@ -44,16 +48,9 @@ public class RepoReportingState
     {
         removal = Boolean.parseBoolean( userProps.getProperty( RR_SUFFIX_SYSPROP ) );
 
-        ignoreLocal = Boolean.parseBoolean( userProps.getProperty( RR_SUFFIX_SYSPROP) );
+        ignoreLocal = Boolean.parseBoolean( userProps.getProperty( RR_SUFFIX_SYSPROP_LOCAL) );
 
-        String settingsFilePath = userProps.getProperty( RR_SETTINGS_SFX_SYSPROP );
-        if (settingsFilePath != null)
-        {
-            settingsFile = new File( settingsFilePath );
-        } else
-        {
-            settingsFile = null;
-        }
+        settings = userProps.getProperty( RR_SETTINGS_SFX_SYSPROP, "settings.xml" );
     }
 
     /**
@@ -68,9 +65,9 @@ public class RepoReportingState
         return removal;
     }
 
-    public File getRemovalBackupSettings()
+    public String getRemovalBackupSettings()
     {
-        return settingsFile;
+        return settings;
     }
 
     public boolean ignoreLocal()

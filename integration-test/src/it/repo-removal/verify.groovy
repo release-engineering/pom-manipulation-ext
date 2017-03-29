@@ -47,3 +47,5 @@ assert settingsFile.exists()
 def settings = new XmlSlurper().parse( settingsFile )
 assert settings.profiles.children().find( { it.id.text() == 'extra-repositories' } ).size() == 1
 assert settings.profiles.children().find( { it.id.text() == 'removed-by-pme' } ).size() == 1
+profile = settings.profiles.children().find { it.id.text() == 'removed-by-pme' }
+assert profile.repositories.text().size() != 0

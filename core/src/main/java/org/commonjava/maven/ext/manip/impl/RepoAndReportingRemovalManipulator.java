@@ -39,6 +39,7 @@ import java.util.List;
 import java.util.Properties;
 import java.util.Set;
 
+import static org.apache.commons.lang.StringUtils.isEmpty;
 import static org.commonjava.maven.ext.manip.util.IdUtils.ga;
 
 /**
@@ -173,8 +174,8 @@ public class RepoAndReportingRemovalManipulator
                     changed.add( project );
                 }
 
-                if ( !repoProfile.getRepositories().isEmpty() && !repoProfile.getPluginRepositories().isEmpty()
-                                && repoProfile.getReporting() != null )
+                if ( !repoProfile.getRepositories().isEmpty() || !repoProfile.getPluginRepositories().isEmpty()
+                                || repoProfile.getReporting() != null )
                 {
                     backupSettings.addProfile( SettingsUtils.convertToSettingsProfile( repoProfile ) );
                 }
@@ -182,18 +183,28 @@ public class RepoAndReportingRemovalManipulator
         }
 
         // create new settings file with the removed repositories and reporting
-        if ( !backupProfile.getRepositories().isEmpty() && !backupProfile.getPluginRepositories().isEmpty()
-            && backupProfile.getReporting() != null )
+        if ( !backupProfile.getRepositories().isEmpty() || !backupProfile.getPluginRepositories().isEmpty()
+            || backupProfile.getReporting() != null )
         {
             backupSettings.addProfile( SettingsUtils.convertToSettingsProfile( backupProfile ) );
+
+            String settingsFilePath = state.getRemovalBackupSettings();
+
+            if ( ! isEmpty ( settingsFilePath ) )
+            {
+                File settingsFile;
+                if ( settingsFilePath.equals( "settings.xml" ))
+                {
+                    String topDir = session.getTargetDir().getParentFile().getPath();
+                    settingsFile = new File( topDir, settingsFilePath );
+                }
+                else
+                {
+                    settingsFile = new File (settingsFilePath);
+                }
+                settingsWriter.update( backupSettings, settingsFile );
+            }
         }
-        File settingsFile = state.getRemovalBackupSettings();
-        if ( settingsFile == null )
-        {
-            String topDir = session.getTargetDir().getParentFile().getPath();
-            settingsFile = new File( topDir, "settings.xml" );
-        }
-        settingsWriter.update( backupSettings, settingsFile );
 
         return changed;
     }
