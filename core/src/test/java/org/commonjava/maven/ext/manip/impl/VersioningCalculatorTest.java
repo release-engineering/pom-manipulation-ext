@@ -543,10 +543,10 @@ public class VersioningCalculatorTest
 
         final String v = "1.2.0.GA";
         final String os = "-foo-1";
-        final String ns = "foo-1";
+        final String ns = "-foo-1";
 
         final String result = calculate( v + os );
-        assertThat( result, equalTo( v + "-" + ns ) );
+        assertThat( result, equalTo( v + ns ) );
     }
 
     @Test
@@ -560,10 +560,10 @@ public class VersioningCalculatorTest
 
         final String v = "1.2.0";
         final String os = ".foo-1";
-        final String ns = "foo-3";
+        final String ns = ".foo-3";
 
         final String result = calculate( v + os );
-        assertThat( result, equalTo( v + "." + ns ) );
+        assertThat( result, equalTo( v + ns ) );
     }
 
     @Test
@@ -654,10 +654,10 @@ public class VersioningCalculatorTest
 
         final String v = "1.2.0.GA";
         final String os = "-foo-bar-1";
-        final String ns = "foo-bar-3";
+        final String ns = "-foo-bar-3";
 
         final String result = calculate( v + os );
-        assertThat( result, equalTo( v + "-" + ns ) );
+        assertThat( result, equalTo( v + ns ) );
     }
 
     @Test
@@ -703,10 +703,10 @@ public class VersioningCalculatorTest
 
         final String v = "1.2.0.GA";
         final String os = "-foo-1";
-        final String ns = "foo-10";
+        final String ns = "-foo-10";
 
         final String result = calculate( v + os );
-        assertThat( result, equalTo( v + "-" + ns ) );
+        assertThat( result, equalTo( v + ns ) );
     }
 
     @Test
