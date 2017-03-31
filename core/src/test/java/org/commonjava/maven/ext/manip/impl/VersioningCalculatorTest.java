@@ -628,6 +628,22 @@ public class VersioningCalculatorTest
     }
 
     @Test
+    public void incrementExistingSerialSuffix7()
+            throws Exception
+    {
+        final Properties props = new Properties();
+
+        props.setProperty( VersioningState.INCREMENT_SERIAL_SUFFIX_SYSPROP, "foo" );
+        setupSession( props );
+
+        final String v = "7.0.0.beta1";
+        final String newVersion = "7.0.0.beta1-foo-1";
+
+        final String result = calculate( v );
+        assertThat( result, equalTo( newVersion ) );
+    }
+
+    @Test
     public void incrementExistingSerialSuffixWithPadding()
                     throws Exception
     {
