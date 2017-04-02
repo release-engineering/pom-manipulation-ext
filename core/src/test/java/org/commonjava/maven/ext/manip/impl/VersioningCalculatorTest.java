@@ -543,10 +543,10 @@ public class VersioningCalculatorTest
 
         final String v = "1.2.0.GA";
         final String os = "-foo-1";
-        final String ns = "foo-1";
+        final String ns = "-foo-1";
 
         final String result = calculate( v + os );
-        assertThat( result, equalTo( v + "-" + ns ) );
+        assertThat( result, equalTo( v + ns ) );
     }
 
     @Test
@@ -560,10 +560,10 @@ public class VersioningCalculatorTest
 
         final String v = "1.2.0";
         final String os = ".foo-1";
-        final String ns = "foo-3";
+        final String ns = ".foo-3";
 
         final String result = calculate( v + os );
-        assertThat( result, equalTo( v + "." + ns ) );
+        assertThat( result, equalTo( v + ns ) );
     }
 
     @Test
@@ -628,6 +628,22 @@ public class VersioningCalculatorTest
     }
 
     @Test
+    public void incrementExistingSerialSuffix7()
+            throws Exception
+    {
+        final Properties props = new Properties();
+
+        props.setProperty( VersioningState.INCREMENT_SERIAL_SUFFIX_SYSPROP, "foo" );
+        setupSession( props );
+
+        final String v = "7.0.0.beta1";
+        final String newVersion = "7.0.0.beta1-foo-1";
+
+        final String result = calculate( v );
+        assertThat( result, equalTo( newVersion ) );
+    }
+
+    @Test
     public void incrementExistingSerialSuffixWithPadding()
                     throws Exception
     {
@@ -654,10 +670,10 @@ public class VersioningCalculatorTest
 
         final String v = "1.2.0.GA";
         final String os = "-foo-bar-1";
-        final String ns = "foo-bar-3";
+        final String ns = "-foo-bar-3";
 
         final String result = calculate( v + os );
-        assertThat( result, equalTo( v + "-" + ns ) );
+        assertThat( result, equalTo( v + ns ) );
     }
 
     @Test
@@ -703,10 +719,10 @@ public class VersioningCalculatorTest
 
         final String v = "1.2.0.GA";
         final String os = "-foo-1";
-        final String ns = "foo-10";
+        final String ns = "-foo-10";
 
         final String result = calculate( v + os );
-        assertThat( result, equalTo( v + "-" + ns ) );
+        assertThat( result, equalTo( v + ns ) );
     }
 
     @Test

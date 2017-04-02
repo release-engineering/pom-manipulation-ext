@@ -64,7 +64,7 @@ public class Version
 
     private final static Pattern versionPattern = Pattern.compile( VERSION_REGEX );
 
-    private final static String SNAPSHOT_REGEX = "(.*?)(" + DELIMITER_REGEX + ")?((?i:" + SNAPSHOT_SUFFIX + "))?$";
+    private final static String SNAPSHOT_REGEX = "(.*?)((" + DELIMITER_REGEX + ")?((?i:" + SNAPSHOT_SUFFIX + ")))?$";
 
     private final static Pattern snapshotPattern = Pattern.compile( SNAPSHOT_REGEX );
 
@@ -115,7 +115,7 @@ public class Version
 
     private String qualifierBase;
 
-    private String buildNumberDelimiter = Character.toString( DEFAULT_QUALIFIER_DELIMITER );
+    private String buildNumberDelimiter;
 
     /**
      * Numeric string at the end of the qualifier
@@ -159,8 +159,8 @@ public class Version
         Matcher snapshotMatcher = snapshotPattern.matcher( version );
         snapshotMatcher.matches();
         final String versionWithoutSnapshot = snapshotMatcher.group( 1 );
-        snapshotDelimiter = snapshotMatcher.group( 2 );
-        snapshot = snapshotMatcher.group( 3 );
+        snapshotDelimiter = snapshotMatcher.group( 3 );
+        snapshot = snapshotMatcher.group( 4 );
 
         Matcher versionMatcher = versionPattern.matcher( versionWithoutSnapshot );
         if ( !versionMatcher.matches() )
@@ -522,8 +522,8 @@ public class Version
         Matcher snapshotMatcher = snapshotPattern.matcher( suffix );
         snapshotMatcher.matches();
         final String suffixWithoutSnapshot = snapshotMatcher.group( 1 );
-        final String suffixSnapshotDelimiter = snapshotMatcher.group( 2 );
-        final String suffixSnapshot = snapshotMatcher.group( 3 );
+        final String suffixSnapshotDelimiter = snapshotMatcher.group( 3 );
+        final String suffixSnapshot = snapshotMatcher.group( 4 );
         if ( !isEmpty( suffixSnapshot ) )
         {
             this.snapshotDelimiter = suffixSnapshotDelimiter;
@@ -555,7 +555,7 @@ public class Version
             }
             qualifierBase = suffixBase;
         }
-        // Check if the new suffix matches the end of the existing qualifier
+        // Check if the new suffix does not match the end of the existing qualifier
         else if ( !Pattern.matches( suffixMatchRegex, oldQualifierBase ) )
         {
             // If the suffix doesn't match, and there is an existing build number
@@ -571,11 +571,19 @@ public class Version
             }
             newQualifierBase.append(suffixBase);
             qualifierBase = newQualifierBase.toString();
+            buildNumberDelimiter = suffixBuildNumberDelimiter;
         }
 
         if ( !isEmpty( suffixBuildNumber ) )
         {
-            buildNumberDelimiter = suffixBuildNumberDelimiter;
+            if ( suffixBuildNumberDelimiter == null )
+            {
+                buildNumberDelimiter = "";
+            }
+            else
+            {
+                buildNumberDelimiter = suffixBuildNumberDelimiter;
+            }
             buildNumber = suffixBuildNumber;
         }
 
@@ -590,6 +598,9 @@ public class Version
      */
     public void setBuildNumber( String buildNumber )
     {
+        if ( buildNumberDelimiter == null ) {
+            buildNumberDelimiter = Character.toString( DEFAULT_QUALIFIER_DELIMITER );
+        }
         if ( buildNumber == null || isNumeric( buildNumber ) )
         {
             this.buildNumber = buildNumber;
