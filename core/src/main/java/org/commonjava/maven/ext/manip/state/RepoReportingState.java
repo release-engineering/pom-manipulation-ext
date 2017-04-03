@@ -31,9 +31,10 @@ public class RepoReportingState
     private static final String RR_SUFFIX_SYSPROP_LOCAL = "repo-removal-ignorelocalhost";
 
     /**
-     * Default value is settings.xml which implicitly means the current build directory.<br/>
+     * Default value is off.<br/>
      * It can be overridden to:
      * <br/>'' (empty) which means disabled
+     * <br/>'settings.xml' which implicitly means the current build directory
      * <br/>'filename' which should be a valid path to write to
      */
     private static final String RR_SETTINGS_SFX_SYSPROP = "repo-removal-backup";
@@ -50,7 +51,7 @@ public class RepoReportingState
 
         ignoreLocal = Boolean.parseBoolean( userProps.getProperty( RR_SUFFIX_SYSPROP_LOCAL) );
 
-        settings = userProps.getProperty( RR_SETTINGS_SFX_SYSPROP, "settings.xml" );
+        settings = userProps.getProperty( RR_SETTINGS_SFX_SYSPROP );
     }
 
     /**
