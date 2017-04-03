@@ -33,7 +33,11 @@ If the property `-Drepo-removal-ignorelocalhost` is set (default: false) PME wil
 
 Occasionally a project's more complex example/quickstart may have a local repository definition; this allows those to be preserved.
 
-Additionally, most project rebuilers aren't interested in hosting their own copy of the project's build reports or generated website; therefore, the reporting section only adds more plugin artifacts to the list of what must be present in the environment for the build to succeed. Eliminating this section simplifies the build and reduces the risk of failed builds.
+Additionally, most project rebuilders aren't interested in hosting their own copy of the project's build reports or generated website; therefore, the reporting section only adds more plugin artifacts to the list of what must be present in the environment for the build to succeed. Eliminating this section simplifies the build and reduces the risk of failed builds.
+
+If the property `-Drepo-removal-backup` (default value: off) is set to
+* `settings.xml` a backup of any removed sections will be created in the top level directory.
+* `<path to file>` a backup of any removed sections will be created in the specified file.
 
 #### `project.version` Expression Replacement
 
