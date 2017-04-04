@@ -80,3 +80,4 @@ Below are links to more specific information about configuring sets of features 
 * [JSON manipulation](guide/json.html)
 * [XML manipulation](guide/xml.html)
 * [Groovy Script Injection](guide/groovy.html)
+* [Index](guide/property-index.html)
