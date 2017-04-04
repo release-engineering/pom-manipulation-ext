@@ -2,6 +2,9 @@
 title: "Plugin Manipulation"
 ---
 
+* Contents
+{:toc}
+
 ### Overview
 
 PME can align plugin versions and configuration using a similar pattern to [dependencies](dep-manip.html). It also has the ability to standardize the use of `skip` flags that determine whether the `maven-install-plugin` and `maven-deploy-plugin` execute. Finally, by default PME will inject plugin executions for the `project-sources-maven-plugin` and `buildmetadata-maven-plugin`, in order to promote reproducibility of the project build.
