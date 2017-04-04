@@ -22,7 +22,7 @@ def failed = true
 def plugin = null
 pom.build.plugins.children().each{
     if (it.artifactId == "project-sources-maven-plugin" ){
-        assert it.version == '0.3'
+        assert it.version == '1.0'
     }
     else if (it.artifactId == 'buildmetadata-maven-plugin'){
         failed = false

@@ -43,7 +43,7 @@ public class ProjectSourcesInjectingState
     private static final String PROJECT_SOURCES_PLUGIN_VERSION_PROPERTY = "project.src.version";
 
     /** The default plugin version to use in case no alternative version is specified on the command line. */
-    private static final String DEFAULT_PROJECT_SOURCES_PLUGIN_VERSION = "0.3";
+    private static final String DEFAULT_PROJECT_SOURCES_PLUGIN_VERSION = "1.0";
 
     /** Set this property to control the version of the build-metadata plugin to be injected. */
     private static final String BMMP_VERSION_PROPERTY = "project.meta.version";
