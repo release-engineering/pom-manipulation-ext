@@ -103,7 +103,7 @@ public class Cli
     /**
      * Optional settings.xml file.
      */
-    private File settings = new File(System.getProperty( "user.home"), ".m2/settings.xml" );
+    private File settings;
 
     /**
      * Properties a user may define on the command line.
@@ -299,8 +299,11 @@ public class Cli
         {
             // Note : don't print out settings information earlier (like when we actually read it) as the logging
             // isn't setup then.
-            logger.debug( "Found global settings file in {} and user settings file in {} with contents \n{}", DEFAULT_GLOBAL_SETTINGS_FILE,
-                          settings, settings.exists() ? FileUtils.readFileToString( settings ) : "** File does not exist **");
+            logger.debug( "Using local repository {} and found global settings file in {} and user settings file in {} with contents \n{}",
+                          session.getLocalRepository(),
+                          DEFAULT_GLOBAL_SETTINGS_FILE,
+                          settings, (settings != null && settings.exists()) ? FileUtils.readFileToString( settings ) : "** File does not exist **"
+                          );
 
             manipulationManager.init( session );
 
@@ -439,41 +442,54 @@ public class Cli
     {
         try
         {
-            PlexusContainer container = new DefaultPlexusContainer( );
-
-            final MavenExecutionRequest req =
-                new DefaultMavenExecutionRequest().setUserProperties( System.getProperties() )
-                                                  .setUserProperties( userProps )
-                                                  .setRemoteRepositories( Collections.<ArtifactRepository>emptyList() );
-
-            ArtifactRepository ar = new MavenArtifactRepository(  );
-            ar.setUrl( "file://" + System.getProperty( "user.home" ) + "/.m2/repository");
-            if (userProps != null && userProps.containsKey( "maven.repo.local" ))
-            {
-                ar.setUrl( "file://" + userProps.getProperty( "maven.repo.local" ));
-            }
-            req.setLocalRepository( ar );
-
-            if ( settings != null )
-            {
-                req.setUserSettingsFile( settings );
-                req.setGlobalSettingsFile( settings );
-
-                MavenExecutionRequestPopulator executionRequestPopulator =
-                    container.lookup( MavenExecutionRequestPopulator.class );
-
-                executionRequestPopulator.populateFromSettings( req, parseSettings( settings ) );
-                executionRequestPopulator.populateDefaults( req );
-            }
-
-            final MavenSession mavenSession =
-                new MavenSession( container, null, req, new DefaultMavenExecutionResult() );
-
-            mavenSession.getRequest().setPom( target );
+            PlexusContainer container = new DefaultPlexusContainer();
 
             pomIO = container.lookup( PomIO.class );
             session = container.lookup( ManipulationSession.class );
             manipulationManager = container.lookup( ManipulationManager.class );
+
+            final MavenExecutionRequest req = new DefaultMavenExecutionRequest().setUserProperties( System.getProperties() )
+                                                                                .setUserProperties( userProps )
+                                                                                .setRemoteRepositories( Collections.<ArtifactRepository>emptyList() );
+
+            ArtifactRepository ar = null;
+            if ( settings == null )
+            {
+                // No, this is not a typo. If current default is null, supply new local and global.
+                // This function passes in settings to make it easier to test.
+                this.settings = settings = new File( System.getProperty( "user.home" ), ".m2/settings.xml" );
+
+                ar = new MavenArtifactRepository();
+                ar.setUrl( "file://" + System.getProperty( "user.home" ) + "/.m2/repository" );
+                req.setLocalRepository( ar );
+            }
+
+            req.setUserSettingsFile( settings );
+            req.setGlobalSettingsFile( settings );
+
+            MavenExecutionRequestPopulator executionRequestPopulator = container.lookup( MavenExecutionRequestPopulator.class );
+
+            executionRequestPopulator.populateFromSettings( req, parseSettings( settings ) );
+            executionRequestPopulator.populateDefaults( req );
+
+            if ( ar != null)
+            {
+                ar.setUrl( "file://" + req.getLocalRepositoryPath() );
+            }
+
+            if ( userProps != null && userProps.containsKey( "maven.repo.local" ) )
+            {
+                if ( ar == null)
+                {
+                    ar = new MavenArtifactRepository();
+                }
+                ar.setUrl( "file://" + userProps.getProperty( "maven.repo.local" ) );
+                req.setLocalRepository( ar );
+            }
+
+            final MavenSession mavenSession = new MavenSession( container, null, req, new DefaultMavenExecutionResult() );
+
+            mavenSession.getRequest().setPom( target );
 
             session.setMavenSession( mavenSession );
         }
@@ -511,6 +527,8 @@ public class Cli
         DefaultSettingsBuildingRequest settingsRequest = new DefaultSettingsBuildingRequest();
         settingsRequest.setUserSettingsFile( settings );
         settingsRequest.setGlobalSettingsFile( DEFAULT_GLOBAL_SETTINGS_FILE );
+        settingsRequest.setUserProperties( session.getUserProperties() );
+        settingsRequest.setSystemProperties( System.getProperties() );
 
         SettingsBuilder settingsBuilder = container.lookup( SettingsBuilder.class );
         SettingsBuildingResult settingsResult = settingsBuilder.build( settingsRequest );

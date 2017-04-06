@@ -17,12 +17,18 @@ package org.commonjava.maven.ext.manip;
 
 import ch.qos.logback.classic.Level;
 import org.apache.commons.lang.reflect.FieldUtils;
+import org.apache.maven.execution.MavenSession;
 import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.lang.reflect.Method;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+import java.util.UUID;
 
 import static org.junit.Assert.assertTrue;
 
@@ -72,6 +78,100 @@ public class CliTest
         File defaultTarget = (File) FieldUtils.readField( c, "target", true );
 
         assertTrue( "Session file should match", defaultTarget.equals( session.getPom() ) );
+    }
+
+    @Test
+    public void checkLocalRepositoryWithDefaults() throws Exception
+    {
+        Cli c = new Cli();
+        executeMethod( c, "run", new Object[] { new String[] {  }} );
+
+        ManipulationSession session = (ManipulationSession) FieldUtils.readField( c, "session", true );
+        MavenSession ms = (MavenSession)FieldUtils.readField( session, "mavenSession", true );
+
+        assertTrue( ms.getRequest().getLocalRepository().getBasedir().equals( ms.getRequest().getLocalRepositoryPath().toString() ) );
+        assertTrue ( new File ( ms.getRequest().getLocalRepository().getBasedir() ).getParentFile().toString().
+                        equals( System.getProperty( "user.home" ) + File.separatorChar + ".m2" ) );
+
+    }
+
+    @Test
+    public void checkLocalRepositoryWithDefaultsAndModifiedUserSettings() throws Exception
+    {
+        boolean restore = false;
+        Path source = Paths.get ( System.getProperty( "user.home" ) + File.separatorChar + ".m2" + File.separatorChar + "settings.xml");
+        Path backup = Paths.get( source.toString() + '.' + UUID.randomUUID().toString() );
+        Path tmpSettings = Paths.get ( getClass().getResource("/settings-test.xml").getFile() );
+
+        try
+        {
+            if ( source.toFile().exists() )
+            {
+                System.out.println ("Backing up settings.xml to " + backup);
+                restore = true;
+                Files.move( source, backup, StandardCopyOption.ATOMIC_MOVE);
+            }
+            Files.move( tmpSettings, source, StandardCopyOption.ATOMIC_MOVE);
+
+            Cli c = new Cli();
+            executeMethod( c, "run", new Object[] { new String[] {} } );
+
+            ManipulationSession session = (ManipulationSession) FieldUtils.readField( c, "session", true );
+            MavenSession ms = (MavenSession) FieldUtils.readField( session, "mavenSession", true );
+
+            assertTrue( ms.getRequest()
+                          .getLocalRepository()
+                          .getBasedir()
+                          .equals( ms.getRequest().getLocalRepositoryPath().toString() ) );
+            assertTrue( ms.getLocalRepository().getBasedir().equals( System.getProperty( "user.home" ) + File.separatorChar + ".m2-mead-test" ) );
+
+        }
+        finally
+        {
+            if ( restore )
+            {
+                Files.move( backup, source, StandardCopyOption.ATOMIC_MOVE);
+            }
+        }
+    }
+
+    @Test
+    public void checkLocalRepositoryWithSettings() throws Exception
+    {
+        Cli c = new Cli();
+        executeMethod( c, "run", new Object[] { new String[] { "-settings=" + getClass().getResource("/settings-test.xml").getFile() }} );
+
+        ManipulationSession session = (ManipulationSession) FieldUtils.readField( c, "session", true );
+        MavenSession ms = (MavenSession)FieldUtils.readField( session, "mavenSession", true );
+
+        assertTrue( ms.getRequest().getLocalRepository().getBasedir().equals( ms.getRequest().getLocalRepositoryPath().toString() ) );
+    }
+
+    @Test
+    public void checkLocalRepositoryWithExplicitMavenRepo() throws Exception
+    {
+        Cli c = new Cli();
+        executeMethod( c, "run", new Object[] { new String[] { "-Dmaven.repo.local=/tmp/foo" }} );
+
+        ManipulationSession session = (ManipulationSession) FieldUtils.readField( c, "session", true );
+        MavenSession ms = (MavenSession)FieldUtils.readField( session, "mavenSession", true );
+
+        assertTrue( ms.getRequest().getLocalRepository().getBasedir().equals( ms.getRequest().getLocalRepositoryPath().toString() ) );
+    }
+
+    @Test
+    public void checkLocalRepositoryWithExplicitMavenRepoAndSettings() throws Exception
+    {
+        Cli c = new Cli();
+        executeMethod( c, "run", new Object[] { new String[]
+                        { "-settings=" + getClass().getResource("/settings-test.xml").getFile(),
+                                        "-Dmaven.repo.local=/tmp/foo" }} );
+
+        ManipulationSession session = (ManipulationSession) FieldUtils.readField( c, "session", true );
+        MavenSession ms = (MavenSession)FieldUtils.readField( session, "mavenSession", true );
+
+        assertTrue( ms.getLocalRepository().getBasedir().equals( "/tmp/foo" ) );
+        assertTrue( ms.getRequest().getLocalRepository().getBasedir().equals( ms.getRequest().getLocalRepositoryPath().toString() ) );
     }
 
     /**
