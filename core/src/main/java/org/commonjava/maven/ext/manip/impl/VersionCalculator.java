@@ -85,30 +85,26 @@ public class VersionCalculator
     {
         final VersioningState state = session.getState( VersioningState.class );
         final Map<ProjectVersionRef, String> versionsByGAV = new HashMap<>();
-        final Map<ProjectVersionRef, Version> versionObjsByGAV = new HashMap<>();
+        //final Map<ProjectVersionRef, String> modVersionsByGAV = new HashMap<>();
         final Set<String> versionSet = new HashSet<>();
 
         for ( final Project project : projects )
         {
             String originalVersion = project.getVersion();
-            String modifiedVersionString;
             originalVersion = PropertiesUtils.resolveProperties( projects, originalVersion);
-            final Version modifiedVersion =
+            String modifiedVersion =
                 calculate( project.getGroupId(), project.getArtifactId(), originalVersion, session );
-            versionObjsByGAV.put( project.getKey(), modifiedVersion );
 
             if ( state.osgi() )
             {
-                modifiedVersionString = modifiedVersion.getOSGiVersionString();
-            }
-            else
-            {
-                modifiedVersionString = modifiedVersion.getVersionString();
+                modifiedVersion = Version.getOsgiVersion( modifiedVersion );
             }
 
-            if ( modifiedVersion.hasBuildNumber() )
+            versionsByGAV.put( project.getKey(), modifiedVersion );
+
+            if ( Version.hasBuildNumber( modifiedVersion ) )
             {
-                versionSet.add( modifiedVersionString );
+                versionSet.add( modifiedVersion );
             }
         }
 
@@ -117,9 +113,9 @@ public class VersionCalculator
         for ( final Project project : projects )
         {
             final String originalVersion = project.getVersion();
-            String modifiedVersionString;
+            //String modifiedVersionString;
 
-            final Version modifiedVersion = versionObjsByGAV.get( project.getKey() );
+            String modifiedVersion = versionsByGAV.get( project.getKey() );
 
             // If there is only a single version there is no real need to try and find the highest matching.
             // This also fixes the problem where there is a single version and leading zeros.
@@ -131,25 +127,23 @@ public class VersionCalculator
                 // set the build number to avoid version conflicts.
                 if ( buildNumber > 0 )
                 {
-                    modifiedVersion.setBuildNumber( StringUtils.leftPad( Integer.toString( buildNumber ), state.getIncrementalSerialSuffixPadding(), '0' ) );
+                    String paddedBuildNum =
+                            StringUtils.leftPad( Integer.toString( buildNumber ), state.getIncrementalSerialSuffixPadding(), '0' );
+                    modifiedVersion = Version.setBuildNumber( modifiedVersion, paddedBuildNum );
                 }
             }
 
             if ( state.osgi() )
             {
-                modifiedVersionString = modifiedVersion.getOSGiVersionString();
-            }
-            else
-            {
-                modifiedVersionString = modifiedVersion.getVersionString();
+                modifiedVersion = Version.getOsgiVersion( modifiedVersion );
             }
 
-            versionSet.add( modifiedVersionString );
-            logger.debug( gav( project ) + " has updated version: {}. Marking for rewrite.", modifiedVersionString );
+            versionSet.add( modifiedVersion );
+            logger.debug( gav( project ) + " has updated version: {}. Marking for rewrite.", modifiedVersion );
 
-            if ( !originalVersion.equals( modifiedVersionString ) )
+            if ( !originalVersion.equals( modifiedVersion ) )
             {
-                versionsByGAV.put(  project.getKey(), modifiedVersionString );
+                versionsByGAV.put(  project.getKey(), modifiedVersion );
             }
         }
 
@@ -166,7 +160,7 @@ public class VersionCalculator
      * @return a Version object allowing the modified version to be extracted.
      * @throws ManipulationException if an error occurs.
      */
-    protected Version calculate( final String groupId, final String artifactId, final String version,
+    protected String calculate( final String groupId, final String artifactId, final String version,
                                  final ManipulationSession session )
         throws ManipulationException
     {
@@ -181,23 +175,23 @@ public class VersionCalculator
             incrementalSuffix );
         logger.debug( "Got the following override:\n  Version: " + override);
 
-        Version versionObj;
+        String newVersion;
 
         if ( override != null )
         {
-            versionObj = new Version( override );
+            newVersion = override;
         }
         else
         {
-            versionObj = new Version( version );
+            newVersion = version;
         }
 
         if ( staticSuffix != null )
         {
-            versionObj.appendQualifierSuffix( staticSuffix );
+            newVersion = Version.appendQualifierSuffix( newVersion, staticSuffix );
             if ( !state.preserveSnapshot() )
             {
-                versionObj.setSnapshot( false );
+                newVersion = Version.removeSnapshot( newVersion );
             }
         }
         else if ( incrementalSuffix != null )
@@ -224,21 +218,23 @@ public class VersionCalculator
                 // Load metadata from local repository
                 versionCandidates.addAll( getMetadataVersions( groupId, artifactId ) );
             }
-            versionObj.appendQualifierSuffix( incrementalSuffix );
-            int highestRemoteBuildNum = findHighestMatchingBuildNumber( versionObj, versionCandidates );
+            newVersion = Version.appendQualifierSuffix( newVersion, incrementalSuffix );
+            int highestRemoteBuildNum = findHighestMatchingBuildNumber( newVersion, versionCandidates );
             ++highestRemoteBuildNum;
 
-            if ( highestRemoteBuildNum > versionObj.getIntegerBuildNumber() )
+            if ( highestRemoteBuildNum > Version.getIntegerBuildNumber( newVersion ) )
             {
-                versionObj.setBuildNumber( StringUtils.leftPad( Integer.toString( highestRemoteBuildNum ), state.getIncrementalSerialSuffixPadding(), '0' ) );
+                String paddedBuildNumber = StringUtils.leftPad( Integer.toString( highestRemoteBuildNum ),
+                        state.getIncrementalSerialSuffixPadding(), '0' );
+                newVersion = Version.setBuildNumber( newVersion, paddedBuildNumber );
             }
             if ( !state.preserveSnapshot() )
             {
-                versionObj.setSnapshot( false );
+                newVersion = Version.removeSnapshot( newVersion );
             }
         }
 
-        return versionObj;
+        return newVersion;
     }
 
     /**

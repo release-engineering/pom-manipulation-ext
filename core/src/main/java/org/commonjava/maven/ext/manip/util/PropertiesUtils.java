@@ -240,13 +240,13 @@ public final class PropertiesUtils
         String newVersion = newValue;
         String suffix = getSuffix( session );
 
-        Version v = new Version( oldValue );
+        String v = oldValue ;
         if ( !vState.preserveSnapshot() )
         {
-            v.setSnapshot( false );
+            v = Version.removeSnapshot( v );
         }
 
-        String osgiVersion = v.getOSGiVersionString();
+        String osgiVersion = Version.getOsgiVersion( v );
 
         // If we have been configured to ignore the suffix (e.g. rebuild-n) then, assuming that
         // the oldValue actually contains the suffix process it.
@@ -264,8 +264,8 @@ public final class PropertiesUtils
             {
                 String oldValueCache = oldValue;
                 oldValue = oldValue.substring( 0, oldValue.indexOf( suffix ) - 1 );
-                v = new Version( oldValue );
-                osgiVersion = v.getOSGiVersionString();
+                v = oldValue;
+                osgiVersion = Version.getOsgiVersion( v );
                 logger.debug( "Updating version to {} and for oldValue {} with newValue {} ", v, oldValueCache, newValue );
 
             }
@@ -277,10 +277,10 @@ public final class PropertiesUtils
 
         // We only need to dummy up and add a suffix if there is no qualifier. This allows us
         // to work out the OSGi version.
-        if ( suffix != null && !v.hasQualifier() )
+        if ( suffix != null && !Version.hasQualifier( v ) )
         {
-            v.appendQualifierSuffix( suffix );
-            osgiVersion = v.getOSGiVersionString();
+            v = Version.appendQualifierSuffix( v, suffix );
+            osgiVersion = Version.getOsgiVersion( v );
             osgiVersion = osgiVersion.substring( 0, osgiVersion.indexOf( suffix ) - 1 );
         }
         if ( suffix != null && newValue.contains( suffix ) )
