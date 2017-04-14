@@ -139,13 +139,11 @@ public class VersioningCalculatorTest
         }
     }
 
-    @Test
     /**
      * Not every version form know to man is converted...but we should try to
      * safely handle unknown forms.
-     *
-     * @throws Exception
      */
+    @Test
     public void osgi_fallback()
         throws Exception
     {

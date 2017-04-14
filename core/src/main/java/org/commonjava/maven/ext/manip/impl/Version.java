@@ -53,7 +53,7 @@ public class Version {
     /**
      * Regular expression used to match version string delimiters
      */
-    private final static String DELIMITER_REGEX = "[\\.\\-_]";
+    private final static String DELIMITER_REGEX = "[.\\-_]";
 
     /**
      * Regular expression used to match version string delimiters
@@ -92,7 +92,7 @@ public class Version {
     /**
      * Used to match valid OSGi version based on section 3.2.5 of the OSGi specification
      */
-    private final static String OSGI_VERSION_REGEX = "(\\d+)(\\.\\d+(\\.\\d+([\\.][\\w\\-_]+)?)?)?";
+    private final static String OSGI_VERSION_REGEX = "(\\d+)(\\.\\d+(\\.\\d+(\\.[\\w\\-_]+)?)?)?";
 
     private final static Pattern osgiPattern = Pattern.compile(OSGI_VERSION_REGEX);
 
@@ -121,7 +121,7 @@ public class Version {
      *
      * @param version The version to parse
      * @param fill Whether to fill the minor and micro versions with zeros if they are missing
-     * @return
+     * @return OSGi formatted major, minor, micro
      */
     static String getOsgiMMM(String version, boolean fill)
     {
@@ -236,11 +236,7 @@ public class Version {
 
     public static boolean isEmpty( String string )
     {
-        if ( string == null )
-        {
-            return true;
-        }
-        if ( string.trim().equals( EMPTY_STRING ) )
+        if ( string == null || string.trim().equals( EMPTY_STRING ) )
         {
             return true;
         }
@@ -265,9 +261,6 @@ public class Version {
 
     /**
      * Remove the build number (and associated delimiter) portion of the version string
-     *
-     * @param version
-     * @return
      */
     public static String removeBuildNumber( String version )
     {
@@ -280,10 +273,8 @@ public class Version {
     }
 
     /**
-     * Remove the snapshot (and associated delimiter) portion of the version string
-     *
-     * @param version
-     * @return
+     * Remove the snapshot (and associated delimiter) portion of the version string.
+     * Converts something like "1.0-SNAPSHOT" to "1.0"
      */
     public static String removeSnapshot( String version )
     {
@@ -295,7 +286,7 @@ public class Version {
         return version;
     }
 
-    static boolean hasLeadingDelimiter( String versionPart )
+    private static boolean hasLeadingDelimiter( String versionPart )
     {
         if ( versionPart.length() < 1 )
         {
@@ -306,9 +297,6 @@ public class Version {
 
     /**
      * Remove any leading delimiters from the partial version string
-     *
-     * @param versionPart
-     * @return
      */
     static String removeLeadingDelimiter(String versionPart )
     {
@@ -328,28 +316,12 @@ public class Version {
     }
 
     /**
-     * Remove any delimiters from the end of the string
-     * //TODO: maybe remove this method
-     * @param partialVersionString
-     * @return
-     */
-    private String removeLastDelimiters( String partialVersionString )
-    {
-        while ( !isEmpty( partialVersionString ) &&
-            versionStringDelimiters.contains( partialVersionString.charAt( partialVersionString.length() - 1 ) ) )
-        {
-            partialVersionString = partialVersionString.substring( 0, partialVersionString.length() - 1 );
-        }
-        return partialVersionString;
-    }
-
-    /**
      * Check if all the characters in the string are digits
      *
      * @param str a string to check
      * @return whether all the characters in the string are digits
      */
-    static boolean isNumeric( String str )
+    private static boolean isNumeric( String str )
     {
         for ( char c : str.toCharArray() )
         {
@@ -452,6 +424,12 @@ public class Version {
      */
     public static String setBuildNumber( String version, String buildNumber )
     {
+        if ( !isNumeric( buildNumber ) )
+        {
+            logger.warn("Failed attempt to set non-numeric build number '" + buildNumber + "' for version '"
+                    + version + "'");
+            return version;
+        }
         if ( isEmpty( buildNumber ) )
         {
             buildNumber = EMPTY_STRING;

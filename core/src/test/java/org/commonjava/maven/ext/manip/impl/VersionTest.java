@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2012 Red Hat, Inc. (jcasey@redhat.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -306,6 +306,5 @@ public class VersionTest
         assertFalse( Version.isValidOSGi("1beta") );
         assertFalse( Version.isValidOSGi("beta1") );
     }
-
 
 }
