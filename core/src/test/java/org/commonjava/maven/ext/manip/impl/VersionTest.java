@@ -46,6 +46,8 @@ public class VersionTest
         assertThat( Version.appendQualifierSuffix( "1.2-jboss-1", "jboss-2" ), equalTo( "1.2-jboss-2") );
         assertThat( Version.appendQualifierSuffix( "1.2-jboss-1", ".jboss-2" ), equalTo( "1.2.jboss-2") );
         assertThat( Version.appendQualifierSuffix( "1.1-SNAPSHOT", ".test_jdk7-SNAPSHOT" ), equalTo( "1.1.test_jdk7-SNAPSHOT") );
+        assertThat( Version.appendQualifierSuffix( "1.1.beta-2", "-beta-1" ), equalTo( "1.1-beta-1") );
+        assertThat( Version.appendQualifierSuffix( "1.1.beta-2", "-foo-1" ), equalTo( "1.1.beta-2-foo-1") );
     }
 
     @Test

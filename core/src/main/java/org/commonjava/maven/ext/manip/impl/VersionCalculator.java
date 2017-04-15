@@ -85,8 +85,7 @@ public class VersionCalculator
     {
         final VersioningState state = session.getState( VersioningState.class );
         final Map<ProjectVersionRef, String> versionsByGAV = new HashMap<>();
-        //final Map<ProjectVersionRef, String> modVersionsByGAV = new HashMap<>();
-        final Set<String> versionSet = new HashSet<>();
+        final Set<String> vesionsWithBuildNums = new HashSet<>();
 
         for ( final Project project : projects )
         {
@@ -104,7 +103,7 @@ public class VersionCalculator
 
             if ( Version.hasBuildNumber( modifiedVersion ) )
             {
-                versionSet.add( modifiedVersion );
+                vesionsWithBuildNums.add( modifiedVersion );
             }
         }
 
@@ -113,15 +112,14 @@ public class VersionCalculator
         for ( final Project project : projects )
         {
             final String originalVersion = project.getVersion();
-            //String modifiedVersionString;
 
             String modifiedVersion = versionsByGAV.get( project.getKey() );
 
             // If there is only a single version there is no real need to try and find the highest matching.
             // This also fixes the problem where there is a single version and leading zeros.
-            if (versionSet.size() > 1)
+            if (vesionsWithBuildNums.size() > 1)
             {
-                int buildNumber = findHighestMatchingBuildNumber( modifiedVersion, versionSet );
+                int buildNumber = findHighestMatchingBuildNumber( modifiedVersion, vesionsWithBuildNums );
 
                 // If the buildNumber is greater than zero, it means we found a match and have to
                 // set the build number to avoid version conflicts.
@@ -133,12 +131,7 @@ public class VersionCalculator
                 }
             }
 
-            if ( state.osgi() )
-            {
-                modifiedVersion = Version.getOsgiVersion( modifiedVersion );
-            }
-
-            versionSet.add( modifiedVersion );
+            vesionsWithBuildNums.add( modifiedVersion );
             logger.debug( gav( project ) + " has updated version: {}. Marking for rewrite.", modifiedVersion );
 
             if ( !originalVersion.equals( modifiedVersion ) )
@@ -175,15 +168,11 @@ public class VersionCalculator
             incrementalSuffix );
         logger.debug( "Got the following override:\n  Version: " + override);
 
-        String newVersion;
+        String newVersion = version;
 
         if ( override != null )
         {
             newVersion = override;
-        }
-        else
-        {
-            newVersion = version;
         }
 
         if ( staticSuffix != null )
@@ -196,35 +185,14 @@ public class VersionCalculator
         }
         else if ( incrementalSuffix != null )
         {
-            // Find matching version strings in the remote repo and increment to the next
-            // available version
-            final Set<String> versionCandidates = new HashSet<>();
+            final Set<String> versionCandidates = this.getVersionCandidates(state, groupId, artifactId);
 
-            Map<ProjectRef, Set<String>> rm = state.getRESTMetadata();
-            if ( rm != null)
-            {
-                // If the REST Client has prepopulated incremental data use that instead of the examining the repository.
-                if (!rm.isEmpty())
-                {
-                    // Use preloaded metadata from remote repository, loaded via a REST Call.
-                    if (rm.get( new SimpleProjectRef( groupId, artifactId ) ) != null)
-                    {
-                        versionCandidates.addAll( rm.get( new SimpleProjectRef( groupId, artifactId ) ) );
-                    }
-                }
-            }
-            else
-            {
-                // Load metadata from local repository
-                versionCandidates.addAll( getMetadataVersions( groupId, artifactId ) );
-            }
             newVersion = Version.appendQualifierSuffix( newVersion, incrementalSuffix );
-            int highestRemoteBuildNum = findHighestMatchingBuildNumber( newVersion, versionCandidates );
-            ++highestRemoteBuildNum;
+            int highestRemoteBuildNumPlusOne = findHighestMatchingBuildNumber( newVersion, versionCandidates ) + 1;
 
-            if ( highestRemoteBuildNum > Version.getIntegerBuildNumber( newVersion ) )
+            if ( highestRemoteBuildNumPlusOne > Version.getIntegerBuildNumber( newVersion ) )
             {
-                String paddedBuildNumber = StringUtils.leftPad( Integer.toString( highestRemoteBuildNum ),
+                String paddedBuildNumber = StringUtils.leftPad( Integer.toString( highestRemoteBuildNumPlusOne ),
                         state.getIncrementalSerialSuffixPadding(), '0' );
                 newVersion = Version.setBuildNumber( newVersion, paddedBuildNumber );
             }
@@ -235,6 +203,36 @@ public class VersionCalculator
         }
 
         return newVersion;
+    }
+
+    /**
+     * Find matching version strings in the remote repo.
+     */
+    private Set<String> getVersionCandidates(VersioningState state, String groupId, String artifactId)
+            throws ManipulationException
+    {
+        final Set<String> versionCandidates = new HashSet<>();
+
+        Map<ProjectRef, Set<String>> rm = state.getRESTMetadata();
+        if ( rm != null)
+        {
+            // If the REST Client has prepopulated incremental data use that instead of the examining the repository.
+            if (!rm.isEmpty())
+            {
+                // Use preloaded metadata from remote repository, loaded via a REST Call.
+                if (rm.get( new SimpleProjectRef( groupId, artifactId ) ) != null)
+                {
+                    versionCandidates.addAll( rm.get( new SimpleProjectRef( groupId, artifactId ) ) );
+                }
+            }
+        }
+        else
+        {
+            // Load metadata from local repository
+            versionCandidates.addAll( getMetadataVersions( groupId, artifactId ) );
+        }
+        return versionCandidates;
+
     }
 
     /**
