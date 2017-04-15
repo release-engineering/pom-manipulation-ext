@@ -49,6 +49,15 @@ public class VersionTest
     }
 
     @Test
+    public void testAppendQualifierSuffix_WithProperty()
+    {
+        assertThat( Version.appendQualifierSuffix( "${project.version}", "foo" ), equalTo( "${project.version}-foo") );
+        assertThat( Version.appendQualifierSuffix( "1.0.${micro}", ".foo" ), equalTo( "1.0.${micro}.foo") );
+        assertThat( Version.setBuildNumber( "${project.version}", "10" ), equalTo( "${project.version}-10") );
+        assertThat( Version.setBuildNumber( "${project.version}-foo", "10" ), equalTo( "${project.version}-foo-10") );
+    }
+
+    @Test
     public void testAppendQualifierSuffix_MulitpleTimes()
     {
 
@@ -195,6 +204,14 @@ public class VersionTest
     }
 
     @Test
+    public void testGetQualifierBase() {
+        assertThat(Version.getQualifierBase("1.0-SNAPSHOT"), equalTo(""));
+        assertThat(Version.getQualifierBase("1.0.0.Beta1"), equalTo("Beta"));
+        assertThat(Version.getQualifierBase("1.0.0.jboss-test-SNAPSHOT"), equalTo("jboss-test"));
+        assertThat(Version.getQualifierBase("${project.version}-test-1"), equalTo("${project.version}-test"));
+    }
+
+    @Test
     public void testGetSnapshot()
     {
         assertThat( Version.getSnapshot( "1.0-SNAPSHOT" ), equalTo( "SNAPSHOT" ) );
@@ -268,6 +285,10 @@ public class VersionTest
     {
         assertThat( Version.setSnapshot( "1.0-SNAPSHOT", true ), equalTo( "1.0-SNAPSHOT" ) );
         assertThat( Version.setSnapshot( "1.0-SNAPSHOT", false ), equalTo( "1.0" ) );
+        assertThat( Version.setSnapshot( "1.1", true ), equalTo( "1.1-SNAPSHOT" ) );
+        assertThat( Version.setSnapshot( "1.1", false ), equalTo( "1.1" ) );
+        assertThat( Version.setSnapshot( "1.2.jboss-1", true ), equalTo( "1.2.jboss-1-SNAPSHOT" ) );
+        assertThat( Version.setSnapshot( "1.2.jboss-1", false ), equalTo( "1.2.jboss-1" ) );
         assertThat( Version.setSnapshot( "1.0.0.Beta1_snapshot", true ), equalTo( "1.0.0.Beta1_snapshot" ) );
         assertThat( Version.setSnapshot( "1.0.0.Beta1_snapshot", false ), equalTo( "1.0.0.Beta1" ) );
         assertThat( Version.setSnapshot( "1.snaPsHot", true ), equalTo( "1.snaPsHot" ) );
@@ -279,7 +300,7 @@ public class VersionTest
     }
 
     @Test
-    public void testStripLeadingDelimiters()
+    public void testRemoveLeadingDelimiters()
     {
         assertThat( Version.removeLeadingDelimiter( ".1.2" ), equalTo( "1.2" ) );
         assertThat( Version.removeLeadingDelimiter( "_Beta1" ), equalTo( "Beta1" ) );
