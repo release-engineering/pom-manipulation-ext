@@ -30,8 +30,9 @@ import java.util.regex.Pattern;
  * OSGi versioning. Parses versions into the following format: &lt;major&gt;.&lt;minor&gt;.&lt;micro&gt;
  * .&lt;qualifierBase&gt;-&lt;buildnumber&gt;-&lt;buildnumber&gt;-&lt;snapshot&gt;
  */
-public class Version {
-    private static final Logger logger = LoggerFactory.getLogger(Version.class);
+public class Version
+{
+    private static final Logger logger = LoggerFactory.getLogger( Version.class );
 
     private final static String EMPTY_STRING = "";
 
