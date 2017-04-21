@@ -18,8 +18,8 @@ package org.commonjava.maven.ext.manip.state;
 import org.commonjava.maven.ext.manip.ManipulationException;
 import org.commonjava.maven.ext.manip.impl.DependencyManipulator;
 import org.commonjava.maven.ext.manip.rest.DefaultVersionTranslator;
-import org.commonjava.maven.ext.manip.rest.DefaultVersionTranslator.RestProtocol;
 import org.commonjava.maven.ext.manip.rest.VersionTranslator;
+import org.commonjava.maven.ext.manip.rest.VersionTranslator.RestProtocol;
 
 import java.util.Properties;
 
@@ -35,9 +35,14 @@ public class RESTState implements State
     public RESTState( final Properties userProps ) throws ManipulationException
     {
         restURL = userProps.getProperty( "restURL" );
-        // See DefaultVersionTranslator for protocol description.
-        restEndpoint = new DefaultVersionTranslator
-                        ( restURL, RestProtocol.parse( userProps.getProperty( "restProtocol", RestProtocol.CURRENT.toString() ) ) );
+
+        int restMaxSize = Integer.valueOf( userProps.getProperty( "restMaxSize", "0" ) );
+        int restMinSize = Integer.valueOf( userProps.getProperty( "restMinSize",
+                                                                  String.valueOf( DefaultVersionTranslator.CHUNK_SPLIT_COUNT ) ) );
+
+        RestProtocol protocol = RestProtocol.parse ( userProps.getProperty( "restProtocol", RestProtocol.CURRENT.toString() ) );
+
+        restEndpoint = new DefaultVersionTranslator ( restURL, protocol, restMaxSize, restMinSize );
     }
 
     /**
@@ -49,14 +54,6 @@ public class RESTState implements State
     public boolean isEnabled()
     {
         return restURL != null && !restURL.isEmpty();
-    }
-
-    /**
-     * @return value of REST URL.
-     */
-    public String getRESTURL()
-    {
-        return restURL;
     }
 
     public VersionTranslator getVersionTranslator()

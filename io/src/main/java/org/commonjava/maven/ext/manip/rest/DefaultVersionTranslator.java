@@ -20,7 +20,7 @@ import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
 import org.apache.commons.codec.binary.Base32;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
-import org.commonjava.maven.ext.manip.ManipulationException;
+import org.commonjava.maven.ext.manip.ListUtils;
 import org.commonjava.maven.ext.manip.rest.exception.RestException;
 import org.commonjava.maven.ext.manip.rest.mapper.ProjectVersionRefMapper;
 import org.slf4j.Logger;
@@ -30,6 +30,7 @@ import org.slf4j.MDC;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
@@ -46,51 +47,19 @@ import static org.apache.http.HttpStatus.SC_OK;
 public class DefaultVersionTranslator
     implements VersionTranslator
 {
-    public enum RestProtocol
-    {
-        /**
-         * Current DependencyAnalyser is not versioning its protocols. To work around this
-         * label the original protocol as deprecated and the new, development version, as current.
-         */
-        DEPRECATED( "deprecated" ), CURRENT( "current" );
-
-        private String name;
-
-        RestProtocol( String name )
-        {
-            this.name = name;
-        }
-
-        @Override
-        public String toString()
-        {
-            return name;
-        }
-
-        public static RestProtocol parse( String protocol ) throws ManipulationException
-        {
-            for ( RestProtocol r : RestProtocol.values() )
-            {
-                if ( r.toString().equals( protocol ) )
-                {
-                    return r;
-                }
-            }
-            throw new ManipulationException( "Unknown protocol " + protocol );
-        }
-    }
-
     private static final Random RANDOM = new Random();
 
     private static final Base32 CODEC = new Base32();
-
-    private static final int CHUNK_SPLIT_COUNT = 4;
 
     private final Logger logger = LoggerFactory.getLogger( getClass() );
 
     private final String endpointUrl;
 
     private final ProjectVersionRefMapper pvrm;
+
+    private final int initialRestMaxSize;
+
+    private final int initialRestMinSize;
 
     /**
      * @param endpointUrl is the URL to talk to.
@@ -117,11 +86,16 @@ public class DefaultVersionTranslator
      *     } ]
      * }
      * }</pre>
+     * @param restMaxSize initial (maximum) size of the rest call; if zero will send everything.
+     * @param restMinSize
      */
-    public DefaultVersionTranslator( String endpointUrl, RestProtocol protocol )
+    public DefaultVersionTranslator( String endpointUrl, RestProtocol protocol, int restMaxSize, int restMinSize )
     {
         this.pvrm = new ProjectVersionRefMapper(protocol);
         this.endpointUrl = endpointUrl;
+        this.initialRestMaxSize = restMaxSize;
+        this.initialRestMinSize = restMinSize;
+
         Unirest.setObjectMapper( pvrm );
         // According to https://github.com/Mashape/unirest-java the default connection timeout is 10000
         // and the default socketTimeout is 60000.
@@ -138,7 +112,21 @@ public class DefaultVersionTranslator
     {
         final Map<ProjectVersionRef, String> result = new HashMap<>();
         final Queue<Task> queue = new ArrayDeque<>();
-        queue.add( new Task( pvrm, projects, endpointUrl ) );
+        if ( initialRestMaxSize != 0 )
+        {
+            // Presplit
+            final List<List<ProjectVersionRef>> partition = ListUtils.partition( projects, initialRestMaxSize );
+            for ( List<ProjectVersionRef> p : partition )
+            {
+                queue.add( new Task( pvrm, p, endpointUrl ) );
+            }
+            logger.debug( "For initial sizing of {} have split the queue into {} ", initialRestMaxSize , queue.size() );
+        }
+        else
+        {
+            queue.add( new Task( pvrm, projects, endpointUrl ) );
+        }
+
 
         while ( !queue.isEmpty() )
         {
@@ -150,7 +138,15 @@ public class DefaultVersionTranslator
             }
             else
             {
-                if ( task.canSplit() )
+                if ( task.canSplit() && task.getStatus() == 504)
+                {
+                    List<Task> tasks = task.split();
+
+                    logger.warn( "Failed to translate versions for task @{} due to {}, splitting and retrying. Chunk size was: {} and new chunk size {} in {} segments.",
+                                 task.hashCode(), task.getStatus(), task.getChunkSize(), tasks.get( 0 ).getChunkSize(), tasks.size());
+                    queue.addAll( tasks );
+                }
+                else
                 {
                     if ( task.getStatus() < 0 )
                     {
@@ -161,15 +157,6 @@ public class DefaultVersionTranslator
                         logger.debug ("Did not get status {} but received {}", SC_OK, task.getStatus());
                     }
 
-                    List<Task> tasks = task.split();
-
-                    logger.warn( "Failed to translate versions for task @{}, splitting and retrying. Chunk size was: {} and new chunk size {} in {} segments.",
-                                 task.hashCode(), task.getChunkSize(), tasks.get( 0 ).getChunkSize(), tasks.size());
-                    queue.addAll( tasks );
-                }
-                else
-                {
-                    logger.debug ("Cannot split and retry anymore.");
                     if ( task.getStatus() > 0 )
                     {
                         throw new RestException(
@@ -185,7 +172,7 @@ public class DefaultVersionTranslator
         return result;
     }
 
-    private static class Task
+    private class Task
     {
         private List<ProjectVersionRef> chunk;
 
@@ -252,25 +239,32 @@ public class DefaultVersionTranslator
 
         public List<Task> split()
         {
-            if ( !canSplit() )
-            {
-                throw new IllegalArgumentException( "Can't split anymore!" );
-            }
             List<Task> res = new ArrayList<>( CHUNK_SPLIT_COUNT );
-            // To KISS, overflow the remainder into the last chunk
-            int chunkSize = chunk.size() / CHUNK_SPLIT_COUNT;
-            for ( int i = 0; i < ( CHUNK_SPLIT_COUNT - 1 ); i++ )
+            if ( chunk.size() >= CHUNK_SPLIT_COUNT )
             {
-                res.add( new Task( pvrm, chunk.subList( i * chunkSize, ( i + 1 ) * chunkSize ), endpointUrl ) );
+                // To KISS, overflow the remainder into the last chunk
+                int chunkSize = chunk.size() / CHUNK_SPLIT_COUNT;
+                for ( int i = 0; i < ( CHUNK_SPLIT_COUNT - 1 ); i++ )
+                {
+                    res.add( new Task( pvrm, chunk.subList( i * chunkSize, ( i + 1 ) * chunkSize ), endpointUrl ) );
+                }
+                // Last chunk may have different size
+                res.add( new Task( pvrm, chunk.subList( ( CHUNK_SPLIT_COUNT - 1 ) * chunkSize, chunk.size() ),
+                                   endpointUrl ) );
             }
-            // Last chunk may have different size
-            res.add( new Task( pvrm, chunk.subList( ( CHUNK_SPLIT_COUNT - 1 ) * chunkSize, chunk.size() ), endpointUrl ) );
+            else
+            {
+                for ( int i = 0 ; i < ( chunk.size() - initialRestMinSize ) + 1; i++ )
+                {
+                    res.add( new Task( pvrm, chunk.subList( i * initialRestMinSize, ( i + 1 ) * initialRestMinSize ), endpointUrl ) );
+                }
+            }
             return res;
         }
 
         boolean canSplit()
         {
-            return ( chunk.size() / CHUNK_SPLIT_COUNT ) > 0;
+            return ( chunk.size() / initialRestMinSize ) > 0 && chunk.size() != 1;
         }
 
         int getStatus()

@@ -19,7 +19,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.mashape.unirest.http.ObjectMapper;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef;
-import org.commonjava.maven.ext.manip.rest.DefaultVersionTranslator.RestProtocol;
+import org.commonjava.maven.ext.manip.rest.VersionTranslator.RestProtocol;
+import org.commonjava.maven.ext.manip.rest.VersionTranslator;
 import org.commonjava.maven.ext.manip.rest.exception.RestException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,7 +43,7 @@ public class ProjectVersionRefMapper implements ObjectMapper
 
     private String errorString;
 
-    private RestProtocol protocol;
+    private VersionTranslator.RestProtocol protocol;
 
     public ProjectVersionRefMapper( RestProtocol protocol )
     {
@@ -128,11 +129,7 @@ public class ProjectVersionRefMapper implements ObjectMapper
             requestBody.add( gav );
         }
 
-        if ( protocol == RestProtocol.DEPRECATED )
-        {
-            request = requestBody;
-        }
-        else if ( protocol == RestProtocol.CURRENT )
+        if ( protocol == VersionTranslator.RestProtocol.CURRENT )
         {
             request = new DAMapper( new String[]{}, new String[]{}, requestBody );
         }
@@ -140,7 +137,7 @@ public class ProjectVersionRefMapper implements ObjectMapper
         {
             throw new RestException( "Unknown protocol value " + protocol );
         }
-        logger.debug ("Writing stream using protocol type '{}'" , protocol);
+        logger.trace ("Writing stream using protocol type '{}'" , protocol);
 
         try
         {
