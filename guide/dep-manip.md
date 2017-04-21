@@ -24,9 +24,9 @@ Multiple remote dependency-management poms can be specified using a comma separa
 
 #### REST Endpoint
 
-Alternatively, rather than using a remote BOM file as a source, it is possible to instruct PME to prescan the project, collect up all group:artifact:version's used and call a REST endpoint using the property `-DrestURL` (provided by https://github.com/project-ncl/dependency-analysis) which will then return a list of possible new versions. By default it will pass *all* GAVs to the endpoint, however, to avoid problems with large requests, if the endpoint returns an error the batch is automatically split into smaller chunks in an attempt to reduce load on the endpoint.
+Alternatively, rather than using a remote BOM file as a source, it is possible to instruct PME to prescan the project, collect up all group:artifact:version's used and call a REST endpoint using the property `-DrestURL` (provided by [https://github.com/project-ncl/dependency-analysis]) which will then return a list of possible new versions.
 
-By default PME will use the 'current' REST API. It can be configured to use the deprecated previous API with the flag `-DrestProtocol=deprecated`.
+By default PME will pass *all* the GAVs to the endpoint ; it can be configured to split them into initial batches via `-DrestMaxSize=<...>`. If the endpoint returns a 504 timeout the batch is automatically split into smaller chunks in an attempt to reduce load on the endpoint. It will by default chunk down to size of 4 before aborting. This can be configured with `-DrestMinSize=<...>`.
 
 The REST endpoint should follow:
 
