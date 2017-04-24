@@ -45,7 +45,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 
-import static org.commonjava.maven.ext.manip.rest.DefaultVersionTranslator.RestProtocol;
+import static org.commonjava.maven.ext.manip.rest.VersionTranslator.RestProtocol;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
@@ -66,7 +66,7 @@ public class DefaultVersionTranslatorTest
     @Parameterized.Parameters()
     public static Collection<Object[]> data()
     {
-        return Arrays.asList( new Object[][] { { RestProtocol.DEPRECATED }, { RestProtocol.CURRENT } } );
+        return Arrays.asList( new Object[][] { { RestProtocol.CURRENT } } );
     }
 
     @Rule
@@ -87,7 +87,7 @@ public class DefaultVersionTranslatorTest
     {
         LoggerFactory.getLogger( DefaultVersionTranslator.class ).info( "Executing test " + testName.getMethodName() );
 
-        this.versionTranslator = new DefaultVersionTranslator( mockServer.getUrl(), protocol );
+        this.versionTranslator = new DefaultVersionTranslator( mockServer.getUrl(), protocol, 0, VersionTranslator.CHUNK_SPLIT_COUNT );
     }
 
     public DefaultVersionTranslatorTest(RestProtocol protocol)
@@ -135,7 +135,8 @@ public class DefaultVersionTranslatorTest
     public void testTranslateVersionsFailNoResponse()
     {
         // Some url that doesn't exist used here
-        VersionTranslator versionTranslator = new DefaultVersionTranslator( "http://127.0.0.2", RestProtocol.DEPRECATED );
+        VersionTranslator versionTranslator = new DefaultVersionTranslator( "http://127.0.0.2", RestProtocol.CURRENT, 0,
+                                                                            VersionTranslator.CHUNK_SPLIT_COUNT );
 
         List<ProjectVersionRef> gavs = new ArrayList<ProjectVersionRef>()
         {{

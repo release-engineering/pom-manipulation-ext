@@ -52,6 +52,8 @@ public class SpyFailJettyHandler extends AbstractHandler implements Handler
 
     private final List<List<Map<String, Object>>> requestData = new ArrayList<>();
 
+    private int responseCode = HttpServletResponse.SC_GATEWAY_TIMEOUT;
+
     @Override public void handle( String target, Request baseRequest, HttpServletRequest request,
                                   HttpServletResponse response )
                     throws IOException, ServletException
@@ -94,9 +96,11 @@ public class SpyFailJettyHandler extends AbstractHandler implements Handler
                 requestBody = objectMapper.readValue( jb.toString(), List.class );
             }
 
+            LOGGER.debug( "Adding to requestBody of size {}", requestBody.size() );
+
             requestData.add(requestBody);
 
-            response.setStatus( HttpServletResponse.SC_GATEWAY_TIMEOUT );
+            response.setStatus( responseCode );
             baseRequest.setHandled( true );
 
         }
@@ -108,5 +112,10 @@ public class SpyFailJettyHandler extends AbstractHandler implements Handler
 
     public List<List<Map<String, Object>>> getRequestData() {
         return requestData;
+    }
+
+    public void setStatusCode (int responseCode)
+    {
+        this.responseCode = responseCode;
     }
 }

@@ -17,7 +17,6 @@ package org.commonjava.maven.ext.manip.rest;
 
 import com.mashape.unirest.http.Unirest;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
-import org.commonjava.maven.ext.manip.rest.DefaultVersionTranslator.RestProtocol;
 import org.commonjava.maven.ext.manip.rest.exception.RestException;
 import org.commonjava.maven.ext.manip.rest.handler.SpyFailJettyHandler;
 import org.commonjava.maven.ext.manip.rest.rule.MockServer;
@@ -31,17 +30,18 @@ import org.junit.runners.Parameterized;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static org.commonjava.maven.ext.manip.rest.DefaultVersionTranslator.RestProtocol.CURRENT;
-import static org.commonjava.maven.ext.manip.rest.DefaultVersionTranslator.RestProtocol.DEPRECATED;
 import static org.commonjava.maven.ext.manip.rest.DefaultVersionTranslatorTest.loadALotOfGAVs;
+import static org.commonjava.maven.ext.manip.rest.VersionTranslator.RestProtocol.CURRENT;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -56,12 +56,12 @@ public class DefaultVersionTranslatorSplitTest
 
     private DefaultVersionTranslator versionTranslator;
 
-    private RestProtocol protocol;
+    private VersionTranslator.RestProtocol protocol;
 
     @Parameterized.Parameters()
     public static Collection<Object[]> data()
     {
-        return Arrays.asList( new Object[][] { { DEPRECATED }, { CURRENT } } );
+        return Arrays.asList( new Object[][] { { CURRENT } } );
     }
 
     @Rule
@@ -84,13 +84,13 @@ public class DefaultVersionTranslatorSplitTest
     @Before
     public void before()
     {
-
         LOG.info( "Executing test " + testName.getMethodName() );
 
-        this.versionTranslator = new DefaultVersionTranslator( mockServer.getUrl(), protocol );
+        handler.setStatusCode( HttpServletResponse.SC_GATEWAY_TIMEOUT );
+        versionTranslator = new DefaultVersionTranslator( mockServer.getUrl(), protocol, 0, VersionTranslator.CHUNK_SPLIT_COUNT );
     }
 
-    public DefaultVersionTranslatorSplitTest( RestProtocol protocol )
+    public DefaultVersionTranslatorSplitTest( VersionTranslator.RestProtocol protocol )
     {
         this.protocol = protocol;
     }
@@ -185,4 +185,109 @@ public class DefaultVersionTranslatorSplitTest
         assertEquals( original, chunks );
     }
 
+    @Test
+    public void testTranslateVersionsCorrectSplitMaxSize()
+    {
+        this.versionTranslator = new DefaultVersionTranslator( mockServer.getUrl(), protocol, 10, VersionTranslator.CHUNK_SPLIT_COUNT );
+
+        List<ProjectVersionRef> data = aLotOfGavs.subList( 0, 30 );
+        handler.getRequestData().clear();
+        try
+        {
+            versionTranslator.translateVersions( data );
+            fail();
+        }
+        catch ( RestException ex )
+        {
+        }
+        List<List<Map<String, Object>>> requestData = handler.getRequestData();
+
+        // split 10,10,10
+        // split    10,10,2,2,2,4
+        // split       10,2,2,2,4,2,2,2,4
+        // split          2,2....
+        // = 10 : 10 : 10 : 2
+        LOG.debug( requestData.toString() );
+        assertEquals( 4, requestData.size() );
+        for ( int i = 0; i < 3; i++ )
+        {
+            assertEquals( 10, requestData.get( i ).size() );
+        }
+        assertEquals( 2, requestData.get( 3 ).size() );
+
+        Set<Map<String, Object>> chunks = new HashSet<>();
+        for ( List<Map<String, Object>> e : requestData.subList( 0, 3 ) )
+        {
+            chunks.addAll( e );
+        }
+        assertEquals( data.size(), chunks.size() );
+    }
+
+    @Test
+    public void testTranslateVersionsNoSplitOnNon504()
+    {
+        List<ProjectVersionRef> data = aLotOfGavs.subList( 0, 36 );
+        handler.getRequestData().clear();
+        handler.setStatusCode( HttpServletResponse.SC_BAD_GATEWAY );
+        try
+        {
+            versionTranslator.translateVersions( data );
+            fail();
+        }
+        catch ( RestException ex )
+        {
+            // ok
+        }
+        List<List<Map<String, Object>>> requestData = handler.getRequestData();
+
+        LOG.debug( requestData.toString() );
+
+        // Due to this returning a non-504 it shouldn't do any splits so we should get size 1 containing 36 back
+        assertEquals( 1, requestData.size() );
+        assertEquals( 36, requestData.get( 0 ).size() );
+    }
+
+    @Test
+    public void testTranslateVersionsCorrectSplitMaxSizeWithMin()
+    {
+        this.versionTranslator = new DefaultVersionTranslator( mockServer.getUrl(), protocol, 10, 1 );
+
+        List<ProjectVersionRef> data = aLotOfGavs.subList( 0, 30 );
+        handler.getRequestData().clear();
+        try
+        {
+            versionTranslator.translateVersions( data );
+            fail();
+        }
+        catch ( RestException ex )
+        {
+        }
+        List<List<Map<String, Object>>> requestData = handler.getRequestData();
+
+        // split 30 ->
+        //        10,10,10
+        // split    10,10,2,2,2,4
+        // split       10,2,2,2,4,2,2,2,4
+        // split          2,2,2,4,2,2,2,4
+        // split            2,2,4,2,2,2,4,2,2,2,4,1
+        // split              2,4,2,2,2,4,2,2,2,4,1...
+        // split                4,2,2,2,4,2,2,2,4,1...
+        // split                  2,2,2,4,2,2,2,4,1...
+        // split                    2,2,4,2,2,2,4,1...
+        // split                      2,4,2,2,2,4,1...
+        // split                        4,2,2,2,4,1...
+        // split                          2,2,2,4,1...
+        // split                            2,2,4,1...
+        // split                              2,4,1...
+        // split                                4,1...
+        // split                                   1...
+        // Count of 16 (all outer edges )
+        LOG.debug( requestData.toString() );
+        assertEquals( 16, requestData.size() );
+        for ( int i = 0; i < 3; i++ )
+        {
+            assertEquals( 10, requestData.get( i ).size() );
+        }
+        assertEquals( 1, requestData.get( 15 ).size() );
+    }
 }

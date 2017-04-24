@@ -19,7 +19,6 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef;
-import org.commonjava.maven.ext.manip.rest.DefaultVersionTranslator.RestProtocol;
 import org.commonjava.maven.ext.manip.rest.exception.RestException;
 import org.commonjava.maven.ext.manip.rest.rule.MockServer;
 import org.eclipse.jetty.server.Request;
@@ -92,7 +91,8 @@ public class HttpErrorVersionTranslatorTest
     {
         LoggerFactory.getLogger( DefaultVersionTranslator.class ).info ("Executing test " + testName.getMethodName());
 
-        this.versionTranslator = new DefaultVersionTranslator( mockServer.getUrl(), RestProtocol.DEPRECATED );
+        this.versionTranslator = new DefaultVersionTranslator( mockServer.getUrl(), VersionTranslator.RestProtocol.CURRENT, 0,
+                                                               VersionTranslator.CHUNK_SPLIT_COUNT );
     }
 
     @Test

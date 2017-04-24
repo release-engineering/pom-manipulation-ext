@@ -16,6 +16,7 @@
 package org.commonjava.maven.ext.manip.rest;
 
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
+import org.commonjava.maven.ext.manip.ManipulationException;
 
 import java.util.List;
 import java.util.Map;
@@ -25,6 +26,7 @@ import java.util.Map;
  */
 public interface VersionTranslator
 {
+    int CHUNK_SPLIT_COUNT = 4;
 
     /**
      * Executes HTTP request to a REST service that translates versions
@@ -34,4 +36,36 @@ public interface VersionTranslator
      */
     Map<ProjectVersionRef, String> translateVersions( List<ProjectVersionRef> projects );
 
+    enum RestProtocol
+    {
+        /**
+         * Current DependencyAnalyser is not versioning its protocols.
+         */
+        CURRENT( "current" );
+
+        private String name;
+
+        RestProtocol( String name )
+        {
+            this.name = name;
+        }
+
+        @Override
+        public String toString()
+        {
+            return name;
+        }
+
+        public static RestProtocol parse( String protocol ) throws ManipulationException
+        {
+            for ( RestProtocol r : RestProtocol.values() )
+            {
+                if ( r.toString().equals( protocol ) )
+                {
+                    return r;
+                }
+            }
+            throw new ManipulationException( "Unknown protocol " + protocol );
+        }
+    }
 }

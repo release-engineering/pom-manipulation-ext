@@ -36,7 +36,7 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
 
-import static org.commonjava.maven.ext.manip.rest.DefaultVersionTranslator.RestProtocol;
+import static org.commonjava.maven.ext.manip.rest.VersionTranslator.RestProtocol;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -79,7 +79,8 @@ public class HttpHeaderHeaderTest
     {
         LoggerFactory.getLogger( DefaultVersionTranslator.class ).info ("Executing test " + testName.getMethodName());
 
-        this.versionTranslator = new DefaultVersionTranslator( mockServer.getUrl(), RestProtocol.DEPRECATED );
+        this.versionTranslator = new DefaultVersionTranslator( mockServer.getUrl(), RestProtocol.CURRENT, 0,
+                                                               VersionTranslator.CHUNK_SPLIT_COUNT );
     }
 
     private String generateResponse( String header )

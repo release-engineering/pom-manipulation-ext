@@ -25,12 +25,18 @@
     </encoder>
   </appender>
 
-  <logger name="org.commonjava.maven.ext" level="DEBUG">
+  <logger name="org.commonjava.maven.ext" level="DEBUG" additivity="false" >
     <appender-ref ref="STDOUT" />
   </logger>
 
   <root level="DEBUG">
     <appender-ref ref="STDOUT" />
   </root>
-  
+
+  <logger name="org.eclipse" level="WARN" />
+  <logger name="org.apache" level="WARN" />
+  <logger name="httpclient.wire" level="WARN" />
+  <logger name="com.jayway.jsonpath.internal.JsonContext" level="WARN" />
+  <logger name="org.commonjava.util.jhttpc" level="WARN" />
+  <logger name="org.commonjava.maven.galley" level="WARN" />
 </configuration>
