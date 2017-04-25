@@ -20,335 +20,314 @@ import org.junit.Test;
 import java.util.HashSet;
 import java.util.Set;
 
-import static org.commonjava.maven.ext.manip.impl.Version.findHighestMatchingBuildNumber;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertFalse;
+
 
 public class VersionTest
 {
 
     @Test
-    public void testParseVersion()
-        throws Exception
+    public void testAppendQualifierSuffix()
     {
-        Version version = new Version("1.2.beta2");
-        assertThat( version.getMajorVersion(), equalTo( "1" ) );
-        assertThat( version.getMinorVersion(), equalTo( "2" ) );
-        assertThat( version.getMicroVersion(), equalTo( "0" ) );
-        assertThat( version.getQualifier(), equalTo( "beta2" ) );
-
-        version = new Version("1");
-        assertThat( version.getMajorVersion(), equalTo( "1" ) );
-        assertThat( version.getMinorVersion(), equalTo( "0" ) );
-        assertThat( version.getMicroVersion(), equalTo( "0" ) );
-        assertThat( version.getQualifier(), equalTo( "" ) );
-
-        version = new Version("1beta1");
-        assertThat( version.getMajorVersion(), equalTo( "1" ) );
-        assertThat( version.getMinorVersion(), equalTo( "0" ) );
-        assertThat( version.getMicroVersion(), equalTo( "0" ) );
-        assertThat( version.getQualifier(), equalTo( "beta1" ) );
-
-        version = new Version("1-0-3.4-beta2");
-        assertThat( version.getMajorVersion(), equalTo( "1" ) );
-        assertThat( version.getMinorVersion(), equalTo( "0" ) );
-        assertThat( version.getMicroVersion(), equalTo( "3" ) );
-        assertThat( version.getQualifier(), equalTo( "4-beta2" ) );
-
-        version = new Version("11-01-beta2_SNAPSHOT_HELLO-1");
-        assertThat( version.getMajorVersion(), equalTo( "11" ) );
-        assertThat( version.getMinorVersion(), equalTo( "01" ) );
-        assertThat( version.getMicroVersion(), equalTo( "0" ) );
-        assertThat( version.getQualifier(), equalTo( "beta2_SNAPSHOT_HELLO-1" ) );
-
-        version = new Version("1.2.3.4.Final-X");
-        assertThat( version.getMajorVersion(), equalTo( "1" ) );
-        assertThat( version.getMinorVersion(), equalTo( "2" ) );
-        assertThat( version.getMicroVersion(), equalTo( "3" ) );
-        assertThat( version.getQualifier(), equalTo( "4.Final-X" ) );
+        assertThat( Version.appendQualifierSuffix( "1.0", "foo" ), equalTo( "1.0.foo") );
+        assertThat( Version.appendQualifierSuffix( "1.0.0.Beta1", "foo" ), equalTo( "1.0.0.Beta1-foo") );
+        assertThat( Version.appendQualifierSuffix( "1.0_Betafoo", "foo" ), equalTo( "1.0_Betafoo") );
+        assertThat( Version.appendQualifierSuffix( "1.0_fooBeta", "foo" ), equalTo( "1.0_fooBeta-foo") );
+        assertThat( Version.appendQualifierSuffix( "1.0", "-foo" ), equalTo( "1.0-foo") );
+        assertThat( Version.appendQualifierSuffix( "1.0.0.Beta1", "_foo" ), equalTo( "1.0.0.Beta1_foo") );
+        assertThat( Version.appendQualifierSuffix( "1.0_Betafoo", "-foo" ), equalTo( "1.0_Beta-foo") );
+        assertThat( Version.appendQualifierSuffix( "1.0_Beta.foo", "-foo" ), equalTo( "1.0_Beta-foo") );
+        assertThat( Version.appendQualifierSuffix( "jboss-1-GA", "jboss" ), equalTo( "jboss-1-GA-jboss") );
+        assertThat( Version.appendQualifierSuffix( "1.2", "jboss-1-SNAPSHOT" ), equalTo( "1.2.jboss-1-SNAPSHOT") );
+        assertThat( Version.appendQualifierSuffix( "1.2-SNAPSHOT", "jboss1" ), equalTo( "1.2.jboss1-SNAPSHOT") );
+        assertThat( Version.appendQualifierSuffix( "1.2-jboss-1", "jboss-2" ), equalTo( "1.2-jboss-2") );
+        assertThat( Version.appendQualifierSuffix( "1.2-jboss-1", ".jboss-2" ), equalTo( "1.2.jboss-2") );
+        assertThat( Version.appendQualifierSuffix( "1.1-SNAPSHOT", ".test_jdk7-SNAPSHOT" ), equalTo( "1.1.test_jdk7-SNAPSHOT") );
+        assertThat( Version.appendQualifierSuffix( "1.1.beta-2", "-beta-1" ), equalTo( "1.1-beta-1") );
+        assertThat( Version.appendQualifierSuffix( "1.1.beta-2", "-foo-1" ), equalTo( "1.1.beta-2-foo-1") );
     }
 
     @Test
-    public void testGetOsgiVersion()
-        throws Exception
+    public void testAppendQualifierSuffix_WithProperty()
     {
-        Version version = new Version("1.2.beta2");
-        assertThat( version.isValidOSGi(), equalTo( false ) );
-        assertThat( version.getOSGiVersionString(), equalTo( "1.2.0.beta2" ) );
-
-        version = new Version("1.2");
-        assertThat( version.isValidOSGi(), equalTo( true ) );
-        assertThat( version.getOSGiVersionString(), equalTo( "1.2" ) );
-
-        version = new Version("1");
-        assertThat( version.isValidOSGi(), equalTo( true ) );
-        assertThat( version.getOSGiVersionString(), equalTo( "1" ) );
-
-        version = new Version("2.6");
-        assertThat( version.isValidOSGi(), equalTo( true ) );
-        assertThat( version.getOSGiVersionString(), equalTo( "2.6" ) );
-
-        version = new Version("2.6");
-        version.appendQualifierSuffix( "rebuild-1" );
-        assertThat( version.isValidOSGi(), equalTo( true ) );
-        assertThat( version.getOSGiVersionString(), equalTo( "2.6.0.rebuild-1" ) );
-
-        version = new Version("12.1.100");
-        assertThat( version.isValidOSGi(), equalTo( true ) );
-        assertThat( version.getOSGiVersionString(), equalTo( "12.1.100" ) );
-
-        version = new Version("1beta1");
-        assertThat( version.isValidOSGi(), equalTo( false ) );
-        assertThat( version.getOSGiVersionString(), equalTo( "1.0.0.beta1" ) );
-
-        version = new Version("1-0-3.4-beta2.1");
-        assertThat( version.isValidOSGi(), equalTo( false ) );
-        assertThat( version.getOSGiVersionString(), equalTo( "1.0.3.4-beta2-1" ) );
-
-        version = new Version("10.0.54.beta-2_3");
-        assertThat( version.isValidOSGi(), equalTo( true ) );
-        assertThat( version.getOSGiVersionString(), equalTo( "10.0.54.beta-2_3" ) );
-
+        assertThat( Version.appendQualifierSuffix( "${project.version}", "foo" ), equalTo( "${project.version}-foo") );
+        assertThat( Version.appendQualifierSuffix( "1.0.${micro}", ".foo" ), equalTo( "1.0.${micro}.foo") );
+        assertThat( Version.setBuildNumber( "${project.version}", "10" ), equalTo( "${project.version}-10") );
+        assertThat( Version.setBuildNumber( "${project.version}-foo", "10" ), equalTo( "${project.version}-foo-10") );
     }
 
     @Test
-    public void testGetBuildNumber()
-        throws Exception
+    public void testAppendQualifierSuffix_MulitpleTimes()
     {
-        Version version = new Version("1.2");
-        assertThat( version.getBuildNumber(), equalTo( null ) );
 
-        version = new Version("1.2beta11");
-        assertThat( version.getBuildNumber(), equalTo( "11" ) );
+        String version = "1.2.0";
+        version = Version.appendQualifierSuffix( version, "jboss-1" );
+        version = Version.appendQualifierSuffix( version, "foo" );
+        assertThat( version, equalTo( "1.2.0.jboss-1-foo" ) );
 
-        version = new Version("1.2.0.jboss-9");
-        assertThat( version.getBuildNumber(), equalTo( "9" ) );
-
-        version = new Version("1.2.3.5");
-        assertThat( version.getBuildNumber(), equalTo( "5" ) );
-
-        version = new Version("1.2-SNAPSHOT");
-        assertThat( version.getBuildNumber(), equalTo( null ) );
-
-        version = new Version("1.2-jboss");
-        assertThat( version.getBuildNumber(), equalTo( null ) );
+        version = "1.2";
+        version = Version.appendQualifierSuffix( version, "jboss-1" );
+        version = Version.appendQualifierSuffix( version, "jboss-2" );
+        version = Version.getOsgiVersion( version );
+        assertThat( version, equalTo( "1.2.0.jboss-2" ) );
     }
 
     @Test
-    public void testSetQualifierSuffix_getVersion()
-        throws Exception
-    {
-        Version version = new Version("1.2");
-        version.appendQualifierSuffix( "jboss" );
-        assertThat( version.getVersionString(), equalTo( "1.2.jboss" ) );
-
-        version = new Version("1.2beta11");
-        version.appendQualifierSuffix( "jboss" );
-        assertThat( version.getVersionString(), equalTo( "1.2.beta11-jboss" ) );
-
-        version = new Version("1.2.GA");
-        version.appendQualifierSuffix( "foo" );
-        assertThat( version.getVersionString(), equalTo( "1.2.GA-foo" ) );
-
-        version = new Version("foo-bar-bad");
-        version.appendQualifierSuffix( "jboss" );
-        assertThat( version.getVersionString(), equalTo( "foo-bar-bad-jboss" ) );
-
-        version = new Version("1.2");
-        version.appendQualifierSuffix( "-SNAPSHOT" );
-        assertThat( version.getVersionString(), equalTo( "1.2.SNAPSHOT" ) );
-
-        version = new Version("1.2");
-        version.appendQualifierSuffix( "jboss-1-SNAPSHOT" );
-        assertThat( version.getVersionString(), equalTo( "1.2.jboss-1-SNAPSHOT" ) );
-
-        version = new Version("1.2");
-        version.appendQualifierSuffix( "jboss1" );
-        version.setSnapshot(true);
-        assertThat( version.getVersionString(), equalTo( "1.2.jboss1-SNAPSHOT" ) );
-
-        version = new Version("1.2-SNAPSHOT");
-        version.appendQualifierSuffix( "jboss1" );
-        version.setSnapshot(false);
-        assertThat( version.getVersionString(), equalTo( "1.2.jboss1" ) );
-
-        version = new Version("1.2-SNAPSHOT");
-        version.appendQualifierSuffix( "jboss1" );
-        version.setSnapshot(true);
-        assertThat( version.getVersionString(), equalTo( "1.2.jboss1-SNAPSHOT" ) );
-
-        version = new Version("1.2");
-        version.appendQualifierSuffix( "-jboss1" );
-        assertThat( version.getVersionString(), equalTo( "1.2-jboss1" ) );
-}
-    
-    @Test
-    public void testSetQualifierSuffix_getOSGiVersion()
-        throws Exception
-    {
-
-        Version version = new Version("jboss-1-GA");
-        version.appendQualifierSuffix( "jboss" );
-        assertThat( version.getVersionString(), equalTo( "jboss-1-GA-jboss" ) );
-
-        version = new Version("1.2");
-        version.appendQualifierSuffix( "jboss" );
-        assertThat( version.getOSGiVersionString(), equalTo( "1.2.0.jboss" ) );
-
-        version = new Version("1.2beta11");
-        version.appendQualifierSuffix( "jboss" );
-        assertThat( version.getOSGiVersionString(), equalTo( "1.2.0.beta11-jboss" ) );
-
-        version = new Version("1.2.0.jboss-9");
-        version.appendQualifierSuffix( "jboss" );
-        assertThat( version.getOSGiVersionString(), equalTo( "1.2.0.jboss-9" ) );
-
-        version = new Version("1.2.3.5");
-        version.appendQualifierSuffix( "jboss" );
-        assertThat( version.getOSGiVersionString(), equalTo( "1.2.3.5-jboss" ) );
-
-        version = new Version("1.2-SNAPSHOT");
-        version.appendQualifierSuffix( "jboss" );
-        assertThat( version.getOSGiVersionString(), equalTo( "1.2.0.jboss-SNAPSHOT" ) );
-
-        version = new Version("1.2-jboss-9-foo");
-        version.appendQualifierSuffix( "jboss" );
-        assertThat( version.getOSGiVersionString(), equalTo( "1.2.0.jboss-9-foo-jboss" ) );
-
-        version = new Version("1.2.1.Final-jboss-8");
-        version.appendQualifierSuffix( "jboss" );
-        assertThat( version.getOSGiVersionString(), equalTo( "1.2.1.Final-jboss-8" ) );
-
-        version = new Version("1.2.1.Final");
-        version.appendQualifierSuffix( "jboss-1" );
-        assertThat( version.getOSGiVersionString(), equalTo( "1.2.1.Final-jboss-1" ) );
-
-        version = new Version("1.2-GA");
-        version.appendQualifierSuffix( "jboss-2" );
-        assertThat( version.getOSGiVersionString(), equalTo( "1.2.0.GA-jboss-2" ) );
-
-        version = new Version("1.2-jboss");
-        version.appendQualifierSuffix( "jboss-2" );
-        assertThat( version.getOSGiVersionString(), equalTo( "1.2.0.jboss-2" ) );
-
-        version = new Version("1.2-jboss");
-        version.appendQualifierSuffix( "jboss-2" );
-        version.setBuildNumber( "3");
-        assertThat( version.getOSGiVersionString(), equalTo( "1.2.0.jboss-3" ) );
-
-        version = new Version("1.2.0-SNAPSHOT");
-        version.appendQualifierSuffix( "jboss-2" );
-        assertThat( version.getOSGiVersionString(), equalTo( "1.2.0.jboss-2-SNAPSHOT" ) );
-
-        version = new Version("1.2.3.4.GA.1");
-        version.appendQualifierSuffix( "jboss-1" );
-        assertThat( version.getOSGiVersionString(), equalTo( "1.2.3.4-GA-1-jboss-1" ) );
-    }
-
-    @Test
-    public void testSetBuildNumber()
-        throws Exception
-    {
-        Version version = new Version("1.2");
-        version.setBuildNumber( "1" );
-        assertThat( version.getOSGiVersionString(), equalTo( "1.2.0.1" ) );
-
-        version = new Version("1.2beta11");
-        version.setBuildNumber( "12" );
-        assertThat( version.getOSGiVersionString(), equalTo( "1.2.0.beta12" ) );
-
-        version = new Version("1.2.3.5");
-        version.setBuildNumber( "8" );
-        assertThat( version.getOSGiVersionString(), equalTo( "1.2.3.8" ) );
-
-        version = new Version("1.2-SNAPSHOT");
-        version.setBuildNumber( "1" );
-        assertThat( version.getOSGiVersionString(), equalTo( "1.2.0.1-SNAPSHOT" ) );
-
-        version = new Version("1.2-jboss-9-foo");
-        version.setBuildNumber( "10" );
-        assertThat( version.getOSGiVersionString(), equalTo( "1.2.0.jboss-9-foo-10" ) );
-
-        version = new Version("1.2.1.Final-jboss-8");
-        version.setBuildNumber( "9" );
-        assertThat( version.getOSGiVersionString(), equalTo( "1.2.1.Final-jboss-9" ) );
-
-        version = new Version("1.2.0-GA");
-        version.appendQualifierSuffix( "foo" );
-        version.setBuildNumber( "2" );
-        assertThat( version.getOSGiVersionString(), equalTo( "1.2.0.GA-foo-2" ) );
-    }
-
-    @Test
-    public void testFindHighestMatchingOSGiBuildNumber()
-    {
+    public void testFindHighestMatchingBuildNumber() {
+        String version = "1.2.0.Final-foo";
         final Set<String> versionSet = new HashSet<>();
-        Version version = new Version( "1.2.0.Final-foo" );
-        versionSet.add( "1.2.0.Final-foo-10" );
-        versionSet.add( "1.2.0.Final-foo-2" );
-        assertThat( findHighestMatchingBuildNumber( version, versionSet ), equalTo( 10 ) );
-        versionSet.clear();
-    }
+        versionSet.add("1.2.0.Final-foo-1");
+        versionSet.add("1.2.0.Final-foo-2");
+        assertThat(Version.findHighestMatchingBuildNumber(version, versionSet), equalTo(2));
 
-    @Test
-    public void testFindHighestMatchingBuildNumber()
-    {
-        final Set<String> versionSet = new HashSet<>();
-        Version version = new Version("1.2.0.Final-foo");
-        versionSet.add( "1.2.0.Final-foo-1" );
-        versionSet.add( "1.2.0.Final-foo-2" );
-        assertThat( findHighestMatchingBuildNumber( version, versionSet ), equalTo( 2 ) );
+        version = "1.2.0.Final-foo10";
         versionSet.clear();
+        versionSet.add("1.2.0.Final-foo-1");
+        versionSet.add("1.2.0.Final-foo-2");
+        assertThat(Version.findHighestMatchingBuildNumber(version, versionSet), equalTo(2));
 
-        version = new Version("0.0.4");
-        version.appendQualifierSuffix( "redhat-0" );
+        version = Version.appendQualifierSuffix( "0.0.4", "redhat-0" );
+        versionSet.clear();
         versionSet.add( "0.0.1" );
         versionSet.add( "0.0.2" );
         versionSet.add( "0.0.3" );
         versionSet.add( "0.0.4" );
         versionSet.add( "0.0.4.redhat-2" );
-        assertThat( findHighestMatchingBuildNumber( version, versionSet ), equalTo( 2 ) );
-        versionSet.clear();
+        assertThat( Version.findHighestMatchingBuildNumber( version, versionSet ), equalTo( 2 ) );
 
-        version = new Version("1.2-foo-1");
+        version = "1.2-foo-1";
+        versionSet.clear();
         versionSet.add( "1.2-foo-4" );
-        assertThat( findHighestMatchingBuildNumber( version, versionSet ), equalTo( 4 ) );
-        versionSet.clear();
+        assertThat( Version.findHighestMatchingBuildNumber( version, versionSet ), equalTo( 4 ) );
     }
 
     @Test
-    public void testZeroFill_FindHighestMatchingBuildNumber()
+    public void testFindHighestMatchingBuildNumber_OSGi()
     {
+        String version = "1.2.0.Final-foo";
         final Set<String> versionSet = new HashSet<>();
-        final Version majorOnlyVersion = new Version( "7" );
-        majorOnlyVersion.appendQualifierSuffix( "redhat" );
-        System.out.println("OSGi version: " + majorOnlyVersion.getOSGiVersionString());
-        versionSet.add( "7.0.0.redhat-2" );
-        assertThat( findHighestMatchingBuildNumber( majorOnlyVersion, versionSet ), equalTo( 2 ) );
-        versionSet.clear();
-
-        final Version majorMinorVersion = new Version( "7.1" );
-        majorMinorVersion.appendQualifierSuffix( "redhat" );
-        System.out.println("OSGi version: " + majorMinorVersion.getOSGiVersionString());
-        versionSet.add( "7.1.0.redhat-2" );
-        assertThat( findHighestMatchingBuildNumber( majorMinorVersion, versionSet ), equalTo( 2 ) );
+        versionSet.add( "1.2.0.Final-foo-10" );
+        versionSet.add( "1.2.0.Final-foo-2" );
+        assertThat( Version.findHighestMatchingBuildNumber( version, versionSet ), equalTo( 10 ) );
         versionSet.clear();
     }
-    
+
     @Test
-    public void testSetQualifierSuffix_MulitpleTimes()
+    public void testFindHighestMatchingBuildNumber_ZeroFill()
+    {
+        String majorOnlyVersion = "7";
+        String version = Version.appendQualifierSuffix( majorOnlyVersion, "redhat" );
+        final Set<String> versionSet = new HashSet<>();
+        versionSet.add( "7.0.0.redhat-2" );
+        assertThat( Version.findHighestMatchingBuildNumber( version, versionSet ), equalTo( 2 ) );
+
+        String majorMinorVersion = "7.1";
+        version = Version.appendQualifierSuffix( majorMinorVersion, "redhat" );
+        versionSet.clear();
+        versionSet.add( "7.1.0.redhat-4" );
+        assertThat( Version.findHighestMatchingBuildNumber( version, versionSet ), equalTo( 4 ) );
+    }
+
+    @Test
+    public void testGetBuildNumber()
+    {
+        assertThat( Version.getBuildNumber( "1.0-SNAPSHOT" ), equalTo( "" ) );
+        assertThat( Version.getBuildNumber( "1.0.0.Beta1" ), equalTo( "1" ) );
+        assertThat( Version.getBuildNumber( "1.0.beta.1-2" ), equalTo( "2" ) );
+        assertThat( Version.getBuildNumber( "Beta3" ), equalTo( "3" ) );
+        assertThat( Version.getBuildNumber( "1.x.2.beta4t" ), equalTo( "" ) );
+        assertThat( Version.getBuildNumber( "1.0.0.Beta11-SNAPSHOT" ), equalTo( "11" ) );
+        assertThat( Version.getBuildNumber( "1.0.0.Beta1-SNAPSHOT-10" ), equalTo( "10" ) );
+    }
+
+    @Test
+    public void testGetMMM()
+    {
+        assertThat( Version.getMMM( "1.0-SNAPSHOT" ), equalTo( "1.0" ) );
+        assertThat( Version.getMMM( "1.0.0.Beta1" ), equalTo( "1.0.0" ) );
+        assertThat( Version.getMMM( "1.0.beta.1" ), equalTo( "1.0" ) );
+        assertThat( Version.getMMM( "Beta1" ), equalTo( "" ) );
+        assertThat( Version.getMMM( "1.x.2.beta1" ), equalTo( "1" ) );
+    }
+
+    @Test
+    public void testGetOsgiMMM()
+    {
+        assertThat( Version.getOsgiMMM( "1.0", false ), equalTo( "1.0" ) );
+        assertThat( Version.getOsgiMMM( "1.0", true ), equalTo( "1.0.0" ) );
+        assertThat( Version.getOsgiMMM( "13_2-43", false ), equalTo( "13.2.43" ) );
+        assertThat( Version.getOsgiMMM( "1", false ), equalTo( "1" ) );
+        assertThat( Version.getOsgiMMM( "2", true ), equalTo( "2.0.0" ) );
+        assertThat( Version.getOsgiMMM( "beta1", false ), equalTo( "" ) );
+        assertThat( Version.getOsgiMMM( "GA-1-GA-foo", true ), equalTo( "" ) );
+    }
+
+    @Test
+    public void testGetOsgiVersion()
+    {
+        assertThat( Version.getOsgiVersion( "1.0" ), equalTo( "1.0" ) );
+        assertThat( Version.getOsgiVersion( "1_2_3" ), equalTo( "1.2.3" ) );
+        assertThat( Version.getOsgiVersion( "1-2.3beta4" ), equalTo( "1.2.3.beta4" ) );
+        assertThat( Version.getOsgiVersion( "1.2.3.4.beta" ), equalTo( "1.2.3.4-beta" ) );
+        assertThat( Version.getOsgiVersion( "12.4-beta" ), equalTo( "12.4.0.beta" ) );
+        assertThat( Version.getOsgiVersion( "-beta1" ), equalTo( "-beta1" ) );
+        assertThat( Version.getOsgiVersion( "12.beta1_3-5.hello" ), equalTo( "12.0.0.beta1_3-5-hello" ) );
+    }
+
+    @Test
+    public void testGetQualifier()
+    {
+        assertThat( Version.getQualifier( "1.0-SNAPSHOT" ), equalTo( "SNAPSHOT" ) );
+        assertThat( Version.getQualifierWithDelim( "1.0-SNAPSHOT" ), equalTo( "-SNAPSHOT" ) );
+
+        assertThat( Version.getQualifier( "1.0.0.Beta1" ), equalTo( "Beta1" ) );
+        assertThat( Version.getQualifierWithDelim( "1.0.0.Beta1" ), equalTo( ".Beta1" ) );
+
+        assertThat( Version.getQualifier( "1.0.beta.1" ), equalTo( "beta.1" ) );
+        assertThat( Version.getQualifierWithDelim( "1.0.beta.1" ), equalTo( ".beta.1" ) );
+
+        assertThat( Version.getQualifier( "Beta1" ), equalTo( "Beta1" ) );
+        assertThat( Version.getQualifierWithDelim( "Beta1" ), equalTo( "Beta1" ) );
+
+        assertThat( Version.getQualifier( "1.x.2.beta1" ), equalTo( "x.2.beta1" ) );
+        assertThat( Version.getQualifierWithDelim( "1.x.2.beta1" ), equalTo( ".x.2.beta1" ) );
+
+        assertThat( Version.getQualifier( "1.2" ), equalTo( "" ) );
+        assertThat( Version.getQualifierWithDelim( "1.2" ), equalTo( "" ) );
+
+        assertThat( Version.getQualifier( "1.5-3_beta-SNAPSHOT-1" ), equalTo( "beta-SNAPSHOT-1" ) );
+        assertThat( Version.getQualifierWithDelim( "1.5-3_beta-SNAPSHOT-1" ), equalTo( "_beta-SNAPSHOT-1" ) );
+
+        assertThat( Version.getQualifier( "_beta-SNAPSHOT-1" ), equalTo( "beta-SNAPSHOT-1" ) );
+        assertThat( Version.getQualifierWithDelim( "_beta-SNAPSHOT-1" ), equalTo( "_beta-SNAPSHOT-1" ) );
+    }
+
+    @Test
+    public void testGetQualifierBase() {
+        assertThat(Version.getQualifierBase("1.0-SNAPSHOT"), equalTo(""));
+        assertThat(Version.getQualifierBase("1.0.0.Beta1"), equalTo("Beta"));
+        assertThat(Version.getQualifierBase("1.0.0.jboss-test-SNAPSHOT"), equalTo("jboss-test"));
+        assertThat(Version.getQualifierBase("${project.version}-test-1"), equalTo("${project.version}-test"));
+    }
+
+    @Test
+    public void testGetSnapshot()
+    {
+        assertThat( Version.getSnapshot( "1.0-SNAPSHOT" ), equalTo( "SNAPSHOT" ) );
+        assertThat( Version.getSnapshotWithDelim( "1.0-SNAPSHOT" ), equalTo( "-SNAPSHOT" ) );
+
+        assertThat( Version.getSnapshot( "1.0.0.SNAPSHOT" ), equalTo( "SNAPSHOT" ) );
+        assertThat( Version.getSnapshotWithDelim( "1.0.0.SNAPSHOT" ), equalTo( ".SNAPSHOT" ) );
+
+        assertThat( Version.getSnapshot( "1.0.0.Beta1-snapshot" ), equalTo( "snapshot" ) );
+        assertThat( Version.getSnapshotWithDelim( "1.0.0.Beta1-snapshot" ), equalTo( "-snapshot" ) );
+
+        assertThat( Version.getSnapshot( "1_snaPsHot" ), equalTo( "snaPsHot" ) );
+        assertThat( Version.getSnapshotWithDelim( "1_snaPsHot" ), equalTo( "_snaPsHot" ) );
+
+        assertThat( Version.getSnapshot( "1.0" ), equalTo( "" ) );
+        assertThat( Version.getSnapshotWithDelim( "1.0" ), equalTo( "" ) );
+
+        assertThat( Version.getSnapshot( "1.0-foo" ), equalTo( "" ) );
+        assertThat( Version.getSnapshotWithDelim( "1.0-foo" ), equalTo( "" ) );
+    }
+
+    @Test
+    public void testIsSnapshot()
+    {
+        assertTrue( Version.isSnapshot( "1.0-SNAPSHOT" ) );
+        assertTrue( Version.isSnapshot( "1.0-snapshot" ) );
+        assertTrue( Version.isSnapshot( "1.0.SnapsHot" ) );
+        assertTrue( Version.isSnapshot( "1.0.0snapshot" ) );
+        assertTrue( Version.isSnapshot( "snapshot" ) );
+
+        assertFalse( Version.isSnapshot( "1" ) );
+        assertFalse( Version.isSnapshot( "1.0-snapsho" ) );
+        assertFalse( Version.isSnapshot( "1.0.beta1-" ) );
+    }
+
+    @Test
+    public void testIsEmpty()
+            throws Exception
+    {
+        assertTrue( Version.isEmpty(null) );
+        assertTrue( Version.isEmpty("") );
+        assertTrue( Version.isEmpty("  \n") );
+
+        assertFalse( Version.isEmpty( "a") );
+        assertFalse( Version.isEmpty( " a \n") );
+    }
+
+    @Test
+    public void testRemoveSnapshot()
+    {
+        assertThat( Version.removeSnapshot( "1.0-SNAPSHOT" ), equalTo( "1.0" ) );
+        assertThat( Version.removeSnapshot( "1.0.0.Beta1_snapshot" ), equalTo( "1.0.0.Beta1" ) );
+        assertThat( Version.removeSnapshot( "1.snaPsHot" ), equalTo( "1" ) );
+        assertThat( Version.removeSnapshot( "SNAPSHOT" ), equalTo( "" ) );
+        assertThat( Version.removeSnapshot( "1.0.snapshot.beta1" ), equalTo( "1.0.snapshot.beta1" ) );
+    }
+
+    @Test
+    public void testSetBuildNumber()
+    {
+        assertThat( Version.setBuildNumber( "1.0.beta1", "2" ), equalTo( "1.0.beta2") );
+        assertThat( Version.setBuildNumber( "1.0_2-Beta1-SNAPSHOT", "41" ), equalTo( "1.0_2-Beta41-SNAPSHOT") );
+        assertThat( Version.setBuildNumber( "1.0.2.1", "3" ), equalTo( "1.0.2.3") );
+        assertThat( Version.setBuildNumber( "1.0.2", "3" ), equalTo( "1.0.2.3") );
+        assertThat( Version.setBuildNumber( "1.0", "2" ), equalTo( "1.0.2") );
+        assertThat( Version.setBuildNumber( "1.0-alpha", "001" ), equalTo( "1.0-alpha-001") );
+    }
+
+    @Test
+    public void testSetSnapshot()
+    {
+        assertThat( Version.setSnapshot( "1.0-SNAPSHOT", true ), equalTo( "1.0-SNAPSHOT" ) );
+        assertThat( Version.setSnapshot( "1.0-SNAPSHOT", false ), equalTo( "1.0" ) );
+        assertThat( Version.setSnapshot( "1.1", true ), equalTo( "1.1-SNAPSHOT" ) );
+        assertThat( Version.setSnapshot( "1.1", false ), equalTo( "1.1" ) );
+        assertThat( Version.setSnapshot( "1.2.jboss-1", true ), equalTo( "1.2.jboss-1-SNAPSHOT" ) );
+        assertThat( Version.setSnapshot( "1.2.jboss-1", false ), equalTo( "1.2.jboss-1" ) );
+        assertThat( Version.setSnapshot( "1.0.0.Beta1_snapshot", true ), equalTo( "1.0.0.Beta1_snapshot" ) );
+        assertThat( Version.setSnapshot( "1.0.0.Beta1_snapshot", false ), equalTo( "1.0.0.Beta1" ) );
+        assertThat( Version.setSnapshot( "1.snaPsHot", true ), equalTo( "1.snaPsHot" ) );
+        assertThat( Version.setSnapshot( "1.snaPsHot", false ), equalTo( "1" ) );
+        assertThat( Version.setSnapshot( "SNAPSHOT", true ), equalTo( "SNAPSHOT" ) );
+        assertThat( Version.setSnapshot( "SNAPSHOT", false ), equalTo( "" ) );
+        assertThat( Version.setSnapshot( "1.0.snapshot.beta1", true ), equalTo( "1.0.snapshot.beta1-SNAPSHOT" ) );
+        assertThat( Version.setSnapshot( "1.0.snapshot.beta1", false ), equalTo( "1.0.snapshot.beta1" ) );
+    }
+
+    @Test
+    public void testRemoveLeadingDelimiters()
+    {
+        assertThat( Version.removeLeadingDelimiter( ".1.2" ), equalTo( "1.2" ) );
+        assertThat( Version.removeLeadingDelimiter( "_Beta1" ), equalTo( "Beta1" ) );
+        assertThat( Version.removeLeadingDelimiter( "1.0-SNAPSHOT" ), equalTo( "1.0-SNAPSHOT" ) );
+        assertThat( Version.removeLeadingDelimiter( "1.0_foo-" ), equalTo( "1.0_foo-" ) );
+    }
+
+    @Test
+    public void testValidOsgi()
         throws Exception
     {
+        assertTrue( Version.isValidOSGi("1") );
+        assertTrue( Version.isValidOSGi("1.2") );
+        assertTrue( Version.isValidOSGi("1.2.3") );
+        assertTrue( Version.isValidOSGi("1.2.3.beta1") );
+        assertTrue( Version.isValidOSGi("1.2.3.beta_1") );
+        assertTrue( Version.isValidOSGi("1.2.3.beta-1") );
+        assertTrue( Version.isValidOSGi("0.0.1") );
 
-        Version version = new Version("1.2.0");
-        version.appendQualifierSuffix( "jboss-1" );
-        version.appendQualifierSuffix( "foo" );
-        assertThat( version.getVersionString(), equalTo( "1.2.0.jboss-1-foo" ) );
-
-        version = new Version("1.2");
-        version.appendQualifierSuffix( "jboss-1" );
-        version.appendQualifierSuffix( "jboss-2" );
-        assertThat( version.getOSGiVersionString(), equalTo( "1.2.0.jboss-2" ) );
-
+        assertFalse( Version.isValidOSGi("1.2.3.beta|1") );
+        assertFalse( Version.isValidOSGi("1.2.3.beta^1") );
+        assertFalse( Version.isValidOSGi("1.2.3.beta.1") );
+        assertFalse( Version.isValidOSGi("1.2.beta1") );
+        assertFalse( Version.isValidOSGi("1beta") );
+        assertFalse( Version.isValidOSGi("beta1") );
     }
+
 }

@@ -34,231 +34,286 @@ public class Version
 {
     private static final Logger logger = LoggerFactory.getLogger( Version.class );
 
-    private final static Character[] DEFAULT_DELIMITERS = { '.', '-', '_' };
+    private final static String EMPTY_STRING = "";
 
-    private final static char OSGI_VERSION_DELIMITER = '.';
+    private final static Character[] DEFAULT_DELIMITERS = {'.', '-', '_'};
+
+    private final static String OSGI_VERSION_DELIMITER = ".";
+
+    private final static String OSGI_QUALIFIER_DELIMITER = "-";
+
+    private final static String DEFAULT_DELIMITER = ".";
+
+    /**
+     * The default delimiter between the different parts of the qualifier
+     */
+    private final static String DEFAULT_QUALIFIER_DELIMITER = "-";
+
+    private final static List<Character> versionStringDelimiters = Arrays.asList( DEFAULT_DELIMITERS );
 
     /**
      * Regular expression used to match version string delimiters
      */
-    private final static String DELIMITER_REGEX = "[\\.\\-_]";
+    private final static String DELIMITER_REGEX = "[.\\-_]";
+
+    /**
+     * Regular expression used to match version string delimiters
+     */
+    private final static String LEADING_DELIMITER_REGEX = "^" + DELIMITER_REGEX;
 
     /**
      * Regular expression used to match the major, minor, and micro versions
      */
-    private final static String MMM_REGEX = "(\\d+)(" + DELIMITER_REGEX + "(\\d+)?(" + DELIMITER_REGEX + "(\\d+))?)?";
+    private final static String MMM_REGEX = "(\\d+)(" + DELIMITER_REGEX + "(\\d+)(" + DELIMITER_REGEX + "(\\d+))?)?";
 
-    private final static Pattern mmmPattern = Pattern.compile( MMM_REGEX );
+    private final static Pattern mmmPattern = Pattern.compile(MMM_REGEX);
 
     private final static String SNAPSHOT_SUFFIX = "SNAPSHOT";
+
+    private final static String SNAPSHOT_REGEX = "(.*?)((" + DELIMITER_REGEX + ")?((?i:" + SNAPSHOT_SUFFIX + ")))$";
+
+    private final static Pattern snapshotPattern = Pattern.compile(SNAPSHOT_REGEX);
 
     /**
      * Regular expression used to match the parts of the qualifier "base-buildnum-snapshot"
      */
-    private final static String QUALIFIER_REGEX = "(.*?)((" + DELIMITER_REGEX + ")?(\\d+))?$";
+    private final static String QUALIFIER_REGEX = "(.*?)((" + DELIMITER_REGEX + ")?(\\d+))?((" + DELIMITER_REGEX + ")?((?i:" + SNAPSHOT_SUFFIX + ")))?$";
 
-    private final static Pattern qualifierPattern = Pattern.compile( QUALIFIER_REGEX );
-
-    private final static String VERSION_REGEX = "(" + MMM_REGEX + ")?" + "(" + DELIMITER_REGEX + ")?"
-            + "(" + QUALIFIER_REGEX + ")";
-
-    private final static Pattern versionPattern = Pattern.compile( VERSION_REGEX );
-
-    private final static String SNAPSHOT_REGEX = "(.*?)((" + DELIMITER_REGEX + ")?((?i:" + SNAPSHOT_SUFFIX + ")))?$";
-
-    private final static Pattern snapshotPattern = Pattern.compile( SNAPSHOT_REGEX );
+    private final static Pattern qualifierPattern = Pattern.compile(QUALIFIER_REGEX);
 
     /**
-     * Used to match valid OSGi version
+     * Version string must start with a digit to match the regex.  Otherwise we have only a
+     * qualifier.
      */
-    private final static String OSGI_VERSION_REGEX = "(\\d+)(\\.\\d+(\\.\\d+([\\.][\\p{Alnum}|\\-_]+)?)?)?";
+    private final static String VERSION_REGEX = "(" + MMM_REGEX + ")" + "((" + DELIMITER_REGEX + ")?"
+            + "(" + QUALIFIER_REGEX + "))";
 
-    private final static Pattern osgiPattern = Pattern.compile( OSGI_VERSION_REGEX );
-
-    private final List<Character> versionStringDelimiters = Arrays.asList( DEFAULT_DELIMITERS );
+    private final static Pattern versionPattern = Pattern.compile(VERSION_REGEX);
 
     /**
-     * The original version string before any modifications
+     * Used to match valid OSGi version based on section 3.2.5 of the OSGi specification
      */
-    private final String originalVersion;
+    private final static String OSGI_VERSION_REGEX = "(\\d+)(\\.\\d+(\\.\\d+(\\.[\\w\\-_]+)?)?)?";
 
-    /**
-     * The original unmodified major, minor, micro portion of the version string.
-     */
-    private String originalMMM;
+    private final static Pattern osgiPattern = Pattern.compile(OSGI_VERSION_REGEX);
 
-    private String majorVersion;
-
-    private String minorVersion;
-
-    private String microVersion;
-
-    /**
-     * The original unmodified version qualifier. Will be null if no qualifier is included.
-     */
-    private String originalQualifier;
-
-    /**
-     * The delimiter between the MMM version and the qualifier
-     */
-    private static final char DEFAULT_MMM_DELIMITER = OSGI_VERSION_DELIMITER;
-
-    /**
-     * The delimiter between the parts of the qualifier
-     */
-    private static final char DEFAULT_QUALIFIER_DELIMITER = '-';
-
-    /**
-     * The original delimiter between the MMM version and the qualifier.
-     */
-    private String qualifierStartDelimiter;
-
-    private String qualifierBase;
-
-    private String buildNumberDelimiter;
-
-    /**
-     * Numeric string at the end of the qualifier
-     */
-    private String buildNumber;
-
-    private String snapshotDelimiter;
-
-    /**
-     * The snapshot portion of the qualifier
-     */
-    private String snapshot;
-
-    /**
-     * Represents whether the major, minor, micro versions are valid integers. This will be false if the version string
-     * uses a property string like "${myVersion}-build-1" or if the version string starts with alpha chars like
-     * "GA-1-Beta". In these cases we can't parse the major, minor, micro versions, so we just leave the string intact.
-     */
-    private boolean numericVersion = true;
-
-    public Version( String version )
+    public static String getBuildNumber(String version)
     {
-        originalVersion = version;
-        logger.debug( "Parsing version: " + originalVersion );
-        parseVersion( originalVersion );
-        logger.debug( "Major: " + getMajorVersion() + ", Minor: " + getMinorVersion() + ",  Micro: " +
-            getMicroVersion() );
-        logger.debug( "Qualifier: " + getQualifier() + ", Base: " + getQualifierBase() + ", BuildNum: " +
-            getBuildNumber() );
-    }
-
-    /**
-     * Parse a version string into its component parts (major, minor, micro, qualifier). By default will split the
-     * String based on ".", "-", and "_".
-     *
-     * @param version
-     * @return
-     */
-    private void parseVersion( final String version )
-    {
-        Matcher snapshotMatcher = snapshotPattern.matcher( version );
-        snapshotMatcher.matches();
-        final String versionWithoutSnapshot = snapshotMatcher.group( 1 );
-        snapshotDelimiter = snapshotMatcher.group( 3 );
-        snapshot = snapshotMatcher.group( 4 );
-
-        Matcher versionMatcher = versionPattern.matcher( versionWithoutSnapshot );
-        if ( !versionMatcher.matches() )
+        Matcher qualifierMatcher = qualifierPattern.matcher( getQualifier( version ) );
+        if( qualifierMatcher.matches() && !isEmpty( qualifierMatcher.group( 4 ) ) )
         {
-            return;
+            return qualifierMatcher.group( 4 );
         }
-        originalMMM = versionMatcher.group( 1 );
-        qualifierStartDelimiter = versionMatcher.group( 7 );
-        originalQualifier = versionMatcher.group( 8 );
+        return EMPTY_STRING;
+    }
 
-        parseMMM( originalMMM );
-        parseQualifier( originalQualifier );
+    static String getMMM(String version)
+    {
+        Matcher versionMatcher = versionPattern.matcher( version );
+        if ( versionMatcher.matches() )
+        {
+            return versionMatcher.group( 1 );
+        }
+        return EMPTY_STRING;
     }
 
     /**
-     * Parse the mmm (major, minor, micro) portions of the version string
+     * Get the major, minor, micro version in OSGi format
      *
-     * @param mmm The numeric portion of the version string before the qualifier
+     * @param version The version to parse
+     * @param fill Whether to fill the minor and micro versions with zeros if they are missing
+     * @return OSGi formatted major, minor, micro
      */
-    private void parseMMM( String mmm )
+    static String getOsgiMMM(String version, boolean fill)
     {
+        String mmm = getMMM( version );
+        Matcher mmmMatcher = mmmPattern.matcher( mmm );
+        if ( mmmMatcher.matches() )
+        {
+            String osgiMMM = mmmMatcher.group( 1 );
+            String minorVersion = mmmMatcher.group( 3 );
+            if ( !isEmpty( minorVersion ) )
+            {
+                osgiMMM += OSGI_VERSION_DELIMITER + minorVersion;
+            }
+            else if ( fill )
+            {
+                osgiMMM += OSGI_VERSION_DELIMITER + "0";
+            }
+            String microVersion = mmmMatcher.group( 5 );
+            if ( !isEmpty( microVersion ) )
+            {
+                osgiMMM += OSGI_VERSION_DELIMITER + microVersion;
+            }
+            else if ( fill )
+            {
+                osgiMMM += OSGI_VERSION_DELIMITER + "0";
+            }
+            return osgiMMM;
+        }
+        return EMPTY_STRING;
+    }
+
+    public static String getOsgiVersion(String version)
+    {
+        String qualifier = getQualifier( version );
+        if ( !isEmpty( qualifier ) )
+        {
+            qualifier = OSGI_VERSION_DELIMITER + qualifier.replace( OSGI_VERSION_DELIMITER, OSGI_QUALIFIER_DELIMITER );
+        }
+        String mmm = getOsgiMMM( version, !isEmpty( qualifier ) );
         if ( isEmpty( mmm ) )
         {
-            numericVersion = false;
-            return;
+            logger.warn( "Unable to parse version for OSGi: " + version );
+            return version;
         }
-
-        Matcher mmmMatcher = mmmPattern.matcher( mmm );
-        mmmMatcher.matches();
-
-        majorVersion = mmmMatcher.group( 1 );
-        String minor = mmmMatcher.group( 3 );
-        if ( !isEmpty( minor ) )
-        {
-            minorVersion = minor;
-        }
-        String micro = mmmMatcher.group( 5 );
-        if ( !isEmpty( micro ) )
-        {
-            microVersion = micro;
-        }
+        return mmm + qualifier;
     }
 
-    /**
-     * Parses the qualifier into the format &gt;qualifierBase&lt;-&gt;buildnumber&lt;-&gt;snapshot&lt;.
-     *
-     * @param qualifier
-     */
-    private void parseQualifier( String qualifier )
+    public static String getQualifier(String version)
     {
-        if ( isEmpty( qualifier ) )
+        Matcher versionMatcher = versionPattern.matcher( version );
+        if ( versionMatcher.matches() )
         {
-            return;
+            return versionMatcher.group( 9 );
         }
-
-        Matcher qualifierMatcher = qualifierPattern.matcher( qualifier );
-        qualifierMatcher.matches();
-
-        qualifierBase = qualifierMatcher.group( 1 );
-        buildNumberDelimiter = qualifierMatcher.group( 3 );
-        if ( buildNumberDelimiter == null )
-        {
-            buildNumberDelimiter = "";
-        }
-        buildNumber = qualifierMatcher.group( 4 );
-        if ( buildNumber == null )
-        {
-            buildNumberDelimiter = Character.toString( DEFAULT_QUALIFIER_DELIMITER );
-        }
+        return removeLeadingDelimiter( version );
     }
 
-    /**
-     * Remove any delimiters from the end of the string
-     *
-     * @param partialVersionString
-     * @return
-     */
-    private String removeLastDelimiters( String partialVersionString )
+    public static String getQualifierBase(String version)
     {
-        while ( !isEmpty( partialVersionString ) &&
-            versionStringDelimiters.contains( partialVersionString.charAt( partialVersionString.length() - 1 ) ) )
+        Matcher versionMatcher = versionPattern.matcher( version );
+        if ( versionMatcher.matches() )
         {
-            partialVersionString = partialVersionString.substring( 0, partialVersionString.length() - 1 );
+            return versionMatcher.group( 10 );
         }
-        return partialVersionString;
+        Matcher qualifierMatcher = qualifierPattern.matcher( version );
+        if ( qualifierMatcher.matches() )
+        {
+            return qualifierMatcher.group( 1 );
+        }
+        return removeLeadingDelimiter( version );
     }
 
-    private static boolean isEmpty( String string )
+    public static String getQualifierWithDelim(String version)
     {
-        if ( string == null )
+        Matcher versionMatcher = versionPattern.matcher( version );
+        if ( versionMatcher.matches() )
         {
-            return true;
+            return versionMatcher.group( 7 );
         }
-        if ( string.trim().equals( "" ) )
+        return version;
+    }
+
+    public static String getSnapshot( String version )
+    {
+        Matcher snapshotMatcher = snapshotPattern.matcher( version );
+        if ( snapshotMatcher.matches() )
+        {
+            return snapshotMatcher.group(4);
+        }
+        return EMPTY_STRING;
+    }
+
+    public static String getSnapshotWithDelim( String version )
+    {
+        Matcher snapshotMatcher = snapshotPattern.matcher( version );
+        if ( snapshotMatcher.matches() )
+        {
+            return snapshotMatcher.group(2);
+        }
+        return EMPTY_STRING;
+    }
+
+    public static boolean hasBuildNumber( String version )
+    {
+        return !isEmpty( getBuildNumber( version ) );
+    }
+
+    public static boolean hasQualifier( String version )
+    {
+        return !isEmpty( getQualifier( version ) );
+    }
+
+    public static boolean isEmpty( String string )
+    {
+        if ( string == null || string.trim().equals( EMPTY_STRING ) )
         {
             return true;
         }
         return false;
+    }
+
+    public static boolean isSnapshot( String version )
+    {
+        Matcher snapshotMatcher = snapshotPattern.matcher( version );
+        return snapshotMatcher.matches();
+    }
+
+    /**
+     * Checks if the string is a valid version according to section 3.2.5 of the OSGi specification
+     *
+     * @return true if the version is valid
+     */
+    public static boolean isValidOSGi(String version)
+    {
+        return osgiPattern.matcher( version ).matches();
+    }
+
+    /**
+     * Remove the build number (and associated delimiter) portion of the version string
+     */
+    public static String removeBuildNumber( String version )
+    {
+        Matcher qualifierMatcher = qualifierPattern.matcher( version );
+        if ( qualifierMatcher.matches() )
+        {
+            return qualifierMatcher.replaceFirst( "$1$5" );
+        }
+        return version;
+    }
+
+    /**
+     * Remove the snapshot (and associated delimiter) portion of the version string.
+     * Converts something like "1.0-SNAPSHOT" to "1.0"
+     */
+    public static String removeSnapshot( String version )
+    {
+        Matcher snapshotMatcher = snapshotPattern.matcher( version );
+        if ( snapshotMatcher.matches() )
+        {
+            return snapshotMatcher.group(1);
+        }
+        return version;
+    }
+
+    private static boolean hasLeadingDelimiter( String versionPart )
+    {
+        if ( versionPart.length() < 1 )
+        {
+            return false;
+        }
+        return versionStringDelimiters.contains( versionPart.charAt( 0 ) );
+    }
+
+    /**
+     * Remove any leading delimiters from the partial version string
+     */
+    static String removeLeadingDelimiter(String versionPart )
+    {
+        return versionPart.replaceAll(LEADING_DELIMITER_REGEX, "");
+    }
+
+    /**
+     * Prepends the given delimiter only if the versionPart does not already start with a delimiter
+     */
+    private static String prependDelimiter( String versionPart, String delimiter )
+    {
+        if ( hasLeadingDelimiter( versionPart ) )
+        {
+            return versionPart;
+        }
+        return delimiter + versionPart;
     }
 
     /**
@@ -267,7 +322,7 @@ public class Version
      * @param str a string to check
      * @return whether all the characters in the string are digits
      */
-    public static boolean isNumeric( String str )
+    private static boolean isNumeric( String str )
     {
         for ( char c : str.toCharArray() )
         {
@@ -278,231 +333,6 @@ public class Version
     }
 
     /**
-     * Checks if the original version string is a valid OSGi version.
-     *
-     * @return true if the version is valid
-     */
-    public boolean isValidOSGi()
-    {
-        Matcher osgiMatcher = osgiPattern.matcher( originalVersion );
-        return osgiMatcher.matches();
-    }
-
-    public String getMajorVersion()
-    {
-        if ( isEmpty( majorVersion) )
-        {
-            majorVersion = "0";
-        }
-        return majorVersion;
-    }
-
-    /**
-     * Assumed to be "0" if no minor version is specified in the string
-     *
-     * @return the minor version
-     */
-    public String getMinorVersion()
-    {
-        if ( isEmpty( minorVersion ) )
-        {
-            minorVersion = "0";
-        }
-        return minorVersion;
-    }
-
-    /**
-     * Assumed to be "0" if no micro version is specified in the string
-     *
-     * @return the micro version
-     */
-    public String getMicroVersion()
-    {
-        if ( isEmpty( microVersion ) )
-        {
-            microVersion = "0";
-        }
-        return microVersion;
-    }
-
-    /**
-     * Get the original version string that was used to create this version object.
-     *
-     * @return the original version string
-     */
-    public String getOriginalVersion()
-    {
-        return originalVersion;
-    }
-
-    /**
-     * Get original unmodified major, minor, micro portion of the version string
-     *
-     * @return the original major/minor/micro version.
-     */
-    public String getOriginalMMM()
-    {
-        if ( originalMMM == null )
-        {
-            originalMMM = "";
-        }
-        return originalMMM;
-    }
-
-    /**
-     * Generate the qualifier by combining the qualifierBase, qualifierSuffix, and build number
-     *
-     * @return The qualifier part of the version string (an empty string if there is no qualifier)
-     */
-    public String getQualifier()
-    {
-        StringBuilder qualifier = new StringBuilder();
-        qualifier.append( getQualifierBaseAndBuildNum() );
-
-        if ( isSnapshot() )
-        {
-            if ( qualifier.length() > 0 )
-            {
-                qualifier.append( DEFAULT_QUALIFIER_DELIMITER );
-            }
-            qualifier.append( this.snapshot );
-        }
-
-        return qualifier.toString();
-    }
-
-    public String getQualifierBase()
-    {
-        if ( qualifierBase == null )
-        {
-            qualifierBase = "";
-        }
-        return qualifierBase;
-    }
-
-    public String getQualifierBaseAndBuildNum()
-    {
-        StringBuilder qualBaseAndNum = new StringBuilder( getQualifierBase() );
-        if ( !isEmpty( getBuildNumber() ) )
-        {
-            if ( qualBaseAndNum.length() > 0 )
-            {
-                qualBaseAndNum.append( getBuildNumberDelimiter() );
-            }
-            qualBaseAndNum.append( getBuildNumber() );
-        }
-        return qualBaseAndNum.toString();
-    }
-
-    public String getVersionString()
-    {
-        if ( isEmpty( getQualifier() ) )
-        {
-            return originalVersion;
-        }
-        if ( isEmpty( originalMMM ) )
-        {
-            return getQualifier();
-        }
-
-        StringBuilder versionString = new StringBuilder();
-        versionString.append( originalMMM );
-        if ( isEmpty( qualifierStartDelimiter ) )
-        {
-            versionString.append( DEFAULT_MMM_DELIMITER );
-        }
-        else
-        {
-            versionString.append( qualifierStartDelimiter  );
-        }
-        versionString.append( getQualifier() );
-        return versionString.toString();
-    }
-
-    public String getOSGiVersionString()
-    {
-        if ( isValidOSGi() && !hasQualifier() )
-        {
-            return originalVersion;
-        }
-        StringBuilder osgiVersion = new StringBuilder();
-        if ( numericVersion )
-        {
-            osgiVersion.append( getThreePartMMM() );
-        }
-        if ( !isEmpty( getQualifier() ) )
-        {
-            if ( numericVersion )
-            {
-                osgiVersion.append( OSGI_VERSION_DELIMITER );
-            }
-            osgiVersion.append( getOSGiQualifier() );
-        }
-        return osgiVersion.toString();
-
-    }
-
-    /**
-     * Get the major, minor, micro version string and use zeros if the minor or micro were not set in the original
-     * version
-     *
-     * @return
-     */
-    private String getThreePartMMM()
-    {
-        StringBuilder mmm = new StringBuilder();
-        mmm.append( getMajorVersion() );
-        mmm.append( OSGI_VERSION_DELIMITER );
-        mmm.append( getMinorVersion() );
-        mmm.append( OSGI_VERSION_DELIMITER );
-        mmm.append( getMicroVersion() );
-        return mmm.toString();
-    }
-
-    /**
-     * Replaces "." delimiters with a "-";
-     *
-     * @return
-     */
-    private String getOSGiQualifier()
-    {
-        if ( getQualifier() == null )
-        {
-            return null;
-        }
-        return getQualifier().replace( '.', '-' );
-    }
-
-    public boolean isSnapshot()
-    {
-        return SNAPSHOT_SUFFIX.equalsIgnoreCase( this.snapshot );
-    }
-
-    public String getBuildNumber()
-    {
-        return buildNumber;
-    }
-
-    public String getBuildNumberDelimiter()
-    {
-        if ( buildNumberDelimiter == null )
-        {
-            buildNumberDelimiter = "";
-        }
-        return buildNumberDelimiter;
-    }
-
-    public boolean hasBuildNumber()
-    {
-        return !isEmpty( getBuildNumber() );
-    }
-
-    public boolean hasQualifier()
-    {
-        return !isEmpty( getQualifier() );
-    }
-
-    /**
      * Appends the given qualifier suffix.  Attempts to match the given qualifier suffix to the current suffix
      * to avoid duplicates like "1.0-beta-beta.  If the suffix matches the existing one, does nothing.
      *
@@ -510,84 +340,81 @@ public class Version
      *            include a build number, for example "foo-1", which will automatically be set as the build number for
      *            this version.
      */
-    public void appendQualifierSuffix( String suffix )
+    public static String appendQualifierSuffix( final String version, final String suffix )
     {
-        logger.debug( "Applying suffix: " + suffix + " to version " + getVersionString() );
-        if ( suffix == null )
+        logger.debug( "Applying suffix: " + suffix + " to version " + version );
+
+        if ( isEmpty( suffix ) )
         {
-            return;
+            return version;
         }
 
-        // Remove snapshot portion first to make parsing simpler
-        Matcher snapshotMatcher = snapshotPattern.matcher( suffix );
-        snapshotMatcher.matches();
-        final String suffixWithoutSnapshot = snapshotMatcher.group( 1 );
-        final String suffixSnapshotDelimiter = snapshotMatcher.group( 3 );
-        final String suffixSnapshot = snapshotMatcher.group( 4 );
-        if ( !isEmpty( suffixSnapshot ) )
+        if ( isEmpty( getQualifier( version ) ) )
         {
-            this.snapshotDelimiter = suffixSnapshotDelimiter;
-            this.snapshot = suffixSnapshot;
+            return version + prependDelimiter( suffix, DEFAULT_DELIMITER);
         }
 
-        // Handle the non-snapshot portion of the new suffix
-        Matcher suffixMatcher = qualifierPattern.matcher( suffixWithoutSnapshot );
-        if ( !suffixMatcher.matches() )
+        Matcher suffixMatcher = createSuffixMatcher( version, suffix );
+        if ( suffixMatcher.matches() )
         {
-            return;
+            return version;
         }
 
-        String suffixBase = suffixMatcher.group( 1 );
-        String suffixBuildNumberDelimiter = suffixMatcher.group( 3 );
-        String suffixBuildNumber = suffixMatcher.group( 4 );
+        final String suffixWoSnapshot = removeSnapshot( suffix );
+        final String suffixBuildNumber = getBuildNumber( suffix );
+        final String suffixWoBuildNumber = removeBuildNumber( suffixWoSnapshot );
+        final String suffixWoBuildNumDelim = removeLeadingDelimiter( suffixWoBuildNumber );
 
-        String suffixBaseNoDelim = this.removeLastDelimiters( suffixBase );
-        String suffixMatchRegex = "(.*?)(" + Pattern.quote( suffixBaseNoDelim ) + ")(" + DELIMITER_REGEX + "?)";
-
-        String oldQualifierBase = getQualifierBase();
-        String oldQualifierBaseAndNum = getQualifierBaseAndBuildNum();
-        if ( isEmpty( oldQualifierBaseAndNum ) )
-        {
-            if ( suffixBase.length() > 0 && versionStringDelimiters.contains( suffixBase.charAt( 0 ) ) )
+        Matcher suffixWoDelimMatcher = createSuffixMatcher( version, suffixWoBuildNumDelim );
+        if (suffixWoDelimMatcher.matches()) {
+            String newVersion = suffixWoDelimMatcher.replaceFirst("$1$2" + suffixWoBuildNumber + "$4$7");
+            if ( hasLeadingDelimiter( suffix ) )
             {
-                qualifierStartDelimiter = Character.toString( suffixBase.charAt( 0 ) );
-                suffixBase = suffixBase.substring( 1 );
+                newVersion = suffixWoDelimMatcher.replaceFirst("$1" + suffixWoBuildNumber + "$4$7");
             }
-            qualifierBase = suffixBase;
+            if ( !isEmpty( suffixBuildNumber ) )
+            {
+                newVersion = setBuildNumber( newVersion, suffixBuildNumber );
+            }
+            if ( isSnapshot( suffix ) )
+            {
+                newVersion = setSnapshot( newVersion, true );
+            }
+            return newVersion;
         }
-        // Check if the new suffix does not match the end of the existing qualifier
-        else if ( !Pattern.matches( suffixMatchRegex, oldQualifierBase ) )
+
+        Matcher qualifierMatcher = qualifierPattern.matcher( version );
+        if ( qualifierMatcher.matches() )
         {
-            // If the suffix doesn't match, and there is an existing build number
-            // the old build number becomes part of the qualifier base
-            // e.g. "1.2.0.Beta-1" + "foo-2" = "1.2.0.Beta-1-foo-2"
-            StringBuilder newQualifierBase = new StringBuilder( oldQualifierBaseAndNum );
-            buildNumber = null;
-
-            if ( newQualifierBase.length() > 0 &&
-                    !versionStringDelimiters.contains( newQualifierBase.charAt( newQualifierBase.length() - 1 ) ) )
+            if ( hasLeadingDelimiter( suffixWoSnapshot ) )
             {
-                newQualifierBase.append( DEFAULT_QUALIFIER_DELIMITER );
+                String newVersion = qualifierMatcher.replaceFirst( "$1$3$4" + suffixWoSnapshot + "$5");
+                if ( isSnapshot( suffix ) )
+                {
+                    newVersion = Version.setSnapshot( newVersion, true );
+                }
+                return newVersion;
             }
-            newQualifierBase.append(suffixBase);
-            qualifierBase = newQualifierBase.toString();
-            buildNumberDelimiter = suffixBuildNumberDelimiter;
+            String delimiter = DEFAULT_QUALIFIER_DELIMITER;
+            if ( isEmpty( getQualifierBase( version ) ) )
+            {
+                delimiter = DEFAULT_DELIMITER;
+            }
+            String newVersion = qualifierMatcher.replaceFirst( "$1$3$4" + delimiter + suffixWoSnapshot + "$5");
+            if ( isSnapshot( suffix ) )
+            {
+                newVersion = Version.setSnapshot( newVersion, true );
+            }
+            return newVersion;
         }
+        return version;
+    }
 
-        if ( !isEmpty( suffixBuildNumber ) )
-        {
-            if ( suffixBuildNumberDelimiter == null )
-            {
-                buildNumberDelimiter = "";
-            }
-            else
-            {
-                buildNumberDelimiter = suffixBuildNumberDelimiter;
-            }
-            buildNumber = suffixBuildNumber;
-        }
-
-        logger.debug( "New version string: " + getVersionString() );
+    private static Matcher createSuffixMatcher( String version, String suffix )
+    {
+        final String SUFFIX_REGEX = "(.*?)(" + DELIMITER_REGEX + ")?(" + suffix + ")(("
+                + DELIMITER_REGEX + ")?(\\d+))?((" + DELIMITER_REGEX + ")?((?i:" + SNAPSHOT_SUFFIX + ")))?$";
+        return Pattern.compile( SUFFIX_REGEX ).matcher( version );
     }
 
     /**
@@ -596,31 +423,58 @@ public class Version
      *
      * @param buildNumber to append to the qualifier.
      */
-    public void setBuildNumber( String buildNumber )
+    public static String setBuildNumber( String version, String buildNumber )
     {
-        if ( buildNumberDelimiter == null ) {
-            buildNumberDelimiter = Character.toString( DEFAULT_QUALIFIER_DELIMITER );
-        }
-        if ( buildNumber == null || isNumeric( buildNumber ) )
+        if ( !isNumeric( buildNumber ) )
         {
-            this.buildNumber = buildNumber;
+            logger.warn("Failed attempt to set non-numeric build number '" + buildNumber + "' for version '"
+                    + version + "'");
+            return version;
         }
+        if ( isEmpty( buildNumber ) )
+        {
+            buildNumber = EMPTY_STRING;
+        }
+        if ( isEmpty( getQualifier( version ) ) )
+        {
+            return version + DEFAULT_DELIMITER + buildNumber;
+        }
+        Matcher qualifierMatcher = qualifierPattern.matcher( version );
+        if ( qualifierMatcher.matches() )
+        {
+            if ( isEmpty( qualifierMatcher.group( 2 ) ) )
+            {
+                buildNumber = prependDelimiter( buildNumber, DEFAULT_QUALIFIER_DELIMITER );
+            }
+            return qualifierMatcher.replaceFirst( "$1$3" + buildNumber + "$5" );
+        }
+        return version;
     }
 
     /**
-     * Sets the snapshot to "SNAPSHOT" if true, otherwise sets to null
+     * Appends the "SNAPSHOT" suffix to this version if not already present
      *
-     * @param snapshot whether to append SNAPSHOT or not.
+     * @param version the version to modify.
+     * @param snapshot set to true if the version should be a snapshot, false otherwise
+     * @return The updated version string
      */
-    public void setSnapshot( boolean snapshot )
+    public static String setSnapshot( String version, boolean snapshot )
     {
-        if ( snapshot )
+        if ( isEmpty( version ) )
         {
-            this.snapshot = SNAPSHOT_SUFFIX;
+            return EMPTY_STRING;
+        }
+        if ( isSnapshot( version ) == snapshot )
+        {
+            return version;
+        }
+        else if ( snapshot )
+        {
+            return (version + DEFAULT_QUALIFIER_DELIMITER + SNAPSHOT_SUFFIX);
         }
         else
         {
-            this.snapshot = null;
+            return removeSnapshot( version );
         }
     }
 
@@ -632,19 +486,26 @@ public class Version
      * @param versionSet a collection of versions to compare to.
      * @return the highest build number, or 0 if no matching build numbers are found.
      */
-    public static int findHighestMatchingBuildNumber( Version version, Set<String> versionSet )
+    public static int findHighestMatchingBuildNumber(String version, Set<String> versionSet )
     {
         int highestBuildNum = 0;
+
+        String qualifier = getQualifier( version );
+        Matcher qualifierMatcher = qualifierPattern.matcher( qualifier );
+        if ( qualifierMatcher.matches() )
+        {
+            qualifier = removeLeadingDelimiter( qualifierMatcher.group( 1 ) );
+        }
 
         // Build version pattern regex, matches something like "<mmm>.<qualifier>.<buildnum>".
         StringBuilder versionPatternBuf = new StringBuilder();
         versionPatternBuf.append( '(' )
-                .append( Pattern.quote( version.getOriginalMMM() ) ).append('(').append( DELIMITER_REGEX ).append("0)*") // Match zeros appended to a major only version
+                .append( Pattern.quote( getMMM( version ) ) ).append('(').append( DELIMITER_REGEX ).append("0)*") // Match zeros appended to a major only version
                 .append( ")?" )
                 .append( DELIMITER_REGEX );
-        if ( !isEmpty( version.getQualifierBase() ) )
+        if ( !isEmpty( qualifier ) )
         {
-            versionPatternBuf.append( Pattern.quote( version.getQualifierBase() ) );
+            versionPatternBuf.append( Pattern.quote( qualifier ) );
             versionPatternBuf.append( DELIMITER_REGEX );
         }
         versionPatternBuf.append( "(\\d+)" );
@@ -676,23 +537,20 @@ public class Version
      *
      * @return the build number as an integer.
      */
-    public int getIntegerBuildNumber()
+    public static int getIntegerBuildNumber( String version )
     {
-        if ( this.isEmpty( buildNumber ) )
+        String buildNumber = getBuildNumber( version );
+        if ( isEmpty( buildNumber ) )
         {
             return 0;
         }
-        return Integer.parseInt( buildNumber );
+        try
+        {
+            return Integer.parseInt( buildNumber );
+        }
+        catch(NumberFormatException e) {
+            return 0;
+        }
     }
 
-    @Override
-    public String toString()
-    {
-        StringBuilder buffer = new StringBuilder();
-        buffer.append( "Version: " );
-        buffer.append( getVersionString() );
-        buffer.append( ", OSGi Version: " );
-        buffer.append( getOSGiVersionString() );
-        return buffer.toString();
-    }
 }

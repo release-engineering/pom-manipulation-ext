@@ -139,13 +139,11 @@ public class VersioningCalculatorTest
         }
     }
 
-    @Test
     /**
      * Not every version form know to man is converted...but we should try to
      * safely handle unknown forms.
-     *
-     * @throws Exception
      */
+    @Test
     public void osgi_fallback()
         throws Exception
     {
@@ -937,15 +935,12 @@ public class VersioningCalculatorTest
     private String calculate( final String version )
         throws Exception
     {
-        Version modifiedVersion = modder.calculate( GROUP_ID, ARTIFACT_ID, version, session );
+        String modifiedVersion = modder.calculate( GROUP_ID, ARTIFACT_ID, version, session );
         if ( session.getState( VersioningState.class ).osgi() )
         {
-            return modifiedVersion.getOSGiVersionString(); 
+            return Version.getOsgiVersion( modifiedVersion );
         }
-        else
-        {
-            return modifiedVersion.getVersionString();
-        }
+        return modifiedVersion;
     }
 
     private VersioningState setupSession( final Properties properties, final String... versions )
@@ -1022,7 +1017,7 @@ public class VersioningCalculatorTest
         }
 
         @Override
-        public Version calculate( final String groupId, final String artifactId,
+        public String calculate( final String groupId, final String artifactId,
                                              final String originalVersion, final ManipulationSession session )
             throws ManipulationException
         {

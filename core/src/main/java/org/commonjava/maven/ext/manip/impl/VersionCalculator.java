@@ -85,30 +85,25 @@ public class VersionCalculator
     {
         final VersioningState state = session.getState( VersioningState.class );
         final Map<ProjectVersionRef, String> versionsByGAV = new HashMap<>();
-        final Map<ProjectVersionRef, Version> versionObjsByGAV = new HashMap<>();
-        final Set<String> versionSet = new HashSet<>();
+        final Set<String> vesionsWithBuildNums = new HashSet<>();
 
         for ( final Project project : projects )
         {
             String originalVersion = project.getVersion();
-            String modifiedVersionString;
             originalVersion = PropertiesUtils.resolveProperties( projects, originalVersion);
-            final Version modifiedVersion =
+            String modifiedVersion =
                 calculate( project.getGroupId(), project.getArtifactId(), originalVersion, session );
-            versionObjsByGAV.put( project.getKey(), modifiedVersion );
 
             if ( state.osgi() )
             {
-                modifiedVersionString = modifiedVersion.getOSGiVersionString();
-            }
-            else
-            {
-                modifiedVersionString = modifiedVersion.getVersionString();
+                modifiedVersion = Version.getOsgiVersion( modifiedVersion );
             }
 
-            if ( modifiedVersion.hasBuildNumber() )
+            versionsByGAV.put( project.getKey(), modifiedVersion );
+
+            if ( Version.hasBuildNumber( modifiedVersion ) )
             {
-                versionSet.add( modifiedVersionString );
+                vesionsWithBuildNums.add( modifiedVersion );
             }
         }
 
@@ -117,39 +112,31 @@ public class VersionCalculator
         for ( final Project project : projects )
         {
             final String originalVersion = project.getVersion();
-            String modifiedVersionString;
 
-            final Version modifiedVersion = versionObjsByGAV.get( project.getKey() );
+            String modifiedVersion = versionsByGAV.get( project.getKey() );
 
             // If there is only a single version there is no real need to try and find the highest matching.
             // This also fixes the problem where there is a single version and leading zeros.
-            if (versionSet.size() > 1)
+            if (vesionsWithBuildNums.size() > 1)
             {
-                int buildNumber = findHighestMatchingBuildNumber( modifiedVersion, versionSet );
+                int buildNumber = findHighestMatchingBuildNumber( modifiedVersion, vesionsWithBuildNums );
 
                 // If the buildNumber is greater than zero, it means we found a match and have to
                 // set the build number to avoid version conflicts.
                 if ( buildNumber > 0 )
                 {
-                    modifiedVersion.setBuildNumber( StringUtils.leftPad( Integer.toString( buildNumber ), state.getIncrementalSerialSuffixPadding(), '0' ) );
+                    String paddedBuildNum =
+                            StringUtils.leftPad( Integer.toString( buildNumber ), state.getIncrementalSerialSuffixPadding(), '0' );
+                    modifiedVersion = Version.setBuildNumber( modifiedVersion, paddedBuildNum );
                 }
             }
 
-            if ( state.osgi() )
-            {
-                modifiedVersionString = modifiedVersion.getOSGiVersionString();
-            }
-            else
-            {
-                modifiedVersionString = modifiedVersion.getVersionString();
-            }
+            vesionsWithBuildNums.add( modifiedVersion );
+            logger.debug( gav( project ) + " has updated version: {}. Marking for rewrite.", modifiedVersion );
 
-            versionSet.add( modifiedVersionString );
-            logger.debug( gav( project ) + " has updated version: {}. Marking for rewrite.", modifiedVersionString );
-
-            if ( !originalVersion.equals( modifiedVersionString ) )
+            if ( !originalVersion.equals( modifiedVersion ) )
             {
-                versionsByGAV.put(  project.getKey(), modifiedVersionString );
+                versionsByGAV.put(  project.getKey(), modifiedVersion );
             }
         }
 
@@ -166,7 +153,7 @@ public class VersionCalculator
      * @return a Version object allowing the modified version to be extracted.
      * @throws ManipulationException if an error occurs.
      */
-    protected Version calculate( final String groupId, final String artifactId, final String version,
+    protected String calculate( final String groupId, final String artifactId, final String version,
                                  final ManipulationSession session )
         throws ManipulationException
     {
@@ -181,64 +168,71 @@ public class VersionCalculator
             incrementalSuffix );
         logger.debug( "Got the following override:\n  Version: " + override);
 
-        Version versionObj;
+        String newVersion = version;
 
         if ( override != null )
         {
-            versionObj = new Version( override );
-        }
-        else
-        {
-            versionObj = new Version( version );
+            newVersion = override;
         }
 
         if ( staticSuffix != null )
         {
-            versionObj.appendQualifierSuffix( staticSuffix );
+            newVersion = Version.appendQualifierSuffix( newVersion, staticSuffix );
             if ( !state.preserveSnapshot() )
             {
-                versionObj.setSnapshot( false );
+                newVersion = Version.removeSnapshot( newVersion );
             }
         }
         else if ( incrementalSuffix != null )
         {
-            // Find matching version strings in the remote repo and increment to the next
-            // available version
-            final Set<String> versionCandidates = new HashSet<>();
+            final Set<String> versionCandidates = this.getVersionCandidates(state, groupId, artifactId);
 
-            Map<ProjectRef, Set<String>> rm = state.getRESTMetadata();
-            if ( rm != null)
-            {
-                // If the REST Client has prepopulated incremental data use that instead of the examining the repository.
-                if (!rm.isEmpty())
-                {
-                    // Use preloaded metadata from remote repository, loaded via a REST Call.
-                    if (rm.get( new SimpleProjectRef( groupId, artifactId ) ) != null)
-                    {
-                        versionCandidates.addAll( rm.get( new SimpleProjectRef( groupId, artifactId ) ) );
-                    }
-                }
-            }
-            else
-            {
-                // Load metadata from local repository
-                versionCandidates.addAll( getMetadataVersions( groupId, artifactId ) );
-            }
-            versionObj.appendQualifierSuffix( incrementalSuffix );
-            int highestRemoteBuildNum = findHighestMatchingBuildNumber( versionObj, versionCandidates );
-            ++highestRemoteBuildNum;
+            newVersion = Version.appendQualifierSuffix( newVersion, incrementalSuffix );
+            int highestRemoteBuildNumPlusOne = findHighestMatchingBuildNumber( newVersion, versionCandidates ) + 1;
 
-            if ( highestRemoteBuildNum > versionObj.getIntegerBuildNumber() )
+            if ( highestRemoteBuildNumPlusOne > Version.getIntegerBuildNumber( newVersion ) )
             {
-                versionObj.setBuildNumber( StringUtils.leftPad( Integer.toString( highestRemoteBuildNum ), state.getIncrementalSerialSuffixPadding(), '0' ) );
+                String paddedBuildNumber = StringUtils.leftPad( Integer.toString( highestRemoteBuildNumPlusOne ),
+                        state.getIncrementalSerialSuffixPadding(), '0' );
+                newVersion = Version.setBuildNumber( newVersion, paddedBuildNumber );
             }
             if ( !state.preserveSnapshot() )
             {
-                versionObj.setSnapshot( false );
+                newVersion = Version.removeSnapshot( newVersion );
             }
         }
 
-        return versionObj;
+        return newVersion;
+    }
+
+    /**
+     * Find matching version strings in the remote repo.
+     */
+    private Set<String> getVersionCandidates(VersioningState state, String groupId, String artifactId)
+            throws ManipulationException
+    {
+        final Set<String> versionCandidates = new HashSet<>();
+
+        Map<ProjectRef, Set<String>> rm = state.getRESTMetadata();
+        if ( rm != null)
+        {
+            // If the REST Client has prepopulated incremental data use that instead of the examining the repository.
+            if (!rm.isEmpty())
+            {
+                // Use preloaded metadata from remote repository, loaded via a REST Call.
+                if (rm.get( new SimpleProjectRef( groupId, artifactId ) ) != null)
+                {
+                    versionCandidates.addAll( rm.get( new SimpleProjectRef( groupId, artifactId ) ) );
+                }
+            }
+        }
+        else
+        {
+            // Load metadata from local repository
+            versionCandidates.addAll( getMetadataVersions( groupId, artifactId ) );
+        }
+        return versionCandidates;
+
     }
 
     /**
