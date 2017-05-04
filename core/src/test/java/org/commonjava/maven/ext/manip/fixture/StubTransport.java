@@ -46,7 +46,7 @@ public class StubTransport
     }
 
     @Override
-    public DownloadJob createDownloadJob( final ConcreteResource resource, final Transfer transfer,
+    public DownloadJob createDownloadJob( final ConcreteResource resource, final Transfer transfer, Map<Transfer, Long> var3,
                                           final int timeoutSeconds, EventMetadata eventMetadata )
         throws TransferException
     {
@@ -54,6 +54,12 @@ public class StubTransport
         return new DownloadJob()
         {
             Transfer t = null;
+
+            @Override
+            public long getTransferSize()
+            {
+                return 0;
+            }
 
             @Override
             public Transfer getTransfer() {
@@ -124,6 +130,12 @@ public class StubTransport
     public boolean handles( final Location loc )
     {
         return loc.equals( MavenLocationExpander.EXPANSION_TARGET );
+    }
+
+    @Override
+    public boolean allowsCaching()
+    {
+        return false;
     }
 
     @Override
