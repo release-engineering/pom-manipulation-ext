@@ -61,18 +61,6 @@
           <artifactId>buildnumber-maven-plugin</artifactId>
           <executions>
             <execution>
-              <id>get-build-timestamp</id>
-              <phase>initialize</phase>
-              <goals>
-                <goal>create-timestamp</goal>
-              </goals>
-              <configuration>
-                <!-- Example date: Wed, 4 Jul 2001 12:08:56 -0700 -->
-                <timestampFormat>EEE, d MMM yyyy HH:mm:ss Z</timestampFormat>
-                <timestampPropertyName>build.datetime</timestampPropertyName>
-              </configuration>
-            </execution>
-            <execution>
               <id>get-scm-revision</id>
               <phase>initialize</phase>
               <goals>
