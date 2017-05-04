@@ -24,6 +24,7 @@ import org.commonjava.maven.ext.manip.ManipulationException;
 import org.commonjava.maven.galley.TransferManager;
 import org.commonjava.maven.galley.auth.MemoryPasswordManager;
 import org.commonjava.maven.galley.cache.FileCacheProvider;
+import org.commonjava.maven.galley.config.TransportManagerConfig;
 import org.commonjava.maven.galley.event.NoOpFileEventManager;
 import org.commonjava.maven.galley.filearc.FileTransport;
 import org.commonjava.maven.galley.filearc.ZipJarTransport;
@@ -176,9 +177,11 @@ public class GalleyInfrastructure
         final NotFoundCache nfc = new MemoryNotFoundCache();
         executor = Executors.newCachedThreadPool();
 
+        final TransportManagerConfig config = new TransportManagerConfig(  );
+
         final TransferManager transfers =
-            new TransferManagerImpl( transports, cache, nfc, fileEvents, new DownloadHandler( nfc, executor ),
-                                     new UploadHandler( nfc, executor ), new ListingHandler( nfc ),
+            new TransferManagerImpl( transports, cache, nfc, fileEvents, new DownloadHandler( nfc, config, executor ),
+                                     new UploadHandler( nfc, config, executor ), new ListingHandler( nfc ),
                                      new ExistenceHandler( nfc ),
                                      new SpecialPathManagerImpl(),
                                      executor );

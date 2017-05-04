@@ -147,7 +147,7 @@ public class TestUtils
      * @param params - Map of String keys and String values representing -D arguments
      * @param workingDir - Working directory in which you want the cli to be run.
      * @return Exit value
-     * @throws Exception
+     * @throws Exception if an error occurs
      */
     public static Integer runCli( List<String> args, Map<String, String> params, String workingDir )
         throws Exception
@@ -191,7 +191,7 @@ public class TestUtils
      * @param params - Map of String keys and values representing -D arguments.
      * @param workingDir - Working directory.
      * @return Exit value
-     * @throws Exception
+     * @throws Exception if an error occurs
      */
     public static Integer runMaven( String commands, Map<String, String> params, String workingDir )
         throws Exception
@@ -207,7 +207,7 @@ public class TestUtils
      *
      * @param workingDir - Directory with groovy script.
      * @param file - groovy script to run
-     * @throws Exception
+     * @throws Exception if an error occurs
      */
     private static void runScript( String workingDir, String file )
         throws Exception
@@ -283,7 +283,7 @@ public class TestUtils
      * @param workingDir - Working directory in which to run the command.
      * @param extraPath
      * @return exit value.
-     * @throws Exception
+     * @throws Exception if an error occurs
      */
     private static Integer runCommandAndWait( String command, String workingDir, String extraPath )
         throws Exception
