@@ -56,7 +56,7 @@ public class BOMBuilderManipulator
 
     private static final String POM_DEPLOYER_AID = "pom-deployer-maven-plugin";
 
-    private static final String POM_DEPLOYER_VID = "1.1";
+    private static final String POM_DEPLOYER_VID = "1.2";
 
     private static final String POM_DEPLOYER_COORD = ga( POM_DEPLOYER_GID, POM_DEPLOYER_AID );
 
