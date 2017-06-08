@@ -17,9 +17,9 @@ package org.commonjava.maven.ext.manip.state;
 
 import org.commonjava.maven.ext.manip.ManipulationException;
 import org.commonjava.maven.ext.manip.impl.DependencyManipulator;
-import org.commonjava.maven.ext.manip.rest.DefaultVersionTranslator;
-import org.commonjava.maven.ext.manip.rest.VersionTranslator;
-import org.commonjava.maven.ext.manip.rest.VersionTranslator.RestProtocol;
+import org.commonjava.maven.ext.manip.rest.DefaultTranslator;
+import org.commonjava.maven.ext.manip.rest.Translator;
+import org.commonjava.maven.ext.manip.rest.Translator.RestProtocol;
 
 import java.util.Properties;
 
@@ -30,7 +30,7 @@ public class RESTState implements State
 {
     private final String restURL;
 
-    private final VersionTranslator restEndpoint;
+    private final Translator restEndpoint;
 
     public RESTState( final Properties userProps ) throws ManipulationException
     {
@@ -38,11 +38,11 @@ public class RESTState implements State
 
         int restMaxSize = Integer.valueOf( userProps.getProperty( "restMaxSize", "0" ) );
         int restMinSize = Integer.valueOf( userProps.getProperty( "restMinSize",
-                                                                  String.valueOf( DefaultVersionTranslator.CHUNK_SPLIT_COUNT ) ) );
+                                                                  String.valueOf( DefaultTranslator.CHUNK_SPLIT_COUNT ) ) );
 
         RestProtocol protocol = RestProtocol.parse ( userProps.getProperty( "restProtocol", RestProtocol.CURRENT.toString() ) );
 
-        restEndpoint = new DefaultVersionTranslator ( restURL, protocol, restMaxSize, restMinSize );
+        restEndpoint = new DefaultTranslator( restURL, protocol, restMaxSize, restMinSize );
     }
 
     /**
@@ -56,7 +56,7 @@ public class RESTState implements State
         return restURL != null && !restURL.isEmpty();
     }
 
-    public VersionTranslator getVersionTranslator()
+    public Translator getVersionTranslator()
     {
         return restEndpoint;
     }

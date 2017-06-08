@@ -21,6 +21,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mashape.unirest.http.Unirest;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
+import org.commonjava.maven.atlas.ident.ref.SimpleProjectRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef;
 import org.commonjava.maven.ext.manip.rest.exception.RestException;
 import org.commonjava.maven.ext.manip.rest.handler.AddSuffixJettyHandler;
@@ -45,7 +46,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 
-import static org.commonjava.maven.ext.manip.rest.VersionTranslator.RestProtocol;
+import static org.commonjava.maven.ext.manip.rest.Translator.RestProtocol;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
@@ -55,11 +56,11 @@ import static org.junit.Assert.fail;
  */
 @FixMethodOrder( MethodSorters.NAME_ASCENDING)
 @RunWith( Parameterized.class)
-public class DefaultVersionTranslatorTest
+public class VersionTranslatorTest
 {
     private static List<ProjectVersionRef> aLotOfGavs;
 
-    private DefaultVersionTranslator versionTranslator;
+    private DefaultTranslator versionTranslator;
 
     private RestProtocol protocol;
 
@@ -85,12 +86,12 @@ public class DefaultVersionTranslatorTest
     @Before
     public void before()
     {
-        LoggerFactory.getLogger( DefaultVersionTranslator.class ).info( "Executing test " + testName.getMethodName() );
+        LoggerFactory.getLogger( DefaultTranslator.class ).info( "Executing test " + testName.getMethodName() );
 
-        this.versionTranslator = new DefaultVersionTranslator( mockServer.getUrl(), protocol, 0, VersionTranslator.CHUNK_SPLIT_COUNT );
+        this.versionTranslator = new DefaultTranslator( mockServer.getUrl(), protocol, 0, Translator.CHUNK_SPLIT_COUNT );
     }
 
-    public DefaultVersionTranslatorTest(RestProtocol protocol)
+    public VersionTranslatorTest( RestProtocol protocol)
     {
         this.protocol = protocol;
     }
@@ -135,8 +136,8 @@ public class DefaultVersionTranslatorTest
     public void testTranslateVersionsFailNoResponse()
     {
         // Some url that doesn't exist used here
-        VersionTranslator versionTranslator = new DefaultVersionTranslator( "http://127.0.0.2", RestProtocol.CURRENT, 0,
-                                                                            VersionTranslator.CHUNK_SPLIT_COUNT );
+        Translator translator = new DefaultTranslator( "http://127.0.0.2", RestProtocol.CURRENT, 0,
+                                                       Translator.CHUNK_SPLIT_COUNT );
 
         List<ProjectVersionRef> gavs = new ArrayList<ProjectVersionRef>()
         {{
@@ -145,7 +146,7 @@ public class DefaultVersionTranslatorTest
 
         try
         {
-            versionTranslator.translateVersions( gavs );
+            translator.translateVersions( gavs );
             fail( "Failed to throw RestException when server failed to respond." );
         }
         catch ( RestException ex )
@@ -175,7 +176,7 @@ public class DefaultVersionTranslatorTest
         StringBuilder fileContents = new StringBuilder();
         String lineSeparator = System.getProperty( "line.separator" );
 
-        try (Scanner scanner = new Scanner( DefaultVersionTranslatorTest.class.getResourceAsStream( filename ) ))
+        try (Scanner scanner = new Scanner( VersionTranslatorTest.class.getResourceAsStream( filename ) ))
         {
             while ( scanner.hasNextLine() )
             {

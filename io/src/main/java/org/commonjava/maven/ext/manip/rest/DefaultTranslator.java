@@ -19,10 +19,12 @@ import com.mashape.unirest.http.HttpResponse;
 import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
 import org.apache.commons.codec.binary.Base32;
+import org.commonjava.maven.atlas.ident.ref.ProjectRef;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.ext.manip.ListUtils;
 import org.commonjava.maven.ext.manip.rest.exception.RestException;
-import org.commonjava.maven.ext.manip.rest.mapper.ProjectVersionRefMapper;
+import org.commonjava.maven.ext.manip.rest.mapper.ListingBlacklistMapper;
+import org.commonjava.maven.ext.manip.rest.mapper.ReportGAVMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -30,7 +32,6 @@ import org.slf4j.MDC;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
@@ -44,9 +45,13 @@ import static org.apache.http.HttpStatus.SC_OK;
  * @author vdedik@redhat.com
  * @author jsenko@redhat.com
  */
-public class DefaultVersionTranslator
-    implements VersionTranslator
+public class DefaultTranslator
+    implements Translator
 {
+    private static final String REPORTS_LOOKUP_GAVS="reports/lookup/gavs";
+
+    private static final String LISTING_BLACKLIST_GA="listings/blacklist/ga";
+
     private static final Random RANDOM = new Random();
 
     private static final Base32 CODEC = new Base32();
@@ -55,16 +60,76 @@ public class DefaultVersionTranslator
 
     private final String endpointUrl;
 
-    private final ProjectVersionRefMapper pvrm;
+    private final ReportGAVMapper rgm;
 
     private final int initialRestMaxSize;
 
     private final int initialRestMinSize;
 
+    private final ListingBlacklistMapper lbm;
+
     /**
      * @param endpointUrl is the URL to talk to.
      * @param protocol determines what REST format PME should use. The two formats
      *                 currently available are:
+     * @param restMaxSize initial (maximum) size of the rest call; if zero will send everything.
+     * @param restMinSize
+     */
+    public DefaultTranslator( String endpointUrl, RestProtocol protocol, int restMaxSize, int restMinSize )
+    {
+        this.rgm = new ReportGAVMapper( protocol);
+        this.lbm = new ListingBlacklistMapper( protocol);
+        this.endpointUrl = endpointUrl;
+        this.initialRestMaxSize = restMaxSize;
+        this.initialRestMinSize = restMinSize;
+
+        // According to https://github.com/Mashape/unirest-java the default connection timeout is 10000
+        // and the default socketTimeout is 60000.
+        // We have increased the first to 30 seconds and the second to 10 minutes.
+        Unirest.setTimeouts( 30000, 600000 );
+    }
+
+    @Override
+    public List<ProjectVersionRef> findBlacklisted( ProjectRef ga )
+    {
+        Unirest.setObjectMapper( lbm );
+
+        final String blacklistEndpointUrl = endpointUrl + ( endpointUrl.endsWith( "/" ) ? "" : "/") + LISTING_BLACKLIST_GA;
+        List<ProjectVersionRef> result;
+        HttpResponse<List> r;
+
+        logger.trace( "Called findBlacklisted to {} with {}", blacklistEndpointUrl, ga );
+
+        try
+        {
+            r = Unirest.get( blacklistEndpointUrl )
+                       .header( "accept", "application/json" )
+                       .header( "Content-Type", "application/json" )
+                       .header( "Log-Context", getHeaderContext() )
+                       .queryString( "groupid", ga.getGroupId() )
+                       .queryString( "artifactid", ga.getArtifactId() )
+                       .asObject( List.class );
+
+            int status = r.getStatus();
+            if ( status == SC_OK )
+            {
+                result = r.getBody();
+            }
+            else
+            {
+                throw new RestException( String.format( "Failed to establish blacklist calling {} with error {} ", this.endpointUrl, lbm.getErrorString() ) );
+            }
+        }
+        catch ( UnirestException e )
+        {
+            throw new RestException( "Unable to contact DA", e );
+        }
+
+        return result;
+    }
+
+    /**
+     * Translate the versions.
      * <pre>{@code
      * [ {
      *     "groupId": "com.google.guava",
@@ -86,30 +151,13 @@ public class DefaultVersionTranslator
      *     } ]
      * }
      * }</pre>
-     * @param restMaxSize initial (maximum) size of the rest call; if zero will send everything.
-     * @param restMinSize
-     */
-    public DefaultVersionTranslator( String endpointUrl, RestProtocol protocol, int restMaxSize, int restMinSize )
-    {
-        this.pvrm = new ProjectVersionRefMapper(protocol);
-        this.endpointUrl = endpointUrl;
-        this.initialRestMaxSize = restMaxSize;
-        this.initialRestMinSize = restMinSize;
-
-        Unirest.setObjectMapper( pvrm );
-        // According to https://github.com/Mashape/unirest-java the default connection timeout is 10000
-        // and the default socketTimeout is 60000.
-        // We have increased the first to 30 seconds and the second to 10 minutes.
-        Unirest.setTimeouts( 30000, 600000 );
-    }
-
-    /**
-     * Translate the versions.
      * There may be a lot of them, possibly causing timeouts or other issues.
      * This is mitigated by splitting them into smaller chunks when an error occurs and retrying.
      */
     public Map<ProjectVersionRef, String> translateVersions( List<ProjectVersionRef> projects )
     {
+        Unirest.setObjectMapper( rgm );
+
         final Map<ProjectVersionRef, String> result = new HashMap<>();
         final Queue<Task> queue = new ArrayDeque<>();
         if ( initialRestMaxSize != 0 )
@@ -118,13 +166,13 @@ public class DefaultVersionTranslator
             final List<List<ProjectVersionRef>> partition = ListUtils.partition( projects, initialRestMaxSize );
             for ( List<ProjectVersionRef> p : partition )
             {
-                queue.add( new Task( pvrm, p, endpointUrl ) );
+                queue.add( new Task( rgm, p, endpointUrl ) );
             }
             logger.debug( "For initial sizing of {} have split the queue into {} ", initialRestMaxSize , queue.size() );
         }
         else
         {
-            queue.add( new Task( pvrm, projects, endpointUrl ) );
+            queue.add( new Task( rgm, projects, endpointUrl ) );
         }
 
 
@@ -172,6 +220,26 @@ public class DefaultVersionTranslator
         return result;
     }
 
+    private String getHeaderContext ()
+    {
+        String headerContext;
+
+        if ( isNotEmpty( MDC.get( "LOG-CONTEXT" ) ) )
+        {
+            headerContext = MDC.get( "LOG-CONTEXT" );
+        }
+        else
+        {
+            // If we have no MDC PME has been used as the entry point. Dummy one up for DA.
+            byte[] randomBytes = new byte[20];
+            RANDOM.nextBytes( randomBytes );
+            headerContext = "pme-" + CODEC.encodeAsString( randomBytes );
+        }
+
+        return headerContext;
+    }
+
+
     private class Task
     {
         private List<ProjectVersionRef> chunk;
@@ -186,37 +254,25 @@ public class DefaultVersionTranslator
 
         private String endpointUrl;
 
-        private ProjectVersionRefMapper pvrm;
+        private ReportGAVMapper pvrm;
 
-        Task( ProjectVersionRefMapper pvrm, List<ProjectVersionRef> chunk, String endpointUrl )
+        Task( ReportGAVMapper pvrm, List<ProjectVersionRef> chunk, String endpointUrl )
         {
             this.pvrm = pvrm;
             this.chunk = chunk;
-            this.endpointUrl = endpointUrl;
+            this.endpointUrl = endpointUrl + ( endpointUrl.endsWith( "/" ) ? "" : "/") + REPORTS_LOOKUP_GAVS;
         }
 
         void executeTranslate()
         {
             HttpResponse<Map> r;
-            String headerContext;
 
-            if ( isNotEmpty( MDC.get( "LOG-CONTEXT" ) ) )
-            {
-                headerContext = MDC.get( "LOG-CONTEXT" );
-            }
-            else
-            {
-                // If we have no MDC PME has been used as the entry point. Dummy one up for DA.
-                byte[] randomBytes = new byte[20];
-                RANDOM.nextBytes( randomBytes );
-                headerContext = "pme-" + CODEC.encodeAsString( randomBytes );
-            }
             try
             {
                 r = Unirest.post( this.endpointUrl )
                            .header( "accept", "application/json" )
                            .header( "Content-Type", "application/json" )
-                           .header( "Log-Context", headerContext )
+                           .header( "Log-Context", getHeaderContext() )
                            .body( chunk )
                            .asObject( Map.class );
 

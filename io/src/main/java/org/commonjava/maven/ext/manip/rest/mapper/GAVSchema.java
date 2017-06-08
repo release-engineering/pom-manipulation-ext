@@ -18,7 +18,7 @@ package org.commonjava.maven.ext.manip.rest.mapper;
 import java.util.List;
 import java.util.Map;
 
-public final class DAMapper
+public final class GAVSchema
 {
     public String[] productNames;
 
@@ -26,9 +26,9 @@ public final class DAMapper
 
     public List<Map<String, Object>> gavs;
 
-    public DAMapper() {}
+    public GAVSchema() {}
 
-    public DAMapper (String []productNames, String []productVersionIds, List<Map<String, Object>> gavs )
+    public GAVSchema( String []productNames, String []productVersionIds, List<Map<String, Object>> gavs )
     {
         this.productNames = productNames;
         this.productVersionIds = productVersionIds;

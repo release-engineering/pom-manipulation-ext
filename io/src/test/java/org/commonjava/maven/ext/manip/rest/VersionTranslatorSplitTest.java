@@ -35,13 +35,12 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static org.commonjava.maven.ext.manip.rest.DefaultVersionTranslatorTest.loadALotOfGAVs;
-import static org.commonjava.maven.ext.manip.rest.VersionTranslator.RestProtocol.CURRENT;
+import static org.commonjava.maven.ext.manip.rest.VersionTranslatorTest.loadALotOfGAVs;
+import static org.commonjava.maven.ext.manip.rest.Translator.RestProtocol.CURRENT;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -50,13 +49,13 @@ import static org.junit.Assert.fail;
  * @author Jakub Senko <jsenko@redhat.com>
  */
 @RunWith( Parameterized.class)
-public class DefaultVersionTranslatorSplitTest
+public class VersionTranslatorSplitTest
 {
     private static List<ProjectVersionRef> aLotOfGavs;
 
-    private DefaultVersionTranslator versionTranslator;
+    private DefaultTranslator versionTranslator;
 
-    private VersionTranslator.RestProtocol protocol;
+    private Translator.RestProtocol protocol;
 
     @Parameterized.Parameters()
     public static Collection<Object[]> data()
@@ -72,7 +71,7 @@ public class DefaultVersionTranslatorSplitTest
     @Rule
     public MockServer mockServer = new MockServer( handler );
 
-    private static final Logger LOG = LoggerFactory.getLogger( DefaultVersionTranslatorSplitTest.class );
+    private static final Logger LOG = LoggerFactory.getLogger( VersionTranslatorSplitTest.class );
 
     @BeforeClass
     public static void startUp() throws IOException
@@ -87,10 +86,10 @@ public class DefaultVersionTranslatorSplitTest
         LOG.info( "Executing test " + testName.getMethodName() );
 
         handler.setStatusCode( HttpServletResponse.SC_GATEWAY_TIMEOUT );
-        versionTranslator = new DefaultVersionTranslator( mockServer.getUrl(), protocol, 0, VersionTranslator.CHUNK_SPLIT_COUNT );
+        versionTranslator = new DefaultTranslator( mockServer.getUrl(), protocol, 0, Translator.CHUNK_SPLIT_COUNT );
     }
 
-    public DefaultVersionTranslatorSplitTest( VersionTranslator.RestProtocol protocol )
+    public VersionTranslatorSplitTest( Translator.RestProtocol protocol )
     {
         this.protocol = protocol;
     }
@@ -188,7 +187,7 @@ public class DefaultVersionTranslatorSplitTest
     @Test
     public void testTranslateVersionsCorrectSplitMaxSize()
     {
-        this.versionTranslator = new DefaultVersionTranslator( mockServer.getUrl(), protocol, 10, VersionTranslator.CHUNK_SPLIT_COUNT );
+        this.versionTranslator = new DefaultTranslator( mockServer.getUrl(), protocol, 10, Translator.CHUNK_SPLIT_COUNT );
 
         List<ProjectVersionRef> data = aLotOfGavs.subList( 0, 30 );
         handler.getRequestData().clear();
@@ -250,7 +249,7 @@ public class DefaultVersionTranslatorSplitTest
     @Test
     public void testTranslateVersionsCorrectSplitMaxSizeWithMin()
     {
-        this.versionTranslator = new DefaultVersionTranslator( mockServer.getUrl(), protocol, 10, 1 );
+        this.versionTranslator = new DefaultTranslator( mockServer.getUrl(), protocol, 10, 1 );
 
         List<ProjectVersionRef> data = aLotOfGavs.subList( 0, 30 );
         handler.getRequestData().clear();

@@ -15,6 +15,7 @@
  */
 package org.commonjava.maven.ext.manip.rest;
 
+import org.commonjava.maven.atlas.ident.ref.ProjectRef;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.ext.manip.ManipulationException;
 
@@ -24,7 +25,7 @@ import java.util.Map;
 /**
  * @author vdedik@redhat.com
  */
-public interface VersionTranslator
+public interface Translator
 {
     int CHUNK_SPLIT_COUNT = 4;
 
@@ -35,6 +36,8 @@ public interface VersionTranslator
      * @return Map of ProjectVersionRef objects as keys and translated versions as values
      */
     Map<ProjectVersionRef, String> translateVersions( List<ProjectVersionRef> projects );
+
+    List<ProjectVersionRef> findBlacklisted( ProjectRef project );
 
     enum RestProtocol
     {

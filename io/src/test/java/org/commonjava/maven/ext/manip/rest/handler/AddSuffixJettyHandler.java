@@ -16,7 +16,7 @@
 package org.commonjava.maven.ext.manip.rest.handler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.commonjava.maven.ext.manip.rest.mapper.DAMapper;
+import org.commonjava.maven.ext.manip.rest.mapper.GAVSchema;
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.handler.AbstractHandler;
@@ -29,8 +29,11 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static org.apache.commons.lang.StringUtils.isEmpty;
 
 /**
  * @author vdedik@redhat.com
@@ -42,45 +45,40 @@ public class AddSuffixJettyHandler
 {
     private static final Logger LOGGER = LoggerFactory.getLogger( AddSuffixJettyHandler.class );
 
-    private static final String DEFAULT_ENDPOINT = "/";
+    public static final String DEFAULT_ENDPOINT = "/reports/lookup/gavs";
 
-    private static final String DEFAULT_METHOD = "POST";
-
-    private static final String DEFAULT_SUFFIX = "redhat-1";
+    public static final String DEFAULT_SUFFIX = "redhat-1";
 
     private static final String EXTENDED_SUFFIX = "redhat-2";
 
     private final String endpoint;
 
-    private final String method;
-
     private final String suffix;
 
     private ObjectMapper objectMapper = new ObjectMapper();
 
+    private String blacklistVersion = null;
+
     public AddSuffixJettyHandler()
     {
-        this( DEFAULT_ENDPOINT, DEFAULT_METHOD, DEFAULT_SUFFIX );
+        this( DEFAULT_ENDPOINT, DEFAULT_SUFFIX );
     }
 
-    public AddSuffixJettyHandler( String endpoint, String method, String suffix )
+    public AddSuffixJettyHandler( String endpoint, String suffix )
     {
         this.endpoint = endpoint;
-        this.method = method;
         this.suffix = suffix;
     }
 
-    @Override public void handle( String target, Request baseRequest, HttpServletRequest request,
+    @Override
+    public void handle( String target, Request baseRequest, HttpServletRequest request,
                                   HttpServletResponse response )
                     throws IOException, ServletException
     {
+        LOGGER.info( "Handling with AddSuffixJettyHandler: {} {}", request.getMethod(), request.getPathInfo() );
 
-        LOGGER.info( "Handling: {} {}", request.getMethod(), request.getPathInfo() );
-
-        if ( target.equals( this.endpoint ) && request.getMethod().equals( this.method ) )
+        if ( target.startsWith( this.endpoint ) )
         {
-            LOGGER.info( "Handling with AddSuffixJettyHandler" );
-
             // Get Request Body
             StringBuilder jb = new StringBuilder();
             try
@@ -91,56 +89,74 @@ public class AddSuffixJettyHandler
                 {
                     jb.append( line );
                 }
-
             }
             catch ( Exception e )
             {
                 LOGGER.warn( "Error reading request body. {}", e.getMessage() );
                 return;
             }
-            LOGGER.info( "Read request body {}", jb );
+            LOGGER.info( "Read request body '{}' and read parameters '{}'.", jb , request.getParameterMap() );
 
             List<Map<String, Object>> requestBody;
-
-            // Protocol analysis
-            if ( jb.toString().startsWith( "{\"productNames" ))
-            {
-                DAMapper daMapper = objectMapper.readValue( jb.toString(), DAMapper.class );
-                requestBody = daMapper.gavs;
-            }
-            else
-            {
-                requestBody = objectMapper.readValue( jb.toString(), List.class );
-            }
-
-            // Prepare Response
             List<Map<String, Object>> responseBody = new ArrayList<>();
-            for ( Map<String, Object> gav : requestBody)
+
+            if ( target.equals( DEFAULT_ENDPOINT ) )
             {
-                List<String> availableVersions = new ArrayList<>();
-
-                String version = (String) gav.get( "version" );
-                String bestMatchVersion;
-
-                // Specific to certain integration tests. For the SNAPSHOT test we want to verify it can handle
-                // a already built version. The PME code should remove SNAPSHOT before sending it.
-                if ( ((String)gav.get ("artifactId")).startsWith( "rest-dependency-version-manip-child-module" ) )
+                // Protocol analysis
+                if ( jb.toString().startsWith( "{\"productNames" ) )
                 {
-                    bestMatchVersion = version + "-" + EXTENDED_SUFFIX;
+                    GAVSchema gavSchema = objectMapper.readValue( jb.toString(), GAVSchema.class );
+                    requestBody = gavSchema.gavs;
                 }
                 else
                 {
-                    bestMatchVersion = version + "-" + this.suffix;
+                    requestBody = objectMapper.readValue( jb.toString(), List.class );
                 }
-                LOGGER.info ("For GA {}, requesting version {} and got bestMatch {} ", gav,  version, bestMatchVersion);
 
-                availableVersions.add( bestMatchVersion );
+                // Prepare Response
+                for ( Map<String, Object> gav : requestBody )
+                {
+                    List<String> availableVersions = new ArrayList<>();
 
-                gav.put( "bestMatchVersion", bestMatchVersion );
-                gav.put( "whitelisted", false );
-                gav.put( "blacklisted", false );
-                gav.put( "availableVersions", availableVersions );
+                    String version = (String) gav.get( "version" );
+                    String bestMatchVersion;
 
+                    // Specific to certain integration tests. For the SNAPSHOT test we want to verify it can handle
+                    // a already built version. The PME code should remove SNAPSHOT before sending it.
+                    if ( ( (String) gav.get( "artifactId" ) ).startsWith( "rest-dependency-version-manip-child-module" ) )
+                    {
+                        bestMatchVersion = version + "-" + EXTENDED_SUFFIX;
+                    }
+                    else
+                    {
+                        bestMatchVersion = version + "-" + this.suffix;
+                    }
+                    LOGGER.info( "For GA {}, requesting version {} and got bestMatch {} ", gav, version,
+                                 bestMatchVersion );
+
+                    availableVersions.add( bestMatchVersion );
+
+                    gav.put( "bestMatchVersion", bestMatchVersion );
+                    gav.put( "whitelisted", false );
+                    gav.put( "blacklisted", false );
+                    gav.put( "availableVersions", availableVersions );
+
+                    responseBody.add( gav );
+                }
+            }
+            else
+            {
+                Map<String, Object> gav = new HashMap<>(  );
+                gav.put ("groupId", request.getParameter( "groupid" ));
+                gav.put ("artifactId", request.getParameter( "artifactid" ));
+                if ( isEmpty ( blacklistVersion ) )
+                {
+                    gav.put( "version", "1.0" + '.' + suffix );
+                }
+                else
+                {
+                    gav.put ( "version", blacklistVersion );
+                }
                 responseBody.add( gav );
             }
 
@@ -154,7 +170,12 @@ public class AddSuffixJettyHandler
         {
             LOGGER.info( "Handling: {} {} with AddSuffixJettyHandler failed,"
                                          + " because expected method was {} and endpoint {}", request.getMethod(),
-                         request.getPathInfo(), this.method, this.endpoint );
+                         request.getPathInfo(), this.endpoint );
         }
+    }
+
+    public void setBlacklist( String s )
+    {
+        blacklistVersion = s;
     }
 }

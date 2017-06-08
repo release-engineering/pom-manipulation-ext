@@ -16,7 +16,7 @@
 package org.commonjava.maven.ext.manip.rest.handler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.commonjava.maven.ext.manip.rest.mapper.DAMapper;
+import org.commonjava.maven.ext.manip.rest.mapper.GAVSchema;
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.handler.AbstractHandler;
@@ -61,7 +61,7 @@ public class SpyFailJettyHandler extends AbstractHandler implements Handler
 
         LOGGER.info( "Handling: {} {}", request.getMethod(), request.getPathInfo() );
 
-        if ( target.equals( ENDPOINT ) && request.getMethod().equals( METHOD ) )
+        if ( target.startsWith( ENDPOINT ) && request.getMethod().equals( METHOD ) )
         {
             LOGGER.info( "Handling with SpyFailJettyHandler" );
 
@@ -88,8 +88,8 @@ public class SpyFailJettyHandler extends AbstractHandler implements Handler
             // Protocol analysis
             if ( jb.toString().startsWith( "{\"productNames" ))
             {
-                DAMapper daMapper = objectMapper.readValue( jb.toString(), DAMapper.class );
-                requestBody = daMapper.gavs;
+                GAVSchema gavSchema = objectMapper.readValue( jb.toString(), GAVSchema.class );
+                requestBody = gavSchema.gavs;
             }
             else
             {

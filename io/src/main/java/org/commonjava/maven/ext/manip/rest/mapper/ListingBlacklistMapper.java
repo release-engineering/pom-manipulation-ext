@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (C) 2012 Red Hat, Inc. (jcasey@redhat.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,51 +13,50 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.commonjava.maven.ext.manip.rest.mapper;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.mashape.unirest.http.ObjectMapper;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef;
-import org.commonjava.maven.ext.manip.rest.VersionTranslator.RestProtocol;
-import org.commonjava.maven.ext.manip.rest.VersionTranslator;
+import org.commonjava.maven.ext.manip.rest.Translator.RestProtocol;
 import org.commonjava.maven.ext.manip.rest.exception.RestException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 /**
- * @author vdedik@redhat.com
+ * Created by rnc on 06/06/17.
  */
-public class ProjectVersionRefMapper implements ObjectMapper
+public class ListingBlacklistMapper
+                implements ObjectMapper
 {
     private final Logger logger = LoggerFactory.getLogger( getClass() );
 
     private final com.fasterxml.jackson.databind.ObjectMapper objectMapper
-        = new com.fasterxml.jackson.databind.ObjectMapper();
+                    = new com.fasterxml.jackson.databind.ObjectMapper();
 
     private String errorString;
 
-    private VersionTranslator.RestProtocol protocol;
+    private RestProtocol protocol;
 
-    public ProjectVersionRefMapper( RestProtocol protocol )
+    public ListingBlacklistMapper( RestProtocol protocol )
     {
         this.protocol = protocol;
     }
 
     @Override
-    public Map<ProjectVersionRef, String> readValue( String s )
+    public Object readValue( String s )
     {
-        Map<ProjectVersionRef, String> result = new HashMap<>();
+        List<ProjectVersionRef> result = new ArrayList<>();
 
         // Workaround for https://github.com/Mashape/unirest-java/issues/122
         // Rather than throwing an exception we return an empty body which allows
-        // DefaultVersionTranslator to examine the status codes.
+        // DefaultTranslator to examine the status codes.
 
         if (s.length() == 0)
         {
@@ -99,13 +98,9 @@ public class ProjectVersionRefMapper implements ObjectMapper
             String groupId = (String) gav.get( "groupId" );
             String artifactId = (String) gav.get( "artifactId" );
             String version = (String) gav.get( "version" );
-            String bestMatchVersion = (String) gav.get( "bestMatchVersion" );
 
-            if ( bestMatchVersion != null )
-            {
-                ProjectVersionRef project = new SimpleProjectVersionRef( groupId, artifactId, version );
-                result.put( project, bestMatchVersion );
-            }
+            ProjectVersionRef project = new SimpleProjectVersionRef( groupId, artifactId, version );
+            result.add ( project );
         }
 
         return result;
@@ -114,39 +109,7 @@ public class ProjectVersionRefMapper implements ObjectMapper
     @Override
     public String writeValue( Object value )
     {
-        List<ProjectVersionRef> projects = (List<ProjectVersionRef>) value;
-        Object request;
-
-        List<Map<String, Object>> requestBody = new ArrayList<>();
-
-        for ( ProjectVersionRef project : projects )
-        {
-            Map<String, Object> gav = new HashMap<>();
-            gav.put( "groupId", project.getGroupId() );
-            gav.put( "artifactId", project.getArtifactId() );
-            gav.put( "version", project.getVersionString() );
-
-            requestBody.add( gav );
-        }
-
-        if ( protocol == VersionTranslator.RestProtocol.CURRENT )
-        {
-            request = new DAMapper( new String[]{}, new String[]{}, requestBody );
-        }
-        else
-        {
-            throw new RestException( "Unknown protocol value " + protocol );
-        }
-        logger.trace ("Writing stream using protocol type '{}'" , protocol);
-
-        try
-        {
-            return objectMapper.writeValueAsString( request );
-        }
-        catch ( JsonProcessingException e )
-        {
-            throw new RestException( "Failed to serialize version request: " + e.getMessage(), e );
-        }
+        throw new RestException( "Fatal: Should not be overriding writeObject for ListingBlacklistMapper" );
     }
 
     public String getErrorString()

@@ -143,8 +143,31 @@ public class RESTManipulator implements Manipulator
         }
         logger.debug ("REST Client returned {} ", restResult);
 
-        // Parse the rest result for the project GAs and store them in versioning state for use
-        // there by incremental suffix calculation.
+        vs.setRESTMetadata (parseVersions(session, projects, state, newProjectKeys, restResult));
+
+        final DependencyState ds = session.getState( DependencyState.class );
+        final Map<ArtifactRef, String> overrides = new HashMap<>();
+
+        // Convert the loaded remote ProjectVersionRefs to the original ArtifactRefs
+        for (ArtifactRef a : localDeps )
+        {
+            if (restResult.containsKey( a.asProjectVersionRef() ))
+            {
+                overrides.put( a, restResult.get( a.asProjectVersionRef()));
+            }
+        }
+        logger.debug( "Setting REST Overrides {} ", overrides );
+        ds.setRemoteRESTOverrides( overrides );
+    }
+
+    /**
+     * Parse the rest result for the project GAs and store them in versioning state for use
+     * there by incremental suffix calculation.
+     */
+    private Map<ProjectRef, Set<String>> parseVersions( ManipulationSession session, List<Project> projects, RESTState state, ArrayList<ProjectVersionRef> newProjectKeys,
+                                                        Map<ProjectVersionRef, String> restResult )
+                    throws ManipulationException
+    {
         Map<ProjectRef, Set<String>> versionStates = new HashMap<>();
         for ( final ProjectVersionRef p : newProjectKeys )
         {
@@ -161,21 +184,71 @@ public class RESTManipulator implements Manipulator
             }
         }
         logger.info ("Added the following ProjectRef:Version from REST call into VersionState {}", versionStates);
-        vs.setRESTMetadata (versionStates);
 
-        final DependencyState ds = session.getState( DependencyState.class );
-        final Map<ArtifactRef, String> overrides = new HashMap<>();
+        // We know we have ProjectVersionRef(s) of the current project(s). We need to establish potential
+        // blacklist by calling
+        // GET /listings/blacklist/ga?groupid=GROUP_ID&artifactid=ARTIFACT_ID
+        // passing in the groupId and artifactId.
 
-        // Convert the loaded remote ProjectVersionRefs to the original ArtifactRefs
-        for (ArtifactRef a : localDeps )
+        // From the results we then need to establish whether the community version occurs in the blacklist
+        // causing a total abort and whether any redhat versions occur in the blacklist. If they do, that will
+        // affect the incremental potential options. The simplest option is simply to add those results to versionStates
+        // list. This will cause the incremental build number to be set to greater than those.
+
+        List<ProjectVersionRef> blacklist;
+
+        for ( Project p : projects )
         {
-            if (restResult.containsKey( a.asProjectVersionRef() ))
+            if ( p.isExecutionRoot() )
             {
-                overrides.put( a, restResult.get( a.asProjectVersionRef()));
+                logger.debug ("Calling REST client for blacklist with {}...", p.getKey().asProjectRef());
+                blacklist = state.getVersionTranslator().findBlacklisted( p.getKey().asProjectRef() );
+
+                if ( blacklist.size() > 0)
+                {
+                    String suffix = PropertiesUtils.getSuffix( session );
+                    String bVersion = blacklist.get( 0 ).getVersionString();
+                    String pVersion = p.getVersion();
+                    logger.debug( "REST Client returned for blacklist {} ", blacklist );
+
+                    if ( isEmpty( suffix ) )
+                    {
+                        logger.warn( "No version suffix found ; unable to verify community blacklisting." );
+                    }
+                    else if ( blacklist.size() == 1 && !bVersion.contains( suffix ) )
+                    {
+                        if ( pVersion.contains( suffix ) )
+                        {
+                            pVersion = pVersion.substring( 0, pVersion.indexOf( suffix ) - 1 );
+                        }
+                        if ( pVersion.equals( bVersion ) )
+                        {
+                            throw new ManipulationException( "community artifact '" + blacklist.get( 0 ) + "' has been blacklisted. Unable to build project version "
+                                                                             + p.getVersion() );
+                        }
+                    }
+
+                    // Found part of the current project to store in Versioning State
+                    Set<String> versions = versionStates.get( p.getKey().asProjectRef() );
+                    if ( versions == null )
+                    {
+                        versions = new HashSet<>();
+                        versionStates.put( p.getKey().asProjectRef(), versions );
+                    }
+                    for ( ProjectVersionRef b : blacklist )
+                    {
+                        versions.add( b.getVersionString() );
+                    }
+
+                }
+                // else no blacklisted artifacts so just continue
+
+                break;
             }
         }
-        logger.debug( "Setting REST Overrides {} ", overrides );
-        ds.setRemoteRESTOverrides( overrides );
+
+
+        return versionStates;
     }
 
     /**
