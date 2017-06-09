@@ -24,11 +24,20 @@ Multiple remote dependency-management poms can be specified using a comma separa
 
 #### REST Endpoint
 
-Alternatively, rather than using a remote BOM file as a source, it is possible to instruct PME to prescan the project, collect up all group:artifact:version's used and call a REST endpoint using the property `-DrestURL` (provided by [https://github.com/project-ncl/dependency-analysis]) which will then return a list of possible new versions.
+Alternatively, rather than using a remote BOM file as a source, it is possible to instruct PME to prescan the project, collect up all group:artifact:version's used and call a REST endpoint using the property `-DrestURL` (provided by [https://github.com/project-ncl/dependency-analysis]) which will then return a list of possible new versions. Note that the URL should be the subset of the endpoint e.g.
 
-By default PME will pass *all* the GAVs to the endpoint ; it can be configured to split them into initial batches via `-DrestMaxSize=<...>`. If the endpoint returns a 504 timeout the batch is automatically split into smaller chunks in an attempt to reduce load on the endpoint. It will by default chunk down to size of 4 before aborting. This can be configured with `-DrestMinSize=<...>`.
+    http://foo.bar.com/da/rest/v-1
 
-The REST endpoint should follow:
+PME will then call the following endpoints
+
+    reports/lookup/gavs
+    listings/blacklist/ga
+
+It will initially call the `lookup/gavs` endpoint. By default PME will pass *all* the GAVs to the endpoint ; it can be configured to split them into initial batches via `-DrestMaxSize=<...>`. If the endpoint returns a 504 timeout the batch is automatically split into smaller chunks in an attempt to reduce load on the endpoint. It will by default chunk down to size of 4 before aborting. This can be configured with `-DrestMinSize=<...>`.
+
+Finally it will call the `blacklist/ga` endpoint in order to check that the version being build is not in the blacklist.
+
+The lookup REST endpoint should follow:
 
 <table>
 <tr>
@@ -67,6 +76,35 @@ The REST endpoint should follow:
 </tr>
 </table>
 
+The blacklist REST endpoint should follow:
+
+<table>
+<tr>
+   <th id="Parameters">Parameters</th>
+   <th id="Returns">Returns</th>
+</tr>
+<tr>
+<td>
+   <pre lang="xml" style="font-size: 10px">
+
+    "groupid": "org.foo",
+    "artifactid": "bar"
+
+    </pre>
+</td>
+<td>
+  <pre lang="xml" style="font-size: 10px">
+[
+    {
+        "groupId": "org.foo",
+        "artifactId": "bar",
+        "version": "1.0.0.Final-rebuild-1",
+    },
+    ...
+]  </pre>
+</td>
+</tr>
+</table>
 
 **NOTE:** For existing dependencies that reference a property, PME will update this property with the new version. If the property can't be found (e.g. it was inherited), a new one will be injected at the top level. This update of the property's value **may** implicitly align other dependencies using the same property that were not explicitly requested to be aligned.
 
