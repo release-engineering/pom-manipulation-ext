@@ -25,8 +25,10 @@ import static org.commonjava.maven.ext.manip.TestUtils.runLikeInvoker;
 
 public class RESTIntegrationTest
 {
+    private static AddSuffixJettyHandler handler = new AddSuffixJettyHandler( "/", AddSuffixJettyHandler.DEFAULT_SUFFIX);
+
     @ClassRule
-    public static MockServer mockServer = new MockServer(new AddSuffixJettyHandler(  ));
+    public static MockServer mockServer = new MockServer( handler );
 
     @Test
     public void testRESTVersionDepManip() throws Exception
@@ -40,5 +42,35 @@ public class RESTIntegrationTest
     {
         String test = getDefaultTestLocation( "rest-version-manip-only" );
         runLikeInvoker( test, mockServer.getUrl() );
+    }
+
+    @Test(expected = ManipulationException.class)
+    public void testRESTBlacklist() throws Exception
+    {
+        try
+        {
+            handler.setBlacklist ("1.0");
+            String test = getDefaultTestLocation( "rest-blacklist" );
+            runLikeInvoker( test, mockServer.getUrl() );
+        }
+        finally
+        {
+            handler.setBlacklist (null);
+        }
+    }
+
+    @Test
+    public void testRESTBlacklist2() throws Exception
+    {
+        try
+        {
+            handler.setBlacklist ("1.0.redhat-3");
+            String test = getDefaultTestLocation( "rest-blacklist" );
+            runLikeInvoker( test, mockServer.getUrl() );
+        }
+        finally
+        {
+            handler.setBlacklist (null);
+        }
     }
 }

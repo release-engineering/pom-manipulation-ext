@@ -15,8 +15,6 @@
  */
 package org.commonjava.maven.ext.manip.rest;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef;
 import org.commonjava.maven.ext.manip.rest.exception.RestException;
@@ -24,13 +22,10 @@ import org.commonjava.maven.ext.manip.rest.rule.MockServer;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.handler.AbstractHandler;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.ClassRule;
-import org.junit.FixMethodOrder;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestName;
-import org.junit.runners.MethodSorters;
 import org.slf4j.LoggerFactory;
 
 import javax.servlet.ServletException;
@@ -39,17 +34,14 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.Scanner;
 
+import static org.commonjava.maven.ext.manip.rest.Translator.RestProtocol;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-@FixMethodOrder( MethodSorters.NAME_ASCENDING)
-public class HttpErrorVersionTranslatorTest
+public class HttpMessageTranslatorTest
 {
-    private static List<ProjectVersionRef> aLotOfGavs;
-
-    private DefaultVersionTranslator versionTranslator;
+    private DefaultTranslator versionTranslator;
 
     @Rule
     public TestName testName = new TestName();
@@ -62,46 +54,27 @@ public class HttpErrorVersionTranslatorTest
                             HttpServletResponse response )
                         throws IOException, ServletException
         {
-            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+            response.setStatus(HttpServletResponse.SC_BAD_GATEWAY);
             baseRequest.setHandled( true );
-            response.getWriter().println( "<html><head><title>404</title></head></html");
+            response.getWriter().println( "{\\\"message\\\":\\\"Communication with remote repository failed\\\"}");
         }
     } );
-
-    @BeforeClass
-    public static void startUp()
-        throws IOException
-    {
-        aLotOfGavs = new ArrayList<>();
-        String longJsonFile = readFileFromClasspath( "example-response-performance-test.json" );
-
-        ObjectMapper objectMapper = new ObjectMapper();
-        List<Map<String, String>> gavs = objectMapper.readValue(
-            longJsonFile, new TypeReference<List<Map<String, String>>>() {} );
-        for ( Map<String, String> gav : gavs )
-        {
-            ProjectVersionRef project =
-                new SimpleProjectVersionRef( gav.get( "groupId" ), gav.get( "artifactId" ), gav.get( "version" ) );
-            aLotOfGavs.add( project );
-        }
-    }
 
     @Before
     public void before()
     {
-        LoggerFactory.getLogger( DefaultVersionTranslator.class ).info ("Executing test " + testName.getMethodName());
+        LoggerFactory.getLogger( DefaultTranslator.class ).info ( "Executing test " + testName.getMethodName());
 
-        this.versionTranslator = new DefaultVersionTranslator( mockServer.getUrl(), VersionTranslator.RestProtocol.CURRENT, 0,
-                                                               VersionTranslator.CHUNK_SPLIT_COUNT );
+        this.versionTranslator = new DefaultTranslator( mockServer.getUrl(), RestProtocol.CURRENT, 0,
+                                                        Translator.CHUNK_SPLIT_COUNT );
     }
 
     @Test
-    public void testTranslateVersionsWith404()
+    public void testTranslateVersionsWithMessage()
     {
         List<ProjectVersionRef> gavs = new ArrayList<ProjectVersionRef>()
         {{
             add( new SimpleProjectVersionRef( "com.example", "example", "1.0" ) );
-            add( new SimpleProjectVersionRef( "org.commonjava", "example", "1.1" ) );
         }};
 
         try
@@ -111,22 +84,7 @@ public class HttpErrorVersionTranslatorTest
         }
         catch ( RestException ex )
         {
-            // Pass
-        }
-    }
-
-    private static String readFileFromClasspath( String filename )
-    {
-        StringBuilder fileContents = new StringBuilder();
-        String lineSeparator = System.getProperty( "line.separator" );
-
-        try (Scanner scanner = new Scanner( HttpErrorVersionTranslatorTest.class.getResourceAsStream( filename ) ))
-        {
-            while ( scanner.hasNextLine() )
-            {
-                fileContents.append( scanner.nextLine() + lineSeparator );
-            }
-            return fileContents.toString();
+            assertTrue( ex.getMessage().contains( "502" ) );
         }
     }
 }

@@ -36,13 +36,13 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
 
-import static org.commonjava.maven.ext.manip.rest.VersionTranslator.RestProtocol;
+import static org.commonjava.maven.ext.manip.rest.Translator.RestProtocol;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 public class HttpHeaderHeaderTest
 {
-    private DefaultVersionTranslator versionTranslator;
+    private DefaultTranslator versionTranslator;
 
     @Rule
     public final SystemOutRule systemOutRule = new SystemOutRule().enableLog();
@@ -77,10 +77,10 @@ public class HttpHeaderHeaderTest
     @Before
     public void before()
     {
-        LoggerFactory.getLogger( DefaultVersionTranslator.class ).info ("Executing test " + testName.getMethodName());
+        LoggerFactory.getLogger( DefaultTranslator.class ).info ( "Executing test " + testName.getMethodName());
 
-        this.versionTranslator = new DefaultVersionTranslator( mockServer.getUrl(), RestProtocol.CURRENT, 0,
-                                                               VersionTranslator.CHUNK_SPLIT_COUNT );
+        this.versionTranslator = new DefaultTranslator( mockServer.getUrl(), RestProtocol.CURRENT, 0,
+                                                        Translator.CHUNK_SPLIT_COUNT );
     }
 
     private String generateResponse( String header )

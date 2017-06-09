@@ -33,7 +33,9 @@ import java.util.Map;
 import static java.util.Collections.emptyList;
 import static org.codehaus.plexus.util.FileUtils.copyFile;
 import static org.commonjava.maven.ext.manip.TestUtils.runCli;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Manipulators may output data in a structured form in a JSON file
@@ -44,7 +46,8 @@ import static org.junit.Assert.*;
  */
 public class ResultJsonFileTest
 {
-    @ClassRule public static MockServer mockServer = new MockServer( new AddSuffixJettyHandler() );
+    @ClassRule
+    public static MockServer mockServer = new MockServer( new AddSuffixJettyHandler("/", AddSuffixJettyHandler.DEFAULT_SUFFIX) );
 
     public static final ObjectMapper MAPPER = new ObjectMapper();
 

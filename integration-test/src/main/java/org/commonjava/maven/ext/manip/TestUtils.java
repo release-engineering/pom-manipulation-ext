@@ -75,6 +75,7 @@ public class TestUtils
         // Run in a separate test so a Mock server may be started.
         add( "rest-dependency-version-manip-child-module" );
         add( "rest-version-manip-only" );
+        add( "rest-blacklist" );
     }};
 
     protected static final Map<String, String> LOCATION_REWRITE = new HashMap<String, String>()
@@ -116,7 +117,7 @@ public class TestUtils
             // Run PME-Cli
             Integer cliExitValue = runCli( args, e.getJavaParams(), e.getLocation() );
 
-            logger.info ("Returned {} from running {} ", cliExitValue, args);
+            logger.info( "Returned {} from running {} ", cliExitValue, args );
             // Run Maven
             Map<String, String> mavenParams = new HashMap<>();
             mavenParams.putAll( DEFAULT_MVN_PARAMS );
@@ -126,13 +127,22 @@ public class TestUtils
             // Test return codes
             if ( e.isSuccess() )
             {
-                assertEquals( "PME-Cli (running in: " + workingDir + ") exited with a non zero value.", Integer.valueOf( 0 ), cliExitValue );
-                assertEquals( "Maven (running in: " + workingDir + ") exited with a non zero value.", Integer.valueOf( 0 ), mavenExitValue );
+                if ( cliExitValue != 0 )
+                {
+                    throw new ManipulationException ( "PME-Cli (running in: " + workingDir + ") exited with a non zero value : " + cliExitValue );
+                }
+                if ( mavenExitValue != 0 )
+                {
+                    throw new ManipulationException ( "Maven (running in: " + workingDir + ") exited with a non zero value." + mavenExitValue );
+                }
             }
             else
             {
-                assertTrue( "Exit value of either PME-Cli or Maven (running in: \" + workingDir + \") must be non-zero.",
-                            cliExitValue != 0 || mavenExitValue != 0 );
+                if ( cliExitValue == 0 && mavenExitValue == 0 )
+                {
+                    throw new ManipulationException
+                                    ( "Exit value of either PME-Cli (" + cliExitValue + ") or Maven (" + mavenExitValue + ") (running in: " + workingDir + ") must be non-zero.");
+                }
             }
         }
 
@@ -179,7 +189,7 @@ public class TestUtils
         consoleAppender.start();
 
         root.addAppender( consoleAppender );
-        root.setLevel( Level.INFO );
+        root.setLevel( Level.DEBUG );
 
         return result;
     }
