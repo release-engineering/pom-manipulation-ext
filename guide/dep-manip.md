@@ -277,4 +277,4 @@ If the property `-DbomBuilder=true` is set, then the PME BOM Builder will be act
 
     PWD=<project two> ; mvn -DdependencyManagement=org.projectOne.artifactOne:pme-bom:1.0.0 -Dversion.suffix=rebuild-1 clean install
 
-**Note:** The new BOM will be installed and deployed via a custom plugin that is added to the top level project. The plugi is configured to only run on the top level POM and will not fail if the BOM POM does not exist.
+**Note:** The new BOM will be installed and deployed via a custom plugin that is added to the top level project. The plugin is configured to only run on the top level POM and will not fail if the BOM POM does not exist.
