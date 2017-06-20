@@ -89,28 +89,48 @@ public class RESTManipulator implements Manipulator
 
         final ArrayList<ProjectVersionRef> restParam = new ArrayList<>();
         final ArrayList<ProjectVersionRef> newProjectKeys = new ArrayList<>();
-        for ( final Project project : projects )
+
+        final String override = vs.getOverride();
+
+
+        if ( isEmpty( override ) )
         {
-            // TODO: Check this : For the rest API I think we need to check every project GA not just inheritance root.
-            // Strip SNAPSHOT from the version for matching. DA will handle OSGi conversion.
-            ProjectVersionRef newKey = new SimpleProjectVersionRef( project.getKey() );
-            if ( project.getKey().getVersionString().endsWith( "-SNAPSHOT" ) )
+            for ( final Project project : projects )
             {
-                if ( !vs.preserveSnapshot() )
+                // TODO: Check this : For the rest API I think we need to check every project GA not just inheritance root.
+                // Strip SNAPSHOT from the version for matching. DA will handle OSGi conversion.
+                ProjectVersionRef newKey = new SimpleProjectVersionRef( project.getKey() );
+                if ( project.getKey().getVersionString().endsWith( "-SNAPSHOT" ) )
                 {
-                    newKey = new SimpleProjectVersionRef( project.getKey().asProjectRef(), project.getKey()
-                                                                                                  .getVersionString()
-                                                                                                  .substring( 0, project
-                                                                                                                  .getKey()
-                                                                                                                  .getVersionString()
-                                                                                                                  .indexOf( "-SNAPSHOT" ) ) );
+                    if ( !vs.preserveSnapshot() )
+                    {
+                        newKey = new SimpleProjectVersionRef( project.getKey().asProjectRef(), project.getKey()
+                                                                                                      .getVersionString()
+                                                                                                      .substring( 0,
+                                                                                                                  project.getKey()
+                                                                                                                         .getVersionString()
+                                                                                                                         .indexOf( "-SNAPSHOT" ) ) );
+                    }
+                    else
+                    {
+                        logger.warn( "SNAPSHOT detected for REST call but preserve-snapshots is enabled." );
+                    }
                 }
-                else
+                newProjectKeys.add( newKey );
+            }
+        }
+        else
+        {
+            for ( final Project project : projects )
+            {
+                if ( project.isExecutionRoot() )
                 {
-                    logger.warn( "SNAPSHOT detected for REST call but preserve-snapshots is enabled." );
+                    // We want to manually override the version ; therefore ignore what is in the project and calculate potential
+                    // matches for that instead.
+                    Project p = projects.get( 0 );
+                    newProjectKeys.add( new SimpleProjectVersionRef( p.getGroupId(), p.getArtifactId(), override ) );
                 }
             }
-            newProjectKeys.add( newKey );
         }
         restParam.addAll( newProjectKeys );
 
