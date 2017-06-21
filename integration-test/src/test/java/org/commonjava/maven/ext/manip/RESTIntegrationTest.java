@@ -44,6 +44,13 @@ public class RESTIntegrationTest
         runLikeInvoker( test, mockServer.getUrl() );
     }
 
+    @Test
+    public void testRESTVersionManipOverride() throws Exception
+    {
+        String test = getDefaultTestLocation( "rest-version-manip-only-override" );
+        runLikeInvoker( test, mockServer.getUrl() );
+    }
+
     @Test(expected = ManipulationException.class)
     public void testRESTBlacklist() throws Exception
     {

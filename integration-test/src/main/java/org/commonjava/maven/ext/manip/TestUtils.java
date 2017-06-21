@@ -75,6 +75,7 @@ public class TestUtils
         // Run in a separate test so a Mock server may be started.
         add( "rest-dependency-version-manip-child-module" );
         add( "rest-version-manip-only" );
+        add( "rest-version-manip-only-override" );
         add( "rest-blacklist" );
     }};
 
