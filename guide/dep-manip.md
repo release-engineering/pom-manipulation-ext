@@ -202,6 +202,14 @@ For example:
 
     mvn install -DdependencyExclusion.junit:*@*=
 
+#### Per Module Override Prevention with Wildcards
+
+Linking the two prior concepts it is also possible to prevent overriding using wildcards on a per-module basis e.g.
+
+    mvn install -DdependencyExclusion.*:*@org.foo:moduleB=
+
+This will prevent any alignment within the org.foo:moduleB.
+
 #### Dependency Exclusion Addition
 
 It is also possible to inject specific exclusions into a dependency. For instance
