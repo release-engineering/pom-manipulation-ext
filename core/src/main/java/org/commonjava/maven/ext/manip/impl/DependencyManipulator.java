@@ -78,6 +78,12 @@ public class DependencyManipulator implements Manipulator
     @Requirement
     private ModelIO effectiveModelBuilder;
 
+    /**
+     * Cache of modules we should ignore ; processed during applyModuleVersionOverrides and used
+     * for whether to post-apply any property processing.
+     */
+    private final HashSet <ProjectRef> ignoredModules = new HashSet<>();
+
 
     /**
      * Initialize the {@link DependencyState} state holder in the {@link ManipulationSession}. This state holder detects
@@ -201,9 +207,29 @@ public class DependencyManipulator implements Manipulator
         if (!result.isEmpty())
         {
             logger.info ("Iterating for standard overrides...");
+
+            // Remove the ignored modules first
+            Set<Project> projectsWithoutIgnoredModules = new HashSet<>(  );
+            projectsWithoutIgnoredModules.addAll( result );
+
+            Iterator<Project> pwiIt = projectsWithoutIgnoredModules.iterator();
+            while ( pwiIt.hasNext() )
+            {
+                Project pwi = pwiIt.next();
+                // loop over all projects and see if one matches in ignored? Then remove it. Only update props for remaining subset
+                for ( ProjectRef pr : ignoredModules)
+                {
+                    if ( pwi.getKey().asProjectRef().equals( pr ))
+                    {
+                        pwiIt.remove();
+                        break;
+                    }
+                }
+            }
+
             for ( final Map.Entry<String, String> entry : versionPropertyUpdateMap.entrySet() )
             {
-                PropertiesUtils.PropertyUpdate found = PropertiesUtils.updateProperties( session, result, false, entry.getKey(), entry.getValue());
+                PropertiesUtils.PropertyUpdate found = PropertiesUtils.updateProperties( session, projectsWithoutIgnoredModules, false, entry.getKey(), entry.getValue());
 
                 if ( found == PropertiesUtils.PropertyUpdate.NOTFOUND )
                 {
@@ -211,7 +237,7 @@ public class DependencyManipulator implements Manipulator
                     // property to update. Its possible this property has been inherited from a parent. Override in the
                     // top pom for safety.
                     logger.info( "Unable to find a property for {} to update", entry.getKey());
-                    for ( final Project p : result )
+                    for ( final Project p : projectsWithoutIgnoredModules )
                     {
                         if ( p.isInheritanceRoot() )
                         {
@@ -224,7 +250,7 @@ public class DependencyManipulator implements Manipulator
             logger.info ("Iterating for explicit overrides...");
             for ( final Map.Entry<String, String> entry : explicitVersionPropertyUpdateMap.entrySet() )
             {
-                PropertiesUtils.PropertyUpdate found = PropertiesUtils.updateProperties( session, result, true, entry.getKey(), entry.getValue() );
+                PropertiesUtils.PropertyUpdate found = PropertiesUtils.updateProperties( session, projectsWithoutIgnoredModules, true, entry.getKey(), entry.getValue() );
 
                 if ( found == PropertiesUtils.PropertyUpdate.NOTFOUND )
                 {
@@ -232,7 +258,7 @@ public class DependencyManipulator implements Manipulator
                     // property to update. Its possible this property has been inherited from a parent. Override in the
                     // top pom for safety.
                     logger.info( "Unable to find a property for {} to update for explicit overrides", entry.getKey());
-                    for ( final Project p : result )
+                    for ( final Project p : projectsWithoutIgnoredModules )
                     {
                         if ( p.isInheritanceRoot() )
                         {
@@ -553,6 +579,7 @@ public class DependencyManipulator implements Manipulator
             {
                 ProjectRef groupIdArtifactId = entry.getKey().asProjectRef();
 
+                logger.debug( "### Processing groupIdartifactId {} against project ref {}  ", groupIdArtifactId , depPr );
                 if ( depPr.equals( groupIdArtifactId ) )
                 {
                     final String oldVersion = dependency.getVersion();
@@ -730,14 +757,14 @@ public class DependencyManipulator implements Manipulator
                     continue;
                 }
 
-                final boolean isWildcard = currentKey.endsWith( "@*" );
-                logger.debug( "Is wildcard? {}", isWildcard );
+                final boolean isModuleWildcard = currentKey.endsWith( "@*" );
+                logger.debug( "Is wildcard? {} and in module wildcard mode? {} ", isModuleWildcard, aWildcardMode );
 
                 // process module-specific overrides (first)
                 if ( !aWildcardMode )
                 {
                     // skip wildcard overrides in this mode
-                    if ( isWildcard )
+                    if ( isModuleWildcard )
                     {
                         logger.debug( "Not currently in wildcard mode. Skip." );
                         continue;
@@ -764,16 +791,17 @@ public class DependencyManipulator implements Manipulator
                         }
                         else
                         {
-                            removeGA( remainingOverrides, SimpleProjectRef.parse( artifactGA ) );
-                            logger.debug( "Ignoring module dependency override for {} " + moduleGA );
+                            // Override prevention...
+                            removeGA( SimpleProjectRef.parse( projectGA ), remainingOverrides, SimpleProjectRef.parse( artifactGA ) );
+                            logger.debug( "For module {}, ignoring dependency override for {} ", moduleGA, artifactGA);
                         }
                     }
                 }
                 // process wildcard overrides (second)
                 else
                 {
-                    // skip module-specific overrides in this mode
-                    if ( !isWildcard )
+                    // skip module-specific overrides in this mode i.e. format of groupdId:artifactId@*=
+                    if ( !isModuleWildcard )
                     {
                         logger.debug( "Currently in wildcard mode. Skip." );
                         continue;
@@ -801,26 +829,8 @@ public class DependencyManipulator implements Manipulator
                     {
                         // If we have a wildcard artifact we want to replace any prior explicit overrides
                         // with this one i.e. this takes precedence.
-                        if ( artifactGA.endsWith( ":*" ) )
-                        {
-                            final ProjectRef artifactGAPr = SimpleProjectRef.parse( artifactGA );
-                            final Iterator<ArtifactRef> it = remainingOverrides.keySet().iterator();
-                            while ( it.hasNext() )
-                            {
-                                final ArtifactRef pr = it.next();
-                                if ( artifactGAPr.getGroupId().equals( pr.getGroupId() ) )
-                                {
-                                    logger.debug( "Removing artifactGA " + pr + " from overrides" );
-                                    it.remove();
-                                }
-                            }
-                        }
-                        else
-                        {
-                            removeGA( remainingOverrides, SimpleProjectRef.parse( artifactGA ) );
-                            logger.debug( "Removing artifactGA " + artifactGA + " from overrides" );
-                        }
-                        logger.debug( "Ignoring module dependency override for {} " + projectGA );
+                        removeGA( SimpleProjectRef.parse( projectGA ), remainingOverrides, SimpleProjectRef.parse( artifactGA ) );
+                        logger.debug( "Removing artifactGA " + artifactGA + " from overrides" );
                     }
                 }
             }
@@ -829,17 +839,26 @@ public class DependencyManipulator implements Manipulator
         return remainingOverrides;
     }
 
-    private void removeGA( Map<ArtifactRef, String> map, ProjectRef ref )
+    private void removeGA( ProjectRef moduleGA, Map<ArtifactRef, String> overrides, ProjectRef ref )
     {
-        Iterator<ArtifactRef> it = map.keySet().iterator();
+        Iterator<ArtifactRef> it = overrides.keySet().iterator();
 
         while ( it.hasNext() )
         {
             ArtifactRef a = it.next();
 
-            if ( a.asProjectRef().equals( ref ) )
+            if ( a.asProjectRef().equals( ref ) ||
+                ( ref.getArtifactId().equals( "*" ) && a.getGroupId().equals( ref.getGroupId() ) ) ||
+                ( ref.getGroupId().equals( "*" ) && a.getArtifactId().equals( ref.getArtifactId() ) ) )
             {
                 it.remove();
+            }
+            else if ( ref.getArtifactId().equals( "*" ) && ref.getGroupId().equals( "*" ) )
+            {
+                // For complete wildcard also cache the ignored module as we need the list later during
+                // property processing.
+                it.remove();
+                ignoredModules.add( moduleGA );
             }
         }
     }
