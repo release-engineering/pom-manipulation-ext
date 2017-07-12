@@ -383,12 +383,27 @@ public final class PropertiesUtils
     public static String resolveProperties( List<Project> projects, String value ) throws ManipulationException
     {
         final Properties amalgamated = new Properties();
+        Project executionRoot = null;
 
-        // Reverse order so execution root ends up overwriting everything.
-        for ( int i = projects.size() - 1; i >= 0; i-- )
+        // Save execution root so it can potentially overwrite.
+        for ( Project p : projects )
         {
-            amalgamated.putAll( projects.get( i ).getModel().getProperties() );
+            if ( p.isExecutionRoot() )
+            {
+                executionRoot = p;
+            }
+            else
+            {
+                amalgamated.putAll( p.getModel().getProperties() );
+            }
         }
+        // In theory executionRoot should never be null but some artificially constructed unit tests don't define
+        // it so lets avoid a null ptr.
+        if ( executionRoot != null)
+        {
+            amalgamated.putAll( executionRoot.getModel().getProperties() );
+        }
+
         PropertyInterpolator pi = new PropertyInterpolator( amalgamated, projects.get( 0 ) );
         return pi.interp( value );
     }
