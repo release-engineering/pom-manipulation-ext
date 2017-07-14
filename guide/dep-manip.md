@@ -210,6 +210,10 @@ Linking the two prior concepts it is also possible to prevent overriding using w
 
 This will prevent any alignment within the org.foo:moduleB.
 
+    mvn install -DdependencyExclusion.*:*@org.foo:*=
+
+This will prevent any alignment within org.foo and all sub-modules within that.
+
 #### Dependency Exclusion Addition
 
 It is also possible to inject specific exclusions into a dependency. For instance
