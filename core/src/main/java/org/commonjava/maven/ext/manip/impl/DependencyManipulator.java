@@ -579,7 +579,6 @@ public class DependencyManipulator implements Manipulator
             {
                 ProjectRef groupIdArtifactId = entry.getKey().asProjectRef();
 
-                logger.debug( "### Processing groupIdartifactId {} against project ref {}  ", groupIdArtifactId , depPr );
                 if ( depPr.equals( groupIdArtifactId ) )
                 {
                     final String oldVersion = dependency.getVersion();
@@ -776,12 +775,17 @@ public class DependencyManipulator implements Manipulator
                         throw new ManipulationException( "Invalid format for exclusion key " + currentKey );
                     }
                     final String artifactGA = artifactAndModule[0];
-                    final String moduleGA = artifactAndModule[1];
+                    final ProjectRef moduleGA = SimpleProjectRef.parse( artifactAndModule[1] );
 
                     logger.debug( "For artifact override: {}, comparing parsed module: {} to current project: {}",
                                   artifactGA, moduleGA, projectGA );
 
-                    if ( moduleGA.equals( projectGA ) )
+                    if ( moduleGA.toString().equals( projectGA ) ||
+                                    (
+                                        moduleGA.getArtifactId().equals( "*" ) &&
+                                        SimpleProjectRef.parse( projectGA ).getGroupId().equals( moduleGA.getGroupId()
+                                    )
+                        ) )
                     {
                         if ( currentValue != null && !currentValue.isEmpty() )
                         {
