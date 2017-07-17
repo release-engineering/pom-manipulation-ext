@@ -24,11 +24,11 @@
 
   <parent>
     <groupId>org.commonjava.maven.ext</groupId>
-    <artifactId>child-module-dependency-override-exclusion</artifactId>
+    <artifactId>child-module-dependency-override-exclusion-wildcard</artifactId>
     <version>1.0-SNAPSHOT</version>
   </parent>
 
-  <artifactId>child-module-dependency-override-child-exclusion</artifactId>
+  <artifactId>child-module-dependency-override-child-exclusion-wildcard</artifactId>
 
   <name>Test override dependency version using command line property with remote pom</name>
 
