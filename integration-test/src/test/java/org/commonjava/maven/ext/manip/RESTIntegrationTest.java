@@ -17,18 +17,44 @@ package org.commonjava.maven.ext.manip;
 
 import org.commonjava.maven.ext.manip.rest.handler.AddSuffixJettyHandler;
 import org.commonjava.maven.ext.manip.rest.rule.MockServer;
+import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.io.File;
+
+import static org.commonjava.maven.ext.manip.DefaultCliIntegrationTest.setupExists;
+import static org.commonjava.maven.ext.manip.TestUtils.DEFAULT_MVN_PARAMS;
 import static org.commonjava.maven.ext.manip.TestUtils.getDefaultTestLocation;
 import static org.commonjava.maven.ext.manip.TestUtils.runLikeInvoker;
+import static org.commonjava.maven.ext.manip.TestUtils.runMaven;
 
 public class RESTIntegrationTest
 {
+    private static final Logger LOGGER = LoggerFactory.getLogger( DefaultCliIntegrationTest.class );
+
     private static AddSuffixJettyHandler handler = new AddSuffixJettyHandler( "/", AddSuffixJettyHandler.DEFAULT_SUFFIX);
 
     @ClassRule
     public static MockServer mockServer = new MockServer( handler );
+
+    @BeforeClass
+    public static void setUp()
+        throws Exception
+    {
+        for ( File setupTest : new File( getDefaultTestLocation( "setup" ) ).listFiles() )
+        {
+            LOGGER.info ("Running install for {}", setupTest.toString());
+
+            // Try to do some simplistic checks to see if this has already been done.
+            if ( ! setupExists( setupTest ))
+            {
+                runMaven( "install", DEFAULT_MVN_PARAMS, setupTest.toString() );
+            }
+        }
+    }
 
     @Test
     public void testRESTVersionDepManip() throws Exception
@@ -41,6 +67,20 @@ public class RESTIntegrationTest
     public void testRESTVersionManip() throws Exception
     {
         String test = getDefaultTestLocation( "rest-version-manip-only" );
+        runLikeInvoker( test, mockServer.getUrl() );
+    }
+
+    @Test
+    public void testRESTVersionManipBOMREST() throws Exception
+    {
+        String test = getDefaultTestLocation( "rest-version-manip-bomrest" );
+        runLikeInvoker( test, mockServer.getUrl() );
+    }
+
+    @Test
+    public void testRESTVersionManipRESTBOM() throws Exception
+    {
+        String test = getDefaultTestLocation( "rest-version-manip-restbom" );
         runLikeInvoker( test, mockServer.getUrl() );
     }
 

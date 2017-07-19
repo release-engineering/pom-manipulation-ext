@@ -24,6 +24,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.io.FileFilter;
 import java.util.ArrayList;
 import java.util.Collection;
 
@@ -104,18 +105,31 @@ public class DefaultCliIntegrationTest
     }
 
 
-    private static boolean setupExists (File test)
+    public static boolean setupExists (File test)
     {
         boolean result = false;
         File t1 = new File (DEFAULT_MVN_PARAMS.get( "maven.repo.local" ),"org/commonjava/maven/ext/");
         if ( t1.exists())
         {
             File t2 = new File( t1, test.getName() );
-            File t3 = new File( t2, "1.0" );
-            if (t2.exists() && t3.exists() && t3.listFiles() != null && t3.listFiles().length > 0)
+            File[] directories = t2.listFiles(new FileFilter()
             {
-                LOGGER.info( "Setup has already been run for {}", test);
-                return true;
+                @Override
+                public boolean accept( File file )
+                {
+                    return file.isDirectory();
+                }
+            });
+            if ( directories != null)
+            {
+                for ( File dir : directories )
+                {
+                    if ( t2.exists() && dir.exists() && dir.listFiles() != null && dir.listFiles().length > 0)
+                    {
+                        LOGGER.info( "Setup has already been run for {}", test);
+                        return true;
+                    }
+                }
             }
         }
         return result;

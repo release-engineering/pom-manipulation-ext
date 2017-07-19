@@ -26,15 +26,15 @@ assert pom.version.text().endsWith( '.redhat-2' )
 // Currently the AddSuffixJettyHandler doesn't do OSGi compatibility.
 def dependency = pom.dependencyManagement.dependencies.dependency.find { it.artifactId.text() == "commons-lang" }
 assert dependency != null
-assert dependency.version.text() == "1.0"
+assert dependency.version.text() == "1.0-redhat-1"
 
 dependency = pom.dependencies.dependency.find { it.artifactId.text() == "errai-common" }
 assert dependency != null
-assert dependency.version.text() == "1.1-Final"
+assert dependency.version.text() == "1.1-Final-redhat-1"
 
 def passed = false
 pom.properties.each {
-    if ( it.text().contains ("3.1") )
+    if ( it.text().contains ("3.1-redhat-1") )
     {
         passed = true
     }

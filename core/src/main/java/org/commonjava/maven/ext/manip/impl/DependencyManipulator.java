@@ -34,6 +34,7 @@ import org.commonjava.maven.ext.manip.ManipulationSession;
 import org.commonjava.maven.ext.manip.io.ModelIO;
 import org.commonjava.maven.ext.manip.model.Project;
 import org.commonjava.maven.ext.manip.state.DependencyState;
+import org.commonjava.maven.ext.manip.state.DependencyState.DependencyPrecedence;
 import org.commonjava.maven.ext.manip.util.ProfileUtils;
 import org.commonjava.maven.ext.manip.util.PropertiesUtils;
 import org.commonjava.maven.ext.manip.util.WildcardMap;
@@ -70,6 +71,7 @@ public class DependencyManipulator implements Manipulator
      * Used to store mappings of old property to new version for explicit overrides.
      */
     private final HashMap<String, String> explicitVersionPropertyUpdateMap = new HashMap<>();
+
     /**
      * Used to store mappings of old property to new version.
      */
@@ -82,8 +84,7 @@ public class DependencyManipulator implements Manipulator
      * Cache of modules we should ignore ; processed during applyModuleVersionOverrides and used
      * for whether to post-apply any property processing.
      */
-    private final HashSet <ProjectRef> ignoredModules = new HashSet<>();
-
+    private final HashSet<ProjectRef> ignoredModules = new HashSet<>();
 
     /**
      * Initialize the {@link DependencyState} state holder in the {@link ManipulationSession}. This state holder detects
@@ -101,8 +102,7 @@ public class DependencyManipulator implements Manipulator
      * No prescanning required for BOM manipulation.
      */
     @Override
-    public void scan( final List<Project> projects, final ManipulationSession session )
-        throws ManipulationException
+    public void scan( final List<Project> projects, final ManipulationSession session ) throws ManipulationException
     {
     }
 
@@ -111,7 +111,7 @@ public class DependencyManipulator implements Manipulator
      */
     @Override
     public Set<Project> applyChanges( final List<Project> projects, final ManipulationSession session )
-        throws ManipulationException
+                    throws ManipulationException
     {
         final DependencyState state = session.getState( DependencyState.class );
 
@@ -131,30 +131,25 @@ public class DependencyManipulator implements Manipulator
      * @return the loaded overrides
      * @throws ManipulationException if an error occurs.
      */
-    private Map<ArtifactRef, String> loadRemoteOverrides( final DependencyState state )
-        throws ManipulationException
+    private Map<ArtifactRef, String> loadRemoteOverrides( final DependencyState state ) throws ManipulationException
     {
-        Map<ArtifactRef, String> overrides = state.getRemoteRESTOverrides();
+        final List<ProjectVersionRef> gavs = state.getRemoteBOMDepMgmt();
 
-        if ( overrides == null)
+        Map<ArtifactRef, String> restOverrides = state.getRemoteRESTOverrides();
+        Map<ArtifactRef, String> bomOverrides = new LinkedHashMap<>();
+        Map<ArtifactRef, String> mergedOverrides = new LinkedHashMap<>();
+
+        if ( gavs != null && !gavs.isEmpty() )
         {
-            overrides = new LinkedHashMap<>();
-            final List<ProjectVersionRef> gavs = state.getRemoteBOMDepMgmt();
-
-            if ( gavs == null || gavs.isEmpty() )
-            {
-                return overrides;
-            }
-
             final ListIterator<ProjectVersionRef> iter = gavs.listIterator( gavs.size() );
             // Iterate in reverse order so that the first GAV in the list overwrites the last
             while ( iter.hasPrevious() )
             {
                 final ProjectVersionRef ref = iter.previous();
 
-                // Firstly, purge out any pre-existing entries.
+                //TODO: cross-reference this with ::applyOverrides that also discusses it.
                 Map<ArtifactRef, String> rBom = effectiveModelBuilder.getRemoteDependencyVersionOverrides( ref );
-                Iterator<ArtifactRef> i = overrides.keySet().iterator();
+                Iterator<ArtifactRef> i = bomOverrides.keySet().iterator();
                 while ( i.hasNext() )
                 {
                     ArtifactRef ar = i.next();
@@ -166,16 +161,64 @@ public class DependencyManipulator implements Manipulator
 
                         if ( !ar.equals( ar2 ) && arp.equals( arp2 ) )
                         {
-                            logger.warn( "When processing {} removing existing artifact {} for dependency consideration as it clashes preferred artifact {} ", ref, ar, ar2 );
+                            logger.warn( "When processing {} removing existing artifact {} for dependency consideration as it clashes preferred artifact {} ",
+                                         ref, ar, ar2 );
                             i.remove();
                             break;
                         }
                     }
                 }
-                overrides.putAll( rBom );
+                bomOverrides.putAll( rBom );
             }
         }
-        return overrides;
+
+        if ( state.getPrecedence() == DependencyPrecedence.DEFAULT )
+        {
+            if ( restOverrides != null )
+            {
+                mergedOverrides = restOverrides;
+            }
+            else
+            {
+                mergedOverrides = bomOverrides;
+            }
+        }
+        else if ( state.getPrecedence() == DependencyPrecedence.RESTBOM )
+        {
+            mergedOverrides = bomOverrides;
+
+            removeDuplicateArtifacts( mergedOverrides, restOverrides );
+            mergedOverrides.putAll( restOverrides );
+        }
+        else if ( state.getPrecedence() == DependencyPrecedence.BOMREST )
+        {
+            mergedOverrides = restOverrides;
+            removeDuplicateArtifacts( mergedOverrides, bomOverrides );
+            mergedOverrides.putAll( bomOverrides );
+        }
+        logger.debug ("Final remote override list is {}", mergedOverrides);
+        return mergedOverrides;
+    }
+
+
+    private void removeDuplicateArtifacts( Map<ArtifactRef, String> mergedOverrides, Map<ArtifactRef, String> targetOverrides )
+    {
+        Iterator<ArtifactRef> i = mergedOverrides.keySet().iterator();
+        while ( i.hasNext() )
+        {
+            ArtifactRef key = i.next();
+            ProjectRef pRef = key.asProjectRef();
+
+            for ( ArtifactRef target : targetOverrides.keySet() )
+            {
+                if ( pRef.equals( target.asProjectRef() ) )
+                {
+                    i.remove();
+                    break;
+                }
+            }
+        }
+
     }
 
     @Override
