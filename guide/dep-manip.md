@@ -9,6 +9,8 @@ title: "Dependency Manipulation"
 
 PME can override a set of dependency versions using a remote source which may be either a pom (BOM) file or a remote REST endpoint.
 
+### Dependency Source
+
 #### Remote POM
 
 By default, all dependencies listed in the remote pom will be added to the current build. This has the effect of overriding matching transitive dependencies, as well as those specified directly in the pom.
@@ -107,6 +109,10 @@ The blacklist REST endpoint should follow:
 </table>
 
 **NOTE:** For existing dependencies that reference a property, PME will update this property with the new version. If the property can't be found (e.g. it was inherited), a new one will be injected at the top level. This update of the property's value **may** implicitly align other dependencies using the same property that were not explicitly requested to be aligned.
+
+#### Combining BOM and REST
+
+The property `dependencySource` is used to alter the behaviour of how PME handles the multiple sources of dependency information. The `DEFAULT` value (which is also the behaviour if this property is not specified) is that PME will use the REST source instead of any BOMs if the REST source is specified. However by setting the property to either `RESTBOM` or `BOMREST` it will instead merge the two sets of values. With `RESTBOM` precendence is given to the REST information and for `BOMREST` precendence is given to the BOM information.
 
 ### Direct Dependencies
 
