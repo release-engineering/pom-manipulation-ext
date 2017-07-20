@@ -44,6 +44,26 @@ public class DependencyState
     private static final String DEPENDENCY_EXCLUSION_PREFIX = "dependencyExclusion.";
 
     /**
+     * Defines how dependencies are located.
+     */
+    private static final String DEPENDENCY_SOURCE = "dependencySource";
+
+    /**
+     * Merging precedence for dependency sources:
+     * <pre>
+     * <code>DEFAULT</code> (solely restURL (if specified) otherwise BOM)
+     * <code>RESTBOM</code> Merges the information but takes the rest as precedence.
+     * <code>BOMREST</code> Merges the information but takes the bom as precedence.
+     * </pre>
+     * Configured by the property <code>-DdependencySource=[DEFAULT|RESTBOM|BOMREST]</code>
+     */
+    public enum DependencyPrecedence
+    {
+        DEFAULT,
+        RESTBOM,
+        BOMREST
+    }
+    /**
      * Merely an alias for {@link DependencyState#DEPENDENCY_EXCLUSION_PREFIX}
      */
     private static final String DEPENDENCY_OVERRIDE_PREFIX = "dependencyOverride.";
@@ -95,7 +115,8 @@ public class DependencyState
 
     private Map<ArtifactRef, String> remoteRESTdepMgmt;
 
-    
+    private DependencyPrecedence precedence;
+
     public DependencyState( final Properties userProps ) throws ManipulationException
     {
         overrideTransitive = Boolean.valueOf( userProps.getProperty( "overrideTransitive", "true" ) );
@@ -112,6 +133,30 @@ public class DependencyState
             if ( dependencyExclusions.put( s, oP.get( s ) ) != null )
             {
                 throw new ManipulationException( "Property clash between dependencyOverride and dependencyExclusion for " + s );
+            }
+        }
+        switch ( DependencyPrecedence.valueOf( userProps.getProperty( DEPENDENCY_SOURCE,
+                                                            DependencyPrecedence.DEFAULT.toString() ).toUpperCase() ) )
+        {
+            case DEFAULT:
+            {
+                precedence = DependencyPrecedence.DEFAULT;
+                break;
+            }
+            case RESTBOM:
+            {
+                precedence = DependencyPrecedence.RESTBOM;
+                break;
+            }
+            case BOMREST:
+            {
+                precedence = DependencyPrecedence.BOMREST;
+                break;
+            }
+            default:
+            {
+                precedence = DependencyPrecedence.DEFAULT;
+                break;
             }
         }
     }
@@ -164,6 +209,11 @@ public class DependencyState
     public boolean getFailOnStrictViolation()
     {
         return failOnStrictViolation;
+    }
+
+    public DependencyPrecedence getPrecedence()
+    {
+        return precedence;
     }
 
     public void setRemoteRESTOverrides( Map<ArtifactRef, String> overrides )
