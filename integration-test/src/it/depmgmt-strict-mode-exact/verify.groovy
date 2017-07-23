@@ -31,6 +31,10 @@ dependency = pom.dependencyManagement.dependencies.dependency.find { it.artifact
 assert dependency != null
 assert dependency.version.text() == "1.0"
 
+dependency = pom.dependencyManagement.dependencies.dependency.find { it.artifactId.text() == "jacorb" }
+assert dependency != null
+assert dependency.version.text() == "2.0.redhat-1"
+
 def passed = false
 pom.properties.each {
     if ( ! it.text().contains ("redhat-1") )
@@ -51,3 +55,7 @@ assert dependency.version.text() == "2.6.0.redhat-4"
 dependency = pomChild.dependencyManagement.dependencies.dependency.find { it.artifactId.text() == "junit" }
 assert dependency != null
 assert dependency.version.text() == "4.1.0"
+
+dependency = pomChild.dependencyManagement.dependencies.dependency.find { it.artifactId.text() == "jacorb" }
+assert dependency != null
+assert dependency.version.text() == "3.1.redhat-1"

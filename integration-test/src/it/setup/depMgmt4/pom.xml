@@ -62,6 +62,12 @@
         <artifactId>jboss-parent</artifactId>
         <version>5</version>
       </dependency>
+
+      <dependency>
+        <groupId>org.jacorb</groupId>
+        <artifactId>jacorb</artifactId>
+        <version>2.0.redhat-1</version>
+      </dependency>
     </dependencies>
   </dependencyManagement>
 

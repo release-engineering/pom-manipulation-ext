@@ -48,6 +48,11 @@
         <artifactId>commons-lang</artifactId>
         <version>2.6</version>
       </dependency>
+      <dependency>
+        <groupId>org.jacorb</groupId>
+        <artifactId>jacorb</artifactId>
+        <version>3.1</version>
+      </dependency>
     </dependencies>
   </dependencyManagement>
 

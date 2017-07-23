@@ -146,28 +146,10 @@ public class DependencyManipulator implements Manipulator
             while ( iter.hasPrevious() )
             {
                 final ProjectVersionRef ref = iter.previous();
-
-                //TODO: cross-reference this with ::applyOverrides that also discusses it.
                 Map<ArtifactRef, String> rBom = effectiveModelBuilder.getRemoteDependencyVersionOverrides( ref );
-                Iterator<ArtifactRef> i = bomOverrides.keySet().iterator();
-                while ( i.hasNext() )
-                {
-                    ArtifactRef ar = i.next();
-                    ProjectRef arp = ar.asProjectRef();
 
-                    for ( ArtifactRef ar2 : rBom.keySet() )
-                    {
-                        ProjectRef arp2 = ar2.asProjectRef();
-
-                        if ( !ar.equals( ar2 ) && arp.equals( arp2 ) )
-                        {
-                            logger.warn( "When processing {} removing existing artifact {} for dependency consideration as it clashes preferred artifact {} ",
-                                         ref, ar, ar2 );
-                            i.remove();
-                            break;
-                        }
-                    }
-                }
+                // To don't normalise the BOM list here as ::applyOverrides can handle multiple GA with different V
+                // for strict override. However, it is undefined if strict is not enabled.
                 bomOverrides.putAll( rBom );
             }
         }
@@ -213,6 +195,7 @@ public class DependencyManipulator implements Manipulator
             {
                 if ( pRef.equals( target.asProjectRef() ) )
                 {
+                    logger.debug( "From source overrides artifact {} clashes with target {}", key, target );
                     i.remove();
                     break;
                 }
