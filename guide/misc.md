@@ -16,6 +16,8 @@ In addition to the main [project-version](project-version-manip.html), [dependen
 
 PME will be default scan every profile in the project. To restrict scanning to only those profiles that are active set `scanActiveProfiles` to true.
 
+Note: This will only detect those profiles explicitly activated via -P ; property activation will not be correctly detected. Further if this is being used in a system such as https://github.com/project-ncl/pnc, unless the profiles are explictly propagated via the CLI this option will have no affect.
+
 ### POM Cleanup
 
 #### Repository And Reporting Removal
