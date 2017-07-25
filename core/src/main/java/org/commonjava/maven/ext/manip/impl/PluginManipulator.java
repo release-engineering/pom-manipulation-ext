@@ -32,6 +32,7 @@ import org.commonjava.maven.ext.manip.ManipulationException;
 import org.commonjava.maven.ext.manip.ManipulationSession;
 import org.commonjava.maven.ext.manip.io.ModelIO;
 import org.commonjava.maven.ext.manip.model.Project;
+import org.commonjava.maven.ext.manip.state.DependencyState;
 import org.commonjava.maven.ext.manip.state.PluginState;
 import org.commonjava.maven.ext.manip.state.PluginState.Precedence;
 import org.commonjava.maven.ext.manip.state.State;
@@ -218,8 +219,6 @@ public class PluginManipulator
     {
         logger.info( "Applying plugin changes for {} to: {} ", type, ga( project ) );
 
-        PluginState state = session.getState( PluginState.class );
-
         if ( project.isInheritanceRoot() )
         {
             // If the model doesn't have any plugin management set by default, create one for it
@@ -244,7 +243,7 @@ public class PluginManipulator
             }
 
             // Override plugin management versions
-            applyOverrides( type, PluginType.LocalPM, pluginManagement.getPlugins(), override, state );
+            applyOverrides( session, type, PluginType.LocalPM, pluginManagement.getPlugins(), override );
         }
 
         if ( model.getBuild() != null )
@@ -255,7 +254,7 @@ public class PluginManipulator
 
             // We can't wipe out the versions as we can't guarantee that the plugins are listed
             // in the top level pluginManagement block.
-            applyOverrides( type, PluginType.LocalP, projectPlugins, override, state );
+            applyOverrides( session, type, PluginType.LocalP, projectPlugins, override );
         }
     }
 
@@ -263,19 +262,24 @@ public class PluginManipulator
      * Set the versions of any plugins which match the contents of the list of plugin overrides
      *
      *
+     *
+     * @param session
      * @param remotePluginType The type of the remote plugin (mgmt or plugins)
      * @param localPluginType The type of local block (mgmt or plugins).
      * @param plugins The list of plugins to modify
      * @param pluginVersionOverrides The list of version overrides to apply to the plugins
      * @throws ManipulationException if an error occurs.
      */
-    private void applyOverrides( PluginType remotePluginType, final PluginType localPluginType, final List<Plugin> plugins, final Map<ProjectRef, Plugin> pluginVersionOverrides,
-                                 PluginState pluginState ) throws ManipulationException
+    private void applyOverrides( ManipulationSession session, PluginType remotePluginType, final PluginType localPluginType,
+                                 final List<Plugin> plugins, final Map<ProjectRef, Plugin> pluginVersionOverrides ) throws ManipulationException
     {
         if ( plugins == null)
         {
             throw new ManipulationException ("Original plugins should not be null");
         }
+
+        final PluginState pluginState = session.getState( PluginState.class );
+        final DependencyState state = session.getState( DependencyState.class );
 
         for ( final Plugin override : pluginVersionOverrides.values())
         {
@@ -373,7 +377,7 @@ public class PluginManipulator
                 // one in build/plugins section.
                 if ( override.getVersion() != null && !override.getVersion().isEmpty())
                 {
-                    if ( ! PropertiesUtils.cacheProperty( pluginState.getVersionPropertyOverrides(), oldVersion, override.getVersion(), plugin, false ))
+                    if ( ! PropertiesUtils.cacheProperty( state, pluginState.getVersionPropertyOverrides(), oldVersion, override.getVersion(), plugin, false ))
                     {
                         if ( oldVersion != null && oldVersion.equals( "${project.version}" ) )
                         {

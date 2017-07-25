@@ -97,7 +97,7 @@ public final class PropertiesUtils
 
         if ( "project.version".equals( key ) )
         {
-            logger.warn( "Not updating key {} with {} ", key, newValue );
+            logger.debug ("Not updating key {} with {} ", key, newValue );
             return PropertyUpdate.IGNORE;
         }
 
@@ -304,6 +304,7 @@ public final class PropertiesUtils
      * This will check if the old version (e.g. in a plugin or dependency) is a property and if so
      * store the mapping in a map.
      *
+     * @param state DependencyState to retrieve property clash value QoS.
      * @param versionPropertyUpdateMap the map to store any updates in
      * @param oldVersion original property value
      * @param newVersion new property value
@@ -312,7 +313,7 @@ public final class PropertiesUtils
      * @return true if a property was found and cached.
      * @throws ManipulationException if an error occurs.
      */
-    public static boolean cacheProperty( Map<String, String> versionPropertyUpdateMap, String oldVersion,
+    public static boolean cacheProperty( DependencyState state, Map<String, String> versionPropertyUpdateMap, String oldVersion,
                                          String newVersion, Object originalType, boolean force )
                     throws ManipulationException
     {
@@ -356,16 +357,24 @@ public final class PropertiesUtils
                     }
                     else
                     {
-                        logger.error( "Replacing property '{}' with a new version but the existing version does not match. Old value is {} and new is {}",
-                                      oldVersionProp, existingPropertyMapping, newVersion );
-                        throw new ManipulationException(
-                                        "Property replacement clash - updating property '{}' to both {} and {} ",
-                                        oldVersionProp, existingPropertyMapping, newVersion );
+                        if ( state.getPropertyClashFails() )
+                        {
+                            logger.error( "Replacing property '{}' with a new version but the existing version does not match. Old value is {} and new is {}",
+                                          oldVersionProp, existingPropertyMapping, newVersion );
+                            throw new ManipulationException(
+                                            "Property replacement clash - updating property '{}' to both {} and {} ",
+                                            oldVersionProp, existingPropertyMapping, newVersion );
+                        }
+                        else
+                        {
+                            logger.warn ("Replacing property '{}' with a new version would clash with existing version does not match. Old value is {} and new is {}. Purging update of existing property.",
+                                          oldVersionProp, existingPropertyMapping, newVersion );
+                            versionPropertyUpdateMap.remove( oldVersionProp );
+                            return false;
+                        }
                     }
                 }
-
                 versionPropertyUpdateMap.put( oldVersionProp, newVersion );
-
                 result = true;
             }
         }

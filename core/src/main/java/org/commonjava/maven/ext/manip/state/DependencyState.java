@@ -96,6 +96,13 @@ public class DependencyState
     private static final String DEPENDENCY_MANAGEMENT_POM_PROPERTY = "dependencyManagement";
 
     /**
+     * When true, clashes with cached properties will throw an exception in PropertiesUtils. Setting this to false will prevent
+     * that. Default value is true.
+     * TODO: Might need to be used by pluginManipulator as well
+     */
+    private static final String PROPERTY_CLASH_FAILS = "propertyClashFails";
+
+    /**
      * Whether to override transitive as well. Note: this uses the same name (overrideTransitive)
      * as {@link PluginState#overrideTransitive }
      */
@@ -108,6 +115,8 @@ public class DependencyState
     private final boolean failOnStrictViolation;
 
     private final boolean ignoreSuffix;
+
+    private final boolean propertyClashFails;
 
     private final List<ProjectVersionRef> remoteBOMdepMgmt;
 
@@ -124,9 +133,10 @@ public class DependencyState
         strict = Boolean.valueOf( userProps.getProperty( STRICT_DEPENDENCIES, "false" ) );
         ignoreSuffix = Boolean.valueOf( userProps.getProperty( STRICT_ALIGNMENT_IGNORE_SUFFIX, "false" ) );
         failOnStrictViolation = Boolean.valueOf( userProps.getProperty( STRICT_VIOLATION_FAILS, "false" ) );
+        propertyClashFails = Boolean.valueOf( userProps.getProperty( PROPERTY_CLASH_FAILS, "true" ) );
         remoteBOMdepMgmt = IdUtils.parseGAVs( userProps.getProperty( DEPENDENCY_MANAGEMENT_POM_PROPERTY ) );
-
         dependencyExclusions = getPropertiesByPrefix( userProps, DEPENDENCY_EXCLUSION_PREFIX );
+
         Map<String, String> oP = PropertiesUtils.getPropertiesByPrefix( userProps, DEPENDENCY_OVERRIDE_PREFIX );
         for ( String s : oP.keySet() )
         {
@@ -211,6 +221,10 @@ public class DependencyState
         return failOnStrictViolation;
     }
 
+    public boolean getPropertyClashFails()
+    {
+        return propertyClashFails;
+    }
     public DependencyPrecedence getPrecedence()
     {
         return precedence;
