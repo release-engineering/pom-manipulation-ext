@@ -135,6 +135,10 @@ public class DependencyManipulator implements Manipulator
     {
         final List<ProjectVersionRef> gavs = state.getRemoteBOMDepMgmt();
 
+        // While in theory we are only mapping ProjectRef -> NewVersion if we store key as ProjectRef we can't then have
+        // org.foo:foobar -> 1.2.0.redhat-2
+        // org.foo:foobar -> 2.0.0.redhat-2
+        // Which is useful for strictAlignment scenarios (although undefined for non-strict).
         Map<ArtifactRef, String> restOverrides = state.getRemoteRESTOverrides();
         Map<ArtifactRef, String> bomOverrides = new LinkedHashMap<>();
         Map<ArtifactRef, String> mergedOverrides = new LinkedHashMap<>();
@@ -148,7 +152,7 @@ public class DependencyManipulator implements Manipulator
                 final ProjectVersionRef ref = iter.previous();
                 Map<ArtifactRef, String> rBom = effectiveModelBuilder.getRemoteDependencyVersionOverrides( ref );
 
-                // To don't normalise the BOM list here as ::applyOverrides can handle multiple GA with different V
+                // We don't normalise the BOM list here as ::applyOverrides can handle multiple GA with different V
                 // for strict override. However, it is undefined if strict is not enabled.
                 bomOverrides.putAll( rBom );
             }
