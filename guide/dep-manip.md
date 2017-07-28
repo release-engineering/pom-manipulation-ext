@@ -122,6 +122,8 @@ By default the extension will override dependencies using declarations from the 
 
 Note that this will still alter any external parent references.
 
+Note: This option is deprecated as of July 2017 and may be removed in a future release.
+
 ### Direct/Transitive Dependencies
 
 By default the extension will inject all dependencies declared in the remote BOM. This will also override dependencies that are not directly specified in the project. If these transitive dependencies should not be overridden, the option `overrideTransitive` can be set to `false` to disable this feature.
@@ -164,7 +166,7 @@ It is possible to flexibly override or exclude a dependency globally or on a per
 
 Sometimes it is more convenient to use the command line rather than a BOM. Therefore extending the above it is possible to set the version of a dependency via:
 
-    mvn install -DdependencyExclusion.junit:junit@*=4.10-rebuild-10
+    mvn install -DdependencyOverride.junit:junit@*=4.10-rebuild-10
 
 This will, throughout the entire project (due to the wildcard), apply the explicit 4.10-rebuild-10 version to the junit:junit dependency.
 
@@ -175,7 +177,7 @@ This will, throughout the entire project (due to the wildcard), apply the explic
 
 However, there are certain cases where it is useful to use different versions of the same dependency in different modules.  For example, if the project includes integration code for multiple versions of a particular API. In that case it is possible to apply a version override to a specific module of a multi-module build. For example to apply an explicit dependency override only to module B of project foo.
 
-    mvn install -DdependencyExclusion.junit:junit@org.foo:moduleB=4.10
+    mvn install -DdependencyOverride.junit:junit@org.foo:moduleB=4.10
 
 **NOTE:** Explicit overrides like this will take precedence over strict alignment and the BOM.
 
@@ -184,39 +186,39 @@ However, there are certain cases where it is useful to use different versions of
 
 It is also possible to **prevent overriding dependency versions** on a per module basis:
 
-    mvn install -DdependencyExclusion.[groupId]:[artifactId]@[moduleGroupId]:[moduleArtifactId]=
+    mvn install -DdependencyOverride.[groupId]:[artifactId]@[moduleGroupId]:[moduleArtifactId]=
 
 For example:
 
-    mvn install -DdependencyExclusion.junit:junit@org.foo:moduleB=
+    mvn install -DdependencyOverride.junit:junit@org.foo:moduleB=
 
 #### Override Prevention with Wildcards
 
 Likewise, you can prevent overriding a dependency version across the entire project using a wildcard:
 
-    mvn install -DdependencyExclusion.[groupId]:[artifactId]@*=
+    mvn install -DdependencyOverride.[groupId]:[artifactId]@*=
 
 For example:
 
-    mvn install -DdependencyExclusion.junit:junit@*=
+    mvn install -DdependencyOverride.junit:junit@*=
 
 Or, you can prevent overriding a dependency version across the entire project where the groupId matches, using multiple wildcards:
 
-    mvn install -DdependencyExclusion.[groupId]:*@*=
+    mvn install -DdependencyOverride.[groupId]:*@*=
 
 For example:
 
-    mvn install -DdependencyExclusion.junit:*@*=
+    mvn install -DdependencyOverride.junit:*@*=
 
 #### Per Module Override Prevention with Wildcards
 
 Linking the two prior concepts it is also possible to prevent overriding using wildcards on a per-module basis e.g.
 
-    mvn install -DdependencyExclusion.*:*@org.foo:moduleB=
+    mvn install -DdependencyOverride.*:*@org.foo:moduleB=
 
 This will prevent any alignment within the org.foo:moduleB.
 
-    mvn install -DdependencyExclusion.*:*@org.foo:*=
+    mvn install -DdependencyOverride.*:*@org.foo:*=
 
 This will prevent any alignment within org.foo and all sub-modules within that.
 
@@ -224,7 +226,7 @@ This will prevent any alignment within org.foo and all sub-modules within that.
 
 It is also possible to inject specific exclusions into a dependency. For instance
 
-    mvn install -DdependencyExclusion.junit:junit@*=4.10-rebuild-1,+slf4j:slf4j
+    mvn install -DdependencyOverride.junit:junit@*=4.10-rebuild-1,+slf4j:slf4j
 
 will, as per above, apply the explicit 4.10-rebuild-10 version to the junit:junit dependency but also add an exclusion e.g.
 
@@ -242,7 +244,7 @@ will, as per above, apply the explicit 4.10-rebuild-10 version to the junit:juni
 
 Multiple exclusions to a dependency may be added using comma separators e.g.
 
-    mvn install -DdependencyExclusion.junit:junit@*=+slf4j:slf4j,+commons-lang:commons-lang
+    mvn install -DdependencyOverride.junit:junit@*=+slf4j:slf4j,+commons-lang:commons-lang
 
 
 ### Strict Mode Version Alignment
@@ -277,9 +279,20 @@ If the property `strictAlignmentIgnoreSuffix` is set to true then the comparison
     3.1.0.Final-rebuild-1 --> 3.1.0.Final-rebuild-3
 
 
+### Property Clash Replacement
+
+When replacing a dependency PME will trace back and update the property value. However there are scenarios where the dependency versions returned from either the BOM or the REST source can be different even though they refer to the same property e.g.
+
+    propertyX = 1.0
+
+    org.foo:bar1:$propertyX
+    org.foo:bar2:$propertyX
+
+And the REST source returns 1.0.rebuild-2 for bar1 and rebuild-4 for bar2. In this case PME will detect the clash and throw an error. It is possible to ensure PME will not update the property and continue by setting `propertyClashFails` to true.
+
 ### Dependency Relocations
 
-In order to handle the situation where one GAV is changed to another (e.g. from community to product) the relocation manipulator can be used. An optional version component may be added; the version will override any prior version used in the dependency. Note this is akin to using the dependencyExclusion functionality with an explicit version. The artifact override is optional.
+In order to handle the situation where one GAV is changed to another (e.g. from community to product) the relocation manipulator can be used. An optional version component may be added; the version will override any prior version used in the dependency. Note this is akin to using the dependencyOverride functionality with an explicit version. The artifact override is optional.
 
     -DdependencyRelocations.oldGroupId:[oldArtifact]@newGroupId:[newArtifactId]=[version],...
 
