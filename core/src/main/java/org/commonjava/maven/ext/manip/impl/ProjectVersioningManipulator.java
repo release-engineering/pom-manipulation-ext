@@ -196,7 +196,7 @@ public class ProjectVersioningManipulator
             if ( versionsByGAV.containsKey( parentGAV ) )
             {
                 final String newVersion = versionsByGAV.get( parentGAV );
-                logger.info( "Changed parent version to: " + newVersion + " in " + parent );
+                logger.debug( "Changed parent version to: " + newVersion + " in " + parent );
                 if (parentGAV.getVersionString().startsWith( "${" ))
                 {
                     if ( PropertiesUtils.updateProperties( session, new HashSet<>( projects ), false, extractPropertyName( parentGAV.getVersionString() ), newVersion ) == PropertiesUtils.PropertyUpdate.NOTFOUND )

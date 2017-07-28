@@ -62,13 +62,14 @@ public class PropertiesUtilsTest
     public void testCacheProperty() throws Exception
     {
         Map<String,String> propertyMap = new HashMap<>();
+        DependencyState state = new DependencyState( new Properties(  ) );
 
-        assertFalse( PropertiesUtils.cacheProperty( null, "${foobar}${foobar2}", null, null, false ) );
-        assertFalse( PropertiesUtils.cacheProperty( null, "suffix.${foobar}", null, null, false ) );
-        assertFalse( PropertiesUtils.cacheProperty( propertyMap, null, "2.0", null, false ) );
-        assertFalse( PropertiesUtils.cacheProperty( propertyMap, "1.0", "2.0", null, false ) );
-        assertTrue( PropertiesUtils.cacheProperty( propertyMap, "${version.org.jboss}", "2.0", null, false ) );
-        assertFalse ( PropertiesUtils.cacheProperty( propertyMap, "${project.version}", "2.0", null, false ) );
+        assertFalse( PropertiesUtils.cacheProperty( state, null, "${foobar}${foobar2}", null, null, false ) );
+        assertFalse( PropertiesUtils.cacheProperty( state, null, "suffix.${foobar}", null, null, false ) );
+        assertFalse( PropertiesUtils.cacheProperty( state, propertyMap, null, "2.0", null, false ) );
+        assertFalse( PropertiesUtils.cacheProperty( state, propertyMap, "1.0", "2.0", null, false ) );
+        assertTrue( PropertiesUtils.cacheProperty( state, propertyMap, "${version.org.jboss}", "2.0", null, false ) );
+        assertFalse ( PropertiesUtils.cacheProperty( state, propertyMap, "${project.version}", "2.0", null, false ) );
 
         // DependencyManipulator does dependency.getVersion(). This could return e.g. ${version.scala} which can
         // refer to <version.scala>${version.scala.major}.7</version.scala>. If we are attempting to change version.scala
@@ -78,12 +79,12 @@ public class PropertiesUtilsTest
         // However we don't need to change the value of the property. If the property is foobar.${....} then
         // we want to append suffix to the property ... but we need to handle that part of the property is hardcoded.
 
-        assertFalse( PropertiesUtils.cacheProperty( propertyMap, "${version.scala}.7", "2.0", null, false ) );
-        assertFalse( PropertiesUtils.cacheProperty( propertyMap, "${version.foo}.${version.scala}.7", "2.0", null, false ) );
+        assertFalse( PropertiesUtils.cacheProperty( state, propertyMap, "${version.scala}.7", "2.0", null, false ) );
+        assertFalse( PropertiesUtils.cacheProperty( state, propertyMap, "${version.foo}.${version.scala}.7", "2.0", null, false ) );
 
         try
         {
-            PropertiesUtils.cacheProperty( propertyMap, "${version.scala}.7.${version.scala2}", "2.0", null, false );
+            PropertiesUtils.cacheProperty( state, propertyMap, "${version.scala}.7.${version.scala2}", "2.0", null, false );
         }
         catch (ManipulationException e)
         {
