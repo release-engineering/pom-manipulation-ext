@@ -32,6 +32,7 @@ import org.commonjava.maven.ext.manip.ManipulationException;
 import org.commonjava.maven.ext.manip.ManipulationSession;
 import org.commonjava.maven.ext.manip.io.ModelIO;
 import org.commonjava.maven.ext.manip.model.Project;
+import org.commonjava.maven.ext.manip.state.CommonState;
 import org.commonjava.maven.ext.manip.state.DependencyState;
 import org.commonjava.maven.ext.manip.state.PluginState;
 import org.commonjava.maven.ext.manip.state.PluginState.Precedence;
@@ -263,7 +264,7 @@ public class PluginManipulator
      *
      *
      *
-     * @param session
+     * @param session the ManipulationSession
      * @param remotePluginType The type of the remote plugin (mgmt or plugins)
      * @param localPluginType The type of local block (mgmt or plugins).
      * @param plugins The list of plugins to modify
@@ -279,7 +280,8 @@ public class PluginManipulator
         }
 
         final PluginState pluginState = session.getState( PluginState.class );
-        final DependencyState state = session.getState( DependencyState.class );
+        final DependencyState dependencyState = session.getState( DependencyState.class );
+        final CommonState commonState = session.getState( CommonState.class );
 
         for ( final Plugin override : pluginVersionOverrides.values())
         {
@@ -377,7 +379,7 @@ public class PluginManipulator
                 // one in build/plugins section.
                 if ( override.getVersion() != null && !override.getVersion().isEmpty())
                 {
-                    if ( ! PropertiesUtils.cacheProperty( state, pluginState.getVersionPropertyOverrides(), oldVersion, override.getVersion(), plugin, false ))
+                    if ( ! PropertiesUtils.cacheProperty( commonState, pluginState.getVersionPropertyOverrides(), oldVersion, override.getVersion(), plugin, false ))
                     {
                         if ( oldVersion != null && oldVersion.equals( "${project.version}" ) )
                         {
@@ -400,7 +402,7 @@ public class PluginManipulator
             // get the correct config.
             else if ( remotePluginType == PluginType.RemotePM &&
                             localPluginType == PluginType.LocalPM &&
-                            pluginState.getOverrideTransitive() &&
+                            commonState.getOverrideTransitive() &&
                             ( override.getConfiguration() != null || override.getExecutions().size() > 0 ) )
             {
                 plugins.add( override );

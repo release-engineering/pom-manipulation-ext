@@ -32,6 +32,8 @@ import org.commonjava.maven.ext.manip.io.PomIO;
 import org.commonjava.maven.ext.manip.model.GAV;
 import org.commonjava.maven.ext.manip.model.Project;
 import org.commonjava.maven.ext.manip.resolver.ExtensionInfrastructure;
+import org.commonjava.maven.ext.manip.state.CommonState;
+import org.commonjava.maven.ext.manip.state.DependencyState;
 import org.commonjava.maven.ext.manip.state.State;
 import org.commonjava.maven.ext.manip.state.VersioningState;
 import org.commonjava.maven.ext.manip.util.ManipulatorPriorityComparator;
@@ -47,6 +49,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 
 /**
@@ -125,6 +128,9 @@ public class ManipulationManager
                                                                    .getSimpleName() );
             manipulator.init( session );
         }
+        // Now init the common state
+        session.setState( new CommonState( session.getUserProperties()) );
+
     }
 
     /**

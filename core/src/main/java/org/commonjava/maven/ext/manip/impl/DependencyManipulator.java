@@ -33,6 +33,7 @@ import org.commonjava.maven.ext.manip.ManipulationException;
 import org.commonjava.maven.ext.manip.ManipulationSession;
 import org.commonjava.maven.ext.manip.io.ModelIO;
 import org.commonjava.maven.ext.manip.model.Project;
+import org.commonjava.maven.ext.manip.state.CommonState;
 import org.commonjava.maven.ext.manip.state.DependencyState;
 import org.commonjava.maven.ext.manip.state.DependencyState.DependencyPrecedence;
 import org.commonjava.maven.ext.manip.util.ProfileUtils;
@@ -312,7 +313,8 @@ public class DependencyManipulator implements Manipulator
         // Map of Group : Map of artifactId [ may be wildcard ] : value
         final WildcardMap<String> explicitOverrides = new WildcardMap<>();
         final String projectGA = ga( project );
-        final DependencyState state = session.getState( DependencyState.class );
+        final DependencyState dependencyState = session.getState( DependencyState.class );
+        final CommonState commonState = session.getState( CommonState.class );
 
         Map<ArtifactRef, String> moduleOverrides = new LinkedHashMap<>( overrides );
         moduleOverrides = removeReactorGAs( session, moduleOverrides );
@@ -320,7 +322,7 @@ public class DependencyManipulator implements Manipulator
         try
         {
             moduleOverrides = applyModuleVersionOverrides( projectGA,
-                                                           state.getDependencyExclusions(),
+                                                           dependencyState.getDependencyExclusions(),
                                                            moduleOverrides, explicitOverrides );
             logger.debug( "Module overrides are:\n{}", moduleOverrides );
             logger.debug( "Explicit overrides are:\n{}", explicitOverrides);
@@ -343,11 +345,11 @@ public class DependencyManipulator implements Manipulator
 
                     if ( entry.getKey().asProjectRef().equals( SimpleProjectRef.parse( ga(project.getParent()) ) ))
                     {
-                        if ( state.getStrict() )
+                        if ( dependencyState.getStrict() )
                         {
                             if ( !PropertiesUtils.checkStrictValue( session, oldValue, newValue ) )
                             {
-                                if ( state.getFailOnStrictViolation() )
+                                if ( dependencyState.getFailOnStrictViolation() )
                                 {
                                     throw new ManipulationException(
                                                     "Parent reference {} replacement: {} of original version: {} violates the strict version-alignment rule!",
@@ -379,7 +381,7 @@ public class DependencyManipulator implements Manipulator
                 d.setArtifactId( project.getParent().getArtifactId() );
                 d.setVersion( project.getParent().getVersion() );
                 pDeps.add( d );
-                applyExplicitOverrides( state, explicitVersionPropertyUpdateMap, explicitOverrides, pDeps );
+                applyExplicitOverrides( commonState, explicitVersionPropertyUpdateMap, explicitOverrides, pDeps );
                 project.getParent().setVersion( d.getVersion() );
             }
 
@@ -405,9 +407,9 @@ public class DependencyManipulator implements Manipulator
                 final Map<ArtifactRef, String> matchedOverrides = new LinkedHashMap<>( moduleOverrides );
                 matchedOverrides.keySet().removeAll( nonMatchingVersionOverrides.keySet() );
 
-                applyExplicitOverrides( state, explicitVersionPropertyUpdateMap, explicitOverrides, dependencies );
+                applyExplicitOverrides( commonState, explicitVersionPropertyUpdateMap, explicitOverrides, dependencies );
 
-                if ( session.getState( DependencyState.class ).getOverrideTransitive() )
+                if ( commonState.getOverrideTransitive() )
                 {
                     final List<Dependency> extraDeps = new ArrayList<>();
 
@@ -453,7 +455,7 @@ public class DependencyManipulator implements Manipulator
             {
                 logger.debug( "Applying overrides to managed dependencies for: {}", projectGA );
                 applyOverrides( session, project, dependencyManagement.getDependencies(), moduleOverrides, explicitOverrides );
-                applyExplicitOverrides( state, explicitVersionPropertyUpdateMap, explicitOverrides,
+                applyExplicitOverrides( commonState, explicitVersionPropertyUpdateMap, explicitOverrides,
                                         dependencyManagement.getDependencies() );
             }
             else
@@ -468,7 +470,7 @@ public class DependencyManipulator implements Manipulator
             // Apply overrides to project direct dependencies
             final List<Dependency> projectDependencies = model.getDependencies();
             applyOverrides( session, project, projectDependencies, moduleOverrides, explicitOverrides );
-            applyExplicitOverrides( state, explicitVersionPropertyUpdateMap, explicitOverrides, projectDependencies );
+            applyExplicitOverrides( commonState, explicitVersionPropertyUpdateMap, explicitOverrides, projectDependencies );
 
             // Now check all possible profiles and update them.
             List<Profile> profiles = ProfileUtils.getProfiles( session, project.getModel());
@@ -480,12 +482,12 @@ public class DependencyManipulator implements Manipulator
                     {
                         applyOverrides( session, project, p.getDependencyManagement().getDependencies(), moduleOverrides,
                                         explicitOverrides );
-                        applyExplicitOverrides( state, explicitVersionPropertyUpdateMap, explicitOverrides,
+                        applyExplicitOverrides( commonState, explicitVersionPropertyUpdateMap, explicitOverrides,
                                                 p.getDependencyManagement().getDependencies() );
                     }
                     final List<Dependency> profileDependencies = p.getDependencies();
                     applyOverrides( session, project, profileDependencies, moduleOverrides, explicitOverrides );
-                    applyExplicitOverrides( state, explicitVersionPropertyUpdateMap, explicitOverrides, profileDependencies );
+                    applyExplicitOverrides( commonState, explicitVersionPropertyUpdateMap, explicitOverrides, profileDependencies );
                 }
             }
         }
@@ -501,13 +503,13 @@ public class DependencyManipulator implements Manipulator
      * ignore any property references (and overwrite them).
      *
      *
-     * @param state
+     * @param state the CommonState, to retrieve Common Properties
      * @param versionPropertyUpdateMap properties to update
      * @param explicitOverrides a custom map to handle wildcard overrides
      * @param dependencies dependencies to check
      * @throws ManipulationException if an error occurs
      */
-    private void applyExplicitOverrides( DependencyState state, final Map<String, String> versionPropertyUpdateMap,
+    private void applyExplicitOverrides( CommonState state, final Map<String, String> versionPropertyUpdateMap,
                                          final WildcardMap<String> explicitOverrides, final List<Dependency> dependencies )
                     throws ManipulationException
     {
@@ -594,8 +596,9 @@ public class DependencyManipulator implements Manipulator
             return unmatchedVersionOverrides;
         }
 
-        final DependencyState state = session.getState( DependencyState.class );
-        final boolean strict = state.getStrict();
+        final DependencyState dependencyState = session.getState( DependencyState.class );
+        final CommonState commonState= session.getState( CommonState.class );
+        final boolean strict = dependencyState.getStrict();
 
         // Apply matching overrides to dependencies
         for ( final Dependency dependency : dependencies )
@@ -645,7 +648,7 @@ public class DependencyManipulator implements Manipulator
                     {
                         logger.debug ("Original fully resolved version {} of {} does not match override version {} -> {} so ignoring",
                                       resolvedValue, dependency, entry.getKey(), overrideVersion);
-                        if ( state.getFailOnStrictViolation() )
+                        if ( dependencyState.getFailOnStrictViolation() )
                         {
                             throw new ManipulationException(
                                             "For {} replacing original property version {} (fully resolved: {} ) with new version {} for {} violates the strict version-alignment rule!",
@@ -665,7 +668,7 @@ public class DependencyManipulator implements Manipulator
                             logger.info( "Updating version {} for dependency {} from {}.", overrideVersion, dependency, project.getPom() );
                         }
 
-                        if ( ! PropertiesUtils.cacheProperty( state, versionPropertyUpdateMap, oldVersion, overrideVersion, entry.getKey(), false ))
+                        if ( ! PropertiesUtils.cacheProperty( commonState, versionPropertyUpdateMap, oldVersion, overrideVersion, entry.getKey(), false ))
                         {
                             if ( oldVersion.equals( "${project.version}" ) )
                             {
@@ -674,7 +677,7 @@ public class DependencyManipulator implements Manipulator
                             }
                             else if ( strict && ! PropertiesUtils.checkStrictValue( session, resolvedValue, overrideVersion) )
                             {
-                                if ( state.getFailOnStrictViolation() )
+                                if ( dependencyState.getFailOnStrictViolation() )
                                 {
                                     throw new ManipulationException(
                                                      "Replacing original version {} in dependency {} with new version {} violates the strict version-alignment rule!",
@@ -696,7 +699,7 @@ public class DependencyManipulator implements Manipulator
                                     String suffix = PropertiesUtils.getSuffix( session );
                                     String replaceVersion;
 
-                                    if ( state.getStrictIgnoreSuffix() && oldVersion.contains( suffix ) )
+                                    if ( dependencyState.getStrictIgnoreSuffix() && oldVersion.contains( suffix ) )
                                     {
                                         replaceVersion = StringUtils.substringBefore( oldVersion, suffix );
                                         replaceVersion += suffix + StringUtils.substringAfter( overrideVersion, suffix );

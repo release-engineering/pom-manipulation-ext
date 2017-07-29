@@ -20,6 +20,7 @@ import org.commonjava.maven.ext.manip.ManipulationException;
 import org.commonjava.maven.ext.manip.ManipulationSession;
 import org.commonjava.maven.ext.manip.impl.Version;
 import org.commonjava.maven.ext.manip.model.Project;
+import org.commonjava.maven.ext.manip.state.CommonState;
 import org.commonjava.maven.ext.manip.state.DependencyState;
 import org.commonjava.maven.ext.manip.state.VersioningState;
 import org.slf4j.Logger;
@@ -304,7 +305,7 @@ public final class PropertiesUtils
      * This will check if the old version (e.g. in a plugin or dependency) is a property and if so
      * store the mapping in a map.
      *
-     * @param state DependencyState to retrieve property clash value QoS.
+     * @param state CommonState to retrieve property clash value QoS.
      * @param versionPropertyUpdateMap the map to store any updates in
      * @param oldVersion original property value
      * @param newVersion new property value
@@ -313,7 +314,7 @@ public final class PropertiesUtils
      * @return true if a property was found and cached.
      * @throws ManipulationException if an error occurs.
      */
-    public static boolean cacheProperty( DependencyState state, Map<String, String> versionPropertyUpdateMap, String oldVersion,
+    public static boolean cacheProperty( CommonState state, Map<String, String> versionPropertyUpdateMap, String oldVersion,
                                          String newVersion, Object originalType, boolean force )
                     throws ManipulationException
     {

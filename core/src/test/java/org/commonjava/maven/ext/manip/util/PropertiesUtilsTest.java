@@ -20,6 +20,7 @@ import org.commonjava.maven.ext.manip.ManipulationException;
 import org.commonjava.maven.ext.manip.ManipulationSession;
 import org.commonjava.maven.ext.manip.fixture.TestUtils;
 import org.commonjava.maven.ext.manip.model.Project;
+import org.commonjava.maven.ext.manip.state.CommonState;
 import org.commonjava.maven.ext.manip.state.DependencyState;
 import org.commonjava.maven.ext.manip.state.VersioningState;
 import org.junit.Rule;
@@ -62,7 +63,7 @@ public class PropertiesUtilsTest
     public void testCacheProperty() throws Exception
     {
         Map<String,String> propertyMap = new HashMap<>();
-        DependencyState state = new DependencyState( new Properties(  ) );
+        CommonState state = new CommonState( new Properties(  ) );
 
         assertFalse( PropertiesUtils.cacheProperty( state, null, "${foobar}${foobar2}", null, null, false ) );
         assertFalse( PropertiesUtils.cacheProperty( state, null, "suffix.${foobar}", null, null, false ) );
