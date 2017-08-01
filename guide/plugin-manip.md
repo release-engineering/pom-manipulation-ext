@@ -39,7 +39,7 @@ By default (unless `injectRemotePlugins` is set to false), PME will also inject 
 
 By default, this extension will disable the skip flag on the install and deploy plugins. This is useful for build environments that compare the results of install with those from deploy as a validation step. More generally, suppressing installation or deployment tends to be an aesthetic decision that can have subtle functional consequences. It's usually not really worth the hassle.
 
-This feature does support four modes for alignment, controlled via the **enforce-skip** command-line property:
+This feature does support four modes for alignment, controlled via the `enforceSkip` (*Deprecated property `enforce-skip`*) command-line property:
 
 1. `none` - (**default**) don't do any alignment
 2. `on` - (aliased to `true`) enforce that the skip flag is **enabled**, suppressing install and deploy functions of the build (useful mainly for module-specific overrides. See below)
@@ -52,7 +52,9 @@ Additionally, the feature supports per-module overrides, which can be specified 
 
 ### Plugin Removal
 
-If the property `-Dplugin-removal=group:artifact,....` is set, PME will remove the specified plugins from the POM files. The argument should be a comma separated list of group:artifact.
+If the property `pluginRemoval` (*Deprecated property `plugin-removal`*) is set, PME will remove the specified plugins from the POM files. The argument should be a comma separated list of group:artifact. For example:
+
+    -DpluginRemoval=group:artifact,....
 
 ### Project Sources / Build Metadata Plugin Injection
 
@@ -60,12 +62,12 @@ The extension will inject an execution of [project-sources-maven-plugin](https:/
 
 **Note**: this manipulator will only be active by default if one or more other manipulators have been activated.
 
-To skip injection of the sources and metadata plugins, you can use:
+To skip injection of the sources and metadata plugins, you can use the properties `projectSrcSkip` (*Deprecated property `project.src.skip`*) and `projectMetaSkip` (*Deprecated property `project.meta.skip`*):
 
-    mvn install -Dproject.src.skip=true
-    mvn install -Dproject.meta.skip=true
+    mvn install -DprojectSrcSkip=true
+    mvn install -DprojectMetaSkip=true
 
-If unspecified, default versions of the project sources and metadata plugins will be injected (currently, version 0.3 and 1.5.0 respectively). To gain more control over this injection, you can specify the versions for project sources and metadata plugins like this:
+If unspecified, default versions of the project sources and metadata plugins will be injected (currently, version 0.3 and 1.5.0 respectively). To gain more control over this injection, you can specify the versions for project sources and metadata plugins with the properties `projectSrcVersion` (*Deprecated property `project.src.version`*) and `projectMetaVersion` (*Deprecated property `project.meta.version`*):
 
     mvn install -Dproject.src.version=x.y
     mvn install -Dproject.meta.version=x.y
