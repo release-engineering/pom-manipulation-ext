@@ -16,6 +16,8 @@
 package org.commonjava.maven.ext.manip.state;
 
 import org.commonjava.maven.ext.manip.impl.RepoAndReportingRemovalManipulator;
+import org.commonjava.maven.ext.manip.util.PropertiesUtils;
+import org.commonjava.maven.ext.manip.util.PropertyFlag;
 
 import java.util.Properties;
 
@@ -26,9 +28,9 @@ import java.util.Properties;
 public class RepoReportingState
     implements State
 {
-    private static final String RR_SUFFIX_SYSPROP = "repo-reporting-removal";
+    private static final PropertyFlag RR_SUFFIX_SYSPROP = new PropertyFlag( "repo-reporting-removal", "repoReportingRemoval" );
 
-    private static final String RR_SUFFIX_SYSPROP_LOCAL = "repo-removal-ignorelocalhost";
+    private static final PropertyFlag RR_SUFFIX_SYSPROP_LOCAL = new PropertyFlag( "repo-removal-ignorelocalhost", "repoRemovalIgnorelocalhost" );
 
     /**
      * Default value is off.<br/>
@@ -37,7 +39,7 @@ public class RepoReportingState
      * <br/>'settings.xml' which implicitly means the current build directory
      * <br/>'filename' which should be a valid path to write to
      */
-    private static final String RR_SETTINGS_SFX_SYSPROP = "repo-removal-backup";
+    private static final PropertyFlag RR_SETTINGS_SFX_SYSPROP = new PropertyFlag( "repo-removal-backup", "repoRemovalBackup" );
 
     private final boolean removal;
 
@@ -47,11 +49,9 @@ public class RepoReportingState
 
     public RepoReportingState( final Properties userProps )
     {
-        removal = Boolean.parseBoolean( userProps.getProperty( RR_SUFFIX_SYSPROP ) );
-
-        ignoreLocal = Boolean.parseBoolean( userProps.getProperty( RR_SUFFIX_SYSPROP_LOCAL) );
-
-        settings = userProps.getProperty( RR_SETTINGS_SFX_SYSPROP );
+        removal = Boolean.parseBoolean( PropertiesUtils.handleDeprecatedProperty ( userProps, RR_SUFFIX_SYSPROP ) );
+        ignoreLocal = Boolean.parseBoolean( PropertiesUtils.handleDeprecatedProperty( userProps, RR_SUFFIX_SYSPROP_LOCAL ) );
+        settings = PropertiesUtils.handleDeprecatedProperty( userProps, RR_SETTINGS_SFX_SYSPROP );
     }
 
     /**

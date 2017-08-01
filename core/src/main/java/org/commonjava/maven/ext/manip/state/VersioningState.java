@@ -20,6 +20,8 @@ import org.commonjava.maven.atlas.ident.ref.ProjectRef;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.ext.manip.impl.ProjectVersioningManipulator;
 import org.commonjava.maven.ext.manip.model.GAV;
+import org.commonjava.maven.ext.manip.util.PropertiesUtils;
+import org.commonjava.maven.ext.manip.util.PropertyFlag;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -34,18 +36,17 @@ import java.util.Set;
 public class VersioningState
     implements State
 {
+    public static final PropertyFlag VERSION_SUFFIX_SYSPROP = new PropertyFlag( "version.suffix", "versionSuffix");
 
-    public static final String VERSION_SUFFIX_SYSPROP = "version.suffix";
+    public static final PropertyFlag INCREMENT_SERIAL_SUFFIX_SYSPROP = new PropertyFlag( "version.incremental.suffix", "versionIncrementalSuffix");
 
-    public static final String INCREMENT_SERIAL_SUFFIX_SYSPROP = "version.incremental.suffix";
+    public static final PropertyFlag INCREMENT_SERIAL_SUFFIX_PADDING_SYSPROP = new PropertyFlag( "version.incremental.suffix.padding", "versionIncrementalSuffixPadding");
 
-    public static final String INCREMENT_SERIAL_SUFFIX_PADDING_SYSPROP = "version.incremental.suffix.padding";
+    public static final PropertyFlag VERSION_SUFFIX_SNAPSHOT_SYSPROP = new PropertyFlag( "version.suffix.snapshot", "versionSuffixSnapshot");
 
-    public static final String VERSION_SUFFIX_SNAPSHOT_SYSPROP = "version.suffix.snapshot";
+    public static final PropertyFlag VERSION_OSGI_SYSPROP = new PropertyFlag( "version.osgi", "versionOsgi");
 
-    public static final String VERSION_OSGI_SYSPROP = "version.osgi";
-
-    public static final String VERSION_OVERRIDE_SYSPROP = "version.override";
+    public static final PropertyFlag VERSION_OVERRIDE_SYSPROP = new PropertyFlag( "version.override", "versionOverride");
 
     private final String suffix;
 
@@ -75,12 +76,12 @@ public class VersioningState
 
     public VersioningState( final Properties userProps )
     {
-        suffix = userProps.getProperty( VERSION_SUFFIX_SYSPROP );
-        incrementSerialSuffix = userProps.getProperty( INCREMENT_SERIAL_SUFFIX_SYSPROP );
-        incrementSerialSuffixPadding = Integer.parseInt( userProps.getProperty( INCREMENT_SERIAL_SUFFIX_PADDING_SYSPROP, "0" ) );
-        preserveSnapshot = Boolean.parseBoolean( userProps.getProperty( VERSION_SUFFIX_SNAPSHOT_SYSPROP ) );
-        osgi = Boolean.parseBoolean( userProps.getProperty( VERSION_OSGI_SYSPROP, "true" ) );
-        override = userProps.getProperty( VERSION_OVERRIDE_SYSPROP );
+        suffix = PropertiesUtils.handleDeprecatedProperty( userProps, VERSION_SUFFIX_SYSPROP );
+        incrementSerialSuffix = PropertiesUtils.handleDeprecatedProperty( userProps, INCREMENT_SERIAL_SUFFIX_SYSPROP );
+        incrementSerialSuffixPadding = Integer.parseInt( PropertiesUtils.handleDeprecatedProperty( userProps, INCREMENT_SERIAL_SUFFIX_PADDING_SYSPROP, "0" ) );
+        preserveSnapshot = Boolean.parseBoolean( PropertiesUtils.handleDeprecatedProperty( userProps, VERSION_SUFFIX_SNAPSHOT_SYSPROP ) );
+        osgi = Boolean.parseBoolean( PropertiesUtils.handleDeprecatedProperty( userProps, VERSION_OSGI_SYSPROP, "true" ) );
+        override = PropertiesUtils.handleDeprecatedProperty( userProps, VERSION_OVERRIDE_SYSPROP );
     }
 
     /**

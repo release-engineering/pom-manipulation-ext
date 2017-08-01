@@ -15,6 +15,9 @@
  */
 package org.commonjava.maven.ext.manip.state;
 
+import org.commonjava.maven.ext.manip.util.PropertiesUtils;
+import org.commonjava.maven.ext.manip.util.PropertyFlag;
+
 import java.util.Properties;
 
 /**
@@ -26,7 +29,8 @@ public class ProjectVersionEnforcingState
     /**
      * Property used to set the enforcement mode.
      */
-    private static final String ENFORCE_PROJECT_VERSION = "enforce-project-version";
+    private static final PropertyFlag
+                    ENFORCE_PROJECT_VERSION = new PropertyFlag ( "enforce-project-version", "enforceProjectVersion" );
 
     static
     {
@@ -38,10 +42,10 @@ public class ProjectVersionEnforcingState
 
     public ProjectVersionEnforcingState( final Properties userProps )
     {
-        final String value = userProps.getProperty( ENFORCE_PROJECT_VERSION );
+        final String value = PropertiesUtils.handleDeprecatedProperty ( userProps, ENFORCE_PROJECT_VERSION );
         if ( value != null )
         {
-            mode = Boolean.parseBoolean( userProps.getProperty( ENFORCE_PROJECT_VERSION ) );
+            mode = Boolean.parseBoolean( value );
         }
         else
         {

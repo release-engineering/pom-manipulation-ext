@@ -215,7 +215,7 @@ public class DistributionEnforcingManipulatorTest
     {
         if ( mode != null )
         {
-            userCliProperties.setProperty( ENFORCE_SYSPROP, mode.name() );
+            userCliProperties.setProperty( ENFORCE_SYSPROP.getCurrent(), mode.name() );
         }
     }
 

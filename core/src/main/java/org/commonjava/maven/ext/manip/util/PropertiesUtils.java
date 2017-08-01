@@ -418,6 +418,28 @@ public final class PropertiesUtils
         return pi.interp( value );
     }
 
+    public static String handleDeprecatedProperty (Properties userProps, PropertyFlag flag)
+    {
+        return handleDeprecatedProperty( userProps, flag, null );
+    }
+
+    public static String handleDeprecatedProperty (Properties userProps, PropertyFlag flag, String defaultValue )
+    {
+        String result;
+        if ( userProps.containsKey( flag.getDeprecated() ) )
+        {
+            logger.error ("Deprecated property usage {} ", flag.getDeprecated());
+            logger.warn ("Property {} is deprecated. Please use property {} instead.", flag.getDeprecated(), flag.getCurrent() );
+
+            result = userProps.getProperty( flag.getDeprecated(), defaultValue );
+        }
+        else
+        {
+            result = userProps.getProperty( flag.getCurrent(), defaultValue );
+        }
+        return result;
+    }
+
     /**
      * Used to determine whether any property updates were successful of not. In the case of detecting that no properties are
      * needed IGNORE is returned. Effectively this is a slightly more explicit tri-state.

@@ -16,6 +16,8 @@
 package org.commonjava.maven.ext.manip.state;
 
 import org.commonjava.maven.ext.manip.impl.DistributionEnforcingManipulator;
+import org.commonjava.maven.ext.manip.util.PropertiesUtils;
+import org.commonjava.maven.ext.manip.util.PropertyFlag;
 
 import java.util.Map;
 import java.util.Properties;
@@ -31,7 +33,7 @@ public class DistributionEnforcingState
     /**
      * Property used to set the enforcement mode.
      */
-    public static final String ENFORCE_SYSPROP = "enforce-skip";
+    public static final PropertyFlag ENFORCE_SYSPROP = new PropertyFlag( "enforce-skip", "enforceSkip");
 
     /**
      * Property prefix used to exclude certain projects in the current build (specified as g:a) from install/deploy plugin skip-flag enforcement.
@@ -44,7 +46,7 @@ public class DistributionEnforcingState
 
     public DistributionEnforcingState( final Properties userProps )
     {
-        final String value = userProps.getProperty( ENFORCE_SYSPROP );
+        final String value = PropertiesUtils.handleDeprecatedProperty (userProps, ENFORCE_SYSPROP );
 
         this.excludedProjects = getPropertiesByPrefix( userProps, DistributionEnforcingState.PROJECT_EXCLUSION_PREFIX );
         this.mode = EnforcingMode.getMode( value );

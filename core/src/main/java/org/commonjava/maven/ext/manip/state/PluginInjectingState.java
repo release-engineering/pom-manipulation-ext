@@ -15,12 +15,14 @@
  */
 package org.commonjava.maven.ext.manip.state;
 
-import org.commonjava.maven.ext.manip.impl.ProjectSourcesInjectingManipulator;
+import org.commonjava.maven.ext.manip.impl.PluginInjectingManipulator;
+import org.commonjava.maven.ext.manip.util.PropertiesUtils;
+import org.commonjava.maven.ext.manip.util.PropertyFlag;
 
 import java.util.Properties;
 
 /**
- * Captures configuration parameters for use with {@link ProjectSourcesInjectingManipulator}. This state implementation captures two properties:
+ * Captures configuration parameters for use with {@link PluginInjectingManipulator}. This state implementation captures two properties:
  *
  * <ul>
  *   <li><b>project.src.skip</b> - If true, don't try to inject the project-sources-maven-plugin.</li>
@@ -29,24 +31,24 @@ import java.util.Properties;
  *   <li><b>project.meta.version</b> - The version of the buildmetadata-maven-plugin to be injected.</li>
  * </ul>
  */
-public class ProjectSourcesInjectingState
+public class PluginInjectingState
     implements State
 {
 
     /** Set this property to true using <code>-Dproject.src.skip=true</code> in order to turn off injection of the project-sources plugin. */
-    private static final String PROJECT_SOURCES_SKIP_PROPERTY = "project.src.skip";
+    private static final PropertyFlag PROJECT_SOURCES_SKIP_PROPERTY = new PropertyFlag( "project.src.skip", "projectSrcSkip");
 
     /** Set this property to true using <code>-Dproject.meta.skip=true</code> in order to turn off injection of the project-sources plugin. */
-    private static final String BMMP_SKIP_PROPERTY = "project.meta.skip";
+    private static final PropertyFlag BMMP_SKIP_PROPERTY = new PropertyFlag( "project.meta.skip", "projectMetaSkip");
 
     /** Set this property to control the version of the project-sources plugin to be injected. */
-    private static final String PROJECT_SOURCES_PLUGIN_VERSION_PROPERTY = "project.src.version";
+    private static final PropertyFlag PROJECT_SOURCES_PLUGIN_VERSION_PROPERTY = new PropertyFlag( "project.src.version", "projectSrcVersion");
 
     /** The default plugin version to use in case no alternative version is specified on the command line. */
     private static final String DEFAULT_PROJECT_SOURCES_PLUGIN_VERSION = "1.0";
 
     /** Set this property to control the version of the build-metadata plugin to be injected. */
-    private static final String BMMP_VERSION_PROPERTY = "project.meta.version";
+    private static final PropertyFlag BMMP_VERSION_PROPERTY = new PropertyFlag( "project.meta.version", "projectMetaVersion");
 
     private static final String DEFAULT_BMMP_VERSION = "1.7.0";
 
@@ -60,7 +62,7 @@ public class ProjectSourcesInjectingState
 
     static
     {
-        State.activeByDefault.add( ProjectSourcesInjectingState.class );
+        State.activeByDefault.add( PluginInjectingState.class );
     }
 
     /**
@@ -68,18 +70,17 @@ public class ProjectSourcesInjectingState
      *
      * @param userProperties the properties for the manipulator
      */
-    public ProjectSourcesInjectingState( final Properties userProperties )
+    public PluginInjectingState( final Properties userProperties )
     {
-        projectsourcesEnabled = !Boolean.parseBoolean( userProperties.getProperty( PROJECT_SOURCES_SKIP_PROPERTY, "false" ) );
-        metadataEnabled = !Boolean.parseBoolean( userProperties.getProperty( BMMP_SKIP_PROPERTY, "false" ) );
+        projectsourcesEnabled = !Boolean.parseBoolean( PropertiesUtils.handleDeprecatedProperty ( userProperties, PROJECT_SOURCES_SKIP_PROPERTY ) );
+        metadataEnabled = !Boolean.parseBoolean( PropertiesUtils.handleDeprecatedProperty ( userProperties, BMMP_SKIP_PROPERTY ) );
 
-        projectSrcPluginVersion =
-            userProperties.getProperty( PROJECT_SOURCES_PLUGIN_VERSION_PROPERTY, DEFAULT_PROJECT_SOURCES_PLUGIN_VERSION );
-        bmmpVersion = userProperties.getProperty( BMMP_VERSION_PROPERTY, DEFAULT_BMMP_VERSION );
+        projectSrcPluginVersion = PropertiesUtils.handleDeprecatedProperty (userProperties, PROJECT_SOURCES_PLUGIN_VERSION_PROPERTY, DEFAULT_PROJECT_SOURCES_PLUGIN_VERSION );
+        bmmpVersion = PropertiesUtils.handleDeprecatedProperty( userProperties, BMMP_VERSION_PROPERTY, DEFAULT_BMMP_VERSION );
     }
 
     /**
-     * @see ProjectSourcesInjectingState#PROJECT_SOURCES_SKIP_PROPERTY
+     * @see PluginInjectingState#PROJECT_SOURCES_SKIP_PROPERTY
      *
      * @return true if <b>either</b> of {@link #isProjectSourcesPluginEnabled()} or {@link #isBuildMetadataPluginEnabled()} is enabled.
      */
@@ -90,7 +91,7 @@ public class ProjectSourcesInjectingState
     }
 
     /**
-     * @see ProjectSourcesInjectingState#BMMP_SKIP_PROPERTY
+     * @see PluginInjectingState#BMMP_SKIP_PROPERTY
      * @return whether the BuildMetadata plugin is projectsourcesEnabled.
      */
     public boolean isProjectSourcesPluginEnabled()
@@ -99,7 +100,7 @@ public class ProjectSourcesInjectingState
     }
 
     /**
-     * @see ProjectSourcesInjectingState#BMMP_SKIP_PROPERTY
+     * @see PluginInjectingState#BMMP_SKIP_PROPERTY
      * @return whether the BuildMetadata plugin is projectsourcesEnabled.
      */
     public boolean isBuildMetadataPluginEnabled()

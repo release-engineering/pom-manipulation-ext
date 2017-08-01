@@ -17,6 +17,8 @@ package org.commonjava.maven.ext.manip.state;
 
 import org.commonjava.maven.atlas.ident.ref.ProjectRef;
 import org.commonjava.maven.ext.manip.util.IdUtils;
+import org.commonjava.maven.ext.manip.util.PropertiesUtils;
+import org.commonjava.maven.ext.manip.util.PropertyFlag;
 
 import java.util.List;
 import java.util.Properties;
@@ -33,13 +35,13 @@ public class PluginRemovalState
      * <code>-DpluginRemoval=org.foo:bar-plugin,....</code>
      * </pre>
      */
-    private static final String PLUGIN_REMOVAL_PROPERTY = "plugin-removal";
+    private static final PropertyFlag PLUGIN_REMOVAL_PROPERTY = new PropertyFlag( "plugin-removal", "pluginRemoval");
 
     private final List<ProjectRef> pluginRemoval;
 
     public PluginRemovalState( final Properties userProps )
     {
-        pluginRemoval = IdUtils.parseGAs( userProps.getProperty( PLUGIN_REMOVAL_PROPERTY ) );
+        pluginRemoval = IdUtils.parseGAs( PropertiesUtils.handleDeprecatedProperty ( userProps, PLUGIN_REMOVAL_PROPERTY ) );
     }
 
     /**

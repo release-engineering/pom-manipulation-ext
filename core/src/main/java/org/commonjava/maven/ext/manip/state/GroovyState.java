@@ -17,8 +17,6 @@ package org.commonjava.maven.ext.manip.state;
 
 import org.commonjava.maven.atlas.ident.ref.ArtifactRef;
 import org.commonjava.maven.ext.manip.util.IdUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Properties;
@@ -29,8 +27,6 @@ import java.util.Properties;
 public class GroovyState
     implements State
 {
-    private final Logger logger = LoggerFactory.getLogger( getClass() );
-
     /**
      * The name of the property which contains a comma separated list of remote groovy scripts to load.
      * <pre>
