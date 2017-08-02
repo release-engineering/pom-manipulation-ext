@@ -11,6 +11,10 @@ PME can override a set of dependency versions using a remote source which may be
 
 ### Dependency Source
 
+#### BOM and REST
+
+There are two sources of dependencies used to align to in PME. The property `dependencySource` is used to alter the behaviour of how PME handles the multiple sources of dependency information. The `BOM` value (the default and the behaviour if this property is not specified) is that PME will use the BOM (i.e. Remote POM) source. Alternatively the `REST` source may be specified to use only the REST Endpoint information. However by setting the property to either `RESTBOM` or `BOMREST` it will instead merge the two sets of values. With `RESTBOM` precendence is given to the REST information and for `BOMREST` precendence is given to the BOM information.
+
 #### Remote POM
 
 By default, all dependencies listed in the remote pom will be added to the current build. This has the effect of overriding matching transitive dependencies, as well as those specified directly in the pom.
@@ -26,7 +30,7 @@ Multiple remote dependency-management poms can be specified using a comma separa
 
 #### REST Endpoint
 
-Alternatively, rather than using a remote BOM file as a source, it is possible to instruct PME to prescan the project, collect up all group:artifact:version's used and call a REST endpoint using the property `-DrestURL` (provided by [https://github.com/project-ncl/dependency-analysis]) which will then return a list of possible new versions. Note that the URL should be the subset of the endpoint e.g.
+Alternatively, rather than using a remote BOM file as a source, it is possible to instruct PME to prescan the project, collect up all group:artifact:version's used and call a REST endpoint using the endpoint property `restURL` (provided by [https://github.com/project-ncl/dependency-analysis]) **and** specifying `dependencySource` of `REST`, which will then return a list of possible new versions. Note that the URL should be the subset of the endpoint e.g.
 
     http://foo.bar.com/da/rest/v-1
 
@@ -109,10 +113,6 @@ The blacklist REST endpoint should follow:
 </table>
 
 **NOTE:** For existing dependencies that reference a property, PME will update this property with the new version. If the property can't be found (e.g. it was inherited), a new one will be injected at the top level. This update of the property's value **may** implicitly align other dependencies using the same property that were not explicitly requested to be aligned.
-
-#### Combining BOM and REST
-
-The property `dependencySource` is used to alter the behaviour of how PME handles the multiple sources of dependency information. The `DEFAULT` value (which is also the behaviour if this property is not specified) is that PME will use the REST source instead of any BOMs if the REST source is specified. However by setting the property to either `RESTBOM` or `BOMREST` it will instead merge the two sets of values. With `RESTBOM` precendence is given to the REST information and for `BOMREST` precendence is given to the BOM information.
 
 ### Direct Dependencies
 
