@@ -15,13 +15,13 @@ PME offers the following version-related configuration:
 
 The extension can be used to append a version suffix/qualifier to the current project, and then apply an incremented index to the version to provide a unique release version.  For example, if the current project version is 1.0.0.GA, the extension can automatically set the version to 1.0.0.GA-rebuild-1, 1.0.0.GA-rebuild-2, etc.
 
-The extension is configured using the property `version.incremental.suffix`.
+The extension is configured using the property `versionIncrementalSuffix` (*Deprecated property `version.incremental.suffix`*).
 
-    mvn install -Dversion.incremental.suffix=rebuild
+    mvn install -DversionIncrementalSuffix=rebuild
 
 #### Version increment padding
 
-When using the automatic increment it is also possible to configure padding for the increment. For instance, by setting `version.incremental.suffix.padding` to `3` the version will be `rebuild-003`.
+When using the automatic increment it is also possible to configure padding for the increment. For instance, by setting `versionIncrementalSuffixPadding` (*Deprecated property `version.incremental.suffix.padding`*)to `3` the version will be `rebuild-003`.
 
 #### Version Increment Metadata
 
@@ -33,31 +33,31 @@ The metadata to work out what the correct version of the increment should be can
 
 ### Manual version suffix
 
-The version suffix to be appended to the current project can be manually selected using the property `version.suffix`
+The version suffix to be appended to the current project can be manually selected using the property `versionSuffix` (*Deprecated property `version.suffix`*)
 
-    mvn install -Dversion.suffix=release-1
+    mvn install -DversionSuffix=release-1
 
 If the current version of the project is "1.2.0.GA", the new version set during the build will be "1.2.0.GA-release-1".
 
-**Note** `version.suffix` takes precedence over `version.incremental.suffix`.
+**Note** `versionSuffix` takes precedence over `versionIncrementalSuffix`.
 
 ### Version override
 
-The version can be forcibly overridden by using the property `version.override`
+The version can be forcibly overridden by using the property `versionOverride` (*Deprecated property `version.override`*)
 
-    mvn install -Dversion.override=6.1.0.Final
+    mvn install -DversionOverride=6.1.0.Final
 
 If the current version of the project is "6.2.0", the new version set during the build will be "6.1.0.Final". A combination of properties may be used e.g.
 
-    mvn install -Dversion.override=6.1.0.Final -Dversion.suffix=rebuild-1
+    mvn install -DversionOverride=6.1.0.Final -DversionSuffix=rebuild-1
 
 Using the above example, this would result in the version being "6.1.0.Final-rebuild-1".
 
 ### Snapshot Detection
 
-The extension can detect snapshot versions and either preserve the snapshot or replace it with a real version. This is controlled by the property `version.suffix.snapshot`. The default is false (i.e. remove SNAPSHOT and replace by the suffix).
+The extension can detect snapshot versions and either preserve the snapshot or replace it with a real version. This is controlled by the property `versionSuffixSnapshot` (*Deprecated property `version.suffix.snapshot`*). The default is false (i.e. remove SNAPSHOT and replace by the suffix).
 
-    mvn install -Dversion.suffix.snapshot=true
+    mvn install -DversionSuffixSnapshot=true
 
 This means that the SNAPSHOT suffix will be kept.
 
@@ -77,4 +77,4 @@ it will change to
     1.3.0.GA
     1.3.0.GA
 
-This is controlled by the property `version.osgi`. The default is true (i.e. make the versions OSGi compliant).
+This is controlled by the property `versionOsgi` (*Deprecated property `version.osgi`*). The default is true (i.e. make the versions OSGi compliant).
