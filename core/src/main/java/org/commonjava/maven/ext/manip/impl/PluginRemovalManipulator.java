@@ -87,7 +87,7 @@ public class PluginRemovalManipulator
         }
 
         final Set<Project> changed = new HashSet<>();
-        
+
         for ( final Project project : projects )
         {
             final Model model = project.getModel();

@@ -22,6 +22,7 @@ import org.commonjava.maven.ext.manip.impl.DependencyManipulator;
 import org.commonjava.maven.ext.manip.util.IdUtils;
 import org.commonjava.maven.ext.manip.util.PropertiesUtils;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -51,15 +52,17 @@ public class DependencyState
     /**
      * Merging precedence for dependency sources:
      * <pre>
-     * <code>DEFAULT</code> (solely restURL (if specified) otherwise BOM)
+     * <code>BOM</code> Solely Remote POM i.e. BOM.
+     * <code>REST</code> Solely restURL.
      * <code>RESTBOM</code> Merges the information but takes the rest as precedence.
      * <code>BOMREST</code> Merges the information but takes the bom as precedence.
      * </pre>
-     * Configured by the property <code>-DdependencySource=[DEFAULT|RESTBOM|BOMREST]</code>
+     * Configured by the property <code>-DdependencySource=[REST|BOM|RESTBOM|BOMREST]</code>
      */
     public enum DependencyPrecedence
     {
-        DEFAULT,
+        REST,
+        BOM,
         RESTBOM,
         BOMREST
     }
@@ -129,11 +132,16 @@ public class DependencyState
             }
         }
         switch ( DependencyPrecedence.valueOf( userProps.getProperty( DEPENDENCY_SOURCE,
-                                                            DependencyPrecedence.DEFAULT.toString() ).toUpperCase() ) )
+                                                            DependencyPrecedence.BOM.toString() ).toUpperCase() ) )
         {
-            case DEFAULT:
+            case REST:
             {
-                precedence = DependencyPrecedence.DEFAULT;
+                precedence = DependencyPrecedence.REST;
+                break;
+            }
+            case BOM:
+            {
+                precedence = DependencyPrecedence.BOM;
                 break;
             }
             case RESTBOM:
@@ -148,8 +156,7 @@ public class DependencyState
             }
             default:
             {
-                precedence = DependencyPrecedence.DEFAULT;
-                break;
+                throw new ManipulationException( "Unknown value {} for {}", userProps.getProperty( DEPENDENCY_SOURCE ), DEPENDENCY_SOURCE);
             }
         }
     }
@@ -202,11 +209,15 @@ public class DependencyState
 
     public void setRemoteRESTOverrides( Map<ArtifactRef, String> overrides )
     {
-        this.remoteRESTdepMgmt = overrides;
+        remoteRESTdepMgmt = overrides;
     }
 
     public Map<ArtifactRef, String> getRemoteRESTOverrides( )
     {
+        if ( remoteRESTdepMgmt == null )
+        {
+            remoteRESTdepMgmt = new HashMap<>(  );
+        }
         return remoteRESTdepMgmt;
     }
 

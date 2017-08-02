@@ -36,6 +36,7 @@ import org.commonjava.maven.ext.manip.model.Project;
 import org.commonjava.maven.ext.manip.state.CommonState;
 import org.commonjava.maven.ext.manip.state.DependencyState;
 import org.commonjava.maven.ext.manip.state.DependencyState.DependencyPrecedence;
+import org.commonjava.maven.ext.manip.state.RESTState;
 import org.commonjava.maven.ext.manip.util.ProfileUtils;
 import org.commonjava.maven.ext.manip.util.PropertiesUtils;
 import org.commonjava.maven.ext.manip.util.WildcardMap;
@@ -121,26 +122,28 @@ public class DependencyManipulator implements Manipulator
             logger.debug( getClass().getSimpleName() + ": Nothing to do!" );
             return Collections.emptySet();
         }
-        return internalApplyChanges( projects, session, loadRemoteOverrides( state ) );
+        return internalApplyChanges( projects, session, loadRemoteOverrides( session ) );
     }
 
     /**
      * This will load the remote overrides. It will first try to load any overrides that might have
      * been prepopulated by the REST scanner, failing that it will load from a remote POM file.
      *
-     * @param state the dependency state
+     * @param session the ManipulationSession
      * @return the loaded overrides
      * @throws ManipulationException if an error occurs.
      */
-    private Map<ArtifactRef, String> loadRemoteOverrides( final DependencyState state ) throws ManipulationException
+    private Map<ArtifactRef, String> loadRemoteOverrides( final ManipulationSession session ) throws ManipulationException
     {
-        final List<ProjectVersionRef> gavs = state.getRemoteBOMDepMgmt();
+        final DependencyState depState = session.getState( DependencyState.class );
+        final RESTState restState = session.getState( RESTState.class );
+        final List<ProjectVersionRef> gavs = depState.getRemoteBOMDepMgmt();
 
         // While in theory we are only mapping ProjectRef -> NewVersion if we store key as ProjectRef we can't then have
         // org.foo:foobar -> 1.2.0.redhat-2
         // org.foo:foobar -> 2.0.0.redhat-2
         // Which is useful for strictAlignment scenarios (although undefined for non-strict).
-        Map<ArtifactRef, String> restOverrides = state.getRemoteRESTOverrides();
+        Map<ArtifactRef, String> restOverrides = depState.getRemoteRESTOverrides();
         Map<ArtifactRef, String> bomOverrides = new LinkedHashMap<>();
         Map<ArtifactRef, String> mergedOverrides = new LinkedHashMap<>();
 
@@ -159,25 +162,32 @@ public class DependencyManipulator implements Manipulator
             }
         }
 
-        if ( state.getPrecedence() == DependencyPrecedence.DEFAULT )
+        if ( depState.getPrecedence() == DependencyPrecedence.BOM )
         {
-            if ( restOverrides != null )
+            mergedOverrides = bomOverrides;
+            if ( mergedOverrides.isEmpty() )
             {
-                mergedOverrides = restOverrides;
-            }
-            else
-            {
-                mergedOverrides = bomOverrides;
+                String msg = restState.isEnabled() ? "dependencySource for restURL" : "dependencyManagement";
+
+                logger.warn( "No dependencies found for dependencySource {}. Has {} been configured? ", depState.getPrecedence(), msg );
             }
         }
-        else if ( state.getPrecedence() == DependencyPrecedence.RESTBOM )
+        if ( depState.getPrecedence() == DependencyPrecedence.REST )
+        {
+            mergedOverrides = restOverrides;
+            if ( mergedOverrides.isEmpty() )
+            {
+                logger.warn( "No dependencies found for dependencySource {}. Has restURL been configured? ", depState.getPrecedence() );
+            }
+        }
+        else if ( depState.getPrecedence() == DependencyPrecedence.RESTBOM )
         {
             mergedOverrides = bomOverrides;
 
             removeDuplicateArtifacts( mergedOverrides, restOverrides );
             mergedOverrides.putAll( restOverrides );
         }
-        else if ( state.getPrecedence() == DependencyPrecedence.BOMREST )
+        else if ( depState.getPrecedence() == DependencyPrecedence.BOMREST )
         {
             mergedOverrides = restOverrides;
             removeDuplicateArtifacts( mergedOverrides, bomOverrides );
