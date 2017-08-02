@@ -170,7 +170,7 @@ public class PomIO
                 gav.setArtifactId( m.getArtifactId() == null ? project.getArtifactId() : m.getArtifactId() );
                 gav.setVersion( m.getVersion() == null ? project.getVersion() : m.getVersion() );
             }
-            logger.info( String.format( "%s modified! Rewriting.", project ) );
+            logger.debug( String.format( "%s modified! Rewriting.", project ) );
             File pom = project.getPom();
 
             final Model model = project.getModel();

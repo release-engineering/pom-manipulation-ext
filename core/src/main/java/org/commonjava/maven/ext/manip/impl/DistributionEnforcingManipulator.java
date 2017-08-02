@@ -163,11 +163,11 @@ public class DistributionEnforcingManipulator
 
             if ( mode == EnforcingMode.none )
             {
-                logger.info( "Install/Deploy skip-flag enforcement is disabled for: {}.", ga );
+                logger.debug( "Install/Deploy skip-flag enforcement is disabled for: {}.", ga );
                 continue;
             }
 
-            logger.info( "Applying skip-flag enforcement mode of: " + mode + " to: " + ga );
+            logger.debug( "Applying skip-flag enforcement mode of: " + mode + " to: " + ga );
 
             final Model model = project.getModel();
 
@@ -279,7 +279,6 @@ public class DistributionEnforcingManipulator
         ref.getContainer()
            .setConfiguration( getConfigXml( ref.getNode() ) );
 
-        //        logger.info( "Checking for changed POM:\nold skip setting:\n'{}'\n\nNew skip setting:\n'{}'\n", old, nxt );
         if ( !old.equals( nxt ) )
         {
             changed.add( project );

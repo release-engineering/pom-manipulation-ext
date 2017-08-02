@@ -527,7 +527,7 @@ public class DependencyManipulator implements Manipulator
                 {
                     if ( isEmpty( oldVersion ) )
                     {
-                        logger.warn( "Unable to force align as no existing version field to update for "
+                        logger.debug( "Unable to force align as no existing version field to update for "
                                                      + groupIdArtifactId + "; ignoring" );
                     }
                     else

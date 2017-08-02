@@ -87,7 +87,7 @@ public class PluginRemovalManipulator
         }
 
         final Set<Project> changed = new HashSet<>();
-
+        
         for ( final Project project : projects )
         {
             final Model model = project.getModel();
@@ -105,7 +105,7 @@ public class PluginRemovalManipulator
     {
         final PluginRemovalState state = session.getState( PluginRemovalState.class );
 
-        logger.info( "Applying plugin changes to: " + ga( project ) );
+        logger.debug( "Applying plugin changes to: " + ga( project ) );
 
         boolean result = false;
         List<ProjectRef> pluginsToRemove = state.getPluginRemoval();

@@ -284,8 +284,8 @@ public class ProjectVersioningManipulator
                             else
                             {
                                 d.setVersion( newVersion );
+                                logger.info( "Changed managed: " + d + " in " + base + " to " + newVersion + " from " + gav.getVersionString() );
                             }
-                            logger.info( "Changed managed: " + d + " in " + base + " to " + newVersion + " from " + gav.getVersionString() );
                             changed = true;
                         }
                     }
@@ -327,8 +327,8 @@ public class ProjectVersioningManipulator
                             else
                             {
                                 d.setVersion( newVersion );
+                                logger.info( "Changed: " + d + " in " + base + " to " + newVersion + " from " + gav.getVersionString());
                             }
-                            logger.info( "Changed: " + d + " in " + base + " to " + newVersion + " from " + gav.getVersionString());
                             changed = true;
                         }
                     }
