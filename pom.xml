@@ -27,7 +27,7 @@
 
   <groupId>org.commonjava.maven.ext</groupId>
   <artifactId>pom-manipulation-parent</artifactId>
-  <version>2.12-SNAPSHOT</version>
+  <version>2.12</version>
   <packaging>pom</packaging>
 
   <name>POM Manipulation Extension for Maven</name>
@@ -67,7 +67,7 @@
     <connection>scm:git:http://github.com/release-engineering/pom-manipulation-ext.git</connection>
     <developerConnection>scm:git:git@github.com:release-engineering/pom-manipulation-ext.git</developerConnection>
     <url>http://github.com/release-engineering/pom-manipulation-ext</url>
-    <tag>HEAD</tag>
+    <tag>pom-manipulation-parent-2.12</tag>
   </scm>
 
   <distributionManagement>
@@ -98,38 +98,38 @@
       <dependency>
         <groupId>org.commonjava.maven.ext</groupId>
         <artifactId>pom-manipulation-common</artifactId>
-        <version>2.12-SNAPSHOT</version>
+        <version>2.12</version>
       </dependency>
       <dependency>
         <groupId>org.commonjava.maven.ext</groupId>
         <artifactId>pom-manipulation-cli</artifactId>
-        <version>2.12-SNAPSHOT</version>
+        <version>2.12</version>
       </dependency>
       <dependency>
         <groupId>org.commonjava.maven.ext</groupId>
         <artifactId>pom-manipulation-cli</artifactId>
         <classifier>minimal</classifier>
-        <version>2.12-SNAPSHOT</version>
+        <version>2.12</version>
       </dependency>
       <dependency>
         <groupId>org.commonjava.maven.ext</groupId>
         <artifactId>pom-manipulation-core</artifactId>
-        <version>2.12-SNAPSHOT</version>
+        <version>2.12</version>
       </dependency>
       <dependency>
         <groupId>org.commonjava.maven.ext</groupId>
         <artifactId>pom-manipulation-ext</artifactId>
-        <version>2.12-SNAPSHOT</version>
+        <version>2.12</version>
       </dependency>
       <dependency>
         <groupId>org.commonjava.maven.ext</groupId>
         <artifactId>pom-manipulation-io</artifactId>
-        <version>2.12-SNAPSHOT</version>
+        <version>2.12</version>
       </dependency>
       <dependency>
         <groupId>org.commonjava.maven.ext</groupId>
         <artifactId>pom-manipulation-io</artifactId>
-        <version>2.12-SNAPSHOT</version>
+        <version>2.12</version>
         <type>test-jar</type>
       </dependency>
 
