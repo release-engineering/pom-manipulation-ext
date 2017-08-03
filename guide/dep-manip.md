@@ -288,7 +288,7 @@ When replacing a dependency PME will trace back and update the property value. H
     org.foo:bar1:$propertyX
     org.foo:bar2:$propertyX
 
-And the REST source returns 1.0.rebuild-2 for bar1 and rebuild-4 for bar2. In this case PME will detect the clash and throw an error. It is possible to ensure PME will not update the property and continue by setting `propertyClashFails` to true.
+And the REST source returns 1.0.rebuild-2 for bar1 and rebuild-4 for bar2. In this case PME will detect the clash and throw an error. It is possible to configure PME so it will not update the property and continue by setting `propertyClashFails` to false (default: true).
 
 ### Dependency Relocations
 
