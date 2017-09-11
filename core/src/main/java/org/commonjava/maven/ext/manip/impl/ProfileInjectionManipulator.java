@@ -33,7 +33,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Properties;
 import java.util.Set;
 
 import static org.commonjava.maven.ext.manip.util.IdUtils.ga;
@@ -52,11 +51,13 @@ public class ProfileInjectionManipulator
     @Requirement
     private ModelIO modelBuilder;
 
+    private ManipulationSession session;
+
     /**
      * No prescanning required for Profile injection.
      */
     @Override
-    public void scan( final List<Project> projects, final ManipulationSession session )
+    public void scan( final List<Project> projects )
         throws ManipulationException
     {
     }
@@ -64,20 +65,20 @@ public class ProfileInjectionManipulator
     /**
      * Initialize the {@link ProfileInjectionState} state holder in the {@link ManipulationSession}. This state holder detects
      * version-change configuration from the Maven user properties (-D properties from the CLI) and makes it available for
-     * later invocations of {@link ProfileInjectionManipulator#scan(List, ManipulationSession)} and the apply* methods.
+     * later invocations of {@link Manipulator#scan(List)} and the apply* methods.
      */
     @Override
     public void init( final ManipulationSession session )
     {
-        final Properties userProps = session.getUserProperties();
-        session.setState( new ProfileInjectionState( userProps ) );
+        this.session = session;
+        session.setState( new ProfileInjectionState( session.getUserProperties() ) );
     }
 
     /**
      * Apply the profile injection changes to the top level pom.
      */
     @Override
-    public Set<Project> applyChanges( final List<Project> projects, final ManipulationSession session )
+    public Set<Project> applyChanges( final List<Project> projects )
         throws ManipulationException
     {
         final ProfileInjectionState state = session.getState( ProfileInjectionState.class );

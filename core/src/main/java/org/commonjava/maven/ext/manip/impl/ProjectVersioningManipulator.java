@@ -39,7 +39,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Set;
 
 import static org.apache.commons.lang.StringUtils.isEmpty;
@@ -64,6 +63,8 @@ public class ProjectVersioningManipulator
     @Requirement
     private VersionCalculator calculator;
 
+    private ManipulationSession session;
+
     protected ProjectVersioningManipulator()
     {
     }
@@ -79,7 +80,7 @@ public class ProjectVersioningManipulator
      * method.
      */
     @Override
-    public void scan( final List<Project> projects, final ManipulationSession session )
+    public void scan( final List<Project> projects )
         throws ManipulationException
     {
         final VersioningState state = session.getState( VersioningState.class );
@@ -96,13 +97,13 @@ public class ProjectVersioningManipulator
     /**
      * Initialize the {@link VersioningState} state holder in the {@link ManipulationSession}. This state holder detects
      * version-change configuration from the Maven user properties (-D properties from the CLI) and makes it available for
-     * later invocations of {@link ProjectVersioningManipulator#scan(List, ManipulationSession)} and the apply* methods.
+     * later invocations of {@link Manipulator#scan(List)} and the apply* methods.
      */
     @Override
     public void init( final ManipulationSession session )
     {
-        final Properties userProps = session.getUserProperties();
-        session.setState( new VersioningState( userProps ) );
+        this.session = session;
+        session.setState( new VersioningState( session.getUserProperties() ) );
     }
 
     /**
@@ -111,7 +112,7 @@ public class ProjectVersioningManipulator
      * discovered/read by the main Maven build initialization.
      */
     @Override
-    public Set<Project> applyChanges( final List<Project> projects, final ManipulationSession session )
+    public Set<Project> applyChanges( final List<Project> projects )
         throws ManipulationException
     {
         final VersioningState state = session.getState( VersioningState.class );
@@ -126,7 +127,7 @@ public class ProjectVersioningManipulator
 
         for ( final Project project : projects )
         {
-            if ( applyVersioningChanges( session, projects, project, state ) )
+            if ( applyVersioningChanges( projects, project, state ) )
             {
                 changed.add( project );
             }
@@ -137,7 +138,7 @@ public class ProjectVersioningManipulator
 
     /**
      * Apply any project versioning changes applicable for the given {@link Model}, using accumulated version-change information stored in the
-     * {@link VersioningState} instance, and produced during the {@link ProjectVersioningManipulator#scan(List, ManipulationSession)} invocation.
+     * {@link VersioningState} instance, and produced during the {@link Manipulator#scan(List)} invocation.
      *
      * These changes include the main POM version, but may also include the parent declaration and dependencies, if they reference other POMs in the
      * current build.
@@ -145,7 +146,6 @@ public class ProjectVersioningManipulator
      * If the project is modified, then it is marked as changed in the {@link ManipulationSession}, which triggers the associated POM to be rewritten.
      *
      *
-     * @param session the current session
      * @param projects list of all projects
      * @param project Project undergoing modification.
      * @param state the VersioningState
@@ -153,8 +153,7 @@ public class ProjectVersioningManipulator
      * @throws ManipulationException if an error occurs.
      */
     // TODO: Loooong method
-    protected boolean applyVersioningChanges( final ManipulationSession session, final List<Project> projects,
-                                              final Project project, final VersioningState state )
+    protected boolean applyVersioningChanges( final List<Project> projects, final Project project, final VersioningState state )
         throws ManipulationException
     {
 

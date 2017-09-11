@@ -50,18 +50,20 @@ public class PropertyManipulator
     @Requirement
     private ModelIO effectiveModelBuilder;
 
+    private ManipulationSession session;
+
     @Override
     public void init( final ManipulationSession session )
     {
-        final Properties userProps = session.getUserProperties();
-        session.setState( new PropertyState( userProps ) );
+        this.session = session;
+        session.setState( new PropertyState( session.getUserProperties() ) );
     }
 
     /**
      * No prescanning required for Property manipulation.
      */
     @Override
-    public void scan( final List<Project> projects, final ManipulationSession session )
+    public void scan( final List<Project> projects )
         throws ManipulationException
     {
     }
@@ -70,7 +72,7 @@ public class PropertyManipulator
      * Apply the property changes to the list of {@link Project}'s given.
      */
     @Override
-    public Set<Project> applyChanges( final List<Project> projects, final ManipulationSession session )
+    public Set<Project> applyChanges( final List<Project> projects )
         throws ManipulationException
     {
         final PropertyState state = session.getState( PropertyState.class );

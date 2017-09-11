@@ -36,7 +36,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Properties;
 import java.util.Set;
 
 import static org.apache.commons.lang.StringUtils.isEmpty;
@@ -56,11 +55,13 @@ public class RepoAndReportingRemovalManipulator
     @Requirement
     private SettingsIO settingsWriter;
 
+    private ManipulationSession session;
+
     /**
      * No prescanning required for Repository and Reporting Removal.
      */
     @Override
-    public void scan( final List<Project> projects, final ManipulationSession session )
+    public void scan( final List<Project> projects )
         throws ManipulationException
     {
     }
@@ -68,20 +69,20 @@ public class RepoAndReportingRemovalManipulator
     /**
      * Initialize the {@link RepoReportingState} state holder in the {@link ManipulationSession}. This state holder detects
      * version-change configuration from the Maven user properties (-D properties from the CLI) and makes it available for
-     * later invocations of {@link RepoAndReportingRemovalManipulator#scan(List, ManipulationSession)} and the apply* methods.
+     * later invocations of {@link Manipulator#scan(List)} and the apply* methods.
      */
     @Override
     public void init( final ManipulationSession session )
     {
-        final Properties userProps = session.getUserProperties();
-        session.setState( new RepoReportingState( userProps ) );
+        this.session = session;
+        session.setState( new RepoReportingState( session.getUserProperties() ) );
     }
 
     /**
      * Apply the reporting and repository removal changes to the list of {@link Project}'s given.
      */
     @Override
-    public Set<Project> applyChanges( final List<Project> projects, final ManipulationSession session )
+    public Set<Project> applyChanges( final List<Project> projects )
         throws ManipulationException
     {
         final RepoReportingState state = session.getState( RepoReportingState.class );

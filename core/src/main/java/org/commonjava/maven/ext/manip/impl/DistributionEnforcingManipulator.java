@@ -97,6 +97,8 @@ public class DistributionEnforcingManipulator
     @Requirement
     private GalleyAPIWrapper galleyWrapper;
 
+    private ManipulationSession session;
+
     /**
      * Sets the mode to on, off, detect (from install plugin), or none (disabled) based on user properties.
      * @see DistributionEnforcingState
@@ -105,6 +107,7 @@ public class DistributionEnforcingManipulator
     public void init( final ManipulationSession session )
         throws ManipulationException
     {
+        this.session = session;
         session.setState( new DistributionEnforcingState( session.getUserProperties() ) );
     }
 
@@ -112,7 +115,7 @@ public class DistributionEnforcingManipulator
      * No pre-scanning necessary.
      */
     @Override
-    public void scan( final List<Project> projects, final ManipulationSession session )
+    public void scan( final List<Project> projects )
         throws ManipulationException
     {
     }
@@ -136,7 +139,7 @@ public class DistributionEnforcingManipulator
      * @see EnforcingMode
      */
     @Override
-    public Set<Project> applyChanges( final List<Project> projects, final ManipulationSession session )
+    public Set<Project> applyChanges( final List<Project> projects )
         throws ManipulationException
     {
         final DistributionEnforcingState state = session.getState( DistributionEnforcingState.class );

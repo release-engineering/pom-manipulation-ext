@@ -45,7 +45,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.TimeUnit;
@@ -63,19 +62,20 @@ public class RESTManipulator implements Manipulator
 {
     private static final Logger logger = LoggerFactory.getLogger( RESTManipulator.class );
 
+    private ManipulationSession session;
+
     @Override
     public void init( final ManipulationSession session ) throws ManipulationException
     {
-        final Properties userProps = session.getUserProperties();
-        RESTState state = new RESTState( userProps );
-        session.setState( state );
+        this.session = session;
+        session.setState( new RESTState( session.getUserProperties() ) );
     }
 
     /**
      * Prescans the Project to build up a list of Project GAs and also the various Dependencies.
      */
     @Override
-    public void scan( final List<Project> projects, final ManipulationSession session )
+    public void scan( final List<Project> projects )
                     throws ManipulationException
     {
         final RESTState state = session.getState( RESTState.class );
@@ -269,7 +269,7 @@ public class RESTManipulator implements Manipulator
      * No-op in this case - any changes, if configured, would happen in Versioning or Dependency Manipulators.
      */
     @Override
-    public Set<Project> applyChanges( final List<Project> projects, final ManipulationSession session )
+    public Set<Project> applyChanges( final List<Project> projects )
                     throws ManipulationException
     {
         return Collections.emptySet();

@@ -52,7 +52,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Set;
 
 import static org.apache.commons.lang.StringUtils.isEmpty;
@@ -88,23 +87,25 @@ public class DependencyManipulator implements Manipulator
      */
     private final HashSet<ProjectRef> ignoredModules = new HashSet<>();
 
+    private ManipulationSession session;
+
     /**
      * Initialize the {@link DependencyState} state holder in the {@link ManipulationSession}. This state holder detects
      * version-change configuration from the Maven user properties (-D properties from the CLI) and makes it available for
-     * later invocations of {@link Manipulator#scan(List, ManipulationSession)} and the apply* methods.
+     * later invocations of {@link Manipulator#scan(List)} and the apply* methods.
      */
     @Override
     public void init( final ManipulationSession session ) throws ManipulationException
     {
-        final Properties userProps = session.getUserProperties();
-        session.setState( new DependencyState( userProps ) );
+        session.setState( new DependencyState( session.getUserProperties() ) );
+        this.session = session;
     }
 
     /**
      * No prescanning required for BOM manipulation.
      */
     @Override
-    public void scan( final List<Project> projects, final ManipulationSession session ) throws ManipulationException
+    public void scan( final List<Project> projects ) throws ManipulationException
     {
     }
 
@@ -112,7 +113,7 @@ public class DependencyManipulator implements Manipulator
      * Apply the alignment changes to the list of {@link Project}'s given.
      */
     @Override
-    public Set<Project> applyChanges( final List<Project> projects, final ManipulationSession session )
+    public Set<Project> applyChanges( final List<Project> projects )
                     throws ManipulationException
     {
         final DependencyState state = session.getState( DependencyState.class );
@@ -122,18 +123,17 @@ public class DependencyManipulator implements Manipulator
             logger.debug( getClass().getSimpleName() + ": Nothing to do!" );
             return Collections.emptySet();
         }
-        return internalApplyChanges( projects, session, loadRemoteOverrides( session ) );
+        return internalApplyChanges( projects, loadRemoteOverrides() );
     }
 
     /**
      * This will load the remote overrides. It will first try to load any overrides that might have
      * been prepopulated by the REST scanner, failing that it will load from a remote POM file.
      *
-     * @param session the ManipulationSession
      * @return the loaded overrides
      * @throws ManipulationException if an error occurs.
      */
-    private Map<ArtifactRef, String> loadRemoteOverrides( final ManipulationSession session ) throws ManipulationException
+    private Map<ArtifactRef, String> loadRemoteOverrides() throws ManipulationException
     {
         final DependencyState depState = session.getState( DependencyState.class );
         final RESTState restState = session.getState( RESTState.class );
@@ -225,8 +225,7 @@ public class DependencyManipulator implements Manipulator
         return 40;
     }
 
-    private Set<Project> internalApplyChanges( final List<Project> projects, final ManipulationSession session,
-                                               Map<ArtifactRef, String> overrides )
+    private Set<Project> internalApplyChanges( final List<Project> projects, Map<ArtifactRef, String> overrides )
                     throws ManipulationException
     {
         final DependencyState state = session.getState( DependencyState.class );
@@ -238,7 +237,7 @@ public class DependencyManipulator implements Manipulator
 
             if (!overrides.isEmpty() || !state.getDependencyExclusions().isEmpty())
             {
-                apply( session, project, model, overrides );
+                apply( project, model, overrides );
 
                 result.add( project );
             }
@@ -316,8 +315,7 @@ public class DependencyManipulator implements Manipulator
     /**
      * Applies dependency overrides to the project.
      */
-    private void apply( final ManipulationSession session, final Project project, final Model model,
-                        final Map<ArtifactRef, String> overrides )
+    private void apply( final Project project, final Model model, final Map<ArtifactRef, String> overrides )
                     throws ManipulationException
     {
         // Map of Group : Map of artifactId [ may be wildcard ] : value
@@ -327,7 +325,7 @@ public class DependencyManipulator implements Manipulator
         final CommonState commonState = session.getState( CommonState.class );
 
         Map<ArtifactRef, String> moduleOverrides = new LinkedHashMap<>( overrides );
-        moduleOverrides = removeReactorGAs( session, moduleOverrides );
+        moduleOverrides = removeReactorGAs( moduleOverrides );
 
         try
         {
@@ -412,7 +410,7 @@ public class DependencyManipulator implements Manipulator
                 logger.debug( "Applying overrides to managed dependencies for top-pom: {}", projectGA );
 
                 final Map<ArtifactRef, String> nonMatchingVersionOverrides =
-                                applyOverrides( session, project, dependencies, moduleOverrides, explicitOverrides );
+                                applyOverrides( project, dependencies, moduleOverrides, explicitOverrides );
 
                 final Map<ArtifactRef, String> matchedOverrides = new LinkedHashMap<>( moduleOverrides );
                 matchedOverrides.keySet().removeAll( nonMatchingVersionOverrides.keySet() );
@@ -464,7 +462,7 @@ public class DependencyManipulator implements Manipulator
             if ( session.getState( DependencyState.class ).getOverrideDependencies() && dependencyManagement != null )
             {
                 logger.debug( "Applying overrides to managed dependencies for: {}", projectGA );
-                applyOverrides( session, project, dependencyManagement.getDependencies(), moduleOverrides, explicitOverrides );
+                applyOverrides( project, dependencyManagement.getDependencies(), moduleOverrides, explicitOverrides );
                 applyExplicitOverrides( commonState, explicitVersionPropertyUpdateMap, explicitOverrides,
                                         dependencyManagement.getDependencies() );
             }
@@ -479,7 +477,7 @@ public class DependencyManipulator implements Manipulator
             logger.debug( "Applying overrides to concrete dependencies for: {}", projectGA );
             // Apply overrides to project direct dependencies
             final List<Dependency> projectDependencies = model.getDependencies();
-            applyOverrides( session, project, projectDependencies, moduleOverrides, explicitOverrides );
+            applyOverrides( project, projectDependencies, moduleOverrides, explicitOverrides );
             applyExplicitOverrides( commonState, explicitVersionPropertyUpdateMap, explicitOverrides, projectDependencies );
 
             // Now check all possible profiles and update them.
@@ -490,13 +488,13 @@ public class DependencyManipulator implements Manipulator
                 {
                     if ( p.getDependencyManagement() != null )
                     {
-                        applyOverrides( session, project, p.getDependencyManagement().getDependencies(), moduleOverrides,
+                        applyOverrides( project, p.getDependencyManagement().getDependencies(), moduleOverrides,
                                         explicitOverrides );
                         applyExplicitOverrides( commonState, explicitVersionPropertyUpdateMap, explicitOverrides,
                                                 p.getDependencyManagement().getDependencies() );
                     }
                     final List<Dependency> profileDependencies = p.getDependencies();
-                    applyOverrides( session, project, profileDependencies, moduleOverrides, explicitOverrides );
+                    applyOverrides( project, profileDependencies, moduleOverrides, explicitOverrides );
                     applyExplicitOverrides( commonState, explicitVersionPropertyUpdateMap, explicitOverrides, profileDependencies );
                 }
             }
@@ -585,14 +583,13 @@ public class DependencyManipulator implements Manipulator
     /**
      * Apply a set of version overrides to a list of dependencies. Return a set of the overrides which were not applied.
      *
-     * @param session The ManipulationSession
      * @param project The current Project
      * @param dependencies The list of dependencies
      * @param overrides The map of dependency version overrides
      * @param explicitOverrides Any explicitOverrides to track for ignoring    @return The map of overrides that were not matched in the dependencies
      * @throws ManipulationException if an error occurs
      */
-    private Map<ArtifactRef, String> applyOverrides( final ManipulationSession session, Project project, final List<Dependency> dependencies,
+    private Map<ArtifactRef, String> applyOverrides( Project project, final List<Dependency> dependencies,
                                                      final Map<ArtifactRef, String> overrides,
                                                      WildcardMap<String> explicitOverrides )
                     throws ManipulationException
@@ -744,12 +741,10 @@ public class DependencyManipulator implements Manipulator
      * Remove version overrides which refer to projects in the current reactor.
      * Projects in the reactor include things like inter-module dependencies
      * which should never be overridden.
-     * @param session the ManipulationSession
      * @param versionOverrides current set of ArtifactRef:newVersion overrides.
      * @return A new Map with the reactor GAs removed.
      */
-    private Map<ArtifactRef, String> removeReactorGAs( final ManipulationSession session,
-                                                       final Map<ArtifactRef, String> versionOverrides )
+    private Map<ArtifactRef, String> removeReactorGAs( final Map<ArtifactRef, String> versionOverrides )
                     throws ManipulationException
     {
         final Map<ArtifactRef, String> reducedVersionOverrides = new LinkedHashMap<>( versionOverrides );

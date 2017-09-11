@@ -36,7 +36,6 @@ import org.slf4j.LoggerFactory;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Properties;
 import java.util.Set;
 
 import static org.commonjava.maven.ext.manip.util.IdUtils.ga;
@@ -52,24 +51,26 @@ public class RelocationManipulator
 {
     private final Logger logger = LoggerFactory.getLogger( getClass() );
 
+    private ManipulationSession session;
+
     /**
      * Initialize the {@link PluginState} state holder in the {@link ManipulationSession}. This state holder detects
      * relocation configuration from the Maven user properties (-D properties from the CLI) and makes it available for
-     * later invocations of {@link Manipulator#scan(List, ManipulationSession)} and the apply* methods.
+     * later invocations of {@link Manipulator#scan(List)} and the apply* methods.
      */
     @Override
     public void init( final ManipulationSession session )
                     throws ManipulationException
     {
-        final Properties userProps = session.getUserProperties();
-        session.setState( new RelocationState( userProps ) );
+        this.session = session;
+        session.setState( new RelocationState( session.getUserProperties() ) );
     }
 
     /**
      * No prescanning required for relocations.
      */
     @Override
-    public void scan( final List<Project> projects, final ManipulationSession session )
+    public void scan( final List<Project> projects )
             throws ManipulationException
     {
     }
@@ -78,7 +79,7 @@ public class RelocationManipulator
      * Apply the relocation changes to the list of {@link Project}'s given.
      */
     @Override
-    public Set<Project> applyChanges( final List<Project> projects, final ManipulationSession session )
+    public Set<Project> applyChanges( final List<Project> projects )
             throws ManipulationException
     {
         final State state = session.getState( RelocationState.class );
@@ -95,7 +96,7 @@ public class RelocationManipulator
         {
             final Model model = project.getModel();
 
-            if ( apply( session, project, model ) )
+            if ( apply( project, model ) )
             {
                 changed.add( project );
             }
@@ -104,7 +105,7 @@ public class RelocationManipulator
         return changed;
     }
 
-    private boolean apply( final ManipulationSession session, final Project project, final Model model )
+    private boolean apply( final Project project, final Model model )
     {
         boolean result = false;
         final RelocationState state = session.getState( RelocationState.class );
@@ -115,25 +116,24 @@ public class RelocationManipulator
         DependencyManagement dependencyManagement = model.getDependencyManagement();
         if ( dependencyManagement != null )
         {
-            result = updateDependencies ( session, relocations, dependencyManagement.getDependencies());
+            result = updateDependencies ( relocations, dependencyManagement.getDependencies());
         }
-        result |= updateDependencies( session, relocations, model.getDependencies() );
+        result |= updateDependencies( relocations, model.getDependencies() );
 
         for ( final Profile profile : ProfileUtils.getProfiles( session, model) )
         {
             dependencyManagement = profile.getDependencyManagement();
             if ( dependencyManagement != null )
             {
-                result |= updateDependencies (session, relocations, dependencyManagement.getDependencies());
+                result |= updateDependencies ( relocations, dependencyManagement.getDependencies());
             }
-            result |= updateDependencies( session, relocations, profile.getDependencies() );
+            result |= updateDependencies( relocations, profile.getDependencies() );
 
         }
         return result;
     }
 
-    private boolean updateDependencies( ManipulationSession session, WildcardMap<ProjectVersionRef> relocations,
-                                        List<Dependency> dependencies )
+    private boolean updateDependencies( WildcardMap<ProjectVersionRef> relocations, List<Dependency> dependencies )
     {
         boolean result = false;
 
@@ -147,7 +147,7 @@ public class RelocationManipulator
                 if ( relocations.containsKey( d ) )
                 {
                     ProjectVersionRef pvr = relocations.get( d );
-                    updateDependencyExclusion( session, pvr, d );
+                    updateDependencyExclusion( pvr, d );
 
                     logger.info( "Replacing groupId {} by {} and artifactId {} with {}", d.getGroupId(), pvr.getGroupId(), d.getArtifactId(), pvr.getArtifactId() );
 
@@ -164,12 +164,10 @@ public class RelocationManipulator
     }
 
     /**
-     *
-     * @param session the manipulation session
-     * @param projectVersionRef Map containing the update information for relocations.
+     *  @param projectVersionRef Map containing the update information for relocations.
      * @param d the dependency we are processing the exclusion for.
      */
-    private void updateDependencyExclusion( ManipulationSession session, ProjectVersionRef projectVersionRef, Dependency d )
+    private void updateDependencyExclusion( ProjectVersionRef projectVersionRef, Dependency d )
     {
         final DependencyState state = session.getState( DependencyState.class );
 

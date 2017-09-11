@@ -49,8 +49,10 @@ public class JSONManipulator
     @Requirement
     private JSONIO jsonIO;
 
+    private ManipulationSession session;
+
     @Override
-    public void scan( final List<Project> projects, final ManipulationSession session )
+    public void scan( final List<Project> projects )
         throws ManipulationException
     {
     }
@@ -58,21 +60,21 @@ public class JSONManipulator
     /**
      * Initialize the {@link JSONState} state holder in the {@link ManipulationSession}. This state holder detects
      * configuration from the Maven user properties (-D properties from the CLI) and makes it available for
-     * later invocations of {@link JSONManipulator#scan(List, ManipulationSession)} and the apply* methods.
+     * later invocations of {@link Manipulator#scan(List)} and the apply* methods.
      */
     @Override
     public void init( final ManipulationSession session )
                     throws ManipulationException
     {
-        final Properties userProps = session.getUserProperties();
-        session.setState( new JSONState( userProps ) );
+        this.session = session;
+        session.setState( new JSONState( session.getUserProperties() ) );
     }
 
     /**
      * Apply the json changes to the specified file(s).
      */
     @Override
-    public Set<Project> applyChanges( final List<Project> projects, final ManipulationSession session )
+    public Set<Project> applyChanges( final List<Project> projects )
         throws ManipulationException
     {
         final JSONState state = session.getState( JSONState.class );

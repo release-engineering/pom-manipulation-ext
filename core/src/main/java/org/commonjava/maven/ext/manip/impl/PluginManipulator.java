@@ -61,6 +61,8 @@ import static org.commonjava.maven.ext.manip.util.IdUtils.ga;
 public class PluginManipulator
     implements Manipulator
 {
+    private ManipulationSession session;
+
     private enum PluginType
     {
         RemotePM,
@@ -95,20 +97,20 @@ public class PluginManipulator
     /**
      * Initialize the {@link PluginState} state holder in the {@link ManipulationSession}. This state holder detects
      * version-change configuration from the Maven user properties (-D properties from the CLI) and makes it available for
-     * later invocations of {@link Manipulator#scan(List, ManipulationSession)} and the apply* methods.
+     * later invocations of {@link Manipulator#scan(List)} and the apply* methods.
      */
     @Override
     public void init( final ManipulationSession session )
     {
-        final Properties userProps = session.getUserProperties();
-        session.setState( new PluginState( userProps ) );
+        this.session = session;
+        session.setState( new PluginState( session.getUserProperties() ) );
     }
 
     /**
      * No prescanning required for BOM manipulation.
      */
     @Override
-    public void scan( final List<Project> projects, final ManipulationSession session )
+    public void scan( final List<Project> projects )
         throws ManipulationException
     {
     }
@@ -117,7 +119,7 @@ public class PluginManipulator
      * Apply the alignment changes to the list of {@link Project}'s given.
      */
     @Override
-    public Set<Project> applyChanges( final List<Project> projects, final ManipulationSession session )
+    public Set<Project> applyChanges( final List<Project> projects )
         throws ManipulationException
     {
         final PluginState state = session.getState( PluginState.class );
@@ -130,8 +132,8 @@ public class PluginManipulator
 
         final Set<Project> changed = new HashSet<>();
 
-        final Map<ProjectRef, Plugin> mgmtOverrides = loadRemoteBOM( PluginType.RemotePM, state, session );
-        final Map<ProjectRef, Plugin> pluginOverrides = loadRemoteBOM( PluginType.RemoteP, state, session );
+        final Map<ProjectRef, Plugin> mgmtOverrides = loadRemoteBOM( PluginType.RemotePM, state );
+        final Map<ProjectRef, Plugin> pluginOverrides = loadRemoteBOM( PluginType.RemoteP, state );
 
         for ( final Project project : projects )
         {
@@ -139,13 +141,13 @@ public class PluginManipulator
 
             if (!mgmtOverrides.isEmpty())
             {
-                apply( session, project, model, PluginType.RemotePM, mgmtOverrides );
+                apply( project, model, PluginType.RemotePM, mgmtOverrides );
 
                 changed.add( project );
             }
             if (!pluginOverrides.isEmpty())
             {
-                apply( session, project, model, PluginType.RemoteP, pluginOverrides );
+                apply( project, model, PluginType.RemoteP, pluginOverrides );
 
                 changed.add( project );
             }
@@ -181,7 +183,7 @@ public class PluginManipulator
     }
 
 
-    private Map<ProjectRef, Plugin> loadRemoteBOM( PluginType type, final State state, final ManipulationSession session )
+    private Map<ProjectRef, Plugin> loadRemoteBOM( PluginType type, final State state )
         throws ManipulationException
     {
         final Map<ProjectRef, Plugin> overrides = new LinkedHashMap<>();
@@ -214,8 +216,7 @@ public class PluginManipulator
         return overrides;
     }
 
-    private void apply( final ManipulationSession session, final Project project, final Model model,
-                        PluginType type, final Map<ProjectRef, Plugin> override )
+    private void apply( final Project project, final Model model, PluginType type, final Map<ProjectRef, Plugin> override )
         throws ManipulationException
     {
         logger.info( "Applying plugin changes for {} to: {} ", type, ga( project ) );
@@ -244,7 +245,7 @@ public class PluginManipulator
             }
 
             // Override plugin management versions
-            applyOverrides( session, type, PluginType.LocalPM, pluginManagement.getPlugins(), override );
+            applyOverrides( type, PluginType.LocalPM, pluginManagement.getPlugins(), override );
         }
 
         if ( model.getBuild() != null )
@@ -255,24 +256,21 @@ public class PluginManipulator
 
             // We can't wipe out the versions as we can't guarantee that the plugins are listed
             // in the top level pluginManagement block.
-            applyOverrides( session, type, PluginType.LocalP, projectPlugins, override );
+            applyOverrides( type, PluginType.LocalP, projectPlugins, override );
         }
     }
 
     /**
      * Set the versions of any plugins which match the contents of the list of plugin overrides
      *
-     *
-     *
-     * @param session the ManipulationSession
      * @param remotePluginType The type of the remote plugin (mgmt or plugins)
      * @param localPluginType The type of local block (mgmt or plugins).
      * @param plugins The list of plugins to modify
      * @param pluginVersionOverrides The list of version overrides to apply to the plugins
      * @throws ManipulationException if an error occurs.
      */
-    private void applyOverrides( ManipulationSession session, PluginType remotePluginType, final PluginType localPluginType,
-                                 final List<Plugin> plugins, final Map<ProjectRef, Plugin> pluginVersionOverrides ) throws ManipulationException
+    private void applyOverrides( PluginType remotePluginType, final PluginType localPluginType, final List<Plugin> plugins,
+                                 final Map<ProjectRef, Plugin> pluginVersionOverrides ) throws ManipulationException
     {
         if ( plugins == null)
         {

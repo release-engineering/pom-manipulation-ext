@@ -35,7 +35,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Properties;
 import java.util.Set;
 
 import static org.commonjava.maven.ext.manip.util.IdUtils.ga;
@@ -50,23 +49,25 @@ public class PluginRemovalManipulator
 {
     private final Logger logger = LoggerFactory.getLogger( getClass() );
 
+    private ManipulationSession session;
+
     /**
      * Initialize the {@link PluginState} state holder in the {@link ManipulationSession}. This state holder detects
      * version-change configuration from the Maven user properties (-D properties from the CLI) and makes it available for
-     * later invocations of {@link Manipulator#scan(List, ManipulationSession)} and the apply* methods.
+     * later invocations of {@link Manipulator#scan(List)} and the apply* methods.
      */
     @Override
     public void init( final ManipulationSession session )
     {
-        final Properties userProps = session.getUserProperties();
-        session.setState( new PluginRemovalState( userProps ) );
+        this.session = session;
+        session.setState( new PluginRemovalState( session.getUserProperties() ) );
     }
 
     /**
      * No prescanning required for BOM manipulation.
      */
     @Override
-    public void scan( final List<Project> projects, final ManipulationSession session )
+    public void scan( final List<Project> projects )
             throws ManipulationException
     {
     }
@@ -75,7 +76,7 @@ public class PluginRemovalManipulator
      * Apply the alignment changes to the list of {@link Project}'s given.
      */
     @Override
-    public Set<Project> applyChanges( final List<Project> projects, final ManipulationSession session )
+    public Set<Project> applyChanges( final List<Project> projects )
             throws ManipulationException
     {
         final State state = session.getState( PluginRemovalState.class );
@@ -92,7 +93,7 @@ public class PluginRemovalManipulator
         {
             final Model model = project.getModel();
 
-            if ( apply( session, project, model ) )
+            if ( apply( project, model ) )
             {
                 changed.add( project );
             }
@@ -101,7 +102,7 @@ public class PluginRemovalManipulator
         return changed;
     }
 
-    private boolean apply( final ManipulationSession session, final Project project, final Model model )
+    private boolean apply( final Project project, final Model model )
     {
         final PluginRemovalState state = session.getState( PluginRemovalState.class );
 

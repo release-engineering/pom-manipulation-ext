@@ -66,15 +66,18 @@ public class BOMBuilderManipulator
     @Requirement
     private PomIO pomIO;
 
+    private ManipulationSession session;
+
     @Override
     public void init( final ManipulationSession session )
         throws ManipulationException
     {
+        this.session = session;
         session.setState( new BOMInjectingState( session.getUserProperties() ) );
     }
 
     @Override
-    public void scan( final List<Project> projects, final ManipulationSession session )
+    public void scan( final List<Project> projects )
         throws ManipulationException
     {
     }
@@ -84,7 +87,7 @@ public class BOMBuilderManipulator
      * handle the manipulation of the bom injection.
      */
     @Override
-    public Set<Project> applyChanges( final List<Project> projects, final ManipulationSession session )
+    public Set<Project> applyChanges( final List<Project> projects )
         throws ManipulationException
     {
         final BOMInjectingState state = session.getState( BOMInjectingState.class );

@@ -51,6 +51,8 @@ public class ProjectVersionEnforcingManipulator
 
     private final Logger logger = LoggerFactory.getLogger( getClass() );
 
+    private ManipulationSession session;
+
     /**
      * Sets the mode based on user properties and defaults.
      * @see ProjectVersionEnforcingState
@@ -58,6 +60,7 @@ public class ProjectVersionEnforcingManipulator
     @Override
     public void init( final ManipulationSession session )
     {
+        this.session = session;
         session.setState( new ProjectVersionEnforcingState( session.getUserProperties() ) );
     }
 
@@ -65,7 +68,7 @@ public class ProjectVersionEnforcingManipulator
      * No pre-scanning necessary.
      */
     @Override
-    public void scan( final List<Project> projects, final ManipulationSession session )
+    public void scan( final List<Project> projects )
         throws ManipulationException
     {
     }
@@ -74,7 +77,7 @@ public class ProjectVersionEnforcingManipulator
      * For each project in the current build set, reset the version if using project.version
     */
     @Override
-    public Set<Project> applyChanges( final List<Project> projects, final ManipulationSession session )
+    public Set<Project> applyChanges( final List<Project> projects )
         throws ManipulationException
     {
         final ProjectVersionEnforcingState state = session.getState( ProjectVersionEnforcingState.class );

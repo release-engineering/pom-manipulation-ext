@@ -36,7 +36,6 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Properties;
 import java.util.Set;
 
 /**
@@ -52,11 +51,13 @@ public class GroovyManipulator
     @Requirement
     protected ModelIO modelBuilder;
 
+    private ManipulationSession session;
+
     /**
      * No prescanning required for Profile injection.
      */
     @Override
-    public void scan( final List<Project> projects, final ManipulationSession session )
+    public void scan( final List<Project> projects )
         throws ManipulationException
     {
     }
@@ -64,20 +65,20 @@ public class GroovyManipulator
     /**
      * Initialize the {@link GroovyState} state holder in the {@link ManipulationSession}. This state holder detects
      * version-change configuration from the Maven user properties (-D properties from the CLI) and makes it available for
-     * later invocations of {@link GroovyManipulator#scan(List, ManipulationSession)} and the apply* methods.
+     * later invocations of {@link Manipulator#scan(List)} and the apply* methods.
      */
     @Override
     public void init( final ManipulationSession session )
     {
-        final Properties userProps = session.getUserProperties();
-        session.setState( new GroovyState( userProps ) );
+        this.session = session;
+        session.setState( new GroovyState( session.getUserProperties() ) );
     }
 
     /**
      * Apply the groovy script changes to the top level pom.
      */
     @Override
-    public Set<Project> applyChanges( final List<Project> projects, final ManipulationSession session )
+    public Set<Project> applyChanges( final List<Project> projects )
         throws ManipulationException
     {
         final GroovyState state = session.getState( GroovyState.class );
