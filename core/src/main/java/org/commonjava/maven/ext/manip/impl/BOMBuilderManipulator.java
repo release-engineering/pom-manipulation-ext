@@ -41,7 +41,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static org.codehaus.plexus.util.StringUtils.isEmpty;
 import static org.commonjava.maven.ext.manip.util.IdUtils.ga;
 
 /**
@@ -195,19 +194,9 @@ public class BOMBuilderManipulator
             Dependency d = new Dependency();
             d.setGroupId( p.getGroupId() );
             d.setArtifactId( p.getArtifactId() );
-            if ( ! isEmpty ( p.getModel().getVersion() ) )
-            {
-                d.setVersion( p.getModel().getVersion() );
-            }
-            else if ( ! isEmpty ( p.getModel().getParent().getVersion() ) )
-            {
-                d.setVersion( p.getModel().getParent().getVersion() );
-            }
-            else
-            {
-                d.setVersion( p.getVersion() );
-            }
+            d.setVersion( p.getVersion() );
             d.setType( p.getModel().getPackaging() );
+
             results.add( d );
         }
         return results;

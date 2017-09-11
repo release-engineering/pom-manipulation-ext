@@ -185,9 +185,9 @@ public class ProjectVersioningManipulator
 
         boolean changed = false;
         Map<ProjectVersionRef, String> versionsByGAV = state.getVersionsByGAVMap();
+
         // If the parent version is defined, it might be necessary to change it
         // If the parent version is not defined, it will be taken automatically from the project version
-
         if ( parent != null && parent.getVersion() != null )
         {
             final ProjectVersionRef parentGAV =

@@ -69,6 +69,11 @@ public class Project
 
     private boolean incrementalPME;
 
+    /**
+     * Tracking inheritance across the project.
+     */
+    private Project projectParent;
+
     public Project( final ProjectVersionRef key, final File pom, final Model model )
     {
         this.pom = pom;
@@ -152,7 +157,7 @@ public class Project
         return key + " [pom=" + pom + "]";
     }
 
-    public Parent getParent()
+    public Parent getModelParent()
     {
         return model.getParent();
     }
@@ -361,7 +366,7 @@ public class Project
         return inheritanceRoot;
     }
 
-    private static ProjectVersionRef modelKey( final Model model )
+    public static ProjectVersionRef modelKey( final Model model )
                     throws ManipulationException
     {
         String g = model.getGroupId();
@@ -383,7 +388,6 @@ public class Project
             {
                 v = p.getVersion();
             }
-
         }
 
         final String a = model.getArtifactId();
@@ -412,5 +416,15 @@ public class Project
     public boolean isIncrementalPME( )
     {
         return incrementalPME;
+    }
+
+    public void setProjectParent( Project parent )
+    {
+        this.projectParent = parent;
+    }
+
+    public Project getProjectParent()
+    {
+        return projectParent;
     }
 }

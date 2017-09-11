@@ -28,6 +28,12 @@ public class TestUtils
     public static Model resolveModelResource( final String resourceBase, final String resourceName )
         throws Exception
     {
+        return new MavenXpp3Reader().read( new FileReader( resolveFileResource( resourceBase, resourceName ) ) );
+    }
+
+    public static File resolveFileResource( final String resourceBase, final String resourceName )
+                    throws Exception
+    {
         final URL resource = Thread.currentThread()
                                    .getContextClassLoader()
                                    .getResource( resourceBase + resourceName );
@@ -36,6 +42,6 @@ public class TestUtils
         {
             throw new ManipulationException( "Unable to locate resource for " + resourceBase + resourceName );
         }
-        return new MavenXpp3Reader().read( new FileReader( new File( resource.getPath() ) ) );
+        return new File( resource.getPath() );
     }
 }

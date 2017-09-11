@@ -81,6 +81,7 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import static org.apache.commons.lang.StringUtils.isNotEmpty;
+import static org.commonjava.maven.ext.manip.util.ProfileUtils.PROFILE_SCANNING;
 
 public class Cli
 {
@@ -313,10 +314,8 @@ public class Cli
                 activeProfiles = new HashSet<>();
                 Collections.addAll( activeProfiles, cmd.getOptionValue( 'P' ).trim().split( "," ) );
 
-                if ( session.getActiveProfiles() != null )
-                {
-                    session.getActiveProfiles().addAll( activeProfiles );
-                }
+                session.getUserProperties().setProperty( PROFILE_SCANNING , "true" );
+                session.getActiveProfiles().addAll( activeProfiles );
             }
 
             if ( cmd.hasOption( 'x' ) )
@@ -341,7 +340,7 @@ public class Cli
             }
             else if ( cmd.hasOption( 'p' ) || cmd.hasOption( "printGAVTC" ) || cmd.hasOption( "printUnusedDepMgmt" ))
             {
-                Set<ArtifactRef> ts = RESTManipulator.establishAllDependencies( pomIO.parseProject( session.getPom() ), activeProfiles );
+                Set<ArtifactRef> ts = RESTManipulator.establishAllDependencies( session, pomIO.parseProject( session.getPom() ), activeProfiles );
                 logger.info( "Found {} dependencies.", ts.size() );
                 File output = null;
 
@@ -352,7 +351,7 @@ public class Cli
                 }
                 if ( cmd.hasOption( "printUnusedDepMgmt" ) )
                 {
-                    Set<ArtifactRef> nonMangedDeps = RESTManipulator.establishNonManagedDependencies( pomIO.parseProject( session.getPom() ), activeProfiles );
+                    Set<ArtifactRef> nonMangedDeps = RESTManipulator.establishNonManagedDependencies( session, pomIO.parseProject( session.getPom() ), activeProfiles );
                     logger.info( "Found {} non-managed dependencies.", nonMangedDeps.size() );
                     // As the managed dependencies may have versions versus the non-managed strip off the versions to see what is left.
                     Set<ProjectRef> tsNoV = new TreeSet<>(  );

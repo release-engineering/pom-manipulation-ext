@@ -49,6 +49,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -90,6 +91,7 @@ public class PomIO
         throws ManipulationException
     {
         final List<Project> projects = new ArrayList<>();
+        final HashMap<Project, ProjectVersionRef> projectToParent = new HashMap<>(  );
 
         for ( final PomPeek peek : peeked )
         {
@@ -122,6 +124,7 @@ public class PomIO
             }
 
             final Project project = new Project( pom, raw );
+            projectToParent.put( project, peek.getParentKey() );
             project.setInheritanceRoot( peek.isInheritanceRoot() );
 
             if ( executionRoot.equals( pom ))
@@ -146,7 +149,27 @@ public class PomIO
             projects.add( project );
         }
 
+        // Fill out inheritance info for every project we have created.
+        for ( Project p : projects )
+        {
+            ProjectVersionRef pvr = projectToParent.get( p );
+            p.setProjectParent( getParent( projects, pvr ) );
+        }
+
         return projects;
+    }
+
+    private Project getParent( List<Project> projects, ProjectVersionRef pvr )
+    {
+        for ( Project p : projects )
+        {
+            if ( p.getKey().equals( pvr ) )
+            {
+                return p;
+            }
+        }
+        // If the PVR refers to something outside of the hierarchy we'll break the inheritance here.
+        return null;
     }
 
     /**

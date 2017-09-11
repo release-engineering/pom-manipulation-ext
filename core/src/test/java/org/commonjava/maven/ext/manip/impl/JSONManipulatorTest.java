@@ -101,6 +101,7 @@ public class JSONManipulatorTest
 
         new JSONState( p );
     }
+
     @Test
     public void testStateConstructionEscaping() throws ManipulationException
     {

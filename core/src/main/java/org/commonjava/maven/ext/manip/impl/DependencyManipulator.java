@@ -346,14 +346,14 @@ public class DependencyManipulator implements Manipulator
         if ( project.isInheritanceRoot() )
         {
             // Handle the situation where the top level parent refers to a prior build that is in the BOM.
-            if ( project.getParent() != null)
+            if ( project.getModelParent() != null)
             {
                 for ( Map.Entry<ArtifactRef, String> entry : moduleOverrides.entrySet() )
                 {
-                    String oldValue = project.getParent().getVersion();
+                    String oldValue = project.getModelParent().getVersion();
                     String newValue = entry.getValue();
 
-                    if ( entry.getKey().asProjectRef().equals( SimpleProjectRef.parse( ga(project.getParent()) ) ))
+                    if ( entry.getKey().asProjectRef().equals( SimpleProjectRef.parse( ga(project.getModelParent()) ) ))
                     {
                         if ( dependencyState.getStrict() )
                         {
@@ -363,12 +363,12 @@ public class DependencyManipulator implements Manipulator
                                 {
                                     throw new ManipulationException(
                                                     "Parent reference {} replacement: {} of original version: {} violates the strict version-alignment rule!",
-                                                    ga( project.getParent() ), newValue, oldValue );
+                                                    ga( project.getModelParent() ), newValue, oldValue );
                                 }
                                 else
                                 {
                                     logger.warn( "Parent reference {} replacement: {} of original version: {} violates the strict version-alignment rule!",
-                                                 ga( project.getParent() ), newValue, oldValue );
+                                                 ga( project.getModelParent() ), newValue, oldValue );
                                     // Ignore the dependency override. As found has been set to true it won't inject
                                     // a new property either.
                                     continue;
@@ -377,7 +377,7 @@ public class DependencyManipulator implements Manipulator
                         }
 
                         logger.debug( " Modifying parent reference from {} to {} for {} ",
-                                      model.getParent().getVersion(), newValue, ga( project.getParent() ) );
+                                      model.getParent().getVersion(), newValue, ga( project.getModelParent() ) );
                         model.getParent().setVersion( newValue );
                         break;
                     }
@@ -387,12 +387,12 @@ public class DependencyManipulator implements Manipulator
                 // dependency so we can reuse applyExplicitOverrides.
                 ArrayList<Dependency> pDeps = new ArrayList<>();
                 Dependency d = new Dependency();
-                d.setGroupId( project.getParent().getGroupId() );
-                d.setArtifactId( project.getParent().getArtifactId() );
-                d.setVersion( project.getParent().getVersion() );
+                d.setGroupId( project.getModelParent().getGroupId() );
+                d.setArtifactId( project.getModelParent().getArtifactId() );
+                d.setVersion( project.getModelParent().getVersion() );
                 pDeps.add( d );
                 applyExplicitOverrides( commonState, explicitVersionPropertyUpdateMap, explicitOverrides, pDeps );
-                project.getParent().setVersion( d.getVersion() );
+                project.getModelParent().setVersion( d.getVersion() );
             }
 
             if ( session.getState( DependencyState.class ).getOverrideDependencies() )
@@ -628,7 +628,7 @@ public class DependencyManipulator implements Manipulator
                 {
                     final String oldVersion = dependency.getVersion();
                     final String overrideVersion = entry.getValue();
-                    final String resolvedValue = PropertiesUtils.resolveProperties( session.getProjects(), oldVersion);
+                    final String resolvedValue = PropertiesUtils.resolveInheritedProperties( session, project, oldVersion);
 
                     if ( isEmpty( overrideVersion ) )
                     {
@@ -750,6 +750,7 @@ public class DependencyManipulator implements Manipulator
      */
     private Map<ArtifactRef, String> removeReactorGAs( final ManipulationSession session,
                                                        final Map<ArtifactRef, String> versionOverrides )
+                    throws ManipulationException
     {
         final Map<ArtifactRef, String> reducedVersionOverrides = new LinkedHashMap<>( versionOverrides );
         for ( final Project project : session.getProjects() )

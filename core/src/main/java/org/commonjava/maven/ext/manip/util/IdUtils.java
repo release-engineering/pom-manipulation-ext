@@ -25,6 +25,7 @@ import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleArtifactRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleProjectRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef;
+import org.commonjava.maven.ext.manip.ManipulationException;
 import org.commonjava.maven.ext.manip.model.Project;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,7 +36,7 @@ import java.util.List;
 import static org.apache.commons.lang.StringUtils.isEmpty;
 
 /**
- * Convenience utilities for converting {@link Model} and {@link MavenProject} instances to GA / GAV strings.
+ * Convenience utilities for converting between {@link ProjectVersionRef}, {@link Model}, {@link MavenProject} and GA / GAV strings.
  *
  * @author jdcasey
  */
@@ -148,37 +149,15 @@ public final class IdUtils
             return refs;
         }
     }
-
-    public static String gav( final MavenProject project )
-    {
-        return String.format( "%s:%s:%s", project.getGroupId(), project.getArtifactId(), project.getVersion() );
-    }
-
+    
     public static String gav( final Project project )
     {
         return String.format( "%s:%s:%s", project.getGroupId(), project.getArtifactId(), project.getVersion() );
     }
 
-    public static String gav( final Model model )
+    public static String gav( final Model model ) throws ManipulationException
     {
-        String g = model.getGroupId();
-        String v = model.getVersion();
-
-        final Parent p = model.getParent();
-        if ( p != null )
-        {
-            if ( g == null )
-            {
-                g = p.getGroupId();
-            }
-
-            if ( v == null )
-            {
-                v = p.getVersion();
-            }
-        }
-
-        return String.format( "%s:%s:%s", g, model.getArtifactId(), v );
+        return Project.modelKey( model ).toString();
     }
 
     public static String ga( final Model model )
@@ -223,8 +202,6 @@ public final class IdUtils
                 g = p.getGroupId();
             }
         }
-
         return g;
     }
-
 }

@@ -15,7 +15,14 @@
  */
 package org.commonjava.maven.ext.manip.util;
 
+import org.apache.maven.artifact.repository.ArtifactRepository;
+import org.apache.maven.execution.DefaultMavenExecutionRequest;
+import org.apache.maven.execution.DefaultMavenExecutionResult;
+import org.apache.maven.execution.MavenExecutionRequest;
+import org.apache.maven.execution.MavenSession;
 import org.apache.maven.model.Model;
+import org.codehaus.plexus.DefaultPlexusContainer;
+import org.codehaus.plexus.PlexusContainer;
 import org.commonjava.maven.ext.manip.ManipulationException;
 import org.commonjava.maven.ext.manip.ManipulationSession;
 import org.commonjava.maven.ext.manip.fixture.TestUtils;
@@ -28,6 +35,7 @@ import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -93,15 +101,26 @@ public class PropertiesUtilsTest
         }
     }
 
-    private ManipulationSession createUpdateSession() throws ManipulationException
+    private ManipulationSession createUpdateSession() throws Exception
     {
         ManipulationSession session = new ManipulationSession();
+
         Properties p = new Properties();
+
         p.setProperty( "strictAlignment", "true" );
         p.setProperty( "strictViolationFails", "true" );
         p.setProperty( "version.suffix", "redhat-1" );
+        p.setProperty( "scanActiveProfiles", "true" );
         session.setState( new DependencyState( p ) );
         session.setState( new VersioningState( p ) );
+
+        final MavenExecutionRequest req =
+                        new DefaultMavenExecutionRequest().setUserProperties( p ).setRemoteRepositories( Collections.<ArtifactRepository>emptyList() );
+
+        final PlexusContainer container = new DefaultPlexusContainer();
+        final MavenSession mavenSession = new MavenSession( container, null, req, new DefaultMavenExecutionResult() );
+
+        session.setMavenSession( mavenSession );
 
         return session;
     }
@@ -182,6 +201,7 @@ public class PropertiesUtilsTest
     {
         final Model modelChild = TestUtils.resolveModelResource( RESOURCE_BASE, "inherited-properties.pom" );
         final Model modelParent = TestUtils.resolveModelResource( RESOURCE_BASE, "infinispan-bom-8.2.0.Final.pom" );
+        ManipulationSession session = createUpdateSession();
 
         Project pP = new Project( modelParent );
         Project pC = new Project( modelChild );
@@ -189,14 +209,14 @@ public class PropertiesUtilsTest
         al.add( pC );
         al.add( pP );
 
-        String result = PropertiesUtils.resolveProperties( al, "${version.scala.major}.${version.scala.minor}" );
+        String result = PropertiesUtils.resolveProperties( session, al, "${version.scala.major}.${version.scala.minor}" );
         assertTrue( result.equals( "2.11.7" ) );
 
-        result = PropertiesUtils.resolveProperties( al,
+        result = PropertiesUtils.resolveProperties( session, al,
                                                     "TestSTART.and.${version.scala.major}.now.${version.scala.minor}" );
         assertTrue( result.equals( "TestSTART.and.2.11.now.7" ) );
 
-        result = PropertiesUtils.resolveProperties( al, "${project.version}" );
+        result = PropertiesUtils.resolveProperties( session, al, "${project.version}" );
         assertTrue( result.equals( "1" ) );
    }
 

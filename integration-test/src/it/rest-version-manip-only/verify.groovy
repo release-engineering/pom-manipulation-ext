@@ -23,6 +23,10 @@ def pom = new XmlSlurper().parse( pomFile )
 System.out.println( "POM Version: ${pom.version.text()}" )
 assert pom.version.text().endsWith( '.redhat-2' )
 
+v = pom.parent.version.text()
+System.out.println( "POM Version: ${v}" )
+assert v.endsWith( '-redhat-1' )
+
 // Currently the AddSuffixJettyHandler doesn't do OSGi compatibility.
 def dependency = pom.dependencyManagement.dependencies.dependency.find { it.artifactId.text() == "commons-lang" }
 assert dependency != null

@@ -32,7 +32,7 @@ public final class ProfileUtils
     /**
      * Denotes whether we only scan active profiles. Default is false (we scan ALL profiles).
      */
-    private static final String PROFILE_SCANNING = "scanActiveProfiles";
+    public static final String PROFILE_SCANNING = "scanActiveProfiles";
 
     private final static Logger logger = LoggerFactory.getLogger( ProfileUtils.class );
 

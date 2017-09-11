@@ -24,7 +24,7 @@
 
   <groupId>org.commonjava.maven.ext</groupId>
   <artifactId>simpleParent</artifactId>
-  <version>1.0.redhat-0</version>
+  <version>1.0-redhat-1</version>
   <packaging>pom</packaging>
 
   <name>Simple parent POM to use with integration tests</name>

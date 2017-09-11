@@ -42,7 +42,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static org.commonjava.maven.ext.manip.util.IdUtils.gav;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
@@ -666,4 +665,10 @@ public class ProjectVersionManipulatorTest
 
     }
 
+    // Was in IdUtils but only used here. Use of MavenProject doesn't track Parent group/version
+    // but not important for this test
+    private static String gav( final MavenProject project )
+    {
+        return String.format( "%s:%s:%s", project.getGroupId(), project.getArtifactId(), project.getVersion() );
+    }
 }

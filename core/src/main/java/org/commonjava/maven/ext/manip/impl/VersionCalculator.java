@@ -90,7 +90,7 @@ public class VersionCalculator
         for ( final Project project : projects )
         {
             String originalVersion = project.getVersion();
-            originalVersion = PropertiesUtils.resolveProperties( projects, originalVersion);
+            originalVersion = PropertiesUtils.resolveInheritedProperties( session, project, originalVersion);
             String modifiedVersion =
                 calculate( project.getGroupId(), project.getArtifactId(), originalVersion, session );
 

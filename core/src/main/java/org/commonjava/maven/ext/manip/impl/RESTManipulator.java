@@ -92,14 +92,14 @@ public class RESTManipulator implements Manipulator
 
         final String override = vs.getOverride();
 
-
-        if ( isEmpty( override ) )
+        for ( final Project project : projects )
         {
-            for ( final Project project : projects )
+            if ( isEmpty( override ) )
             {
                 // TODO: Check this : For the rest API I think we need to check every project GA not just inheritance root.
                 // Strip SNAPSHOT from the version for matching. DA will handle OSGi conversion.
                 ProjectVersionRef newKey = new SimpleProjectVersionRef( project.getKey() );
+
                 if ( project.getKey().getVersionString().endsWith( "-SNAPSHOT" ) )
                 {
                     if ( !vs.preserveSnapshot() )
@@ -118,23 +118,17 @@ public class RESTManipulator implements Manipulator
                 }
                 newProjectKeys.add( newKey );
             }
-        }
-        else
-        {
-            for ( final Project project : projects )
+            else if ( project.isExecutionRoot() )
             {
-                if ( project.isExecutionRoot() )
-                {
-                    // We want to manually override the version ; therefore ignore what is in the project and calculate potential
-                    // matches for that instead.
-                    Project p = projects.get( 0 );
-                    newProjectKeys.add( new SimpleProjectVersionRef( p.getGroupId(), p.getArtifactId(), override ) );
-                }
+                // We want to manually override the version ; therefore ignore what is in the project and calculate potential
+                // matches for that instead.
+                Project p = projects.get( 0 );
+                newProjectKeys.add( new SimpleProjectVersionRef( p.getGroupId(), p.getArtifactId(), override ) );
             }
         }
         restParam.addAll( newProjectKeys );
 
-        Set<ArtifactRef> localDeps = establishAllDependencies( projects, null );
+        Set<ArtifactRef> localDeps = establishAllDependencies( session, projects, null );
 
         // Ok we now have a defined list of top level project plus a unique list of all possible dependencies.
         // Need to send that to the rest interface to get a translation.
@@ -292,32 +286,37 @@ public class RESTManipulator implements Manipulator
     /**
      * Scans a list of projects and accumulates all non managed dependencies and returns them. Currently only used by the CLI tool to establish
      * a list of non-managed dependencies.
+     *
+     * @param session
      * @param projects the projects to scan.
      * @param activeProfiles which profiles to check
      * @return an unsorted set of ArtifactRefs used.
      * @throws ManipulationException if an error occurs
      */
-    public static Set<ArtifactRef> establishNonManagedDependencies( final List<Project> projects, Set<String> activeProfiles ) throws ManipulationException
+    public static Set<ArtifactRef> establishNonManagedDependencies( ManipulationSession session, final List<Project> projects,
+                                                                    Set<String> activeProfiles ) throws ManipulationException
     {
-        return establishDependencies( projects, activeProfiles, false );
+        return establishDependencies( session, projects, activeProfiles, false );
     }
 
 
     /**
      * Scans a list of projects and accumulates all dependencies and returns them.
+     *
+     * @param session
      * @param projects the projects to scan.
      * @param activeProfiles which profiles to check
      * @return an unsorted set of ArtifactRefs used.
      * @throws ManipulationException if an error occurs
      */
-    public static Set<ArtifactRef> establishAllDependencies( final List<Project> projects, Set<String> activeProfiles ) throws ManipulationException
+    public static Set<ArtifactRef> establishAllDependencies( ManipulationSession session, final List<Project> projects, Set<String> activeProfiles ) throws ManipulationException
     {
-        return establishDependencies( projects, activeProfiles, true );
+        return establishDependencies( session, projects, activeProfiles, true );
     }
 
 
-    private static Set<ArtifactRef> establishDependencies( final List<Project> projects, Set<String> activeProfiles,
-                                                             boolean includeManaged ) throws ManipulationException
+    private static Set<ArtifactRef> establishDependencies( ManipulationSession session, final List<Project> projects, Set<String> activeProfiles,
+                                                           boolean includeManaged ) throws ManipulationException
     {
         Set<ArtifactRef> localDeps = new TreeSet<>();
         Set<String> activeModules = new HashSet<>();
@@ -358,19 +357,19 @@ public class RESTManipulator implements Manipulator
         {
             if ( project.isInheritanceRoot() || scanAll || activeModules.contains( project.getPom().getParentFile().getName() ) )
             {
-                if ( project.getParent() != null )
+                if ( project.getModelParent() != null )
                 {
                     SimpleProjectVersionRef parent = new SimpleProjectVersionRef(
-                                    project.getParent().getGroupId(), project.getParent().getArtifactId(), project.getParent().getVersion() );
+                                    project.getModelParent().getGroupId(), project.getModelParent().getArtifactId(), project.getModelParent().getVersion() );
                     localDeps.add( new SimpleArtifactRef(parent, new SimpleTypeAndClassifier( "pom", null )
                     ) );
                 }
 
                 if (includeManaged)
                 {
-                    recordDependencies( projects, project, localDeps, project.getManagedDependencies(), includeManaged );
+                    recordDependencies( session, projects, project, localDeps, project.getManagedDependencies(), includeManaged );
                 }
-                recordDependencies( projects, project, localDeps, project.getDependencies(), includeManaged );
+                recordDependencies( session, projects, project, localDeps, project.getDependencies(), includeManaged );
 
                 List<Profile> profiles = project.getModel().getProfiles();
                 if ( profiles != null )
@@ -383,10 +382,10 @@ public class RESTManipulator implements Manipulator
                         }
                         if ( p.getDependencyManagement() != null && includeManaged )
                         {
-                            recordDependencies( projects, project, localDeps, p.getDependencyManagement().getDependencies(),
+                            recordDependencies( session, projects, project, localDeps, p.getDependencyManagement().getDependencies(),
                                                 includeManaged );
                         }
-                        recordDependencies( projects, project, localDeps, p.getDependencies(), includeManaged );
+                        recordDependencies( session, projects, project, localDeps, p.getDependencies(), includeManaged );
                     }
                 }
             }
@@ -399,13 +398,14 @@ public class RESTManipulator implements Manipulator
 
     /**
      * Translate a given set of dependencies into ProjectVersionRefs.
+     * @param session
      * @param projects list of all projects
      * @param project currently scanned project
      * @param deps Set of ProjectVersionRef to store the results in.
      * @param dependencies dependencies to examine
      * @param excludeEmptyVersions if true, exclude empty versions
      */
-    private static void recordDependencies( List<Project> projects, Project project, Set<ArtifactRef> deps,
+    private static void recordDependencies( ManipulationSession session, List<Project> projects, Project project, Set<ArtifactRef> deps,
                                             Iterable<Dependency> dependencies, boolean excludeEmptyVersions )
                     throws ManipulationException
     {
@@ -426,10 +426,11 @@ public class RESTManipulator implements Manipulator
             }
             else
             {
+                // TODO: Process hierarchy better to handle a->b being different to a->c->d.
                 PropertyInterpolator pi = new PropertyInterpolator( project.getModel().getProperties(), project );
-                String version = PropertiesUtils.resolveProperties( projects, d.getVersion() );
-                String groupId = pi.interp( d.getGroupId().equals( "${project.groupId}" ) ? project.getGroupId() : d.getGroupId() );
-                String artifactId = pi.interp( d.getArtifactId().equals( "${project.artifactId}" ) ? project.getArtifactId() : d.getArtifactId() );
+                String version = PropertiesUtils.resolveInheritedProperties( session, project, d.getVersion() );
+                String groupId = PropertiesUtils.resolveInheritedProperties ( session, project, d.getGroupId().equals( "${project.groupId}" ) ? project.getGroupId() : d.getGroupId() );
+                String artifactId = PropertiesUtils.resolveInheritedProperties( session, project, d.getArtifactId().equals( "${project.artifactId}" ) ? project.getArtifactId() : d.getArtifactId() );
 
                 if ( isEmpty ( version ) )
                 {
@@ -443,7 +444,7 @@ public class RESTManipulator implements Manipulator
                     deps.add( new SimpleScopedArtifactRef( new SimpleProjectVersionRef( groupId, artifactId, version ),
                                                            new SimpleTypeAndClassifier( d.getType(), d.getClassifier() ),
                                                            // TODO: Should atlas handle default scope?
-                                                           d.getScope() == null ? DependencyScope.compile.realName() : d.getScope()));
+                                                           d.getScope() == null ? DependencyScope.compile.realName() : pi.interp( d.getScope() )));
                 }
                 else
                 {
