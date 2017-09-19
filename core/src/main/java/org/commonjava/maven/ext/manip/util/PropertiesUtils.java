@@ -16,7 +16,6 @@
 package org.commonjava.maven.ext.manip.util;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.maven.model.Profile;
 import org.commonjava.maven.ext.manip.ManipulationException;
 import org.commonjava.maven.ext.manip.ManipulationSession;
 import org.commonjava.maven.ext.manip.impl.Version;
@@ -30,7 +29,6 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
@@ -94,7 +92,7 @@ public final class PropertiesUtils
         final DependencyState state = session.getState( DependencyState.class );
         PropertyUpdate found = PropertyUpdate.NOTFOUND;
 
-        final String resolvedValue = resolveProperties( session, new ArrayList<>( projects ), "${" + key + '}' );
+        final String resolvedValue = PropertyResolver.resolveProperties( session, new ArrayList<>( projects ), "${" + key + '}' );
         logger.debug( "Fully resolvedValue is {} for {} ", resolvedValue, key );
 
         if ( "project.version".equals( key ) )
@@ -379,83 +377,6 @@ public final class PropertiesUtils
                 versionPropertyUpdateMap.put( oldVersionProp, newVersion );
                 result = true;
             }
-        }
-        return result;
-    }
-
-
-    /**
-     * This recursively checks the supplied value and recursively resolves it if its a property.
-     *
-     * @param session the manipulation session.
-     * @param value value to check
-     * @return the version string
-     * @throws ManipulationException if an error occurs
-     */
-    public static String resolveInheritedProperties( ManipulationSession session, Project start, String value ) throws ManipulationException
-    {
-        final List<Project> found = new ArrayList<>(  );
-        found.add( start );
-
-        Project loop = start;
-        while ( loop.getProjectParent() != null)
-        {
-            // Place inherited first so latter down tree take precedence.
-            found.add( 0, loop.getProjectParent() );
-            loop = loop.getProjectParent();
-        }
-
-        logger.debug ("### Resolving inherited properties for projects {} ", found);
-        return resolveProperties( session, found, value );
-    }
-
-
-    /**
-     * This recursively checks the supplied value and recursively resolves it if its a property.
-     *
-     * @param session the current session
-     * @param projects set of projects
-     * @param value value to check
-     * @return the version string
-     * @throws ManipulationException if an error occurs
-     */
-    static String resolveProperties( ManipulationSession session, List<Project> projects, String value ) throws ManipulationException
-    {
-        final Properties amalgamated = new Properties();
-        Project executionRoot = null;
-
-        // Save execution root so it can potentially overwrite.
-        for ( Project p : projects )
-        {
-            if ( p.isExecutionRoot() )
-            {
-                executionRoot = p;
-            }
-            else
-            {
-                amalgamated.putAll( p.getModel().getProperties() );
-                amalgamated.putAll( searchProfiles( session, p ) );
-            }
-        }
-        // In theory executionRoot should never be null but some artificially constructed unit tests don't define
-        // it so lets avoid a null ptr.
-        if ( executionRoot != null)
-        {
-            amalgamated.putAll( executionRoot.getModel().getProperties() );
-            amalgamated.putAll( searchProfiles( session, executionRoot ) );
-        }
-
-        PropertyInterpolator pi = new PropertyInterpolator( amalgamated, projects.get( 0 ) );
-        return pi.interp( value );
-    }
-
-    private static Properties searchProfiles ( ManipulationSession session, Project p )
-    {
-        final Properties result = new Properties();
-
-        for ( Profile pr : ProfileUtils.getProfiles( session, p.getModel() ) )
-        {
-            result.putAll( pr.getProperties() );
         }
         return result;
     }

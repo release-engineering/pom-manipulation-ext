@@ -17,12 +17,15 @@ package org.commonjava.maven.ext.manip.util;
 
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.Model;
+import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
+import org.commonjava.maven.ext.manip.ManipulationSession;
 import org.commonjava.maven.ext.manip.fixture.TestUtils;
 import org.commonjava.maven.ext.manip.model.Project;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
+import java.util.HashMap;
 import java.util.Properties;
 
 import static org.junit.Assert.assertFalse;
@@ -64,17 +67,29 @@ public class PropertyInterpolatorTest
         Project project = new Project( model );
         PropertyInterpolator pi = new PropertyInterpolator( project.getModel().getProperties(), project );
 
-        String nonInterp ="" , interp = "";
-        for ( Dependency d : project.getManagedDependencies())
+        String nonInterp = "", interp = "";
+        // Explicitly calling the non-resolved model dependencies...
+        for ( Dependency d : project.getModel().getDependencyManagement().getDependencies() )
         {
-            nonInterp += ( d.getGroupId().equals( "${project.groupId}" ) ? project.getGroupId() : d.getGroupId() ) + ":" +
-                            ( d.getArtifactId().equals( "${project.artifactId}" ) ? project.getArtifactId() : d.getArtifactId() ) + System.lineSeparator();
+            nonInterp += ( d.getGroupId().equals( "${project.groupId}" ) ? project.getGroupId() : d.getGroupId() ) + ":"
+                            + ( d.getArtifactId().equals( "${project.artifactId}" ) ? project.getArtifactId() : d.getArtifactId() ) + System.lineSeparator();
 
-            interp += pi.interp( d.getGroupId().equals( "${project.groupId}" ) ? project.getGroupId() : d.getGroupId() ) + ":" +
-                                pi.interp( d.getArtifactId().equals( "${project.artifactId}" ) ? project.getArtifactId() : d.getArtifactId() ) + System.lineSeparator();
+            interp += pi.interp( d.getGroupId().equals( "${project.groupId}" ) ? project.getGroupId() : d.getGroupId() ) + ":" + pi.interp(
+                            d.getArtifactId().equals( "${project.artifactId}" ) ? project.getArtifactId() : d.getArtifactId() ) + System.lineSeparator();
 
         }
-        assertTrue ( nonInterp.contains( "${" ) );
-        assertFalse ( interp.contains( "${" ) );
+        assertTrue( nonInterp.contains( "${" ) );
+        assertFalse( interp.contains( "${" ) );
+    }
+
+    @Test
+    public void testResolveProjectDependencies() throws Exception
+    {
+        final Model model = TestUtils.resolveModelResource( RESOURCE_BASE, "infinispan-bom-8.2.0.Final.pom" );
+        final Project project = new Project( model );
+
+        HashMap<ProjectVersionRef, Dependency> deps = project.getResolvedManagedDependencies( new ManipulationSession() );
+
+        assertTrue( deps.size() == 66 );
     }
 }

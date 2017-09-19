@@ -23,6 +23,7 @@ import org.codehaus.plexus.component.annotations.Requirement;
 import org.commonjava.maven.ext.manip.impl.Manipulator;
 import org.commonjava.maven.ext.manip.io.PomIO;
 import org.commonjava.maven.ext.manip.model.Project;
+import org.commonjava.maven.ext.manip.session.MavenSessionHandler;
 import org.commonjava.maven.ext.manip.state.State;
 import org.commonjava.maven.ext.manip.state.VersioningState;
 
@@ -44,6 +45,7 @@ import java.util.Properties;
  */
 @Component( role = ManipulationSession.class, instantiationStrategy = "singleton" )
 public class ManipulationSession
+                implements MavenSessionHandler
 {
 
     private static final String MANIPULATIONS_DISABLED_PROP = "manipulation.disable";
@@ -106,6 +108,7 @@ public class ManipulationSession
         this.mavenSession = mavenSession;
     }
 
+    @Override
     public Properties getUserProperties()
     {
         return mavenSession == null ? new Properties() : mavenSession.getRequest()
@@ -122,6 +125,7 @@ public class ManipulationSession
         return projects;
     }
 
+    @Override
     public List<ArtifactRepository> getRemoteRepositories()
     {
         return mavenSession == null ? null : mavenSession.getRequest()
@@ -129,6 +133,7 @@ public class ManipulationSession
     }
 
 
+    @Override
     public File getPom() throws ManipulationException
     {
         if (mavenSession == null)
@@ -139,6 +144,7 @@ public class ManipulationSession
         return mavenSession.getRequest().getPom();
     }
 
+    @Override
     public File getTargetDir()
     {
         if ( mavenSession == null )
@@ -156,6 +162,7 @@ public class ManipulationSession
         return new File( pom.getParentFile(), "target" );
     }
 
+    @Override
     public ArtifactRepository getLocalRepository()
     {
         return mavenSession == null ? null : mavenSession.getRequest()
@@ -181,12 +188,14 @@ public class ManipulationSession
         return error;
     }
 
+    @Override
     public List<String> getActiveProfiles()
     {
         return mavenSession == null || mavenSession.getRequest() == null ? null : mavenSession.getRequest()
                                                                                               .getActiveProfiles();
     }
 
+    @Override
     public Settings getSettings()
     {
         return mavenSession == null ? null : mavenSession.getSettings();

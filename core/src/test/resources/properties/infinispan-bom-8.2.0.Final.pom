@@ -64,6 +64,7 @@
       <version.antlr>3.5.2</version.antlr>
       <version.c3p0>0.9.5</version.c3p0>
       <version.commons.pool>1.6</version.commons.pool>
+      <getopt></getopt>
       <version.gnu.getopt>1.0.13</version.gnu.getopt>
       <version.hibernate.javax.persistence>1.0.0.Final</version.hibernate.javax.persistence>
       <version.hibernate.core>5.0.4.Final</version.hibernate.core>
@@ -301,7 +302,7 @@
 
          <dependency>
             <groupId>gnu-getopt</groupId>
-            <artifactId>getopt</artifactId>
+            <artifactId>${getopt}</artifactId>
             <version>${version.gnu.getopt}</version>
          </dependency>
          <dependency>
@@ -467,6 +468,11 @@
             <groupId>com.mchange</groupId>
             <artifactId>c3p0</artifactId>
             <version>${version.c3p0}</version>
+         </dependency>
+
+         <dependency>
+            <groupId>io.netty</groupId>
+            <artifactId>managed-dep</artifactId>
          </dependency>
       </dependencies>
    </dependencyManagement>

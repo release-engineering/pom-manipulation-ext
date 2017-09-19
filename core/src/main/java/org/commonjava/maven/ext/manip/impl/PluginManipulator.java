@@ -278,7 +278,6 @@ public class PluginManipulator
         }
 
         final PluginState pluginState = session.getState( PluginState.class );
-        final DependencyState dependencyState = session.getState( DependencyState.class );
         final CommonState commonState = session.getState( CommonState.class );
 
         for ( final Plugin override : pluginVersionOverrides.values())

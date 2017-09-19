@@ -31,6 +31,7 @@ import org.commonjava.maven.atlas.ident.ref.SimpleArtifactRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleProjectRef;
 import org.commonjava.maven.ext.manip.ManipulationException;
 import org.commonjava.maven.ext.manip.ManipulationSession;
+import org.commonjava.maven.ext.manip.util.PropertyResolver;
 import org.commonjava.maven.ext.manip.io.ModelIO;
 import org.commonjava.maven.ext.manip.model.Project;
 import org.commonjava.maven.ext.manip.state.CommonState;
@@ -625,7 +626,7 @@ public class DependencyManipulator implements Manipulator
                 {
                     final String oldVersion = dependency.getVersion();
                     final String overrideVersion = entry.getValue();
-                    final String resolvedValue = PropertiesUtils.resolveInheritedProperties( session, project, oldVersion);
+                    final String resolvedValue = PropertyResolver.resolveInheritedProperties( session, project, oldVersion);
 
                     if ( isEmpty( overrideVersion ) )
                     {

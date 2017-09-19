@@ -27,6 +27,7 @@ import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleTypeAndClassifier;
 import org.commonjava.maven.ext.manip.ManipulationException;
 import org.commonjava.maven.ext.manip.ManipulationSession;
+import org.commonjava.maven.ext.manip.util.PropertyResolver;
 import org.commonjava.maven.ext.manip.model.Project;
 import org.commonjava.maven.ext.manip.model.SimpleScopedArtifactRef;
 import org.commonjava.maven.ext.manip.rest.exception.RestException;
@@ -293,6 +294,7 @@ public class RESTManipulator implements Manipulator
      * @return an unsorted set of ArtifactRefs used.
      * @throws ManipulationException if an error occurs
      */
+    // TODO: Remove
     public static Set<ArtifactRef> establishNonManagedDependencies( ManipulationSession session, final List<Project> projects,
                                                                     Set<String> activeProfiles ) throws ManipulationException
     {
@@ -367,9 +369,10 @@ public class RESTManipulator implements Manipulator
 
                 if (includeManaged)
                 {
-                    recordDependencies( session, projects, project, localDeps, project.getManagedDependencies(), includeManaged );
+                    //TODO: Still to fix this....
+                     recordDependencies( session, projects, project, localDeps, project.getResolvedManagedDependencies( session), includeManaged );
                 }
-                recordDependencies( session, projects, project, localDeps, project.getDependencies(), includeManaged );
+                recordDependencies( session, projects, project, localDeps, project.getResolvedDependencies(session), includeManaged );
 
                 List<Profile> profiles = project.getModel().getProfiles();
                 if ( profiles != null )
@@ -382,10 +385,10 @@ public class RESTManipulator implements Manipulator
                         }
                         if ( p.getDependencyManagement() != null && includeManaged )
                         {
-                            recordDependencies( session, projects, project, localDeps, p.getDependencyManagement().getDependencies(),
+                            recordDependencies( session, projects, project, localDeps, project.getResolvedProfileManagedDependencies( session ).get (p),
                                                 includeManaged );
                         }
-                        recordDependencies( session, projects, project, localDeps, p.getDependencies(), includeManaged );
+                        recordDependencies( session, projects, project, localDeps, project.getResolvedProfileDependencies( session ).get( p ), includeManaged );
                     }
                 }
             }
@@ -406,7 +409,9 @@ public class RESTManipulator implements Manipulator
      * @param excludeEmptyVersions if true, exclude empty versions
      */
     private static void recordDependencies( ManipulationSession session, List<Project> projects, Project project, Set<ArtifactRef> deps,
-                                            Iterable<Dependency> dependencies, boolean excludeEmptyVersions )
+                                            HashMap<ProjectVersionRef, Dependency> dependencies, boolean excludeEmptyVersions )
+    // TODO: called by establishNonManaged with false which is called by the CLI::printUnusedDepMgmt
+    // TODO: called by establishAllDeps with true which is called by CLI and RESTManip.
                     throws ManipulationException
     {
         if ( dependencies == null )
@@ -414,7 +419,20 @@ public class RESTManipulator implements Manipulator
             return;
         }
 
-        Iterator<Dependency> iterator = dependencies.iterator();
+        for ( ProjectVersionRef pvr : dependencies.keySet() )
+        {
+            Dependency d = dependencies.get( pvr );
+            deps.add( new SimpleScopedArtifactRef( pvr, new SimpleTypeAndClassifier( d.getType(), d.getClassifier() ),
+                                                   // TODO: Should atlas handle default scope?
+                                                   isEmpty( d.getScope() ) ?
+                                                                   DependencyScope.compile.realName() :
+                                                                   PropertyResolver.resolveInheritedProperties( session,
+                                                                                                                project,
+                                                                                                                d.getScope() ) ) );
+        }
+
+/*
+        Iterator<Dependency> iterator = dependencies.keySet().iterator();
 
         while ( iterator.hasNext() )
         {
@@ -428,12 +446,15 @@ public class RESTManipulator implements Manipulator
             {
                 // TODO: Process hierarchy better to handle a->b being different to a->c->d.
                 PropertyInterpolator pi = new PropertyInterpolator( project.getModel().getProperties(), project );
-                String version = PropertiesUtils.resolveInheritedProperties( session, project, d.getVersion() );
-                String groupId = PropertiesUtils.resolveInheritedProperties ( session, project, d.getGroupId().equals( "${project.groupId}" ) ? project.getGroupId() : d.getGroupId() );
-                String artifactId = PropertiesUtils.resolveInheritedProperties( session, project, d.getArtifactId().equals( "${project.artifactId}" ) ? project.getArtifactId() : d.getArtifactId() );
+                String version = PropertyResolver.resolveInheritedProperties( session, project, d.getVersion() );
+                String groupId = d.getGroupId();
+                                //PropertyResolver.resolveInheritedProperties ( session, project, d.getGroupId().equals( "${project.groupId}" ) ? project.getGroupId() : d.getGroupId() );
+                String artifactId = d.getArtifactId();
+                                //PropertyResolver.resolveInheritedProperties( session, project, d.getArtifactId().equals( "${project.artifactId}" ) ? project.getArtifactId() : d.getArtifactId() );
 
                 if ( isEmpty ( version ) )
                 {
+                    // TODO: HOW???
                     // Hack for non-managed versions to be stored in this set. Only used by CLI codepath
                     logger.trace( "Version for " + d + " is empty." );
                     version = "<unknown>";
@@ -452,6 +473,7 @@ public class RESTManipulator implements Manipulator
                 }
             }
         }
+        */
     }
 
 

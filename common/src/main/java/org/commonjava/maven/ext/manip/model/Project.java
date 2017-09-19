@@ -28,11 +28,20 @@ import org.apache.maven.model.Profile;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef;
 import org.commonjava.maven.ext.manip.ManipulationException;
+import org.commonjava.maven.ext.manip.session.MavenSessionHandler;
+import org.commonjava.maven.ext.manip.util.ProfileUtils;
+import org.commonjava.maven.ext.manip.util.PropertyResolver;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static org.apache.commons.lang.StringUtils.isEmpty;
+import static org.apache.commons.lang.StringUtils.isNotEmpty;
 
 /**
  * Provides a convenient way of passing around related information about a Maven
@@ -74,6 +83,14 @@ public class Project
      */
     private Project projectParent;
 
+    private HashMap<ProjectVersionRef, Dependency> resolvedDependencies;
+
+    private HashMap<ProjectVersionRef, Dependency> resolvedManagedDepencies;
+
+    private HashMap<Profile, HashMap<ProjectVersionRef, Dependency>> resolvedProfileDependencies;
+
+    private HashMap<Profile, HashMap<ProjectVersionRef, Dependency>> resolvedProfileManagedDependencies;
+
     public Project( final ProjectVersionRef key, final File pom, final Model model )
     {
         this.pom = pom;
@@ -91,25 +108,6 @@ public class Project
         throws ManipulationException
     {
         this( modelKey( model ), model.getPomFile(), model );
-    }
-
-    public File getPom()
-    {
-        return pom;
-    }
-
-    /**
-     * Retrieve the model undergoing modification.
-     * @return the Model being modified.
-     */
-    public Model getModel()
-    {
-        return model;
-    }
-
-    public ProjectVersionRef getKey()
-    {
-        return key;
     }
 
     @Override
@@ -157,6 +155,25 @@ public class Project
         return key + " [pom=" + pom + "]";
     }
 
+    public File getPom()
+    {
+        return pom;
+    }
+
+    /**
+     * Retrieve the model undergoing modification.
+     * @return the Model being modified.
+     */
+    public Model getModel()
+    {
+        return model;
+    }
+
+    public ProjectVersionRef getKey()
+    {
+        return key;
+    }
+
     public Parent getModelParent()
     {
         return model.getParent();
@@ -185,12 +202,12 @@ public class Project
         return key.getVersionString();
     }
 
-    public List<Plugin> getPlugins()
+/*    public List<Plugin> getPlugins()
     {
         return getPlugins( model );
     }
 
-    public List<Plugin> getPlugins( final ModelBase base )
+    private List<Plugin> getPlugins( final ModelBase base )
     {
         final BuildBase build = getBuild( base );
 
@@ -206,12 +223,7 @@ public class Project
         }
 
         return result;
-    }
-
-    public Map<String, Plugin> getPluginMap()
-    {
-        return getPluginMap( model );
-    }
+    }*/
 
     public Map<String, Plugin> getPluginMap( final ModelBase base )
     {
@@ -239,7 +251,7 @@ public class Project
         return result;
     }
 
-    public Build getBuild()
+/*    public Build getBuild()
     {
         return (Build) getBuild( model );
     }
@@ -258,39 +270,7 @@ public class Project
 
         return build;
     }
-
-    public List<Plugin> getManagedPlugins( final ModelBase base )
-    {
-        BuildBase build;
-        if ( base instanceof Model )
-        {
-            build = ( (Model) base ).getBuild();
-        }
-        else
-        {
-            build = ( (Profile) base ).getBuild();
-        }
-
-        if ( build == null )
-        {
-            return Collections.emptyList();
-        }
-
-        final PluginManagement pm = build.getPluginManagement();
-        if ( pm == null )
-        {
-            return Collections.emptyList();
-        }
-
-        final List<Plugin> result = pm.getPlugins();
-        if ( result == null )
-        {
-            return Collections.emptyList();
-        }
-
-        return result;
-    }
-
+*/
 
     public Map<String, Plugin> getManagedPluginMap( final ModelBase base )
     {
@@ -320,37 +300,129 @@ public class Project
         return Collections.emptyMap();
     }
 
-
-    public Iterable<Dependency> getDependencies()
+    public HashMap<Profile, HashMap<ProjectVersionRef, Dependency>> getResolvedProfileDependencies( MavenSessionHandler session) throws ManipulationException
     {
-        return getDependencies( model );
-    }
-
-    public Iterable<Dependency> getDependencies( final ModelBase base )
-    {
-        List<Dependency> deps = base.getDependencies();
-        if ( deps == null )
+        if ( resolvedProfileDependencies == null )
         {
-            deps = Collections.emptyList();
+            resolvedProfileDependencies = new HashMap<>(  );
+
+            for ( final Profile profile : ProfileUtils.getProfiles( session, model ) )
+            {
+                HashMap<ProjectVersionRef, Dependency> profileDeps = new HashMap<>();
+
+                resolveDeps( session, profile.getDependencies(), profileDeps );
+
+                resolvedProfileDependencies.put( profile, profileDeps );
+            }
         }
-
-        return deps;
+        return resolvedProfileDependencies;
     }
 
-    public Iterable<Dependency> getManagedDependencies()
+    public HashMap<Profile, HashMap<ProjectVersionRef, Dependency>> getResolvedProfileManagedDependencies( MavenSessionHandler session) throws ManipulationException
     {
-        return getManagedDependencies( model );
-    }
-
-    public Iterable<Dependency> getManagedDependencies( final ModelBase base )
-    {
-        final DependencyManagement dm = base.getDependencyManagement();
-        if ( dm == null || dm.getDependencies() == null )
+        if ( resolvedProfileManagedDependencies == null )
         {
-            return Collections.emptyList();
-        }
+            resolvedProfileManagedDependencies = new HashMap<>(  );
 
-        return dm.getDependencies();
+            for ( final Profile profile : ProfileUtils.getProfiles( session, model ) )
+            {
+                HashMap<ProjectVersionRef, Dependency> profileDeps = new HashMap<>();
+
+                resolveDeps( session, profile.getDependencies(), profileDeps );
+
+                resolvedProfileManagedDependencies.put( profile, profileDeps );
+            }
+        }
+        return resolvedProfileManagedDependencies;
+    }
+
+    public HashMap<ProjectVersionRef, Dependency> getResolvedDependencies( MavenSessionHandler session) throws ManipulationException
+    {
+        if ( resolvedDependencies == null )
+        {
+            resolvedDependencies = new HashMap<>();
+
+            resolveDeps( session, getModel().getDependencies(), resolvedDependencies );
+/*
+            List<Dependency> deps = getModel().getDependencies();
+
+            for ( Dependency d : deps )
+            {
+                ProjectVersionRef pvr = new SimpleProjectVersionRef(
+                PropertyResolver.resolveInheritedProperties( session, this, d.getGroupId().equals( "${project.groupId}" ) ?
+                                getGroupId() :
+                                d.getGroupId() ),
+                PropertyResolver.resolveInheritedProperties( session, this, d.getArtifactId().equals( "${project.artifactId}" ) ?
+                                getArtifactId() :
+                                d.getArtifactId() ),
+                PropertyResolver.resolveInheritedProperties( session, this, d.getArtifactId().equals( "${project.version}" ) ?
+                                d.getVersion() :
+                                d.getVersion() ) );
+                resolvedDependencies.put( pvr, d);
+            }*/
+        }
+        return resolvedDependencies;
+    }
+
+    public HashMap<ProjectVersionRef, Dependency> getResolvedManagedDependencies( MavenSessionHandler session ) throws ManipulationException
+    {
+        if ( resolvedManagedDepencies == null )
+        {
+            resolvedManagedDepencies = new HashMap<>(  );
+
+            final DependencyManagement dm = getModel().getDependencyManagement();
+            if ( ! ( dm == null || dm.getDependencies() == null ) )
+            {
+                resolveDeps( session, dm.getDependencies(), resolvedManagedDepencies );
+                /*
+                List<Dependency> deps = dm.getDependencies();
+
+                for ( Dependency d : deps )
+                {
+                    ProjectVersionRef pvr = new SimpleProjectVersionRef(
+                    PropertyResolver.resolveInheritedProperties( session, this, d.getGroupId().equals( "${project.groupId}" ) ?
+                                    getGroupId() :
+                                    d.getGroupId() ),
+                    PropertyResolver.resolveInheritedProperties( session, this, d.getArtifactId().equals( "${project.artifactId}" ) ?
+                                    getArtifactId() :
+                                    d.getArtifactId() ),
+                    PropertyResolver.resolveInheritedProperties( session, this, d.getArtifactId().equals( "${project.version}" ) ?
+                                    d.getVersion() :
+                                    d.getVersion() ) );
+                    resolvedDependencies.put( pvr, d );
+                }*/
+            }
+        }
+        return resolvedManagedDepencies;
+    }
+
+
+    // TODO: ### Remove
+    private final static Logger logger = LoggerFactory.getLogger( PropertyResolver.class );
+
+
+    private void resolveDeps ( MavenSessionHandler session, List<Dependency> deps, HashMap<ProjectVersionRef, Dependency> resolvedDependencies)
+                    throws ManipulationException
+    {
+        for ( Dependency d : deps )
+        {
+            logger.debug( "### For {} found version empty {} ", d, isEmpty( d.getVersion() ) );
+            String g = PropertyResolver.resolveInheritedProperties( session, this, "${project.groupId}".equals( d.getGroupId() ) ?
+                            getGroupId() :
+                            d.getGroupId() );
+            String a = PropertyResolver.resolveInheritedProperties( session, this, "${project.artifactId}".equals( d.getArtifactId() ) ?
+                            getArtifactId() :
+                            d.getArtifactId() );
+            String v = PropertyResolver.resolveInheritedProperties( session, this, "${project.version}".equals( d.getVersion() ) ?
+                            d.getVersion() :
+                            d.getVersion() );
+
+            if ( isNotEmpty( g ) && isNotEmpty( a ) && isNotEmpty( v ) )
+            {
+                resolvedDependencies.put( new SimpleProjectVersionRef( g, a, v ), d );
+            }
+
+        }
     }
 
     public void setInheritanceRoot( final boolean inheritanceRoot )

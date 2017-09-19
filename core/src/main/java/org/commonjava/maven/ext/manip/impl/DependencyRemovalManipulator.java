@@ -20,6 +20,7 @@ import org.apache.maven.model.Model;
 import org.apache.maven.model.Profile;
 import org.codehaus.plexus.component.annotations.Component;
 import org.commonjava.maven.atlas.ident.ref.ProjectRef;
+import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleProjectRef;
 import org.commonjava.maven.ext.manip.ManipulationException;
 import org.commonjava.maven.ext.manip.ManipulationSession;
@@ -32,6 +33,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -102,28 +104,33 @@ public class DependencyRemovalManipulator
         return changed;
     }
 
-    private boolean apply( final Project project, final Model model ) {
+    private boolean apply( final Project project, final Model model ) throws ManipulationException
+    {
         final DependencyRemovalState state = session.getState(DependencyRemovalState.class);
 
         logger.info("Applying Dependency changes to: " + ga(project));
 
         List<ProjectRef> dependenciesToRemove = state.getDependencyRemoval();
-        boolean result = scanDependencies(dependenciesToRemove, model.getDependencies());
+        boolean result = scanDependencies( project.getResolvedDependencies( session ), dependenciesToRemove, model.getDependencies());
 
         if ( model.getDependencyManagement() != null &&
-             scanDependencies(dependenciesToRemove, model.getDependencyManagement().getDependencies()))
+             scanDependencies(project.getResolvedManagedDependencies( session ), dependenciesToRemove, model.getDependencyManagement().getDependencies()))
         {
             result = true;
         }
 
-        for ( final Profile profile : ProfileUtils.getProfiles( session, model) )
+        final HashMap<Profile, HashMap<ProjectVersionRef, Dependency>> pd = project.getResolvedProfileDependencies( session );
+        final HashMap<Profile, HashMap<ProjectVersionRef, Dependency>> pmd = project.getResolvedProfileManagedDependencies( session );
+        for ( Profile profile : pd.keySet())
         {
-            if ( scanDependencies( dependenciesToRemove, profile.getDependencies() ) )
+            if ( scanDependencies( pd.get( profile ), dependenciesToRemove, profile.getDependencies() ) )
             {
                 result = true;
             }
-            if ( profile.getDependencyManagement() != null &&
-                    scanDependencies( dependenciesToRemove, profile.getDependencyManagement().getDependencies() ) )
+        }
+        for ( Profile profile : pmd.keySet())
+        {
+            if ( scanDependencies( pmd.get( profile ), dependenciesToRemove, profile.getDependencies() ) )
             {
                 result = true;
             }
@@ -131,19 +138,18 @@ public class DependencyRemovalManipulator
         return result;
     }
 
-    private boolean scanDependencies( List<ProjectRef> dependenciesToRemove, List<Dependency> dependencies )
+    private boolean scanDependencies( HashMap<ProjectVersionRef, Dependency> resolvedDependencies,
+                                      List<ProjectRef> dependenciesToRemove, List<Dependency> dependencies )
     {
         boolean result = false;
         if ( dependencies != null )
         {
-            Iterator<Dependency> it = dependencies.iterator();
-            while ( it.hasNext() )
+            for ( ProjectVersionRef pvr : resolvedDependencies.keySet() )
             {
-                Dependency d = it.next();
-                if ( dependenciesToRemove.contains( SimpleProjectRef.parse( (d.getGroupId() + ":" + d.getArtifactId()) ) ) )
+                if ( dependenciesToRemove.contains( pvr.asProjectRef() ) )
                 {
-                    logger.debug( "Removing {} ", d.toString() );
-                    it.remove();
+                    logger.debug( "Removing {} ", resolvedDependencies.get( pvr ) );
+                    dependencies.remove( resolvedDependencies.get( pvr ) );
                     result = true;
                 }
             }

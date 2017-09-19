@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (C) 2012 Red Hat, Inc. (jcasey@redhat.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,7 +17,7 @@ package org.commonjava.maven.ext.manip.util;
 
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Profile;
-import org.commonjava.maven.ext.manip.ManipulationSession;
+import org.commonjava.maven.ext.manip.session.MavenSessionHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,7 +41,7 @@ public final class ProfileUtils
     }
 
 
-    public static List<Profile> getProfiles ( ManipulationSession session, Model model)
+    public static List<Profile> getProfiles ( MavenSessionHandler session, Model model)
     {
         final List<Profile> result = new ArrayList<>( );
         final List<Profile> profiles = model.getProfiles();
@@ -64,7 +64,6 @@ public final class ProfileUtils
                 result.addAll( profiles );
             }
         }
-        logger.debug ("Located profiles {} ", result.toString());
         return result;
     }
 }

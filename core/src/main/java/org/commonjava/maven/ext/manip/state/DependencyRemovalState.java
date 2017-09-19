@@ -53,6 +53,9 @@ public class DependencyRemovalState
         return dependencyRemoval != null && !dependencyRemoval.isEmpty();
     }
 
+    /**
+     * @return the dependencies we wish to remove.
+     */
     public List<ProjectRef> getDependencyRemoval()
     {
         return dependencyRemoval;

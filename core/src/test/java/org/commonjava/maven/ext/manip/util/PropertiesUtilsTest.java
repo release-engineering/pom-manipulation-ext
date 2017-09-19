@@ -209,14 +209,14 @@ public class PropertiesUtilsTest
         al.add( pC );
         al.add( pP );
 
-        String result = PropertiesUtils.resolveProperties( session, al, "${version.scala.major}.${version.scala.minor}" );
+        String result = PropertyResolver.resolveProperties( session, al, "${version.scala.major}.${version.scala.minor}" );
         assertTrue( result.equals( "2.11.7" ) );
 
-        result = PropertiesUtils.resolveProperties( session, al,
-                                                    "TestSTART.and.${version.scala.major}.now.${version.scala.minor}" );
+        result = PropertyResolver.resolveProperties( session, al,
+                                                     "TestSTART.and.${version.scala.major}.now.${version.scala.minor}" );
         assertTrue( result.equals( "TestSTART.and.2.11.now.7" ) );
 
-        result = PropertiesUtils.resolveProperties( session, al, "${project.version}" );
+        result = PropertyResolver.resolveProperties( session, al, "${project.version}" );
         assertTrue( result.equals( "1" ) );
    }
 
