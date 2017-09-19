@@ -160,10 +160,6 @@ public class Cli
                                  .longOpt( "printGAVTC" )
                                  .desc( "Print all project dependencies in group:artifact:version:type:classifier with scope information" )
                                  .build() );
-        options.addOption( Option.builder()
-                                 .longOpt( "printUnusedDepMgmt" )
-                                 .desc( "Print unused managed dependencies in group:artifact:version format" )
-                                 .build() );
         options.addOption( Option.builder( "D" )
                                  .hasArgs()
                                  .numberOfArgs( 2 )
@@ -300,10 +296,13 @@ public class Cli
         {
             // Note : don't print out settings information earlier (like when we actually read it) as the logging
             // isn't setup then.
-            logger.debug( "Using local repository {} and found global settings file in {} and user settings file in {} with contents \n{}",
+            logger.debug( "Using local repository \n{} and found global settings file in {} with contents \n{} and user settings file in {} with contents \n{}",
                           session.getLocalRepository(),
                           DEFAULT_GLOBAL_SETTINGS_FILE,
-                          settings, (settings != null && settings.exists()) ? FileUtils.readFileToString( settings ) : "** File does not exist **"
+                          (DEFAULT_GLOBAL_SETTINGS_FILE != null && DEFAULT_GLOBAL_SETTINGS_FILE.exists()) ? FileUtils.readFileToString
+                                          ( DEFAULT_GLOBAL_SETTINGS_FILE ) : "** File does not exist **",
+                          settings,
+                          (settings != null && settings.exists()) ? FileUtils.readFileToString( settings ) : "** File does not exist **"
                           );
 
             manipulationManager.init( session );
@@ -338,10 +337,11 @@ public class Cli
                     logger.info  ("Found node {} and value {} ", node.getNodeName(), node.getTextContent());
                 }
             }
-            else if ( cmd.hasOption( 'p' ) || cmd.hasOption( "printGAVTC" ) || cmd.hasOption( "printUnusedDepMgmt" ))
+            else if ( cmd.hasOption( 'p' ) || cmd.hasOption( "printGAVTC" ) )
             {
-                Set<ArtifactRef> ts = RESTManipulator.establishAllDependencies( session, pomIO.parseProject( session.getPom() ), activeProfiles );
-                logger.info( "Found {} dependencies.", ts.size() );
+                Set<ArtifactRef> ts = RESTManipulator.establishAllDependencies( session, pomIO.parseProject( session.getPom() ),
+                                                                                activeProfiles );
+                logger.info( "Found {} dependencies. {}", ts.size(), ts );
                 File output = null;
 
                 if ( cmd.hasOption( 'o' ) )
@@ -349,65 +349,33 @@ public class Cli
                     output = new File( cmd.getOptionValue( 'o' ) );
                     output.delete();
                 }
-                if ( cmd.hasOption( "printUnusedDepMgmt" ) )
+                for ( ArtifactRef a : ts )
                 {
-                    Set<ArtifactRef> nonMangedDeps = RESTManipulator.establishNonManagedDependencies( session, pomIO.parseProject( session.getPom() ), activeProfiles );
-                    logger.info( "Found {} non-managed dependencies.", nonMangedDeps.size() );
-                    // As the managed dependencies may have versions versus the non-managed strip off the versions to see what is left.
-                    Set<ProjectRef> tsNoV = new TreeSet<>(  );
-                    for ( ArtifactRef ar : ts)
+                    String scope = null;
+                    if ( a instanceof SimpleScopedArtifactRef )
                     {
-                        tsNoV.add( ar.asProjectRef() );
+                        scope = ( (SimpleScopedArtifactRef) a ).getScope();
                     }
-                    Set<ProjectRef> nonManagedNoV = new TreeSet<>(  );
-                    for ( ArtifactRef ar : nonMangedDeps)
+                    if ( cmd.hasOption( 'o' ) )
                     {
-                        nonManagedNoV.add( ar.asProjectRef() );
-                    }
-                    tsNoV.removeAll( nonManagedNoV );
-
-                    for ( ProjectRef pr : tsNoV)
-                    {
-                        if ( cmd.hasOption( 'o' ) )
+                        if ( cmd.hasOption( "printGAVTC" ) )
                         {
-                            FileUtils.writeStringToFile( output, pr.toString(), true );
+                            FileUtils.writeStringToFile( output, String.format( "%-80s%10s\n", a, scope ), true );
                         }
                         else
                         {
-                            System.out.println( pr.toString() );
+                            FileUtils.writeStringToFile( output, a.asProjectVersionRef().toString() + '\n', true );
                         }
                     }
-                }
-                else
-                {
-                    for ( ArtifactRef a : ts )
+                    else
                     {
-                        String scope = null;
-                        if ( a instanceof SimpleScopedArtifactRef )
+                        if ( cmd.hasOption( "printGAVTC" ) )
                         {
-                            scope = ( (SimpleScopedArtifactRef) a ).getScope();
-                        }
-                        if ( cmd.hasOption( 'o' ) )
-                        {
-                            if ( cmd.hasOption( "printGAVTC" ) )
-                            {
-                                FileUtils.writeStringToFile( output, String.format( "%-80s%10s\n", a, scope ), true );
-                            }
-                            else
-                            {
-                                FileUtils.writeStringToFile( output, a.asProjectVersionRef().toString() + '\n', true );
-                            }
+                            System.out.format( "%-80s%10s\n", a, scope );
                         }
                         else
                         {
-                            if ( cmd.hasOption( "printGAVTC" ) )
-                            {
-                                System.out.format( "%-80s%10s\n", a, scope );
-                            }
-                            else
-                            {
-                                System.out.println( a.asProjectVersionRef() );
-                            }
+                            System.out.println( a.asProjectVersionRef() );
                         }
                     }
                 }
