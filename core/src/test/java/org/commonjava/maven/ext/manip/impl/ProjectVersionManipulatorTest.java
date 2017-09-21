@@ -15,7 +15,6 @@
  */
 package org.commonjava.maven.ext.manip.impl;
 
-import org.apache.maven.execution.MavenSession;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.DependencyManagement;
 import org.apache.maven.model.Model;
@@ -644,14 +643,14 @@ public class ProjectVersionManipulatorTest
             final Set<MavenProject> changed = new HashSet<>();
             for ( final MavenProject project : projects )
             {
-                if ( applyVersioningChanges( null, new Project ( project.getOriginalModel()), state ) )
+                if ( applyVersioningChanges( new Project ( project.getOriginalModel()), state ) )
                 {
                     final String v = _versionsByGAV.get( SimpleProjectVersionRef.parse( gav( project ) ) );
                     logger.info( project.getName() + " (" + gav( project ) + "): VERSION MODIFIED\n    New version: "
                         + v );
 
                     // this is a bigger model, so only do this if the originalModel was modded.
-                    applyVersioningChanges( null, new Project ( project.getModel()), state );
+                    applyVersioningChanges( new Project ( project.getModel()), state );
                     changed.add( project );
 
                     if ( v != null )

@@ -37,11 +37,9 @@ import org.junit.rules.TemporaryFolder;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.Set;
 
 import static org.commonjava.maven.ext.manip.util.PropertiesUtils.updateProperties;
 import static org.junit.Assert.assertFalse;
@@ -70,15 +68,16 @@ public class PropertiesUtilsTest
     @Test
     public void testCacheProperty() throws Exception
     {
-        Map<String,String> propertyMap = new HashMap<>();
+        Map<Project,Map<String,String>> propertyMap = new HashMap<>();
         CommonState state = new CommonState( new Properties(  ) );
+        Project project = getProject();
 
-        assertFalse( PropertiesUtils.cacheProperty( state, null, "${foobar}${foobar2}", null, null, false ) );
-        assertFalse( PropertiesUtils.cacheProperty( state, null, "suffix.${foobar}", null, null, false ) );
-        assertFalse( PropertiesUtils.cacheProperty( state, propertyMap, null, "2.0", null, false ) );
-        assertFalse( PropertiesUtils.cacheProperty( state, propertyMap, "1.0", "2.0", null, false ) );
-        assertTrue( PropertiesUtils.cacheProperty( state, propertyMap, "${version.org.jboss}", "2.0", null, false ) );
-        assertFalse ( PropertiesUtils.cacheProperty( state, propertyMap, "${project.version}", "2.0", null, false ) );
+        assertFalse( PropertiesUtils.cacheProperty( project, state, propertyMap, "${foobar}${foobar2}", null, null, false ) );
+        assertFalse( PropertiesUtils.cacheProperty( project, state, propertyMap, "suffix.${foobar}", null, null, false ) );
+        assertFalse( PropertiesUtils.cacheProperty( project, state, propertyMap, null, "2.0", null, false ) );
+        assertFalse( PropertiesUtils.cacheProperty( project, state, propertyMap, "1.0", "2.0", null, false ) );
+        assertTrue( PropertiesUtils.cacheProperty( project, state, propertyMap, "${version.org.jboss}", "2.0", null, false ) );
+        assertFalse ( PropertiesUtils.cacheProperty( project, state, propertyMap, "${project.version}", "2.0", null, false ) );
 
         // DependencyManipulator does dependency.getVersion(). This could return e.g. ${version.scala} which can
         // refer to <version.scala>${version.scala.major}.7</version.scala>. If we are attempting to change version.scala
@@ -88,12 +87,12 @@ public class PropertiesUtilsTest
         // However we don't need to change the value of the property. If the property is foobar.${....} then
         // we want to append suffix to the property ... but we need to handle that part of the property is hardcoded.
 
-        assertFalse( PropertiesUtils.cacheProperty( state, propertyMap, "${version.scala}.7", "2.0", null, false ) );
-        assertFalse( PropertiesUtils.cacheProperty( state, propertyMap, "${version.foo}.${version.scala}.7", "2.0", null, false ) );
+        assertFalse( PropertiesUtils.cacheProperty( project, state, propertyMap, "${version.scala}.7", "2.0", null, false ) );
+        assertFalse( PropertiesUtils.cacheProperty( project, state, propertyMap, "${version.foo}.${version.scala}.7", "2.0", null, false ) );
 
         try
         {
-            PropertiesUtils.cacheProperty( state, propertyMap, "${version.scala}.7.${version.scala2}", "2.0", null, false );
+            PropertiesUtils.cacheProperty( project, state, propertyMap, "${version.scala}.7.${version.scala2}", "2.0", null, false );
         }
         catch (ManipulationException e)
         {
@@ -101,46 +100,18 @@ public class PropertiesUtilsTest
         }
     }
 
-    private ManipulationSession createUpdateSession() throws Exception
-    {
-        ManipulationSession session = new ManipulationSession();
-
-        Properties p = new Properties();
-
-        p.setProperty( "strictAlignment", "true" );
-        p.setProperty( "strictViolationFails", "true" );
-        p.setProperty( "version.suffix", "redhat-1" );
-        p.setProperty( "scanActiveProfiles", "true" );
-        session.setState( new DependencyState( p ) );
-        session.setState( new VersioningState( p ) );
-
-        final MavenExecutionRequest req =
-                        new DefaultMavenExecutionRequest().setUserProperties( p ).setRemoteRepositories( Collections.<ArtifactRepository>emptyList() );
-
-        final PlexusContainer container = new DefaultPlexusContainer();
-        final MavenSession mavenSession = new MavenSession( container, null, req, new DefaultMavenExecutionResult() );
-
-        session.setMavenSession( mavenSession );
-
-        return session;
-    }
-
     @Test
     public void testUpdateNestedProperties() throws Exception
     {
-        final Model modelParent = TestUtils.resolveModelResource( RESOURCE_BASE, "infinispan-bom-8.2.0.Final.pom" );
-        Project pP = new Project( modelParent );
-        Set<Project> sp = new HashSet<>();
-        sp.add( pP );
-
+        Project pP = getProject();
         ManipulationSession session = createUpdateSession();
 
-        assertTrue( updateProperties( session, sp, false, "version.hibernate.core", "5.0.4.Final-redhat-1" ) == PropertiesUtils.PropertyUpdate.FOUND);
+        assertTrue( updateProperties( session, pP, false, "version.hibernate.core", "5.0.4.Final-redhat-1" ) == PropertiesUtils.PropertyUpdate.FOUND);
 
-        assertTrue( updateProperties( session, sp, false, "version.scala", "2.11.7.redhat-1" ) == PropertiesUtils.PropertyUpdate.FOUND);
+        assertTrue( updateProperties( session, pP, false, "version.scala", "2.11.7.redhat-1" ) == PropertiesUtils.PropertyUpdate.FOUND);
         try
         {
-            updateProperties( session, sp, false, "version.scala", "3.11.7-redhat-1" );
+            updateProperties( session, pP, false, "version.scala", "3.11.7-redhat-1" );
         }
         catch ( ManipulationException e )
         {
@@ -151,16 +122,13 @@ public class PropertiesUtilsTest
     @Test
     public void testUpdateNestedProperties2() throws Exception
     {
-        final Model modelParent = TestUtils.resolveModelResource(  RESOURCE_BASE, "infinispan-bom-8.2.0.Final.pom" );
-        Project pP = new Project( modelParent );
-        Set<Project> sp = new HashSet<>();
-        sp.add( pP );
+        Project pP = getProject();
 
         ManipulationSession session = createUpdateSession();
 
-        assertTrue( updateProperties( session, sp, false, "version.hibernate.osgi", "5.0.4.Final-redhat-1" ) == PropertiesUtils.PropertyUpdate.FOUND);
+        assertTrue( updateProperties( session, pP, false, "version.hibernate.osgi", "5.0.4.Final-redhat-1" ) == PropertiesUtils.PropertyUpdate.FOUND);
 
-        assertFalse( updateProperties( session, sp, false, "version.scala", "2.11.7" ) == PropertiesUtils.PropertyUpdate.FOUND);
+        assertFalse( updateProperties( session, pP, false, "version.scala", "2.11.7" ) == PropertiesUtils.PropertyUpdate.FOUND);
     }
 
     @Test
@@ -169,16 +137,14 @@ public class PropertiesUtilsTest
         // io.hawt:project:1.4.9
         final Model modelParent = TestUtils.resolveModelResource( RESOURCE_BASE, "project-1.4.9.pom" );
         Project pP = new Project( modelParent );
-        Set<Project> sp = new HashSet<>();
-        sp.add( pP );
 
         ManipulationSession session = createUpdateSession();
 
-        assertTrue( updateProperties( session, sp, false, "perfectus-build", "610379.redhat-1" ) == PropertiesUtils.PropertyUpdate.FOUND);
+        assertTrue( updateProperties( session, pP, false, "perfectus-build", "610379.redhat-1" ) == PropertiesUtils.PropertyUpdate.FOUND);
 
         try
         {
-            assertTrue( updateProperties( session, sp, false, "perfectus-build", "610.NOTTHEVALUE.redhat-1" ) == PropertiesUtils.PropertyUpdate.FOUND);
+            assertTrue( updateProperties( session, pP, false, "perfectus-build", "610.NOTTHEVALUE.redhat-1" ) == PropertiesUtils.PropertyUpdate.FOUND);
         }
         catch ( ManipulationException e )
         {
@@ -187,7 +153,7 @@ public class PropertiesUtilsTest
         }
         try
         {
-            assertTrue( updateProperties( session, sp, true, "perfectus-build", "610.NOTTHEVALUE.redhat-1" ) == PropertiesUtils.PropertyUpdate.FOUND);
+            assertTrue( updateProperties( session, pP, true, "perfectus-build", "610.NOTTHEVALUE.redhat-1" ) == PropertiesUtils.PropertyUpdate.FOUND);
         }
         catch ( ManipulationException e )
         {
@@ -223,13 +189,40 @@ public class PropertiesUtilsTest
     @Test
     public void testUpdateProjectVersionProperty() throws Exception
     {
-        final Model modelParent = TestUtils.resolveModelResource( RESOURCE_BASE, "infinispan-bom-8.2.0.Final.pom" );
-        Project pP = new Project( modelParent );
-        Set<Project> sp = new HashSet<>();
-        sp.add( pP );
+        Project pP = getProject();
 
         ManipulationSession session = createUpdateSession();
 
-        assertFalse( updateProperties( session, sp, false, "project.version", "5.0.4.Final-redhat-1" ) == PropertiesUtils.PropertyUpdate.FOUND);
+        assertFalse( updateProperties( session, pP, false, "project.version", "5.0.4.Final-redhat-1" ) == PropertiesUtils.PropertyUpdate.FOUND);
+    }
+
+    private Project getProject() throws Exception
+    {
+        final Model modelParent = TestUtils.resolveModelResource( RESOURCE_BASE, "infinispan-bom-8.2.0.Final.pom" );
+        return new Project( modelParent );
+    }
+
+    private ManipulationSession createUpdateSession() throws Exception
+    {
+        ManipulationSession session = new ManipulationSession();
+
+        Properties p = new Properties();
+
+        p.setProperty( "strictAlignment", "true" );
+        p.setProperty( "strictViolationFails", "true" );
+        p.setProperty( "version.suffix", "redhat-1" );
+        p.setProperty( "scanActiveProfiles", "true" );
+        session.setState( new DependencyState( p ) );
+        session.setState( new VersioningState( p ) );
+
+        final MavenExecutionRequest req =
+                        new DefaultMavenExecutionRequest().setUserProperties( p ).setRemoteRepositories( Collections.<ArtifactRepository>emptyList() );
+
+        final PlexusContainer container = new DefaultPlexusContainer();
+        final MavenSession mavenSession = new MavenSession( container, null, req, new DefaultMavenExecutionResult() );
+
+        session.setMavenSession( mavenSession );
+
+        return session;
     }
 }

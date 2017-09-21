@@ -31,16 +31,14 @@ import org.commonjava.maven.ext.manip.ManipulationException;
 import org.commonjava.maven.ext.manip.session.MavenSessionHandler;
 import org.commonjava.maven.ext.manip.util.ProfileUtils;
 import org.commonjava.maven.ext.manip.util.PropertyResolver;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.apache.commons.lang.StringUtils.isEmpty;
 import static org.apache.commons.lang.StringUtils.isNotEmpty;
 
 /**
@@ -343,23 +341,6 @@ public class Project
             resolvedDependencies = new HashMap<>();
 
             resolveDeps( session, getModel().getDependencies(), resolvedDependencies );
-/*
-            List<Dependency> deps = getModel().getDependencies();
-
-            for ( Dependency d : deps )
-            {
-                ProjectVersionRef pvr = new SimpleProjectVersionRef(
-                PropertyResolver.resolveInheritedProperties( session, this, d.getGroupId().equals( "${project.groupId}" ) ?
-                                getGroupId() :
-                                d.getGroupId() ),
-                PropertyResolver.resolveInheritedProperties( session, this, d.getArtifactId().equals( "${project.artifactId}" ) ?
-                                getArtifactId() :
-                                d.getArtifactId() ),
-                PropertyResolver.resolveInheritedProperties( session, this, d.getArtifactId().equals( "${project.version}" ) ?
-                                d.getVersion() :
-                                d.getVersion() ) );
-                resolvedDependencies.put( pvr, d);
-            }*/
         }
         return resolvedDependencies;
     }
@@ -374,31 +355,10 @@ public class Project
             if ( ! ( dm == null || dm.getDependencies() == null ) )
             {
                 resolveDeps( session, dm.getDependencies(), resolvedManagedDepencies );
-                /*
-                List<Dependency> deps = dm.getDependencies();
-
-                for ( Dependency d : deps )
-                {
-                    ProjectVersionRef pvr = new SimpleProjectVersionRef(
-                    PropertyResolver.resolveInheritedProperties( session, this, d.getGroupId().equals( "${project.groupId}" ) ?
-                                    getGroupId() :
-                                    d.getGroupId() ),
-                    PropertyResolver.resolveInheritedProperties( session, this, d.getArtifactId().equals( "${project.artifactId}" ) ?
-                                    getArtifactId() :
-                                    d.getArtifactId() ),
-                    PropertyResolver.resolveInheritedProperties( session, this, d.getArtifactId().equals( "${project.version}" ) ?
-                                    d.getVersion() :
-                                    d.getVersion() ) );
-                    resolvedDependencies.put( pvr, d );
-                }*/
             }
         }
         return resolvedManagedDepencies;
     }
-
-
-    // TODO: ### Remove
-    private final static Logger logger = LoggerFactory.getLogger( PropertyResolver.class );
 
 
     private void resolveDeps ( MavenSessionHandler session, List<Dependency> deps, HashMap<ProjectVersionRef, Dependency> resolvedDependencies)
@@ -406,7 +366,6 @@ public class Project
     {
         for ( Dependency d : deps )
         {
-            logger.debug( "### For {} found version empty {} ", d, isEmpty( d.getVersion() ) );
             String g = PropertyResolver.resolveInheritedProperties( session, this, "${project.groupId}".equals( d.getGroupId() ) ?
                             getGroupId() :
                             d.getGroupId() );
@@ -498,5 +457,41 @@ public class Project
     public Project getProjectParent()
     {
         return projectParent;
+    }
+
+    /**
+     * @return inherited projects. Returned with order of root project first, down to this project.
+     */
+    public List<Project> getInheritedList()
+    {
+        final List<Project> found = new ArrayList<>(  );
+        found.add( this );
+
+        Project loop = this;
+        while ( loop.getProjectParent() != null)
+        {
+            // Place inherited first so latter down tree take precedence.
+            found.add( 0, loop.getProjectParent() );
+            loop = loop.getProjectParent();
+        }
+        return found;
+    }
+
+    /**
+     * @return inherited projects. Returned with order of this project first, up to root project.
+     */
+    public List<Project> getReverseInheritedList()
+    {
+        final List<Project> found = new ArrayList<>(  );
+        found.add( this );
+
+        Project loop = this;
+        while ( loop.getProjectParent() != null)
+        {
+            // Place inherited last for iteration purposes
+            found.add( loop.getProjectParent() );
+            loop = loop.getProjectParent();
+        }
+        return found;
     }
 }

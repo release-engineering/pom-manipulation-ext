@@ -1,0 +1,28 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>io.apiman</groupId>
+    <artifactId>apiman</artifactId>
+    <version>1.2.7-SNAPSHOT</version>
+    <relativePath>../pom.xml</relativePath>
+  </parent>
+  <artifactId>apiman-common</artifactId>
+  <packaging>pom</packaging>
+  <name>apiman-common</name>
+
+
+  <properties>
+    <version.junit>3.8.2</version.junit>
+  </properties>
+
+  <modules>
+    <!-- <module>auth</module> -->
+    <module>config</module>
+    <!-- <module>net</module> -->
+    <!-- <module>plugin</module> -->
+    <!-- <module>servlet</module> -->
+    <!-- <module>util</module> -->
+    <!-- <module>logging</module> -->
+  </modules>
+</project>

@@ -33,7 +33,6 @@ import org.commonjava.maven.ext.manip.ManipulationSession;
 import org.commonjava.maven.ext.manip.io.ModelIO;
 import org.commonjava.maven.ext.manip.model.Project;
 import org.commonjava.maven.ext.manip.state.CommonState;
-import org.commonjava.maven.ext.manip.state.DependencyState;
 import org.commonjava.maven.ext.manip.state.PluginState;
 import org.commonjava.maven.ext.manip.state.PluginState.Precedence;
 import org.commonjava.maven.ext.manip.state.State;
@@ -93,6 +92,11 @@ public class PluginManipulator
 
     @Requirement
     private ModelIO effectiveModelBuilder;
+
+    /**
+     * Used to store mappings of old property to new version.
+     */
+    private final Map<Project,Map<String, String>> versionPropertyUpdateMap = new LinkedHashMap<>();
 
     /**
      * Initialize the {@link PluginState} state holder in the {@link ManipulationSession}. This state holder detects
@@ -156,24 +160,28 @@ public class PluginManipulator
         if (!changed.isEmpty())
         {
             logger.info( "Iterating for standard overrides..." );
-            for ( final String key : state.getVersionPropertyOverrides().keySet() )
+            for ( Project project : versionPropertyUpdateMap.keySet() )
             {
-                // Ignore strict alignment for plugins ; if we're attempting to use a differing plugin
-                // its unlikely to be an exact match.
-                PropertiesUtils.PropertyUpdate found = PropertiesUtils.updateProperties( session, changed, true, key, state.getVersionPropertyOverride( key ) );
-
-                if ( found == PropertiesUtils.PropertyUpdate.NOTFOUND )
+                for ( final Map.Entry<String, String> entry : versionPropertyUpdateMap.get( project ).entrySet() )
                 {
-                    // Problem in this scenario is that we know we have a property update map but we have not found a
-                    // property to update. Its possible this property has been inherited from a parent. Override in the
-                    // top pom for safety.
-                    logger.info( "Unable to find a property for {} to update", key );
-                    for ( final Project p : changed )
+                    // Ignore strict alignment for plugins ; if we're attempting to use a differing plugin
+                    // its unlikely to be an exact match.
+                    PropertiesUtils.PropertyUpdate found =
+                                    PropertiesUtils.updateProperties( session, project, true, entry.getKey(), entry.getValue() );
+
+                    if ( found == PropertiesUtils.PropertyUpdate.NOTFOUND )
                     {
-                        if ( p.isInheritanceRoot() )
+                        // Problem in this scenario is that we know we have a property update map but we have not found a
+                        // property to update. Its possible this property has been inherited from a parent. Override in the
+                        // top pom for safety.
+                        logger.info( "Unable to find a property for {} to update", entry.getKey() );
+                        for ( final Project p : changed )
                         {
-                            logger.info( "Adding property {} with {} ", key, state.getVersionPropertyOverride( key ) );
-                            p.getModel().getProperties().setProperty( key, state.getVersionPropertyOverride( key ) );
+                            if ( p.isInheritanceRoot() )
+                            {
+                                logger.info( "Adding property {} with {} ", entry.getKey(), entry.getValue() );
+                                p.getModel().getProperties().setProperty( entry.getKey(), entry.getValue() );
+                            }
                         }
                     }
                 }
@@ -245,7 +253,7 @@ public class PluginManipulator
             }
 
             // Override plugin management versions
-            applyOverrides( type, PluginType.LocalPM, pluginManagement.getPlugins(), override );
+            applyOverrides( project, type, PluginType.LocalPM, pluginManagement.getPlugins(), override );
         }
 
         if ( model.getBuild() != null )
@@ -256,20 +264,21 @@ public class PluginManipulator
 
             // We can't wipe out the versions as we can't guarantee that the plugins are listed
             // in the top level pluginManagement block.
-            applyOverrides( type, PluginType.LocalP, projectPlugins, override );
+            applyOverrides( project, type, PluginType.LocalP, projectPlugins, override );
         }
     }
 
     /**
      * Set the versions of any plugins which match the contents of the list of plugin overrides
      *
+     * @param project the current project
      * @param remotePluginType The type of the remote plugin (mgmt or plugins)
      * @param localPluginType The type of local block (mgmt or plugins).
      * @param plugins The list of plugins to modify
      * @param pluginVersionOverrides The list of version overrides to apply to the plugins
      * @throws ManipulationException if an error occurs.
      */
-    private void applyOverrides( PluginType remotePluginType, final PluginType localPluginType, final List<Plugin> plugins,
+    private void applyOverrides( Project project, PluginType remotePluginType, final PluginType localPluginType, final List<Plugin> plugins,
                                  final Map<ProjectRef, Plugin> pluginVersionOverrides ) throws ManipulationException
     {
         if ( plugins == null)
@@ -376,7 +385,7 @@ public class PluginManipulator
                 // one in build/plugins section.
                 if ( override.getVersion() != null && !override.getVersion().isEmpty())
                 {
-                    if ( ! PropertiesUtils.cacheProperty( commonState, pluginState.getVersionPropertyOverrides(), oldVersion, override.getVersion(), plugin, false ))
+                    if ( ! PropertiesUtils.cacheProperty( project, commonState, versionPropertyUpdateMap, oldVersion, override.getVersion(), plugin, false ))
                     {
                         if ( oldVersion != null && oldVersion.equals( "${project.version}" ) )
                         {

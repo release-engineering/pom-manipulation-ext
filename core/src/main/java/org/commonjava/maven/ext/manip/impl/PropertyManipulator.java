@@ -105,8 +105,7 @@ public class PropertyManipulator
                 {
                     // For any matching property that exists in the current project overwrite that value.
                     @SuppressWarnings( { "unchecked", "rawtypes" } )
-                    final
-                    Set<String> keyClone = new HashSet(model.getProperties().keySet());
+                    final Set<String> keyClone = new HashSet(model.getProperties().keySet());
                     keyClone.retainAll( overrides.keySet() );
 
                     if (!keyClone.isEmpty())

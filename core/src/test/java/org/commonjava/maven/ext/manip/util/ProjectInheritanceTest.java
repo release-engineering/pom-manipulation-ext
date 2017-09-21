@@ -49,4 +49,80 @@ public class ProjectInheritanceTest
             }
         }
     }
+
+
+    @Test
+    public void testVerifyInheritanceMultiple() throws Exception
+    {
+        // Locate the PME project pom file. Use that to verify inheritance tracking.
+        final File projectroot = new File (TestUtils.resolveFileResource( RESOURCE_BASE, "" )
+                                                    .getParentFile()
+                                                    .getParentFile()
+                                                    .getParentFile()
+                                                    .getParentFile(), "integration-test/src/it/project-inheritance/pom.xml" );
+        PomIO pomIO = new PomIO();
+
+        List<Project> projects = pomIO.parseProject( projectroot );
+
+        for ( int i = 0; i<= 3 ; i++ )
+        {
+            if ( i == 0 )
+            {
+                // First project should be root
+                assertTrue ( projects.get( i ).getProjectParent() == null );
+                assertTrue ( projects.get( i ).getPom().equals( projectroot ) );
+                assertTrue ( projects.get( i ).getInheritedList().size() == 1 );
+            }
+            else if ( i == 1 )
+            {
+                List<Project> inherited = projects.get( i ).getInheritedList();
+                assertTrue (inherited.size() == 2 );
+                assertTrue ( inherited.get( 1 ).getProjectParent().getPom().equals( projectroot ) );
+            }
+            else if ( i == 2 )
+            {
+                List<Project> inherited = projects.get( i ).getInheritedList();
+                assertTrue (inherited.size() == 3 );
+                assertTrue ( inherited.get( 0 ).getPom().equals( projectroot ) );
+            }
+        }
+    }
+
+
+    @Test
+    public void testVerifyInheritanceReversedMultiple() throws Exception
+    {
+        // Locate the PME project pom file. Use that to verify inheritance tracking.
+        final File projectroot = new File (TestUtils.resolveFileResource( RESOURCE_BASE, "" )
+                                                    .getParentFile()
+                                                    .getParentFile()
+                                                    .getParentFile()
+                                                    .getParentFile(), "integration-test/src/it/project-inheritance/pom.xml" );
+        PomIO pomIO = new PomIO();
+
+        List<Project> projects = pomIO.parseProject( projectroot );
+
+        for ( int i = 0; i<= 3 ; i++ )
+        {
+            if ( i == 0 )
+            {
+                // First project should be root
+                assertTrue ( projects.get( i ).getProjectParent() == null );
+                assertTrue ( projects.get( i ).getPom().equals( projectroot ) );
+                assertTrue ( projects.get( i ).getReverseInheritedList().size() == 1 );
+            }
+            else if ( i == 1 )
+            {
+                List<Project> inherited = projects.get( i ).getReverseInheritedList();
+                assertTrue (inherited.size() == 2 );
+                assertTrue ( inherited.get( 0 ).getProjectParent().getPom().equals( projectroot ) );
+            }
+            else if ( i == 2 )
+            {
+                List<Project> inherited = projects.get( i ).getReverseInheritedList();
+                assertTrue (inherited.size() == 3 );
+                assertTrue ( inherited.get( 2 ).getPom().equals( projectroot ) );
+            }
+        }
+    }
 }

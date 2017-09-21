@@ -31,7 +31,6 @@ import org.commonjava.maven.atlas.ident.ref.SimpleArtifactRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleProjectRef;
 import org.commonjava.maven.ext.manip.ManipulationException;
 import org.commonjava.maven.ext.manip.ManipulationSession;
-import org.commonjava.maven.ext.manip.util.PropertyResolver;
 import org.commonjava.maven.ext.manip.io.ModelIO;
 import org.commonjava.maven.ext.manip.model.Project;
 import org.commonjava.maven.ext.manip.state.CommonState;
@@ -40,13 +39,13 @@ import org.commonjava.maven.ext.manip.state.DependencyState.DependencyPrecedence
 import org.commonjava.maven.ext.manip.state.RESTState;
 import org.commonjava.maven.ext.manip.util.ProfileUtils;
 import org.commonjava.maven.ext.manip.util.PropertiesUtils;
+import org.commonjava.maven.ext.manip.util.PropertyResolver;
 import org.commonjava.maven.ext.manip.util.WildcardMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -72,12 +71,12 @@ public class DependencyManipulator implements Manipulator
     /**
      * Used to store mappings of old property to new version for explicit overrides.
      */
-    private final HashMap<String, String> explicitVersionPropertyUpdateMap = new HashMap<>();
+    private final Map<Project,Map<String, String>> explicitVersionPropertyUpdateMap = new LinkedHashMap<>();
 
     /**
      * Used to store mappings of old property to new version.
      */
-    private final HashMap<String, String> versionPropertyUpdateMap = new HashMap<>();
+    private final Map<Project,Map<String, String>> versionPropertyUpdateMap = new LinkedHashMap<>();
 
     @Requirement
     private ModelIO effectiveModelBuilder;
@@ -85,8 +84,8 @@ public class DependencyManipulator implements Manipulator
     /**
      * Cache of modules we should ignore ; processed during applyModuleVersionOverrides and used
      * for whether to post-apply any property processing.
-     */
     private final HashSet<ProjectRef> ignoredModules = new HashSet<>();
+     */
 
     private ManipulationSession session;
 
@@ -248,64 +247,48 @@ public class DependencyManipulator implements Manipulator
         if (!result.isEmpty())
         {
             logger.info ("Iterating for standard overrides...");
-
-            // Remove the ignored modules first
-            Set<Project> projectsWithoutIgnoredModules = new HashSet<>(  );
-            projectsWithoutIgnoredModules.addAll( result );
-
-            Iterator<Project> pwiIt = projectsWithoutIgnoredModules.iterator();
-            while ( pwiIt.hasNext() )
+logger.info ("#### versionPropMap {} ", versionPropertyUpdateMap);
+            for ( Project project : versionPropertyUpdateMap.keySet() )
             {
-                Project pwi = pwiIt.next();
-                // loop over all projects and see if one matches in ignored? Then remove it. Only update props for remaining subset
-                for ( ProjectRef pr : ignoredModules)
+                logger.debug( "Checking property override within project {} ", project );
+                for ( final Map.Entry<String, String> entry : versionPropertyUpdateMap.get( project ).entrySet() )
                 {
-                    if ( pwi.getKey().asProjectRef().equals( pr ))
-                    {
-                        pwiIt.remove();
-                        break;
-                    }
-                }
-            }
+                    PropertiesUtils.PropertyUpdate found =
+                                    PropertiesUtils.updateProperties( session, project, false,
+                                                                      entry.getKey(), entry.getValue() );
 
-            for ( final Map.Entry<String, String> entry : versionPropertyUpdateMap.entrySet() )
-            {
-                PropertiesUtils.PropertyUpdate found = PropertiesUtils.updateProperties( session, projectsWithoutIgnoredModules, false, entry.getKey(), entry.getValue());
-
-                if ( found == PropertiesUtils.PropertyUpdate.NOTFOUND )
-                {
-                    // Problem in this scenario is that we know we have a property update map but we have not found a
-                    // property to update. Its possible this property has been inherited from a parent. Override in the
-                    // top pom for safety.
-                    logger.info( "Unable to find a property for {} to update", entry.getKey());
-                    for ( final Project p : projectsWithoutIgnoredModules )
+                    if ( found == PropertiesUtils.PropertyUpdate.NOTFOUND )
                     {
-                        if ( p.isInheritanceRoot() )
-                        {
-                            logger.info( "Adding property {} with {} ", entry.getKey(), entry.getValue() );
-                            p.getModel().getProperties().setProperty( entry.getKey(), entry.getValue() );
-                        }
+                        // Problem in this scenario is that we know we have a property update map but we have not found a
+                        // property to update. Its possible this property has been inherited from a parent. Override in the
+                        // top pom for safety.
+                        logger.info( "Unable to find a property for {} to update", entry.getKey() );
+                        logger.info( "Adding property {} with {} ", entry.getKey(), entry.getValue() );
+                        // We know the inheritance root is at position 0 in the inherited list...
+                        project.getInheritedList().get( 0 ).getModel().getProperties().setProperty( entry.getKey(), entry.getValue() );
                     }
                 }
             }
             logger.info ("Iterating for explicit overrides...");
-            for ( final Map.Entry<String, String> entry : explicitVersionPropertyUpdateMap.entrySet() )
-            {
-                PropertiesUtils.PropertyUpdate found = PropertiesUtils.updateProperties( session, projectsWithoutIgnoredModules, true, entry.getKey(), entry.getValue() );
 
-                if ( found == PropertiesUtils.PropertyUpdate.NOTFOUND )
+            for ( Project project : explicitVersionPropertyUpdateMap.keySet() )
+            {
+                logger.debug( "Checking property override within project {} ", project );
+                for ( final Map.Entry<String, String> entry : explicitVersionPropertyUpdateMap.get( project ).entrySet() )
                 {
-                    // Problem in this scenario is that we know we have a property update map but we have not found a
-                    // property to update. Its possible this property has been inherited from a parent. Override in the
-                    // top pom for safety.
-                    logger.info( "Unable to find a property for {} to update for explicit overrides", entry.getKey());
-                    for ( final Project p : projectsWithoutIgnoredModules )
+                    PropertiesUtils.PropertyUpdate found =
+                                    PropertiesUtils.updateProperties( session, project, true,
+                                                                      entry.getKey(), entry.getValue() );
+
+                    if ( found == PropertiesUtils.PropertyUpdate.NOTFOUND )
                     {
-                        if ( p.isInheritanceRoot() )
-                        {
-                            logger.info( "Adding property {} with {} ", entry.getKey(), entry.getValue() );
-                            p.getModel().getProperties().setProperty( entry.getKey(), entry.getValue() );
-                        }
+                        // Problem in this scenario is that we know we have a property update map but we have not found a
+                        // property to update. Its possible this property has been inherited from a parent. Override in the
+                        // top pom for safety.
+                        logger.info( "Unable to find a property for {} to update for explicit overrides", entry.getKey() );
+                        logger.info( "Adding property {} with {} ", entry.getKey(), entry.getValue() );
+                        // We know the inheritance root is at position 0 in the inherited list...
+                        project.getInheritedList().get( 0 ).getModel().getProperties().setProperty( entry.getKey(), entry.getValue() );
                     }
                 }
             }
@@ -390,7 +373,7 @@ public class DependencyManipulator implements Manipulator
                 d.setArtifactId( project.getModelParent().getArtifactId() );
                 d.setVersion( project.getModelParent().getVersion() );
                 pDeps.add( d );
-                applyExplicitOverrides( commonState, explicitVersionPropertyUpdateMap, explicitOverrides, pDeps );
+                applyExplicitOverrides( project, commonState, explicitVersionPropertyUpdateMap, explicitOverrides, pDeps );
                 project.getModelParent().setVersion( d.getVersion() );
             }
 
@@ -416,7 +399,7 @@ public class DependencyManipulator implements Manipulator
                 final Map<ArtifactRef, String> matchedOverrides = new LinkedHashMap<>( moduleOverrides );
                 matchedOverrides.keySet().removeAll( nonMatchingVersionOverrides.keySet() );
 
-                applyExplicitOverrides( commonState, explicitVersionPropertyUpdateMap, explicitOverrides, dependencies );
+                applyExplicitOverrides( project, commonState, explicitVersionPropertyUpdateMap, explicitOverrides, dependencies );
 
                 if ( commonState.getOverrideTransitive() )
                 {
@@ -464,7 +447,7 @@ public class DependencyManipulator implements Manipulator
             {
                 logger.debug( "Applying overrides to managed dependencies for: {}", projectGA );
                 applyOverrides( project, dependencyManagement.getDependencies(), moduleOverrides, explicitOverrides );
-                applyExplicitOverrides( commonState, explicitVersionPropertyUpdateMap, explicitOverrides,
+                applyExplicitOverrides( project, commonState, explicitVersionPropertyUpdateMap, explicitOverrides,
                                         dependencyManagement.getDependencies() );
             }
             else
@@ -479,7 +462,7 @@ public class DependencyManipulator implements Manipulator
             // Apply overrides to project direct dependencies
             final List<Dependency> projectDependencies = model.getDependencies();
             applyOverrides( project, projectDependencies, moduleOverrides, explicitOverrides );
-            applyExplicitOverrides( commonState, explicitVersionPropertyUpdateMap, explicitOverrides, projectDependencies );
+            applyExplicitOverrides( project, commonState, explicitVersionPropertyUpdateMap, explicitOverrides, projectDependencies );
 
             // Now check all possible profiles and update them.
             List<Profile> profiles = ProfileUtils.getProfiles( session, project.getModel());
@@ -491,12 +474,12 @@ public class DependencyManipulator implements Manipulator
                     {
                         applyOverrides( project, p.getDependencyManagement().getDependencies(), moduleOverrides,
                                         explicitOverrides );
-                        applyExplicitOverrides( commonState, explicitVersionPropertyUpdateMap, explicitOverrides,
+                        applyExplicitOverrides( project, commonState, explicitVersionPropertyUpdateMap, explicitOverrides,
                                                 p.getDependencyManagement().getDependencies() );
                     }
                     final List<Dependency> profileDependencies = p.getDependencies();
                     applyOverrides( project, profileDependencies, moduleOverrides, explicitOverrides );
-                    applyExplicitOverrides( commonState, explicitVersionPropertyUpdateMap, explicitOverrides, profileDependencies );
+                    applyExplicitOverrides( project, commonState, explicitVersionPropertyUpdateMap, explicitOverrides, profileDependencies );
                 }
             }
         }
@@ -511,14 +494,14 @@ public class DependencyManipulator implements Manipulator
      * dependencyExclusion. However they have to be separated out from standard overrides so we can easily
      * ignore any property references (and overwrite them).
      *
-     *
+     * @param project the current Project
      * @param state the CommonState, to retrieve Common Properties
      * @param versionPropertyUpdateMap properties to update
      * @param explicitOverrides a custom map to handle wildcard overrides
      * @param dependencies dependencies to check
      * @throws ManipulationException if an error occurs
      */
-    private void applyExplicitOverrides( CommonState state, final Map<String, String> versionPropertyUpdateMap,
+    private void applyExplicitOverrides( Project project, CommonState state, final Map<Project, Map<String, String>> versionPropertyUpdateMap,
                                          final WildcardMap<String> explicitOverrides, final List<Dependency> dependencies )
                     throws ManipulationException
     {
@@ -562,7 +545,7 @@ public class DependencyManipulator implements Manipulator
                             logger.info( "Explicit overrides : force aligning {} to {}.", groupIdArtifactId,
                                          target );
 
-                            if ( !PropertiesUtils.cacheProperty( state, versionPropertyUpdateMap, oldVersion, target,
+                            if ( !PropertiesUtils.cacheProperty( project, state, versionPropertyUpdateMap, oldVersion, target,
                                                                  dependency, true ) )
                             {
                                 if ( oldVersion.contains( "${" ) )
@@ -599,6 +582,7 @@ public class DependencyManipulator implements Manipulator
         final Map<ArtifactRef, String> unmatchedVersionOverrides = new LinkedHashMap<>();
         unmatchedVersionOverrides.putAll( overrides );
 
+        logger.debug ("### Applying to dpendencies {} ", dependencies);
         if ( dependencies == null )
         {
             return unmatchedVersionOverrides;
@@ -676,7 +660,7 @@ public class DependencyManipulator implements Manipulator
                             logger.info( "Updating version {} for dependency {} from {}.", overrideVersion, dependency, project.getPom() );
                         }
 
-                        if ( ! PropertiesUtils.cacheProperty( commonState, versionPropertyUpdateMap, oldVersion, overrideVersion, entry.getKey(), false ))
+                        if ( ! PropertiesUtils.cacheProperty( project, commonState, versionPropertyUpdateMap, oldVersion, overrideVersion, entry.getKey(), false ))
                         {
                             if ( oldVersion.equals( "${project.version}" ) )
                             {
@@ -838,7 +822,7 @@ public class DependencyManipulator implements Manipulator
                         else
                         {
                             // Override prevention...
-                            removeGA( SimpleProjectRef.parse( projectGA ), remainingOverrides, SimpleProjectRef.parse( artifactGA ) );
+                            removeGA( remainingOverrides, SimpleProjectRef.parse( artifactGA ) );
                             logger.debug( "For module {}, ignoring dependency override for {} ", moduleGA, artifactGA);
                         }
                     }
@@ -875,7 +859,7 @@ public class DependencyManipulator implements Manipulator
                     {
                         // If we have a wildcard artifact we want to replace any prior explicit overrides
                         // with this one i.e. this takes precedence.
-                        removeGA( SimpleProjectRef.parse( projectGA ), remainingOverrides, SimpleProjectRef.parse( artifactGA ) );
+                        removeGA( remainingOverrides, SimpleProjectRef.parse( artifactGA ) );
                         logger.debug( "Removing artifactGA " + artifactGA + " from overrides" );
                     }
                 }
@@ -885,7 +869,7 @@ public class DependencyManipulator implements Manipulator
         return remainingOverrides;
     }
 
-    private void removeGA( ProjectRef moduleGA, Map<ArtifactRef, String> overrides, ProjectRef ref )
+    private void removeGA( Map<ArtifactRef, String> overrides, ProjectRef ref )
     {
         Iterator<ArtifactRef> it = overrides.keySet().iterator();
 
@@ -904,7 +888,6 @@ public class DependencyManipulator implements Manipulator
                 // For complete wildcard also cache the ignored module as we need the list later during
                 // property processing.
                 it.remove();
-                ignoredModules.add( moduleGA );
             }
         }
     }
