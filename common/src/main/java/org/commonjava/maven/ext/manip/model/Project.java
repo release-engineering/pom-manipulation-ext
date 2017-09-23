@@ -200,29 +200,6 @@ public class Project
         return key.getVersionString();
     }
 
-/*    public List<Plugin> getPlugins()
-    {
-        return getPlugins( model );
-    }
-
-    private List<Plugin> getPlugins( final ModelBase base )
-    {
-        final BuildBase build = getBuild( base );
-
-        if ( build == null )
-        {
-            return Collections.emptyList();
-        }
-
-        final List<Plugin> result = build.getPlugins();
-        if ( result == null )
-        {
-            return Collections.emptyList();
-        }
-
-        return result;
-    }*/
-
     public Map<String, Plugin> getPluginMap( final ModelBase base )
     {
         final BuildBase build;
@@ -248,27 +225,6 @@ public class Project
 
         return result;
     }
-
-/*    public Build getBuild()
-    {
-        return (Build) getBuild( model );
-    }
-
-    public BuildBase getBuild( final ModelBase base )
-    {
-        BuildBase build;
-        if ( base instanceof Model )
-        {
-            build = ( (Model) base ).getBuild();
-        }
-        else
-        {
-            build = ( (Profile) base ).getBuild();
-        }
-
-        return build;
-    }
-*/
 
     public Map<String, Plugin> getManagedPluginMap( final ModelBase base )
     {
@@ -298,6 +254,16 @@ public class Project
         return Collections.emptyMap();
     }
 
+    /**
+     * This method will scan the dependencies in the potentially active Profiles in this project and
+     * return a fully resolved list. Note that while updating the {@link Dependency} reference returned
+     * will be reflected in the Model as it is the same object, if you wish to remove or add items to
+     * the Model then you must use {@link #getModel()}
+     *
+     * @param session MavenSessionHandler, used by {@link PropertyResolver}
+     * @return a list of fully resolved {@link ProjectVersionRef} to the original {@link Dependency}
+     * @throws ManipulationException
+     */
     public HashMap<Profile, HashMap<ProjectVersionRef, Dependency>> getResolvedProfileDependencies( MavenSessionHandler session) throws ManipulationException
     {
         if ( resolvedProfileDependencies == null )
@@ -316,6 +282,16 @@ public class Project
         return resolvedProfileDependencies;
     }
 
+    /**
+     * This method will scan the dependencies in the dependencyManagement section of the potentially active Profiles in
+     * this project and return a fully resolved list. Note that while updating the {@link Dependency}
+     * reference returned will be reflected in the Model as it is the same object, if you wish to remove or add items
+     * to the Model then you must use {@link #getModel()}
+     *
+     * @param session MavenSessionHandler, used by {@link PropertyResolver}
+     * @return a list of fully resolved {@link ProjectVersionRef} to the original {@link Dependency} (that were within DependencyManagement)
+     * @throws ManipulationException
+     */
     public HashMap<Profile, HashMap<ProjectVersionRef, Dependency>> getResolvedProfileManagedDependencies( MavenSessionHandler session) throws ManipulationException
     {
         if ( resolvedProfileManagedDependencies == null )
@@ -338,6 +314,15 @@ public class Project
         return resolvedProfileManagedDependencies;
     }
 
+    /**
+     * This method will scan the dependencies in this project and return a fully resolved list. Note that
+     * while updating the {@link Dependency} reference returned will be reflected in the Model as it is the
+     * same object, if you wish to remove or add items to the Model then you must use {@link #getModel()}
+     *
+     * @param session MavenSessionHandler, used by {@link PropertyResolver}
+     * @return a list of fully resolved {@link ProjectVersionRef} to the original {@link Dependency}
+     * @throws ManipulationException
+     */
     public HashMap<ProjectVersionRef, Dependency> getResolvedDependencies( MavenSessionHandler session) throws ManipulationException
     {
         if ( resolvedDependencies == null )
@@ -350,6 +335,15 @@ public class Project
     }
 
 
+    /**
+     * This method will scan the dependencies in the dependencyManagement section of this project and return a
+     * fully resolved list. Note that while updating the {@link Dependency} reference returned will be reflected
+     * in the Model as it is the same object, if you wish to remove or add items to the Model then you must use {@link #getModel()}
+     *
+     * @param session MavenSessionHandler, used by {@link PropertyResolver}
+     * @return a list of fully resolved {@link ProjectVersionRef} to the original {@link Dependency} (that were within DependencyManagement)
+     * @throws ManipulationException
+     */
     public HashMap<ProjectVersionRef, Dependency> getResolvedManagedDependencies( MavenSessionHandler session ) throws ManipulationException
     {
         if ( resolvedManagedDepencies == null )

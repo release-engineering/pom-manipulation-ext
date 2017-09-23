@@ -18,8 +18,6 @@ package org.commonjava.maven.ext.manip.util;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Profile;
 import org.commonjava.maven.ext.manip.session.MavenSessionHandler;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,8 +31,6 @@ public final class ProfileUtils
      * Denotes whether we only scan active profiles. Default is false (we scan ALL profiles).
      */
     public static final String PROFILE_SCANNING = "scanActiveProfiles";
-
-    private final static Logger logger = LoggerFactory.getLogger( ProfileUtils.class );
 
     private ProfileUtils()
     {
