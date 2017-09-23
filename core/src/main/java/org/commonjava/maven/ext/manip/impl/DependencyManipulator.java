@@ -374,7 +374,7 @@ public class DependencyManipulator implements Manipulator
                 d.setArtifactId( project.getModelParent().getArtifactId() );
                 d.setVersion( project.getModelParent().getVersion() );
                 pDepMap.put( SimpleProjectVersionRef.parse( d.getManagementKey() ), d );
-                applyExplicitOverrides( project, commonState, explicitVersionPropertyUpdateMap, explicitOverrides, pDepMap );
+                applyExplicitOverrides( project, pDepMap, explicitOverrides, commonState, explicitVersionPropertyUpdateMap );
                 project.getModelParent().setVersion( d.getVersion() );
             }
 
@@ -393,12 +393,14 @@ public class DependencyManipulator implements Manipulator
                 logger.debug( "Applying overrides to managed dependencies for: {}", projectGA );
 
                 final Map<ArtifactRef, String> nonMatchingVersionOverrides =
-                                applyOverrides( project, project.getResolvedManagedDependencies( session ), moduleOverrides, explicitOverrides );
+                                applyOverrides( project, project.getResolvedManagedDependencies( session ),
+                                                explicitOverrides, moduleOverrides );
 
                 final Map<ArtifactRef, String> matchedOverrides = new LinkedHashMap<>( moduleOverrides );
                 matchedOverrides.keySet().removeAll( nonMatchingVersionOverrides.keySet() );
 
-                applyExplicitOverrides( project, commonState, explicitVersionPropertyUpdateMap, explicitOverrides, project.getResolvedManagedDependencies( session ) );
+                applyExplicitOverrides( project, project.getResolvedManagedDependencies( session ), explicitOverrides,
+                                        commonState, explicitVersionPropertyUpdateMap );
 
                 if ( commonState.getOverrideTransitive() )
                 {
@@ -444,9 +446,10 @@ public class DependencyManipulator implements Manipulator
             if ( session.getState( DependencyState.class ).getOverrideDependencies()  )
             {
                 logger.debug( "Applying overrides to managed dependencies for: {}", projectGA );
-                applyOverrides( project, project.getResolvedManagedDependencies( session ), moduleOverrides, explicitOverrides );
-                applyExplicitOverrides( project, commonState, explicitVersionPropertyUpdateMap, explicitOverrides,
-                                        project.getResolvedManagedDependencies( session ) );
+                applyOverrides( project, project.getResolvedManagedDependencies( session ), explicitOverrides,
+                                moduleOverrides );
+                applyExplicitOverrides( project, project.getResolvedManagedDependencies( session ), explicitOverrides,
+                                        commonState, explicitVersionPropertyUpdateMap );
             }
             else
             {
@@ -458,21 +461,21 @@ public class DependencyManipulator implements Manipulator
         {
             logger.debug( "Applying overrides to concrete dependencies for: {}", projectGA );
             // Apply overrides to project direct dependencies
-            applyOverrides( project, project.getResolvedDependencies( session ), moduleOverrides, explicitOverrides );
-            applyExplicitOverrides( project, commonState, explicitVersionPropertyUpdateMap, explicitOverrides, project.getResolvedDependencies( session ) );
+            applyOverrides( project, project.getResolvedDependencies( session ), explicitOverrides, moduleOverrides );
+            applyExplicitOverrides( project, project.getResolvedDependencies( session ), explicitOverrides, commonState, explicitVersionPropertyUpdateMap );
 
             final HashMap<Profile, HashMap<ProjectVersionRef, Dependency>> pd = project.getResolvedProfileDependencies( session );
             final HashMap<Profile, HashMap<ProjectVersionRef, Dependency>> pmd = project.getResolvedProfileManagedDependencies( session );
 
             for ( Profile p : pd.keySet())
             {
-                applyOverrides( project, pd.get( p ), moduleOverrides, explicitOverrides );
-                applyExplicitOverrides( project, commonState, explicitVersionPropertyUpdateMap, explicitOverrides, pd.get( p ) );
+                applyOverrides( project, pd.get( p ), explicitOverrides, moduleOverrides );
+                applyExplicitOverrides( project, pd.get( p ), explicitOverrides, commonState, explicitVersionPropertyUpdateMap );
             }
             for ( Profile p : pmd.keySet())
             {
-                applyOverrides( project, pmd.get( p ), moduleOverrides, explicitOverrides );
-                applyExplicitOverrides( project, commonState, explicitVersionPropertyUpdateMap, explicitOverrides, pmd.get( p ) );
+                applyOverrides( project, pmd.get( p ), explicitOverrides, moduleOverrides );
+                applyExplicitOverrides( project, pmd.get( p ), explicitOverrides, commonState, explicitVersionPropertyUpdateMap );
             }
         }
         else
@@ -487,14 +490,15 @@ public class DependencyManipulator implements Manipulator
      * ignore any property references (and overwrite them).
      *
      * @param project the current Project
+     * @param dependencies dependencies to check
+     * @param explicitOverrides a custom map to handle wildcard overrides
      * @param state the CommonState, to retrieve Common Properties
      * @param versionPropertyUpdateMap properties to update
-     * @param explicitOverrides a custom map to handle wildcard overrides
-     * @param dependencies dependencies to check
      * @throws ManipulationException if an error occurs
      */
-    private void applyExplicitOverrides( Project project, CommonState state, final Map<Project, Map<String, String>> versionPropertyUpdateMap,
-                                         final WildcardMap<String> explicitOverrides, final HashMap<ProjectVersionRef, Dependency> dependencies )
+    private void applyExplicitOverrides( final Project project, final HashMap<ProjectVersionRef, Dependency> dependencies,
+                                         final WildcardMap<String> explicitOverrides, final CommonState state,
+                                         final Map<Project, Map<String, String>> versionPropertyUpdateMap )
                     throws ManipulationException
     {
         // Apply matching overrides to dependencies
@@ -560,13 +564,13 @@ public class DependencyManipulator implements Manipulator
      *
      * @param project The current Project
      * @param dependencies The list of dependencies
+     * @param explicitOverrides Any explicitOverrides to track for ignoring
      * @param overrides The map of dependency version overrides
-     * @param explicitOverrides Any explicitOverrides to track for ignoring    @return The map of overrides that were not matched in the dependencies
+     * @return The map of overrides that were not matched in the dependencies
      * @throws ManipulationException if an error occurs
      */
-    private Map<ArtifactRef, String> applyOverrides( Project project, final HashMap<ProjectVersionRef, Dependency> dependencies,
-                                                     final Map<ArtifactRef, String> overrides,
-                                                     WildcardMap<String> explicitOverrides )
+    private Map<ArtifactRef, String> applyOverrides( final Project project, final HashMap<ProjectVersionRef, Dependency> dependencies,
+                                                     final WildcardMap<String> explicitOverrides, final Map<ArtifactRef, String> overrides )
                     throws ManipulationException
     {
         // Duplicate the override map so unused overrides can be easily recorded
