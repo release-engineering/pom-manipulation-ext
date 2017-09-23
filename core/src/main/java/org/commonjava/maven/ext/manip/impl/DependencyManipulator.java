@@ -29,6 +29,7 @@ import org.commonjava.maven.atlas.ident.ref.ProjectRef;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleArtifactRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleProjectRef;
+import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef;
 import org.commonjava.maven.ext.manip.ManipulationException;
 import org.commonjava.maven.ext.manip.ManipulationSession;
 import org.commonjava.maven.ext.manip.io.ModelIO;
@@ -37,15 +38,14 @@ import org.commonjava.maven.ext.manip.state.CommonState;
 import org.commonjava.maven.ext.manip.state.DependencyState;
 import org.commonjava.maven.ext.manip.state.DependencyState.DependencyPrecedence;
 import org.commonjava.maven.ext.manip.state.RESTState;
-import org.commonjava.maven.ext.manip.util.ProfileUtils;
 import org.commonjava.maven.ext.manip.util.PropertiesUtils;
-import org.commonjava.maven.ext.manip.util.PropertyResolver;
 import org.commonjava.maven.ext.manip.util.WildcardMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -216,7 +216,6 @@ public class DependencyManipulator implements Manipulator
                 }
             }
         }
-
     }
 
     @Override
@@ -247,7 +246,7 @@ public class DependencyManipulator implements Manipulator
         if (!result.isEmpty())
         {
             logger.info ("Iterating for standard overrides...");
-logger.info ("#### versionPropMap {} ", versionPropertyUpdateMap);
+
             for ( Project project : versionPropertyUpdateMap.keySet() )
             {
                 logger.debug( "Checking property override within project {} ", project );
@@ -308,6 +307,8 @@ logger.info ("#### versionPropMap {} ", versionPropertyUpdateMap);
         final DependencyState dependencyState = session.getState( DependencyState.class );
         final CommonState commonState = session.getState( CommonState.class );
 
+        logger.info ("Processing project {} ", projectGA);
+
         Map<ArtifactRef, String> moduleOverrides = new LinkedHashMap<>( overrides );
         moduleOverrides = removeReactorGAs( moduleOverrides );
 
@@ -367,13 +368,13 @@ logger.info ("#### versionPropMap {} ", versionPropertyUpdateMap);
 
                 // Apply any explicit overrides to the top level parent. Convert it to a simulated
                 // dependency so we can reuse applyExplicitOverrides.
-                ArrayList<Dependency> pDeps = new ArrayList<>();
+                HashMap<ProjectVersionRef, Dependency> pDepMap = new HashMap<>(  );
                 Dependency d = new Dependency();
                 d.setGroupId( project.getModelParent().getGroupId() );
                 d.setArtifactId( project.getModelParent().getArtifactId() );
                 d.setVersion( project.getModelParent().getVersion() );
-                pDeps.add( d );
-                applyExplicitOverrides( project, commonState, explicitVersionPropertyUpdateMap, explicitOverrides, pDeps );
+                pDepMap.put( SimpleProjectVersionRef.parse( d.getManagementKey() ), d );
+                applyExplicitOverrides( project, commonState, explicitVersionPropertyUpdateMap, explicitOverrides, pDepMap );
                 project.getModelParent().setVersion( d.getVersion() );
             }
 
@@ -389,17 +390,15 @@ logger.info ("#### versionPropMap {} ", versionPropertyUpdateMap);
                 }
 
                 // Apply overrides to project dependency management
-                final List<Dependency> dependencies = dependencyManagement.getDependencies();
-
-                logger.debug( "Applying overrides to managed dependencies for top-pom: {}", projectGA );
+                logger.debug( "Applying overrides to managed dependencies for: {}", projectGA );
 
                 final Map<ArtifactRef, String> nonMatchingVersionOverrides =
-                                applyOverrides( project, dependencies, moduleOverrides, explicitOverrides );
+                                applyOverrides( project, project.getResolvedManagedDependencies( session ), moduleOverrides, explicitOverrides );
 
                 final Map<ArtifactRef, String> matchedOverrides = new LinkedHashMap<>( moduleOverrides );
                 matchedOverrides.keySet().removeAll( nonMatchingVersionOverrides.keySet() );
 
-                applyExplicitOverrides( project, commonState, explicitVersionPropertyUpdateMap, explicitOverrides, dependencies );
+                applyExplicitOverrides( project, commonState, explicitVersionPropertyUpdateMap, explicitOverrides, project.getResolvedManagedDependencies( session ) );
 
                 if ( commonState.getOverrideTransitive() )
                 {
@@ -442,13 +441,12 @@ logger.info ("#### versionPropMap {} ", versionPropertyUpdateMap);
         else
         {
             // If a child module has a depMgmt section we'll change that as well.
-            final DependencyManagement dependencyManagement = model.getDependencyManagement();
-            if ( session.getState( DependencyState.class ).getOverrideDependencies() && dependencyManagement != null )
+            if ( session.getState( DependencyState.class ).getOverrideDependencies()  )
             {
                 logger.debug( "Applying overrides to managed dependencies for: {}", projectGA );
-                applyOverrides( project, dependencyManagement.getDependencies(), moduleOverrides, explicitOverrides );
+                applyOverrides( project, project.getResolvedManagedDependencies( session ), moduleOverrides, explicitOverrides );
                 applyExplicitOverrides( project, commonState, explicitVersionPropertyUpdateMap, explicitOverrides,
-                                        dependencyManagement.getDependencies() );
+                                        project.getResolvedManagedDependencies( session ) );
             }
             else
             {
@@ -460,27 +458,21 @@ logger.info ("#### versionPropMap {} ", versionPropertyUpdateMap);
         {
             logger.debug( "Applying overrides to concrete dependencies for: {}", projectGA );
             // Apply overrides to project direct dependencies
-            final List<Dependency> projectDependencies = model.getDependencies();
-            applyOverrides( project, projectDependencies, moduleOverrides, explicitOverrides );
-            applyExplicitOverrides( project, commonState, explicitVersionPropertyUpdateMap, explicitOverrides, projectDependencies );
+            applyOverrides( project, project.getResolvedDependencies( session ), moduleOverrides, explicitOverrides );
+            applyExplicitOverrides( project, commonState, explicitVersionPropertyUpdateMap, explicitOverrides, project.getResolvedDependencies( session ) );
 
-            // Now check all possible profiles and update them.
-            List<Profile> profiles = ProfileUtils.getProfiles( session, project.getModel());
-            if ( profiles != null )
+            final HashMap<Profile, HashMap<ProjectVersionRef, Dependency>> pd = project.getResolvedProfileDependencies( session );
+            final HashMap<Profile, HashMap<ProjectVersionRef, Dependency>> pmd = project.getResolvedProfileManagedDependencies( session );
+
+            for ( Profile p : pd.keySet())
             {
-                for ( Profile p : profiles )
-                {
-                    if ( p.getDependencyManagement() != null )
-                    {
-                        applyOverrides( project, p.getDependencyManagement().getDependencies(), moduleOverrides,
-                                        explicitOverrides );
-                        applyExplicitOverrides( project, commonState, explicitVersionPropertyUpdateMap, explicitOverrides,
-                                                p.getDependencyManagement().getDependencies() );
-                    }
-                    final List<Dependency> profileDependencies = p.getDependencies();
-                    applyOverrides( project, profileDependencies, moduleOverrides, explicitOverrides );
-                    applyExplicitOverrides( project, commonState, explicitVersionPropertyUpdateMap, explicitOverrides, profileDependencies );
-                }
+                applyOverrides( project, pd.get( p ), moduleOverrides, explicitOverrides );
+                applyExplicitOverrides( project, commonState, explicitVersionPropertyUpdateMap, explicitOverrides, pd.get( p ) );
+            }
+            for ( Profile p : pmd.keySet())
+            {
+                applyOverrides( project, pmd.get( p ), moduleOverrides, explicitOverrides );
+                applyExplicitOverrides( project, commonState, explicitVersionPropertyUpdateMap, explicitOverrides, pmd.get( p ) );
             }
         }
         else
@@ -502,25 +494,24 @@ logger.info ("#### versionPropMap {} ", versionPropertyUpdateMap);
      * @throws ManipulationException if an error occurs
      */
     private void applyExplicitOverrides( Project project, CommonState state, final Map<Project, Map<String, String>> versionPropertyUpdateMap,
-                                         final WildcardMap<String> explicitOverrides, final List<Dependency> dependencies )
+                                         final WildcardMap<String> explicitOverrides, final HashMap<ProjectVersionRef, Dependency> dependencies )
                     throws ManipulationException
     {
         // Apply matching overrides to dependencies
-        for ( final Dependency dependency : dependencies )
+        for ( final ProjectVersionRef dependency : dependencies.keySet() )
         {
             final ProjectRef groupIdArtifactId = new SimpleProjectRef( dependency.getGroupId(), dependency.getArtifactId() );
 
             if ( explicitOverrides.containsKey( groupIdArtifactId ) )
             {
                 final String overrideVersion = explicitOverrides.get( groupIdArtifactId );
-                final String oldVersion = dependency.getVersion();
+                final String oldVersion = dependencies.get( dependency ).getVersion();
 
-                if ( isEmpty( overrideVersion )|| isEmpty( oldVersion ) )
+                if ( isEmpty( overrideVersion ) || isEmpty( oldVersion ) )
                 {
                     if ( isEmpty( oldVersion ) )
                     {
-                        logger.debug( "Unable to force align as no existing version field to update for "
-                                                     + groupIdArtifactId + "; ignoring" );
+                        logger.debug( "Unable to force align as no existing version field to update for " + groupIdArtifactId + "; ignoring" );
                     }
                     else
                     {
@@ -532,21 +523,21 @@ logger.info ("#### versionPropMap {} ", versionPropertyUpdateMap);
                 {
                     for ( String target : overrideVersion.split( "," ) )
                     {
-                        if (target.startsWith( "+" ))
+                        if ( target.startsWith( "+" ) )
                         {
-                            logger.info ("Adding dependency exclusion {} to dependency {} ", target.substring( 1 ), dependency);
+                            logger.info( "Adding dependency exclusion {} to dependency {} ", target.substring( 1 ),
+                                         dependency );
                             Exclusion e = new Exclusion();
                             e.setGroupId( target.substring( 1 ).split( ":" )[0] );
                             e.setArtifactId( target.split( ":" )[1] );
-                            dependency.addExclusion( e );
+                            dependencies.get( dependency ).addExclusion( e );
                         }
                         else
                         {
-                            logger.info( "Explicit overrides : force aligning {} to {}.", groupIdArtifactId,
-                                         target );
+                            logger.info( "Explicit overrides : force aligning {} to {}.", groupIdArtifactId, target );
 
-                            if ( !PropertiesUtils.cacheProperty( project, state, versionPropertyUpdateMap, oldVersion, target,
-                                                                 dependency, true ) )
+                            if ( !PropertiesUtils.cacheProperty( project, state, versionPropertyUpdateMap, oldVersion,
+                                                                 target, dependency, true ) )
                             {
                                 if ( oldVersion.contains( "${" ) )
                                 {
@@ -555,7 +546,7 @@ logger.info ("#### versionPropMap {} ", versionPropertyUpdateMap);
                                     // TODO: Should this throw an exception?
                                 }
                                 // Not checking strict version alignment here as explicit overrides take priority.
-                                dependency.setVersion( target );
+                                dependencies.get( dependency ).setVersion( target );
                             }
                         }
                     }
@@ -573,7 +564,7 @@ logger.info ("#### versionPropMap {} ", versionPropertyUpdateMap);
      * @param explicitOverrides Any explicitOverrides to track for ignoring    @return The map of overrides that were not matched in the dependencies
      * @throws ManipulationException if an error occurs
      */
-    private Map<ArtifactRef, String> applyOverrides( Project project, final List<Dependency> dependencies,
+    private Map<ArtifactRef, String> applyOverrides( Project project, final HashMap<ProjectVersionRef, Dependency> dependencies,
                                                      final Map<ArtifactRef, String> overrides,
                                                      WildcardMap<String> explicitOverrides )
                     throws ManipulationException
@@ -582,8 +573,7 @@ logger.info ("#### versionPropMap {} ", versionPropertyUpdateMap);
         final Map<ArtifactRef, String> unmatchedVersionOverrides = new LinkedHashMap<>();
         unmatchedVersionOverrides.putAll( overrides );
 
-        logger.debug ("### Applying to dpendencies {} ", dependencies);
-        if ( dependencies == null )
+        if ( dependencies == null || dependencies.size() == 0 )
         {
             return unmatchedVersionOverrides;
         }
@@ -593,7 +583,7 @@ logger.info ("#### versionPropMap {} ", versionPropertyUpdateMap);
         final boolean strict = dependencyState.getStrict();
 
         // Apply matching overrides to dependencies
-        for ( final Dependency dependency : dependencies )
+        for ( final ProjectVersionRef dependency : dependencies.keySet() )
         {
             ProjectRef depPr = new SimpleProjectRef( dependency.getGroupId(), dependency.getArtifactId() );
 
@@ -608,9 +598,9 @@ logger.info ("#### versionPropMap {} ", versionPropertyUpdateMap);
 
                 if ( depPr.equals( groupIdArtifactId ) )
                 {
-                    final String oldVersion = dependency.getVersion();
+                    final String oldVersion = dependencies.get( dependency ).getVersion();
                     final String overrideVersion = entry.getValue();
-                    final String resolvedValue = PropertyResolver.resolveInheritedProperties( session, project, oldVersion);
+                    final String resolvedValue = dependency.getVersionString();
 
                     if ( isEmpty( overrideVersion ) )
                     {
@@ -644,12 +634,12 @@ logger.info ("#### versionPropMap {} ", versionPropertyUpdateMap);
                         {
                             throw new ManipulationException(
                                             "For {} replacing original property version {} (fully resolved: {} ) with new version {} for {} violates the strict version-alignment rule!",
-                                            depPr.toString(), dependency.getVersion(), resolvedValue, entry.getKey().getVersionString(), entry.getKey().asProjectRef().toString());
+                                            depPr.toString(), dependencies.get( dependency ).getVersion(), resolvedValue, entry.getKey().getVersionString(), entry.getKey().asProjectRef().toString());
                         }
                         else
                         {
                             logger.warn( "Replacing original property version {} with new version {} for {} violates the strict version-alignment rule!",
-                                         resolvedValue, overrideVersion, dependency.getVersion() );
+                                         resolvedValue, overrideVersion, dependencies.get( dependency ).getVersion() );
                         }
                     }
                     else
@@ -705,11 +695,11 @@ logger.info ("#### versionPropMap {} ", versionPropertyUpdateMap);
                                     // In this case the previous value couldn't be cached even though it contained a property
                                     // as it was either multiple properties or a property combined with a hardcoded value. Therefore
                                     // just append the suffix.
-                                    dependency.setVersion( replaceVersion );
+                                    dependencies.get( dependency ).setVersion( replaceVersion );
                                 }
                                 else
                                 {
-                                    dependency.setVersion( overrideVersion );
+                                    dependencies.get( dependency ).setVersion( overrideVersion );
                                 }
                             }
                         }

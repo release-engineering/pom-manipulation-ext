@@ -326,9 +326,13 @@ public class Project
             {
                 HashMap<ProjectVersionRef, Dependency> profileDeps = new HashMap<>();
 
-                resolveDeps( session, profile.getDependencies(), profileDeps );
+                final DependencyManagement dm = profile.getDependencyManagement();
+                if ( ! ( dm == null || dm.getDependencies() == null ) )
+                {
+                    resolveDeps( session, dm.getDependencies(), profileDeps );
 
-                resolvedProfileManagedDependencies.put( profile, profileDeps );
+                    resolvedProfileManagedDependencies.put( profile, profileDeps );
+                }
             }
         }
         return resolvedProfileManagedDependencies;
@@ -344,6 +348,7 @@ public class Project
         }
         return resolvedDependencies;
     }
+
 
     public HashMap<ProjectVersionRef, Dependency> getResolvedManagedDependencies( MavenSessionHandler session ) throws ManipulationException
     {
@@ -380,7 +385,6 @@ public class Project
             {
                 resolvedDependencies.put( new SimpleProjectVersionRef( g, a, v ), d );
             }
-
         }
     }
 

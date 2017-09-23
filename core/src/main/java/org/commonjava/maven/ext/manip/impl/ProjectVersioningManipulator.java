@@ -159,7 +159,6 @@ public class ProjectVersioningManipulator
             return false;
         }
 
-        // TODO: ### Potentially not handling GAV with properties????
         final Model model = project.getModel();
         if ( model == null )
         {

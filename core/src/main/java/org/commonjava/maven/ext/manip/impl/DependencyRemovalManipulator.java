@@ -16,6 +16,7 @@
 package org.commonjava.maven.ext.manip.impl;
 
 import org.apache.maven.model.Dependency;
+import org.apache.maven.model.DependencyManagement;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Profile;
 import org.codehaus.plexus.component.annotations.Component;
@@ -123,16 +124,22 @@ public class DependencyRemovalManipulator
         final HashMap<Profile, HashMap<ProjectVersionRef, Dependency>> pmd = project.getResolvedProfileManagedDependencies( session );
         for ( Profile profile : pd.keySet())
         {
-            if ( scanDependencies( pd.get( profile ), dependenciesToRemove, profile.getDependencies() ) )
+            int index = model.getProfiles().indexOf( profile );
+            if ( scanDependencies( pd.get( profile ), dependenciesToRemove, model.getProfiles().get( index ).getDependencies() ) )
             {
                 result = true;
             }
         }
         for ( Profile profile : pmd.keySet())
         {
-            if ( scanDependencies( pmd.get( profile ), dependenciesToRemove, profile.getDependencies() ) )
+            int index = model.getProfiles().indexOf( profile );
+            DependencyManagement dm = model.getProfiles().get( index ).getDependencyManagement();
+            if ( dm != null )
             {
-                result = true;
+                if ( scanDependencies( pmd.get( profile ), dependenciesToRemove, dm.getDependencies() ) )
+                {
+                    result = true;
+                }
             }
         }
         return result;

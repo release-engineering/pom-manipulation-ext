@@ -42,7 +42,6 @@ public class ProjectInheritanceTest
         List<Project> projects = pomIO.parseProject( projectroot );
         for ( Project p : projects )
         {
-            System.out.println( "### p parent " + p.getProjectParent() );
             if ( ! p.getPom().equals( projectroot ) )
             {
                 assertTrue ( p.getProjectParent().getPom().equals( projectroot ) );
