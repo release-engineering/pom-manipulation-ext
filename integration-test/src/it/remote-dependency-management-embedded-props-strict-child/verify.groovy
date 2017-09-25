@@ -25,6 +25,10 @@ pom.properties.each {
     {
         passed = true
     }
+    if ( it.text().contains ("3.1-redhat-1") )
+    {
+        passed = false
+    }
 }
 assert (passed == true)
 
@@ -38,7 +42,12 @@ pomFile.eachLine {
 
 assert message == 1
 
+assert ! pomFile.text.contains("http>3.1-redhat-1")
+
+
 pomFile = new File( basedir, 'child/pom.xml' )
 System.out.println( "Slurping POM: ${pomFile.getAbsolutePath()}" )
 
 assert pomFile.text.contains("commons.lang>2.6.0.redhat-4")
+
+assert pomFile.text.contains("http>3.1-redhat-1")

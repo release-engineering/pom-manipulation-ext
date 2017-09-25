@@ -16,6 +16,7 @@
 package org.commonjava.maven.ext.manip.util;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.maven.model.Profile;
 import org.commonjava.maven.ext.manip.ManipulationException;
 import org.commonjava.maven.ext.manip.ManipulationSession;
 import org.commonjava.maven.ext.manip.impl.Version;
@@ -28,7 +29,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
@@ -88,9 +88,7 @@ public final class PropertiesUtils
     public static PropertyUpdate updateProperties( ManipulationSession session, Project project, boolean ignoreStrict,
                                                    String key, String newValue ) throws ManipulationException
     {
-        final DependencyState state = session.getState( DependencyState.class );
         final String resolvedValue = PropertyResolver.resolveProperties( session, project.getInheritedList(), "${" + key + '}' );
-        PropertyUpdate found = PropertyUpdate.NOTFOUND;
 
         logger.debug( "Fully resolvedValue is {} for {} ", resolvedValue, key );
 
@@ -104,89 +102,111 @@ public final class PropertiesUtils
         {
             if ( p.getModel().getProperties().containsKey( key ) )
             {
-                final String oldValue = p.getModel().getProperties().getProperty( key );
+                logger.trace( "Searching properties of {} ", p );
+                return internalUpdateProperty( session, p, ignoreStrict, key, newValue, resolvedValue, p.getModel().getProperties() );
+            }
+            else
+            {
+                for ( Profile pr : ProfileUtils.getProfiles( session, p.getModel() ) )
+                {
+                    logger.trace( "Searching properties of profile {} within project {} ", pr.getId(), p );
+                    // Lets check the profiles for property updates...
+                    if ( pr.getProperties().containsKey( key ) )
+                    {
+                        return internalUpdateProperty( session, p, ignoreStrict, key, newValue, resolvedValue, pr.getProperties() );
+                    }
+                }
+            }
+        }
 
-                logger.info( "Updating property {} / {} with {} ", key, oldValue, newValue );
+        return PropertyUpdate.NOTFOUND;
+    }
 
-                found = PropertyUpdate.FOUND;
 
-                // We'll only recursively resolve the property if its a single >${foo}<. If its one of
+    private static PropertyUpdate internalUpdateProperty( ManipulationSession session, Project p, boolean ignoreStrict,
+                                                          String key, String newValue, String resolvedValue,
+                                                          Properties props )
+                    throws ManipulationException
+    {
+        final DependencyState state = session.getState( DependencyState.class );
+        final String oldValue = props.getProperty( key );
+
+        logger.info( "Updating property {} / {} with {} ", key, oldValue, newValue );
+
+        PropertyUpdate found = PropertyUpdate.FOUND;
+
+        // We'll only recursively resolve the property if its a single >${foo}<. If its one of
+        // >${foo}value${foo}<
+        // >${foo}${foo}<
+        // >value${foo}<
+        // >${foo}value<
+        // it becomes hairy to verify strict compliance and to correctly split the old value and
+        // update it with a portion of the new value.
+        if ( oldValue != null && oldValue.startsWith( "${" ) && oldValue.endsWith( "}" ) &&
+                        !( StringUtils.countMatches( oldValue, "${" ) > 1 ) )
+        {
+            logger.debug( "Recursively resolving {} ", oldValue.substring( 2, oldValue.length() - 1 ) );
+
+            if ( updateProperties( session, p, ignoreStrict,
+                                   oldValue.substring( 2, oldValue.length() - 1 ), newValue ) == PropertyUpdate.NOTFOUND )
+            {
+                logger.error( "Recursive property not found for {} with {} ", oldValue, newValue );
+                return PropertyUpdate.NOTFOUND;
+            }
+        }
+        else
+        {
+            if ( state.getStrict() && !ignoreStrict )
+            {
+                if ( !checkStrictValue( session, resolvedValue, newValue ) )
+                {
+                    if ( state.getFailOnStrictViolation() )
+                    {
+                        throw new ManipulationException(
+                                        "Replacing original property version {} (fully resolved: {} ) with new version {} for {} violates the strict version-alignment rule!",
+                                        oldValue, resolvedValue, newValue, key );
+                    }
+                    else
+                    {
+                        logger.warn( "Replacing original property version {} with new version {} for {} violates the strict version-alignment rule!",
+                                     oldValue, newValue, key );
+                        // Ignore the dependency override. As found has been set to true it won't inject
+                        // a new property either.
+                        return found;
+                    }
+                }
+            }
+
+            // TODO: Does not handle explicit overrides.
+            if ( oldValue != null && oldValue.contains( "${" ) &&
+                            !( oldValue.startsWith( "${" ) && oldValue.endsWith( "}" ) ) || (
+                            StringUtils.countMatches( oldValue, "${" ) > 1 ) )
+            {
+                // This block handles
                 // >${foo}value${foo}<
                 // >${foo}${foo}<
                 // >value${foo}<
                 // >${foo}value<
-                // it becomes hairy to verify strict compliance and to correctly split the old value and
-                // update it with a portion of the new value.
-                if ( oldValue != null && oldValue.startsWith( "${" ) && oldValue.endsWith( "}" ) &&
-                                !( StringUtils.countMatches( oldValue, "${" ) > 1 ) )
+                // We don't attempt to recursively resolve those as tracking the split of the variables, combined
+                // with the update and strict version checking becomes overly fragile.
+
+                if ( ignoreStrict )
                 {
-                    logger.debug( "Recursively resolving {} ", oldValue.substring( 2, oldValue.length() - 1 ) );
-
-                    if ( updateProperties( session, p, ignoreStrict,
-                                            oldValue.substring( 2, oldValue.length() - 1 ), newValue ) == PropertyUpdate.NOTFOUND )
-                    {
-                        logger.error( "Recursive property not found for {} with {} ", oldValue, newValue );
-                        return PropertyUpdate.NOTFOUND;
-                    }
+                    throw new ManipulationException(
+                                    "NYI : handling for versions with explicit overrides (" + oldValue + ") with multiple embedded properties is NYI. " );
                 }
-                else
+                if ( resolvedValue.equals( newValue ))
                 {
-                    if ( state.getStrict() && !ignoreStrict )
-                    {
-                        if ( !checkStrictValue( session, resolvedValue, newValue ) )
-                        {
-                            if ( state.getFailOnStrictViolation() )
-                            {
-                                throw new ManipulationException(
-                                                "Replacing original property version {} (fully resolved: {} ) with new version {} for {} violates the strict version-alignment rule!",
-                                                oldValue, resolvedValue, newValue, key );
-                            }
-                            else
-                            {
-                                logger.warn( "Replacing original property version {} with new version {} for {} violates the strict version-alignment rule!",
-                                             oldValue, newValue, key );
-                                // Ignore the dependency override. As found has been set to true it won't inject
-                                // a new property either.
-                                break;
-                            }
-                        }
-                    }
-
-                    // TODO: Does not handle explicit overrides.
-                    if ( oldValue != null && oldValue.contains( "${" ) &&
-                                    !( oldValue.startsWith( "${" ) && oldValue.endsWith( "}" ) ) || (
-                                    StringUtils.countMatches( oldValue, "${" ) > 1 ) )
-                    {
-                        // This block handles
-                        // >${foo}value${foo}<
-                        // >${foo}${foo}<
-                        // >value${foo}<
-                        // >${foo}value<
-                        // We don't attempt to recursively resolve those as tracking the split of the variables, combined
-                        // with the update and strict version checking becomes overly fragile.
-
-                        if ( ignoreStrict )
-                        {
-                            throw new ManipulationException(
-                                            "NYI : handling for versions with explicit overrides (" + oldValue + ") with multiple embedded properties is NYI. " );
-                        }
-                        if ( resolvedValue.equals( newValue ))
-                        {
-                            logger.warn( "Nothing to update as original key {} value matches new value {} ", key,
-                                         newValue );
-                            found = PropertyUpdate.IGNORE;
-                            break;
-                        }
-                        newValue = oldValue + StringUtils.removeStart( newValue, resolvedValue );
-                        logger.info( "Ignoring new value due to embedded property {} and appending {} ", oldValue,
-                                     newValue );
-                    }
-
-                    p.getModel().getProperties().setProperty( key, newValue );
-
-                    break;
+                    logger.warn( "Nothing to update as original key {} value matches new value {} ", key,
+                                 newValue );
+                    found = PropertyUpdate.IGNORE;
                 }
+                newValue = oldValue + StringUtils.removeStart( newValue, resolvedValue );
+                logger.info( "Ignoring new value due to embedded property {} and appending {} ", oldValue,
+                             newValue );
             }
+
+            props.setProperty( key, newValue );
         }
         return found;
     }

@@ -40,6 +40,23 @@
       <artifactId>commons-lang</artifactId>
       <version>${commons.lang}</version>
     </dependency>
+    <dependency>
+      <groupId>commons-httpclient</groupId>
+      <artifactId>commons-httpclient</artifactId>
+      <version>${http}</version>
+    </dependency>
   </dependencies>
 
+
+  <profiles>
+    <profile>
+      <id>dummy</id>
+      <activation>
+        <activeByDefault>true</activeByDefault>
+      </activation>
+      <properties>
+        <http>3.1</http>
+      </properties>
+    </profile>
+  </profiles>
 </project>
