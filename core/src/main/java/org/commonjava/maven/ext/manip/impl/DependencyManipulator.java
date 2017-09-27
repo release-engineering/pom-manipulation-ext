@@ -193,6 +193,7 @@ public class DependencyManipulator implements Manipulator
             removeDuplicateArtifacts( mergedOverrides, bomOverrides );
             mergedOverrides.putAll( bomOverrides );
         }
+        logger.info ( "Remote precedence is {}", depState.getPrecedence() );
         logger.debug ("Final remote override list is {}", mergedOverrides);
         return mergedOverrides;
     }

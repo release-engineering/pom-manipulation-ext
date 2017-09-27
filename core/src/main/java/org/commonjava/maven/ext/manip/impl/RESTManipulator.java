@@ -190,7 +190,7 @@ public class RESTManipulator implements Manipulator
                 versions.add( restResult.get( p ) );
             }
         }
-        logger.info ("Added the following ProjectRef:Version from REST call into VersionState {}", versionStates);
+        logger.debug ("Added the following ProjectRef:Version from REST call into VersionState {}", versionStates);
 
         // We know we have ProjectVersionRef(s) of the current project(s). We need to establish potential
         // blacklist by calling

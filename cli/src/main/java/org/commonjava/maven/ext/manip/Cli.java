@@ -54,7 +54,6 @@ import org.codehaus.plexus.PlexusContainer;
 import org.codehaus.plexus.PlexusContainerException;
 import org.codehaus.plexus.component.repository.exception.ComponentLookupException;
 import org.commonjava.maven.atlas.ident.ref.ArtifactRef;
-import org.commonjava.maven.atlas.ident.ref.ProjectRef;
 import org.commonjava.maven.ext.manip.impl.RESTManipulator;
 import org.commonjava.maven.ext.manip.io.ConfigIO;
 import org.commonjava.maven.ext.manip.io.PomIO;
@@ -78,7 +77,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
-import java.util.TreeSet;
 
 import static org.apache.commons.lang.StringUtils.isNotEmpty;
 import static org.commonjava.maven.ext.manip.util.ProfileUtils.PROFILE_SCANNING;
@@ -121,7 +119,7 @@ public class Cli
         Options options = new Options();
         options.addOption( "h", false, "Print this help message." );
         options.addOption( Option.builder( "d" ).longOpt( "debug" ).desc( "Enable debug" ).build() );
-        options.addOption( Option.builder( "t" ).longOpt( "debug" ).desc( "Enable trace" ).build() );
+        options.addOption( Option.builder( "t" ).longOpt( "trace" ).desc( "Enable trace" ).build() );
         options.addOption( Option.builder( "h" ).longOpt( "help" ).desc( "Print help" ).build() );
         options.addOption( Option.builder( "f" )
                                  .longOpt( "file" )
@@ -298,8 +296,7 @@ public class Cli
             // isn't setup then.
             logger.debug( "Using local repository \n{} and found global settings file in {} with contents \n{} and user settings file in {} with contents \n{}",
                           session.getLocalRepository(),
-                          DEFAULT_GLOBAL_SETTINGS_FILE,
-                          (DEFAULT_GLOBAL_SETTINGS_FILE != null && DEFAULT_GLOBAL_SETTINGS_FILE.exists()) ? FileUtils.readFileToString
+                          DEFAULT_GLOBAL_SETTINGS_FILE, DEFAULT_GLOBAL_SETTINGS_FILE.exists() ? FileUtils.readFileToString
                                           ( DEFAULT_GLOBAL_SETTINGS_FILE ) : "** File does not exist **",
                           settings,
                           (settings != null && settings.exists()) ? FileUtils.readFileToString( settings ) : "** File does not exist **"
