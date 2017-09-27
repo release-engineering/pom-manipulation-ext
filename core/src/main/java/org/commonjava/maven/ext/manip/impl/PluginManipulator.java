@@ -33,7 +33,6 @@ import org.commonjava.maven.ext.manip.ManipulationSession;
 import org.commonjava.maven.ext.manip.io.ModelIO;
 import org.commonjava.maven.ext.manip.model.Project;
 import org.commonjava.maven.ext.manip.state.CommonState;
-import org.commonjava.maven.ext.manip.state.DependencyState;
 import org.commonjava.maven.ext.manip.state.PluginState;
 import org.commonjava.maven.ext.manip.state.PluginState.Precedence;
 import org.commonjava.maven.ext.manip.state.State;
@@ -61,6 +60,8 @@ import static org.commonjava.maven.ext.manip.util.IdUtils.ga;
 public class PluginManipulator
     implements Manipulator
 {
+    private ManipulationSession session;
+
     private enum PluginType
     {
         RemotePM,
@@ -93,22 +94,27 @@ public class PluginManipulator
     private ModelIO effectiveModelBuilder;
 
     /**
+     * Used to store mappings of old property to new version.
+     */
+    private final Map<Project,Map<String, String>> versionPropertyUpdateMap = new LinkedHashMap<>();
+
+    /**
      * Initialize the {@link PluginState} state holder in the {@link ManipulationSession}. This state holder detects
      * version-change configuration from the Maven user properties (-D properties from the CLI) and makes it available for
-     * later invocations of {@link Manipulator#scan(List, ManipulationSession)} and the apply* methods.
+     * later invocations of {@link Manipulator#scan(List)} and the apply* methods.
      */
     @Override
     public void init( final ManipulationSession session )
     {
-        final Properties userProps = session.getUserProperties();
-        session.setState( new PluginState( userProps ) );
+        this.session = session;
+        session.setState( new PluginState( session.getUserProperties() ) );
     }
 
     /**
      * No prescanning required for BOM manipulation.
      */
     @Override
-    public void scan( final List<Project> projects, final ManipulationSession session )
+    public void scan( final List<Project> projects )
         throws ManipulationException
     {
     }
@@ -117,7 +123,7 @@ public class PluginManipulator
      * Apply the alignment changes to the list of {@link Project}'s given.
      */
     @Override
-    public Set<Project> applyChanges( final List<Project> projects, final ManipulationSession session )
+    public Set<Project> applyChanges( final List<Project> projects )
         throws ManipulationException
     {
         final PluginState state = session.getState( PluginState.class );
@@ -130,8 +136,8 @@ public class PluginManipulator
 
         final Set<Project> changed = new HashSet<>();
 
-        final Map<ProjectRef, Plugin> mgmtOverrides = loadRemoteBOM( PluginType.RemotePM, state, session );
-        final Map<ProjectRef, Plugin> pluginOverrides = loadRemoteBOM( PluginType.RemoteP, state, session );
+        final Map<ProjectRef, Plugin> mgmtOverrides = loadRemoteBOM( PluginType.RemotePM, state );
+        final Map<ProjectRef, Plugin> pluginOverrides = loadRemoteBOM( PluginType.RemoteP, state );
 
         for ( final Project project : projects )
         {
@@ -139,13 +145,13 @@ public class PluginManipulator
 
             if (!mgmtOverrides.isEmpty())
             {
-                apply( session, project, model, PluginType.RemotePM, mgmtOverrides );
+                apply( project, model, PluginType.RemotePM, mgmtOverrides );
 
                 changed.add( project );
             }
             if (!pluginOverrides.isEmpty())
             {
-                apply( session, project, model, PluginType.RemoteP, pluginOverrides );
+                apply( project, model, PluginType.RemoteP, pluginOverrides );
 
                 changed.add( project );
             }
@@ -154,24 +160,28 @@ public class PluginManipulator
         if (!changed.isEmpty())
         {
             logger.info( "Iterating for standard overrides..." );
-            for ( final String key : state.getVersionPropertyOverrides().keySet() )
+            for ( Project project : versionPropertyUpdateMap.keySet() )
             {
-                // Ignore strict alignment for plugins ; if we're attempting to use a differing plugin
-                // its unlikely to be an exact match.
-                PropertiesUtils.PropertyUpdate found = PropertiesUtils.updateProperties( session, changed, true, key, state.getVersionPropertyOverride( key ) );
-
-                if ( found == PropertiesUtils.PropertyUpdate.NOTFOUND )
+                for ( final Map.Entry<String, String> entry : versionPropertyUpdateMap.get( project ).entrySet() )
                 {
-                    // Problem in this scenario is that we know we have a property update map but we have not found a
-                    // property to update. Its possible this property has been inherited from a parent. Override in the
-                    // top pom for safety.
-                    logger.info( "Unable to find a property for {} to update", key );
-                    for ( final Project p : changed )
+                    // Ignore strict alignment for plugins ; if we're attempting to use a differing plugin
+                    // its unlikely to be an exact match.
+                    PropertiesUtils.PropertyUpdate found =
+                                    PropertiesUtils.updateProperties( session, project, true, entry.getKey(), entry.getValue() );
+
+                    if ( found == PropertiesUtils.PropertyUpdate.NOTFOUND )
                     {
-                        if ( p.isInheritanceRoot() )
+                        // Problem in this scenario is that we know we have a property update map but we have not found a
+                        // property to update. Its possible this property has been inherited from a parent. Override in the
+                        // top pom for safety.
+                        logger.info( "Unable to find a property for {} to update", entry.getKey() );
+                        for ( final Project p : changed )
                         {
-                            logger.info( "Adding property {} with {} ", key, state.getVersionPropertyOverride( key ) );
-                            p.getModel().getProperties().setProperty( key, state.getVersionPropertyOverride( key ) );
+                            if ( p.isInheritanceRoot() )
+                            {
+                                logger.info( "Adding property {} with {} ", entry.getKey(), entry.getValue() );
+                                p.getModel().getProperties().setProperty( entry.getKey(), entry.getValue() );
+                            }
                         }
                     }
                 }
@@ -181,7 +191,7 @@ public class PluginManipulator
     }
 
 
-    private Map<ProjectRef, Plugin> loadRemoteBOM( PluginType type, final State state, final ManipulationSession session )
+    private Map<ProjectRef, Plugin> loadRemoteBOM( PluginType type, final State state )
         throws ManipulationException
     {
         final Map<ProjectRef, Plugin> overrides = new LinkedHashMap<>();
@@ -214,8 +224,7 @@ public class PluginManipulator
         return overrides;
     }
 
-    private void apply( final ManipulationSession session, final Project project, final Model model,
-                        PluginType type, final Map<ProjectRef, Plugin> override )
+    private void apply( final Project project, final Model model, PluginType type, final Map<ProjectRef, Plugin> override )
         throws ManipulationException
     {
         logger.info( "Applying plugin changes for {} to: {} ", type, ga( project ) );
@@ -244,7 +253,7 @@ public class PluginManipulator
             }
 
             // Override plugin management versions
-            applyOverrides( session, type, PluginType.LocalPM, pluginManagement.getPlugins(), override );
+            applyOverrides( project, type, PluginType.LocalPM, pluginManagement.getPlugins(), override );
         }
 
         if ( model.getBuild() != null )
@@ -255,24 +264,22 @@ public class PluginManipulator
 
             // We can't wipe out the versions as we can't guarantee that the plugins are listed
             // in the top level pluginManagement block.
-            applyOverrides( session, type, PluginType.LocalP, projectPlugins, override );
+            applyOverrides( project, type, PluginType.LocalP, projectPlugins, override );
         }
     }
 
     /**
      * Set the versions of any plugins which match the contents of the list of plugin overrides
      *
-     *
-     *
-     * @param session the ManipulationSession
+     * @param project the current project
      * @param remotePluginType The type of the remote plugin (mgmt or plugins)
      * @param localPluginType The type of local block (mgmt or plugins).
      * @param plugins The list of plugins to modify
      * @param pluginVersionOverrides The list of version overrides to apply to the plugins
      * @throws ManipulationException if an error occurs.
      */
-    private void applyOverrides( ManipulationSession session, PluginType remotePluginType, final PluginType localPluginType,
-                                 final List<Plugin> plugins, final Map<ProjectRef, Plugin> pluginVersionOverrides ) throws ManipulationException
+    private void applyOverrides( Project project, PluginType remotePluginType, final PluginType localPluginType, final List<Plugin> plugins,
+                                 final Map<ProjectRef, Plugin> pluginVersionOverrides ) throws ManipulationException
     {
         if ( plugins == null)
         {
@@ -280,7 +287,6 @@ public class PluginManipulator
         }
 
         final PluginState pluginState = session.getState( PluginState.class );
-        final DependencyState dependencyState = session.getState( DependencyState.class );
         final CommonState commonState = session.getState( CommonState.class );
 
         for ( final Plugin override : pluginVersionOverrides.values())
@@ -379,7 +385,7 @@ public class PluginManipulator
                 // one in build/plugins section.
                 if ( override.getVersion() != null && !override.getVersion().isEmpty())
                 {
-                    if ( ! PropertiesUtils.cacheProperty( commonState, pluginState.getVersionPropertyOverrides(), oldVersion, override.getVersion(), plugin, false ))
+                    if ( ! PropertiesUtils.cacheProperty( project, commonState, versionPropertyUpdateMap, oldVersion, override.getVersion(), plugin, false ))
                     {
                         if ( oldVersion != null && oldVersion.equals( "${project.version}" ) )
                         {

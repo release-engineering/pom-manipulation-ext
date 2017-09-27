@@ -41,7 +41,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static org.codehaus.plexus.util.StringUtils.isEmpty;
 import static org.commonjava.maven.ext.manip.util.IdUtils.ga;
 
 /**
@@ -67,15 +66,18 @@ public class BOMBuilderManipulator
     @Requirement
     private PomIO pomIO;
 
+    private ManipulationSession session;
+
     @Override
     public void init( final ManipulationSession session )
         throws ManipulationException
     {
+        this.session = session;
         session.setState( new BOMInjectingState( session.getUserProperties() ) );
     }
 
     @Override
-    public void scan( final List<Project> projects, final ManipulationSession session )
+    public void scan( final List<Project> projects )
         throws ManipulationException
     {
     }
@@ -85,7 +87,7 @@ public class BOMBuilderManipulator
      * handle the manipulation of the bom injection.
      */
     @Override
-    public Set<Project> applyChanges( final List<Project> projects, final ManipulationSession session )
+    public Set<Project> applyChanges( final List<Project> projects )
         throws ManipulationException
     {
         final BOMInjectingState state = session.getState( BOMInjectingState.class );
@@ -195,19 +197,9 @@ public class BOMBuilderManipulator
             Dependency d = new Dependency();
             d.setGroupId( p.getGroupId() );
             d.setArtifactId( p.getArtifactId() );
-            if ( ! isEmpty ( p.getModel().getVersion() ) )
-            {
-                d.setVersion( p.getModel().getVersion() );
-            }
-            else if ( ! isEmpty ( p.getModel().getParent().getVersion() ) )
-            {
-                d.setVersion( p.getModel().getParent().getVersion() );
-            }
-            else
-            {
-                d.setVersion( p.getVersion() );
-            }
+            d.setVersion( p.getVersion() );
             d.setType( p.getModel().getPackaging() );
+
             results.add( d );
         }
         return results;

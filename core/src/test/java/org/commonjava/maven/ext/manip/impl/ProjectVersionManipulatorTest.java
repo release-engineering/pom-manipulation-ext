@@ -42,7 +42,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static org.commonjava.maven.ext.manip.util.IdUtils.gav;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
@@ -623,7 +622,7 @@ public class ProjectVersionManipulatorTest
 
         private final Logger logger = LoggerFactory.getLogger( getClass() );
 
-        private final ManipulationSession session;
+        private ManipulationSession session;
 
         TestVersioningModifier( final ManipulationSession session )
             throws ManipulationException
@@ -631,6 +630,7 @@ public class ProjectVersionManipulatorTest
             super( new VersionCalculator( new GalleyAPIWrapper( new GalleyInfrastructure( session.getTargetDir(), session.getRemoteRepositories(),
                                                                                           session.getLocalRepository(), session.getSettings(), session.getActiveProfiles() ) ) ) );
             this.session = session;
+            init (session);
         }
 
         Set<MavenProject> applyVersioningChanges( final Collection<MavenProject> projects,
@@ -643,14 +643,14 @@ public class ProjectVersionManipulatorTest
             final Set<MavenProject> changed = new HashSet<>();
             for ( final MavenProject project : projects )
             {
-                if ( applyVersioningChanges( session, null, new Project ( project.getOriginalModel()), state ) )
+                if ( applyVersioningChanges( new Project ( project.getOriginalModel()), state ) )
                 {
                     final String v = _versionsByGAV.get( SimpleProjectVersionRef.parse( gav( project ) ) );
                     logger.info( project.getName() + " (" + gav( project ) + "): VERSION MODIFIED\n    New version: "
                         + v );
 
                     // this is a bigger model, so only do this if the originalModel was modded.
-                    applyVersioningChanges( session, null, new Project ( project.getModel()), state );
+                    applyVersioningChanges( new Project ( project.getModel()), state );
                     changed.add( project );
 
                     if ( v != null )
@@ -666,4 +666,10 @@ public class ProjectVersionManipulatorTest
 
     }
 
+    // Was in IdUtils but only used here. Use of MavenProject doesn't track Parent group/version
+    // but not important for this test
+    private static String gav( final MavenProject project )
+    {
+        return String.format( "%s:%s:%s", project.getGroupId(), project.getArtifactId(), project.getVersion() );
+    }
 }

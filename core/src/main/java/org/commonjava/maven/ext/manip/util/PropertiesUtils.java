@@ -16,6 +16,7 @@
 package org.commonjava.maven.ext.manip.util;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.maven.model.Profile;
 import org.commonjava.maven.ext.manip.ManipulationException;
 import org.commonjava.maven.ext.manip.ManipulationSession;
 import org.commonjava.maven.ext.manip.impl.Version;
@@ -26,13 +27,10 @@ import org.commonjava.maven.ext.manip.state.VersioningState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.Set;
 
 /**
  * Commonly used manipulations / extractions from project / user (CLI) properties.
@@ -80,20 +78,18 @@ public final class PropertiesUtils
      * Recursively update properties.
      *
      * @param session the DependencyState
-     * @param projects the current set of projects we are scanning.
+     * @param project the current set of projects we are scanning.
      * @param ignoreStrict whether to ignore strict alignment.
      * @param key a key to look for.
      * @param newValue a value to look for.
      * @return {@code PropertyUpdate} enumeration showing status of any changes.
      * @throws ManipulationException if an error occurs
      */
-    public static PropertyUpdate updateProperties( ManipulationSession session, Set<Project> projects, boolean ignoreStrict,
+    public static PropertyUpdate updateProperties( ManipulationSession session, Project project, boolean ignoreStrict,
                                                    String key, String newValue ) throws ManipulationException
     {
-        final DependencyState state = session.getState( DependencyState.class );
-        PropertyUpdate found = PropertyUpdate.NOTFOUND;
+        final String resolvedValue = PropertyResolver.resolveProperties( session, project.getInheritedList(), "${" + key + '}' );
 
-        final String resolvedValue = resolveProperties( new ArrayList<>( projects ), "${" + key + '}' );
         logger.debug( "Fully resolvedValue is {} for {} ", resolvedValue, key );
 
         if ( "project.version".equals( key ) )
@@ -102,91 +98,115 @@ public final class PropertiesUtils
             return PropertyUpdate.IGNORE;
         }
 
-        for ( final Project p : projects )
+        for ( final Project p : project.getReverseInheritedList() )
         {
             if ( p.getModel().getProperties().containsKey( key ) )
             {
-                final String oldValue = p.getModel().getProperties().getProperty( key );
+                logger.trace( "Searching properties of {} ", p );
+                return internalUpdateProperty( session, p, ignoreStrict, key, newValue, resolvedValue, p.getModel().getProperties() );
+            }
+            else
+            {
+                for ( Profile pr : ProfileUtils.getProfiles( session, p.getModel() ) )
+                {
+                    logger.trace( "Searching properties of profile {} within project {} ", pr.getId(), p );
+                    // Lets check the profiles for property updates...
+                    if ( pr.getProperties().containsKey( key ) )
+                    {
+                        return internalUpdateProperty( session, p, ignoreStrict, key, newValue, resolvedValue, pr.getProperties() );
+                    }
+                }
+            }
+        }
 
-                logger.info( "Updating property {} / {} with {} ", key, oldValue, newValue );
+        return PropertyUpdate.NOTFOUND;
+    }
 
-                found = PropertyUpdate.FOUND;
 
-                // We'll only recursively resolve the property if its a single >${foo}<. If its one of
+    private static PropertyUpdate internalUpdateProperty( ManipulationSession session, Project p, boolean ignoreStrict,
+                                                          String key, String newValue, String resolvedValue,
+                                                          Properties props )
+                    throws ManipulationException
+    {
+        final DependencyState state = session.getState( DependencyState.class );
+        final String oldValue = props.getProperty( key );
+
+        logger.info( "Updating property {} / {} with {} ", key, oldValue, newValue );
+
+        PropertyUpdate found = PropertyUpdate.FOUND;
+
+        // We'll only recursively resolve the property if its a single >${foo}<. If its one of
+        // >${foo}value${foo}<
+        // >${foo}${foo}<
+        // >value${foo}<
+        // >${foo}value<
+        // it becomes hairy to verify strict compliance and to correctly split the old value and
+        // update it with a portion of the new value.
+        if ( oldValue != null && oldValue.startsWith( "${" ) && oldValue.endsWith( "}" ) &&
+                        !( StringUtils.countMatches( oldValue, "${" ) > 1 ) )
+        {
+            logger.debug( "Recursively resolving {} ", oldValue.substring( 2, oldValue.length() - 1 ) );
+
+            if ( updateProperties( session, p, ignoreStrict,
+                                   oldValue.substring( 2, oldValue.length() - 1 ), newValue ) == PropertyUpdate.NOTFOUND )
+            {
+                logger.error( "Recursive property not found for {} with {} ", oldValue, newValue );
+                return PropertyUpdate.NOTFOUND;
+            }
+        }
+        else
+        {
+            if ( state.getStrict() && !ignoreStrict )
+            {
+                if ( !checkStrictValue( session, resolvedValue, newValue ) )
+                {
+                    if ( state.getFailOnStrictViolation() )
+                    {
+                        throw new ManipulationException(
+                                        "Replacing original property version {} (fully resolved: {} ) with new version {} for {} violates the strict version-alignment rule!",
+                                        oldValue, resolvedValue, newValue, key );
+                    }
+                    else
+                    {
+                        logger.warn( "Replacing original property version {} with new version {} for {} violates the strict version-alignment rule!",
+                                     oldValue, newValue, key );
+                        // Ignore the dependency override. As found has been set to true it won't inject
+                        // a new property either.
+                        return found;
+                    }
+                }
+            }
+
+            // TODO: Does not handle explicit overrides.
+            if ( oldValue != null && oldValue.contains( "${" ) &&
+                            !( oldValue.startsWith( "${" ) && oldValue.endsWith( "}" ) ) || (
+                            StringUtils.countMatches( oldValue, "${" ) > 1 ) )
+            {
+                // This block handles
                 // >${foo}value${foo}<
                 // >${foo}${foo}<
                 // >value${foo}<
                 // >${foo}value<
-                // it becomes hairy to verify strict compliance and to correctly split the old value and
-                // update it with a portion of the new value.
-                if ( oldValue != null && oldValue.startsWith( "${" ) && oldValue.endsWith( "}" ) &&
-                                !( StringUtils.countMatches( oldValue, "${" ) > 1 ) )
+                // We don't attempt to recursively resolve those as tracking the split of the variables, combined
+                // with the update and strict version checking becomes overly fragile.
+
+                if ( ignoreStrict )
                 {
-                    logger.debug( "Recursively resolving {} ", oldValue.substring( 2, oldValue.length() - 1 ) );
-
-                    if ( updateProperties( session, projects, ignoreStrict,
-                                            oldValue.substring( 2, oldValue.length() - 1 ), newValue ) == PropertyUpdate.NOTFOUND )
-                    {
-                        logger.error( "Recursive property not found for {} with {} ", oldValue, newValue );
-                        return PropertyUpdate.NOTFOUND;
-                    }
+                    throw new ManipulationException(
+                                    "NYI : handling for versions with explicit overrides (" + oldValue + ") with multiple embedded properties is NYI. " );
                 }
-                else
+                if ( resolvedValue.equals( newValue ))
                 {
-                    if ( state.getStrict() && !ignoreStrict )
-                    {
-                        if ( !checkStrictValue( session, resolvedValue, newValue ) )
-                        {
-                            if ( state.getFailOnStrictViolation() )
-                            {
-                                throw new ManipulationException(
-                                                "Replacing original property version {} (fully resolved: {} ) with new version {} for {} violates the strict version-alignment rule!",
-                                                oldValue, resolvedValue, newValue, key );
-                            }
-                            else
-                            {
-                                logger.warn( "Replacing original property version {} with new version {} for {} violates the strict version-alignment rule!",
-                                             oldValue, newValue, key );
-                                // Ignore the dependency override. As found has been set to true it won't inject
-                                // a new property either.
-                                continue;
-                            }
-                        }
-                    }
-
-                    // TODO: Does not handle explicit overrides.
-                    if ( oldValue != null && oldValue.contains( "${" ) &&
-                                    !( oldValue.startsWith( "${" ) && oldValue.endsWith( "}" ) ) || (
-                                    StringUtils.countMatches( oldValue, "${" ) > 1 ) )
-                    {
-                        // This block handles
-                        // >${foo}value${foo}<
-                        // >${foo}${foo}<
-                        // >value${foo}<
-                        // >${foo}value<
-                        // We don't attempt to recursively resolve those as tracking the split of the variables, combined
-                        // with the update and strict version checking becomes overly fragile.
-
-                        if ( ignoreStrict )
-                        {
-                            throw new ManipulationException(
-                                            "NYI : handling for versions with explicit overrides (" + oldValue + ") with multiple embedded properties is NYI. " );
-                        }
-                        if ( resolvedValue.equals( newValue ))
-                        {
-                            logger.warn( "Nothing to update as original key {} value matches new value {} ", key,
-                                         newValue );
-                            found = PropertyUpdate.IGNORE;
-                            continue;
-                        }
-                        newValue = oldValue + StringUtils.removeStart( newValue, resolvedValue );
-                        logger.info( "Ignoring new value due to embedded property {} and appending {} ", oldValue,
-                                     newValue );
-                    }
-
-                    p.getModel().getProperties().setProperty( key, newValue );
+                    logger.warn( "Nothing to update as original key {} value matches new value {} ", key,
+                                 newValue );
+                    found = PropertyUpdate.IGNORE;
                 }
+                newValue = oldValue + StringUtils.removeStart( newValue, resolvedValue );
+                logger.info( "Ignoring new value due to embedded property {} and appending {} ", oldValue,
+                             newValue );
             }
+
+            props.setProperty( key, newValue );
         }
         return found;
     }
@@ -305,6 +325,8 @@ public final class PropertiesUtils
      * This will check if the old version (e.g. in a plugin or dependency) is a property and if so
      * store the mapping in a map.
      *
+     *
+     * @param project the current project the needs to cache the value.
      * @param state CommonState to retrieve property clash value QoS.
      * @param versionPropertyUpdateMap the map to store any updates in
      * @param oldVersion original property value
@@ -314,11 +336,17 @@ public final class PropertiesUtils
      * @return true if a property was found and cached.
      * @throws ManipulationException if an error occurs.
      */
-    public static boolean cacheProperty( CommonState state, Map<String, String> versionPropertyUpdateMap, String oldVersion,
+    public static boolean cacheProperty( Project project, CommonState state, Map<Project, Map<String, String>> versionPropertyUpdateMap, String oldVersion,
                                          String newVersion, Object originalType, boolean force )
                     throws ManipulationException
     {
         boolean result = false;
+        Map<String,String> projectProps = versionPropertyUpdateMap.get( project );
+        if ( projectProps == null )
+        {
+            versionPropertyUpdateMap.put ( project, ( projectProps = new HashMap<>( ) ) );
+        }
+
         if ( oldVersion != null && oldVersion.contains( "${" ) )
         {
             final int endIndex = oldVersion.indexOf( '}' );
@@ -339,15 +367,15 @@ public final class PropertiesUtils
             }
             else
             {
-                logger.debug( "For {} ; original version was a property mapping; caching new value for update {} -> {}",
-                              originalType, oldProperty, newVersion );
+                logger.debug( "For {} ; original version was a property mapping; caching new value for update {} -> {} for project {} ",
+                              originalType, oldProperty, newVersion, project );
 
                 final String oldVersionProp = oldVersion.substring( 2, oldVersion.length() - 1 );
 
                 // We check if we are replacing a property and there is already a mapping. While we don't allow
                 // a property to be updated to two different versions, if a dependencyExclusion (i.e. a force override)
                 // has been specified this will bypass the check.
-                String existingPropertyMapping = versionPropertyUpdateMap.get( oldVersionProp );
+                String existingPropertyMapping = projectProps.get( oldVersionProp );
 
                 if ( existingPropertyMapping != null && !existingPropertyMapping.equals( newVersion ) )
                 {
@@ -368,54 +396,18 @@ public final class PropertiesUtils
                         }
                         else
                         {
-                            logger.warn ("Replacing property '{}' with a new version would clash with existing version does not match. Old value is {} and new is {}. Purging update of existing property.",
+                            logger.warn ("Replacing property '{}' with a new version would clash with existing version which does not match. Old value is {} and new is {}. Purging update of existing property.",
                                           oldVersionProp, existingPropertyMapping, newVersion );
-                            versionPropertyUpdateMap.remove( oldVersionProp );
+                            projectProps.remove( oldVersionProp );
                             return false;
                         }
                     }
                 }
-                versionPropertyUpdateMap.put( oldVersionProp, newVersion );
+                projectProps.put( oldVersionProp, newVersion );
                 result = true;
             }
         }
         return result;
-    }
-
-    /**
-     * This recursively checks the supplied version and recursively resolves it if its a property.
-     *
-     * @param projects set of projects
-     * @param value value to check
-     * @return the version string
-     * @throws ManipulationException if an error occurs
-     */
-    public static String resolveProperties( List<Project> projects, String value ) throws ManipulationException
-    {
-        final Properties amalgamated = new Properties();
-        Project executionRoot = null;
-
-        // Save execution root so it can potentially overwrite.
-        for ( Project p : projects )
-        {
-            if ( p.isExecutionRoot() )
-            {
-                executionRoot = p;
-            }
-            else
-            {
-                amalgamated.putAll( p.getModel().getProperties() );
-            }
-        }
-        // In theory executionRoot should never be null but some artificially constructed unit tests don't define
-        // it so lets avoid a null ptr.
-        if ( executionRoot != null)
-        {
-            amalgamated.putAll( executionRoot.getModel().getProperties() );
-        }
-
-        PropertyInterpolator pi = new PropertyInterpolator( amalgamated, projects.get( 0 ) );
-        return pi.interp( value );
     }
 
     public static String handleDeprecatedProperty (Properties userProps, PropertyFlag flag)

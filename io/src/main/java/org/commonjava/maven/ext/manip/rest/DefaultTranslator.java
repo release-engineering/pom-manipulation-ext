@@ -21,7 +21,7 @@ import com.mashape.unirest.http.exceptions.UnirestException;
 import org.apache.commons.codec.binary.Base32;
 import org.commonjava.maven.atlas.ident.ref.ProjectRef;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
-import org.commonjava.maven.ext.manip.ListUtils;
+import org.commonjava.maven.ext.manip.util.ListUtils;
 import org.commonjava.maven.ext.manip.rest.exception.RestException;
 import org.commonjava.maven.ext.manip.rest.mapper.ListingBlacklistMapper;
 import org.commonjava.maven.ext.manip.rest.mapper.ReportGAVMapper;

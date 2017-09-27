@@ -33,7 +33,6 @@ import org.commonjava.maven.ext.manip.model.GAV;
 import org.commonjava.maven.ext.manip.model.Project;
 import org.commonjava.maven.ext.manip.resolver.ExtensionInfrastructure;
 import org.commonjava.maven.ext.manip.state.CommonState;
-import org.commonjava.maven.ext.manip.state.DependencyState;
 import org.commonjava.maven.ext.manip.state.State;
 import org.commonjava.maven.ext.manip.state.VersioningState;
 import org.commonjava.maven.ext.manip.util.ManipulatorPriorityComparator;
@@ -49,7 +48,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Set;
 
 /**
@@ -207,7 +205,7 @@ public class ManipulationManager
         session.setProjects( projects );
         for ( final Manipulator manipulator : orderedManipulators )
         {
-            manipulator.scan( projects, session );
+            manipulator.scan( projects );
         }
     }
 
@@ -230,7 +228,7 @@ public class ManipulationManager
         final Set<Project> changed = new HashSet<>();
         for ( final Manipulator manipulator : orderedManipulators )
         {
-            final Set<Project> mChanged = manipulator.applyChanges( projects, session );
+            final Set<Project> mChanged = manipulator.applyChanges( projects );
 
             if ( mChanged != null )
             {

@@ -29,7 +29,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Properties;
 import java.util.Set;
 
 import static org.commonjava.maven.ext.manip.util.IdUtils.ga;
@@ -44,11 +43,13 @@ public class ProfileRemovalManipulator
 {
     private final Logger logger = LoggerFactory.getLogger( getClass() );
 
+    private ManipulationSession session;
+
     /**
      * No prescanning required for Profile removal.
      */
     @Override
-    public void scan( final List<Project> projects, final ManipulationSession session )
+    public void scan( final List<Project> projects )
         throws ManipulationException
     {
     }
@@ -56,20 +57,20 @@ public class ProfileRemovalManipulator
     /**
      * Initialize the {@link ProfileRemovalState} state holder in the {@link ManipulationSession}. This state holder detects
      * version-change configuration from the Maven user properties (-D properties from the CLI) and makes it available for
-     * later invocations of {@link ProfileRemovalManipulator#scan(List, ManipulationSession)} and the apply* methods.
+     * later invocations of {@link Manipulator#scan(List)} and the apply* methods.
      */
     @Override
     public void init( final ManipulationSession session )
     {
-        final Properties userProps = session.getUserProperties();
-        session.setState( new ProfileRemovalState( userProps ) );
+        this.session = session;
+        session.setState( new ProfileRemovalState( session.getUserProperties() ) );
     }
 
     /**
      * Apply the profile removal changes to all pom files.
      */
     @Override
-    public Set<Project> applyChanges( final List<Project> projects, final ManipulationSession session )
+    public Set<Project> applyChanges( final List<Project> projects )
         throws ManipulationException
     {
         final ProfileRemovalState state = session.getState( ProfileRemovalState.class );

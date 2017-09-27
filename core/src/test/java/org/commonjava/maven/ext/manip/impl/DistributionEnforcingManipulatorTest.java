@@ -287,7 +287,7 @@ public class DistributionEnforcingManipulatorTest
         final List<Project> projects = new ArrayList<>();
         projects.add( project );
 
-        final Set<Project> changed = manipulator.applyChanges( projects, session );
+        final Set<Project> changed = manipulator.applyChanges( projects );
 
         if ( expectChanged != null )
         {
@@ -313,7 +313,7 @@ public class DistributionEnforcingManipulatorTest
             manipulatedModels.put( ga( model ), model );
         }
 
-        final Set<Project> changed = manipulator.applyChanges( projects, session );
+        final Set<Project> changed = manipulator.applyChanges( projects );
 
         if ( expectChanged != null && !expectChanged.isEmpty() )
         {

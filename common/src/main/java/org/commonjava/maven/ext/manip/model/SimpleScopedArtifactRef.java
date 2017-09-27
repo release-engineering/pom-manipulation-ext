@@ -44,6 +44,6 @@ public class SimpleScopedArtifactRef extends SimpleArtifactRef
 
     public String getScope()
     {
-        return scope.realName();
+        return ( scope == null ? "" : scope.realName() );
     }
 }

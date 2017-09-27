@@ -71,15 +71,18 @@ public class PluginInjectingManipulator
 
     private final Logger logger = LoggerFactory.getLogger( getClass() );
 
+    private ManipulationSession session;
+
     @Override
     public void init( final ManipulationSession session )
         throws ManipulationException
     {
+        this.session = session;
         session.setState( new PluginInjectingState( session.getUserProperties() ) );
     }
 
     @Override
-    public void scan( final List<Project> projects, final ManipulationSession session )
+    public void scan( final List<Project> projects )
         throws ManipulationException
     {
     }
@@ -90,7 +93,7 @@ public class PluginInjectingManipulator
      * sources if this plugin has not already been declared in the base build section.
      */
     @Override
-    public Set<Project> applyChanges( final List<Project> projects, final ManipulationSession session )
+    public Set<Project> applyChanges( final List<Project> projects )
         throws ManipulationException
     {
         final PluginInjectingState state = session.getState( PluginInjectingState.class );

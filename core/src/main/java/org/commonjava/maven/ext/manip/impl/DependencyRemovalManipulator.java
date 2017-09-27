@@ -16,10 +16,12 @@
 package org.commonjava.maven.ext.manip.impl;
 
 import org.apache.maven.model.Dependency;
+import org.apache.maven.model.DependencyManagement;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Profile;
 import org.codehaus.plexus.component.annotations.Component;
 import org.commonjava.maven.atlas.ident.ref.ProjectRef;
+import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleProjectRef;
 import org.commonjava.maven.ext.manip.ManipulationException;
 import org.commonjava.maven.ext.manip.ManipulationSession;
@@ -32,10 +34,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Properties;
 import java.util.Set;
 
 import static org.commonjava.maven.ext.manip.util.IdUtils.ga;
@@ -50,23 +52,25 @@ public class DependencyRemovalManipulator
 {
     private final Logger logger = LoggerFactory.getLogger( getClass() );
 
+    private ManipulationSession session;
+
     /**
      * Initialize the {@link DependencyState} state holder in the {@link ManipulationSession}. This state holder detects
      * version-change configuration from the Maven user properties (-D properties from the CLI) and makes it available for
-     * later invocations of {@link Manipulator#scan(List, ManipulationSession)} and the apply* methods.
+     * later invocations of {@link Manipulator#scan(List)} and the apply* methods.
      */
     @Override
     public void init( final ManipulationSession session )
     {
-        final Properties userProps = session.getUserProperties();
-        session.setState( new DependencyRemovalState( userProps ) );
+        session.setState( new DependencyRemovalState( session.getUserProperties() ) );
+        this.session = session;
     }
 
     /**
      * No prescanning required for BOM manipulation.
      */
     @Override
-    public void scan( final List<Project> projects, final ManipulationSession session )
+    public void scan( final List<Project> projects )
             throws ManipulationException
     {
     }
@@ -75,7 +79,7 @@ public class DependencyRemovalManipulator
      * Apply the alignment changes to the list of {@link Project}'s given.
      */
     @Override
-    public Set<Project> applyChanges( final List<Project> projects, final ManipulationSession session )
+    public Set<Project> applyChanges( final List<Project> projects )
             throws ManipulationException
     {
         final State state = session.getState( DependencyRemovalState.class );
@@ -92,7 +96,7 @@ public class DependencyRemovalManipulator
         {
             final Model model = project.getModel();
 
-            if ( apply( session, project, model ) )
+            if ( apply( project, model ) )
             {
                 changed.add( project );
             }
@@ -101,49 +105,58 @@ public class DependencyRemovalManipulator
         return changed;
     }
 
-    private boolean apply( final ManipulationSession session, final Project project, final Model model ) {
+    private boolean apply( final Project project, final Model model ) throws ManipulationException
+    {
         final DependencyRemovalState state = session.getState(DependencyRemovalState.class);
 
         logger.info("Applying Dependency changes to: " + ga(project));
 
-        boolean result = false;
         List<ProjectRef> dependenciesToRemove = state.getDependencyRemoval();
-        result = scanDependencies(dependenciesToRemove, model.getDependencies());
+        boolean result = scanDependencies( project.getResolvedDependencies( session ), dependenciesToRemove, model.getDependencies());
 
         if ( model.getDependencyManagement() != null &&
-             scanDependencies(dependenciesToRemove, model.getDependencyManagement().getDependencies()))
+             scanDependencies(project.getResolvedManagedDependencies( session ), dependenciesToRemove, model.getDependencyManagement().getDependencies()))
         {
             result = true;
         }
 
-        for ( final Profile profile : ProfileUtils.getProfiles( session, model) )
+        final HashMap<Profile, HashMap<ProjectVersionRef, Dependency>> pd = project.getResolvedProfileDependencies( session );
+        final HashMap<Profile, HashMap<ProjectVersionRef, Dependency>> pmd = project.getResolvedProfileManagedDependencies( session );
+        for ( Profile profile : pd.keySet())
         {
-            if ( scanDependencies( dependenciesToRemove, profile.getDependencies() ) )
+            int index = model.getProfiles().indexOf( profile );
+            if ( scanDependencies( pd.get( profile ), dependenciesToRemove, model.getProfiles().get( index ).getDependencies() ) )
             {
                 result = true;
             }
-            if ( profile.getDependencyManagement() != null &&
-                    scanDependencies( dependenciesToRemove, profile.getDependencyManagement().getDependencies() ) )
+        }
+        for ( Profile profile : pmd.keySet())
+        {
+            int index = model.getProfiles().indexOf( profile );
+            DependencyManagement dm = model.getProfiles().get( index ).getDependencyManagement();
+            if ( dm != null )
             {
-                result = true;
+                if ( scanDependencies( pmd.get( profile ), dependenciesToRemove, dm.getDependencies() ) )
+                {
+                    result = true;
+                }
             }
         }
         return result;
     }
 
-    private boolean scanDependencies( List<ProjectRef> dependenciesToRemove, List<Dependency> dependencies )
+    private boolean scanDependencies( HashMap<ProjectVersionRef, Dependency> resolvedDependencies,
+                                      List<ProjectRef> dependenciesToRemove, List<Dependency> dependencies )
     {
         boolean result = false;
         if ( dependencies != null )
         {
-            Iterator<Dependency> it = dependencies.iterator();
-            while ( it.hasNext() )
+            for ( ProjectVersionRef pvr : resolvedDependencies.keySet() )
             {
-                Dependency d = it.next();
-                if ( dependenciesToRemove.contains( SimpleProjectRef.parse( (d.getGroupId() + ":" + d.getArtifactId()) ) ) )
+                if ( dependenciesToRemove.contains( pvr.asProjectRef() ) )
                 {
-                    logger.debug( "Removing {} ", d.toString() );
-                    it.remove();
+                    logger.debug( "Removing {} ", resolvedDependencies.get( pvr ) );
+                    dependencies.remove( resolvedDependencies.get( pvr ) );
                     result = true;
                 }
             }

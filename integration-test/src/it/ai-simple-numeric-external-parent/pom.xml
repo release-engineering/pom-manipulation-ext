@@ -22,7 +22,7 @@
   <parent>
       <groupId>org.commonjava.maven.ext</groupId>
       <artifactId>simpleParent</artifactId>
-      <version>1.0.redhat-0</version>
+      <version>1.0-redhat-1</version>
   </parent>
 
   <groupId>org.commonjava.maven.ext.versioning.test</groupId>

@@ -31,7 +31,7 @@ public class CommonState
     private static final String TRANSITIVE_OVERRIDE_PROPERTY = "overrideTransitive";
 
     /**
-     * When true, clashes with cached properties will throw an exception in PropertiesUtils. Setting this to false will prevent
+     * When true, clashes with cached properties will throw an exception in PropertyResolver. Setting this to false will prevent
      * that. Default value is true.
      * TODO: Might need to be used by pluginManipulator as well
      */

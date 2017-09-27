@@ -28,11 +28,18 @@ import org.apache.maven.model.Profile;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef;
 import org.commonjava.maven.ext.manip.ManipulationException;
+import org.commonjava.maven.ext.manip.session.MavenSessionHandler;
+import org.commonjava.maven.ext.manip.util.ProfileUtils;
+import org.commonjava.maven.ext.manip.util.PropertyResolver;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static org.apache.commons.lang.StringUtils.isNotEmpty;
 
 /**
  * Provides a convenient way of passing around related information about a Maven
@@ -69,6 +76,19 @@ public class Project
 
     private boolean incrementalPME;
 
+    /**
+     * Tracking inheritance across the project.
+     */
+    private Project projectParent;
+
+    private HashMap<ProjectVersionRef, Dependency> resolvedDependencies;
+
+    private HashMap<ProjectVersionRef, Dependency> resolvedManagedDepencies;
+
+    private HashMap<Profile, HashMap<ProjectVersionRef, Dependency>> resolvedProfileDependencies;
+
+    private HashMap<Profile, HashMap<ProjectVersionRef, Dependency>> resolvedProfileManagedDependencies;
+
     public Project( final ProjectVersionRef key, final File pom, final Model model )
     {
         this.pom = pom;
@@ -86,25 +106,6 @@ public class Project
         throws ManipulationException
     {
         this( modelKey( model ), model.getPomFile(), model );
-    }
-
-    public File getPom()
-    {
-        return pom;
-    }
-
-    /**
-     * Retrieve the model undergoing modification.
-     * @return the Model being modified.
-     */
-    public Model getModel()
-    {
-        return model;
-    }
-
-    public ProjectVersionRef getKey()
-    {
-        return key;
     }
 
     @Override
@@ -152,7 +153,26 @@ public class Project
         return key + " [pom=" + pom + "]";
     }
 
-    public Parent getParent()
+    public File getPom()
+    {
+        return pom;
+    }
+
+    /**
+     * Retrieve the model undergoing modification.
+     * @return the Model being modified.
+     */
+    public Model getModel()
+    {
+        return model;
+    }
+
+    public ProjectVersionRef getKey()
+    {
+        return key;
+    }
+
+    public Parent getModelParent()
     {
         return model.getParent();
     }
@@ -180,34 +200,6 @@ public class Project
         return key.getVersionString();
     }
 
-    public List<Plugin> getPlugins()
-    {
-        return getPlugins( model );
-    }
-
-    public List<Plugin> getPlugins( final ModelBase base )
-    {
-        final BuildBase build = getBuild( base );
-
-        if ( build == null )
-        {
-            return Collections.emptyList();
-        }
-
-        final List<Plugin> result = build.getPlugins();
-        if ( result == null )
-        {
-            return Collections.emptyList();
-        }
-
-        return result;
-    }
-
-    public Map<String, Plugin> getPluginMap()
-    {
-        return getPluginMap( model );
-    }
-
     public Map<String, Plugin> getPluginMap( final ModelBase base )
     {
         final BuildBase build;
@@ -233,59 +225,6 @@ public class Project
 
         return result;
     }
-
-    public Build getBuild()
-    {
-        return (Build) getBuild( model );
-    }
-
-    public BuildBase getBuild( final ModelBase base )
-    {
-        BuildBase build;
-        if ( base instanceof Model )
-        {
-            build = ( (Model) base ).getBuild();
-        }
-        else
-        {
-            build = ( (Profile) base ).getBuild();
-        }
-
-        return build;
-    }
-
-    public List<Plugin> getManagedPlugins( final ModelBase base )
-    {
-        BuildBase build;
-        if ( base instanceof Model )
-        {
-            build = ( (Model) base ).getBuild();
-        }
-        else
-        {
-            build = ( (Profile) base ).getBuild();
-        }
-
-        if ( build == null )
-        {
-            return Collections.emptyList();
-        }
-
-        final PluginManagement pm = build.getPluginManagement();
-        if ( pm == null )
-        {
-            return Collections.emptyList();
-        }
-
-        final List<Plugin> result = pm.getPlugins();
-        if ( result == null )
-        {
-            return Collections.emptyList();
-        }
-
-        return result;
-    }
-
 
     public Map<String, Plugin> getManagedPluginMap( final ModelBase base )
     {
@@ -315,37 +254,132 @@ public class Project
         return Collections.emptyMap();
     }
 
-
-    public Iterable<Dependency> getDependencies()
+    /**
+     * This method will scan the dependencies in the potentially active Profiles in this project and
+     * return a fully resolved list. Note that while updating the {@link Dependency} reference returned
+     * will be reflected in the Model as it is the same object, if you wish to remove or add items to
+     * the Model then you must use {@link #getModel()}
+     *
+     * @param session MavenSessionHandler, used by {@link PropertyResolver}
+     * @return a list of fully resolved {@link ProjectVersionRef} to the original {@link Dependency}
+     * @throws ManipulationException
+     */
+    public HashMap<Profile, HashMap<ProjectVersionRef, Dependency>> getResolvedProfileDependencies( MavenSessionHandler session) throws ManipulationException
     {
-        return getDependencies( model );
-    }
-
-    public Iterable<Dependency> getDependencies( final ModelBase base )
-    {
-        List<Dependency> deps = base.getDependencies();
-        if ( deps == null )
+        if ( resolvedProfileDependencies == null )
         {
-            deps = Collections.emptyList();
+            resolvedProfileDependencies = new HashMap<>(  );
+
+            for ( final Profile profile : ProfileUtils.getProfiles( session, model ) )
+            {
+                HashMap<ProjectVersionRef, Dependency> profileDeps = new HashMap<>();
+
+                resolveDeps( session, profile.getDependencies(), profileDeps );
+
+                resolvedProfileDependencies.put( profile, profileDeps );
+            }
         }
-
-        return deps;
+        return resolvedProfileDependencies;
     }
 
-    public Iterable<Dependency> getManagedDependencies()
+    /**
+     * This method will scan the dependencies in the dependencyManagement section of the potentially active Profiles in
+     * this project and return a fully resolved list. Note that while updating the {@link Dependency}
+     * reference returned will be reflected in the Model as it is the same object, if you wish to remove or add items
+     * to the Model then you must use {@link #getModel()}
+     *
+     * @param session MavenSessionHandler, used by {@link PropertyResolver}
+     * @return a list of fully resolved {@link ProjectVersionRef} to the original {@link Dependency} (that were within DependencyManagement)
+     * @throws ManipulationException
+     */
+    public HashMap<Profile, HashMap<ProjectVersionRef, Dependency>> getResolvedProfileManagedDependencies( MavenSessionHandler session) throws ManipulationException
     {
-        return getManagedDependencies( model );
-    }
-
-    public Iterable<Dependency> getManagedDependencies( final ModelBase base )
-    {
-        final DependencyManagement dm = base.getDependencyManagement();
-        if ( dm == null || dm.getDependencies() == null )
+        if ( resolvedProfileManagedDependencies == null )
         {
-            return Collections.emptyList();
-        }
+            resolvedProfileManagedDependencies = new HashMap<>(  );
 
-        return dm.getDependencies();
+            for ( final Profile profile : ProfileUtils.getProfiles( session, model ) )
+            {
+                HashMap<ProjectVersionRef, Dependency> profileDeps = new HashMap<>();
+
+                final DependencyManagement dm = profile.getDependencyManagement();
+                if ( ! ( dm == null || dm.getDependencies() == null ) )
+                {
+                    resolveDeps( session, dm.getDependencies(), profileDeps );
+
+                    resolvedProfileManagedDependencies.put( profile, profileDeps );
+                }
+            }
+        }
+        return resolvedProfileManagedDependencies;
+    }
+
+    /**
+     * This method will scan the dependencies in this project and return a fully resolved list. Note that
+     * while updating the {@link Dependency} reference returned will be reflected in the Model as it is the
+     * same object, if you wish to remove or add items to the Model then you must use {@link #getModel()}
+     *
+     * @param session MavenSessionHandler, used by {@link PropertyResolver}
+     * @return a list of fully resolved {@link ProjectVersionRef} to the original {@link Dependency}
+     * @throws ManipulationException
+     */
+    public HashMap<ProjectVersionRef, Dependency> getResolvedDependencies( MavenSessionHandler session) throws ManipulationException
+    {
+        if ( resolvedDependencies == null )
+        {
+            resolvedDependencies = new HashMap<>();
+
+            resolveDeps( session, getModel().getDependencies(), resolvedDependencies );
+        }
+        return resolvedDependencies;
+    }
+
+
+    /**
+     * This method will scan the dependencies in the dependencyManagement section of this project and return a
+     * fully resolved list. Note that while updating the {@link Dependency} reference returned will be reflected
+     * in the Model as it is the same object, if you wish to remove or add items to the Model then you must use {@link #getModel()}
+     *
+     * @param session MavenSessionHandler, used by {@link PropertyResolver}
+     * @return a list of fully resolved {@link ProjectVersionRef} to the original {@link Dependency} (that were within DependencyManagement)
+     * @throws ManipulationException
+     */
+    public HashMap<ProjectVersionRef, Dependency> getResolvedManagedDependencies( MavenSessionHandler session ) throws ManipulationException
+    {
+        if ( resolvedManagedDepencies == null )
+        {
+            resolvedManagedDepencies = new HashMap<>(  );
+
+            final DependencyManagement dm = getModel().getDependencyManagement();
+            if ( ! ( dm == null || dm.getDependencies() == null ) )
+            {
+                resolveDeps( session, dm.getDependencies(), resolvedManagedDepencies );
+            }
+        }
+        return resolvedManagedDepencies;
+    }
+
+
+    private void resolveDeps ( MavenSessionHandler session, List<Dependency> deps, HashMap<ProjectVersionRef, Dependency> resolvedDependencies)
+                    throws ManipulationException
+    {
+        for ( Dependency d : deps )
+        {
+            String g = PropertyResolver.resolveInheritedProperties( session, this, "${project.groupId}".equals( d.getGroupId() ) ?
+                            getGroupId() :
+                            d.getGroupId() );
+            String a = PropertyResolver.resolveInheritedProperties( session, this, "${project.artifactId}".equals( d.getArtifactId() ) ?
+                            getArtifactId() :
+                            d.getArtifactId() );
+            String v = PropertyResolver.resolveInheritedProperties( session, this, "${project.version}".equals( d.getVersion() ) ?
+                            d.getVersion() :
+                            d.getVersion() );
+
+            if ( isNotEmpty( g ) && isNotEmpty( a ) && isNotEmpty( v ) )
+            {
+                resolvedDependencies.put( new SimpleProjectVersionRef( g, a, v ), d );
+            }
+        }
     }
 
     public void setInheritanceRoot( final boolean inheritanceRoot )
@@ -361,7 +395,7 @@ public class Project
         return inheritanceRoot;
     }
 
-    private static ProjectVersionRef modelKey( final Model model )
+    public static ProjectVersionRef modelKey( final Model model )
                     throws ManipulationException
     {
         String g = model.getGroupId();
@@ -383,7 +417,6 @@ public class Project
             {
                 v = p.getVersion();
             }
-
         }
 
         final String a = model.getArtifactId();
@@ -412,5 +445,51 @@ public class Project
     public boolean isIncrementalPME( )
     {
         return incrementalPME;
+    }
+
+    public void setProjectParent( Project parent )
+    {
+        this.projectParent = parent;
+    }
+
+    public Project getProjectParent()
+    {
+        return projectParent;
+    }
+
+    /**
+     * @return inherited projects. Returned with order of root project first, down to this project.
+     */
+    public List<Project> getInheritedList()
+    {
+        final List<Project> found = new ArrayList<>(  );
+        found.add( this );
+
+        Project loop = this;
+        while ( loop.getProjectParent() != null)
+        {
+            // Place inherited first so latter down tree take precedence.
+            found.add( 0, loop.getProjectParent() );
+            loop = loop.getProjectParent();
+        }
+        return found;
+    }
+
+    /**
+     * @return inherited projects. Returned with order of this project first, up to root project.
+     */
+    public List<Project> getReverseInheritedList()
+    {
+        final List<Project> found = new ArrayList<>(  );
+        found.add( this );
+
+        Project loop = this;
+        while ( loop.getProjectParent() != null)
+        {
+            // Place inherited last for iteration purposes
+            found.add( loop.getProjectParent() );
+            loop = loop.getProjectParent();
+        }
+        return found;
     }
 }

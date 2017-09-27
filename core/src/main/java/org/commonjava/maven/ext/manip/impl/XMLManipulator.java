@@ -36,7 +36,6 @@ import java.io.File;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Properties;
 import java.util.Set;
 
 import static org.apache.commons.lang.StringUtils.isEmpty;
@@ -56,8 +55,10 @@ public class XMLManipulator
     @Requirement
     private XMLIO xmlIO;
 
+    private ManipulationSession session;
+
     @Override
-    public void scan( final List<Project> projects, final ManipulationSession session )
+    public void scan( final List<Project> projects )
         throws ManipulationException
     {
     }
@@ -65,21 +66,21 @@ public class XMLManipulator
     /**
      * Initialize the {@link XMLState} state holder in the {@link ManipulationSession}. This state holder detects
      * configuration from the Maven user properties (-D properties from the CLI) and makes it available for
-     * later invocations of {@link XMLManipulator#scan(List, ManipulationSession)} and the apply* methods.
+     * later invocations of {@link Manipulator#scan(List)} and the apply* methods.
      */
     @Override
     public void init( final ManipulationSession session )
                     throws ManipulationException
     {
-        final Properties userProps = session.getUserProperties();
-        session.setState( new XMLState( userProps ) );
+        this.session = session;
+        session.setState( new XMLState( session.getUserProperties() ) );
     }
 
     /**
      * Apply the xml changes to the specified file(s).
      */
     @Override
-    public Set<Project> applyChanges( final List<Project> projects, final ManipulationSession session )
+    public Set<Project> applyChanges( final List<Project> projects )
         throws ManipulationException
     {
         final XMLState state = session.getState( XMLState.class );

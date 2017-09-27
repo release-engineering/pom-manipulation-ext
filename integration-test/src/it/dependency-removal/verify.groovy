@@ -26,3 +26,5 @@ assert (ossDependency == null || ossDependency == "")
 
 def ossDependencyInDependencyManagement = pom.dependencyManagement.dependencies.dependency.find { it.artifactId.text() == "oss-parent" }
 assert (ossDependencyInDependencyManagement == null || ossDependencyInDependencyManagement == "")
+
+assert ! pomFile.text.contains("oss-parent")

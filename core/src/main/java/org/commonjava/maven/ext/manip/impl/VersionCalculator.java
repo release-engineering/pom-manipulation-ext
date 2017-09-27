@@ -23,10 +23,10 @@ import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleProjectRef;
 import org.commonjava.maven.ext.manip.ManipulationException;
 import org.commonjava.maven.ext.manip.ManipulationSession;
+import org.commonjava.maven.ext.manip.util.PropertyResolver;
 import org.commonjava.maven.ext.manip.model.Project;
 import org.commonjava.maven.ext.manip.resolver.GalleyAPIWrapper;
 import org.commonjava.maven.ext.manip.state.VersioningState;
-import org.commonjava.maven.ext.manip.util.PropertiesUtils;
 import org.commonjava.maven.galley.maven.GalleyMavenException;
 import org.commonjava.maven.galley.maven.model.view.meta.MavenMetadataView;
 import org.slf4j.Logger;
@@ -90,7 +90,7 @@ public class VersionCalculator
         for ( final Project project : projects )
         {
             String originalVersion = project.getVersion();
-            originalVersion = PropertiesUtils.resolveProperties( projects, originalVersion);
+            originalVersion = PropertyResolver.resolveInheritedProperties( session, project, originalVersion);
             String modifiedVersion =
                 calculate( project.getGroupId(), project.getArtifactId(), originalVersion, session );
 
