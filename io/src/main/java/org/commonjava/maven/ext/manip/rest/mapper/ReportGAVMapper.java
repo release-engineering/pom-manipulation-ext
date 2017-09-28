@@ -74,7 +74,8 @@ public class ReportGAVMapper
             errorString = stripped;
             return result;
         }
-        else if (s.startsWith( "{\\\"message\\\":" ) || s.startsWith( "{\"message\":" ))
+        else if (s.startsWith( "{\\\"message\\\":" ) || s.startsWith( "{\"message\":" ) ||
+                        s.startsWith( "{\\\"errorType\\\":" ) || s.startsWith( "{\"errorType\":" ))
         {
             String endStripped = s.replace( "\\\"}", "" ).replace( "\"}", "" );
             errorString = endStripped.substring( endStripped.lastIndexOf( "\"" ) + 1 );
