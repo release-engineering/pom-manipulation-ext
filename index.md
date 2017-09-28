@@ -32,6 +32,7 @@ It supports the following arguments
                               group:artifact:version:type:classifier with
                               scope information
     -s,--settings <arg>       Optional settings.xml file
+    -t,--trace                Enable trace
     -x <arg> <arg>            XPath tester ( file : xpath )
 
 Note that all property arguments are the equivalent to those used when it is used as a Maven extension.
