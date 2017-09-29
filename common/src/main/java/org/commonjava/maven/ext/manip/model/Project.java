@@ -262,7 +262,7 @@ public class Project
      *
      * @param session MavenSessionHandler, used by {@link PropertyResolver}
      * @return a list of fully resolved {@link ProjectVersionRef} to the original {@link Dependency}
-     * @throws ManipulationException
+     * @throws ManipulationException if an error occurs
      */
     public HashMap<Profile, HashMap<ProjectVersionRef, Dependency>> getResolvedProfileDependencies( MavenSessionHandler session) throws ManipulationException
     {
@@ -290,7 +290,7 @@ public class Project
      *
      * @param session MavenSessionHandler, used by {@link PropertyResolver}
      * @return a list of fully resolved {@link ProjectVersionRef} to the original {@link Dependency} (that were within DependencyManagement)
-     * @throws ManipulationException
+     * @throws ManipulationException if an error occurs
      */
     public HashMap<Profile, HashMap<ProjectVersionRef, Dependency>> getResolvedProfileManagedDependencies( MavenSessionHandler session) throws ManipulationException
     {
@@ -321,7 +321,7 @@ public class Project
      *
      * @param session MavenSessionHandler, used by {@link PropertyResolver}
      * @return a list of fully resolved {@link ProjectVersionRef} to the original {@link Dependency}
-     * @throws ManipulationException
+     * @throws ManipulationException if an error occurs
      */
     public HashMap<ProjectVersionRef, Dependency> getResolvedDependencies( MavenSessionHandler session) throws ManipulationException
     {
@@ -342,7 +342,7 @@ public class Project
      *
      * @param session MavenSessionHandler, used by {@link PropertyResolver}
      * @return a list of fully resolved {@link ProjectVersionRef} to the original {@link Dependency} (that were within DependencyManagement)
-     * @throws ManipulationException
+     * @throws ManipulationException if an error occurs
      */
     public HashMap<ProjectVersionRef, Dependency> getResolvedManagedDependencies( MavenSessionHandler session ) throws ManipulationException
     {
