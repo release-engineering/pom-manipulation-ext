@@ -66,6 +66,11 @@
     </dependency>
 
     <dependency>
+      <groupId>org.commonjava.maven.galley</groupId>
+      <artifactId>galley-maven</artifactId>
+    </dependency>
+
+    <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
     </dependency>

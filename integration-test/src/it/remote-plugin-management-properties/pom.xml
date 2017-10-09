@@ -23,10 +23,10 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>org.commonjava.maven.ext</groupId>
-  <artifactId>remote-plugin-management-dependency</artifactId>
+  <artifactId>remote-plugin-management-properties</artifactId>
   <version>1.0-SNAPSHOT</version>
 
-  <name>Test override plugin version and dependency using command line property</name>
+  <name>Test override plugin version using command line property</name>
 
   <scm>
     <connection>scm:git:http://github.com/release-engineering/pom-manipulation-ext.git</connection>
@@ -37,13 +37,18 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+    <compiler>maven-compiler-plugin</compiler>
+
+    <junitGrouppArtifactId>junit</junitGrouppArtifactId>
+    <junitVersion>4.1</junitVersion>
   </properties>
 
   <dependencies>
     <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>4.1</version>
+      <groupId>${junitGrouppArtifactId}</groupId>
+      <artifactId>${junitGrouppArtifactId}</artifactId>
+      <version>${junitVersion}</version>
     </dependency>
   </dependencies>
 
@@ -52,53 +57,56 @@
       <plugins>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-compiler-plugin</artifactId>
+          <artifactId>${compiler}</artifactId>
           <version>99-bad</version>
         </plugin>
-
         <plugin>
           <groupId>org.codehaus.mojo</groupId>
           <artifactId>buildnumber-maven-plugin</artifactId>
           <executions>
             <execution>
-              <id>get-scm-revision</id>
+              <id>get-build-timestamp</id>
               <phase>initialize</phase>
               <goals>
-                <goal>create</goal>
+                <goal>create-timestamp</goal>
               </goals>
               <configuration>
-                <doCheck>false</doCheck>
-                <doUpdate>false</doUpdate>
-                <revisionOnScmFailure>UNKNOWN</revisionOnScmFailure>
-                <getRevisionOnlyOnce>true</getRevisionOnlyOnce>
+                <timestampFormat>EEE, d MMM yyyy HH:mm:ss Z</timestampFormat>
+                <timestampPropertyName>build.datetime</timestampPropertyName>
               </configuration>
             </execution>
           </executions>
-          <dependencies>
-            <dependency>
-              <groupId>org.apache.maven</groupId>
-              <artifactId>maven-core</artifactId>
-              <version>2.2.1</version>
-            </dependency>
-            <dependency>
-              <groupId>commons-lang</groupId>
-              <artifactId>commons-lang</artifactId>
-              <version>1.0</version>
-            </dependency>
-          </dependencies>
         </plugin>
-
+        <plugin>
+          <groupId>org.commonjava.maven.plugins</groupId>
+          <artifactId>project-sources-maven-plugin</artifactId>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-compiler-plugin</artifactId>
+          <configuration>
+            <debug>false</debug>
+            <showDeprecation>true</showDeprecation>
+            <showWarnings>true</showWarnings>
+            <testSource>${maven.compiler.source}</testSource>
+            <testTarget>${maven.compiler.source}</testTarget>
+          </configuration>
+        </plugin>
       </plugins>
     </pluginManagement>
 
 
     <plugins>
       <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>${compiler}</artifactId>
+        <version>1000-bad</version>
+      </plugin>
+      <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>buildnumber-maven-plugin</artifactId>
       </plugin>
     </plugins>
-
   </build>
 
 </project>

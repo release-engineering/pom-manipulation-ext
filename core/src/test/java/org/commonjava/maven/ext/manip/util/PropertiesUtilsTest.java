@@ -184,7 +184,7 @@ public class PropertiesUtilsTest
 
         result = PropertyResolver.resolveProperties( session, al, "${project.version}" );
         assertTrue( result.equals( "1" ) );
-   }
+    }
 
     @Test
     public void testUpdateProjectVersionProperty() throws Exception
@@ -224,5 +224,16 @@ public class PropertiesUtilsTest
         session.setMavenSession( mavenSession );
 
         return session;
+    }
+
+    @Test
+    public void testResolvePluginsProject() throws Exception
+    {
+        final Model modelChild = TestUtils.resolveModelResource( RESOURCE_BASE, "inherited-properties.pom" );
+        ManipulationSession session = createUpdateSession();
+        Project pC = new Project( modelChild );
+
+        assertTrue ( pC.getResolvedPlugins( session ).size() == 0);
+        assertTrue ( pC.getResolvedManagedPlugins( session ).size() == 0);
     }
 }

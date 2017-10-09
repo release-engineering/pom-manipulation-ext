@@ -18,7 +18,7 @@ System.out.println( "Slurping POM: ${pomFile.getAbsolutePath()}" )
 
 def pom = new XmlSlurper().parse( pomFile )
 
-def plugin = pom.build.pluginManagement.plugins.plugin.find { it.artifactId.text() == "maven-compiler-plugin" }
+def plugin = pom.build.pluginManagement.plugins.plugin.find { it.artifactId.text().contains( "compiler" ) }
 assert plugin != null
 assert plugin.version.text() == "3.1"
 
@@ -27,12 +27,11 @@ pomFile.eachLine {
    if (it.contains( "<debug>true</debug>")) {
       message++
    }
-   if (it.contains( "maven-core")) {
-      message++
-   }
-   if (it.contains( "2.5")) {
-      message++
+   if (it.contains( "maven-bundle-plugin")) {
+      message+=10
    }
 }
 
-assert message == 3
+assert message == 1
+
+assert ! pomFile.text.contains("iterator-maven-plugin")

@@ -71,6 +71,7 @@ public class DependencyState
      */
     private static final String DEPENDENCY_OVERRIDE_PREFIX = "dependencyOverride.";
 
+    // TODO: ### the next 3 options probably need to be in common state to be shared by PluginState
     /**
      * Enables strict checking of non-exclusion dependency versions before aligning to the given BOM dependencies.
      * For example, <code>1.1</code> will match <code>1.1-rebuild-1</code> in strict mode, but <code>1.2</code> will not.
@@ -181,6 +182,7 @@ public class DependencyState
 
     /**
      * @return whether to override managed dependencies in the build. Defaults to true.
+     * @deprecated
      */
     public boolean getOverrideDependencies()
     {

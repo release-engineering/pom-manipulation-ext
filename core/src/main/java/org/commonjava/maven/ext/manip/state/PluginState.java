@@ -55,12 +55,16 @@ public class PluginState
 
     private final Precedence configPrecedence;
 
+    /**
+     * Denote whether to inject plugin sections from a remote bom. This is separate to injecting
+     * pluginMgmt.
+     */
     private final boolean injectRemotePlugins;
 
     public PluginState( final Properties userProps )
     {
         pluginMgmt = IdUtils.parseGAVs( userProps.getProperty( PLUGIN_MANAGEMENT_POM_PROPERTY ) );
-        injectRemotePlugins = Boolean.valueOf( userProps.getProperty( "injectRemotePlugins", "true" ) );
+        injectRemotePlugins = Boolean.valueOf( userProps.getProperty( "injectRemotePlugins", "false" ) );
         switch ( Precedence.valueOf( userProps.getProperty( "pluginManagementPrecedence",
                                                             Precedence.REMOTE.toString() ).toUpperCase() ) )
         {
@@ -101,6 +105,7 @@ public class PluginState
 
     /**
      * @return whether to inject plugins found in the remote pom.
+     * @deprecated
      */
     public boolean getInjectRemotePlugins()
     {
