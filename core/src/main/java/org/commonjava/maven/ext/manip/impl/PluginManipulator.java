@@ -26,7 +26,6 @@ import org.codehaus.plexus.component.annotations.Requirement;
 import org.codehaus.plexus.util.xml.Xpp3Dom;
 import org.codehaus.plexus.util.xml.Xpp3DomUtils;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
-import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef;
 import org.commonjava.maven.ext.manip.ManipulationException;
 import org.commonjava.maven.ext.manip.ManipulationSession;
 import org.commonjava.maven.ext.manip.io.ModelIO;
@@ -289,30 +288,55 @@ public class PluginManipulator
 
         final PluginState pluginState = session.getState( PluginState.class );
         final CommonState commonState = session.getState( CommonState.class );
-        final HashMap<String, Plugin> pluginsNonStrict = new LinkedHashMap<>(  );
-        // Secondary map of original plugins group:artifact to plugin mapping for fast access for non-strict mode.
+        final HashMap<String, ProjectVersionRef> pluginsByGA = new LinkedHashMap<>(  );
+        // Secondary map of original plugins group:artifact to pvr mapping.
         for ( ProjectVersionRef pvr : plugins.keySet() )
         {
-            pluginsNonStrict.put( pvr.asProjectRef().toString(), plugins.get( pvr ) );
+            // We should NEVER have multiple group:artifact with different versions in the same project. If we do,
+            // like with dependencies, the behaviour is undefined - although its most likely the last-wins.
+            pluginsByGA.put( pvr.asProjectRef().toString(), pvr );
         }
 
-        logger.debug( "#### plugins {} pluginsNonStrict {} ", plugins, pluginsNonStrict );
+        logger.debug( "#### plugins {} pluginsByGA {} ", plugins, pluginsByGA );
 
         for ( final Plugin override : pluginVersionOverrides )
         {
-            Plugin plugin;
+            Plugin plugin = null;
+            String newValue = override.getVersion();
 
-            // TODO: ### Complete strict implementation
-            if ( commonState.getStrict() )
+            // If we're doing strict matching then we need to see if there is a matching plugin with the
+            // same version. Problem is when we have been run previously i.e. plugins contains rebuild-x
+            // and we want to compare without suffix. How do we establish the original version versus the
+            // override version.
+            if ( pluginsByGA.containsKey( override.getKey() ) )
             {
-                plugin = plugins.get( SimpleProjectVersionRef.parse( override.getId() ) );
-            }
-            else
-            {
-                plugin = pluginsNonStrict.get( override.getKey() );
+                // Potential match of override group:artifact to original plugin group:artifact.
+                String oldValue = pluginsByGA.get( override.getKey() ).getVersionString();
+                plugin = plugins.get( pluginsByGA.get( override.getKey() ) );
+
+                if ( commonState.getStrict() )
+                {
+                    if ( !PropertiesUtils.checkStrictValue( session, oldValue, newValue ) )
+                    {
+                        if ( commonState.getFailOnStrictViolation() )
+                        {
+                            throw new ManipulationException(
+                                            "Plugin reference {} replacement: {} of original version: {} violates the strict version-alignment rule!",
+                                            plugin.getId(), newValue, oldValue );
+                        }
+                        else
+                        {
+                            logger.warn( "Plugin reference {} replacement: {} of original version: {} violates the strict version-alignment rule!",
+                                         plugin.getId(), newValue, oldValue );
+                            // Ignore the dependency override. As found has been set to true it won't inject
+                            // a new property either.
+                            continue;
+                        }
+                    }
+                }
             }
 
-            logger.debug( "Plugin override {} and local plugin {} with remotePluginType {} / localPluginType {}", override.getId(), plugin.getId(), remotePluginType, localPluginType );
+            logger.debug( "Plugin override {} and local plugin {} with remotePluginType {} / localPluginType {}", override.getId(), plugin, remotePluginType, localPluginType );
 
             if ( plugin != null )
             {
@@ -406,20 +430,20 @@ public class PluginManipulator
                     }
                 }
 
-                String oldVersion = plugin.getVersion(); // TODO: User fully resolved version....
-                // TODO: ### Maybe use Project to get fully resolved list of plugins....
+                // Explicitly using the original non-resolved original version.
+                String oldVersion = plugin.getVersion();
                 // Always force the version in a pluginMgmt block or set the version if there is an existing
                 // one in build/plugins section.
 
                 // Due to StandardMaven304PluginDefaults::getDefault version returning "[0.0.0.1]" override version
                 // will never be null.
                 if ( !PropertiesUtils.cacheProperty( project, commonState, versionPropertyUpdateMap, oldVersion,
-                                                     override.getVersion(), plugin, false ) )
+                                                     newValue, plugin, false ) )
                 {
                     if ( oldVersion != null && oldVersion.equals( "${project.version}" ) )
                     {
                         logger.debug( "For plugin {} ; version is built in {} so skipping inlining {}", plugin,
-                                      oldVersion, override.getVersion() );
+                                      oldVersion, newValue );
                     }
                     else if ( oldVersion != null && oldVersion.contains( "${" ) )
                     {
@@ -427,21 +451,18 @@ public class PluginManipulator
                     }
                     else
                     {
-                        // TODO: ### Strict checking potential - better done above?
-                        plugin.setVersion( override.getVersion() );
-                        logger.info( "Altered plugin version: " + override.getKey() + "=" + override.getVersion() );
+                        plugin.setVersion( newValue );
+                        logger.info( "Altered plugin version: " + override.getKey() + "=" + newValue );
                     }
                 }
-
             }
-
             // If the plugin doesn't exist but has a configuration section in the remote inject it so we
             // get the correct config.
             else if ( remotePluginType == PluginType.RemotePM && localPluginType == PluginType.LocalPM && commonState.getOverrideTransitive() && ( override.getConfiguration() != null
                             || override.getExecutions().size() > 0 ) )
             {
                 project.getModel().getBuild().getPluginManagement().getPlugins().add( override );
-                logger.info( "Added plugin version: " + override.getKey() + "=" + override.getVersion() );
+                logger.info( "Added plugin version: " + override.getKey() + "=" + newValue );
             }
             // If the plugin in <plugins> doesn't exist but has a configuration section in the remote inject it so we
             // get the correct config.
@@ -451,7 +472,7 @@ public class PluginManipulator
             {
                 project.getModel().getBuild().getPlugins().add( override );
                 logger.info( "For non-pluginMgmt, added plugin version : " + override.getKey() + "="
-                                             + override.getVersion() );
+                                             + newValue );
             }
         }
     }

@@ -25,6 +25,7 @@
   <groupId>org.commonjava.maven.ext</groupId>
   <artifactId>propertyMgmt1</artifactId>
   <version>1.0</version>
+  <packaging>pom</packaging>
 
   <name>Property Management POM to use with integration tests</name>
 

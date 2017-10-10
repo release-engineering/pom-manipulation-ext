@@ -23,36 +23,37 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>org.commonjava.maven.ext</groupId>
-  <artifactId>profileMgmt1</artifactId>
-  <version>1.0</version>
-  <packaging>pom</packaging>
+  <artifactId>remote-plugin-management-strict</artifactId>
+  <version>1.0-SNAPSHOT</version>
 
-  <name>Profile Management POM to use with integration tests</name>
+  <name>Test override plugin version using command line property</name>
+
+  <scm>
+    <connection>scm:git:http://github.com/release-engineering/pom-manipulation-ext.git</connection>
+    <developerConnection>scm:git:git@github.com:release-engineering/pom-manipulation-ext.git</developerConnection>
+    <url>http://github.com/release-engineering/pom-manipulation-ext</url>
+    <tag>HEAD</tag>
+  </scm>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
 
-  <profiles>
-      <profile>
-          <id>extra-properties</id>
-          <properties>
-              <version.junit>4.1</version.junit>
-          </properties>
-      </profile>
+  <build>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-jar-plugin</artifactId>
+          <version>3.1</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.cxf.xjcplugins</groupId>
+          <artifactId>cxf-xjc-wsdlextension</artifactId>
+          <version>2.6.0</version>
+        </plugin>
+      </plugins>
+    </pluginManagement>
 
-      <profile>
-          <id>extra-plugins</id>
-          <build>
-              <plugins>
-                  <plugin>
-                      <groupId>org.apache.maven.plugins</groupId>
-                      <artifactId>maven-jar-plugin</artifactId>
-                      <version>2.4</version>
-                  </plugin>
-              </plugins>
-          </build>
-      </profile>
-  </profiles>
-
+  </build>
 </project>

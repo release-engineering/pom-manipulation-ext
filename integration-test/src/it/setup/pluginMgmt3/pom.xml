@@ -23,7 +23,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>org.commonjava.maven.ext</groupId>
-  <artifactId>pluginMgmt2</artifactId>
+  <artifactId>pluginMgmt3</artifactId>
   <version>1.0</version>
   <packaging>pom</packaging>
 
@@ -32,7 +32,7 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-    <maven-jar-plugin>2.4</maven-jar-plugin>
+    <maven-jar-plugin>2.3.1-redhat-1</maven-jar-plugin>
   </properties>
 
   <build>
@@ -41,7 +41,7 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-compiler-plugin</artifactId>
-          <version>3.1</version>
+          <version>3.0-redhat-1</version>
         </plugin>
 
         <plugin>
@@ -74,39 +74,46 @@
           </configuration>
         </plugin>
 
+        <plugin>
+          <groupId>org.apache.cxf.xjcplugins</groupId>
+          <artifactId>cxf-xjc-wsdlextension</artifactId>
+          <version>2.6.0.redhat-4</version>
+        </plugin>
+
       </plugins>
     </pluginManagement>
-
-
-    <plugins>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-bundle-plugin</artifactId>
-        <version>2.5.4</version>
-        <configuration>
-          <archive>
-            <index>true</index>
-            <manifest>
-              <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
-              <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
-            </manifest>
-            <manifestEntries>
-              <Implementation-URL>${project.url}</Implementation-URL>
-              <Java-Version>${java.version}</Java-Version>
-              <Java-Vendor>${java.vendor}</Java-Vendor>
-              <Os-Name>${os.name}</Os-Name>
-              <Os-Arch>${os.arch}</Os-Arch>
-              <Os-Version>${os.version}</Os-Version>
-              <Scm-Url>${project.scm.url}</Scm-Url>
-              <Scm-Connection>${project.scm.connection}</Scm-Connection>
-            </manifestEntries>
-          </archive>
-          <instructions>
-            <Scm-Revision>${buildNumber}</Scm-Revision>
-          </instructions>
-        </configuration>
-      </plugin>
-    </plugins>
   </build>
+
+
+  <repositories>
+    <repository>
+      <id>jboss-eap-repository-group</id>
+      <name>JBoss EAP Maven Repository</name>
+      <url>https://maven.repository.redhat.com/earlyaccess/all/</url>
+      <layout>default</layout>
+      <releases>
+        <enabled>true</enabled>
+        <updatePolicy>never</updatePolicy>
+      </releases>
+      <snapshots>
+        <enabled>true</enabled>
+        <updatePolicy>never</updatePolicy>
+      </snapshots>
+    </repository>
+  </repositories>
+
+  <pluginRepositories>
+    <pluginRepository>
+      <id>jboss-eap-repository-group</id>
+      <name>JBoss EAP Maven Repository</name>
+      <url>https://maven.repository.redhat.com/earlyaccess/all/</url>
+      <releases>
+        <enabled>true</enabled>
+      </releases>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+    </pluginRepository>
+  </pluginRepositories>
 
 </project>
