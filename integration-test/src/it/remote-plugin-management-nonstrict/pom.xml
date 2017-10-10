@@ -106,4 +106,29 @@
     </plugins>
   </build>
 
+  <profiles>
+    <profile>
+      <id>one</id>
+      <build>
+        <pluginManagement>
+          <plugins>
+            <plugin>
+              <groupId>org.apache.maven.plugins</groupId>
+              <artifactId>maven-jar-plugin</artifactId>
+              <version>2.3.0</version>
+            </plugin>
+          </plugins>
+        </pluginManagement>
+
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>${compiler}</artifactId>
+            <version>2000-bad</version>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
+
 </project>

@@ -98,7 +98,9 @@ public class Project
 
     private HashMap<ProjectVersionRef, Plugin> resolvedManagedPlugins;
 
-    private HashMap<Profile, HashMap<ProjectVersionRef, Dependency>> resolvedProfileManagedPlugins;
+    private HashMap<Profile, HashMap<ProjectVersionRef, Plugin>> resolvedProfilePlugins;
+
+    private HashMap<Profile, HashMap<ProjectVersionRef, Plugin>> resolvedProfileManagedPlugins;
 
     public Project( final ProjectVersionRef key, final File pom, final Model model )
     {
@@ -364,7 +366,7 @@ public class Project
     {
         if ( resolvedManagedPlugins == null )
         {
-            resolvedManagedPlugins = new HashMap<>();
+            resolvedManagedPlugins = new HashMap<>(  );
 
             if ( getModel().getBuild() != null )
             {
@@ -379,6 +381,52 @@ public class Project
         return resolvedManagedPlugins;
     }
 
+    public HashMap<Profile,HashMap<ProjectVersionRef,Plugin>> getResolvedProfilePlugins( MavenSessionHandler session )
+                    throws ManipulationException
+    {
+        if ( resolvedProfilePlugins == null )
+        {
+            resolvedProfilePlugins = new HashMap<>();
+
+            for ( final Profile profile : ProfileUtils.getProfiles( session, model ) )
+            {
+                HashMap<ProjectVersionRef, Plugin> profileDeps = new HashMap<>();
+
+                if ( profile.getBuild() != null )
+                {
+                    resolvePlugins( session, profile.getBuild().getPlugins(), profileDeps );
+
+                }
+                resolvedProfilePlugins.put( profile, profileDeps );
+            }
+        }
+        return resolvedProfilePlugins;
+    }
+
+    public HashMap<Profile,HashMap<ProjectVersionRef,Plugin>> getResolvedProfileManagedPlugins( MavenSessionHandler session )
+                    throws ManipulationException
+    {
+        if ( resolvedProfileManagedPlugins == null )
+        {
+            resolvedProfileManagedPlugins = new HashMap<>();
+
+            for ( final Profile profile : ProfileUtils.getProfiles( session, model ) )
+            {
+                HashMap<ProjectVersionRef, Plugin> profileDeps = new HashMap<>();
+
+                if ( profile.getBuild() != null )
+                {
+                    final PluginManagement pm = profile.getBuild().getPluginManagement();
+                    if ( !( pm == null || pm.getPlugins() == null ) )
+                    {
+                        resolvePlugins( session, pm.getPlugins(), profileDeps );
+                    }
+                }
+                resolvedProfileManagedPlugins.put( profile, profileDeps );
+            }
+        }
+        return resolvedProfileManagedPlugins;
+    }
 
     /**
      * This method will scan the dependencies in this project and return a fully resolved list. Note that

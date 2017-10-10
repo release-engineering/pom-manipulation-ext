@@ -21,6 +21,7 @@ import org.apache.maven.model.Model;
 import org.apache.maven.model.Plugin;
 import org.apache.maven.model.PluginExecution;
 import org.apache.maven.model.PluginManagement;
+import org.apache.maven.model.Profile;
 import org.codehaus.plexus.component.annotations.Component;
 import org.codehaus.plexus.component.annotations.Requirement;
 import org.codehaus.plexus.util.xml.Xpp3Dom;
@@ -237,18 +238,16 @@ public class PluginManipulator
             {
                 build = new Build();
                 model.setBuild( build );
-                logger.info( "Created new Build for model " + model.getId() );
+                logger.debug( "Created new Build for model " + model.getId() );
             }
 
-            PluginManagement pluginManagement = model.getBuild()
-                                                     .getPluginManagement();
+            PluginManagement pluginManagement = model.getBuild().getPluginManagement();
 
             if ( pluginManagement == null )
             {
                 pluginManagement = new PluginManagement();
-                model.getBuild()
-                     .setPluginManagement( pluginManagement );
-                logger.info( "Created new Plugin Management for model " + model.getId() );
+                model.getBuild().setPluginManagement( pluginManagement );
+                logger.debug( "Created new Plugin Management for model " + model.getId() );
             }
 
             // Override plugin management versions
@@ -257,7 +256,19 @@ public class PluginManipulator
 
         applyOverrides( project, type, PluginType.LocalP, project.getResolvedPlugins( session ), override );
 
-        // TODO: ### Not handling profiles with plugins in it :-(
+        final HashMap<Profile, HashMap<ProjectVersionRef, Plugin>> pd = project.getResolvedProfilePlugins( session );
+        final HashMap<Profile, HashMap<ProjectVersionRef, Plugin>> pmd = project.getResolvedProfileManagedPlugins( session );
+
+        logger.debug ("Processing profiles with plugin management");
+        for ( Profile p : pmd.keySet() )
+        {
+            applyOverrides( project, type, PluginType.LocalPM, pmd.get( p ), override );
+        }
+        logger.debug ("Processing profiles with plugins");
+        for ( Profile p : pd.keySet() )
+        {
+            applyOverrides( project, type, PluginType.LocalP, pd.get( p ), override );
+        }
     }
 
     /**

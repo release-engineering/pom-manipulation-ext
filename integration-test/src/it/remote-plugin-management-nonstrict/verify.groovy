@@ -30,6 +30,9 @@ pomFile.eachLine {
    if (it.contains( "2.3.1-redhat-1")) {
       message++
    }
+   if (it.contains( "3.0-redhat-1")) {
+      message++
+   }
 }
 
-assert message == 2
+assert message == 6
