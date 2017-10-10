@@ -43,11 +43,13 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 
 import static org.apache.commons.io.IOUtils.closeQuietly;
 import static org.apache.commons.lang.StringUtils.isEmpty;
@@ -203,8 +205,7 @@ public class ModelIO
      * @return a map containing ProjectRef to Plugins
      * @throws ManipulationException if an error occurs
      */
-    public Map<ProjectRef, Plugin> getRemotePluginManagementVersionOverrides( final ProjectVersionRef ref,
-                                                                              Properties userProperties )
+    public Set<Plugin> getRemotePluginManagementVersionOverrides( final ProjectVersionRef ref, final Properties userProperties )
                     throws ManipulationException
     {
         return getRemotePluginVersionOverrides( PluginType.PluginMgmt, ref, userProperties );
@@ -217,22 +218,21 @@ public class ModelIO
      * @return a map containing ProjectRef to Plugins
      * @throws ManipulationException if an error occurs
      */
-    public Map<ProjectRef, Plugin> getRemotePluginVersionOverrides( final ProjectVersionRef ref,
-                                                                              Properties userProperties )
+    public Set<Plugin> getRemotePluginVersionOverrides( final ProjectVersionRef ref, final Properties userProperties )
                     throws ManipulationException
     {
         return getRemotePluginVersionOverrides( PluginType.Plugins, ref, userProperties );
     }
 
 
-    private Map<ProjectRef, Plugin> getRemotePluginVersionOverrides( final PluginType type, final ProjectVersionRef ref,
-                                                                     Properties userProperties )
+    private Set<Plugin> getRemotePluginVersionOverrides( final PluginType type, final ProjectVersionRef ref,
+                                                                    final Properties userProperties )
                     throws ManipulationException
     {
         logger.debug( "Resolving remote {} POM: {}", type, ref );
-        final Map<ProjectRef, Plugin> pluginOverrides = new HashMap<>();
-        final Map<ProjectRef, ProjectVersionRef> pluginOverridesPomView = new HashMap<>();
 
+        final Set<Plugin> pluginOverrides = new HashSet<>();
+        final Map<ProjectRef, ProjectVersionRef> pluginOverridesPomView = new HashMap<>();
         final Model m = resolveRawModel( ref );
 
         try
@@ -257,7 +257,7 @@ public class ModelIO
             throw new ManipulationException( "Unable to resolve: %s", e, ref );
         }
 
-        logger.debug( "Found pluginOverridesResolvedVersions {} " + pluginOverridesPomView );
+        logger.debug( "Found pluginOverridesResolvedVersions {} ", pluginOverridesPomView );
 
         // The list of pluginOverridesPomView may be larger than those in current model pluginMgtm. Dummy up an extra
         // set of plugins with versions to handle those.
@@ -268,9 +268,7 @@ public class ModelIO
             p.setGroupId( entry.getKey().getGroupId() );
             p.setVersion( entry.getValue().getVersionString() );
 
-            pluginOverrides.put( entry.getKey(), p );
-
-            logger.debug( "Added plugin override for: " + entry.getKey().toString() + ":" + p.getVersion() );
+            pluginOverrides.add( p );
         }
 
         // TODO: active profiles!
@@ -310,7 +308,9 @@ public class ModelIO
                                                   " with " + newVersion );
                      p.setVersion( newVersion );
                 }
-                pluginOverrides.put( pr, p );
+                // Replacing the element with the fully parsed element from the Model.
+                pluginOverrides.remove( p );
+                pluginOverrides.add( p );
 
                 // If we have a configuration block, as per with plugin versions ensure we
                 // resolve any properties.
@@ -346,9 +346,8 @@ public class ModelIO
                     }
                 }
 
-                logger.debug( "Added plugin override for: " + pr.toString() + ":" + p.getVersion() +
-                                              " with configuration\n" + p.getConfiguration() + " and executions "
-                                              + p.getExecutions() );
+                logger.debug( "Added plugin override for {} with configuration \n" + p.getConfiguration() + " and executions "
+                                              + p.getExecutions() + " and dependencies " + p.getDependencies(), p.getId() );
             }
         }
         else

@@ -72,23 +72,6 @@ public class DependencyState
     private static final String DEPENDENCY_OVERRIDE_PREFIX = "dependencyOverride.";
 
     // TODO: ### the next 3 options probably need to be in common state to be shared by PluginState
-    /**
-     * Enables strict checking of non-exclusion dependency versions before aligning to the given BOM dependencies.
-     * For example, <code>1.1</code> will match <code>1.1-rebuild-1</code> in strict mode, but <code>1.2</code> will not.
-     */
-    private static final String STRICT_DEPENDENCIES = "strictAlignment";
-
-    /**
-     * When false, strict version-alignment violations will be reported in the warning log-level, but WILL NOT FAIL THE BUILD. When true, the build
-     * will fail if such a violation is detected. Default value is false.
-     */
-    private static final String STRICT_VIOLATION_FAILS = "strictViolationFails";
-
-    /**
-     * When true, it will ignore any suffix ( e.g. rebuild-2 ) on the source version during comparisons. Further, it will
-     * only allow alignment to a higher incrementing suffix (e.g. rebuild-3 ).
-     */
-    public static final String STRICT_ALIGNMENT_IGNORE_SUFFIX = "strictAlignmentIgnoreSuffix";
 
     /**
      * The name of the property which contains the GAV of the remote pom from which to retrieve dependency management
@@ -101,12 +84,6 @@ public class DependencyState
 
     private final boolean overrideDependencies;
 
-    private final boolean strict;
-
-    private final boolean failOnStrictViolation;
-
-    private final boolean ignoreSuffix;
-
     private final List<ProjectVersionRef> remoteBOMdepMgmt;
 
     private Map<String, String> dependencyExclusions;
@@ -118,9 +95,6 @@ public class DependencyState
     public DependencyState( final Properties userProps ) throws ManipulationException
     {
         overrideDependencies = Boolean.valueOf( userProps.getProperty( "overrideDependencies", "true" ) );
-        strict = Boolean.valueOf( userProps.getProperty( STRICT_DEPENDENCIES, "false" ) );
-        ignoreSuffix = Boolean.valueOf( userProps.getProperty( STRICT_ALIGNMENT_IGNORE_SUFFIX, "false" ) );
-        failOnStrictViolation = Boolean.valueOf( userProps.getProperty( STRICT_VIOLATION_FAILS, "false" ) );
         remoteBOMdepMgmt = IdUtils.parseGAVs( userProps.getProperty( DEPENDENCY_MANAGEMENT_POM_PROPERTY ) );
         dependencyExclusions = getPropertiesByPrefix( userProps, DEPENDENCY_EXCLUSION_PREFIX );
 
@@ -187,21 +161,6 @@ public class DependencyState
     public boolean getOverrideDependencies()
     {
         return overrideDependencies;
-    }
-
-    public boolean getStrict()
-    {
-        return strict;
-    }
-
-    public boolean getStrictIgnoreSuffix()
-    {
-        return ignoreSuffix;
-    }
-
-    public boolean getFailOnStrictViolation()
-    {
-        return failOnStrictViolation;
     }
 
     public DependencyPrecedence getPrecedence()

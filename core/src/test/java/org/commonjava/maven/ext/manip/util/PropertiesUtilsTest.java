@@ -214,6 +214,7 @@ public class PropertiesUtilsTest
         p.setProperty( "scanActiveProfiles", "true" );
         session.setState( new DependencyState( p ) );
         session.setState( new VersioningState( p ) );
+        session.setState( new CommonState( p ) );
 
         final MavenExecutionRequest req =
                         new DefaultMavenExecutionRequest().setUserProperties( p ).setRemoteRepositories( Collections.<ArtifactRepository>emptyList() );

@@ -22,7 +22,6 @@ import org.commonjava.maven.ext.manip.ManipulationSession;
 import org.commonjava.maven.ext.manip.impl.Version;
 import org.commonjava.maven.ext.manip.model.Project;
 import org.commonjava.maven.ext.manip.state.CommonState;
-import org.commonjava.maven.ext.manip.state.DependencyState;
 import org.commonjava.maven.ext.manip.state.VersioningState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -128,7 +127,7 @@ public final class PropertiesUtils
                                                           Properties props )
                     throws ManipulationException
     {
-        final DependencyState state = session.getState( DependencyState.class );
+        final CommonState state = session.getState( CommonState.class );
         final String oldValue = props.getProperty( key );
 
         logger.info( "Updating property {} / {} with {} ", key, oldValue, newValue );
@@ -253,9 +252,9 @@ public final class PropertiesUtils
             return true;
         }
 
-        final DependencyState dState = session.getState( DependencyState.class );
+        final CommonState cState = session.getState( CommonState.class );
         final VersioningState vState = session.getState( VersioningState.class );
-        final boolean ignoreSuffix = dState.getStrictIgnoreSuffix();
+        final boolean ignoreSuffix = cState.getStrictIgnoreSuffix();
 
         // New value might be e.g. 3.1-rebuild-1 or 3.1.0.rebuild-1 (i.e. it *might* be OSGi compliant).
         String newVersion = newValue;

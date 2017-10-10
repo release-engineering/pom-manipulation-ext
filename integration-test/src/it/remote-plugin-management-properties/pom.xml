@@ -56,11 +56,6 @@
     <pluginManagement>
       <plugins>
         <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>${compiler}</artifactId>
-          <version>99-bad</version>
-        </plugin>
-        <plugin>
           <groupId>org.codehaus.mojo</groupId>
           <artifactId>buildnumber-maven-plugin</artifactId>
           <executions>
@@ -82,8 +77,8 @@
           <artifactId>project-sources-maven-plugin</artifactId>
         </plugin>
         <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-compiler-plugin</artifactId>
+          <artifactId>${compiler}</artifactId>
+          <version>99-bad</version>
           <configuration>
             <debug>false</debug>
             <showDeprecation>true</showDeprecation>

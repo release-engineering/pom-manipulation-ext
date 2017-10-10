@@ -339,11 +339,11 @@ public class DependencyManipulator implements Manipulator
 
                     if ( entry.getKey().asProjectRef().equals( SimpleProjectRef.parse( ga(project.getModelParent()) ) ))
                     {
-                        if ( dependencyState.getStrict() )
+                        if ( commonState.getStrict() )
                         {
                             if ( !PropertiesUtils.checkStrictValue( session, oldValue, newValue ) )
                             {
-                                if ( dependencyState.getFailOnStrictViolation() )
+                                if ( commonState.getFailOnStrictViolation() )
                                 {
                                     throw new ManipulationException(
                                                     "Parent reference {} replacement: {} of original version: {} violates the strict version-alignment rule!",
@@ -584,8 +584,8 @@ public class DependencyManipulator implements Manipulator
         }
 
         final DependencyState dependencyState = session.getState( DependencyState.class );
-        final CommonState commonState= session.getState( CommonState.class );
-        final boolean strict = dependencyState.getStrict();
+        final CommonState commonState = session.getState( CommonState.class );
+        final boolean strict = commonState.getStrict();
 
         // Apply matching overrides to dependencies
         for ( final ProjectVersionRef dependency : dependencies.keySet() )
@@ -635,7 +635,7 @@ public class DependencyManipulator implements Manipulator
                     {
                         logger.debug ("Original fully resolved version {} of {} does not match override version {} -> {} so ignoring",
                                       resolvedValue, dependency, entry.getKey(), overrideVersion);
-                        if ( dependencyState.getFailOnStrictViolation() )
+                        if ( commonState.getFailOnStrictViolation() )
                         {
                             throw new ManipulationException(
                                             "For {} replacing original property version {} (fully resolved: {} ) with new version {} for {} violates the strict version-alignment rule!",
@@ -664,7 +664,7 @@ public class DependencyManipulator implements Manipulator
                             }
                             else if ( strict && ! PropertiesUtils.checkStrictValue( session, resolvedValue, overrideVersion) )
                             {
-                                if ( dependencyState.getFailOnStrictViolation() )
+                                if ( commonState.getFailOnStrictViolation() )
                                 {
                                     throw new ManipulationException(
                                                      "Replacing original version {} in dependency {} with new version {} violates the strict version-alignment rule!",
@@ -686,7 +686,7 @@ public class DependencyManipulator implements Manipulator
                                     String suffix = PropertiesUtils.getSuffix( session );
                                     String replaceVersion;
 
-                                    if ( dependencyState.getStrictIgnoreSuffix() && oldVersion.contains( suffix ) )
+                                    if ( commonState.getStrictIgnoreSuffix() && oldVersion.contains( suffix ) )
                                     {
                                         replaceVersion = StringUtils.substringBefore( oldVersion, suffix );
                                         replaceVersion += suffix + StringUtils.substringAfter( overrideVersion, suffix );
