@@ -59,6 +59,7 @@
         <plugin>
           <groupId>org.codehaus.mojo</groupId>
           <artifactId>buildnumber-maven-plugin</artifactId>
+          <version>[0.0.0.1,]</version>
           <executions>
             <execution>
               <id>get-build-timestamp</id>

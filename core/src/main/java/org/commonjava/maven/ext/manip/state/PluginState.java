@@ -15,11 +15,14 @@
  */
 package org.commonjava.maven.ext.manip.state;
 
+import org.commonjava.maven.atlas.ident.ref.ArtifactRef;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.ext.manip.impl.PluginManipulator;
 import org.commonjava.maven.ext.manip.util.IdUtils;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
 /**
@@ -60,6 +63,8 @@ public class PluginState
      * pluginMgmt.
      */
     private final boolean injectRemotePlugins;
+
+    private Map<ArtifactRef, String> remoteRESTplugins;
 
     public PluginState( final Properties userProps )
     {
@@ -110,5 +115,19 @@ public class PluginState
     public boolean getInjectRemotePlugins()
     {
         return injectRemotePlugins;
+    }
+
+    public void setRemoteRESTOverrides( Map<ArtifactRef, String> overrides )
+    {
+        remoteRESTplugins = overrides;
+    }
+
+    public Map<ArtifactRef, String> getRemoteRESTOverrides( )
+    {
+        if ( remoteRESTplugins == null )
+        {
+            remoteRESTplugins = new HashMap<>(  );
+        }
+        return remoteRESTplugins;
     }
 }

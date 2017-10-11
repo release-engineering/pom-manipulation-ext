@@ -518,18 +518,11 @@ public class Project
             {
                 g = PLUGIN_DEFAULTS.getDefaultGroupId( a );
             }
-            if ( isEmpty( v ) )
-            {
-                v = PLUGIN_DEFAULTS.getDefaultVersion( g, a );
-            }
+            // Theoretically we could default an empty v via PLUGIN_DEFAULTS.getDefaultVersion( g, a ) but
+            // this means managed plugins would be included which confuses things.
             if ( isNotEmpty( g ) && isNotEmpty( a ) && isNotEmpty( v ) )
             {
                 resolvedPlugins.put( new SimpleProjectVersionRef( g, a, v ), p );
-            }
-            else
-            {
-                // We should never have a plugin with a non-resolvable artifactId.
-                throw new ManipulationException( "Unable to resolve plugin due to missing artifactId : " + g + ':' + a  + ':' + v );
             }
         }
     }

@@ -16,6 +16,7 @@
 package org.commonjava.maven.ext.manip.impl;
 
 import org.apache.maven.model.Dependency;
+import org.apache.maven.model.Plugin;
 import org.apache.maven.model.Profile;
 import org.codehaus.plexus.component.annotations.Component;
 import org.commonjava.maven.atlas.ident.DependencyScope;
@@ -30,6 +31,7 @@ import org.commonjava.maven.ext.manip.ManipulationSession;
 import org.commonjava.maven.ext.manip.model.Project;
 import org.commonjava.maven.ext.manip.model.SimpleScopedArtifactRef;
 import org.commonjava.maven.ext.manip.state.DependencyState;
+import org.commonjava.maven.ext.manip.state.PluginState;
 import org.commonjava.maven.ext.manip.state.RESTState;
 import org.commonjava.maven.ext.manip.state.VersioningState;
 import org.commonjava.maven.ext.manip.util.PropertiesUtils;
@@ -153,6 +155,7 @@ public class RESTManipulator implements Manipulator
         vs.setRESTMetadata (parseVersions(session, projects, state, newProjectKeys, restResult));
 
         final DependencyState ds = session.getState( DependencyState.class );
+        final PluginState ps = session.getState( PluginState.class );
         final Map<ArtifactRef, String> overrides = new HashMap<>();
 
         // Convert the loaded remote ProjectVersionRefs to the original ArtifactRefs
@@ -165,6 +168,8 @@ public class RESTManipulator implements Manipulator
         }
         logger.debug( "Setting REST Overrides {} ", overrides );
         ds.setRemoteRESTOverrides( overrides );
+        // TODO: #### Do we need to more specifically handle when we get back some plugins? But impossible to tell (just GAVs) so send everything to Plugin as well?
+        ps.setRemoteRESTOverrides( overrides );
     }
 
     /**
@@ -336,6 +341,8 @@ public class RESTManipulator implements Manipulator
 
                 recordDependencies( session, project, localDeps, project.getResolvedManagedDependencies( session ) );
                 recordDependencies( session, project, localDeps, project.getResolvedDependencies( session ) );
+                recordPlugins( localDeps, project.getResolvedManagedPlugins( session ) );
+                recordPlugins( localDeps, project.getResolvedPlugins( session ) );
 
                 List<Profile> profiles = project.getModel().getProfiles();
                 if ( profiles != null )
@@ -346,13 +353,13 @@ public class RESTManipulator implements Manipulator
                         {
                             continue;
                         }
-                        if ( p.getDependencyManagement() != null )
-                        {
-                            recordDependencies( session, project, localDeps,
-                                                project.getResolvedProfileManagedDependencies( session ).get( p ) );
-                        }
+                        recordDependencies( session, project, localDeps,
+                                                    project.getResolvedProfileManagedDependencies( session ).get( p ) );
                         recordDependencies( session, project, localDeps,
                                             project.getResolvedProfileDependencies( session ).get( p ) );
+                        recordPlugins( localDeps, project.getResolvedProfileManagedPlugins( session ).get( p ) );
+                        recordPlugins( localDeps, project.getResolvedProfilePlugins( session ).get( p ) );
+
                     }
                 }
             }
@@ -361,7 +368,27 @@ public class RESTManipulator implements Manipulator
     }
 
     /**
-     * Translate a given set of dependencies into ProjectVersionRefs.
+     * Translate a given set of pvr:plugins into ArtifactRefs.
+     * @param deps the list of ArtifactRefs to return
+     * @param plugins the plugins to transform.
+     */
+    private static void recordPlugins( Set<ArtifactRef> deps, HashMap<ProjectVersionRef, Plugin> plugins )
+    {
+        if ( plugins == null )
+        {
+            return;
+        }
+
+        for ( ProjectVersionRef pvr : plugins.keySet() )
+        {
+            deps.add( new SimpleScopedArtifactRef( pvr, new SimpleTypeAndClassifier( "maven-plugin", null ),
+                                                   DependencyScope.compile.realName() ) );
+        }
+    }
+
+
+    /**
+     * Translate a given set of pvr:dependencies into ArtifactRefs.
      * @param session the ManipulationSession
      * @param project currently scanned project
      * @param deps Set of ArtifactRef to store the results in.
