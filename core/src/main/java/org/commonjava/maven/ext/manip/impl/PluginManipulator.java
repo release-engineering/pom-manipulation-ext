@@ -268,8 +268,7 @@ public class PluginManipulator
             }
         }
 
-        logger.info ( "Remote precedence is {}", pState.getPrecedence() );
-        logger.debug ("Final remote override list is {}", mergedOverrides);
+        logger.debug ("Final remote override list for type {} with precedence {} is {}", type.toString(), pState.getPrecedence(), mergedOverrides);
 
         return mergedOverrides;
     }
