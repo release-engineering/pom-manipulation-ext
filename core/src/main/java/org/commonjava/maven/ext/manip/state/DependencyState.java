@@ -47,7 +47,7 @@ public class DependencyState
     /**
      * Defines how dependencies are located.
      */
-    private static final String DEPENDENCY_SOURCE = "dependencySource";
+    static final String DEPENDENCY_SOURCE = "dependencySource";
 
     /**
      * Merging precedence for dependency sources:
@@ -66,12 +66,11 @@ public class DependencyState
         RESTBOM,
         BOMREST
     }
+
     /**
      * Merely an alias for {@link DependencyState#DEPENDENCY_EXCLUSION_PREFIX}
      */
     private static final String DEPENDENCY_OVERRIDE_PREFIX = "dependencyOverride.";
-
-    // TODO: ### the next 3 options probably need to be in common state to be shared by PluginState
 
     /**
      * The name of the property which contains the GAV of the remote pom from which to retrieve dependency management

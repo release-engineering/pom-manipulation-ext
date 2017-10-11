@@ -168,7 +168,7 @@ public class RESTManipulator implements Manipulator
         }
         logger.debug( "Setting REST Overrides {} ", overrides );
         ds.setRemoteRESTOverrides( overrides );
-        // TODO: #### Do we need to more specifically handle when we get back some plugins? But impossible to tell (just GAVs) so send everything to Plugin as well?
+        // Unfortunately as everything is just GAVs we have to send everything to the PluginManipulator as well.
         ps.setRemoteRESTOverrides( overrides );
     }
 

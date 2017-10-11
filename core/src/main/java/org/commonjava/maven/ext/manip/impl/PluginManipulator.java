@@ -33,8 +33,9 @@ import org.commonjava.maven.ext.manip.io.ModelIO;
 import org.commonjava.maven.ext.manip.model.Project;
 import org.commonjava.maven.ext.manip.state.CommonState;
 import org.commonjava.maven.ext.manip.state.PluginState;
+import org.commonjava.maven.ext.manip.state.PluginState.PluginPrecedence;
 import org.commonjava.maven.ext.manip.state.PluginState.Precedence;
-import org.commonjava.maven.ext.manip.state.State;
+import org.commonjava.maven.ext.manip.state.RESTState;
 import org.commonjava.maven.ext.manip.util.PropertiesUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -104,7 +105,7 @@ public class PluginManipulator
      * later invocations of {@link Manipulator#scan(List)} and the apply* methods.
      */
     @Override
-    public void init( final ManipulationSession session )
+    public void init( final ManipulationSession session ) throws ManipulationException
     {
         this.session = session;
         session.setState( new PluginState( session.getUserProperties() ) );
@@ -135,8 +136,8 @@ public class PluginManipulator
         }
 
         final Set<Project> changed = new HashSet<>();
-        final Set<Plugin> mgmtOverrides = loadRemoteBOM( PluginType.RemotePM, state );
-        final Set<Plugin> pluginOverrides = loadRemoteBOM( PluginType.RemoteP, state );
+        final Set<Plugin> mgmtOverrides = loadRemoteBOM( PluginType.RemotePM );
+        final Set<Plugin> pluginOverrides = loadRemoteBOM( PluginType.RemoteP );
 
         for ( final Project project : projects )
         {
@@ -190,38 +191,87 @@ public class PluginManipulator
     }
 
 
-    private Set<Plugin> loadRemoteBOM( PluginType type, final State state )
+    private Set<Plugin> loadRemoteBOM( PluginType type )
         throws ManipulationException
     {
-        final Set<Plugin> overrides = new LinkedHashSet<>();
-        final List<ProjectVersionRef> gavs = ( (PluginState) state ).getRemotePluginMgmt();
+        final RESTState rState = session.getState( RESTState.class );
+        final PluginState pState = session.getState( PluginState.class );
+        final Set<Plugin> restOverrides = pState.getRemoteRESTOverrides();
+        final Set<Plugin> bomOverrides = new LinkedHashSet<>();
+        final List<ProjectVersionRef> gavs = pState.getRemotePluginMgmt();
 
-        if ( gavs == null || gavs.isEmpty() )
+        Set<Plugin> mergedOverrides = new LinkedHashSet<>();
+
+        if ( gavs != null )
         {
-            return overrides;
+            // We used to iterate in reverse order so that the first GAV in the list overwrites the last
+            // but due to the simplification moving to a single Set, as that doesn't support replace operation,
+            // we now iterate in normal order.
+            final Iterator<ProjectVersionRef> iter = gavs.iterator();
+            final Properties exclusions = (Properties) session.getUserProperties().clone();
+            exclusions.putAll( System.getProperties() );
+
+            while ( iter.hasNext() )
+            {
+                final ProjectVersionRef ref = iter.next();
+                if ( type == PluginType.RemotePM )
+                {
+                    bomOverrides.addAll( effectiveModelBuilder.getRemotePluginManagementVersionOverrides( ref,
+                                                                                                          exclusions ) );
+                }
+                else
+                {
+                    bomOverrides.addAll( effectiveModelBuilder.getRemotePluginVersionOverrides( ref, exclusions ) );
+                }
+            }
         }
 
-        // We used to iterate in reverse order so that the first GAV in the list overwrites the last
-        // but due to the simplification moving to a single Set, as that doesn't support replace operation,
-        // we now iterate in normal order.
-        final Iterator<ProjectVersionRef> iter = gavs.iterator( );
-        final Properties exclusions = (Properties) session.getUserProperties().clone();
-        exclusions.putAll( System.getProperties() );
 
-        while ( iter.hasNext() )
+        // TODO: Remote Plugin (as opposed to Remote PluginManagement) alignment is deprecated. Therefore we don't support combining it with REST.
+        if ( type == PluginType.RemoteP )
         {
-            final ProjectVersionRef ref = iter.next();
-            if ( type == PluginType.RemotePM )
+            if ( pState.getPrecedence() != PluginPrecedence.BOM )
             {
-                overrides.addAll( effectiveModelBuilder.getRemotePluginManagementVersionOverrides( ref, exclusions ) );
+                logger.warn( "Remote plugin alignment is only supported with precedence type of BOM" );
             }
-            else
+            mergedOverrides = bomOverrides;
+        }
+        else
+        {
+            if ( pState.getPrecedence() == PluginPrecedence.BOM )
             {
-                overrides.addAll( effectiveModelBuilder.getRemotePluginVersionOverrides( ref, exclusions ) );
+                mergedOverrides = bomOverrides;
+                if ( mergedOverrides.isEmpty() )
+                {
+                    String msg = rState.isEnabled() ? "pluginSource for restURL" : "pluginManagement";
+
+                    logger.warn( "No dependencies found for pluginSource {}. Has {} been configured? ", pState.getPrecedence(), msg );
+                }
+            }
+            if ( pState.getPrecedence() == PluginPrecedence.REST )
+            {
+                mergedOverrides = restOverrides;
+                if ( mergedOverrides.isEmpty() )
+                {
+                    logger.warn( "No dependencies found for pluginSource {}. Has restURL been configured? ", pState.getPrecedence() );
+                }
+            }
+            else if ( pState.getPrecedence() == PluginPrecedence.RESTBOM )
+            {
+                mergedOverrides = restOverrides;
+                mergedOverrides.addAll( bomOverrides );
+            }
+            else if ( pState.getPrecedence() == PluginPrecedence.BOMREST )
+            {
+                mergedOverrides = bomOverrides;
+                mergedOverrides.addAll( restOverrides );
             }
         }
 
-        return overrides;
+        logger.info ( "Remote precedence is {}", pState.getPrecedence() );
+        logger.debug ("Final remote override list is {}", mergedOverrides);
+
+        return mergedOverrides;
     }
 
     private void apply( final Project project, final Model model, PluginType type, final Set<Plugin> override )
@@ -307,8 +357,6 @@ public class PluginManipulator
             // like with dependencies, the behaviour is undefined - although its most likely the last-wins.
             pluginsByGA.put( pvr.asProjectRef().toString(), pvr );
         }
-
-        logger.debug( "#### plugins {} pluginsByGA {} ", plugins, pluginsByGA );
 
         for ( final Plugin override : pluginVersionOverrides )
         {

@@ -147,7 +147,7 @@ public class DependencyManipulator implements Manipulator
         Map<ArtifactRef, String> bomOverrides = new LinkedHashMap<>();
         Map<ArtifactRef, String> mergedOverrides = new LinkedHashMap<>();
 
-        if ( gavs != null && !gavs.isEmpty() )
+        if ( gavs != null )
         {
             final ListIterator<ProjectVersionRef> iter = gavs.listIterator( gavs.size() );
             // Iterate in reverse order so that the first GAV in the list overwrites the last
@@ -381,15 +381,6 @@ public class DependencyManipulator implements Manipulator
 
             if ( session.getState( DependencyState.class ).getOverrideDependencies() )
             {
-                // If the model doesn't have any Dependency Management set by default, create one for it
-                DependencyManagement dependencyManagement = model.getDependencyManagement();
-                if ( dependencyManagement == null )
-                {
-                    dependencyManagement = new DependencyManagement();
-                    model.setDependencyManagement( dependencyManagement );
-                    logger.debug( "Added <DependencyManagement/> for current project" );
-                }
-
                 // Apply overrides to project dependency management
                 logger.debug( "Applying overrides to managed dependencies for: {}", projectGA );
 
@@ -429,7 +420,18 @@ public class DependencyManipulator implements Manipulator
                         logger.debug( "New entry added to <DependencyManagement/> - {} : {} ", var, artifactVersion );
                     }
 
-                    dependencyManagement.getDependencies().addAll( 0, extraDeps );
+                    // If the model doesn't have any Dependency Management set by default, create one for it
+                    DependencyManagement dependencyManagement = model.getDependencyManagement();
+                    if ( extraDeps.size() > 0 )
+                    {
+                        if ( dependencyManagement == null )
+                        {
+                            dependencyManagement = new DependencyManagement();
+                            model.setDependencyManagement( dependencyManagement );
+                            logger.debug( "Added <DependencyManagement/> for current project" );
+                        }
+                        dependencyManagement.getDependencies().addAll( 0, extraDeps );
+                    }
                 }
                 else
                 {
@@ -583,7 +585,6 @@ public class DependencyManipulator implements Manipulator
             return unmatchedVersionOverrides;
         }
 
-        final DependencyState dependencyState = session.getState( DependencyState.class );
         final CommonState commonState = session.getState( CommonState.class );
         final boolean strict = commonState.getStrict();
 
