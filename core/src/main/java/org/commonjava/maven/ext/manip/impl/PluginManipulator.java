@@ -21,31 +21,32 @@ import org.apache.maven.model.Model;
 import org.apache.maven.model.Plugin;
 import org.apache.maven.model.PluginExecution;
 import org.apache.maven.model.PluginManagement;
+import org.apache.maven.model.Profile;
 import org.codehaus.plexus.component.annotations.Component;
 import org.codehaus.plexus.component.annotations.Requirement;
 import org.codehaus.plexus.util.xml.Xpp3Dom;
 import org.codehaus.plexus.util.xml.Xpp3DomUtils;
-import org.commonjava.maven.atlas.ident.ref.ProjectRef;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
-import org.commonjava.maven.atlas.ident.ref.SimpleProjectRef;
 import org.commonjava.maven.ext.manip.ManipulationException;
 import org.commonjava.maven.ext.manip.ManipulationSession;
 import org.commonjava.maven.ext.manip.io.ModelIO;
 import org.commonjava.maven.ext.manip.model.Project;
 import org.commonjava.maven.ext.manip.state.CommonState;
 import org.commonjava.maven.ext.manip.state.PluginState;
+import org.commonjava.maven.ext.manip.state.PluginState.PluginPrecedence;
 import org.commonjava.maven.ext.manip.state.PluginState.Precedence;
-import org.commonjava.maven.ext.manip.state.State;
+import org.commonjava.maven.ext.manip.state.RESTState;
 import org.commonjava.maven.ext.manip.util.PropertiesUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
@@ -104,7 +105,7 @@ public class PluginManipulator
      * later invocations of {@link Manipulator#scan(List)} and the apply* methods.
      */
     @Override
-    public void init( final ManipulationSession session )
+    public void init( final ManipulationSession session ) throws ManipulationException
     {
         this.session = session;
         session.setState( new PluginState( session.getUserProperties() ) );
@@ -135,9 +136,8 @@ public class PluginManipulator
         }
 
         final Set<Project> changed = new HashSet<>();
-
-        final Map<ProjectRef, Plugin> mgmtOverrides = loadRemoteBOM( PluginType.RemotePM, state );
-        final Map<ProjectRef, Plugin> pluginOverrides = loadRemoteBOM( PluginType.RemoteP, state );
+        final Set<Plugin> mgmtOverrides = loadRemoteBOM( PluginType.RemotePM );
+        final Set<Plugin> pluginOverrides = loadRemoteBOM( PluginType.RemoteP );
 
         for ( final Project project : projects )
         {
@@ -191,40 +191,90 @@ public class PluginManipulator
     }
 
 
-    private Map<ProjectRef, Plugin> loadRemoteBOM( PluginType type, final State state )
+    private Set<Plugin> loadRemoteBOM( PluginType type )
         throws ManipulationException
     {
-        final Map<ProjectRef, Plugin> overrides = new LinkedHashMap<>();
-        final List<ProjectVersionRef> gavs = ( (PluginState) state ).getRemotePluginMgmt();
+        final RESTState rState = session.getState( RESTState.class );
+        final PluginState pState = session.getState( PluginState.class );
+        final Set<Plugin> restOverrides = pState.getRemoteRESTOverrides();
+        final Set<Plugin> bomOverrides = new LinkedHashSet<>();
+        final List<ProjectVersionRef> gavs = pState.getRemotePluginMgmt();
 
-        if ( gavs == null || gavs.isEmpty() )
+        Set<Plugin> mergedOverrides = new LinkedHashSet<>();
+
+        if ( gavs != null )
         {
-            return overrides;
+            // We used to iterate in reverse order so that the first GAV in the list overwrites the last
+            // but due to the simplification moving to a single Set, as that doesn't support replace operation,
+            // we now iterate in normal order.
+            final Iterator<ProjectVersionRef> iter = gavs.iterator();
+            final Properties exclusions = (Properties) session.getUserProperties().clone();
+            exclusions.putAll( System.getProperties() );
+
+            while ( iter.hasNext() )
+            {
+                final ProjectVersionRef ref = iter.next();
+                if ( type == PluginType.RemotePM )
+                {
+                    bomOverrides.addAll( effectiveModelBuilder.getRemotePluginManagementVersionOverrides( ref,
+                                                                                                          exclusions ) );
+                }
+                else
+                {
+                    bomOverrides.addAll( effectiveModelBuilder.getRemotePluginVersionOverrides( ref, exclusions ) );
+                }
+            }
         }
 
-        final ListIterator<ProjectVersionRef> iter = gavs.listIterator( gavs.size() );
-        // Iterate in reverse order so that the first GAV in the list overwrites the last
 
-        Properties exclusions = (Properties) session.getUserProperties().clone();
-        exclusions.putAll( System.getProperties() );
-
-        while ( iter.hasPrevious() )
+        // TODO: Remote Plugin (as opposed to Remote PluginManagement) alignment is deprecated. Therefore we don't support combining it with REST.
+        if ( type == PluginType.RemoteP )
         {
-            final ProjectVersionRef ref = iter.previous();
-            if ( type == PluginType.RemotePM )
+            if ( pState.getPrecedence() != PluginPrecedence.BOM )
             {
-                overrides.putAll( effectiveModelBuilder.getRemotePluginManagementVersionOverrides( ref, exclusions ) );
+                logger.warn( "Remote plugin alignment is only supported with precedence type of BOM" );
             }
-            else
+            mergedOverrides = bomOverrides;
+        }
+        else
+        {
+            if ( pState.getPrecedence() == PluginPrecedence.BOM )
             {
-                overrides.putAll( effectiveModelBuilder.getRemotePluginVersionOverrides( ref, exclusions ) );
+                mergedOverrides = bomOverrides;
+                if ( mergedOverrides.isEmpty() )
+                {
+                    String msg = rState.isEnabled() ? "pluginSource for restURL" : "pluginManagement";
+
+                    logger.warn( "No dependencies found for pluginSource {}. Has {} been configured? ", pState.getPrecedence(), msg );
+                }
+            }
+            if ( pState.getPrecedence() == PluginPrecedence.REST )
+            {
+                mergedOverrides = restOverrides;
+                if ( mergedOverrides.isEmpty() )
+                {
+                    logger.warn( "No dependencies found for pluginSource {}. Has restURL been configured? ", pState.getPrecedence() );
+                }
+            }
+            else if ( pState.getPrecedence() == PluginPrecedence.RESTBOM )
+            {
+                mergedOverrides = restOverrides;
+                mergedOverrides.addAll( bomOverrides );
+            }
+            else if ( pState.getPrecedence() == PluginPrecedence.BOMREST )
+            {
+                mergedOverrides = bomOverrides;
+                mergedOverrides.addAll( restOverrides );
             }
         }
 
-        return overrides;
+        logger.info ( "Remote precedence is {}", pState.getPrecedence() );
+        logger.debug ("Final remote override list is {}", mergedOverrides);
+
+        return mergedOverrides;
     }
 
-    private void apply( final Project project, final Model model, PluginType type, final Map<ProjectRef, Plugin> override )
+    private void apply( final Project project, final Model model, PluginType type, final Set<Plugin> override )
         throws ManipulationException
     {
         logger.info( "Applying plugin changes for {} to: {} ", type, ga( project ) );
@@ -238,191 +288,250 @@ public class PluginManipulator
             {
                 build = new Build();
                 model.setBuild( build );
-                logger.info( "Created new Build for model " + model.getId() );
+                logger.debug( "Created new Build for model " + model.getId() );
             }
 
-            PluginManagement pluginManagement = model.getBuild()
-                                                     .getPluginManagement();
+            PluginManagement pluginManagement = model.getBuild().getPluginManagement();
 
             if ( pluginManagement == null )
             {
                 pluginManagement = new PluginManagement();
-                model.getBuild()
-                     .setPluginManagement( pluginManagement );
-                logger.info( "Created new Plugin Management for model " + model.getId() );
+                model.getBuild().setPluginManagement( pluginManagement );
+                logger.debug( "Created new Plugin Management for model " + model.getId() );
             }
 
             // Override plugin management versions
-            applyOverrides( project, type, PluginType.LocalPM, pluginManagement.getPlugins(), override );
+            applyOverrides( project, type, PluginType.LocalPM, project.getResolvedManagedPlugins( session ), override );
         }
 
-        if ( model.getBuild() != null )
-        {
-            // Override plugin versions
-            final List<Plugin> projectPlugins = model.getBuild()
-                                                     .getPlugins();
+        applyOverrides( project, type, PluginType.LocalP, project.getResolvedPlugins( session ), override );
 
-            // We can't wipe out the versions as we can't guarantee that the plugins are listed
-            // in the top level pluginManagement block.
-            applyOverrides( project, type, PluginType.LocalP, projectPlugins, override );
+        final HashMap<Profile, HashMap<ProjectVersionRef, Plugin>> pd = project.getResolvedProfilePlugins( session );
+        final HashMap<Profile, HashMap<ProjectVersionRef, Plugin>> pmd = project.getResolvedProfileManagedPlugins( session );
+
+        logger.debug ("Processing profiles with plugin management");
+        for ( Profile p : pmd.keySet() )
+        {
+            applyOverrides( project, type, PluginType.LocalPM, pmd.get( p ), override );
+        }
+        logger.debug ("Processing profiles with plugins");
+        for ( Profile p : pd.keySet() )
+        {
+            applyOverrides( project, type, PluginType.LocalP, pd.get( p ), override );
         }
     }
 
     /**
-     * Set the versions of any plugins which match the contents of the list of plugin overrides
+     * Set the versions of any plugins which match the contents of the list of plugin overrides.
+     *
+     * Currently this method takes the remote plugin type (note that remote plugins are deprecated) and the local plugin type.
+     * It will ONLY apply configurations, executions and dependencies from the remote pluginMgmt to the local pluginMgmt.
+     *   If the local pluginMgmt does not have a matching plugin then, if {@link CommonState#getOverrideTransitive()} is true
+     * then it will inject a new plugin into the local pluginMgmt.
+     *   It will however apply version changes to both local pluginMgmt and local plugins.
+     * Note that if the deprecated injectRemotePlugins is enabled then remote plugin version, executions, dependencies and
+     * configurations will also be applied to the local plugins.
      *
      * @param project the current project
      * @param remotePluginType The type of the remote plugin (mgmt or plugins)
-     * @param localPluginType The type of local block (mgmt or plugins).
+     * @param localPluginType The type of local block (mgmt or plugins). Only used to determine whether to inject configs/deps/executions.
      * @param plugins The list of plugins to modify
      * @param pluginVersionOverrides The list of version overrides to apply to the plugins
      * @throws ManipulationException if an error occurs.
      */
-    private void applyOverrides( Project project, PluginType remotePluginType, final PluginType localPluginType, final List<Plugin> plugins,
-                                 final Map<ProjectRef, Plugin> pluginVersionOverrides ) throws ManipulationException
+    private void applyOverrides( Project project, PluginType remotePluginType, final PluginType localPluginType, final HashMap<ProjectVersionRef, Plugin> plugins,
+                                 final Set<Plugin> pluginVersionOverrides ) throws ManipulationException
     {
-        if ( plugins == null)
+        if ( plugins == null )
         {
-            throw new ManipulationException ("Original plugins should not be null");
+            throw new ManipulationException( "Original plugins should not be null" );
         }
 
         final PluginState pluginState = session.getState( PluginState.class );
         final CommonState commonState = session.getState( CommonState.class );
-
-        for ( final Plugin override : pluginVersionOverrides.values())
+        final HashMap<String, ProjectVersionRef> pluginsByGA = new LinkedHashMap<>(  );
+        // Secondary map of original plugins group:artifact to pvr mapping.
+        for ( ProjectVersionRef pvr : plugins.keySet() )
         {
-            final int index = plugins.indexOf( override );
-            logger.debug( "Plugin override {} with index {} with remotePluginType {} / localPluginType {}", override, index, remotePluginType, localPluginType );
+            // We should NEVER have multiple group:artifact with different versions in the same project. If we do,
+            // like with dependencies, the behaviour is undefined - although its most likely the last-wins.
+            pluginsByGA.put( pvr.asProjectRef().toString(), pvr );
+        }
 
-            if ( index != -1 )
+        for ( final Plugin override : pluginVersionOverrides )
+        {
+            Plugin plugin = null;
+            String newValue = override.getVersion();
+
+            // If we're doing strict matching then we need to see if there is a matching plugin with the
+            // same version. Problem is when we have been run previously i.e. plugins contains rebuild-x
+            // and we want to compare without suffix. How do we establish the original version versus the
+            // override version.
+            if ( pluginsByGA.containsKey( override.getKey() ) )
             {
-                final ProjectRef groupIdArtifactId = new SimpleProjectRef(override.getGroupId(), override.getArtifactId());
-                final Plugin plugin = plugins.get( index );
+                // Potential match of override group:artifact to original plugin group:artifact.
+                String oldValue = pluginsByGA.get( override.getKey() ).getVersionString();
+                plugin = plugins.get( pluginsByGA.get( override.getKey() ) );
 
-                if ( override.getConfiguration() != null)
+                if ( commonState.getStrict() )
                 {
-                    logger.debug ("Injecting plugin configuration" + override.getConfiguration());
-                    if (localPluginType == PluginType.LocalPM && plugin.getConfiguration() == null)
+                    if ( !PropertiesUtils.checkStrictValue( session, oldValue, newValue ) )
                     {
-                        plugin.setConfiguration( override.getConfiguration() );
-                        logger.debug( "Altered plugin configuration: " + groupIdArtifactId + "=" + plugin.getConfiguration());
-                    }
-                    else if (localPluginType == PluginType.LocalPM && plugin.getConfiguration() != null)
-                    {
-                        logger.debug( "Existing plugin configuration: " + plugin.getConfiguration());
-
-                        if ( ! (plugin.getConfiguration() instanceof Xpp3Dom) || ! (override.getConfiguration() instanceof Xpp3Dom))
+                        if ( commonState.getFailOnStrictViolation() )
                         {
-                            throw new ManipulationException ("Incorrect DOM type " + plugin.getConfiguration().getClass().getName() +
-                                                             " and" + override.getConfiguration().getClass().getName());
-                        }
-
-                        if ( pluginState.getConfigPrecedence() == Precedence.REMOTE)
-                        {
-                            plugin.setConfiguration ( Xpp3DomUtils.mergeXpp3Dom
-                                                      ((Xpp3Dom)override.getConfiguration(), (Xpp3Dom)plugin.getConfiguration() ) );
-                        }
-                        else if ( pluginState.getConfigPrecedence() == Precedence.LOCAL )
-                        {
-                            plugin.setConfiguration ( Xpp3DomUtils.mergeXpp3Dom
-                                                      ((Xpp3Dom)plugin.getConfiguration(), (Xpp3Dom)override.getConfiguration() ) );
-                        }
-                        logger.debug( "Altered plugin configuration: " + groupIdArtifactId + "=" + plugin.getConfiguration());
-                    }
-                }
-                else
-                {
-                    logger.debug ("No remote configuration to inject from " + override.toString());
-                }
-
-                if (override.getExecutions() != null)
-                {
-                    Map<String,PluginExecution> newExecutions = override.getExecutionsAsMap();
-                    Map<String,PluginExecution> originalExecutions = plugin.getExecutionsAsMap();
-
-                    for (PluginExecution pe : newExecutions.values())
-                    {
-                        if (originalExecutions.containsKey( pe.getId() ) )
-                        {
-                            logger.warn ("Unable to inject execution " + pe.getId() + " as it clashes with an existing execution");
+                            throw new ManipulationException(
+                                            "Plugin reference {} replacement: {} of original version: {} violates the strict version-alignment rule!",
+                                            plugin.getId(), newValue, oldValue );
                         }
                         else
                         {
-                            logger.debug ("Injecting execution {} ", pe);
-                            plugin.getExecutions().add (pe);
+                            logger.warn( "Plugin reference {} replacement: {} of original version: {} violates the strict version-alignment rule!",
+                                         plugin.getId(), newValue, oldValue );
+                            // Ignore the dependency override. As found has been set to true it won't inject
+                            // a new property either.
+                            continue;
                         }
                     }
                 }
+            }
 
-                if (!override.getDependencies().isEmpty())
+            logger.debug( "Plugin override {} and local plugin {} with remotePluginType {} / localPluginType {}", override.getId(), plugin, remotePluginType, localPluginType );
+
+            if ( plugin != null )
+            {
+                if ( localPluginType == PluginType.LocalPM )
                 {
-                    logger.debug( "Checking original plugin dependencies versus override" );
-                    // First, remove any Dependency from the original Plugin if the GA exists in the override.
-                    Iterator<Dependency> originalIt = plugin.getDependencies().iterator();
-                    while (originalIt.hasNext())
+                    if ( override.getConfiguration() != null )
                     {
-                        Dependency originalD = originalIt.next();
-                        Iterator<Dependency> overrideIt = override.getDependencies().iterator();
-                        while ( overrideIt.hasNext() )
+                        logger.debug( "Injecting plugin configuration" + override.getConfiguration() );
+                        if ( plugin.getConfiguration() == null )
                         {
-                            Dependency newD = overrideIt.next();
-                            if (originalD.getGroupId().equals( newD.getGroupId() ) &&
-                                originalD.getArtifactId().equals( newD.getArtifactId() ) )
+                            plugin.setConfiguration( override.getConfiguration() );
+                            logger.debug( "Altered plugin configuration: " + plugin.getKey() + "=" + plugin.getConfiguration() );
+                        }
+                        else if ( plugin.getConfiguration() != null )
+                        {
+                            logger.debug( "Existing plugin configuration: " + plugin.getConfiguration() );
+
+                            if ( !( plugin.getConfiguration() instanceof Xpp3Dom ) || !( override.getConfiguration() instanceof Xpp3Dom ) )
                             {
-                                logger.debug( "Removing original dependency {} in favour of {} ", originalD, newD );
-                                originalIt.remove();
-                                break;
+                                throw new ManipulationException(
+                                                "Incorrect DOM type " + plugin.getConfiguration().getClass().getName() + " and" + override.getConfiguration()
+                                                                                                                                          .getClass()
+                                                                                                                                          .getName() );
+                            }
+
+                            if ( pluginState.getConfigPrecedence() == Precedence.REMOTE )
+                            {
+                                plugin.setConfiguration(
+                                                Xpp3DomUtils.mergeXpp3Dom( (Xpp3Dom) override.getConfiguration(), (Xpp3Dom) plugin.getConfiguration() ) );
+                            }
+                            else if ( pluginState.getConfigPrecedence() == Precedence.LOCAL )
+                            {
+                                plugin.setConfiguration( Xpp3DomUtils.mergeXpp3Dom( (Xpp3Dom) plugin.getConfiguration(),
+                                                                                    (Xpp3Dom) override.getConfiguration() ) );
+                            }
+                            logger.debug( "Altered plugin configuration: " + plugin.getKey() + "=" + plugin.getConfiguration() );
+                        }
+                    }
+                    else
+                    {
+                        logger.debug( "No remote configuration to inject from " + override.toString() );
+                    }
+
+                    if ( override.getExecutions() != null )
+                    {
+                        Map<String, PluginExecution> newExecutions = override.getExecutionsAsMap();
+                        Map<String, PluginExecution> originalExecutions = plugin.getExecutionsAsMap();
+
+                        for ( PluginExecution pe : newExecutions.values() )
+                        {
+                            if ( originalExecutions.containsKey( pe.getId() ) )
+                            {
+                                logger.warn( "Unable to inject execution " + pe.getId() + " as it clashes with an existing execution" );
+                            }
+                            else
+                            {
+                                logger.debug( "Injecting execution {} ", pe );
+                                plugin.getExecutions().add( pe );
                             }
                         }
                     }
-                    // Now merge them together.
-                    logger.debug( "Adding in plugin dependencies {}", override.getDependencies() );
-                    plugin.getDependencies().addAll( override.getDependencies() );
+                    else
+                    {
+                        logger.debug( "No remote executions to inject from " + override.toString() );
+                    }
+
+                    if ( !override.getDependencies().isEmpty() )
+                    {
+                        // TODO: ### Review this - is it still required?
+                        logger.debug( "Checking original plugin dependencies versus override" );
+                        // First, remove any Dependency from the original Plugin if the GA exists in the override.
+                        Iterator<Dependency> originalIt = plugin.getDependencies().iterator();
+                        while ( originalIt.hasNext() )
+                        {
+                            Dependency originalD = originalIt.next();
+                            Iterator<Dependency> overrideIt = override.getDependencies().iterator();
+                            while ( overrideIt.hasNext() )
+                            {
+                                Dependency newD = overrideIt.next();
+                                if ( originalD.getGroupId().equals( newD.getGroupId() ) && originalD.getArtifactId().equals( newD.getArtifactId() ) )
+                                {
+                                    logger.debug( "Removing original dependency {} in favour of {} ", originalD, newD );
+                                    originalIt.remove();
+                                    break;
+                                }
+                            }
+                        }
+                        // Now merge them together. Only inject dependencies in the management block.
+                        logger.debug( "Adding in plugin dependencies {}", override.getDependencies() );
+                        plugin.getDependencies().addAll( override.getDependencies() );
+                    }
                 }
 
+                // Explicitly using the original non-resolved original version.
                 String oldVersion = plugin.getVersion();
                 // Always force the version in a pluginMgmt block or set the version if there is an existing
                 // one in build/plugins section.
-                if ( override.getVersion() != null && !override.getVersion().isEmpty())
+
+                // Due to StandardMaven304PluginDefaults::getDefault version returning "[0.0.0.1]" override version
+                // will never be null.
+                if ( !PropertiesUtils.cacheProperty( project, commonState, versionPropertyUpdateMap, oldVersion,
+                                                     newValue, plugin, false ) )
                 {
-                    if ( ! PropertiesUtils.cacheProperty( project, commonState, versionPropertyUpdateMap, oldVersion, override.getVersion(), plugin, false ))
+                    if ( oldVersion != null && oldVersion.equals( "${project.version}" ) )
                     {
-                        if ( oldVersion != null && oldVersion.equals( "${project.version}" ) )
-                        {
-                            logger.debug( "For plugin {} ; version is built in {} so skipping inlining {}", plugin,
-                                          oldVersion, override.getVersion() );
-                        }
-                        else if ( oldVersion != null && oldVersion.contains( "${" ) )
-                        {
-                            throw new ManipulationException( "NYI : Multiple embedded properties for plugins." );
-                        }
-                        else
-                        {
-                            plugin.setVersion( override.getVersion() );
-                            logger.info( "Altered plugin version: " + groupIdArtifactId + "=" + override.getVersion() );
-                        }
+                        logger.debug( "For plugin {} ; version is built in {} so skipping inlining {}", plugin,
+                                      oldVersion, newValue );
+                    }
+                    else if ( oldVersion != null && oldVersion.contains( "${" ) )
+                    {
+                        throw new ManipulationException( "NYI : Multiple embedded properties for plugins." );
+                    }
+                    else
+                    {
+                        plugin.setVersion( newValue );
+                        logger.info( "Altered plugin version: " + override.getKey() + "=" + newValue );
                     }
                 }
             }
             // If the plugin doesn't exist but has a configuration section in the remote inject it so we
             // get the correct config.
-            else if ( remotePluginType == PluginType.RemotePM &&
-                            localPluginType == PluginType.LocalPM &&
-                            commonState.getOverrideTransitive() &&
-                            ( override.getConfiguration() != null || override.getExecutions().size() > 0 ) )
+            else if ( remotePluginType == PluginType.RemotePM && localPluginType == PluginType.LocalPM && commonState.getOverrideTransitive() && ( override.getConfiguration() != null
+                            || override.getExecutions().size() > 0 ) )
             {
-                plugins.add( override );
-                logger.info( "Added plugin version: " + override.getKey() + "=" + override.getVersion());
+                project.getModel().getBuild().getPluginManagement().getPlugins().add( override );
+                logger.info( "Added plugin version: " + override.getKey() + "=" + newValue );
             }
             // If the plugin in <plugins> doesn't exist but has a configuration section in the remote inject it so we
             // get the correct config.
-            else if ( remotePluginType == PluginType.RemoteP &&
-                            localPluginType == PluginType.LocalP &&
-                            pluginState.getInjectRemotePlugins() &&
-                            ( override.getConfiguration() != null || override.getExecutions().size() > 0 ) )
+            // TODO: Deprecated section.
+            else if ( remotePluginType == PluginType.RemoteP && localPluginType == PluginType.LocalP && pluginState.getInjectRemotePlugins() && ( override.getConfiguration() != null
+                            || override.getExecutions().size() > 0 ) )
             {
-                plugins.add( override );
-                logger.info( "For non-pluginMgmt, added plugin version : " + override.getKey() + "=" + override.getVersion());
+                project.getModel().getBuild().getPlugins().add( override );
+                logger.info( "For non-pluginMgmt, added plugin version : " + override.getKey() + "="
+                                             + newValue );
             }
         }
     }

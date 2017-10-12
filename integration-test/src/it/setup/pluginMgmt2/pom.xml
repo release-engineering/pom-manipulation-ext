@@ -25,6 +25,7 @@
   <groupId>org.commonjava.maven.ext</groupId>
   <artifactId>pluginMgmt2</artifactId>
   <version>1.0</version>
+  <packaging>pom</packaging>
 
   <name>Plugin Management POM to use with integration tests</name>
 

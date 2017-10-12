@@ -17,6 +17,7 @@ package org.commonjava.maven.ext.manip.util;
 
 import org.commonjava.maven.ext.manip.ManipulationException;
 import org.commonjava.maven.ext.manip.ManipulationSession;
+import org.commonjava.maven.ext.manip.state.CommonState;
 import org.commonjava.maven.ext.manip.state.DependencyState;
 import org.commonjava.maven.ext.manip.state.VersioningState;
 import org.junit.Before;
@@ -48,10 +49,10 @@ public class CheckStrictValueTest
         session.setState( vs );
         if (strictIgnoreSuffix)
         {
-            user.setProperty( DependencyState.STRICT_ALIGNMENT_IGNORE_SUFFIX, "true" );
+            user.setProperty( CommonState.STRICT_ALIGNMENT_IGNORE_SUFFIX, "true" );
         }
-        final DependencyState ds = new DependencyState( user );
-        session.setState( ds );
+        final CommonState cs = new CommonState( user );
+        session.setState( cs );
     }
 
     @Parameterized.Parameters( name = "{0} --> {1}" )

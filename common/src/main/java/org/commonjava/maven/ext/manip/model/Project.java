@@ -31,6 +31,8 @@ import org.commonjava.maven.ext.manip.ManipulationException;
 import org.commonjava.maven.ext.manip.session.MavenSessionHandler;
 import org.commonjava.maven.ext.manip.util.ProfileUtils;
 import org.commonjava.maven.ext.manip.util.PropertyResolver;
+import org.commonjava.maven.galley.maven.internal.defaults.StandardMaven304PluginDefaults;
+import org.commonjava.maven.galley.maven.spi.defaults.MavenPluginDefaults;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -39,6 +41,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.apache.commons.lang.StringUtils.isEmpty;
 import static org.apache.commons.lang.StringUtils.isNotEmpty;
 
 /**
@@ -51,6 +54,8 @@ import static org.apache.commons.lang.StringUtils.isNotEmpty;
  */
 public class Project
 {
+    private static final MavenPluginDefaults PLUGIN_DEFAULTS = new StandardMaven304PluginDefaults();
+
     /**
      * Original POM file from which this model information was loaded.
      */
@@ -83,11 +88,19 @@ public class Project
 
     private HashMap<ProjectVersionRef, Dependency> resolvedDependencies;
 
-    private HashMap<ProjectVersionRef, Dependency> resolvedManagedDepencies;
+    private HashMap<ProjectVersionRef, Dependency> resolvedManagedDependencies;
 
     private HashMap<Profile, HashMap<ProjectVersionRef, Dependency>> resolvedProfileDependencies;
 
     private HashMap<Profile, HashMap<ProjectVersionRef, Dependency>> resolvedProfileManagedDependencies;
+
+    private HashMap<ProjectVersionRef, Plugin> resolvedPlugins;
+
+    private HashMap<ProjectVersionRef, Plugin> resolvedManagedPlugins;
+
+    private HashMap<Profile, HashMap<ProjectVersionRef, Plugin>> resolvedProfilePlugins;
+
+    private HashMap<Profile, HashMap<ProjectVersionRef, Plugin>> resolvedProfileManagedPlugins;
 
     public Project( final ProjectVersionRef key, final File pom, final Model model )
     {
@@ -262,7 +275,7 @@ public class Project
      *
      * @param session MavenSessionHandler, used by {@link PropertyResolver}
      * @return a list of fully resolved {@link ProjectVersionRef} to the original {@link Dependency}
-     * @throws ManipulationException
+     * @throws ManipulationException if an error occurs
      */
     public HashMap<Profile, HashMap<ProjectVersionRef, Dependency>> getResolvedProfileDependencies( MavenSessionHandler session) throws ManipulationException
     {
@@ -290,7 +303,7 @@ public class Project
      *
      * @param session MavenSessionHandler, used by {@link PropertyResolver}
      * @return a list of fully resolved {@link ProjectVersionRef} to the original {@link Dependency} (that were within DependencyManagement)
-     * @throws ManipulationException
+     * @throws ManipulationException if an error occurs
      */
     public HashMap<Profile, HashMap<ProjectVersionRef, Dependency>> getResolvedProfileManagedDependencies( MavenSessionHandler session) throws ManipulationException
     {
@@ -314,6 +327,107 @@ public class Project
         return resolvedProfileManagedDependencies;
     }
 
+
+    /**
+     * This method will scan the plugins in this project and return a fully resolved list. Note that
+     * while updating the {@link Plugin} reference returned will be reflected in the Model as it is the
+     * same object, if you wish to remove or add items to the Model then you must use {@link #getModel()}
+     *
+     * @param session MavenSessionHandler, used by {@link PropertyResolver}
+     * @return a list of fully resolved {@link ProjectVersionRef} to the original {@link Plugin}
+     * @throws ManipulationException if an error occurs
+     */
+    public HashMap<ProjectVersionRef, Plugin> getResolvedPlugins ( MavenSessionHandler session) throws ManipulationException
+    {
+        if ( resolvedPlugins == null )
+        {
+            resolvedPlugins = new HashMap<>();
+
+            if ( getModel().getBuild() != null )
+            {
+                resolvePlugins( session, getModel().getBuild().getPlugins(), resolvedPlugins );
+            }
+        }
+        return resolvedPlugins;
+    }
+
+
+    /**
+     * This method will scan the plugins in the pluginManagement section of this project and return a fully
+     * resolved list. Note that while updating the {@link Plugin} reference returned will be reflected in
+     * the Model as it is the same object, if you wish to remove or add items to the Model then you must
+     * use {@link #getModel()}
+     *
+     * @param session MavenSessionHandler, used by {@link PropertyResolver}
+     * @return a list of fully resolved {@link ProjectVersionRef} to the original {@link Plugin}
+     * @throws ManipulationException if an error occurs
+     */
+    public HashMap<ProjectVersionRef, Plugin> getResolvedManagedPlugins ( MavenSessionHandler session) throws ManipulationException
+    {
+        if ( resolvedManagedPlugins == null )
+        {
+            resolvedManagedPlugins = new HashMap<>(  );
+
+            if ( getModel().getBuild() != null )
+            {
+                final PluginManagement pm = getModel().getBuild().getPluginManagement();
+                if ( !( pm == null || pm.getPlugins() == null ) )
+                {
+                    resolvePlugins( session, pm.getPlugins(), resolvedManagedPlugins );
+                }
+            }
+        }
+
+        return resolvedManagedPlugins;
+    }
+
+    public HashMap<Profile,HashMap<ProjectVersionRef,Plugin>> getResolvedProfilePlugins( MavenSessionHandler session )
+                    throws ManipulationException
+    {
+        if ( resolvedProfilePlugins == null )
+        {
+            resolvedProfilePlugins = new HashMap<>();
+
+            for ( final Profile profile : ProfileUtils.getProfiles( session, model ) )
+            {
+                HashMap<ProjectVersionRef, Plugin> profileDeps = new HashMap<>();
+
+                if ( profile.getBuild() != null )
+                {
+                    resolvePlugins( session, profile.getBuild().getPlugins(), profileDeps );
+
+                }
+                resolvedProfilePlugins.put( profile, profileDeps );
+            }
+        }
+        return resolvedProfilePlugins;
+    }
+
+    public HashMap<Profile,HashMap<ProjectVersionRef,Plugin>> getResolvedProfileManagedPlugins( MavenSessionHandler session )
+                    throws ManipulationException
+    {
+        if ( resolvedProfileManagedPlugins == null )
+        {
+            resolvedProfileManagedPlugins = new HashMap<>();
+
+            for ( final Profile profile : ProfileUtils.getProfiles( session, model ) )
+            {
+                HashMap<ProjectVersionRef, Plugin> profileDeps = new HashMap<>();
+
+                if ( profile.getBuild() != null )
+                {
+                    final PluginManagement pm = profile.getBuild().getPluginManagement();
+                    if ( !( pm == null || pm.getPlugins() == null ) )
+                    {
+                        resolvePlugins( session, pm.getPlugins(), profileDeps );
+                    }
+                }
+                resolvedProfileManagedPlugins.put( profile, profileDeps );
+            }
+        }
+        return resolvedProfileManagedPlugins;
+    }
+
     /**
      * This method will scan the dependencies in this project and return a fully resolved list. Note that
      * while updating the {@link Dependency} reference returned will be reflected in the Model as it is the
@@ -321,7 +435,7 @@ public class Project
      *
      * @param session MavenSessionHandler, used by {@link PropertyResolver}
      * @return a list of fully resolved {@link ProjectVersionRef} to the original {@link Dependency}
-     * @throws ManipulationException
+     * @throws ManipulationException if an error occurs
      */
     public HashMap<ProjectVersionRef, Dependency> getResolvedDependencies( MavenSessionHandler session) throws ManipulationException
     {
@@ -342,21 +456,21 @@ public class Project
      *
      * @param session MavenSessionHandler, used by {@link PropertyResolver}
      * @return a list of fully resolved {@link ProjectVersionRef} to the original {@link Dependency} (that were within DependencyManagement)
-     * @throws ManipulationException
+     * @throws ManipulationException if an error occurs
      */
     public HashMap<ProjectVersionRef, Dependency> getResolvedManagedDependencies( MavenSessionHandler session ) throws ManipulationException
     {
-        if ( resolvedManagedDepencies == null )
+        if ( resolvedManagedDependencies == null )
         {
-            resolvedManagedDepencies = new HashMap<>(  );
+            resolvedManagedDependencies = new HashMap<>(  );
 
             final DependencyManagement dm = getModel().getDependencyManagement();
             if ( ! ( dm == null || dm.getDependencies() == null ) )
             {
-                resolveDeps( session, dm.getDependencies(), resolvedManagedDepencies );
+                resolveDeps( session, dm.getDependencies(), resolvedManagedDependencies );
             }
         }
-        return resolvedManagedDepencies;
+        return resolvedManagedDependencies;
     }
 
 
@@ -378,6 +492,37 @@ public class Project
             if ( isNotEmpty( g ) && isNotEmpty( a ) && isNotEmpty( v ) )
             {
                 resolvedDependencies.put( new SimpleProjectVersionRef( g, a, v ), d );
+            }
+        }
+    }
+
+
+    private void resolvePlugins ( MavenSessionHandler session, List<Plugin> plugins, HashMap<ProjectVersionRef, Plugin> resolvedPlugins)
+                    throws ManipulationException
+    {
+        for ( Plugin p : plugins )
+        {
+            String g = PropertyResolver.resolveInheritedProperties( session, this, "${project.groupId}".equals( p.getGroupId() ) ?
+                            getGroupId() :
+                            p.getGroupId() );
+            String a = PropertyResolver.resolveInheritedProperties( session, this, "${project.artifactId}".equals( p.getArtifactId() ) ?
+                            getArtifactId() :
+                            p.getArtifactId() );
+            String v = PropertyResolver.resolveInheritedProperties( session, this, "${project.version}".equals( p.getVersion() ) ?
+                            p.getVersion() :
+                            p.getVersion() );
+
+            // Its possible the internal plugin list is either abbreviated or empty. Attempt to fill in default values for
+            // comparison purposes.
+            if ( isEmpty( g ) )
+            {
+                g = PLUGIN_DEFAULTS.getDefaultGroupId( a );
+            }
+            // Theoretically we could default an empty v via PLUGIN_DEFAULTS.getDefaultVersion( g, a ) but
+            // this means managed plugins would be included which confuses things.
+            if ( isNotEmpty( g ) && isNotEmpty( a ) && isNotEmpty( v ) )
+            {
+                resolvedPlugins.put( new SimpleProjectVersionRef( g, a, v ), p );
             }
         }
     }

@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (C) 2012 Red Hat, Inc. (jcasey@redhat.com)
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+            http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
+
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>org.commonjava.maven.ext</groupId>
+  <artifactId>remote-plugin-management-strict-suffix</artifactId>
+  <version>1.0-SNAPSHOT</version>
+
+  <name>Test override plugin version using command line property</name>
+
+  <scm>
+    <connection>scm:git:http://github.com/release-engineering/pom-manipulation-ext.git</connection>
+    <developerConnection>scm:git:git@github.com:release-engineering/pom-manipulation-ext.git</developerConnection>
+    <url>http://github.com/release-engineering/pom-manipulation-ext</url>
+    <tag>HEAD</tag>
+  </scm>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+    <compiler>maven-compiler-plugin</compiler>
+    <maven-jar-plugin>2.3.1-redhat-0</maven-jar-plugin>
+
+    <junitGrouppArtifactId>junit</junitGrouppArtifactId>
+    <junitVersion>4.1</junitVersion>
+  </properties>
+
+  <dependencies>
+    <dependency>
+      <groupId>${junitGrouppArtifactId}</groupId>
+      <artifactId>${junitGrouppArtifactId}</artifactId>
+      <version>${junitVersion}</version>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>buildnumber-maven-plugin</artifactId>
+          <version>[0.0.0.1,]</version>
+          <executions>
+            <execution>
+              <id>get-build-timestamp</id>
+              <phase>initialize</phase>
+              <goals>
+                <goal>create-timestamp</goal>
+              </goals>
+              <configuration>
+                <timestampFormat>EEE, d MMM yyyy HH:mm:ss Z</timestampFormat>
+                <timestampPropertyName>build.datetime</timestampPropertyName>
+              </configuration>
+            </execution>
+          </executions>
+        </plugin>
+        <plugin>
+          <artifactId>${compiler}</artifactId>
+          <version>99-bad</version>
+          <configuration>
+            <debug>false</debug>
+            <showDeprecation>true</showDeprecation>
+            <showWarnings>true</showWarnings>
+            <testSource>${maven.compiler.source}</testSource>
+            <testTarget>${maven.compiler.source}</testTarget>
+          </configuration>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-jar-plugin</artifactId>
+          <version>${maven-jar-plugin}</version>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+
+
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>${compiler}</artifactId>
+        <version>1000-bad</version>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>buildnumber-maven-plugin</artifactId>
+      </plugin>
+    </plugins>
+  </build>
+
+</project>

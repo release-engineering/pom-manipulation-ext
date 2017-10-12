@@ -79,6 +79,9 @@ public class TestUtils
         add( "rest-version-manip-only" );
         add( "rest-version-manip-only-override" );
         add( "rest-version-manip-restbom" );
+        add( "rest-version-manip-plugin-restbom" );
+        add( "rest-version-manip-plugin-rest" );
+        add( "rest-version-manip-plugin-bomrest" );
     }};
 
     protected static final Map<String, String> LOCATION_REWRITE = new HashMap<String, String>()

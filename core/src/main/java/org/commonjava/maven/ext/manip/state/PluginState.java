@@ -15,12 +15,18 @@
  */
 package org.commonjava.maven.ext.manip.state;
 
+import org.apache.maven.model.Plugin;
+import org.commonjava.maven.atlas.ident.ref.ArtifactRef;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
+import org.commonjava.maven.ext.manip.ManipulationException;
 import org.commonjava.maven.ext.manip.impl.PluginManipulator;
 import org.commonjava.maven.ext.manip.util.IdUtils;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 
 /**
  * Captures configuration relating to plugin alignment from the POMs. Used by {@link PluginManipulator}.
@@ -28,6 +34,28 @@ import java.util.Properties;
 public class PluginState
     implements State
 {
+    /**
+     * Defines how dependencies are located.
+     */
+    private static final String PLUGIN_SOURCE = "pluginSource";
+
+    /**
+     * Merging precedence for dependency sources:
+     * <pre>
+     * <code>BOM</code> Solely Remote POM i.e. BOM.
+     * <code>REST</code> Solely restURL.
+     * <code>RESTBOM</code> Merges the information but takes the rest as precedence.
+     * <code>BOMREST</code> Merges the information but takes the bom as precedence.
+     * </pre>
+     * Configured by the property <code>-DpluginSource=[REST|BOM|RESTBOM|BOMREST]</code>
+     */
+    public enum PluginPrecedence
+    {
+        REST,
+        BOM,
+        RESTBOM,
+        BOMREST
+    }
     /**
      * The name of the property which contains the GAV of the remote pom from which to retrieve plugin management
      * information.
@@ -55,12 +83,20 @@ public class PluginState
 
     private final Precedence configPrecedence;
 
+    /**
+     * Denote whether to inject plugin sections from a remote bom. This is separate to injecting
+     * pluginMgmt.
+     */
     private final boolean injectRemotePlugins;
 
-    public PluginState( final Properties userProps )
+    private Set<Plugin> remoteRESTplugins = new HashSet<>(  );
+
+    private PluginPrecedence precedence;
+
+    public PluginState( final Properties userProps ) throws ManipulationException
     {
         pluginMgmt = IdUtils.parseGAVs( userProps.getProperty( PLUGIN_MANAGEMENT_POM_PROPERTY ) );
-        injectRemotePlugins = Boolean.valueOf( userProps.getProperty( "injectRemotePlugins", "true" ) );
+        injectRemotePlugins = Boolean.valueOf( userProps.getProperty( "injectRemotePlugins", "false" ) );
         switch ( Precedence.valueOf( userProps.getProperty( "pluginManagementPrecedence",
                                                             Precedence.REMOTE.toString() ).toUpperCase() ) )
         {
@@ -76,6 +112,39 @@ public class PluginState
                 break;
             }
         }
+        // While pluginState can have a separate precedence to dependencyState by default it takes the same. This
+        // is a slight shortcut to avoid duplicate configuring while still allowing flexibility.
+        switch ( PluginPrecedence.valueOf( (
+                        userProps.getProperty( PLUGIN_SOURCE,
+                        userProps.getProperty( DependencyState.DEPENDENCY_SOURCE, DependencyState.DependencyPrecedence.BOM.toString() ) )
+                                           ).toUpperCase() ) )
+        {
+            case REST:
+            {
+                precedence = PluginPrecedence.REST;
+                break;
+            }
+            case BOM:
+            {
+                precedence = PluginPrecedence.BOM;
+                break;
+            }
+            case RESTBOM:
+            {
+                precedence = PluginPrecedence.RESTBOM;
+                break;
+            }
+            case BOMREST:
+            {
+                precedence = PluginPrecedence.BOMREST;
+                break;
+            }
+            default:
+            {
+                throw new ManipulationException( "Unknown value {} for {}", userProps.getProperty( PLUGIN_SOURCE ),
+                                                 PLUGIN_SOURCE );
+            }
+        }
     }
 
     /**
@@ -86,7 +155,8 @@ public class PluginState
     @Override
     public boolean isEnabled()
     {
-        return pluginMgmt != null && !pluginMgmt.isEmpty();
+        return ( pluginMgmt != null && !pluginMgmt.isEmpty() ) ||
+               ( remoteRESTplugins != null && !remoteRESTplugins.isEmpty() );
     }
 
     public List<ProjectVersionRef> getRemotePluginMgmt()
@@ -101,9 +171,32 @@ public class PluginState
 
     /**
      * @return whether to inject plugins found in the remote pom.
+     * @deprecated
      */
     public boolean getInjectRemotePlugins()
     {
         return injectRemotePlugins;
+    }
+
+    public void setRemoteRESTOverrides( Map<ArtifactRef, String> overrides )
+    {
+        for ( ArtifactRef a : overrides.keySet() )
+        {
+            Plugin p = new Plugin();
+            p.setGroupId( a.getGroupId() );
+            p.setArtifactId( a.getArtifactId() );
+            p.setVersion( overrides.get( a ) );
+            remoteRESTplugins.add( p );
+        }
+    }
+
+    public Set<Plugin> getRemoteRESTOverrides( )
+    {
+        return remoteRESTplugins;
+    }
+
+    public PluginPrecedence getPrecedence()
+    {
+        return precedence;
     }
 }

@@ -85,6 +85,26 @@ public class RESTIntegrationTest
     }
 
     @Test
+    public void testRESTVersionManipRESTPlugin() throws Exception
+    {
+        String test = getDefaultTestLocation( "rest-version-manip-plugin-rest" );
+        runLikeInvoker( test, mockServer.getUrl() );
+    }
+    @Test
+    public void testRESTVersionManipRESTBOMPlugin() throws Exception
+    {
+        String test = getDefaultTestLocation( "rest-version-manip-plugin-restbom" );
+        runLikeInvoker( test, mockServer.getUrl() );
+    }
+
+    @Test
+    public void testRESTVersionManipBOMRESTPlugin() throws Exception
+    {
+        String test = getDefaultTestLocation( "rest-version-manip-plugin-bomrest" );
+        runLikeInvoker( test, mockServer.getUrl() );
+    }
+
+    @Test
     public void testRESTVersionManipOverride() throws Exception
     {
         String test = getDefaultTestLocation( "rest-version-manip-only-override" );

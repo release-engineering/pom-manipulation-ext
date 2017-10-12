@@ -23,7 +23,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>org.commonjava.maven.ext</groupId>
-  <artifactId>rest-version-manip-only</artifactId>
+  <artifactId>rest-version-manip-bomrest</artifactId>
   <version>1.0.0</version>
   <packaging>pom</packaging>
 

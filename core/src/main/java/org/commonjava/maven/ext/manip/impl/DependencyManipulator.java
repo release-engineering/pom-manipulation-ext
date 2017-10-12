@@ -147,7 +147,7 @@ public class DependencyManipulator implements Manipulator
         Map<ArtifactRef, String> bomOverrides = new LinkedHashMap<>();
         Map<ArtifactRef, String> mergedOverrides = new LinkedHashMap<>();
 
-        if ( gavs != null && !gavs.isEmpty() )
+        if ( gavs != null )
         {
             final ListIterator<ProjectVersionRef> iter = gavs.listIterator( gavs.size() );
             // Iterate in reverse order so that the first GAV in the list overwrites the last
@@ -339,11 +339,11 @@ public class DependencyManipulator implements Manipulator
 
                     if ( entry.getKey().asProjectRef().equals( SimpleProjectRef.parse( ga(project.getModelParent()) ) ))
                     {
-                        if ( dependencyState.getStrict() )
+                        if ( commonState.getStrict() )
                         {
                             if ( !PropertiesUtils.checkStrictValue( session, oldValue, newValue ) )
                             {
-                                if ( dependencyState.getFailOnStrictViolation() )
+                                if ( commonState.getFailOnStrictViolation() )
                                 {
                                     throw new ManipulationException(
                                                     "Parent reference {} replacement: {} of original version: {} violates the strict version-alignment rule!",
@@ -381,15 +381,6 @@ public class DependencyManipulator implements Manipulator
 
             if ( session.getState( DependencyState.class ).getOverrideDependencies() )
             {
-                // If the model doesn't have any Dependency Management set by default, create one for it
-                DependencyManagement dependencyManagement = model.getDependencyManagement();
-                if ( dependencyManagement == null )
-                {
-                    dependencyManagement = new DependencyManagement();
-                    model.setDependencyManagement( dependencyManagement );
-                    logger.debug( "Added <DependencyManagement/> for current project" );
-                }
-
                 // Apply overrides to project dependency management
                 logger.debug( "Applying overrides to managed dependencies for: {}", projectGA );
 
@@ -429,7 +420,18 @@ public class DependencyManipulator implements Manipulator
                         logger.debug( "New entry added to <DependencyManagement/> - {} : {} ", var, artifactVersion );
                     }
 
-                    dependencyManagement.getDependencies().addAll( 0, extraDeps );
+                    // If the model doesn't have any Dependency Management set by default, create one for it
+                    DependencyManagement dependencyManagement = model.getDependencyManagement();
+                    if ( extraDeps.size() > 0 )
+                    {
+                        if ( dependencyManagement == null )
+                        {
+                            dependencyManagement = new DependencyManagement();
+                            model.setDependencyManagement( dependencyManagement );
+                            logger.debug( "Added <DependencyManagement/> for current project" );
+                        }
+                        dependencyManagement.getDependencies().addAll( 0, extraDeps );
+                    }
                 }
                 else
                 {
@@ -583,9 +585,8 @@ public class DependencyManipulator implements Manipulator
             return unmatchedVersionOverrides;
         }
 
-        final DependencyState dependencyState = session.getState( DependencyState.class );
-        final CommonState commonState= session.getState( CommonState.class );
-        final boolean strict = dependencyState.getStrict();
+        final CommonState commonState = session.getState( CommonState.class );
+        final boolean strict = commonState.getStrict();
 
         // Apply matching overrides to dependencies
         for ( final ProjectVersionRef dependency : dependencies.keySet() )
@@ -635,7 +636,7 @@ public class DependencyManipulator implements Manipulator
                     {
                         logger.debug ("Original fully resolved version {} of {} does not match override version {} -> {} so ignoring",
                                       resolvedValue, dependency, entry.getKey(), overrideVersion);
-                        if ( dependencyState.getFailOnStrictViolation() )
+                        if ( commonState.getFailOnStrictViolation() )
                         {
                             throw new ManipulationException(
                                             "For {} replacing original property version {} (fully resolved: {} ) with new version {} for {} violates the strict version-alignment rule!",
@@ -664,7 +665,7 @@ public class DependencyManipulator implements Manipulator
                             }
                             else if ( strict && ! PropertiesUtils.checkStrictValue( session, resolvedValue, overrideVersion) )
                             {
-                                if ( dependencyState.getFailOnStrictViolation() )
+                                if ( commonState.getFailOnStrictViolation() )
                                 {
                                     throw new ManipulationException(
                                                      "Replacing original version {} in dependency {} with new version {} violates the strict version-alignment rule!",
@@ -686,7 +687,7 @@ public class DependencyManipulator implements Manipulator
                                     String suffix = PropertiesUtils.getSuffix( session );
                                     String replaceVersion;
 
-                                    if ( dependencyState.getStrictIgnoreSuffix() && oldVersion.contains( suffix ) )
+                                    if ( commonState.getStrictIgnoreSuffix() && oldVersion.contains( suffix ) )
                                     {
                                         replaceVersion = StringUtils.substringBefore( oldVersion, suffix );
                                         replaceVersion += suffix + StringUtils.substringAfter( overrideVersion, suffix );
