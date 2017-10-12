@@ -9,7 +9,26 @@ title: "Plugin Manipulation"
 
 PME can align plugin versions and configuration using a similar pattern to [dependencies](dep-manip.html). It also has the ability to standardize the use of `skip` flags that determine whether the `maven-install-plugin` and `maven-deploy-plugin` execute. Finally, by default PME will inject plugin executions for the `project-sources-maven-plugin` and `buildmetadata-maven-plugin`, in order to promote reproducibility of the project build.
 
-### Basic Plugin Alignment
+### Plugin Alignment
+
+<table bgcolor="#00ff99">
+<tr>
+<td>
+    <b>NOTE</b> : Several configuration flags are shared with  <a href="dep-manip.html">Dependency Manipulator</a>.
+</td>
+</tr>
+</table>
+
+#### Dependency Source
+
+##### BOM and REST
+
+There are two sources of dependencies used to align to in PME. The property `pluginSource` is used to alter the behaviour of how PME handles the multiple sources of plugin information. The `BOM` value is that PME will use the BOM (i.e. Remote POM) source. Alternatively the `REST` source may be specified to use only the REST Endpoint information. However by setting the property to either `RESTBOM` or `BOMREST` it will instead merge the two sets of values. With `RESTBOM` precendence is given to the REST information and for `BOMREST` precendence is given to the BOM information.
+
+**Note**: If this is not specified the default value for `pluginSource` will match the value for `dependencySource`. Therefore it is only necessary to set `pluginSource` if a *different* value to `dependencySource` is needed.
+
+
+##### Remote POM
 
 A remote plugin management POM is used to specify the plugin versions (and configuration) to inject:
 
@@ -19,11 +38,25 @@ This will inject all `<pluginManagement/>` versions, executions and configuratio
 
     mvn install -DpluginManagement=org.company:pluginMgrA:1.0,org.company:pluginMgrB:2.0
 
+
+##### REST Endpoint
+
+For information on the REST Endpoint see [here](dep-manip.html#rest-endpoint)
+
+
+#### Direct/Transitive Dependencies
+
 By default the extension will inject _all_ plugins declared in the remote BOM. If the option `overrideTransitive` is set to `false` to then only plugins used will be overridden.
 
     mvn install -DpluginManagement=org.foo:my-dep-pom:1.0 -DoverrideTransitive=false
 
 **Note**: overrideTransitive is also used by the Dependency Manipulator.
+
+#### Strict Mode Version Alignment
+
+For information on strict mode configuration see [here](dep-manip.html#strict-mode-version-alignment)
+
+#### Configuration
 
 If there is an existing local configuration then it will be merged with the remote. The following configuration controls the precedence:
 
@@ -33,7 +66,15 @@ Default is `REMOTE` which means the remote configuration takes precedence over l
 
 If when attempting to merge the remote execution blocks into local, the `<id>`'s clash an exception will be thrown.
 
-By default (unless `injectRemotePlugins` is set to false), PME will also inject any `<plugin/>` that have execution or configuration sections found in the remote BOM.
+<table bgcolor="#ff3333">
+<tr>
+<td>
+    <b>NOTE</b> : As of October 2017 the default for injectRemotePlugins has changed from true to false. This option and the corresponding functionality is now marked as deprecated and may be removed in a future release.
+</td>
+</tr>
+</table>
+
+If `injectRemotePlugins` is set to true, PME will also inject any `<plugin/>` that has execution or configuration sections found in the remote BOM.
 
 ### Install and Deploy Skip Flag Alignment
 
