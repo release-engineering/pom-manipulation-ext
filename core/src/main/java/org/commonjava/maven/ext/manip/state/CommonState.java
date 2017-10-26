@@ -70,12 +70,10 @@ public class CommonState
 
     public CommonState( final Properties userProps )
     {
-        overrideTransitive = Boolean.valueOf( userProps.getProperty( TRANSITIVE_OVERRIDE_PROPERTY, "true" ) );
+        overrideTransitive = Boolean.valueOf( userProps.getProperty( TRANSITIVE_OVERRIDE_PROPERTY, "false" ) );
         propertyClashFails = Boolean.valueOf( userProps.getProperty( PROPERTY_CLASH_FAILS, "true" ) );
-        // TODO: ### Considering changing strict matching to the default.
-        strict = Boolean.valueOf( userProps.getProperty( STRICT_ALIGNMENT, "false" ) );
-        // TODO: ### Considering changing strictignoresuffix to default to true.
-        ignoreSuffix = Boolean.valueOf( userProps.getProperty( STRICT_ALIGNMENT_IGNORE_SUFFIX, "false" ) );
+        strict = Boolean.valueOf( userProps.getProperty( STRICT_ALIGNMENT, "true" ) );
+        ignoreSuffix = Boolean.valueOf( userProps.getProperty( STRICT_ALIGNMENT_IGNORE_SUFFIX, "true" ) );
         failOnStrictViolation = Boolean.valueOf( userProps.getProperty( STRICT_VIOLATION_FAILS, "false" ) );
     }
 
