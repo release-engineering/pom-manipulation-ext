@@ -125,7 +125,7 @@ Note that this will still alter any external parent references.
 <table bgcolor="#ff3333">
 <tr>
 <td>
-    <b>NOTE</b> : This option is deprecated as of July 2017 and may be removed in a future release.
+    <b>NOTE</b> : This option is deprecated as of PME 2.12 (July 2017) and may be removed in a future release.
 </td>
 </tr>
 </table>
@@ -135,7 +135,7 @@ Note that this will still alter any external parent references.
 <table bgcolor="#ffff00">
 <tr>
 <td>
-    <b>NOTE</b> : As of October 2017 the default for <i>overrideTransitive</i> has changed from true to false.
+    <b>NOTE</b> : As of PME 2.13 (October 2017) the default for <i>overrideTransitive</i> has changed from true to false.
 </td>
 </tr>
 </table>
@@ -266,7 +266,7 @@ Multiple exclusions to a dependency may be added using comma separators e.g.
 <table bgcolor="#ffff00">
 <tr>
 <td>
-    <b>NOTE</b> : As of October 2017 the default for <i>strictAlignment</i> has changed from false to true.
+    <b>NOTE</b> : As of PME 2.13 (October 2017) the default for <i>strictAlignment</i> has changed from false to true.
 </td>
 </tr>
 </table>
@@ -300,7 +300,7 @@ This will cause the build to fail with a ManipulationException, and prevent the 
 <table bgcolor="#ffff00">
 <tr>
 <td>
-    <b>NOTE</b> : As of October 2017 the default for <i>strictAlignmentIgnoreSuffix</i> has changed from false to true.
+    <b>NOTE</b> : As of PME 2.13 (October 2017) the default for <i>strictAlignmentIgnoreSuffix</i> has changed from false to true.
 </td>
 </tr>
 </table>

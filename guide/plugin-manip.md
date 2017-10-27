@@ -69,7 +69,7 @@ If when attempting to merge the remote execution blocks into local, the `<id>`'s
 <table bgcolor="#ff3333">
 <tr>
 <td>
-    <b>NOTE</b> : As of October 2017 the default for <i>injectRemotePlugins</i> has changed from true to false. This option and the corresponding functionality is now marked as deprecated and may be removed in a future release.
+    <b>NOTE</b> : As of PME 2.13 (October 2017) the default for <i>injectRemotePlugins</i> has changed from true to false. This option and the corresponding functionality is now marked as deprecated and may be removed in a future release.
 </td>
 </tr>
 </table>
