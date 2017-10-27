@@ -53,6 +53,7 @@ import java.util.Set;
 
 import static org.apache.commons.io.IOUtils.closeQuietly;
 import static org.apache.commons.lang.StringUtils.isEmpty;
+import static org.apache.commons.lang.StringUtils.isNotEmpty;
 
 /**
  * Class to resolve artifact descriptors (pom files) from a maven repository
@@ -292,7 +293,7 @@ public class ModelIO
                 Plugin p = plit.next();
                 ProjectRef pr = new SimpleProjectRef( p.getGroupId(), p.getArtifactId() );
 
-                if ( p.getVersion() != null && (p.getVersion().startsWith( "${" ) || p.getVersion().length() == 0 ))
+                if ( ( isNotEmpty( p.getVersion() ) && p.getVersion().startsWith( "${" ) ) || isEmpty( p.getVersion() ) )
                 {
                     // Property reference to something in the remote pom. Resolve and inline it now.
                     String newVersion = resolveProperty( userProperties, m.getProperties(), p.getVersion() );
@@ -308,6 +309,7 @@ public class ModelIO
                                                   " with " + newVersion );
                      p.setVersion( newVersion );
                 }
+
                 // Replacing the element with the fully parsed element from the Model.
                 pluginOverrides.remove( p );
                 pluginOverrides.add( p );
@@ -399,7 +401,7 @@ public class ModelIO
     private String resolveProperty( Properties userProperties, Properties p, String key )
     {
         String result = "";
-        String child = key.substring( 2, key.length() - 1 );
+        String child = ( isEmpty( key ) ? "" : key.substring( 2, key.length() - 1 ) );
 
         if ( p.containsKey( child ) && !userProperties.containsKey( child ) )
         {
