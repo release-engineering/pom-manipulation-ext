@@ -31,6 +31,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Properties;
 
+import static org.apache.commons.lang.StringUtils.isNotEmpty;
+
 /**
  * Commonly used manipulations / extractions from project / user (CLI) properties.
  */
@@ -268,44 +270,48 @@ public final class PropertiesUtils
 
         String osgiVersion = Version.getOsgiVersion( v );
 
-        // If we have been configured to ignore the suffix (e.g. rebuild-n) then, assuming that
-        // the oldValue actually contains the suffix process it.
-        if ( ignoreSuffix && oldValue.contains( suffix ))
+        if ( isNotEmpty ( suffix ))
         {
-            HashSet<String> s = new HashSet<>();
-            s.add( oldValue );
-            s.add( newValue );
-
-            String x = String.valueOf( Version.findHighestMatchingBuildNumber( v, s ) );
-
-            // If the new value has the higher matching build number strip the old suffix to allow for strict
-            // matching.
-            if ( newValue.endsWith( x ) )
+            // If we have been configured to ignore the suffix (e.g. rebuild-n) then, assuming that
+            // the oldValue actually contains the suffix process it.
+            if ( ignoreSuffix && oldValue.contains( suffix ) )
             {
-                String oldValueCache = oldValue;
-                oldValue = oldValue.substring( 0, oldValue.indexOf( suffix ) - 1 );
-                v = oldValue;
+                HashSet<String> s = new HashSet<>();
+                s.add( oldValue );
+                s.add( newValue );
+
+                String x = String.valueOf( Version.findHighestMatchingBuildNumber( v, s ) );
+
+                // If the new value has the higher matching build number strip the old suffix to allow for strict
+                // matching.
+                if ( newValue.endsWith( x ) )
+                {
+                    String oldValueCache = oldValue;
+                    oldValue = oldValue.substring( 0, oldValue.indexOf( suffix ) - 1 );
+                    v = oldValue;
+                    osgiVersion = Version.getOsgiVersion( v );
+                    logger.debug( "Updating version to {} and for oldValue {} with newValue {} ", v, oldValueCache,
+                                  newValue );
+
+                }
+                else
+                {
+                    logger.warn( "strictIgnoreSuffix set but unable to align from {} to {}", oldValue, newValue );
+                }
+            }
+
+            // We only need to dummy up and add a suffix if there is no qualifier. This allows us
+            // to work out the OSGi version.
+            if ( !Version.hasQualifier( v ) )
+            {
+                v = Version.appendQualifierSuffix( v, suffix );
                 osgiVersion = Version.getOsgiVersion( v );
-                logger.debug( "Updating version to {} and for oldValue {} with newValue {} ", v, oldValueCache, newValue );
-
+                osgiVersion = osgiVersion.substring( 0, osgiVersion.indexOf( suffix ) - 1 );
             }
-            else
+            if ( newValue.contains( suffix ) )
             {
-                logger.warn( "strictIgnoreSuffix set but unable to align from {} to {}", oldValue, newValue );
+                newVersion = newValue.substring( 0, newValue.indexOf( suffix ) - 1 );
             }
-        }
-
-        // We only need to dummy up and add a suffix if there is no qualifier. This allows us
-        // to work out the OSGi version.
-        if ( suffix != null && !Version.hasQualifier( v ) )
-        {
-            v = Version.appendQualifierSuffix( v, suffix );
-            osgiVersion = Version.getOsgiVersion( v );
-            osgiVersion = osgiVersion.substring( 0, osgiVersion.indexOf( suffix ) - 1 );
-        }
-        if ( suffix != null && newValue.contains( suffix ) )
-        {
-            newVersion = newValue.substring( 0, newValue.indexOf( suffix ) - 1 );
         }
         logger.debug( "Comparing original version {} and OSGi variant {} with new version {} and suffix removed {} ",
                       oldValue, osgiVersion, newValue, newVersion );

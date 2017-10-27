@@ -73,7 +73,7 @@ public class DefaultTranslator
      * @param protocol determines what REST format PME should use. The two formats
      *                 currently available are:
      * @param restMaxSize initial (maximum) size of the rest call; if zero will send everything.
-     * @param restMinSize
+     * @param restMinSize minimum size for the call
      */
     public DefaultTranslator( String endpointUrl, RestProtocol protocol, int restMaxSize, int restMinSize )
     {

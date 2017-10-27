@@ -26,11 +26,10 @@ import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
 import java.io.File;
+import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
-import static java.util.Collections.emptyList;
 import static org.codehaus.plexus.util.FileUtils.copyFile;
 import static org.commonjava.maven.ext.manip.TestUtils.runCli;
 import static org.junit.Assert.assertEquals;
@@ -49,7 +48,7 @@ public class ResultJsonFileTest
     @ClassRule
     public static MockServer mockServer = new MockServer( new AddSuffixJettyHandler("/", AddSuffixJettyHandler.DEFAULT_SUFFIX) );
 
-    public static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final ObjectMapper MAPPER = new ObjectMapper();
 
     @Rule public TemporaryFolder tmpFolderRule = new TemporaryFolder();
 
@@ -69,7 +68,7 @@ public class ResultJsonFileTest
         params.put( "restURL", mockServer.getUrl() );
         params.put( "version.incremental.suffix", "redhat" );
 
-        Integer exitValue = runCli( (List<String>) (List<?>) emptyList(), params, baseDir.getCanonicalPath() );
+        Integer exitValue = runCli( Collections.<String>emptyList(), params, baseDir.getCanonicalPath() );
 
         // then
 
@@ -114,7 +113,7 @@ public class ResultJsonFileTest
         params.put( "restURL", mockServer.getUrl() );
         params.put( "repo-reporting-removal", "true" );
 
-        Integer exitValue = runCli( (List<String>) (List<?>) emptyList(), params, baseDir.getCanonicalPath() );
+        Integer exitValue = runCli( Collections.<String>emptyList(), params, baseDir.getCanonicalPath() );
 
         // then
 

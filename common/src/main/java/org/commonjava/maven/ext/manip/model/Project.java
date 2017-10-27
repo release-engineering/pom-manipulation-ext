@@ -381,6 +381,16 @@ public class Project
         return resolvedManagedPlugins;
     }
 
+    /**
+     * This method will scan the plugins in the potentially active Profiles in this project and
+     * return a fully resolved list. Note that while updating the {@link Plugin} reference
+     * returned will be reflected in the Model as it is the same object, if you wish to
+     * remove or add items to the Model then you must use {@link #getModel()}
+     *
+     * @param session MavenSessionHandler, used by {@link PropertyResolver}
+     * @return a list of fully resolved {@link ProjectVersionRef} to the original {@link Plugin}
+     * @throws ManipulationException if an error occurs
+     */
     public HashMap<Profile,HashMap<ProjectVersionRef,Plugin>> getResolvedProfilePlugins( MavenSessionHandler session )
                     throws ManipulationException
     {
@@ -403,6 +413,16 @@ public class Project
         return resolvedProfilePlugins;
     }
 
+    /**
+     * This method will scan the plugins in the pluginManagement section in the potentially active Profiles
+     * in this project and return a fully resolved list. Note that while updating the {@link Plugin}
+     * reference returned will be reflected in the Model as it is the same object, if you wish to remove
+     * or add items to the Model then you must use {@link #getModel()}
+     *
+     * @param session MavenSessionHandler, used by {@link PropertyResolver}
+     * @return a list of fully resolved {@link ProjectVersionRef} to the original {@link Plugin}
+     * @throws ManipulationException if an error occurs
+     */
     public HashMap<Profile,HashMap<ProjectVersionRef,Plugin>> getResolvedProfileManagedPlugins( MavenSessionHandler session )
                     throws ManipulationException
     {

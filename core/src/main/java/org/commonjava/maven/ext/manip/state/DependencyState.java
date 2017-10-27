@@ -21,6 +21,8 @@ import org.commonjava.maven.ext.manip.ManipulationException;
 import org.commonjava.maven.ext.manip.impl.DependencyManipulator;
 import org.commonjava.maven.ext.manip.util.IdUtils;
 import org.commonjava.maven.ext.manip.util.PropertiesUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.List;
@@ -81,6 +83,8 @@ public class DependencyState
      */
     private static final String DEPENDENCY_MANAGEMENT_POM_PROPERTY = "dependencyManagement";
 
+    private static final Logger logger = LoggerFactory.getLogger( DependencyState.class );
+
     private final boolean overrideDependencies;
 
     private final List<ProjectVersionRef> remoteBOMdepMgmt;
@@ -93,6 +97,10 @@ public class DependencyState
 
     public DependencyState( final Properties userProps ) throws ManipulationException
     {
+        if ( userProps.containsKey( "overrideDependencies" ) )
+        {
+            logger.error ("overrideDependencies is deprecated.");
+        }
         overrideDependencies = Boolean.valueOf( userProps.getProperty( "overrideDependencies", "true" ) );
         remoteBOMdepMgmt = IdUtils.parseGAVs( userProps.getProperty( DEPENDENCY_MANAGEMENT_POM_PROPERTY ) );
         dependencyExclusions = getPropertiesByPrefix( userProps, DEPENDENCY_EXCLUSION_PREFIX );

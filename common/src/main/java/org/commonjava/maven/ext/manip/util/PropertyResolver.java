@@ -36,6 +36,7 @@ public final class PropertyResolver
      * This recursively checks the supplied value and recursively resolves it if its a property.
      *
      * @param session the manipulation session.
+     * @param start the {@link Project} to start resolving from.
      * @param value value to check
      * @return the version string
      * @throws ManipulationException if an error occurs

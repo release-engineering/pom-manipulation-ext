@@ -47,9 +47,9 @@ public class CheckStrictValueTest
         user.setProperty( VersioningState.VERSION_SUFFIX_SYSPROP.getCurrent(), "redhat-5" );
         final VersioningState vs = new VersioningState( user );
         session.setState( vs );
-        if (strictIgnoreSuffix)
+        if ( ! strictIgnoreSuffix)
         {
-            user.setProperty( CommonState.STRICT_ALIGNMENT_IGNORE_SUFFIX, "true" );
+            user.setProperty( CommonState.STRICT_ALIGNMENT_IGNORE_SUFFIX, "false" );
         }
         final CommonState cs = new CommonState( user );
         session.setState( cs );
