@@ -122,11 +122,25 @@ By default the extension will override dependencies using declarations from the 
 
 Note that this will still alter any external parent references.
 
-Note: This option is deprecated as of July 2017 and may be removed in a future release.
+<table bgcolor="#ff3333">
+<tr>
+<td>
+    <b>NOTE</b> : This option is deprecated as of PME 2.12 (July 2017) and may be removed in a future release.
+</td>
+</tr>
+</table>
 
 ### Direct/Transitive Dependencies
 
-By default the extension will inject all dependencies declared in the remote BOM. This will also override dependencies that are not directly specified in the project. If these transitive dependencies should not be overridden, the option `overrideTransitive` can be set to `false` to disable this feature.
+<table bgcolor="#ffff00">
+<tr>
+<td>
+    <b>NOTE</b> : As of PME 2.13 (October 2017) the default for <i>overrideTransitive</i> has changed from true to false.
+</td>
+</tr>
+</table>
+
+The extension can inject all dependencies declared in the remote BOM. This will also override dependencies that are not directly specified in the project. If these transitive dependencies should not be overridden, the option `overrideTransitive` can be set to `false` to disable this feature.
 
     mvn install -DdependencyManagement=org.foo:my-dep-pom:1.0 -DoverrideTransitive=false
 
@@ -249,13 +263,19 @@ Multiple exclusions to a dependency may be added using comma separators e.g.
 
 ### Strict Mode Version Alignment
 
+<table bgcolor="#ffff00">
+<tr>
+<td>
+    <b>NOTE</b> : As of PME 2.13 (October 2017) the default for <i>strictAlignment</i> has changed from false to true.
+</td>
+</tr>
+</table>
+
 When aligning dependency versions to some shared standard, it's possible to introduce incompatibilities that stem from changing the version. This may be due to unexpected API changes. While _in general_ it might be safe to revise a dependency's version from 1.5 to 1.5.1, it may not be safe to revise it to 2.0, or even 1.6.
 
-In cases where this is a concern, and for dependencies whose versions are aligned via a BOM (not via explicit overrides, as explained above), strict-mode version alignment checks can be enabled using:
+By default strict-mode version alignment checks are enabled. This is recommended for cases where this is a concern, and for dependencies whose versions are aligned via a BOM or REST source (not via explicit overrides, as explained above).
 
-    mvn install -DstrictAlignment=true
-
-This will detect cases where the adjusted version, once OSGi and suffix are handled, does not match with the old version, **not** do the alignment and report the mismatch as a warning in the build's console output. For example, if the incremental or manual suffix is configured to be `rebuild` then these are valid changes.
+Strict-mode alignment will detect cases where the adjusted version, once OSGi and suffix are handled, does not match with the old version, **not** do the alignment and report the mismatch as a warning in the build's console output. For example, if the incremental or manual suffix is configured to be `rebuild` then these are valid changes.
 
 | Original Version | Potential New Versions |
 | --- | --- |
@@ -265,7 +285,11 @@ This will detect cases where the adjusted version, once OSGi and suffix are hand
 
 Note that it will not consider 3 -> 3.1 as a valid transition.
 
-If, instead, the build should fail when strict-mode checks are violated, add the `strictViolationFails=true` property:
+If required, strict-mode version alignment checks can be disabled using:
+
+    mvn install -DstrictAlignment=false
+
+If the build should fail when strict-mode checks are violated set `strictViolationFails` property to true (default: false):
 
     mvn install -DstrictAlignment=true -DstrictViolationFails=true
 
@@ -273,11 +297,17 @@ This will cause the build to fail with a ManipulationException, and prevent the 
 
 **NOTE:** dependency exclusions they will not work if the dependency uses a version property that has been changed by another dependency modification. Explicit version override will overwrite the property value though.
 
+<table bgcolor="#ffff00">
+<tr>
+<td>
+    <b>NOTE</b> : As of PME 2.13 (October 2017) the default for <i>strictAlignmentIgnoreSuffix</i> has changed from false to true.
+</td>
+</tr>
+</table>
 
-If the property `strictAlignmentIgnoreSuffix` is set to true then the comparison will ignore the suffix depicted by `version.incremental.suffix` or `version.suffix` during version comparisons. It will also only allow alignment to a higher incrementing suffix e.g.
+The property `strictAlignmentIgnoreSuffix` will mean that the comparison will ignore the suffix depicted by `version.incremental.suffix` or `version.suffix` during version comparisons. It will also only allow alignment to a higher incrementing suffix e.g.
 
     3.1.0.Final-rebuild-1 --> 3.1.0.Final-rebuild-3
-
 
 ### Property Clash Replacement
 
