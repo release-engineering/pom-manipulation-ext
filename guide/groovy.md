@@ -56,7 +56,9 @@ The deployed file can then be used with e.g.
 
 ### Groovy Scripts
 
-The groovy script will be run once on the execution root (i.e. where Maven is invoked). The groovy script will run **after** all the other Manipulators have run.
+The groovy script will be run once on the execution root (i.e. where Maven is invoked). By default groovy script will run **after** all the other Manipulators have run.
+
+It is possible to configure it to run before all other manipulators by setting `groovyManipulatorPrecedence` to `FIRST` instead of the default `LAST` value.
 
 Each script should use the [BaseScript](http://docs.groovy-lang.org/latest/html/gapi/groovy/transform/BaseScript.html)
 annotation:
