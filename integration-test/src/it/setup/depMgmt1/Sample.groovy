@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.commonjava.maven.ext.depMgmt1
 
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
@@ -22,7 +23,7 @@ import groovy.util.logging.Slf4j
 @BaseScript org.commonjava.maven.ext.manip.groovy.BaseScript pme
 
 @Slf4j
-public class Processor {
+class Processor {
     File basedir
     Properties props
 

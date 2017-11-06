@@ -118,7 +118,6 @@ public class ManipulationManager
         }
 
         orderedManipulators = new ArrayList<>( revMap.keySet() );
-        Collections.sort( orderedManipulators, new ManipulatorPriorityComparator() );
 
         for ( final Manipulator manipulator : orderedManipulators )
         {
@@ -126,6 +125,8 @@ public class ManipulationManager
                                                                    .getSimpleName() );
             manipulator.init( session );
         }
+        Collections.sort( orderedManipulators, new ManipulatorPriorityComparator() );
+
         // Now init the common state
         session.setState( new CommonState( session.getUserProperties()) );
 
