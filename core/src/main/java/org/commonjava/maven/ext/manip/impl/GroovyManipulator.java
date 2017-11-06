@@ -53,6 +53,8 @@ public class GroovyManipulator
 
     private ManipulationSession session;
 
+    private int executionIndex = 99;
+
     /**
      * No prescanning required for Profile injection.
      */
@@ -70,8 +72,10 @@ public class GroovyManipulator
     @Override
     public void init( final ManipulationSession session )
     {
+        GroovyState gs = new GroovyState( session.getUserProperties() );
         this.session = session;
-        session.setState( new GroovyState( session.getUserProperties() ) );
+        this.executionIndex = gs.getExecutionIndex();
+        session.setState( gs );
     }
 
     /**
@@ -162,6 +166,6 @@ public class GroovyManipulator
     @Override
     public int getExecutionIndex()
     {
-        return 99;
+        return executionIndex;
     }
 }

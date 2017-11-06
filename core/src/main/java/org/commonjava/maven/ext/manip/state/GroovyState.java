@@ -35,11 +35,30 @@ public class GroovyState
      */
     private static final String GROOVY_SCRIPT = "groovyScripts";
 
+    private static final String GROOVY_MANIPULATION_PRIORITY = "groovyManipulatorPrecedence";
+
+    private enum GroovyPrecendence
+    {
+        FIRST( "1" ), LAST( "99" );
+
+        private String index;
+
+        GroovyPrecendence( String index )
+        {
+            this.index = index;
+        }
+    }
+
     private final List<ArtifactRef> groovyScripts;
+
+    private final int executionIndex;
 
     public GroovyState( final Properties userProps )
     {
         groovyScripts = IdUtils.parseGAVTCs( userProps.getProperty( GROOVY_SCRIPT ) );
+        executionIndex = Integer.parseInt
+                ( GroovyPrecendence.valueOf
+                                ( userProps.getProperty( GROOVY_MANIPULATION_PRIORITY, GroovyPrecendence.LAST.toString() ).toUpperCase() ).index );
     }
 
     /**
@@ -56,5 +75,10 @@ public class GroovyState
     public List<ArtifactRef> getGroovyScripts()
     {
         return groovyScripts;
+    }
+
+    public int getExecutionIndex()
+    {
+        return executionIndex;
     }
 }
