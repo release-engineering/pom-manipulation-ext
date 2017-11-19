@@ -163,10 +163,10 @@ public class VersionCalculator
         final String staticSuffix = state.getSuffix();
         final String override = state.getOverride();
 
-        logger.debug( "Got the following version:\n  Original version: " + version );
-        logger.debug( "Got the following version suffixes:\n  Static: " + staticSuffix + "\n  Incremental: " +
-            incrementalSuffix );
-        logger.debug( "Got the following override:\n  Version: " + override);
+        logger.debug( "Got the following original version: {}", version );
+        logger.debug( "Got the following version suffixes:\n  Static: {}\n  Incremental: {}",
+                      staticSuffix, incrementalSuffix );
+        logger.debug( "Got the following version override: {}", override);
 
         String newVersion = version;
 
@@ -201,6 +201,7 @@ public class VersionCalculator
                 newVersion = Version.removeSnapshot( newVersion );
             }
         }
+        logger.debug( "Returning version: {}", newVersion );
 
         return newVersion;
     }
