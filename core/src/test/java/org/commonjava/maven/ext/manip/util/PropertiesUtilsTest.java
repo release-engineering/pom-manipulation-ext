@@ -30,6 +30,7 @@ import org.commonjava.maven.ext.manip.model.Project;
 import org.commonjava.maven.ext.manip.state.CommonState;
 import org.commonjava.maven.ext.manip.state.DependencyState;
 import org.commonjava.maven.ext.manip.state.VersioningState;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -42,6 +43,7 @@ import java.util.Map;
 import java.util.Properties;
 
 import static org.commonjava.maven.ext.manip.util.PropertiesUtils.updateProperties;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
@@ -52,17 +54,50 @@ public class PropertiesUtilsTest
     @Rule
     public TemporaryFolder temp = new TemporaryFolder();
 
+    private final Properties p = new Properties();
+
+    @Before
+    public void beforeTest()
+    {
+        p.setProperty( "strictAlignment", "true" );
+        p.setProperty( "strictViolationFails", "true" );
+        p.setProperty( "version.suffix", "redhat-1" );
+        p.setProperty( "scanActiveProfiles", "true" );
+    }
+
     @Test
     public void testCheckStrictValue() throws Exception
     {
         ManipulationSession session = createUpdateSession();
         assertFalse( PropertiesUtils.checkStrictValue( session, null, "1.0" ) );
         assertFalse( PropertiesUtils.checkStrictValue( session, "1.0", null ) );
-        assertFalse ( PropertiesUtils.checkStrictValue( session, "1.0.0.Final", "1.0.0.redhat-1" ) );
-        assertTrue ( PropertiesUtils.checkStrictValue( session, "1.0.0", "1.0.0.redhat-1" ) );
-        assertTrue ( PropertiesUtils.checkStrictValue( session, "1.0.0-SNAPSHOT", "1.0.0.redhat-1" ) );
-        assertFalse ( PropertiesUtils.checkStrictValue( session, "1.0.Final-SNAPSHOT", "1.0.0.redhat-1" ) );
-        assertTrue ( PropertiesUtils.checkStrictValue( session, "1.0-SNAPSHOT", "1.0.0.redhat-1" ) );
+        assertFalse( PropertiesUtils.checkStrictValue( session, "1.0.0.Final", "1.0.0.redhat-1" ) );
+        assertTrue( PropertiesUtils.checkStrictValue( session, "1.0.0", "1.0.0.redhat-1" ) );
+        assertTrue( PropertiesUtils.checkStrictValue( session, "1.0.0-SNAPSHOT", "1.0.0.redhat-1" ) );
+        assertFalse( PropertiesUtils.checkStrictValue( session, "1.0.Final-SNAPSHOT", "1.0.0.redhat-1" ) );
+        assertTrue( PropertiesUtils.checkStrictValue( session, "1.0-SNAPSHOT", "1.0.0.redhat-1" ) );
+    }
+
+    @Test
+    public void testStrictWithTimeStamp() throws Exception
+    {
+        String suffix = "t-20170216-223844-555-rebuild";
+        p.setProperty( "version.suffix", suffix + "-1" );
+        ManipulationSession session = createUpdateSession();
+
+        assertTrue( PropertiesUtils.getSuffix( session ).equals( suffix ) );
+        assertTrue( PropertiesUtils.checkStrictValue( session, "1.0.0.Final", "1.0.0.Final-t-20170216-223844-555-rebuild-1" ) );
+        assertTrue( PropertiesUtils.checkStrictValue( session, "1.0", "1.0.0.t-20170216-223844-555-rebuild-1" ) );
+        assertTrue( PropertiesUtils.checkStrictValue( session, "1.0-SNAPSHOT", "1.0.0.t-20170216-223844-555-rebuild-1" ) );
+
+        suffix = "t20170216223844555-rebuild";
+        p.setProperty( "version.suffix", suffix + "-2" );
+        session = createUpdateSession();
+
+        assertTrue( PropertiesUtils.getSuffix( session ).equals( suffix ) );
+        assertTrue( PropertiesUtils.checkStrictValue( session, "1.0.0.Final", "1.0.0.Final-t20170216223844555-rebuild-2" ) );
+        assertTrue( PropertiesUtils.checkStrictValue( session, "1.0", "1.0.0.t20170216223844555-rebuild-2" ) );
+        assertTrue( PropertiesUtils.checkStrictValue( session, "1.0-SNAPSHOT", "1.0.0.t20170216223844555-rebuild-2" ) );
     }
 
     @Test
@@ -206,12 +241,6 @@ public class PropertiesUtilsTest
     {
         ManipulationSession session = new ManipulationSession();
 
-        Properties p = new Properties();
-
-        p.setProperty( "strictAlignment", "true" );
-        p.setProperty( "strictViolationFails", "true" );
-        p.setProperty( "version.suffix", "redhat-1" );
-        p.setProperty( "scanActiveProfiles", "true" );
         session.setState( new DependencyState( p ) );
         session.setState( new VersioningState( p ) );
         session.setState( new CommonState( p ) );
