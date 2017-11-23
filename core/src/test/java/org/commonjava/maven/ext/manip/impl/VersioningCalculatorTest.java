@@ -339,6 +339,23 @@ public class VersioningCalculatorTest
     }
 
     @Test
+    public void applySerialSuffix_Timestamp()
+                    throws Exception
+    {
+        final Properties props = new Properties();
+        
+        final String s = "t-20170216-223844-555-foo";
+        props.setProperty( VersioningState.INCREMENT_SERIAL_SUFFIX_SYSPROP.getCurrent(), s );
+        setupSession( props );
+
+        final String v = "1.2.0.t-20170216-223844-555-foo";
+
+        final String result = calculate( v );
+        System.out.println ("### Got " + result);
+        assertThat( result, equalTo( v + "-1" ) );
+    }
+
+    @Test
     public void applySerialSuffix_SimpleSuffixProperty()
                     throws Exception
     {
@@ -626,6 +643,22 @@ public class VersioningCalculatorTest
     }
 
     @Test
+    public void incrementExistingSerialSuffixTimestamp1()
+                    throws Exception
+    {
+        final Properties props = new Properties();
+
+        props.setProperty( VersioningState.INCREMENT_SERIAL_SUFFIX_SYSPROP.getCurrent(), "t-20170216-223844-555-foo" );
+        setupSession( props, "1.2.0-t-20170216-223844-555-foo-8", "1.2.0-t-20170216-223844-555-foo-9" );
+
+        final String newVersion = "1.2.0.t-20170216-223844-555-foo-10";
+        final String v = "1.2.0.t-20170216-223844-555-foo-5";
+
+        final String result = calculate( v );
+        assertThat( result, equalTo( newVersion ) );
+    }
+
+    @Test
     public void incrementExistingSerialSuffix7()
             throws Exception
     {
@@ -904,7 +937,6 @@ public class VersioningCalculatorTest
 
         props.setProperty( VersioningState.VERSION_SUFFIX_SYSPROP.getCurrent(), "Beta1" );
         props.setProperty( VersioningState.VERSION_OSGI_SYSPROP.getCurrent(), "true" );
-        //props.setProperty( VersioningState.VERSION_SUFFIX_SNAPSHOT_SYSPROP.getCurrent(), "true" );
         setupSession( props );
 
         final String v = "1";
@@ -913,6 +945,23 @@ public class VersioningCalculatorTest
 
         final String result = calculate( v + os );
         assertThat( result, equalTo( v + ".0.0" + ns ) );
+    }
+
+    @Test
+    public void alphaNumericSuffixBaseOSGiTimestamp()
+                    throws Exception
+    {
+        final Properties props = new Properties();
+
+        props.setProperty( VersioningState.VERSION_SUFFIX_SYSPROP.getCurrent(), "t171222-2230-rebuild-1" );
+        props.setProperty( VersioningState.VERSION_OSGI_SYSPROP.getCurrent(), "true" );
+        setupSession( props );
+
+        final String v = "1.1";
+        final String ns = ".t171222-2230-rebuild-1";
+
+        final String result = calculate( v );
+        assertThat( result, equalTo( v + ".0" + ns ) );
     }
 
     @Test
@@ -1011,7 +1060,7 @@ public class VersioningCalculatorTest
         return String.format( "%s/%s/maven-metadata.xml", key.getGroupId()
                                                              .replace( '.', '/' ), key.getArtifactId() );
     }
-
+    
     public static final class TestVersionCalculator
         extends VersionCalculator
     {

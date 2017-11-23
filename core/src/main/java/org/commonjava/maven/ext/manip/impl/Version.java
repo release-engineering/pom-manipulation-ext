@@ -76,6 +76,8 @@ public class Version
 
     /**
      * Regular expression used to match the parts of the qualifier "base-buildnum-snapshot"
+     * Note : Technically within the rebuild-numeric the dash is currently optional and can be any
+     *        delimeter type within the regex. It could be made mandatory via '{1}'.
      */
     private final static String QUALIFIER_REGEX = "(.*?)((" + DELIMITER_REGEX + ")?(\\d+))?((" + DELIMITER_REGEX + ")?((?i:" + SNAPSHOT_SUFFIX + ")))?$";
 
@@ -96,6 +98,9 @@ public class Version
     private final static String OSGI_VERSION_REGEX = "(\\d+)(\\.\\d+(\\.\\d+(\\.[\\w\\-_]+)?)?)?";
 
     private final static Pattern osgiPattern = Pattern.compile(OSGI_VERSION_REGEX);
+
+    // Prevent construction.
+    private Version () {}
 
     public static String getBuildNumber(String version)
     {
@@ -180,6 +185,24 @@ public class Version
         return removeLeadingDelimiter( version );
     }
 
+    /**
+     * This will return the OSGi qualifier portion without the numeric rebuild increment.
+     * For example
+     *
+     * <blockquote><table cellpadding=0 cellspacing=5 summary="">
+     *   <tr>
+     *      <th>Version</th><th>Qualifier</th>
+     *   </tr>
+     *   <tr><td align=left>1.0.0.Beta1</td><td align=center>Beta1</td>
+     *   <tr><td align=left>1.0.0.Beta10-rebuild-1</td><td align=center>Beta10-rebuild</td>
+     *   <tr><td align=left>1.0.0.GA-rebuild1</td><td align=center>GA-rebuild</td>
+     *   <tr><td align=left>1.0.0.Final-Beta-1</td><td align=center>Final-Beta</td>
+     *   </tr>
+     * </table></blockquote>
+     *
+     * @param version a {@code String} to parse
+     * @return the qualifier
+     */
     public static String getQualifierBase(String version)
     {
         Matcher versionMatcher = versionPattern.matcher( version );

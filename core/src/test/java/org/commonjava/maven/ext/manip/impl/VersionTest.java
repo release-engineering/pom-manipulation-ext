@@ -21,6 +21,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertFalse;
@@ -175,6 +176,7 @@ public class VersionTest
         assertThat( Version.getOsgiVersion( "12.4-beta" ), equalTo( "12.4.0.beta" ) );
         assertThat( Version.getOsgiVersion( "-beta1" ), equalTo( "-beta1" ) );
         assertThat( Version.getOsgiVersion( "12.beta1_3-5.hello" ), equalTo( "12.0.0.beta1_3-5-hello" ) );
+        assertThat( Version.getOsgiVersion( "1.0.0.Final-t20170516223844555-redhat-1" ), equalTo( "1.0.0.Final-t20170516223844555-redhat-1" ) );
     }
 
     @Test
@@ -211,6 +213,11 @@ public class VersionTest
         assertThat(Version.getQualifierBase("1.0.0.Beta1"), equalTo("Beta"));
         assertThat(Version.getQualifierBase("1.0.0.jboss-test-SNAPSHOT"), equalTo("jboss-test"));
         assertThat(Version.getQualifierBase("${project.version}-test-1"), equalTo("${project.version}-test"));
+
+        assertThat(Version.getQualifierBase("Final-Beta10"), equalTo("Final-Beta"));
+        assertThat(Version.getQualifierBase("1.0.0.Beta10-rebuild-3"), equalTo("Beta10-rebuild"));
+        assertThat(Version.getQualifierBase("1.0.0.Final-Beta-1"), equalTo("Final-Beta"));
+        assertThat(Version.getQualifierBase("1.0.0.Final-Beta10"), equalTo("Final-Beta"));
     }
 
     @Test
@@ -330,4 +337,25 @@ public class VersionTest
         assertFalse( Version.isValidOSGi("beta1") );
     }
 
+
+    @Test
+    public void testTimestampedVersion()
+        throws Exception
+    {
+        String v = "1.0.0.t20170216-223844-555-redhat-1";
+        assertEquals("1.0.0", Version.getMMM( v ));
+        assertEquals("1.0.0", Version.getOsgiMMM( v, false ));
+        assertTrue(Integer.parseInt( "1" ) == Version.getIntegerBuildNumber( v ));
+        assertEquals("t20170216-223844-555-redhat-1", Version.getQualifier( v ));
+        assertEquals(".t20170216-223844-555-redhat-1", Version.getQualifierWithDelim( v ));
+        assertEquals("t20170216-223844-555-redhat", Version.getQualifierBase( v ));
+
+        v = "1.0.t-20170216-223844-555-rebuild-5";
+        assertEquals("1.0", Version.getMMM( v ));
+        assertEquals("1.0.0", Version.getOsgiMMM( v, true ));
+        assertTrue(Integer.parseInt( "5" ) == Version.getIntegerBuildNumber( v ));
+        assertEquals("t-20170216-223844-555-rebuild-5", Version.getQualifier( v ));
+        assertEquals(".t-20170216-223844-555-rebuild-5", Version.getQualifierWithDelim( v ));
+        assertEquals("t-20170216-223844-555-rebuild", Version.getQualifierBase( v ));
+    }
 }

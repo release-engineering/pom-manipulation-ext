@@ -228,9 +228,8 @@ public final class PropertiesUtils
         }
         else if ( versioningState.getSuffix() != null && !versioningState.getSuffix().isEmpty() )
         {
-            suffix = versioningState.getSuffix().substring( 0, versioningState.getSuffix().indexOf( '-' ) );
+            suffix = versioningState.getSuffix().substring( 0, versioningState.getSuffix().lastIndexOf( '-' ) );
         }
-
         return suffix;
     }
 
