@@ -77,10 +77,10 @@ public class HttpHeaderHeaderTest
     @Before
     public void before()
     {
-        LoggerFactory.getLogger( DefaultTranslator.class ).info ( "Executing test " + testName.getMethodName());
+        LoggerFactory.getLogger( HttpHeaderHeaderTest.class ).info ( "Executing test " + testName.getMethodName());
 
         this.versionTranslator = new DefaultTranslator( mockServer.getUrl(), RestProtocol.CURRENT, 0,
-                                                        Translator.CHUNK_SPLIT_COUNT );
+                                                        Translator.CHUNK_SPLIT_COUNT, "" );
     }
 
     private String generateResponse( String header )

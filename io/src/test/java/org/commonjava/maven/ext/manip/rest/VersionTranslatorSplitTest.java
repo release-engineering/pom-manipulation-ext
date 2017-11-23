@@ -86,7 +86,8 @@ public class VersionTranslatorSplitTest
         LOG.info( "Executing test " + testName.getMethodName() );
 
         handler.setStatusCode( HttpServletResponse.SC_GATEWAY_TIMEOUT );
-        versionTranslator = new DefaultTranslator( mockServer.getUrl(), protocol, 0, Translator.CHUNK_SPLIT_COUNT );
+        versionTranslator = new DefaultTranslator( mockServer.getUrl(), protocol, 0, Translator.CHUNK_SPLIT_COUNT,
+                                                   "" );
     }
 
     public VersionTranslatorSplitTest( Translator.RestProtocol protocol )
@@ -187,7 +188,8 @@ public class VersionTranslatorSplitTest
     @Test
     public void testTranslateVersionsCorrectSplitMaxSize()
     {
-        this.versionTranslator = new DefaultTranslator( mockServer.getUrl(), protocol, 10, Translator.CHUNK_SPLIT_COUNT );
+        this.versionTranslator = new DefaultTranslator( mockServer.getUrl(), protocol, 10, Translator.CHUNK_SPLIT_COUNT,
+                                                        "" );
 
         List<ProjectVersionRef> data = aLotOfGavs.subList( 0, 30 );
         handler.getRequestData().clear();
@@ -196,7 +198,7 @@ public class VersionTranslatorSplitTest
             versionTranslator.translateVersions( data );
             fail();
         }
-        catch ( RestException ex )
+        catch ( RestException ignored )
         {
         }
         List<List<Map<String, Object>>> requestData = handler.getRequestData();
@@ -249,7 +251,7 @@ public class VersionTranslatorSplitTest
     @Test
     public void testTranslateVersionsCorrectSplitMaxSizeWithMin()
     {
-        this.versionTranslator = new DefaultTranslator( mockServer.getUrl(), protocol, 10, 1 );
+        this.versionTranslator = new DefaultTranslator( mockServer.getUrl(), protocol, 10, 1, "" );
 
         List<ProjectVersionRef> data = aLotOfGavs.subList( 0, 30 );
         handler.getRequestData().clear();
@@ -258,7 +260,7 @@ public class VersionTranslatorSplitTest
             versionTranslator.translateVersions( data );
             fail();
         }
-        catch ( RestException ex )
+        catch ( RestException ignored )
         {
         }
         List<List<Map<String, Object>>> requestData = handler.getRequestData();

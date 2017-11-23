@@ -15,29 +15,38 @@
  */
 package org.commonjava.maven.ext.manip.rest.mapper;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
 import java.util.List;
 import java.util.Map;
 
 public final class GAVSchema
 {
+    @JsonInclude(value= JsonInclude.Include.NON_EMPTY)
     public String[] productNames;
 
+    @JsonInclude(value= JsonInclude.Include.NON_EMPTY)
     public String[] productVersionIds;
+
+    // Backwards compatibility for versions of DependencyAnalyser that don't have this field.
+    @JsonInclude(value= JsonInclude.Include.NON_EMPTY)
+    public String repositoryGroup;
 
     public List<Map<String, Object>> gavs;
 
     public GAVSchema() {}
 
-    public GAVSchema( String []productNames, String []productVersionIds, List<Map<String, Object>> gavs )
+    public GAVSchema( String []productNames, String []productVersionIds, String repositoryGroup, List<Map<String, Object>> gavs )
     {
         this.productNames = productNames;
         this.productVersionIds = productVersionIds;
+        this.repositoryGroup = repositoryGroup;
         this.gavs = gavs;
     }
 
     @Override
     public String toString()
     {
-        return "ProductNames '" + productNames + "' :: ProductVersionIds '" + productVersionIds + "' :: gavs " + gavs;
+        return "ProductNames '" + productNames + "' :: ProductVersionIds '" + productVersionIds + "' :: RepositoryGroup '" + repositoryGroup+ "' :: gavs " + gavs;
     }
 }

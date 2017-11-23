@@ -86,15 +86,8 @@ public class SpyFailJettyHandler extends AbstractHandler implements Handler
             List<Map<String, Object>> requestBody;
 
             // Protocol analysis
-            if ( jb.toString().startsWith( "{\"productNames" ))
-            {
-                GAVSchema gavSchema = objectMapper.readValue( jb.toString(), GAVSchema.class );
-                requestBody = gavSchema.gavs;
-            }
-            else
-            {
-                requestBody = objectMapper.readValue( jb.toString(), List.class );
-            }
+            GAVSchema gavSchema = objectMapper.readValue( jb.toString(), GAVSchema.class );
+            requestBody = gavSchema.gavs;
 
             LOGGER.debug( "Adding to requestBody of size {}", requestBody.size() );
 

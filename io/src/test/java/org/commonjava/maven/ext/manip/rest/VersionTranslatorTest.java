@@ -21,7 +21,6 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mashape.unirest.http.Unirest;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
-import org.commonjava.maven.atlas.ident.ref.SimpleProjectRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef;
 import org.commonjava.maven.ext.manip.rest.exception.RestException;
 import org.commonjava.maven.ext.manip.rest.handler.AddSuffixJettyHandler;
@@ -86,9 +85,9 @@ public class VersionTranslatorTest
     @Before
     public void before()
     {
-        LoggerFactory.getLogger( DefaultTranslator.class ).info( "Executing test " + testName.getMethodName() );
+        LoggerFactory.getLogger( VersionTranslatorTest.class ).info( "Executing test " + testName.getMethodName() );
 
-        this.versionTranslator = new DefaultTranslator( mockServer.getUrl(), protocol, 0, Translator.CHUNK_SPLIT_COUNT );
+        this.versionTranslator = new DefaultTranslator( mockServer.getUrl(), protocol, 0, Translator.CHUNK_SPLIT_COUNT, "indyGroup" );
     }
 
     public VersionTranslatorTest( RestProtocol protocol)
@@ -137,7 +136,7 @@ public class VersionTranslatorTest
     {
         // Some url that doesn't exist used here
         Translator translator = new DefaultTranslator( "http://127.0.0.2", RestProtocol.CURRENT, 0,
-                                                       Translator.CHUNK_SPLIT_COUNT );
+                                                       Translator.CHUNK_SPLIT_COUNT, "" );
 
         List<ProjectVersionRef> gavs = new ArrayList<ProjectVersionRef>()
         {{
@@ -187,7 +186,7 @@ public class VersionTranslatorTest
     }
 
 
-    public static List<ProjectVersionRef> loadALotOfGAVs() throws IOException {
+    static List<ProjectVersionRef> loadALotOfGAVs() throws IOException {
         List<ProjectVersionRef> result = new ArrayList<>();
         String longJsonFile = readFileFromClasspath( "example-response-performance-test.json" );
 

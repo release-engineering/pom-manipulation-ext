@@ -48,9 +48,9 @@ import static org.apache.http.HttpStatus.SC_OK;
 public class DefaultTranslator
     implements Translator
 {
-    private static final String REPORTS_LOOKUP_GAVS="reports/lookup/gavs";
+    private static final String REPORTS_LOOKUP_GAVS = "reports/lookup/gavs";
 
-    private static final String LISTING_BLACKLIST_GA="listings/blacklist/ga";
+    private static final String LISTING_BLACKLIST_GA = "listings/blacklist/ga";
 
     private static final Random RANDOM = new Random();
 
@@ -68,16 +68,23 @@ public class DefaultTranslator
 
     private final ListingBlacklistMapper lbm;
 
+    public DefaultTranslator( String endpointUrl, RestProtocol protocol, int restMaxSize, int restMinSize )
+    {
+        this ( endpointUrl, protocol, restMaxSize, restMinSize, "");
+    }
+
     /**
      * @param endpointUrl is the URL to talk to.
      * @param protocol determines what REST format PME should use. The two formats
      *                 currently available are:
      * @param restMaxSize initial (maximum) size of the rest call; if zero will send everything.
      * @param restMinSize minimum size for the call
+     * @param repositoryGroup
      */
-    public DefaultTranslator( String endpointUrl, RestProtocol protocol, int restMaxSize, int restMinSize )
+    public DefaultTranslator( String endpointUrl, RestProtocol protocol, int restMaxSize, int restMinSize,
+                              String repositoryGroup )
     {
-        this.rgm = new ReportGAVMapper( protocol);
+        this.rgm = new ReportGAVMapper( protocol, repositoryGroup );
         this.lbm = new ListingBlacklistMapper( protocol);
         this.endpointUrl = endpointUrl;
         this.initialRestMaxSize = restMaxSize;
@@ -143,6 +150,7 @@ public class DefaultTranslator
      * {
      *     "productNames": [],
      *     "productVersionIds": [],
+     *     "repositoryGroup": "",
      *     "gavs": [
      *     {
      *         "groupId": "com.google.guava",
