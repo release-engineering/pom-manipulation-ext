@@ -89,10 +89,10 @@ public class HttpErrorTranslatorTest
     @Before
     public void before()
     {
-        LoggerFactory.getLogger( DefaultTranslator.class ).info ( "Executing test " + testName.getMethodName());
+        LoggerFactory.getLogger( HttpErrorTranslatorTest.class ).info ( "Executing test " + testName.getMethodName());
 
         this.versionTranslator = new DefaultTranslator( mockServer.getUrl(), Translator.RestProtocol.CURRENT, 0,
-                                                        Translator.CHUNK_SPLIT_COUNT );
+                                                        Translator.CHUNK_SPLIT_COUNT, "" );
     }
 
     @Test
@@ -124,7 +124,8 @@ public class HttpErrorTranslatorTest
         {
             while ( scanner.hasNextLine() )
             {
-                fileContents.append( scanner.nextLine() + lineSeparator );
+                fileContents.append( scanner.nextLine() );
+                fileContents.append( lineSeparator );
             }
             return fileContents.toString();
         }

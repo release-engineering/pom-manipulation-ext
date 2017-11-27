@@ -103,15 +103,8 @@ public class AddSuffixJettyHandler
             if ( target.equals( DEFAULT_ENDPOINT ) )
             {
                 // Protocol analysis
-                if ( jb.toString().startsWith( "{\"productNames" ) )
-                {
-                    GAVSchema gavSchema = objectMapper.readValue( jb.toString(), GAVSchema.class );
-                    requestBody = gavSchema.gavs;
-                }
-                else
-                {
-                    requestBody = objectMapper.readValue( jb.toString(), List.class );
-                }
+                GAVSchema gavSchema = objectMapper.readValue( jb.toString(), GAVSchema.class );
+                requestBody = gavSchema.gavs;
 
                 // Prepare Response
                 for ( Map<String, Object> gav : requestBody )

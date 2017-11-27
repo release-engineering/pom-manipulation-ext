@@ -42,13 +42,16 @@ public class ReportGAVMapper
     private final com.fasterxml.jackson.databind.ObjectMapper objectMapper
         = new com.fasterxml.jackson.databind.ObjectMapper();
 
+    private final String repositoryGroup;
+
     private String errorString;
 
     private Translator.RestProtocol protocol;
 
-    public ReportGAVMapper( RestProtocol protocol )
+    public ReportGAVMapper( RestProtocol protocol, String repositoryGroup )
     {
         this.protocol = protocol;
+        this.repositoryGroup = repositoryGroup;
     }
 
     @Override
@@ -85,29 +88,29 @@ public class ReportGAVMapper
             return result;
         }
 
-        List<Map<String, Object>> responseBody;
         try
         {
-            responseBody = objectMapper.readValue( s, List.class );
+            @SuppressWarnings( "unchecked" )
+            List<Map<String, Object>> responseBody = objectMapper.readValue( s, List.class );
+
+            for ( Map<String, Object> gav : responseBody )
+            {
+                String groupId = (String) gav.get( "groupId" );
+                String artifactId = (String) gav.get( "artifactId" );
+                String version = (String) gav.get( "version" );
+                String bestMatchVersion = (String) gav.get( "bestMatchVersion" );
+
+                if ( bestMatchVersion != null )
+                {
+                    ProjectVersionRef project = new SimpleProjectVersionRef( groupId, artifactId, version );
+                    result.put( project, bestMatchVersion );
+                }
+            }
         }
         catch ( IOException e )
         {
             logger.error( "Failed to decode map when reading string {}", s );
             throw new RestException( "Failed to read list-of-maps response from version server: " + e.getMessage(), e );
-        }
-
-        for ( Map<String, Object> gav: responseBody )
-        {
-            String groupId = (String) gav.get( "groupId" );
-            String artifactId = (String) gav.get( "artifactId" );
-            String version = (String) gav.get( "version" );
-            String bestMatchVersion = (String) gav.get( "bestMatchVersion" );
-
-            if ( bestMatchVersion != null )
-            {
-                ProjectVersionRef project = new SimpleProjectVersionRef( groupId, artifactId, version );
-                result.put( project, bestMatchVersion );
-            }
         }
 
         return result;
@@ -116,6 +119,7 @@ public class ReportGAVMapper
     @Override
     public String writeValue( Object value )
     {
+        @SuppressWarnings( "unchecked" )
         List<ProjectVersionRef> projects = (List<ProjectVersionRef>) value;
         Object request;
 
@@ -133,7 +137,7 @@ public class ReportGAVMapper
 
         if ( protocol == Translator.RestProtocol.CURRENT )
         {
-            request = new GAVSchema( new String[]{}, new String[]{}, requestBody );
+            request = new GAVSchema( new String[]{}, new String[]{}, repositoryGroup, requestBody );
         }
         else
         {
