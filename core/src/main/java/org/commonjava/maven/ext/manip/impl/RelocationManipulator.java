@@ -114,7 +114,7 @@ public class RelocationManipulator
         final RelocationState state = session.getState( RelocationState.class );
         final WildcardMap<ProjectVersionRef> relocations = state.getDependencyRelocations();
 
-        logger.info( "Applying relocation changes to: " + ga( project ) );
+        logger.debug( "Applying relocation changes to: " + ga( project ) );
 
         DependencyManagement dependencyManagement = model.getDependencyManagement();
         if ( dependencyManagement != null )
