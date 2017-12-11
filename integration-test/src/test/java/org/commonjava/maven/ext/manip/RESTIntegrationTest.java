@@ -85,6 +85,13 @@ public class RESTIntegrationTest
     }
 
     @Test
+    public void testRESTVersionManipRESTBOMAutodetectBom() throws Exception
+    {
+        String test = getDefaultTestLocation( "rest-version-manip-restbom-autodetectbom" );
+        runLikeInvoker( test, mockServer.getUrl() );
+    }
+
+    @Test
     public void testRESTVersionManipRESTPlugin() throws Exception
     {
         String test = getDefaultTestLocation( "rest-version-manip-plugin-rest" );
