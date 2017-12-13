@@ -20,23 +20,20 @@ import org.apache.maven.model.DependencyManagement;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Profile;
 import org.codehaus.plexus.component.annotations.Component;
+import org.commonjava.maven.atlas.ident.ref.ArtifactRef;
 import org.commonjava.maven.atlas.ident.ref.ProjectRef;
-import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
-import org.commonjava.maven.atlas.ident.ref.SimpleProjectRef;
 import org.commonjava.maven.ext.manip.ManipulationException;
 import org.commonjava.maven.ext.manip.ManipulationSession;
 import org.commonjava.maven.ext.manip.model.Project;
 import org.commonjava.maven.ext.manip.state.DependencyRemovalState;
 import org.commonjava.maven.ext.manip.state.DependencyState;
 import org.commonjava.maven.ext.manip.state.State;
-import org.commonjava.maven.ext.manip.util.ProfileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -120,8 +117,8 @@ public class DependencyRemovalManipulator
             result = true;
         }
 
-        final HashMap<Profile, HashMap<ProjectVersionRef, Dependency>> pd = project.getResolvedProfileDependencies( session );
-        final HashMap<Profile, HashMap<ProjectVersionRef, Dependency>> pmd = project.getResolvedProfileManagedDependencies( session );
+        final HashMap<Profile, HashMap<ArtifactRef, Dependency>> pd = project.getResolvedProfileDependencies( session );
+        final HashMap<Profile, HashMap<ArtifactRef, Dependency>> pmd = project.getResolvedProfileManagedDependencies( session );
         for ( Profile profile : pd.keySet())
         {
             int index = model.getProfiles().indexOf( profile );
@@ -145,13 +142,13 @@ public class DependencyRemovalManipulator
         return result;
     }
 
-    private boolean scanDependencies( HashMap<ProjectVersionRef, Dependency> resolvedDependencies,
+    private boolean scanDependencies( HashMap<ArtifactRef, Dependency> resolvedDependencies,
                                       List<ProjectRef> dependenciesToRemove, List<Dependency> dependencies )
     {
         boolean result = false;
         if ( dependencies != null )
         {
-            for ( ProjectVersionRef pvr : resolvedDependencies.keySet() )
+            for ( ArtifactRef pvr : resolvedDependencies.keySet() )
             {
                 if ( dependenciesToRemove.contains( pvr.asProjectRef() ) )
                 {

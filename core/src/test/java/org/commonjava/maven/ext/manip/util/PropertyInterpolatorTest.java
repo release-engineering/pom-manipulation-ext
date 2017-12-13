@@ -17,7 +17,7 @@ package org.commonjava.maven.ext.manip.util;
 
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.Model;
-import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
+import org.commonjava.maven.atlas.ident.ref.ArtifactRef;
 import org.commonjava.maven.ext.manip.ManipulationSession;
 import org.commonjava.maven.ext.manip.fixture.TestUtils;
 import org.commonjava.maven.ext.manip.model.Project;
@@ -88,7 +88,7 @@ public class PropertyInterpolatorTest
         final Model model = TestUtils.resolveModelResource( RESOURCE_BASE, "infinispan-bom-8.2.0.Final.pom" );
         final Project project = new Project( model );
 
-        HashMap<ProjectVersionRef, Dependency> deps = project.getResolvedManagedDependencies( new ManipulationSession() );
+        HashMap<ArtifactRef, Dependency> deps = project.getResolvedManagedDependencies( new ManipulationSession() );
 
         assertTrue( deps.size() == 66 );
     }

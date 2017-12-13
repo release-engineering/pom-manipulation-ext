@@ -20,8 +20,9 @@ import org.apache.maven.model.DependencyManagement;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Profile;
 import org.codehaus.plexus.component.annotations.Component;
+import org.commonjava.maven.atlas.ident.ref.ArtifactRef;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
-import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef;
+import org.commonjava.maven.atlas.ident.ref.SimpleArtifactRef;
 import org.commonjava.maven.ext.manip.ManipulationException;
 import org.commonjava.maven.ext.manip.ManipulationSession;
 import org.commonjava.maven.ext.manip.model.Project;
@@ -136,20 +137,20 @@ public class RelocationManipulator
         return result;
     }
 
-    private boolean updateDependencies( WildcardMap<ProjectVersionRef> relocations, HashMap<ProjectVersionRef, Dependency> dependencies )
+    private boolean updateDependencies( WildcardMap<ProjectVersionRef> relocations, HashMap<ArtifactRef, Dependency> dependencies )
     {
         boolean result = false;
-        final HashMap<ProjectVersionRef, Dependency> postFixUp = new HashMap<>(  );
+        final HashMap<ArtifactRef, Dependency> postFixUp = new HashMap<>(  );
 
         // If we do a single pass over the dependencies that will handle the relocations *but* it will not handle
         // where one relocation alters the dependency and a subsequent relocation alters it again. For instance, the
         // first might wildcard alter the groupId and the second, more specifically alters one with the artifactId
         for ( int i = 0 ; i < relocations.size(); i++ )
         {
-            Iterator<ProjectVersionRef> it = dependencies.keySet().iterator();
+            Iterator<ArtifactRef> it = dependencies.keySet().iterator();
             while ( it.hasNext() )
             {
-                final ProjectVersionRef pvr = it.next();
+                final ArtifactRef pvr = it.next();
                 if ( relocations.containsKey( pvr.asProjectRef() ) )
                 {
                     ProjectVersionRef relocation = relocations.get( pvr.asProjectRef() );
@@ -167,7 +168,7 @@ public class RelocationManipulator
                     // Unfortunately because we iterate using the resolved project keys if the relocation updates those
                     // keys multiple iterations will not work. Therefore we need to remove the original key:dependency
                     // to map to the relocated form.
-                    postFixUp.put( SimpleProjectVersionRef.parse( dependencies.get( pvr ).getManagementKey() ), dependencies.get( pvr ) );
+                    postFixUp.put( SimpleArtifactRef.parse( dependencies.get( pvr ).getManagementKey() ), dependencies.get( pvr ) );
                     it.remove();
 
                     result = true;

@@ -25,7 +25,9 @@ import org.apache.maven.model.Parent;
 import org.apache.maven.model.Plugin;
 import org.apache.maven.model.PluginManagement;
 import org.apache.maven.model.Profile;
+import org.commonjava.maven.atlas.ident.ref.ArtifactRef;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
+import org.commonjava.maven.atlas.ident.ref.SimpleArtifactRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef;
 import org.commonjava.maven.ext.manip.ManipulationException;
 import org.commonjava.maven.ext.manip.session.MavenSessionHandler;
@@ -33,6 +35,8 @@ import org.commonjava.maven.ext.manip.util.ProfileUtils;
 import org.commonjava.maven.ext.manip.util.PropertyResolver;
 import org.commonjava.maven.galley.maven.internal.defaults.StandardMaven304PluginDefaults;
 import org.commonjava.maven.galley.maven.spi.defaults.MavenPluginDefaults;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -55,6 +59,8 @@ import static org.apache.commons.lang.StringUtils.isNotEmpty;
 public class Project
 {
     private static final MavenPluginDefaults PLUGIN_DEFAULTS = new StandardMaven304PluginDefaults();
+
+    private final Logger logger = LoggerFactory.getLogger( getClass() );
 
     /**
      * Original POM file from which this model information was loaded.
@@ -86,13 +92,13 @@ public class Project
      */
     private Project projectParent;
 
-    private HashMap<ProjectVersionRef, Dependency> resolvedDependencies;
+    private HashMap<ArtifactRef, Dependency> resolvedDependencies;
 
-    private HashMap<ProjectVersionRef, Dependency> resolvedManagedDependencies;
+    private HashMap<ArtifactRef, Dependency> resolvedManagedDependencies;
 
-    private HashMap<Profile, HashMap<ProjectVersionRef, Dependency>> resolvedProfileDependencies;
+    private HashMap<Profile, HashMap<ArtifactRef, Dependency>> resolvedProfileDependencies;
 
-    private HashMap<Profile, HashMap<ProjectVersionRef, Dependency>> resolvedProfileManagedDependencies;
+    private HashMap<Profile, HashMap<ArtifactRef, Dependency>> resolvedProfileManagedDependencies;
 
     private HashMap<ProjectVersionRef, Plugin> resolvedPlugins;
 
@@ -274,10 +280,10 @@ public class Project
      * the Model then you must use {@link #getModel()}
      *
      * @param session MavenSessionHandler, used by {@link PropertyResolver}
-     * @return a list of fully resolved {@link ProjectVersionRef} to the original {@link Dependency}
+     * @return a list of fully resolved {@link ArtifactRef} to the original {@link Dependency}
      * @throws ManipulationException if an error occurs
      */
-    public HashMap<Profile, HashMap<ProjectVersionRef, Dependency>> getResolvedProfileDependencies( MavenSessionHandler session) throws ManipulationException
+    public HashMap<Profile, HashMap<ArtifactRef, Dependency>> getResolvedProfileDependencies( MavenSessionHandler session) throws ManipulationException
     {
         if ( resolvedProfileDependencies == null )
         {
@@ -285,7 +291,7 @@ public class Project
 
             for ( final Profile profile : ProfileUtils.getProfiles( session, model ) )
             {
-                HashMap<ProjectVersionRef, Dependency> profileDeps = new HashMap<>();
+                HashMap<ArtifactRef, Dependency> profileDeps = new HashMap<>();
 
                 resolveDeps( session, profile.getDependencies(), profileDeps );
 
@@ -302,10 +308,10 @@ public class Project
      * to the Model then you must use {@link #getModel()}
      *
      * @param session MavenSessionHandler, used by {@link PropertyResolver}
-     * @return a list of fully resolved {@link ProjectVersionRef} to the original {@link Dependency} (that were within DependencyManagement)
+     * @return a list of fully resolved {@link ArtifactRef} to the original {@link Dependency} (that were within DependencyManagement)
      * @throws ManipulationException if an error occurs
      */
-    public HashMap<Profile, HashMap<ProjectVersionRef, Dependency>> getResolvedProfileManagedDependencies( MavenSessionHandler session) throws ManipulationException
+    public HashMap<Profile, HashMap<ArtifactRef, Dependency>> getResolvedProfileManagedDependencies( MavenSessionHandler session) throws ManipulationException
     {
         if ( resolvedProfileManagedDependencies == null )
         {
@@ -313,7 +319,7 @@ public class Project
 
             for ( final Profile profile : ProfileUtils.getProfiles( session, model ) )
             {
-                HashMap<ProjectVersionRef, Dependency> profileDeps = new HashMap<>();
+                HashMap<ArtifactRef, Dependency> profileDeps = new HashMap<>();
 
                 final DependencyManagement dm = profile.getDependencyManagement();
                 if ( ! ( dm == null || dm.getDependencies() == null ) )
@@ -454,10 +460,10 @@ public class Project
      * same object, if you wish to remove or add items to the Model then you must use {@link #getModel()}
      *
      * @param session MavenSessionHandler, used by {@link PropertyResolver}
-     * @return a list of fully resolved {@link ProjectVersionRef} to the original {@link Dependency}
+     * @return a list of fully resolved {@link ArtifactRef} to the original {@link Dependency}
      * @throws ManipulationException if an error occurs
      */
-    public HashMap<ProjectVersionRef, Dependency> getResolvedDependencies( MavenSessionHandler session) throws ManipulationException
+    public HashMap<ArtifactRef, Dependency> getResolvedDependencies( MavenSessionHandler session) throws ManipulationException
     {
         if ( resolvedDependencies == null )
         {
@@ -475,10 +481,10 @@ public class Project
      * in the Model as it is the same object, if you wish to remove or add items to the Model then you must use {@link #getModel()}
      *
      * @param session MavenSessionHandler, used by {@link PropertyResolver}
-     * @return a list of fully resolved {@link ProjectVersionRef} to the original {@link Dependency} (that were within DependencyManagement)
+     * @return a list of fully resolved {@link ArtifactRef} to the original {@link Dependency} (that were within DependencyManagement)
      * @throws ManipulationException if an error occurs
      */
-    public HashMap<ProjectVersionRef, Dependency> getResolvedManagedDependencies( MavenSessionHandler session ) throws ManipulationException
+    public HashMap<ArtifactRef, Dependency> getResolvedManagedDependencies( MavenSessionHandler session ) throws ManipulationException
     {
         if ( resolvedManagedDependencies == null )
         {
@@ -494,7 +500,7 @@ public class Project
     }
 
 
-    private void resolveDeps ( MavenSessionHandler session, List<Dependency> deps, HashMap<ProjectVersionRef, Dependency> resolvedDependencies)
+    private void resolveDeps ( MavenSessionHandler session, List<Dependency> deps, HashMap<ArtifactRef, Dependency> resolvedDependencies)
                     throws ManipulationException
     {
         for ( Dependency d : deps )
@@ -511,7 +517,11 @@ public class Project
 
             if ( isNotEmpty( g ) && isNotEmpty( a ) && isNotEmpty( v ) )
             {
-                resolvedDependencies.put( new SimpleProjectVersionRef( g, a, v ), d );
+                Dependency old = resolvedDependencies.put( new SimpleArtifactRef( g, a, v, d.getType(), d.getClassifier() ), d );
+                if ( old != null)
+                {
+                     logger.error( "Internal project dependency resolution failure ; replaced {} within store.", old.toString() );
+                }
             }
         }
     }
@@ -542,7 +552,11 @@ public class Project
             // this means managed plugins would be included which confuses things.
             if ( isNotEmpty( g ) && isNotEmpty( a ) && isNotEmpty( v ) )
             {
-                resolvedPlugins.put( new SimpleProjectVersionRef( g, a, v ), p );
+                Plugin old = resolvedPlugins.put( new SimpleProjectVersionRef( g, a, v ), p );
+                if ( old != null)
+                {
+                    logger.error( "Internal project plugin resolution failure ; replaced {} within store.", old.toString() );
+                }
             }
         }
     }

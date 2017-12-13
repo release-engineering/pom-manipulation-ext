@@ -394,7 +394,8 @@ public class RESTManipulator implements Manipulator
      * @param deps Set of ArtifactRef to store the results in.
      * @param dependencies dependencies to examine
      */
-    private static void recordDependencies( ManipulationSession session, Project project, Set<ArtifactRef> deps, HashMap<ProjectVersionRef, Dependency> dependencies )
+    private static void recordDependencies( ManipulationSession session, Project project, Set<ArtifactRef> deps,
+                                            HashMap<ArtifactRef, Dependency> dependencies )
                     throws ManipulationException
     {
         if ( dependencies == null )
@@ -402,7 +403,7 @@ public class RESTManipulator implements Manipulator
             return;
         }
 
-        for ( ProjectVersionRef pvr : dependencies.keySet() )
+        for ( ArtifactRef pvr : dependencies.keySet() )
         {
             Dependency d = dependencies.get( pvr );
             deps.add( new SimpleScopedArtifactRef( pvr, new SimpleTypeAndClassifier( d.getType(), d.getClassifier() ),
@@ -421,7 +422,7 @@ public class RESTManipulator implements Manipulator
         long minutes = TimeUnit.NANOSECONDS.toMinutes( finish - start );
         long seconds = TimeUnit.NANOSECONDS.toSeconds( finish - start ) - ( minutes * 60 );
         logger.info ( "REST client finished {}... (took {} min, {} sec, {} millisec)",
-                      (finished == true ? "successfully" : "with failures"), minutes, seconds,
+                      ( finished ? "successfully" : "with failures"), minutes, seconds,
                       (TimeUnit.NANOSECONDS.toMillis( finish - start ) - ( minutes * 60 * 1000 ) - ( seconds * 1000) ));
     }
 }

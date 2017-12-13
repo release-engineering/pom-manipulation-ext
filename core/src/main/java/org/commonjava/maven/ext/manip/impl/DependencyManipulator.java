@@ -29,7 +29,6 @@ import org.commonjava.maven.atlas.ident.ref.ProjectRef;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleArtifactRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleProjectRef;
-import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef;
 import org.commonjava.maven.ext.manip.ManipulationException;
 import org.commonjava.maven.ext.manip.ManipulationSession;
 import org.commonjava.maven.ext.manip.io.ModelIO;
@@ -369,12 +368,12 @@ public class DependencyManipulator implements Manipulator
 
                 // Apply any explicit overrides to the top level parent. Convert it to a simulated
                 // dependency so we can reuse applyExplicitOverrides.
-                HashMap<ProjectVersionRef, Dependency> pDepMap = new HashMap<>(  );
+                HashMap<ArtifactRef, Dependency> pDepMap = new HashMap<>(  );
                 Dependency d = new Dependency();
                 d.setGroupId( project.getModelParent().getGroupId() );
                 d.setArtifactId( project.getModelParent().getArtifactId() );
                 d.setVersion( project.getModelParent().getVersion() );
-                pDepMap.put( SimpleProjectVersionRef.parse( d.getManagementKey() ), d );
+                pDepMap.put( SimpleArtifactRef.parse( d.getManagementKey() ), d );
                 applyExplicitOverrides( project, pDepMap, explicitOverrides, commonState, explicitVersionPropertyUpdateMap );
                 project.getModelParent().setVersion( d.getVersion() );
             }
@@ -467,8 +466,8 @@ public class DependencyManipulator implements Manipulator
             applyOverrides( project, project.getResolvedDependencies( session ), explicitOverrides, moduleOverrides );
             applyExplicitOverrides( project, project.getResolvedDependencies( session ), explicitOverrides, commonState, explicitVersionPropertyUpdateMap );
 
-            final HashMap<Profile, HashMap<ProjectVersionRef, Dependency>> pd = project.getResolvedProfileDependencies( session );
-            final HashMap<Profile, HashMap<ProjectVersionRef, Dependency>> pmd = project.getResolvedProfileManagedDependencies( session );
+            final HashMap<Profile, HashMap<ArtifactRef, Dependency>> pd = project.getResolvedProfileDependencies( session );
+            final HashMap<Profile, HashMap<ArtifactRef, Dependency>> pmd = project.getResolvedProfileManagedDependencies( session );
 
             for ( Profile p : pd.keySet())
             {
@@ -499,7 +498,7 @@ public class DependencyManipulator implements Manipulator
      * @param versionPropertyUpdateMap properties to update
      * @throws ManipulationException if an error occurs
      */
-    private void applyExplicitOverrides( final Project project, final HashMap<ProjectVersionRef, Dependency> dependencies,
+    private void applyExplicitOverrides( final Project project, final HashMap<ArtifactRef, Dependency> dependencies,
                                          final WildcardMap<String> explicitOverrides, final CommonState state,
                                          final Map<Project, Map<String, String>> versionPropertyUpdateMap )
                     throws ManipulationException
@@ -572,7 +571,7 @@ public class DependencyManipulator implements Manipulator
      * @return The map of overrides that were not matched in the dependencies
      * @throws ManipulationException if an error occurs
      */
-    private Map<ArtifactRef, String> applyOverrides( final Project project, final HashMap<ProjectVersionRef, Dependency> dependencies,
+    private Map<ArtifactRef, String> applyOverrides( final Project project, final HashMap<ArtifactRef, Dependency> dependencies,
                                                      final WildcardMap<String> explicitOverrides, final Map<ArtifactRef, String> overrides )
                     throws ManipulationException
     {

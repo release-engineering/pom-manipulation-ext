@@ -379,8 +379,9 @@
          </dependency>
          <dependency>
             <groupId>org.rhq</groupId>
-            <artifactId>rhq-jboss-as-7-plugin</artifactId>
+            <artifactId>rhq-jmx-plugin</artifactId>
             <version>${version.rhq}</version>
+            <classifier>src</classifier>
          </dependency>
          <dependency>
             <groupId>org.rhq</groupId>
