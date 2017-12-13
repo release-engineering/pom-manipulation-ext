@@ -31,7 +31,7 @@
   <packaging>pom</packaging>
 
   <name>POM Manipulation Extension for Maven</name>
-  <url>http://github.com/jdcasey/pom-manipulation-ext</url>
+  <url>http://github.com/release-engineering/pom-manipulation-ext</url>
   <inceptionYear>2012</inceptionYear>
 
   <description>
