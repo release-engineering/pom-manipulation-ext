@@ -90,7 +90,9 @@ public class CliTest
         MavenSession ms = (MavenSession)FieldUtils.readField( session, "mavenSession", true );
 
         assertTrue( ms.getRequest().getLocalRepository().getBasedir().equals( ms.getRequest().getLocalRepositoryPath().toString() ) );
-        assertTrue ( new File ( ms.getRequest().getLocalRepository().getBasedir() ).getParentFile().toString().
+        assertTrue ( "File " + new File ( ms.getRequest().getLocalRepository().getBasedir() ).getParentFile().toString() +
+                                     " was not equal to " + System.getProperty( "user.home" ) + File.separatorChar + ".m2",
+                        new File ( ms.getRequest().getLocalRepository().getBasedir() ).getParentFile().toString().
                         equals( System.getProperty( "user.home" ) + File.separatorChar + ".m2" ) );
 
     }
