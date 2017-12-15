@@ -16,13 +16,17 @@
 package org.commonjava.maven.ext.manip;
 
 import ch.qos.logback.classic.Level;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.reflect.FieldUtils;
 import org.apache.maven.execution.MavenSession;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -34,6 +38,9 @@ import static org.junit.Assert.assertTrue;
 
 public class CliTest
 {
+    @Rule
+    public TemporaryFolder temp = new TemporaryFolder( );
+
     @Before
     public void before()
     {
@@ -42,14 +49,24 @@ public class CliTest
         root.setLevel( Level.OFF );
     }
 
+    private File writeSettings (File f) throws IOException
+    {
+        FileUtils.writeStringToFile( f, "<?xml version=\"1.0\" encoding=\"utf-8\"?>"
+                        + "<settings xmlns=\"http://maven.apache.org/SETTINGS/1.0.0\""
+                        + "xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\""
+                        + "xsi:schemaLocation=\"http://maven.apache.org/SETTINGS/1.0.0 http://maven.apache.org/xsd/settings-1.0.0.xsd\">"
+                        + "</settings>" );
+        return f;
+    }
+
     @Test
     public void checkTargetMatches() throws Exception
     {
         Cli c = new Cli();
-        File pom1 = new File( "/tmp/foobar" );
-        File settings1 = new File( "/tmp/foobarsettings" );
+        File pom1 = temp.newFile( );
+        File settings = writeSettings( temp.newFile( ));
 
-        executeMethod( c, "createSession", new Object[] { pom1, settings1 } );
+        executeMethod( c, "createSession", new Object[] { pom1, settings } );
 
         assertTrue( "Session file should match",
                     pom1.equals( ( (ManipulationSession) FieldUtils.readField( c, "session", true ) ).getPom() ) );
@@ -59,7 +76,7 @@ public class CliTest
     public void checkTargetMatchesWithRun() throws Exception
     {
         Cli c = new Cli();
-        File pom1 = new File( "/tmp/foobar" );
+        File pom1 = temp.newFile( );
 
         executeMethod( c, "run", new Object[] { new String[] { "-f", pom1.toString() } } );
 
@@ -84,13 +101,17 @@ public class CliTest
     public void checkLocalRepositoryWithDefaults() throws Exception
     {
         Cli c = new Cli();
-        executeMethod( c, "run", new Object[] { new String[] {  }} );
+        File settings = writeSettings( temp.newFile());
+
+        executeMethod( c, "run", new Object[] { new String[] { "-s", settings.toString()} } );
 
         ManipulationSession session = (ManipulationSession) FieldUtils.readField( c, "session", true );
         MavenSession ms = (MavenSession)FieldUtils.readField( session, "mavenSession", true );
 
         assertTrue( ms.getRequest().getLocalRepository().getBasedir().equals( ms.getRequest().getLocalRepositoryPath().toString() ) );
-        assertTrue ( new File ( ms.getRequest().getLocalRepository().getBasedir() ).getParentFile().toString().
+        assertTrue ( "File " + new File ( ms.getRequest().getLocalRepository().getBasedir() ).getParentFile().toString() +
+                                     " was not equal to " + System.getProperty( "user.home" ) + File.separatorChar + ".m2",
+                        new File ( ms.getRequest().getLocalRepository().getBasedir() ).getParentFile().toString().
                         equals( System.getProperty( "user.home" ) + File.separatorChar + ".m2" ) );
 
     }
@@ -111,7 +132,7 @@ public class CliTest
                 restore = true;
                 Files.move( source, backup, StandardCopyOption.ATOMIC_MOVE);
             }
-            Files.move( tmpSettings, source, StandardCopyOption.ATOMIC_MOVE);
+            Files.copy( tmpSettings, source );
 
             Cli c = new Cli();
             executeMethod( c, "run", new Object[] { new String[] {} } );
@@ -132,6 +153,10 @@ public class CliTest
             {
                 Files.move( backup, source, StandardCopyOption.ATOMIC_MOVE);
             }
+            else
+            {
+                Files.delete( source );
+            }
         }
     }
 
@@ -150,8 +175,9 @@ public class CliTest
     @Test
     public void checkLocalRepositoryWithExplicitMavenRepo() throws Exception
     {
+        File folder = temp.newFolder();
         Cli c = new Cli();
-        executeMethod( c, "run", new Object[] { new String[] { "-Dmaven.repo.local=/tmp/foo" }} );
+        executeMethod( c, "run", new Object[] { new String[] { "-Dmaven.repo.local=" + folder.toString() }} );
 
         ManipulationSession session = (ManipulationSession) FieldUtils.readField( c, "session", true );
         MavenSession ms = (MavenSession)FieldUtils.readField( session, "mavenSession", true );
@@ -162,15 +188,16 @@ public class CliTest
     @Test
     public void checkLocalRepositoryWithExplicitMavenRepoAndSettings() throws Exception
     {
+        File folder = temp.newFolder();
         Cli c = new Cli();
         executeMethod( c, "run", new Object[] { new String[]
                         { "-settings=" + getClass().getResource("/settings-test.xml").getFile(),
-                                        "-Dmaven.repo.local=/tmp/foo" }} );
+                                        "-Dmaven.repo.local=" + folder.toString() }} );
 
         ManipulationSession session = (ManipulationSession) FieldUtils.readField( c, "session", true );
         MavenSession ms = (MavenSession)FieldUtils.readField( session, "mavenSession", true );
 
-        assertTrue( ms.getLocalRepository().getBasedir().equals( "/tmp/foo" ) );
+        assertTrue( ms.getLocalRepository().getBasedir().equals( folder.toString() ) );
         assertTrue( ms.getRequest().getLocalRepository().getBasedir().equals( ms.getRequest().getLocalRepositoryPath().toString() ) );
     }
 

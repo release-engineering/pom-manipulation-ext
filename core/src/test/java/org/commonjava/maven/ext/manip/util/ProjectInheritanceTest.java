@@ -23,6 +23,7 @@ import org.junit.Test;
 import java.io.File;
 import java.util.List;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 public class ProjectInheritanceTest
@@ -87,6 +88,35 @@ public class ProjectInheritanceTest
         }
     }
 
+    @Test
+    public void testVerifyExecutionRoot() throws Exception
+    {
+        // Locate the PME project pom file. Use that to verify inheritance tracking.
+        final File projectroot = new File( TestUtils.resolveFileResource( RESOURCE_BASE, "" )
+                                                    .getParentFile()
+                                                    .getParentFile()
+                                                    .getParentFile()
+                                                    .getParentFile(),
+                                           "integration-test/src/it/project-inheritance/common/pom.xml" );
+        PomIO pomIO = new PomIO();
+
+        List<Project> projects = pomIO.parseProject( projectroot );
+
+        for ( Project p : projects )
+        {
+            if ( p.getKey().toString().equals( "io.apiman:apiman-common:1.2.7-SNAPSHOT" ))
+            {
+                assertTrue( p.isExecutionRoot() );
+                assertTrue( p.isInheritanceRoot() );
+            }
+            else
+            {
+                assertFalse( p.isExecutionRoot() );
+                assertFalse( p.isInheritanceRoot() );
+            }
+        }
+
+    }
 
     @Test
     public void testVerifyInheritanceReversedMultiple() throws Exception
