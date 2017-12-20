@@ -32,13 +32,11 @@ public class RESTState implements State
 
     private final Translator restEndpoint;
 
-    private final String repositoryGroup;
-
     public RESTState( final Properties userProps ) throws ManipulationException
     {
         restURL = userProps.getProperty( "restURL" );
 
-        repositoryGroup = userProps.getProperty( "restRepositoryGroup", "" );
+        String repositoryGroup = userProps.getProperty( "restRepositoryGroup", "" );
         int restMaxSize = Integer.valueOf( userProps.getProperty( "restMaxSize", "0" ) );
         int restMinSize = Integer.valueOf( userProps.getProperty( "restMinSize",
                                                                   String.valueOf( DefaultTranslator.CHUNK_SPLIT_COUNT ) ) );

@@ -23,32 +23,48 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>org.commonjava.maven.ext</groupId>
-  <artifactId>depMgmtAgg14</artifactId>
-  <version>1.0</version>
+  <artifactId>rest-version-manip-restbom-autodetectbom</artifactId>
+  <version>1.0.0</version>
+  <packaging>pom</packaging>
 
-  <name>Dependency Management POM to use with integration tests</name>
+  <name>Module to test REST manipulation of project version only</name>
 
   <properties>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <errai-tools>1.1-Final</errai-tools>
+    <httpclient>3.1</httpclient>
+    <httpclient-indirect>${httpclient}</httpclient-indirect>
   </properties>
 
   <dependencyManagement>
     <dependencies>
       <dependency>
-        <groupId>org.commonjava.maven.ext</groupId>
-        <artifactId>depMgmt1</artifactId>
-        <version>1.0</version>
-        <type>pom</type>
-        <scope>import</scope>
+        <groupId>junit</groupId>
+        <artifactId>junit</artifactId>
+        <version>3.8.2</version>
       </dependency>
       <dependency>
-        <groupId>org.commonjava.maven.ext</groupId>
-        <artifactId>depMgmt2</artifactId>
-        <version>1.0.0-redhat-2</version>
-        <type>pom</type>
-        <scope>import</scope>
+        <groupId>commons-lang</groupId>
+        <artifactId>commons-lang</artifactId>
+        <version>1.0</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jboss.errai</groupId>
+        <artifactId>errai-tools</artifactId>
+        <version>${errai-tools}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
 
+  <dependencies>
+    <dependency>
+      <groupId>commons-httpclient</groupId>
+      <artifactId>commons-httpclient</artifactId>
+      <version>${httpclient-indirect}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.jboss.errai</groupId>
+      <artifactId>errai-common</artifactId>
+      <version>1.1-Final</version>
+    </dependency>
+  </dependencies>
 </project>

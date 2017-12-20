@@ -120,6 +120,10 @@ public class AddSuffixJettyHandler
                     {
                         bestMatchVersion = version + "-" + EXTENDED_SUFFIX;
                     }
+                    else if ( ( (String) gav.get( "artifactId" ) ).startsWith( "depMgmt2" ) )
+                    {
+                        bestMatchVersion = "1.0.0-" + EXTENDED_SUFFIX;
+                    }
                     else
                     {
                         bestMatchVersion = version + "-" + this.suffix;

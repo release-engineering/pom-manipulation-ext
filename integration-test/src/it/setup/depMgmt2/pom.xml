@@ -24,7 +24,7 @@
 
   <groupId>org.commonjava.maven.ext</groupId>
   <artifactId>depMgmt2</artifactId>
-  <version>1.0</version>
+  <version>1.0.0-redhat-2</version>
   <packaging>pom</packaging>
 
   <name>Dependency Management POM to use with integration tests</name>

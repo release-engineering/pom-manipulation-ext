@@ -44,6 +44,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
@@ -79,6 +80,8 @@ public class RESTManipulator implements Manipulator
     {
         final RESTState state = session.getState( RESTState.class );
         final VersioningState vs = session.getState( VersioningState.class );
+        final DependencyState ds = session.getState( DependencyState.class );
+        final PluginState ps = session.getState( PluginState.class );
 
         if ( !session.isEnabled() || !state.isEnabled() )
         {
@@ -127,8 +130,20 @@ public class RESTManipulator implements Manipulator
         }
         restParam.addAll( newProjectKeys );
 
-        Set<ArtifactRef> localDeps = establishAllDependencies( session, projects, null );
+        // If the dependencyState getRemoteBOMDepMgmt contains suffix then send that to process as well.
+        // We only recognise dependencyManagement of the form g:a:version-rebuild not g:a:version-rebuild-<numeric>.
+        for ( ProjectVersionRef bom : ( ds.getRemoteBOMDepMgmt() == null ? Collections.<ProjectVersionRef>emptyList() : ds.getRemoteBOMDepMgmt() ) )
+        {
+            if ( ! Version.hasBuildNumber( bom.getVersionString() ) && bom.getVersionString().contains( PropertiesUtils.getSuffix( session ) ) )
+            {
+                // Create the dummy PVR to send to DA (which requires a numeric suffix).
+                ProjectVersionRef newBom = new SimpleProjectVersionRef( bom.asProjectRef(), bom.getVersionString() + "-0" );
+                logger.debug ("Adding dependencyManagement BOM {} into REST call.", newBom);
+                restParam.add( newBom );
+            }
+        }
 
+        Set<ArtifactRef> localDeps = establishAllDependencies( session, projects, null );
         // Ok we now have a defined list of top level project plus a unique list of all possible dependencies.
         // Need to send that to the rest interface to get a translation.
         for ( ArtifactRef p : localDeps )
@@ -152,10 +167,28 @@ public class RESTManipulator implements Manipulator
         }
         logger.debug ("REST Client returned {} ", restResult);
 
+        // Process rest result for boms
+        ListIterator<ProjectVersionRef> iterator = (ds.getRemoteBOMDepMgmt() == null ? Collections.<ProjectVersionRef>emptyList().listIterator() : ds.getRemoteBOMDepMgmt().listIterator());
+        while ( iterator.hasNext() )
+        {
+            ProjectVersionRef pvr = iterator.next();
+            // As before, only process the BOMs if they are of the format <rebuild suffix> without a numeric portion.
+            if ( ! Version.hasBuildNumber( pvr.getVersionString() ) && pvr.getVersionString().contains( PropertiesUtils.getSuffix( session ) ) )
+            {
+                // Create the dummy PVR to compare with results to...
+                ProjectVersionRef newBom = new SimpleProjectVersionRef( pvr.asProjectRef(), pvr.getVersionString() + "-0" );
+                if ( restResult.keySet().contains( newBom ) )
+                {
+                    ProjectVersionRef replacementBOM = new SimpleProjectVersionRef( pvr.asProjectRef(), restResult.get( newBom ) );
+                    logger.debug( "Replacing BOM value of {} with {}.", pvr, replacementBOM );
+                    iterator.remove();
+                    iterator.add( replacementBOM );
+                }
+            }
+        }
+
         vs.setRESTMetadata (parseVersions(session, projects, state, newProjectKeys, restResult));
 
-        final DependencyState ds = session.getState( DependencyState.class );
-        final PluginState ps = session.getState( PluginState.class );
         final Map<ArtifactRef, String> overrides = new HashMap<>();
 
         // Convert the loaded remote ProjectVersionRefs to the original ArtifactRefs

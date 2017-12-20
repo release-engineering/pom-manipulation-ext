@@ -208,6 +208,26 @@ public class VersionTest
     }
 
     @Test
+    public void testHasQualifier()
+    {
+        assertTrue( Version.hasQualifier( "1.0-SNAPSHOT" ) );
+        assertFalse( Version.hasQualifier( "1.0.0" ) );
+        assertTrue( Version.hasQualifier( "1.0.0.Final" ) );
+        assertTrue( Version.hasQualifier( "1.0.Final-rebuild" ) );
+        assertTrue( Version.hasQualifier( "1.0.Final-rebuild-1" ) );
+    }
+
+    @Test
+    public void testHasBuildNum()
+    {
+        assertFalse( Version.hasBuildNumber( "1.0-SNAPSHOT" ) );
+        assertFalse( Version.hasBuildNumber( "1.0.0" ) );
+        assertFalse( Version.hasBuildNumber( "1.0.0.Final" ) );
+        assertFalse( Version.hasBuildNumber( "1.0.Final-rebuild" ) );
+        assertTrue( Version.hasBuildNumber( "1.0.Final-rebuild-1" ) );
+    }
+
+    @Test
     public void testGetQualifierBase() {
         assertThat(Version.getQualifierBase("1.0-SNAPSHOT"), equalTo(""));
         assertThat(Version.getQualifierBase("1.0.0.Beta1"), equalTo("Beta"));
