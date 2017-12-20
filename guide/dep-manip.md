@@ -27,6 +27,7 @@ Multiple remote dependency-management poms can be specified using a comma separa
 
     mvn install -DdependencyManagement=org.foo:my-dep-pom:1.0,org.bar:my-dep-pom:2.0
 
+**NOTE:** If the BOM is specified in the format `-DdependencyManagement=org.foo:my-dep-pom:1.0-rebuild` i.e. a rebuild suffix is specified *but without a numeric portion* then PME will automatically replace the BOM GAV with the latest suffix via a REST call. For instance, assuming the latest suffix is rebuild-3, the above will be replaced implicitly by `-DdependencyManagement=org.foo:my-dep-pom:1.0-rebuild-3`.
 
 #### REST Endpoint
 
