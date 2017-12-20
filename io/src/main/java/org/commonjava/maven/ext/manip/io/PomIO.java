@@ -75,7 +75,7 @@ public class PomIO
     public List<Project> parseProject (final File pom) throws ManipulationException
     {
         final List<PomPeek> peeked = peekAtPomHierarchy(pom);
-        return readModelsForManipulation( pom, peeked );
+        return readModelsForManipulation( pom.getAbsoluteFile(), peeked );
     }
 
     /**

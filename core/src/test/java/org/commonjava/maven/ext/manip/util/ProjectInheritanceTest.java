@@ -21,6 +21,8 @@ import org.commonjava.maven.ext.manip.model.Project;
 import org.junit.Test;
 
 import java.io.File;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 
 import static org.junit.Assert.assertFalse;
@@ -98,6 +100,7 @@ public class ProjectInheritanceTest
                                                     .getParentFile()
                                                     .getParentFile(),
                                            "integration-test/src/it/project-inheritance/common/pom.xml" );
+
         PomIO pomIO = new PomIO();
 
         List<Project> projects = pomIO.parseProject( projectroot );
@@ -116,6 +119,23 @@ public class ProjectInheritanceTest
             }
         }
 
+    }
+
+    @Test
+    public void testVerifyRelativeExecutionRoot() throws Exception
+    {
+        final File projectRoot = new File( System.getProperty( "user.dir" ) + "/pom.xml" );
+
+        Path root = Paths.get( projectRoot.getParent() );
+        Path absolute = Paths.get( projectRoot.toString() );
+        Path relative = root.relativize( absolute );
+
+        PomIO pomIO = new PomIO();
+
+        List<Project> projects = pomIO.parseProject( relative.toFile() );
+
+        assertTrue( projects.size() == 1 );
+        assertTrue( projects.get( 0 ).isExecutionRoot() );
     }
 
     @Test
