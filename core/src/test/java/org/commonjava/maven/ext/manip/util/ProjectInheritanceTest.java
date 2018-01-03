@@ -15,6 +15,10 @@
  */
 package org.commonjava.maven.ext.manip.util;
 
+import org.apache.maven.model.Dependency;
+import org.commonjava.maven.atlas.ident.ref.ArtifactRef;
+import org.commonjava.maven.atlas.ident.ref.SimpleArtifactRef;
+import org.commonjava.maven.ext.manip.ManipulationSession;
 import org.commonjava.maven.ext.manip.fixture.TestUtils;
 import org.commonjava.maven.ext.manip.io.PomIO;
 import org.commonjava.maven.ext.manip.model.Project;
@@ -23,6 +27,7 @@ import org.junit.Test;
 import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.HashMap;
 import java.util.List;
 
 import static org.junit.Assert.assertFalse;
@@ -174,4 +179,51 @@ public class ProjectInheritanceTest
             }
         }
     }
+
+
+
+    @Test
+    public void testVerifyProjectVersion() throws Exception
+    {
+        final ManipulationSession session = new ManipulationSession();
+
+        final File projectroot = new File (TestUtils.resolveFileResource( RESOURCE_BASE, "" )
+                                                    .getParentFile()
+                                                    .getParentFile()
+                                                    .getParentFile()
+                                                    .getParentFile(), "integration-test/src/it/project-inheritance/pom.xml" );
+
+        PomIO pomIO = new PomIO();
+        List<Project> projects = pomIO.parseProject( projectroot );
+        for ( Project p : projects )
+        {
+            if ( p.getPom().equals( projectroot ) )
+            {
+                HashMap<ArtifactRef, Dependency> deps = p.getResolvedManagedDependencies( session );
+                for ( ArtifactRef a : deps.keySet())
+                {
+                    assertFalse ( a.getVersionString().contains( "project.version" ));
+                }
+                deps = p.getResolvedDependencies( session );
+                assertTrue( deps.size() == 1 );
+                for ( ArtifactRef a : deps.keySet())
+                {
+                    assertFalse ( a.getVersionString().contains( "project.version" ));
+                }
+                assertFalse( deps.containsKey(  "org.mockito:mockito-all:jar:*" ));
+                deps = p.getAllResolvedDependencies( session );
+                assertTrue( deps.size() == 3 );
+                for ( ArtifactRef a : deps.keySet())
+                {
+                    assertFalse ( a.getVersionString().contains( "project.version" ));
+                    if ( a.getGroupId().equals( "org.mockito" ) )
+                    {
+                        assertTrue ( a.getVersionString().contains( "*" ));
+                    }
+                }
+                assertTrue( deps.containsKey( SimpleArtifactRef.parse( "org.mockito:mockito-all:jar:*" )));
+            }
+        }
+    }
+
 }

@@ -94,9 +94,13 @@ public class Project
 
     private HashMap<ArtifactRef, Dependency> resolvedDependencies;
 
+    private HashMap<ArtifactRef, Dependency> allResolvedDependencies;
+
     private HashMap<ArtifactRef, Dependency> resolvedManagedDependencies;
 
     private HashMap<Profile, HashMap<ArtifactRef, Dependency>> resolvedProfileDependencies;
+
+    private HashMap<Profile, HashMap<ArtifactRef, Dependency>> allResolvedProfileDependencies;
 
     private HashMap<Profile, HashMap<ArtifactRef, Dependency>> resolvedProfileManagedDependencies;
 
@@ -275,9 +279,12 @@ public class Project
 
     /**
      * This method will scan the dependencies in the potentially active Profiles in this project and
-     * return a fully resolved list. Note that while updating the {@link Dependency} reference returned
-     * will be reflected in the Model as it is the same object, if you wish to remove or add items to
-     * the Model then you must use {@link #getModel()}
+     * return a fully resolved list.  Note that this will only return full dependencies not managed
+     * i.e. those with a group, artifact and version.
+     *
+     * Note that while updating the {@link Dependency} reference returned will be reflected in the
+     * Model as it is the same object, if you wish to remove or add items to the Model then you
+     * must use {@link #getModel()}
      *
      * @param session MavenSessionHandler, used by {@link PropertyResolver}
      * @return a list of fully resolved {@link ArtifactRef} to the original {@link Dependency}
@@ -293,12 +300,43 @@ public class Project
             {
                 HashMap<ArtifactRef, Dependency> profileDeps = new HashMap<>();
 
-                resolveDeps( session, profile.getDependencies(), profileDeps );
+                resolveDeps( session, profile.getDependencies(), false, profileDeps );
 
                 resolvedProfileDependencies.put( profile, profileDeps );
             }
         }
         return resolvedProfileDependencies;
+    }
+
+    /**
+     * This method will scan the dependencies in the potentially active Profiles in this project and
+     * return a fully resolved list. Note that this will return all dependencies including managed
+     * i.e. those with a group, artifact and potentially empty version.
+     *
+     * Note that while updating the {@link Dependency} reference returned will be reflected in the
+     * Model as it is the same object, if you wish to remove or add items to the Model then you
+     * must use {@link #getModel()}
+     *
+     * @param session MavenSessionHandler, used by {@link PropertyResolver}
+     * @return a list of fully resolved {@link ArtifactRef} to the original {@link Dependency}
+     * @throws ManipulationException if an error occurs
+     */
+    public HashMap<Profile, HashMap<ArtifactRef, Dependency>> getAllResolvedProfileDependencies( MavenSessionHandler session) throws ManipulationException
+    {
+        if ( allResolvedProfileDependencies == null )
+        {
+            allResolvedProfileDependencies = new HashMap<>(  );
+
+            for ( final Profile profile : ProfileUtils.getProfiles( session, model ) )
+            {
+                HashMap<ArtifactRef, Dependency> profileDeps = new HashMap<>();
+
+                resolveDeps( session, profile.getDependencies(), true, profileDeps );
+
+                allResolvedProfileDependencies.put( profile, profileDeps );
+            }
+        }
+        return allResolvedProfileDependencies;
     }
 
     /**
@@ -324,7 +362,7 @@ public class Project
                 final DependencyManagement dm = profile.getDependencyManagement();
                 if ( ! ( dm == null || dm.getDependencies() == null ) )
                 {
-                    resolveDeps( session, dm.getDependencies(), profileDeps );
+                    resolveDeps( session, dm.getDependencies(), false, profileDeps );
 
                     resolvedProfileManagedDependencies.put( profile, profileDeps );
                 }
@@ -455,9 +493,11 @@ public class Project
     }
 
     /**
-     * This method will scan the dependencies in this project and return a fully resolved list. Note that
-     * while updating the {@link Dependency} reference returned will be reflected in the Model as it is the
-     * same object, if you wish to remove or add items to the Model then you must use {@link #getModel()}
+     * This method will scan the dependencies in this project and return a fully resolved list. Note that this
+     * will only return full dependencies not managed i.e. those with a group, artifact and version.
+     *
+     * Note that while updating the {@link Dependency} reference returned will be reflected in the Model
+     * as it is the same object, if you wish to remove or add items to the Model then you must use {@link #getModel()}
      *
      * @param session MavenSessionHandler, used by {@link PropertyResolver}
      * @return a list of fully resolved {@link ArtifactRef} to the original {@link Dependency}
@@ -469,9 +509,33 @@ public class Project
         {
             resolvedDependencies = new HashMap<>();
 
-            resolveDeps( session, getModel().getDependencies(), resolvedDependencies );
+            resolveDeps( session, getModel().getDependencies(), false, resolvedDependencies );
         }
         return resolvedDependencies;
+    }
+
+
+    /**
+     * This method will scan the dependencies in this project and return a fully resolved list. Note that this
+     * will return all dependencies including managed i.e. those with a group, artifact and potentially empty
+     * version.
+     *
+     * Note that while updating the {@link Dependency} reference returned will be reflected in the Model
+     * as it is the same object, if you wish to remove or add items to the Model then you must use {@link #getModel()}
+     *
+     * @param session MavenSessionHandler, used by {@link PropertyResolver}
+     * @return a list of fully resolved {@link ArtifactRef} to the original {@link Dependency}
+     * @throws ManipulationException if an error occurs
+     */
+    public HashMap<ArtifactRef, Dependency> getAllResolvedDependencies( MavenSessionHandler session ) throws ManipulationException
+    {
+        if ( allResolvedDependencies == null )
+        {
+            allResolvedDependencies = new HashMap<>();
+
+            resolveDeps( session, getModel().getDependencies(), true, allResolvedDependencies );
+        }
+        return allResolvedDependencies;
     }
 
 
@@ -493,14 +557,15 @@ public class Project
             final DependencyManagement dm = getModel().getDependencyManagement();
             if ( ! ( dm == null || dm.getDependencies() == null ) )
             {
-                resolveDeps( session, dm.getDependencies(), resolvedManagedDependencies );
+                resolveDeps( session, dm.getDependencies(), false, resolvedManagedDependencies );
             }
         }
         return resolvedManagedDependencies;
     }
 
 
-    private void resolveDeps ( MavenSessionHandler session, List<Dependency> deps, HashMap<ArtifactRef, Dependency> resolvedDependencies)
+    private void resolveDeps( MavenSessionHandler session, List<Dependency> deps, boolean includeManagedDependencies,
+                              HashMap<ArtifactRef, Dependency> resolvedDependencies )
                     throws ManipulationException
     {
         for ( Dependency d : deps )
@@ -511,16 +576,19 @@ public class Project
             String a = PropertyResolver.resolveInheritedProperties( session, this, "${project.artifactId}".equals( d.getArtifactId() ) ?
                             getArtifactId() :
                             d.getArtifactId() );
-            String v = PropertyResolver.resolveInheritedProperties( session, this, "${project.version}".equals( d.getVersion() ) ?
-                            d.getVersion() :
-                            d.getVersion() );
+            String v = PropertyResolver.resolveInheritedProperties ( session, this, d.getVersion() );
 
+            if ( includeManagedDependencies && isEmpty( v ) )
+            {
+                v = "*";
+            }
             if ( isNotEmpty( g ) && isNotEmpty( a ) && isNotEmpty( v ) )
             {
                 Dependency old = resolvedDependencies.put( new SimpleArtifactRef( g, a, v, d.getType(), d.getClassifier() ), d );
                 if ( old != null)
                 {
-                     logger.error( "Internal project dependency resolution failure ; replaced {} within store.", old.toString() );
+                     logger.error( "Internal project dependency resolution failure ; replaced {} in store by {}:{}:{}.",
+                                   old.toString(), g, a, v );
                 }
             }
         }

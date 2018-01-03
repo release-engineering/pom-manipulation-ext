@@ -82,5 +82,9 @@
             <version>3.8.1</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>${oss-group}</groupId>
+            <artifactId>oss-parent</artifactId>
+        </dependency>
     </dependencies>
 </project>

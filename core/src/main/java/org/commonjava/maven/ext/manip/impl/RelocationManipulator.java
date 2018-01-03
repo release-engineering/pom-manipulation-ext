@@ -120,18 +120,18 @@ public class RelocationManipulator
         DependencyManagement dependencyManagement = model.getDependencyManagement();
         if ( dependencyManagement != null )
         {
-            result = updateDependencies ( relocations, project.getResolvedManagedDependencies( session ) );
+            result = updateDependencies( relocations, project.getResolvedManagedDependencies( session ) );
         }
-        result |= updateDependencies( relocations, project.getResolvedDependencies( session ) );
+        result |= updateDependencies( relocations, project.getAllResolvedDependencies( session ) );
 
         for ( final Profile profile : ProfileUtils.getProfiles( session, model) )
         {
             dependencyManagement = profile.getDependencyManagement();
             if ( dependencyManagement != null )
             {
-                result |= updateDependencies ( relocations, project.getResolvedProfileManagedDependencies( session ).get( profile ) );
+                result |= updateDependencies( relocations, project.getResolvedProfileManagedDependencies( session ).get( profile ) );
             }
-            result |= updateDependencies( relocations, project.getResolvedProfileDependencies( session ).get( profile ) );
+            result |= updateDependencies( relocations, project.getAllResolvedProfileDependencies( session ).get( profile ) );
 
         }
         return result;
@@ -200,7 +200,7 @@ public class RelocationManipulator
                 artifact = relocation.getArtifactId();
             }
 
-            logger.debug ("Adding dependencyExclusion {} & {}", relocation.getGroupId() + ':' + artifact + "@*",
+            logger.debug ("Adding dependencyOverride {} & {}", relocation.getGroupId() + ':' + artifact + "@*",
                           relocation.getVersionString() );
             state.updateExclusions( relocation.getGroupId() + ':' + artifact + "@*", relocation.getVersionString() );
         }

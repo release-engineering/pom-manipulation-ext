@@ -109,7 +109,7 @@ public class DependencyRemovalManipulator
         logger.info("Applying Dependency changes to: " + ga(project));
 
         List<ProjectRef> dependenciesToRemove = state.getDependencyRemoval();
-        boolean result = scanDependencies( project.getResolvedDependencies( session ), dependenciesToRemove, model.getDependencies());
+        boolean result = scanDependencies( project.getAllResolvedDependencies( session ), dependenciesToRemove, model.getDependencies());
 
         if ( model.getDependencyManagement() != null &&
              scanDependencies(project.getResolvedManagedDependencies( session ), dependenciesToRemove, model.getDependencyManagement().getDependencies()))
@@ -117,7 +117,7 @@ public class DependencyRemovalManipulator
             result = true;
         }
 
-        final HashMap<Profile, HashMap<ArtifactRef, Dependency>> pd = project.getResolvedProfileDependencies( session );
+        final HashMap<Profile, HashMap<ArtifactRef, Dependency>> pd = project.getAllResolvedProfileDependencies( session );
         final HashMap<Profile, HashMap<ArtifactRef, Dependency>> pmd = project.getResolvedProfileManagedDependencies( session );
         for ( Profile profile : pd.keySet())
         {
