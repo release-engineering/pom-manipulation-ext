@@ -44,7 +44,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -59,7 +58,7 @@ import java.util.Set;
  * <ol>
  *   <li>{@link #init(ManipulationSession)}</li>
  *   <li>{@link #scan(List, ManipulationSession)}</li>
- *   <li>{@link #applyManipulations(List, ManipulationSession)}</li>
+ *   <li>{@link #applyManipulations(List)}</li>
  * </ol>
  * 
  * @author jdcasey
@@ -111,13 +110,10 @@ public class ManipulationManager
                         session.getSettings(), session.getActiveProfiles() );
         }
 
-        final HashMap<Manipulator, String> revMap = new HashMap<>();
-        for ( final Map.Entry<String, Manipulator> entry : manipulators.entrySet() )
-        {
-            revMap.put( entry.getValue(), entry.getKey() );
-        }
-
-        orderedManipulators = new ArrayList<>( revMap.keySet() );
+        orderedManipulators = new ArrayList<>( manipulators.values() );
+        // The RESTState depends upon the VersionState being initialised. Therefore initialise in reverse order
+        // and do a final sort to run in the correct order.
+        Collections.sort( orderedManipulators, Collections.reverseOrder( new ManipulatorPriorityComparator() ) );
 
         for ( final Manipulator manipulator : orderedManipulators )
         {
@@ -133,7 +129,7 @@ public class ManipulationManager
     }
 
     /**
-     * Encapsulates both {@link #scan(List, ManipulationSession)} and {@link #applyManipulations(List, ManipulationSession)}
+     * Encapsulates both {@link #scan(List, ManipulationSession)} and {@link #applyManipulations(List)}
      *
      * @param session the container session for manipulation.
      * @throws ManipulationException if an error occurs.
@@ -150,7 +146,7 @@ public class ManipulationManager
             logger.debug( "Got " + project + " (POM: " + project.getPom() + ")" );
         }
 
-        Set<Project> changed = applyManipulations( projects, session );
+        Set<Project> changed = applyManipulations( projects );
 
         // Create a marker file if we made some changes to prevent duplicate runs.
         if ( !changed.isEmpty() )
@@ -219,11 +215,10 @@ public class ManipulationManager
      * </ul>
      *
      * @param projects the list of Projects to apply the changes to.
-     * @param session the container session for manipulation.
      * @return collection of the changed projects.
      * @throws ManipulationException if an error occurs.
      */
-    private Set<Project> applyManipulations( final List<Project> projects, final ManipulationSession session )
+    private Set<Project> applyManipulations( final List<Project> projects )
         throws ManipulationException
     {
         final Set<Project> changed = new HashSet<>();

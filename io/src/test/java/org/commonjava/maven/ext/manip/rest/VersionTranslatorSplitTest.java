@@ -87,7 +87,7 @@ public class VersionTranslatorSplitTest
 
         handler.setStatusCode( HttpServletResponse.SC_GATEWAY_TIMEOUT );
         versionTranslator = new DefaultTranslator( mockServer.getUrl(), protocol, 0, Translator.CHUNK_SPLIT_COUNT,
-                                                   "" );
+                                                   "", "" );
     }
 
     public VersionTranslatorSplitTest( Translator.RestProtocol protocol )
@@ -189,7 +189,7 @@ public class VersionTranslatorSplitTest
     public void testTranslateVersionsCorrectSplitMaxSize()
     {
         this.versionTranslator = new DefaultTranslator( mockServer.getUrl(), protocol, 10, Translator.CHUNK_SPLIT_COUNT,
-                                                        "" );
+                                                        "", "" );
 
         List<ProjectVersionRef> data = aLotOfGavs.subList( 0, 30 );
         handler.getRequestData().clear();
@@ -251,7 +251,8 @@ public class VersionTranslatorSplitTest
     @Test
     public void testTranslateVersionsCorrectSplitMaxSizeWithMin()
     {
-        this.versionTranslator = new DefaultTranslator( mockServer.getUrl(), protocol, 10, 1, "" );
+        this.versionTranslator = new DefaultTranslator( mockServer.getUrl(), protocol, 10, 1, "",
+                                                        "" );
 
         List<ProjectVersionRef> data = aLotOfGavs.subList( 0, 30 );
         handler.getRequestData().clear();
