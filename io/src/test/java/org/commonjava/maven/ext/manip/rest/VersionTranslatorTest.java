@@ -87,7 +87,8 @@ public class VersionTranslatorTest
     {
         LoggerFactory.getLogger( VersionTranslatorTest.class ).info( "Executing test " + testName.getMethodName() );
 
-        this.versionTranslator = new DefaultTranslator( mockServer.getUrl(), protocol, 0, Translator.CHUNK_SPLIT_COUNT, "indyGroup" );
+        this.versionTranslator = new DefaultTranslator( mockServer.getUrl(), protocol, 0, Translator.CHUNK_SPLIT_COUNT, "indyGroup",
+                                                        "" );
     }
 
     public VersionTranslatorTest( RestProtocol protocol)
@@ -136,7 +137,8 @@ public class VersionTranslatorTest
     {
         // Some url that doesn't exist used here
         Translator translator = new DefaultTranslator( "http://127.0.0.2", RestProtocol.CURRENT, 0,
-                                                       Translator.CHUNK_SPLIT_COUNT, "" );
+                                                       Translator.CHUNK_SPLIT_COUNT, "",
+                                                       "" );
 
         List<ProjectVersionRef> gavs = new ArrayList<ProjectVersionRef>()
         {{

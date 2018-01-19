@@ -16,6 +16,7 @@
 package org.commonjava.maven.ext.manip.state;
 
 import org.commonjava.maven.ext.manip.ManipulationException;
+import org.commonjava.maven.ext.manip.ManipulationSession;
 import org.commonjava.maven.ext.manip.impl.DependencyManipulator;
 import org.commonjava.maven.ext.manip.rest.DefaultTranslator;
 import org.commonjava.maven.ext.manip.rest.Translator;
@@ -32,8 +33,11 @@ public class RESTState implements State
 
     private final Translator restEndpoint;
 
-    public RESTState( final Properties userProps ) throws ManipulationException
+    public RESTState( final ManipulationSession session ) throws ManipulationException
     {
+        final VersioningState vState = session.getState( VersioningState.class );
+        final Properties userProps = session.getUserProperties();
+
         restURL = userProps.getProperty( "restURL" );
 
         String repositoryGroup = userProps.getProperty( "restRepositoryGroup", "" );
@@ -43,7 +47,7 @@ public class RESTState implements State
 
         RestProtocol protocol = RestProtocol.parse ( userProps.getProperty( "restProtocol", RestProtocol.CURRENT.toString() ) );
 
-        restEndpoint = new DefaultTranslator( restURL, protocol, restMaxSize, restMinSize, repositoryGroup );
+        restEndpoint = new DefaultTranslator( restURL, protocol, restMaxSize, restMinSize, repositoryGroup, vState.getIncrementalSerialSuffix() );
     }
 
     /**

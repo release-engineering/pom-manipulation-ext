@@ -44,14 +44,17 @@ public class ReportGAVMapper
 
     private final String repositoryGroup;
 
+    private final String versionSuffix;
+
     private String errorString;
 
     private Translator.RestProtocol protocol;
 
-    public ReportGAVMapper( RestProtocol protocol, String repositoryGroup )
+    public ReportGAVMapper( RestProtocol protocol, String repositoryGroup, String incrementalSerialSuffix )
     {
         this.protocol = protocol;
         this.repositoryGroup = repositoryGroup;
+        this.versionSuffix = incrementalSerialSuffix;
     }
 
     @Override
@@ -137,7 +140,7 @@ public class ReportGAVMapper
 
         if ( protocol == Translator.RestProtocol.CURRENT )
         {
-            request = new GAVSchema( new String[]{}, new String[]{}, repositoryGroup, requestBody );
+            request = new GAVSchema( new String[]{}, new String[]{}, repositoryGroup, versionSuffix, requestBody );
         }
         else
         {

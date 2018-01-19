@@ -41,11 +41,13 @@ import java.util.List;
 import static org.commonjava.maven.ext.manip.rest.Translator.RestProtocol;
 import static org.junit.Assert.assertTrue;
 
-public class RepositoryGroupTest
+public class RESTParametersTest
 {
     private static final Logger LOGGER = LoggerFactory.getLogger( AddSuffixJettyHandler.class );
 
     private final String group = "indyGroup";
+
+    private final String suffix = "rebuild";
 
     private DefaultTranslator versionTranslator;
 
@@ -79,14 +81,14 @@ public class RepositoryGroupTest
     @Before
     public void before()
     {
-        LoggerFactory.getLogger( RepositoryGroupTest.class ).info( "Executing test " + testName.getMethodName() );
+        LoggerFactory.getLogger( RESTParametersTest.class ).info( "Executing test " + testName.getMethodName() );
     }
 
     @Test
     public void testVerifyGroup()
     {
         this.versionTranslator = new DefaultTranslator( mockServer.getUrl(), RestProtocol.CURRENT, 0,
-                                                        Translator.CHUNK_SPLIT_COUNT, group );
+                                                        Translator.CHUNK_SPLIT_COUNT, group, "" );
         List<ProjectVersionRef> gavs = new ArrayList<ProjectVersionRef>()
         {{
             add( new SimpleProjectVersionRef( "com.example", "example", "1.0" ) );
@@ -100,7 +102,7 @@ public class RepositoryGroupTest
     public void testVerifyNoGroup()
     {
         this.versionTranslator = new DefaultTranslator( mockServer.getUrl(), RestProtocol.CURRENT, 0,
-                                                        Translator.CHUNK_SPLIT_COUNT, "" );
+                                                        Translator.CHUNK_SPLIT_COUNT, "", "" );
         List<ProjectVersionRef> gavs = new ArrayList<ProjectVersionRef>()
         {{
             add( new SimpleProjectVersionRef( "com.example", "example", "1.0" ) );
@@ -108,5 +110,33 @@ public class RepositoryGroupTest
 
         versionTranslator.translateVersions( gavs );
         assertTrue ( gavSchema.repositoryGroup == null );
+    }
+
+    @Test
+    public void testVerifySuffix()
+    {
+        this.versionTranslator = new DefaultTranslator( mockServer.getUrl(), RestProtocol.CURRENT, 0,
+                                                        Translator.CHUNK_SPLIT_COUNT, "", suffix );
+        List<ProjectVersionRef> gavs = new ArrayList<ProjectVersionRef>()
+        {{
+            add( new SimpleProjectVersionRef( "com.example", "example", "1.0" ) );
+        }};
+
+        versionTranslator.translateVersions( gavs );
+        assertTrue( suffix.equals( gavSchema.versionSuffix ) );
+    }
+
+    @Test
+    public void testVerifyNoSuffix()
+    {
+        this.versionTranslator = new DefaultTranslator( mockServer.getUrl(), RestProtocol.CURRENT, 0,
+                                                        Translator.CHUNK_SPLIT_COUNT, "", "" );
+        List<ProjectVersionRef> gavs = new ArrayList<ProjectVersionRef>()
+        {{
+            add( new SimpleProjectVersionRef( "com.example", "example", "1.0" ) );
+        }};
+
+        versionTranslator.translateVersions( gavs );
+        assertTrue ( gavSchema.versionSuffix == null );
     }
 }

@@ -17,27 +17,33 @@ package org.commonjava.maven.ext.manip.rest.mapper;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
 public final class GAVSchema
 {
-    @JsonInclude(value= JsonInclude.Include.NON_EMPTY)
+    @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
     public String[] productNames;
 
-    @JsonInclude(value= JsonInclude.Include.NON_EMPTY)
+    @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
     public String[] productVersionIds;
 
     // Backwards compatibility for versions of DependencyAnalyser that don't have this field.
-    @JsonInclude(value= JsonInclude.Include.NON_EMPTY)
+    @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
     public String repositoryGroup;
+
+    @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
+    public String versionSuffix;
 
     public List<Map<String, Object>> gavs;
 
     public GAVSchema() {}
 
-    public GAVSchema( String []productNames, String []productVersionIds, String repositoryGroup, List<Map<String, Object>> gavs )
+    public GAVSchema( String[] productNames, String[] productVersionIds, String repositoryGroup, String versionSuffix,
+                      List<Map<String, Object>> gavs )
     {
+        this.versionSuffix = versionSuffix;
         this.productNames = productNames;
         this.productVersionIds = productVersionIds;
         this.repositoryGroup = repositoryGroup;
@@ -47,6 +53,10 @@ public final class GAVSchema
     @Override
     public String toString()
     {
-        return "ProductNames '" + productNames + "' :: ProductVersionIds '" + productVersionIds + "' :: RepositoryGroup '" + repositoryGroup+ "' :: gavs " + gavs;
+        return "ProductNames '" + Arrays.toString( productNames ) +
+                        "' :: ProductVersionIds '" + Arrays.toString( productVersionIds )+
+                        "' :: RepositoryGroup '" + repositoryGroup +
+                        "' :: versionSuffix '" + versionSuffix +
+                        "' :: gavs " + gavs;
     }
 }

@@ -68,7 +68,7 @@ public class RESTManipulator implements Manipulator
     public void init( final ManipulationSession session ) throws ManipulationException
     {
         this.session = session;
-        session.setState( new RESTState( session.getUserProperties() ) );
+        session.setState( new RESTState( session ) );
     }
 
     /**

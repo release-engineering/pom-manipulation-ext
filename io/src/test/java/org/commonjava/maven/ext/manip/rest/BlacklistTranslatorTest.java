@@ -65,7 +65,8 @@ public class BlacklistTranslatorTest
     {
         LoggerFactory.getLogger( BlacklistTranslatorTest.class ).info( "Executing test " + testName.getMethodName() );
 
-        this.blacklistTranslator = new DefaultTranslator( mockServer.getUrl(), protocol, 0, Translator.CHUNK_SPLIT_COUNT, "" );
+        this.blacklistTranslator = new DefaultTranslator( mockServer.getUrl(), protocol, 0, Translator.CHUNK_SPLIT_COUNT, "",
+                                                          "" );
     }
 
     public BlacklistTranslatorTest( RestProtocol protocol)

@@ -21,10 +21,10 @@ import com.mashape.unirest.http.exceptions.UnirestException;
 import org.apache.commons.codec.binary.Base32;
 import org.commonjava.maven.atlas.ident.ref.ProjectRef;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
-import org.commonjava.maven.ext.manip.util.ListUtils;
 import org.commonjava.maven.ext.manip.rest.exception.RestException;
 import org.commonjava.maven.ext.manip.rest.mapper.ListingBlacklistMapper;
 import org.commonjava.maven.ext.manip.rest.mapper.ReportGAVMapper;
+import org.commonjava.maven.ext.manip.util.ListUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -68,23 +68,19 @@ public class DefaultTranslator
 
     private final ListingBlacklistMapper lbm;
 
-    public DefaultTranslator( String endpointUrl, RestProtocol protocol, int restMaxSize, int restMinSize )
-    {
-        this ( endpointUrl, protocol, restMaxSize, restMinSize, "");
-    }
-
     /**
      * @param endpointUrl is the URL to talk to.
      * @param protocol determines what REST format PME should use. The two formats
      *                 currently available are:
      * @param restMaxSize initial (maximum) size of the rest call; if zero will send everything.
      * @param restMinSize minimum size for the call
-     * @param repositoryGroup
+     * @param repositoryGroup the group to pass to the endpoint.
+     * @param incrementalSerialSuffix the suffix to pass to the endpoint.
      */
     public DefaultTranslator( String endpointUrl, RestProtocol protocol, int restMaxSize, int restMinSize,
-                              String repositoryGroup )
+                              String repositoryGroup, String incrementalSerialSuffix )
     {
-        this.rgm = new ReportGAVMapper( protocol, repositoryGroup );
+        this.rgm = new ReportGAVMapper( protocol, repositoryGroup, incrementalSerialSuffix );
         this.lbm = new ListingBlacklistMapper( protocol);
         this.endpointUrl = endpointUrl;
         this.initialRestMaxSize = restMaxSize;
