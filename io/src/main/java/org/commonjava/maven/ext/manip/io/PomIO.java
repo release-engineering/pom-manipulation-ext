@@ -29,6 +29,7 @@ import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.ext.manip.ManipulationException;
 import org.commonjava.maven.ext.manip.model.GAV;
 import org.commonjava.maven.ext.manip.model.Project;
+import org.commonjava.maven.ext.manip.util.ManifestUtils;
 import org.commonjava.maven.galley.maven.parse.PomPeek;
 import org.jdom2.Comment;
 import org.jdom2.Content;
@@ -45,17 +46,14 @@ import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
-import java.util.jar.Manifest;
 
 import static org.apache.commons.io.IOUtils.closeQuietly;
 
@@ -241,7 +239,7 @@ public class PomIO
     {
         try
         {
-            final String manifestInformation = project.isInheritanceRoot() ? getManifestInformation() : null;
+            final String manifestInformation = project.isInheritanceRoot() ? ManifestUtils.getManifestInformation() : null;
 
             MavenJDOMWriter mjw = new MavenJDOMWriter( model );
 
@@ -286,46 +284,6 @@ public class PomIO
         {
             throw new ManipulationException( "Failed to parse POM for rewrite: %s. Reason: %s", e, pom, e.getMessage() );
         }
-    }
-
-    /**
-     * Retrieves the SHA this was built with.
-     *
-     * @return the GIT sha of this codebase.
-     * @throws ManipulationException if an error occurs.
-     */
-    public static String getManifestInformation()
-        throws ManipulationException
-    {
-        String result = "";
-        try
-        {
-            final Enumeration<URL> resources = PomIO.class.getClassLoader()
-                                                                         .getResources( "META-INF/MANIFEST.MF" );
-
-            while ( resources.hasMoreElements() )
-            {
-                final URL jarUrl = resources.nextElement();
-
-                if ( jarUrl.getFile()
-                           .contains( "pom-manipulation-" ) )
-                {
-                    final Manifest manifest = new Manifest( jarUrl.openStream() );
-
-                    result = manifest.getMainAttributes()
-                                     .getValue( "Implementation-Version" );
-                    result += " ( SHA: " + manifest.getMainAttributes()
-                                                   .getValue( "Scm-Revision" ) + " ) ";
-                    break;
-                }
-            }
-        }
-        catch ( final IOException e )
-        {
-            throw new ManipulationException( "Error retrieving information from manifest", e );
-        }
-
-        return result;
     }
 
     private List<PomPeek> peekAtPomHierarchy(final File topPom)

@@ -21,11 +21,11 @@ import org.apache.maven.settings.Settings;
 import org.codehaus.plexus.component.annotations.Component;
 import org.codehaus.plexus.component.annotations.Requirement;
 import org.commonjava.maven.ext.manip.impl.Manipulator;
-import org.commonjava.maven.ext.manip.io.PomIO;
 import org.commonjava.maven.ext.manip.model.Project;
 import org.commonjava.maven.ext.manip.session.MavenSessionHandler;
 import org.commonjava.maven.ext.manip.state.State;
 import org.commonjava.maven.ext.manip.state.VersioningState;
+import org.commonjava.maven.ext.manip.util.ManifestUtils;
 
 import java.io.File;
 import java.util.HashMap;
@@ -68,7 +68,7 @@ public class ManipulationSession
     {
         try
         {
-            System.out.println( "[INFO] Maven-Manipulation-Extension " + PomIO.getManifestInformation() );
+            System.out.println( "[INFO] Maven-Manipulation-Extension " + ManifestUtils.getManifestInformation() );
         }
         catch ( ManipulationException e )
         {
