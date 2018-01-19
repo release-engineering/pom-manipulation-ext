@@ -22,7 +22,10 @@ import org.apache.maven.execution.ExecutionEvent;
 import org.apache.maven.execution.ExecutionEvent.Type;
 import org.codehaus.plexus.component.annotations.Component;
 import org.codehaus.plexus.component.annotations.Requirement;
-import org.commonjava.maven.ext.manip.io.ConfigIO;
+import org.commonjava.maven.ext.common.ManipulationException;
+import org.commonjava.maven.ext.core.ManipulationManager;
+import org.commonjava.maven.ext.core.ManipulationSession;
+import org.commonjava.maven.ext.io.ConfigIO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

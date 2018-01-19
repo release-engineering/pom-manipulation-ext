@@ -17,9 +17,9 @@ package org.commonjava.maven.ext.depMgmt2
 
 import groovy.transform.BaseScript
 import groovy.util.logging.Slf4j
-import org.commonjava.maven.ext.manip.model.Project
+import org.commonjava.maven.ext.common.model.Project
 
-@BaseScript org.commonjava.maven.ext.manip.groovy.BaseScript pme
+@BaseScript org.commonjava.maven.ext.core.groovy.BaseScript pme
 
 @Slf4j
 class GroovyModifier {
