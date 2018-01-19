@@ -28,15 +28,15 @@ import org.apache.maven.project.ProjectBuilder;
 import org.codehaus.plexus.component.annotations.Component;
 import org.codehaus.plexus.component.annotations.Requirement;
 import org.commonjava.maven.ext.common.ManipulationException;
-import org.commonjava.maven.ext.core.impl.Manipulator;
-import org.commonjava.maven.ext.io.PomIO;
 import org.commonjava.maven.ext.common.model.GAV;
 import org.commonjava.maven.ext.common.model.Project;
-import org.commonjava.maven.ext.io.resolver.ExtensionInfrastructure;
+import org.commonjava.maven.ext.core.impl.Manipulator;
 import org.commonjava.maven.ext.core.state.CommonState;
 import org.commonjava.maven.ext.core.state.State;
 import org.commonjava.maven.ext.core.state.VersioningState;
 import org.commonjava.maven.ext.core.util.ManipulatorPriorityComparator;
+import org.commonjava.maven.ext.io.PomIO;
+import org.commonjava.maven.ext.io.resolver.ExtensionInfrastructure;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

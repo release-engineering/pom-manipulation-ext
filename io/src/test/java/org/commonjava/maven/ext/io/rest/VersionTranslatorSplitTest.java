@@ -39,8 +39,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static org.commonjava.maven.ext.io.rest.VersionTranslatorTest.loadALotOfGAVs;
 import static org.commonjava.maven.ext.io.rest.Translator.RestProtocol.CURRENT;
+import static org.commonjava.maven.ext.io.rest.VersionTranslatorTest.loadALotOfGAVs;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;

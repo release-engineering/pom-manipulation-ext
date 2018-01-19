@@ -18,8 +18,8 @@ package org.commonjava.maven.ext.core.state;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.commonjava.maven.atlas.ident.ref.ProjectRef;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
-import org.commonjava.maven.ext.core.impl.ProjectVersioningManipulator;
 import org.commonjava.maven.ext.common.model.GAV;
+import org.commonjava.maven.ext.core.impl.ProjectVersioningManipulator;
 import org.commonjava.maven.ext.core.util.PropertiesUtils;
 import org.commonjava.maven.ext.core.util.PropertyFlag;
 

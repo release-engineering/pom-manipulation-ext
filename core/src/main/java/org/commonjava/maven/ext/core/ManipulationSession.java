@@ -21,12 +21,12 @@ import org.apache.maven.settings.Settings;
 import org.codehaus.plexus.component.annotations.Component;
 import org.codehaus.plexus.component.annotations.Requirement;
 import org.commonjava.maven.ext.common.ManipulationException;
-import org.commonjava.maven.ext.core.impl.Manipulator;
 import org.commonjava.maven.ext.common.model.Project;
 import org.commonjava.maven.ext.common.session.MavenSessionHandler;
+import org.commonjava.maven.ext.common.util.ManifestUtils;
+import org.commonjava.maven.ext.core.impl.Manipulator;
 import org.commonjava.maven.ext.core.state.State;
 import org.commonjava.maven.ext.core.state.VersioningState;
-import org.commonjava.maven.ext.common.util.ManifestUtils;
 
 import java.io.File;
 import java.util.HashMap;

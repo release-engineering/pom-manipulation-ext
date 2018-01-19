@@ -25,11 +25,11 @@ import org.codehaus.plexus.component.annotations.Component;
 import org.codehaus.plexus.component.annotations.Requirement;
 import org.codehaus.plexus.util.xml.Xpp3Dom;
 import org.commonjava.maven.ext.common.ManipulationException;
-import org.commonjava.maven.ext.core.ManipulationSession;
-import org.commonjava.maven.ext.io.PomIO;
 import org.commonjava.maven.ext.common.model.Project;
+import org.commonjava.maven.ext.core.ManipulationSession;
 import org.commonjava.maven.ext.core.state.BOMInjectingState;
 import org.commonjava.maven.ext.core.util.IdUtils;
+import org.commonjava.maven.ext.io.PomIO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

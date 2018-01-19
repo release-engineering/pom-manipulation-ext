@@ -16,8 +16,8 @@
 package org.commonjava.maven.ext.core.impl;
 
 import org.commonjava.maven.ext.common.ManipulationException;
-import org.commonjava.maven.ext.core.ManipulationSession;
 import org.commonjava.maven.ext.common.model.Project;
+import org.commonjava.maven.ext.core.ManipulationSession;
 import org.commonjava.maven.ext.core.state.State;
 import org.commonjava.maven.ext.core.state.VersioningState;
 import org.commonjava.maven.ext.core.util.IdUtils;

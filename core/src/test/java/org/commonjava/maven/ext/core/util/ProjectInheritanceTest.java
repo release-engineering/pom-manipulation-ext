@@ -18,10 +18,10 @@ package org.commonjava.maven.ext.core.util;
 import org.apache.maven.model.Dependency;
 import org.commonjava.maven.atlas.ident.ref.ArtifactRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleArtifactRef;
+import org.commonjava.maven.ext.common.model.Project;
 import org.commonjava.maven.ext.core.ManipulationSession;
 import org.commonjava.maven.ext.core.fixture.TestUtils;
 import org.commonjava.maven.ext.io.PomIO;
-import org.commonjava.maven.ext.common.model.Project;
 import org.junit.Test;
 
 import java.io.File;

@@ -15,9 +15,9 @@
  */
 package org.commonjava.maven.ext.io.rest.rule;
 
-import org.commonjava.maven.ext.io.server.JettyHttpServer;
 import org.commonjava.maven.ext.io.rest.handler.AddSuffixJettyHandler;
 import org.commonjava.maven.ext.io.server.HttpServer;
+import org.commonjava.maven.ext.io.server.JettyHttpServer;
 import org.eclipse.jetty.server.handler.AbstractHandler;
 import org.junit.rules.ExternalResource;
 

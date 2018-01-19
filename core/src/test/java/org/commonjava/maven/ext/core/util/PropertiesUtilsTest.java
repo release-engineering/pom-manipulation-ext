@@ -24,10 +24,10 @@ import org.apache.maven.model.Model;
 import org.codehaus.plexus.DefaultPlexusContainer;
 import org.codehaus.plexus.PlexusContainer;
 import org.commonjava.maven.ext.common.ManipulationException;
+import org.commonjava.maven.ext.common.model.Project;
 import org.commonjava.maven.ext.common.util.PropertyResolver;
 import org.commonjava.maven.ext.core.ManipulationSession;
 import org.commonjava.maven.ext.core.fixture.TestUtils;
-import org.commonjava.maven.ext.common.model.Project;
 import org.commonjava.maven.ext.core.state.CommonState;
 import org.commonjava.maven.ext.core.state.DependencyState;
 import org.commonjava.maven.ext.core.state.VersioningState;
@@ -44,7 +44,6 @@ import java.util.Map;
 import java.util.Properties;
 
 import static org.commonjava.maven.ext.core.util.PropertiesUtils.updateProperties;
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 

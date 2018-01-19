@@ -23,11 +23,11 @@ import org.apache.maven.settings.SettingsUtils;
 import org.codehaus.plexus.component.annotations.Component;
 import org.codehaus.plexus.component.annotations.Requirement;
 import org.commonjava.maven.ext.common.ManipulationException;
-import org.commonjava.maven.ext.core.ManipulationSession;
-import org.commonjava.maven.ext.io.SettingsIO;
 import org.commonjava.maven.ext.common.model.Project;
-import org.commonjava.maven.ext.core.state.RepoReportingState;
 import org.commonjava.maven.ext.common.util.ProfileUtils;
+import org.commonjava.maven.ext.core.ManipulationSession;
+import org.commonjava.maven.ext.core.state.RepoReportingState;
+import org.commonjava.maven.ext.io.SettingsIO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -20,10 +20,10 @@ import com.jayway.jsonpath.JsonPathException;
 import org.codehaus.plexus.component.annotations.Component;
 import org.codehaus.plexus.component.annotations.Requirement;
 import org.commonjava.maven.ext.common.ManipulationException;
-import org.commonjava.maven.ext.core.ManipulationSession;
-import org.commonjava.maven.ext.io.JSONIO;
 import org.commonjava.maven.ext.common.model.Project;
+import org.commonjava.maven.ext.core.ManipulationSession;
 import org.commonjava.maven.ext.core.state.JSONState;
+import org.commonjava.maven.ext.io.JSONIO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

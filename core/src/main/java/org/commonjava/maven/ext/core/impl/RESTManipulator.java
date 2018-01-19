@@ -27,15 +27,15 @@ import org.commonjava.maven.atlas.ident.ref.SimpleArtifactRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleTypeAndClassifier;
 import org.commonjava.maven.ext.common.ManipulationException;
-import org.commonjava.maven.ext.core.ManipulationSession;
 import org.commonjava.maven.ext.common.model.Project;
 import org.commonjava.maven.ext.common.model.SimpleScopedArtifactRef;
+import org.commonjava.maven.ext.common.util.PropertyResolver;
+import org.commonjava.maven.ext.core.ManipulationSession;
 import org.commonjava.maven.ext.core.state.DependencyState;
 import org.commonjava.maven.ext.core.state.PluginState;
 import org.commonjava.maven.ext.core.state.RESTState;
 import org.commonjava.maven.ext.core.state.VersioningState;
 import org.commonjava.maven.ext.core.util.PropertiesUtils;
-import org.commonjava.maven.ext.common.util.PropertyResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

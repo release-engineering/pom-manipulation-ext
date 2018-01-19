@@ -17,9 +17,9 @@ package org.commonjava.maven.ext.integrationtest;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.commonjava.maven.ext.core.state.VersioningState;
 import org.commonjava.maven.ext.io.rest.handler.AddSuffixJettyHandler;
 import org.commonjava.maven.ext.io.rest.rule.MockServer;
-import org.commonjava.maven.ext.core.state.VersioningState;
 import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;

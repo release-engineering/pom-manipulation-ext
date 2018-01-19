@@ -26,12 +26,12 @@ import org.commonjava.maven.atlas.ident.ref.InvalidRefException;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef;
 import org.commonjava.maven.ext.common.ManipulationException;
-import org.commonjava.maven.ext.core.ManipulationSession;
 import org.commonjava.maven.ext.common.model.Project;
-import org.commonjava.maven.ext.core.state.VersioningState;
 import org.commonjava.maven.ext.common.util.ProfileUtils;
-import org.commonjava.maven.ext.core.util.PropertiesUtils;
 import org.commonjava.maven.ext.common.util.PropertyInterpolator;
+import org.commonjava.maven.ext.core.ManipulationSession;
+import org.commonjava.maven.ext.core.state.VersioningState;
+import org.commonjava.maven.ext.core.util.PropertiesUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
