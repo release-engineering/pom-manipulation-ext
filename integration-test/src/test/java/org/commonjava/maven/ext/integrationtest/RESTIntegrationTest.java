@@ -1,0 +1,151 @@
+/**
+ * Copyright (C) 2012 Red Hat, Inc. (jcasey@redhat.com)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *         http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.commonjava.maven.ext.integrationtest;
+
+import org.commonjava.maven.ext.common.ManipulationException;
+import org.commonjava.maven.ext.io.rest.handler.AddSuffixJettyHandler;
+import org.commonjava.maven.ext.io.rest.rule.MockServer;
+import org.junit.BeforeClass;
+import org.junit.ClassRule;
+import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.File;
+
+import static org.commonjava.maven.ext.integrationtest.DefaultCliIntegrationTest.setupExists;
+import static org.commonjava.maven.ext.integrationtest.TestUtils.DEFAULT_MVN_PARAMS;
+import static org.commonjava.maven.ext.integrationtest.TestUtils.getDefaultTestLocation;
+import static org.commonjava.maven.ext.integrationtest.TestUtils.runLikeInvoker;
+import static org.commonjava.maven.ext.integrationtest.TestUtils.runMaven;
+
+public class RESTIntegrationTest
+{
+    private static final Logger LOGGER = LoggerFactory.getLogger( DefaultCliIntegrationTest.class );
+
+    private static AddSuffixJettyHandler handler = new AddSuffixJettyHandler( "/", AddSuffixJettyHandler.DEFAULT_SUFFIX);
+
+    @ClassRule
+    public static MockServer mockServer = new MockServer( handler );
+
+    @BeforeClass
+    public static void setUp()
+        throws Exception
+    {
+        for ( File setupTest : new File( getDefaultTestLocation( "setup" ) ).listFiles() )
+        {
+            LOGGER.info ("Running install for {}", setupTest.toString());
+
+            // Try to do some simplistic checks to see if this has already been done.
+            if ( ! setupExists( setupTest ))
+            {
+                runMaven( "install", DEFAULT_MVN_PARAMS, setupTest.toString() );
+            }
+        }
+    }
+
+    @Test
+    public void testRESTVersionDepManip() throws Exception
+    {
+        String test = getDefaultTestLocation( "rest-dependency-version-manip-child-module" );
+        runLikeInvoker( test, mockServer.getUrl() );
+    }
+
+    @Test
+    public void testRESTVersionManip() throws Exception
+    {
+        String test = getDefaultTestLocation( "rest-version-manip-only" );
+        runLikeInvoker( test, mockServer.getUrl() );
+    }
+
+    @Test
+    public void testRESTVersionManipBOMREST() throws Exception
+    {
+        String test = getDefaultTestLocation( "rest-version-manip-bomrest" );
+        runLikeInvoker( test, mockServer.getUrl() );
+    }
+
+    @Test
+    public void testRESTVersionManipRESTBOM() throws Exception
+    {
+        String test = getDefaultTestLocation( "rest-version-manip-restbom" );
+        runLikeInvoker( test, mockServer.getUrl() );
+    }
+
+    @Test
+    public void testRESTVersionManipRESTBOMAutodetectBom() throws Exception
+    {
+        String test = getDefaultTestLocation( "rest-version-manip-restbom-autodetectbom" );
+        runLikeInvoker( test, mockServer.getUrl() );
+    }
+
+    @Test
+    public void testRESTVersionManipRESTPlugin() throws Exception
+    {
+        String test = getDefaultTestLocation( "rest-version-manip-plugin-rest" );
+        runLikeInvoker( test, mockServer.getUrl() );
+    }
+    @Test
+    public void testRESTVersionManipRESTBOMPlugin() throws Exception
+    {
+        String test = getDefaultTestLocation( "rest-version-manip-plugin-restbom" );
+        runLikeInvoker( test, mockServer.getUrl() );
+    }
+
+    @Test
+    public void testRESTVersionManipBOMRESTPlugin() throws Exception
+    {
+        String test = getDefaultTestLocation( "rest-version-manip-plugin-bomrest" );
+        runLikeInvoker( test, mockServer.getUrl() );
+    }
+
+    @Test
+    public void testRESTVersionManipOverride() throws Exception
+    {
+        String test = getDefaultTestLocation( "rest-version-manip-only-override" );
+        runLikeInvoker( test, mockServer.getUrl() );
+    }
+
+    @Test(expected = ManipulationException.class)
+    public void testRESTBlacklist() throws Exception
+    {
+        try
+        {
+            handler.setBlacklist ("1.0");
+            String test = getDefaultTestLocation( "rest-blacklist" );
+            runLikeInvoker( test, mockServer.getUrl() );
+        }
+        finally
+        {
+            handler.setBlacklist (null);
+        }
+    }
+
+    @Test
+    public void testRESTBlacklist2() throws Exception
+    {
+        try
+        {
+            handler.setBlacklist ("1.0.redhat-3");
+            String test = getDefaultTestLocation( "rest-blacklist" );
+            runLikeInvoker( test, mockServer.getUrl() );
+        }
+        finally
+        {
+            handler.setBlacklist (null);
+        }
+    }
+}

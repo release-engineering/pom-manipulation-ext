@@ -20,7 +20,7 @@ import groovy.json.JsonSlurper
 import groovy.transform.BaseScript
 import groovy.util.logging.Slf4j
 
-@BaseScript org.commonjava.maven.ext.manip.groovy.BaseScript pme
+@BaseScript org.commonjava.maven.ext.core.groovy.BaseScript pme
 
 @Slf4j
 class Processor {

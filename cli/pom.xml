@@ -171,7 +171,7 @@
           <archive>
             <index>true</index>
             <manifest>
-              <mainClass>org.commonjava.maven.ext.manip.Cli</mainClass>
+              <mainClass>org.commonjava.maven.ext.cli.Cli</mainClass>
             </manifest>
           </archive>
           <descriptors>

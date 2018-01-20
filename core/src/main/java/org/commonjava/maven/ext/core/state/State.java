@@ -1,0 +1,42 @@
+/*
+ * Copyright (C) 2012 Red Hat, Inc. (jcasey@redhat.com)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *         http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.commonjava.maven.ext.core.state;
+
+import org.commonjava.maven.ext.core.impl.Manipulator;
+
+import java.util.ArrayList;
+
+/**
+ * Basic list of methods that state collections related to different {@link Manipulator}'s should implement. This is also a marker interface to 
+ * help ensure the validity of content stored in the session.
+ * 
+ * A State implementation can contain a mixture of configuration (parsed/configured from command-line properties or other sources) and state output
+ * from the {@link Manipulator#scan(java.util.List)} invocation.
+ * 
+ * @author jdcasey
+ */
+public interface State
+{
+    /**
+     * Contains list of manipulations that are active by default for checking in applyChanges.
+     */
+    ArrayList<Class<? extends State>> activeByDefault = new ArrayList<>();
+
+    /**
+     * @return true if this State is enabled.
+     */
+    boolean isEnabled();
+}
