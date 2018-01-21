@@ -18,11 +18,9 @@ package org.commonjava.maven.ext.core.util;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Parent;
 import org.apache.maven.project.MavenProject;
-import org.commonjava.maven.atlas.ident.ref.ArtifactRef;
 import org.commonjava.maven.atlas.ident.ref.InvalidRefException;
 import org.commonjava.maven.atlas.ident.ref.ProjectRef;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
-import org.commonjava.maven.atlas.ident.ref.SimpleArtifactRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleProjectRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef;
 import org.commonjava.maven.ext.common.ManipulationException;
@@ -69,40 +67,6 @@ public final class IdUtils
                 try
                 {
                     final ProjectVersionRef ref = SimpleProjectVersionRef.parse( gav );
-                    refs.add( ref );
-                }
-                catch ( final InvalidRefException e )
-                {
-                    logger.error( "Skipping invalid remote management GAV: " + gav );
-                    throw e;
-                }
-            }
-
-            return refs;
-        }
-    }
-
-    /**
-     * Splits the value on ',', then wraps each value in {@link SimpleArtifactRef#parse(String)} and prints a warning / skips in the event of a
-     * parsing error. Returns null if the input value is null.
-     * @param value a comma separated list of GAVTC to parse
-     * @return a collection of parsed ArtifactRef.
-     */
-    public static List<ArtifactRef> parseGAVTCs( final String value )
-    {
-        if ( isEmpty (value ) )
-        {
-            return null;
-        }
-        else
-        {
-            final String[] gavs = value.split( "," );
-            final List<ArtifactRef> refs = new ArrayList<>();
-            for ( final String gav : gavs )
-            {
-                try
-                {
-                    final ArtifactRef ref = SimpleArtifactRef.parse( gav );
                     refs.add( ref );
                 }
                 catch ( final InvalidRefException e )

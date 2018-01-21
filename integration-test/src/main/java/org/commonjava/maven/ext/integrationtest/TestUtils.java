@@ -58,8 +58,6 @@ public class TestUtils
 
     private static final String LOCAL_REPO = System.getProperty( "localRepositoryPath" );
 
-    private static final String REST_URL_PROPERTY = "restURL";
-
     protected static final String IT_LOCATION = BUILD_DIR + "/it-cli";
 
     protected static final Map<String, String> DEFAULT_MVN_PARAMS = new HashMap<String, String>()
@@ -81,6 +79,7 @@ public class TestUtils
         add( "rest-version-manip-plugin-restbom" );
         add( "rest-version-manip-restbom" );
         add( "rest-version-manip-restbom-autodetectbom" );
+        add( "groovy-manipulator-first-http" );
     }};
 
     protected static final Map<String, String> LOCATION_REWRITE = new HashMap<String, String>()
@@ -92,10 +91,10 @@ public class TestUtils
      * Run the same/similar execution to what invoker plugin would run.
      *
      * @param workingDir - Working directory where the invoker properties are.
-     * @param restURL The URL to the REST server that manages versions, or null
+     * @param url The URL to either the REST server that manages versions, or HTTP server for static Groovy scripts or null
      * @throws Exception if an error occurs
      */
-    public static void runLikeInvoker( String workingDir, String restURL )
+    public static void runLikeInvoker( String workingDir, String url )
         throws Exception
     {
         ExecutionParser executionParser = new DefaultExecutionParser( DefaultExecutionParser.DEFAULT_HANDLERS );
@@ -107,10 +106,17 @@ public class TestUtils
             // Setup
             runScript( workingDir, "setup" );
 
-            if ( restURL != null )
+            if ( url != null )
             {
-                logger.info( "Resetting REST URL to: {}", restURL );
-                e.getJavaParams().put( REST_URL_PROPERTY, restURL );
+                logger.info( "Resetting URL to: {}", url );
+                if ( url.matches( ".*[0-9]+$" ) )
+                {
+                    e.getJavaParams().put( "restURL", url );
+                }
+                else
+                {
+                    e.getJavaParams().put( "groovyScripts", url );
+                }
             }
 
             List<String> args = new ArrayList<>();

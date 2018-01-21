@@ -351,7 +351,6 @@ public class VersioningCalculatorTest
         final String v = "1.2.0.t-20170216-223844-555-foo";
 
         final String result = calculate( v );
-        System.out.println ("### Got " + result);
         assertThat( result, equalTo( v + "-1" ) );
     }
 

@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2012 Red Hat, Inc. (jcasey@redhat.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -95,6 +95,13 @@ public class GalleyInfrastructure
 
     private ExecutorService executor;
 
+    public File getCacheDir()
+    {
+        return cacheDir;
+    }
+
+    private File cacheDir;
+
     protected GalleyInfrastructure()
     {
     }
@@ -130,7 +137,7 @@ public class GalleyInfrastructure
 
     private void init( final File targetDirectory, final List<ArtifactRepository> remoteRepositories, final ArtifactRepository localRepository,
                       final Settings settings, final List<String> activeProfiles, final Location customLocation,
-                       final Transport customTransport, File cacheDir )
+                       final Transport customTransport, File cacheDir_ )
         throws ManipulationException
     {
         LocationExpander locationExpander;
@@ -164,6 +171,7 @@ public class GalleyInfrastructure
                                           new FileTransport(), new ZipJarTransport() );
         }
 
+        cacheDir = cacheDir_;
         if ( cacheDir == null )
         {
             cacheDir = new File( targetDirectory, "manipulator-cache" );

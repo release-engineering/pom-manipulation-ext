@@ -23,20 +23,26 @@ import org.codehaus.groovy.control.CompilationFailedException;
 import org.codehaus.plexus.component.annotations.Component;
 import org.codehaus.plexus.component.annotations.Requirement;
 import org.commonjava.maven.atlas.ident.ref.ArtifactRef;
+import org.commonjava.maven.atlas.ident.ref.SimpleArtifactRef;
 import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.common.model.Project;
 import org.commonjava.maven.ext.core.ManipulationSession;
 import org.commonjava.maven.ext.core.state.GroovyState;
+import org.commonjava.maven.ext.io.FileIO;
 import org.commonjava.maven.ext.io.ModelIO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
+import static org.apache.commons.lang.StringUtils.isEmpty;
 
 /**
  * {@link Manipulator} implementation that can resolve a remote groovy file and execute it on executionRoot. Configuration
@@ -50,6 +56,9 @@ public class GroovyManipulator
 
     @Requirement
     protected ModelIO modelBuilder;
+
+    @Requirement
+    private FileIO fileIO;
 
     private ManipulationSession session;
 
@@ -93,15 +102,9 @@ public class GroovyManipulator
         }
 
         final Set<Project> changed = new HashSet<>();
-        final List<ArtifactRef> scripts = state.getGroovyScripts();
 
-        for (ArtifactRef ar : scripts)
+        for ( File groovyScript : parseGroovyScripts( state.getGroovyScripts() ))
         {
-            logger.info ("Attempting to read GAV {} with classifier {} and type {} ",
-                         ar.asProjectVersionRef(), ar.getClassifier(), ar.getType());
-
-            final File groovyScript = modelBuilder.resolveRawFile( ar );
-
             GroovyShell shell = new GroovyShell( );
             Script script;
 
@@ -167,5 +170,50 @@ public class GroovyManipulator
     public int getExecutionIndex()
     {
         return executionIndex;
+    }
+
+    /**
+     * Splits the value on ',', then wraps each value in {@link SimpleArtifactRef#parse(String)} and prints a warning / skips in the event of a
+     * parsing error. Returns null if the input value is null.
+     * @param value a comma separated list of GAVTC to parse
+     * @return a collection of parsed ArtifactRef.
+     */
+    public List<File> parseGroovyScripts( final String value ) throws ManipulationException
+    {
+        if ( isEmpty( value ) )
+        {
+            return Collections.emptyList();
+        }
+        else
+        {
+            final List<File> result = new ArrayList<>();
+
+            logger.debug( "Processing groovy scripts {} ", value );
+            try
+            {
+                final String[] scripts = value.split( "," );
+                for ( final String script : scripts )
+                {
+                    File found;
+                    if ( script.startsWith( "http" ) )
+                    {
+                        logger.info( "Attempting to read URL {} ", script );
+                        found = fileIO.resolveURL( new URL( script ) );
+                    }
+                    else
+                    {
+                        final ArtifactRef ar = SimpleArtifactRef.parse( script );
+                        logger.info( "Attempting to read GAV {} with classifier {} and type {} ", ar.asProjectVersionRef(), ar.getClassifier(), ar.getType() );
+                        found = modelBuilder.resolveRawFile( ar );
+                    }
+                    result.add( found );
+                }
+            }
+            catch ( IOException e )
+            {
+                throw new ManipulationException( "Unable to parse groovyScripts", e );
+            }
+            return result;
+        }
     }
 }

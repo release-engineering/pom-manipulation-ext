@@ -15,10 +15,6 @@
  */
 package org.commonjava.maven.ext.core.state;
 
-import org.commonjava.maven.atlas.ident.ref.ArtifactRef;
-import org.commonjava.maven.ext.core.util.IdUtils;
-
-import java.util.List;
 import java.util.Properties;
 
 /**
@@ -49,13 +45,14 @@ public class GroovyState
         }
     }
 
-    private final List<ArtifactRef> groovyScripts;
+    private final String groovyScripts;
 
     private final int executionIndex;
 
     public GroovyState( final Properties userProps )
     {
-        groovyScripts = IdUtils.parseGAVTCs( userProps.getProperty( GROOVY_SCRIPT ) );
+        groovyScripts = userProps.getProperty( GROOVY_SCRIPT );
+//###        groovyScripts = IdUtils.parseGAVTCs( userProps.getProperty( GROOVY_SCRIPT ) );
         executionIndex = Integer.parseInt
                 ( GroovyPrecendence.valueOf
                                 ( userProps.getProperty( GROOVY_MANIPULATION_PRIORITY, GroovyPrecendence.LAST.toString() ).toUpperCase() ).index );
@@ -72,7 +69,7 @@ public class GroovyState
         return groovyScripts != null && !groovyScripts.isEmpty();
     }
 
-    public List<ArtifactRef> getGroovyScripts()
+    public String getGroovyScripts()
     {
         return groovyScripts;
     }
