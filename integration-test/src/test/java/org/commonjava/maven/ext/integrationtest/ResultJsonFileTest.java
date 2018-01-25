@@ -26,8 +26,11 @@ import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
 import java.io.File;
+import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static org.codehaus.plexus.util.FileUtils.copyFile;
@@ -50,7 +53,13 @@ public class ResultJsonFileTest
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
-    @Rule public TemporaryFolder tmpFolderRule = new TemporaryFolder();
+    private static final File workingDirectory = new File ( System.getProperty( "user.dir" ) );
+
+    @Rule
+    public TemporaryFolder tmpFolderRule = new TemporaryFolder();
+
+    @Rule
+    public TemporaryFolder tmpFolderWorkingRule = new TemporaryFolder(new File ( workingDirectory, "target" ) );
 
     @Test
     public void testVersioningStateOutputJsonFile()
@@ -69,6 +78,55 @@ public class ResultJsonFileTest
         params.put( "version.incremental.suffix", "redhat" );
 
         Integer exitValue = runCli( Collections.<String>emptyList(), params, baseDir.getCanonicalPath() );
+
+        // then
+
+        assertEquals( (Integer) 0, exitValue );
+
+        File outputJsonFile = new File( baseDir, "/target/pom-manip-ext-result.json" );
+        assertTrue( outputJsonFile.exists() );
+
+        JsonNode rootNode = MAPPER.readTree( outputJsonFile );
+
+        JsonNode versioningState = rootNode.get( "VersioningState" );
+        assertNotNull( versioningState );
+
+        JsonNode executionRootModified = versioningState.get( "executionRootModified" );
+        assertNotNull( executionRootModified );
+
+        JsonNode groupId = executionRootModified.get( "groupId" );
+        JsonNode artifactId = executionRootModified.get( "artifactId" );
+        JsonNode version = executionRootModified.get( "version" );
+        assertNotNull( groupId );
+        assertNotNull( artifactId );
+        assertNotNull( version );
+
+        assertEquals( "org.commonjava.maven.ext.versioning.test", groupId.textValue() );
+        assertEquals( "project-version", artifactId.textValue() );
+        assertEquals( "1.0.0.redhat-2", version.textValue() );
+    }
+
+    @Test
+    public void testVersioningStateOutputJsonFileSubDirectory()
+                    throws Exception
+    {
+        // given
+
+        File baseDir = tmpFolderWorkingRule.newFolder();
+        File pomFile = getResourceFile( "result-json-test/pom.xml" );
+        copyFile( pomFile, new File( baseDir, "pom.xml" ) );
+
+        // when
+
+        Map<String, String> params = new HashMap<>();
+        params.put( "restURL", mockServer.getUrl() );
+        params.put( "version.incremental.suffix", "redhat" );
+
+        List<String> args = new ArrayList<>();
+        args.add( "--file=" + Paths.get(workingDirectory.getCanonicalPath()).relativize(
+                                                  Paths.get( baseDir.getCanonicalPath()) ) + "/pom.xml" );
+
+        Integer exitValue = runCli( args, params, baseDir.getCanonicalPath() );
 
         // then
 

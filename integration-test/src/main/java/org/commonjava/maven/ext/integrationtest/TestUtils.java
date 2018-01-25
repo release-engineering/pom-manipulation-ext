@@ -162,7 +162,7 @@ public class TestUtils
     }
 
     /**
-     * Run pom-manipulation-cli.jar with java params (-D arguments) in workingDir directory.
+     * Run pom-manipulation-cli via run() with java params (-D arguments) in workingDir directory.
      *
      * @param args - List of additional command line arguments
      * @param params - Map of String keys and String values representing -D arguments
@@ -175,9 +175,19 @@ public class TestUtils
     {
         ArrayList<String> arguments = new ArrayList<>( args );
         Collections.addAll( arguments, toJavaParams( params ).split( "\\s+" ) );
-        arguments.add( "--log=" + workingDir + File.separator + "build.log" );
-        arguments.add( "--file=" + workingDir + File.separator + "pom.xml" );
-
+        boolean argsContainsFile = false;
+        for ( String s : args)
+        {
+            if ( s.startsWith( "--file" ) )
+            {
+                argsContainsFile = true;
+            }
+        }
+        if ( ! argsContainsFile )
+        {
+            arguments.add( "--log=" + workingDir + File.separator + "build.log" );
+            arguments.add( "--file=" + workingDir + File.separator + "pom.xml" );
+        }
         logger.info( "Invoking CLI with {} ", arguments );
         int result = new Cli().run( arguments.toArray( new String[arguments.size()] ) );
 
