@@ -513,7 +513,8 @@ public class Version
     {
         int highestBuildNum = 0;
 
-        String qualifier = getQualifier( version );
+        String osgiVersion = getOsgiVersion( version );
+        String qualifier = getQualifier( osgiVersion );
         Matcher qualifierMatcher = qualifierPattern.matcher( qualifier );
         if ( qualifierMatcher.matches() )
         {
@@ -526,6 +527,7 @@ public class Version
                 .append( Pattern.quote( getMMM( version ) ) ).append('(').append( DELIMITER_REGEX ).append("0)*") // Match zeros appended to a major only version
                 .append( ")?" )
                 .append( DELIMITER_REGEX );
+
         if ( !isEmpty( qualifier ) )
         {
             versionPatternBuf.append( Pattern.quote( qualifier ) );

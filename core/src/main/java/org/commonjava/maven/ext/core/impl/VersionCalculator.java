@@ -89,10 +89,8 @@ public class VersionCalculator
 
         for ( final Project project : projects )
         {
-            String originalVersion = project.getVersion();
-            originalVersion = PropertyResolver.resolveInheritedProperties( session, project, originalVersion);
-            String modifiedVersion =
-                calculate( project.getGroupId(), project.getArtifactId(), originalVersion, session );
+            String originalVersion = PropertyResolver.resolveInheritedProperties( session, project, project.getVersion() );
+            String modifiedVersion = calculate( project.getGroupId(), project.getArtifactId(), originalVersion, session );
 
             if ( state.osgi() )
             {
