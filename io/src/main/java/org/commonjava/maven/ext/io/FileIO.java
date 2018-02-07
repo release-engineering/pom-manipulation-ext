@@ -53,8 +53,6 @@ public class FileIO
         File cache = infra.getCacheDir();
         File result = new File( cache, UUID.randomUUID().toString() );
 
-        logger.info( "### [temp debug] cache dir is {} and result is {} ", cache, result );
-
         FileUtils.copyURLToFile( ref, result );
 
         return result;

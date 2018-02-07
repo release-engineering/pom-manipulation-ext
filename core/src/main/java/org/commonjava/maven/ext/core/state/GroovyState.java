@@ -52,7 +52,6 @@ public class GroovyState
     public GroovyState( final Properties userProps )
     {
         groovyScripts = userProps.getProperty( GROOVY_SCRIPT );
-//###        groovyScripts = IdUtils.parseGAVTCs( userProps.getProperty( GROOVY_SCRIPT ) );
         executionIndex = Integer.parseInt
                 ( GroovyPrecendence.valueOf
                                 ( userProps.getProperty( GROOVY_MANIPULATION_PRIORITY, GroovyPrecendence.LAST.toString() ).toUpperCase() ).index );

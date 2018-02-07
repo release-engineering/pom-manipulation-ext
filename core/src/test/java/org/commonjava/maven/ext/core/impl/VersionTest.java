@@ -117,6 +117,19 @@ public class VersionTest
     }
 
     @Test
+    public void testFindHighestMatchingBuildNumber_Fuse()
+    {
+        String version = "2.10.0-000164.fuse-000001-redhat";
+        final Set<String> versionSet = new HashSet<>();
+        versionSet.add( "2.10.0.redhat-000022" );
+        versionSet.add( "2.10.0.000164-fuse-000001-redhat-2" );
+        versionSet.add( "2.10.0.fuse-000022-redhat-2" );
+        versionSet.add( "2.10.0.fuse-000022-redhat-1" );
+        assertThat( Version.findHighestMatchingBuildNumber( version, versionSet ), equalTo( 2 ) );
+        versionSet.clear();
+    }
+
+    @Test
     public void testFindHighestMatchingBuildNumber_ZeroFill()
     {
         String majorOnlyVersion = "7";
