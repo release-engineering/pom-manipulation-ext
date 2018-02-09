@@ -8,7 +8,7 @@ PME offers the ability to run arbitrary groovy scripts on the sources prior to r
 <table bgcolor="red">
 <tr>
 <td>
-    <b>Warning : Do NOT alter POM files directly on the disk; they will get overwriten by the POM Manipulator. The Manipulator processes the POM files in memory and then writes them back out to disk. If you wish to alter the POM files access the `org.commonjava.maven.ext.manip.model.Project` and call `getModel()` to retrieve the `org.apache.maven.model.Model` instance.</b>
+    <b>Warning : Do NOT alter POM files directly on the disk; they will get overwriten by the POM Manipulator. The Manipulator processes the POM files in memory and then writes them back out to disk. If you wish to alter the POM files access the <i>Project</i> class and call <i>getModel()</i> to retrieve the <i>org.apache.maven.model.Model instance.</i></b>
 </td>
 </tr>
 </table>
@@ -17,9 +17,14 @@ PME offers the ability to run arbitrary groovy scripts on the sources prior to r
 
 ### Configuration
 
-If the property `-DgroovyScripts=GAVTC,....` is set, PME will load the remote Groovy script file. The argument should be a comma separate list of group:artifact:version (with optional type and classifiers).
+If the property `-DgroovyScripts=<value>,....` is set, PME will load the remote Groovy script file.
 
-The remote groovy file can be deployed by e.g.
+The argument should a comma separated list of either:
+
+* group:artifact:version (with optional type and classifiers).
+* A HTTP / HTTPS URL.
+
+If using a GAVTC, the remote groovy file can be deployed by e.g.
 
     <build>
         <plugins>
@@ -63,7 +68,16 @@ It is possible to configure it to run before all other manipulators by setting `
 Each script should use the [BaseScript](http://docs.groovy-lang.org/latest/html/gapi/groovy/transform/BaseScript.html)
 annotation:
 
-    @BaseScript org.commonjava.maven.ext.manip.groovy.BaseScript pme
+    @BaseScript org.commonjava.maven.ext.core.groovy.BaseScript pme
+
+<table bgcolor="#ffff00">
+<tr>
+<td>
+    <b>NOTE</b> : As of PME 2.14 the API has changed: <i>org.commonjava.maven.ext.core.groovy.BaseScript</i> instead of <i>org.commonjava.maven.ext.manip.groovy.BaseScript</i> and <i>org.commonjava.maven.ext.common.model.Project</i> instead of <i>org.commonjava.maven.ext.manip.model.Project</i>
+</td>
+</tr>
+</table>
+
 
 This make the following API available:
 
@@ -89,7 +103,7 @@ A typical groovy script that alters a JSON file on disk might be:
     import groovy.transform.BaseScript
     import groovy.util.logging.Slf4j
 
-    @BaseScript org.commonjava.maven.ext.manip.groovy.BaseScript pme
+    @BaseScript org.commonjava.maven.ext.core.groovy.BaseScript pme
 
     @Slf4j
     public class Processor
