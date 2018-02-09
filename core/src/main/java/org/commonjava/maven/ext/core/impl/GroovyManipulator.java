@@ -27,6 +27,7 @@ import org.commonjava.maven.atlas.ident.ref.SimpleArtifactRef;
 import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.common.model.Project;
 import org.commonjava.maven.ext.core.ManipulationSession;
+import org.commonjava.maven.ext.core.groovy.BaseScript;
 import org.commonjava.maven.ext.core.state.GroovyState;
 import org.commonjava.maven.ext.io.FileIO;
 import org.commonjava.maven.ext.io.ModelIO;
@@ -118,13 +119,20 @@ public class GroovyManipulator
                     {
                         script = shell.parse( groovyScript );
 
-                        script.invokeMethod( "setValues", new Object[] { session.getUserProperties(), projects, project } );
+                        if ( script instanceof BaseScript )
+                        {
+                            ((BaseScript)script).setValues(session.getUserProperties(), projects, project);
+                        }
+                        else
+                        {
+                            throw new ManipulationException( "Cannot cast " + groovyScript + " to a BaseScript to set values." );
+                        }
                     }
                     catch (MissingMethodException e)
                     {
                         try
                         {
-                            logger.debug ( "Failure when injecting into script {} ", FileUtils.readFileToString( groovyScript ) );
+                            logger.debug ( "Failure when injecting into script {} ", FileUtils.readFileToString( groovyScript ), e );
                         }
                         catch ( IOException e1 )
                         {
@@ -136,7 +144,7 @@ public class GroovyManipulator
                     {
                         try
                         {
-                            logger.debug ( "Failure when parsing script {} ", FileUtils.readFileToString( groovyScript ) );
+                            logger.debug ( "Failure when parsing script {} ", FileUtils.readFileToString( groovyScript ), e );
                         }
                         catch ( IOException e1 )
                         {
