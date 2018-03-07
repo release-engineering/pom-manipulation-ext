@@ -15,11 +15,14 @@
  */
 package org.commonjava.maven.ext.core.impl;
 
+import org.apache.maven.model.Build;
+import org.apache.maven.model.BuildBase;
 import org.apache.maven.model.ConfigurationContainer;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.ModelBase;
 import org.apache.maven.model.Plugin;
 import org.apache.maven.model.PluginExecution;
+import org.apache.maven.model.PluginManagement;
 import org.apache.maven.model.Profile;
 import org.codehaus.plexus.component.annotations.Component;
 import org.codehaus.plexus.component.annotations.Requirement;
@@ -109,15 +112,6 @@ public class DistributionEnforcingManipulator
     {
         this.session = session;
         session.setState( new DistributionEnforcingState( session.getUserProperties() ) );
-    }
-
-    /**
-     * No pre-scanning necessary.
-     */
-    @Override
-    public void scan( final List<Project> projects )
-        throws ManipulationException
-    {
     }
 
     /**
@@ -317,11 +311,11 @@ public class DistributionEnforcingManipulator
 
         final List<SkipReference> result = new ArrayList<>();
 
-        Map<String, Plugin> pluginMap = project.getManagedPluginMap( base );
+        Map<String, Plugin> pluginMap = getManagedPluginMap( base );
         Plugin plugin = pluginMap.get( key );
         result.addAll( findSkipRefs( plugin, project ) );
 
-        pluginMap = project.getPluginMap( base );
+        pluginMap = getPluginMap( base );
         plugin = pluginMap.get( key );
         result.addAll( findSkipRefs( plugin, project ) );
 
@@ -425,4 +419,58 @@ public class DistributionEnforcingManipulator
         return 80;
     }
 
+
+    private Map<String, Plugin> getPluginMap( final ModelBase base )
+    {
+        final BuildBase build;
+        if ( base instanceof Model )
+        {
+            build = ( (Model) base ).getBuild();
+        }
+        else
+        {
+            build = ( (Profile) base ).getBuild();
+        }
+
+        if ( build == null )
+        {
+            return Collections.emptyMap();
+        }
+
+        final Map<String, Plugin> result = build.getPluginsAsMap();
+        if ( result == null )
+        {
+            return Collections.emptyMap();
+        }
+
+        return result;
+    }
+
+    private Map<String, Plugin> getManagedPluginMap( final ModelBase base )
+    {
+        if ( base instanceof Model )
+        {
+            final Build build = ( (Model) base ).getBuild();
+            if ( build == null )
+            {
+                return Collections.emptyMap();
+            }
+
+            final PluginManagement pm = build.getPluginManagement();
+            if ( pm == null )
+            {
+                return Collections.emptyMap();
+            }
+
+            final Map<String, Plugin> result = pm.getPluginsAsMap();
+            if ( result == null )
+            {
+                return Collections.emptyMap();
+            }
+
+            return result;
+        }
+
+        return Collections.emptyMap();
+    }
 }

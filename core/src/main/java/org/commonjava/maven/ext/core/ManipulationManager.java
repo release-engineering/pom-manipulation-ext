@@ -58,7 +58,6 @@ import java.util.Set;
  * Sequence of calls:
  * <ol>
  *   <li>{@link #init(ManipulationSession)}</li>
- *   <li>{@link #scan(List, ManipulationSession)}</li>
  *   <li>{@link #applyManipulations(List)}</li>
  * </ol>
  * 
@@ -112,7 +111,8 @@ public class ManipulationManager
 
         orderedManipulators = new ArrayList<>( manipulators.values() );
         // The RESTState depends upon the VersionState being initialised. Therefore initialise in reverse order
-        // and do a final sort to run in the correct order.
+        // and do a final sort to run in the correct order. See the Manipulator interface for detailed discussion
+        // on ordered.
         Collections.sort( orderedManipulators, Collections.reverseOrder( new ManipulatorPriorityComparator() ) );
 
         for ( final Manipulator manipulator : orderedManipulators )
@@ -129,7 +129,7 @@ public class ManipulationManager
     }
 
     /**
-     * Encapsulates both {@link #scan(List, ManipulationSession)} and {@link #applyManipulations(List)}
+     * Encapsulates {@link #applyManipulations(List)}
      *
      * @param session the container session for manipulation.
      * @throws ManipulationException if an error occurs.
@@ -139,7 +139,7 @@ public class ManipulationManager
     {
         final List<Project> projects = pomIO.parseProject( session.getPom() );
 
-        scan( projects, session );
+        session.setProjects( projects );
 
         for ( final Project project : projects )
         {
@@ -188,29 +188,11 @@ public class ManipulationManager
         logger.info( "Maven-Manipulation-Extension: Finished." );
     }
 
-
-    /**
-     * Scan the projects implied by the given POM file for modifications, and save the state in the session for later rewriting to apply it.
-     *
-     * @param projects the list of Projects to scan.
-     * @param session the container session for manipulation.
-     * @throws ManipulationException if an error occurs.
-     */
-    private void scan( final List<Project> projects, final ManipulationSession session )
-        throws ManipulationException
-    {
-        session.setProjects( projects );
-        for ( final Manipulator manipulator : orderedManipulators )
-        {
-            manipulator.scan( projects );
-        }
-    }
-
     /**
      * After projects are scanned for modifications, apply any modifications and rewrite POMs as needed. This method performs the following:
      * <ul>
      *   <li>read the raw models (uninherited, with only a bare minimum interpolation) from disk to escape any interpretation happening during project-building</li>
-     *   <li>apply any manipulations from the previous {@link ManipulationManager#scan(List, ManipulationSession)} call</li>
+     *   <li>apply any manipulations
      *   <li>rewrite any POMs that were changed</li>
      * </ul>
      *

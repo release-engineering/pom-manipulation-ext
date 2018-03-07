@@ -53,18 +53,9 @@ public class RepositoryInjectionManipulator
     private ManipulationSession session;
 
     /**
-     * No prescanning required for Repository injection.
-     */
-    @Override
-    public void scan( final List<Project> projects )
-            throws ManipulationException
-    {
-    }
-
-    /**
      * Initialize the {@link RepositoryInjectionState} state holder in the {@link ManipulationSession}. This state holder detects
      * version-change configuration from the Maven user properties (-D properties from the CLI) and makes it available for
-     * later invocations of {@link Manipulator#scan(List)} and the apply* methods.
+     * later.
      */
     @Override
     public void init( final ManipulationSession session )

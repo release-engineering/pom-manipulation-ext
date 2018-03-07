@@ -15,12 +15,11 @@
  */
 package org.commonjava.maven.ext.common.model;
 
-import org.apache.maven.model.Build;
-import org.apache.maven.model.BuildBase;
+import org.apache.maven.model.Activation;
+import org.apache.maven.model.ActivationProperty;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.DependencyManagement;
 import org.apache.maven.model.Model;
-import org.apache.maven.model.ModelBase;
 import org.apache.maven.model.Parent;
 import org.apache.maven.model.Plugin;
 import org.apache.maven.model.PluginManagement;
@@ -40,10 +39,9 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 import static org.apache.commons.lang.StringUtils.isEmpty;
 import static org.apache.commons.lang.StringUtils.isNotEmpty;
@@ -221,60 +219,6 @@ public class Project
     public String getVersion()
     {
         return key.getVersionString();
-    }
-
-    public Map<String, Plugin> getPluginMap( final ModelBase base )
-    {
-        final BuildBase build;
-        if ( base instanceof Model )
-        {
-            build = ( (Model) base ).getBuild();
-        }
-        else
-        {
-            build = ( (Profile) base ).getBuild();
-        }
-
-        if ( build == null )
-        {
-            return Collections.emptyMap();
-        }
-
-        final Map<String, Plugin> result = build.getPluginsAsMap();
-        if ( result == null )
-        {
-            return Collections.emptyMap();
-        }
-
-        return result;
-    }
-
-    public Map<String, Plugin> getManagedPluginMap( final ModelBase base )
-    {
-        if ( base instanceof Model )
-        {
-            final Build build = ( (Model) base ).getBuild();
-            if ( build == null )
-            {
-                return Collections.emptyMap();
-            }
-
-            final PluginManagement pm = build.getPluginManagement();
-            if ( pm == null )
-            {
-                return Collections.emptyMap();
-            }
-
-            final Map<String, Plugin> result = pm.getPluginsAsMap();
-            if ( result == null )
-            {
-                return Collections.emptyMap();
-            }
-
-            return result;
-        }
-
-        return Collections.emptyMap();
     }
 
     /**
@@ -738,5 +682,54 @@ public class Project
             loop = loop.getProjectParent();
         }
         return found;
+    }
+
+    public void updateProfiles (List<Profile> remoteProfiles)
+    {
+        final List<Profile> profiles = model.getProfiles();
+
+        if ( !remoteProfiles.isEmpty() )
+        {
+            for ( Profile profile : remoteProfiles )
+            {
+                final Iterator<Profile> i = profiles.iterator();
+                while ( i.hasNext() )
+                {
+                    final Profile p = i.next();
+
+                    if ( profile.getId().equals( p.getId() ) )
+                    {
+                        logger.debug( "Removing local profile {} ", p );
+                        i.remove();
+                        // Don't break out of the loop so we can check for active profiles
+                    }
+
+                    // If we have injected profiles and one of the current profiles is using
+                    // activeByDefault it will get mistakingly deactivated due to the semantics
+                    // of activeByDefault. Therefore replace the activation.
+                    if ( p.getActivation() != null && p.getActivation().isActiveByDefault() )
+                    {
+                        logger.warn( "Profile {} is activeByDefault", p );
+
+                        final Activation replacement = new Activation();
+                        final ActivationProperty replacementProp = new ActivationProperty();
+                        replacementProp.setName( "!disableProfileActivation" );
+                        replacement.setProperty( replacementProp );
+
+                        p.setActivation( replacement );
+                    }
+                }
+
+                logger.debug( "Adding profile {}", profile );
+                profiles.add( profile );
+            }
+
+            logger.info( "Clearing resolved profile caches to trigger rescanning..." );
+            resolvedProfileDependencies = null;
+            allResolvedProfileDependencies = null;
+            resolvedProfileManagedDependencies = null;
+            resolvedProfileManagedPlugins = null;
+            resolvedProfilePlugins = null;
+        }
     }
 }

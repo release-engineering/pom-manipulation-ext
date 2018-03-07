@@ -65,6 +65,13 @@ public class RESTIntegrationTest
     }
 
     @Test
+    public void testRESTVersionDepManipProfile() throws Exception
+    {
+        String test = getDefaultTestLocation( "rest-dependency-version-manip-profile" );
+        runLikeInvoker( test, mockServer.getUrl() );
+    }
+
+    @Test
     public void testRESTVersionManip() throws Exception
     {
         String test = getDefaultTestLocation( "rest-version-manip-only" );

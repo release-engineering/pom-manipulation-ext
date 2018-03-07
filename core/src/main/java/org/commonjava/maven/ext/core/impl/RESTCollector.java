@@ -53,14 +53,15 @@ import java.util.concurrent.TimeUnit;
 import static org.apache.commons.lang.StringUtils.isEmpty;
 
 /**
- * This Manipulator runs first. It makes a REST call to an external service to loadRemoteOverrides the GAVs to align the project version
+ * This Manipulator runs very early. It makes a REST call to an external service to loadRemoteOverrides the GAVs to align the project version
  * and dependencies to. It will prepopulate Project GA versions into the VersioningState in case the VersioningManipulator has been activated
  * and the remote overrides into the DependencyState for those as well.
  */
 @Component( role = Manipulator.class, hint = "rest-manipulator" )
-public class RESTManipulator implements Manipulator
+public class RESTCollector
+                implements Manipulator
 {
-    private static final Logger logger = LoggerFactory.getLogger( RESTManipulator.class );
+    private static final Logger logger = LoggerFactory.getLogger( RESTCollector.class );
 
     private ManipulationSession session;
 
@@ -74,8 +75,7 @@ public class RESTManipulator implements Manipulator
     /**
      * Prescans the Project to build up a list of Project GAs and also the various Dependencies.
      */
-    @Override
-    public void scan( final List<Project> projects )
+    private void collect( final List<Project> projects )
                     throws ManipulationException
     {
         final RESTState state = session.getState( RESTState.class );
@@ -303,14 +303,16 @@ public class RESTManipulator implements Manipulator
     public Set<Project> applyChanges( final List<Project> projects )
                     throws ManipulationException
     {
+        collect( projects );
+
         return Collections.emptySet();
     }
 
     @Override
     public int getExecutionIndex()
     {
-        // Low value index so it runs first in order to call the REST API.
-        return 5;
+        // Low value index so it runs very early in order to call the REST API.
+        return 10;
     }
 
 

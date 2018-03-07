@@ -19,7 +19,7 @@ import org.commonjava.maven.atlas.ident.ref.ArtifactRef;
 import org.commonjava.maven.ext.common.model.Project;
 import org.commonjava.maven.ext.core.ManipulationSession;
 import org.commonjava.maven.ext.core.fixture.TestUtils;
-import org.commonjava.maven.ext.core.impl.RESTManipulator;
+import org.commonjava.maven.ext.core.impl.RESTCollector;
 import org.commonjava.maven.ext.io.PomIO;
 import org.junit.Test;
 
@@ -46,7 +46,7 @@ public class ResolveArtifactTest
         PomIO pomIO = new PomIO();
         List<Project> projects = pomIO.parseProject( projectroot );
 
-        Set<ArtifactRef> artifacts = RESTManipulator.establishAllDependencies( session, projects, null );
+        Set<ArtifactRef> artifacts = RESTCollector.establishAllDependencies( session, projects, null );
 
         // NB If this test fails then check if PME deps/plugins have changed...
         assertTrue ( artifacts.size() == 59 );

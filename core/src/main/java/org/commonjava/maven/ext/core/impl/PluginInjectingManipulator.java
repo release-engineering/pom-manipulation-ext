@@ -81,12 +81,6 @@ public class PluginInjectingManipulator
         session.setState( new PluginInjectingState( session.getUserProperties() ) );
     }
 
-    @Override
-    public void scan( final List<Project> projects )
-        throws ManipulationException
-    {
-    }
-
     /**
      * If enabled, grab the execution root pom (which will be the topmost POM in terms of directory structure). Check for the
      * presence of the project-sources-maven-plugin in the base build (/project/build/plugins/). Inject a new plugin execution for creating project

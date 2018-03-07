@@ -57,16 +57,10 @@ public class XMLManipulator
 
     private ManipulationSession session;
 
-    @Override
-    public void scan( final List<Project> projects )
-        throws ManipulationException
-    {
-    }
-
     /**
      * Initialize the {@link XMLState} state holder in the {@link ManipulationSession}. This state holder detects
      * configuration from the Maven user properties (-D properties from the CLI) and makes it available for
-     * later invocations of {@link Manipulator#scan(List)} and the apply* methods.
+     * later.
      */
     @Override
     public void init( final ManipulationSession session )

@@ -21,7 +21,6 @@ import org.apache.maven.model.Profile;
 import org.codehaus.plexus.component.annotations.Component;
 import org.commonjava.maven.atlas.ident.ref.ProjectRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleProjectRef;
-import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.common.model.Project;
 import org.commonjava.maven.ext.common.util.ProfileUtils;
 import org.commonjava.maven.ext.core.ManipulationSession;
@@ -54,7 +53,7 @@ public class PluginRemovalManipulator
     /**
      * Initialize the {@link PluginState} state holder in the {@link ManipulationSession}. This state holder detects
      * version-change configuration from the Maven user properties (-D properties from the CLI) and makes it available for
-     * later invocations of {@link Manipulator#scan(List)} and the apply* methods.
+     * later.
      */
     @Override
     public void init( final ManipulationSession session )
@@ -64,20 +63,10 @@ public class PluginRemovalManipulator
     }
 
     /**
-     * No prescanning required for BOM manipulation.
-     */
-    @Override
-    public void scan( final List<Project> projects )
-            throws ManipulationException
-    {
-    }
-
-    /**
      * Apply the alignment changes to the list of {@link Project}'s given.
      */
     @Override
     public Set<Project> applyChanges( final List<Project> projects )
-            throws ManipulationException
     {
         final State state = session.getState( PluginRemovalState.class );
 

@@ -18,7 +18,6 @@ package org.commonjava.maven.ext.core.impl;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Profile;
 import org.codehaus.plexus.component.annotations.Component;
-import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.common.model.Project;
 import org.commonjava.maven.ext.core.ManipulationSession;
 import org.commonjava.maven.ext.core.state.ProfileRemovalState;
@@ -46,18 +45,9 @@ public class ProfileRemovalManipulator
     private ManipulationSession session;
 
     /**
-     * No prescanning required for Profile removal.
-     */
-    @Override
-    public void scan( final List<Project> projects )
-        throws ManipulationException
-    {
-    }
-
-    /**
      * Initialize the {@link ProfileRemovalState} state holder in the {@link ManipulationSession}. This state holder detects
      * version-change configuration from the Maven user properties (-D properties from the CLI) and makes it available for
-     * later invocations of {@link Manipulator#scan(List)} and the apply* methods.
+     * later.
      */
     @Override
     public void init( final ManipulationSession session )
@@ -71,7 +61,6 @@ public class ProfileRemovalManipulator
      */
     @Override
     public Set<Project> applyChanges( final List<Project> projects )
-        throws ManipulationException
     {
         final ProfileRemovalState state = session.getState( ProfileRemovalState.class );
         if ( !session.isEnabled() || !state.isEnabled() )

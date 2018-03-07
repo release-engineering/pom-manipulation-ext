@@ -23,8 +23,8 @@ import java.util.ArrayList;
  * Basic list of methods that state collections related to different {@link Manipulator}'s should implement. This is also a marker interface to 
  * help ensure the validity of content stored in the session.
  * 
- * A State implementation can contain a mixture of configuration (parsed/configured from command-line properties or other sources) and state output
- * from the {@link Manipulator#scan(java.util.List)} invocation.
+ * A State implementation can contain a mixture of configuration (parsed/configured from command-line properties or other sources) and storage output
+ * from the Manipulators.
  * 
  * @author jdcasey
  */

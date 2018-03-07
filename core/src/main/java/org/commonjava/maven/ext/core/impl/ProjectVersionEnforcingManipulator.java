@@ -65,15 +65,6 @@ public class ProjectVersionEnforcingManipulator
     }
 
     /**
-     * No pre-scanning necessary.
-     */
-    @Override
-    public void scan( final List<Project> projects )
-        throws ManipulationException
-    {
-    }
-
-    /**
      * For each project in the current build set, reset the version if using project.version
     */
     @Override

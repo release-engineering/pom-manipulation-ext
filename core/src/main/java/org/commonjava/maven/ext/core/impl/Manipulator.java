@@ -31,6 +31,16 @@ import java.util.Set;
  * {@link ManipulationSession} instance. State consists of both configuration (normally detected from the user properties, or -D options on the command
  * line), and also changes detected in the scan() method invocation that will be applied later.
  *
+ * Note that the order of the Manipulators is important. While later Manipulators such as the Remove* are not so important in terms of order, the
+ * initial ones are. The order is currently:
+ * [ Groovy - optionally first ]
+ * ProfileInjection ; this can cause the project to be reevaluated (e.g. for new dependencies).
+ * RESTCollector ; performs no changes itself, but scans the build for GAVs to send to the REST endpoint. It will
+ *                 also populate later Manipulator states with the results.
+ * .... rest of the manipulators ....
+ * [ Groovy - optionally last ]
+ *
+ *
  * @author jdcasey
  */
 public interface Manipulator
@@ -45,16 +55,6 @@ public interface Manipulator
      * @throws ManipulationException if an error occurs.
      */
     void init( ManipulationSession session )
-        throws ManipulationException;
-
-    /**
-     * Pre-scan the list of {@link Project} instances for changes that should be made BEFORE any of the changes are actually applied. This allows
-     * for changes to references between projects, for example.
-     *
-     * @param projects the current list of Projects.
-     * @throws ManipulationException if an error occurs.
-     */
-    void scan( final List<Project> projects )
         throws ManipulationException;
 
     /**
@@ -74,5 +74,4 @@ public interface Manipulator
      * @return current index.
      */
     int getExecutionIndex();
-
 }

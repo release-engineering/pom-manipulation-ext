@@ -60,15 +60,6 @@ public class PropertyManipulator
     }
 
     /**
-     * No prescanning required for Property manipulation.
-     */
-    @Override
-    public void scan( final List<Project> projects )
-        throws ManipulationException
-    {
-    }
-
-    /**
      * Apply the property changes to the list of {@link Project}'s given.
      */
     @Override

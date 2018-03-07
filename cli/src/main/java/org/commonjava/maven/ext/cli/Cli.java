@@ -58,7 +58,7 @@ import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.common.model.SimpleScopedArtifactRef;
 import org.commonjava.maven.ext.core.ManipulationManager;
 import org.commonjava.maven.ext.core.ManipulationSession;
-import org.commonjava.maven.ext.core.impl.RESTManipulator;
+import org.commonjava.maven.ext.core.impl.RESTCollector;
 import org.commonjava.maven.ext.io.ConfigIO;
 import org.commonjava.maven.ext.io.PomIO;
 import org.commonjava.maven.ext.io.XMLIO;
@@ -339,8 +339,8 @@ public class Cli
             }
             else if ( cmd.hasOption( 'p' ) || cmd.hasOption( "printGAVTC" ) )
             {
-                Set<ArtifactRef> ts = RESTManipulator.establishAllDependencies( session, pomIO.parseProject( session.getPom() ),
-                                                                                activeProfiles );
+                Set<ArtifactRef> ts = RESTCollector.establishAllDependencies( session, pomIO.parseProject( session.getPom() ),
+                                                                              activeProfiles );
                 logger.info( "Found {} dependencies. {}", ts.size(), ts );
                 File output = null;
 
@@ -465,7 +465,6 @@ public class Cli
             logger.debug( "Caught problem instantiating ", e );
             System.err.println( "Unable to start Cli subsystem" );
             System.exit( 100 );
-            e.printStackTrace();
         }
         catch ( PlexusContainerException e )
         {

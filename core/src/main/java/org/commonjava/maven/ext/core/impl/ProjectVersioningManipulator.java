@@ -75,29 +75,9 @@ public class ProjectVersioningManipulator
     }
 
     /**
-     * Use the {@link VersionCalculator} to calculate any project version changes, and store them in the {@link VersioningState} that was associated
-     * with the {@link ManipulationSession} via the {@link ProjectVersioningManipulator#init(ManipulationSession)}
-     * method.
-     */
-    @Override
-    public void scan( final List<Project> projects )
-        throws ManipulationException
-    {
-        final VersioningState state = session.getState( VersioningState.class );
-        if ( !session.isEnabled() || !state.isEnabled() )
-        {
-            logger.debug( "Version Manipulator: Nothing to do!" );
-            return;
-        }
-
-        logger.info( "Version Manipulator: Calculating the necessary versioning changes." );
-        state.setVersionsByGAVMap( calculator.calculateVersioningChanges( projects, session ) );
-    }
-
-    /**
      * Initialize the {@link VersioningState} state holder in the {@link ManipulationSession}. This state holder detects
      * version-change configuration from the Maven user properties (-D properties from the CLI) and makes it available for
-     * later invocations of {@link Manipulator#scan(List)} and the apply* methods.
+     * later.
      */
     @Override
     public void init( final ManipulationSession session )
@@ -123,6 +103,13 @@ public class ProjectVersioningManipulator
             return Collections.emptySet();
         }
 
+        /*
+         * Use the {@link VersionCalculator} to calculate any project version changes, and store them in the {@link VersioningState} that was associated
+         * with the {@link ManipulationSession} via the {@link ProjectVersioningManipulator#init(ManipulationSession)}
+         */
+        logger.info( "Version Manipulator: Calculating the necessary versioning changes." );
+        state.setVersionsByGAVMap( calculator.calculateVersioningChanges( projects, session ) );
+
         final Set<Project> changed = new HashSet<>();
 
         for ( final Project project : projects )
@@ -138,7 +125,7 @@ public class ProjectVersioningManipulator
 
     /**
      * Apply any project versioning changes applicable for the given {@link Model}, using accumulated version-change information stored in the
-     * {@link VersioningState} instance, and produced during the {@link Manipulator#scan(List)} invocation.
+     * {@link VersioningState} instance, and also produced during the initial {@link Manipulator#applyChanges(List)} invocation.
      *
      * These changes include the main POM version, but may also include the parent declaration and dependencies, if they reference other POMs in the
      * current build.

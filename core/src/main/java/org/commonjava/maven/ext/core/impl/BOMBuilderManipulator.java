@@ -76,12 +76,6 @@ public class BOMBuilderManipulator
         session.setState( new BOMInjectingState( session.getUserProperties() ) );
     }
 
-    @Override
-    public void scan( final List<Project> projects )
-        throws ManipulationException
-    {
-    }
-
     /**
      * If enabled, grab the execution root pom (which will be the topmost POM in terms of directory structure). Within that
      * handle the manipulation of the bom injection.

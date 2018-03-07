@@ -15,8 +15,6 @@
  */
 package org.commonjava.maven.ext.core.impl;
 
-import org.apache.maven.model.Activation;
-import org.apache.maven.model.ActivationProperty;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Profile;
 import org.codehaus.plexus.component.annotations.Component;
@@ -31,7 +29,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -54,18 +51,9 @@ public class ProfileInjectionManipulator
     private ManipulationSession session;
 
     /**
-     * No prescanning required for Profile injection.
-     */
-    @Override
-    public void scan( final List<Project> projects )
-        throws ManipulationException
-    {
-    }
-
-    /**
      * Initialize the {@link ProfileInjectionState} state holder in the {@link ManipulationSession}. This state holder detects
      * version-change configuration from the Maven user properties (-D properties from the CLI) and makes it available for
-     * later invocations of {@link Manipulator#scan(List)} and the apply* methods.
+     * later.
      */
     @Override
     public void init( final ManipulationSession session )
@@ -98,19 +86,8 @@ public class ProfileInjectionManipulator
             if ( project.isInheritanceRoot() )
             {
                 logger.info( "Applying changes to: {} ", ga( project ) );
-                final Model model = project.getModel();
-                final List<Profile> profiles = model.getProfiles();
-
-                if ( !remoteProfiles.isEmpty() )
-                {
-                    final Iterator<Profile> i = remoteProfiles.iterator();
-                    while ( i.hasNext() )
-                    {
-                        addProfile( profiles, i.next() );
-                    }
-                    changed.add( project );
-                }
-
+                project.updateProfiles( remoteProfiles );
+                changed.add( project );
                 break;
             }
         }
@@ -118,52 +95,9 @@ public class ProfileInjectionManipulator
         return changed;
     }
 
-    /**
-     * Add the profile to the list of profiles. If an existing profile has the same
-     * id it is removed first.
-     *
-     * @param profiles Existing profiles
-     * @param profile Target profile to add
-     */
-    void addProfile( final List<Profile> profiles, final Profile profile )
-    {
-        final Iterator<Profile> i = profiles.iterator();
-        while ( i.hasNext() )
-        {
-            final Profile p = i.next();
-
-            if ( profile.getId()
-                        .equals( p.getId() ) )
-            {
-                logger.debug( "Removing local profile {} ", p );
-                i.remove();
-                // Don't break out of the loop so we can check for active profiles
-            }
-
-            // If we have injected profiles and one of the current profiles is using
-            // activeByDefault it will get mistakingly deactivated due to the semantics
-            // of activeByDefault. Therefore replace the activation.
-            if (p.getActivation() != null && p.getActivation().isActiveByDefault())
-            {
-                logger.warn( "Profile {} is activeByDefault", p );
-
-                final Activation replacement = new Activation();
-                final ActivationProperty replacementProp = new ActivationProperty();
-                replacementProp.setName( "!disableProfileActivation" );
-                replacement.setProperty( replacementProp );
-
-                p.setActivation( replacement );
-            }
-        }
-
-        logger.debug( "Adding profile {}", profile );
-        profiles.add( profile );
-    }
-
-
     @Override
     public int getExecutionIndex()
     {
-        return 45;
+        return 5;
     }
 }
