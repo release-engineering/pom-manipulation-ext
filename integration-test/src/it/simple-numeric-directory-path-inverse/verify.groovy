@@ -19,7 +19,7 @@ def pomFile = new File( basedir, 'pom.xml' )
 System.out.println( "Slurping POM: ${pomFile.getAbsolutePath()}" )
 
 def pom = new XmlSlurper().parse( pomFile )
-def v = pom.version.text()
+def v = pom.parent.version.text()
 def g = pom.groupId.text()
 def a = pom.artifactId.text()
 
@@ -52,3 +52,7 @@ buildLog.eachLine {
    }
 }
 assert executionRoot == true
+
+File json = new File( basedir, 'target/pom-manip-ext-result.json' )
+assert json.exists()
+assert json.text.contains("redhat-1")

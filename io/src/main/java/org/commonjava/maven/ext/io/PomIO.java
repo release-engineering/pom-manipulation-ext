@@ -186,10 +186,10 @@ public class PomIO
         {
             if ( project.isExecutionRoot() )
             {
-                Model m = project.getModel();
-                gav.setGroupId( m.getGroupId() == null ? project.getGroupId() : m.getGroupId() );
-                gav.setArtifactId( m.getArtifactId() == null ? project.getArtifactId() : m.getArtifactId() );
-                gav.setVersion( m.getVersion() == null ? project.getVersion() : m.getVersion() );
+                ProjectVersionRef pvr = Project.modelKey( project.getModel() );
+                gav.setGroupId( pvr.getGroupId() );
+                gav.setArtifactId( pvr.getArtifactId() );
+                gav.setVersion( pvr.getVersionString() );
             }
             logger.debug( String.format( "%s modified! Rewriting.", project ) );
             File pom = project.getPom();

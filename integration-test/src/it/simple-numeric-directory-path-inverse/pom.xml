@@ -25,7 +25,6 @@
       <version>1.0</version>
       <relativePath>parent/pom.xml</relativePath>
   </parent>
-  <version>1.0</version>
 
   <groupId>org.commonjava.maven.ext.versioning.test</groupId>
   <artifactId>simple-numeric-directory-path-child-inverse</artifactId>
