@@ -175,21 +175,20 @@ public class PomIO
      * Uses JDOM {@link ModelWriter} and {@link MavenJDOMWriter} to preserve as much formatting as possible.
      *
      *
-     * @param gav GAV to fill in.
      * @param changed the modified Projects to write out.
+     * @return gav execution root GAV
      * @throws ManipulationException if an error occurs.
      */
-    public void rewritePOMs( GAV gav, final Set<Project> changed )
+    public GAV rewritePOMs( final Set<Project> changed )
         throws ManipulationException
     {
+        GAV result = null;
+
         for ( final Project project : changed )
         {
             if ( project.isExecutionRoot() )
             {
-                ProjectVersionRef pvr = Project.modelKey( project.getModel() );
-                gav.setGroupId( pvr.getGroupId() );
-                gav.setArtifactId( pvr.getArtifactId() );
-                gav.setVersion( pvr.getVersionString() );
+                result = new GAV( Project.modelKey( project.getModel() ) );
             }
             logger.debug( String.format( "%s modified! Rewriting.", project ) );
             File pom = project.getPom();
@@ -211,6 +210,7 @@ public class PomIO
                 write( project, pom, model );
             }
         }
+        return result;
     }
 
 

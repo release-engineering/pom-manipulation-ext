@@ -153,9 +153,7 @@ public class ManipulationManager
         {
             logger.info( "Maven-Manipulation-Extension: Rewrite changed: " + projects );
 
-            GAV gav = new GAV();
-
-            pomIO.rewritePOMs( gav, changed );
+            GAV gav = pomIO.rewritePOMs( changed );
 
             try
             {

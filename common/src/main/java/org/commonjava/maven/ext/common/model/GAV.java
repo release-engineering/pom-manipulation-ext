@@ -16,45 +16,23 @@
 package org.commonjava.maven.ext.common.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 
 public class GAV
 {
     @JsonProperty
-    String groupId;
+    public final String groupId;
 
     @JsonProperty
-    String artifactId;
+    public final String artifactId;
 
     @JsonProperty
-    String version;
+    public final String version;
 
-    public String getGroupId()
+    public GAV( ProjectVersionRef pvr )
     {
-        return groupId;
-    }
-
-    public void setGroupId( String groupId )
-    {
-        this.groupId = groupId;
-    }
-
-    public String getArtifactId()
-    {
-        return artifactId;
-    }
-
-    public void setArtifactId( String artifactId )
-    {
-        this.artifactId = artifactId;
-    }
-
-    public String getVersion()
-    {
-        return version;
-    }
-
-    public void setVersion( String version )
-    {
-        this.version = version;
+        groupId = pvr.getGroupId();
+        artifactId = pvr.getArtifactId();
+        version = pvr.getVersionString();
     }
 }

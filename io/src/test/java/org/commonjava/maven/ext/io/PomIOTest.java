@@ -70,10 +70,41 @@ public class PomIOTest
         HashSet<Project> changed = new HashSet<>();
         changed.add( p );
 
-        pomIO.rewritePOMs( new GAV(), changed );
+        pomIO.rewritePOMs( changed );
 
         assertTrue( FileUtils.contentEqualsIgnoreEOL( pom, targetFile, "UTF-8" ) );
         assertTrue( FileUtils.contentEquals( targetFile, pom ) );
+    }
+
+    @Test
+    public void testGAVReturnPOMs()
+                    throws Exception
+    {
+        URL resource = PomIOTest.class.getResource( filename );
+        assertNotNull( resource );
+        File pom = new File( resource.getFile() );
+        assertTrue( pom.exists() );
+
+        File targetFile = folder.newFile( "target.xml" );
+        FileUtils.copyFile( pom, targetFile );
+
+        Model model = new Model();
+        model.setGroupId( "org.commonjava.maven.ext.versioning.test" );
+        model.setArtifactId( "dospom" );
+        model.setVersion( "1.0" );
+        model.setPackaging( "pom" );
+        model.setModelVersion( "4.0.0" );
+
+        Project p = new Project( targetFile, model );
+        p.setExecutionRoot();
+        HashSet<Project> changed = new HashSet<>();
+        changed.add( p );
+
+        GAV gav = pomIO.rewritePOMs( changed );
+
+        assertTrue( gav.version.equals( "1.0" ));
+        assertTrue( gav.groupId.equals( "org.commonjava.maven.ext.versioning.test" ));
+        assertTrue( gav.artifactId.equals( "dospom" ));
     }
 
 
