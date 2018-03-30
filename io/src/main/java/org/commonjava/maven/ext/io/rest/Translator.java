@@ -41,10 +41,11 @@ public interface Translator
 
     enum RestProtocol
     {
-        /**
-         * Current DependencyAnalyser is not versioning its protocols.
-         */
-        CURRENT( "current" );
+        // These two are equivalent. Keeping current for backwards compatibility.
+        CURRENT( "current" ),
+        PNC12( "1.2" ),
+
+        PNC13( "1.3" );
 
         private String name;
 

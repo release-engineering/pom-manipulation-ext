@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (C) 2012 Red Hat, Inc. (jcasey@redhat.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,28 +21,18 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-public class GAVSchema
+public class GAV13Schema extends GAVSchema
 {
     @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
-    public String[] productNames;
+    public String versionSuffix;
 
-    @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
-    public String[] productVersionIds;
+    public GAV13Schema() {}
 
-    // Backwards compatibility for versions of DependencyAnalyser that don't have this field.
-    @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
-    public String repositoryGroup;
-
-    public List<Map<String, Object>> gavs;
-
-    public GAVSchema() {}
-
-    public GAVSchema( String[] productNames, String[] productVersionIds, String repositoryGroup, List<Map<String, Object>> gavs )
+    public GAV13Schema( String[] productNames, String[] productVersionIds, String repositoryGroup, String versionSuffix,
+                        List<Map<String, Object>> gavs )
     {
-        this.productNames = productNames;
-        this.productVersionIds = productVersionIds;
-        this.repositoryGroup = repositoryGroup;
-        this.gavs = gavs;
+        super (productNames, productVersionIds, repositoryGroup, gavs);
+        this.versionSuffix = versionSuffix;
     }
 
     @Override
@@ -51,6 +41,7 @@ public class GAVSchema
         return "ProductNames '" + Arrays.toString( productNames ) +
                         "' :: ProductVersionIds '" + Arrays.toString( productVersionIds )+
                         "' :: RepositoryGroup '" + repositoryGroup +
+                        "' :: versionSuffix '" + versionSuffix +
                         "' :: gavs " + gavs;
     }
 }

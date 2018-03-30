@@ -66,7 +66,7 @@ public class VersionTranslatorTest
     @Parameterized.Parameters()
     public static Collection<Object[]> data()
     {
-        return Arrays.asList( new Object[][] { { RestProtocol.CURRENT } } );
+        return Arrays.asList( new Object[][] { { RestProtocol.PNC12 } } );
     }
 
     @Rule
@@ -136,7 +136,7 @@ public class VersionTranslatorTest
     public void testTranslateVersionsFailNoResponse()
     {
         // Some url that doesn't exist used here
-        Translator translator = new DefaultTranslator( "http://127.0.0.2", RestProtocol.CURRENT, 0,
+        Translator translator = new DefaultTranslator( "http://127.0.0.2", RestProtocol.PNC12, 0,
                                                        Translator.CHUNK_SPLIT_COUNT, "",
                                                        "" );
 

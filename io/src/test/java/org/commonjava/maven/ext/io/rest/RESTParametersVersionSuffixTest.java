@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (C) 2012 Red Hat, Inc. (jcasey@redhat.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,7 +19,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef;
 import org.commonjava.maven.ext.io.rest.handler.AddSuffixJettyHandler;
-import org.commonjava.maven.ext.io.rest.mapper.GAVSchema;
+import org.commonjava.maven.ext.io.rest.mapper.GAV13Schema;
 import org.commonjava.maven.ext.io.rest.rule.MockServer;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.handler.AbstractHandler;
@@ -41,7 +41,7 @@ import java.util.List;
 import static org.commonjava.maven.ext.io.rest.Translator.RestProtocol;
 import static org.junit.Assert.assertTrue;
 
-public class RESTParametersTest
+public class RESTParametersVersionSuffixTest
 {
     private static final Logger LOGGER = LoggerFactory.getLogger( AddSuffixJettyHandler.class );
 
@@ -51,7 +51,7 @@ public class RESTParametersTest
 
     private DefaultTranslator versionTranslator;
 
-    private GAVSchema gavSchema;
+    private GAV13Schema gavSchema;
 
     @Rule
     public final TestName testName = new TestName();
@@ -71,7 +71,7 @@ public class RESTParametersTest
             {
                 jb.append( line );
             }
-            gavSchema = objectMapper.readValue( jb.toString(), GAVSchema.class );
+            gavSchema = objectMapper.readValue( jb.toString(), GAV13Schema.class );
             LOGGER.info( "Read request body '{}' and read parameters '{}' and Group {} ", jb, request.getParameterMap(), gavSchema.repositoryGroup );
             baseRequest.setHandled( true );
 
@@ -81,27 +81,27 @@ public class RESTParametersTest
     @Before
     public void before()
     {
-        LoggerFactory.getLogger( RESTParametersTest.class ).info( "Executing test " + testName.getMethodName() );
+        LoggerFactory.getLogger( RESTParametersVersionSuffixTest.class ).info( "Executing test " + testName.getMethodName() );
     }
 
     @Test
-    public void testVerifyGroup()
+    public void testVerifySuffix()
     {
-        this.versionTranslator = new DefaultTranslator( mockServer.getUrl(), RestProtocol.PNC12, 0,
-                                                        Translator.CHUNK_SPLIT_COUNT, group, "" );
+        this.versionTranslator = new DefaultTranslator( mockServer.getUrl(), RestProtocol.PNC13, 0,
+                                                        Translator.CHUNK_SPLIT_COUNT, "", suffix );
         List<ProjectVersionRef> gavs = new ArrayList<ProjectVersionRef>()
         {{
             add( new SimpleProjectVersionRef( "com.example", "example", "1.0" ) );
         }};
 
         versionTranslator.translateVersions( gavs );
-        assertTrue( group.equals( gavSchema.repositoryGroup ) );
+        assertTrue( suffix.equals( gavSchema.versionSuffix ) );
     }
 
     @Test
-    public void testVerifyNoGroup()
+    public void testVerifyNoSuffix()
     {
-        this.versionTranslator = new DefaultTranslator( mockServer.getUrl(), RestProtocol.PNC12, 0,
+        this.versionTranslator = new DefaultTranslator( mockServer.getUrl(), RestProtocol.PNC13, 0,
                                                         Translator.CHUNK_SPLIT_COUNT, "", "" );
         List<ProjectVersionRef> gavs = new ArrayList<ProjectVersionRef>()
         {{
@@ -109,6 +109,6 @@ public class RESTParametersTest
         }};
 
         versionTranslator.translateVersions( gavs );
-        assertTrue ( gavSchema.repositoryGroup == null );
+        assertTrue ( gavSchema.versionSuffix == null );
     }
 }

@@ -49,7 +49,7 @@ public class BlacklistTranslatorTest
     @Parameterized.Parameters()
     public static Collection<Object[]> data()
     {
-        return Arrays.asList( new Object[][] { { RestProtocol.CURRENT } } );
+        return Arrays.asList( new Object[][] { { RestProtocol.PNC12 } } );
     }
 
     @Rule
