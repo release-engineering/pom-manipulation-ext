@@ -42,6 +42,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
 
 import static org.apache.commons.lang.StringUtils.isEmpty;
 import static org.apache.commons.lang.StringUtils.isNotEmpty;
@@ -512,15 +513,20 @@ public class Project
                               HashMap<ArtifactRef, Dependency> resolvedDependencies )
                     throws ManipulationException
     {
-        for ( Dependency d : deps )
+        ListIterator<Dependency> iterator = deps.listIterator( deps.size() );
+
+        // Iterate in reverse order so later deps take precedence
+        while ( iterator.hasPrevious() )
         {
+            Dependency d = iterator.previous();
+
             String g = PropertyResolver.resolveInheritedProperties( session, this, "${project.groupId}".equals( d.getGroupId() ) ?
                             getGroupId() :
                             d.getGroupId() );
             String a = PropertyResolver.resolveInheritedProperties( session, this, "${project.artifactId}".equals( d.getArtifactId() ) ?
                             getArtifactId() :
                             d.getArtifactId() );
-            String v = PropertyResolver.resolveInheritedProperties ( session, this, d.getVersion() );
+            String v = PropertyResolver.resolveInheritedProperties( session, this, d.getVersion() );
 
             if ( includeManagedDependencies && isEmpty( v ) )
             {
@@ -528,11 +534,27 @@ public class Project
             }
             if ( isNotEmpty( g ) && isNotEmpty( a ) && isNotEmpty( v ) )
             {
-                Dependency old = resolvedDependencies.put( new SimpleArtifactRef( g, a, v, d.getType(), d.getClassifier() ), d );
-                if ( old != null)
+                SimpleArtifactRef sar = new SimpleArtifactRef( g, a, v, d.getType(), d.getClassifier() );
+
+                // If the GAVTC already exists within the map it means we have a duplicate entry. While Maven
+                // technically allows this it does warn that this leads to unstable models. In PME case this breaks
+                // the indexing as we don't have duplicate entries. Given they are exact matches, remove older duplicate.
+                if ( resolvedDependencies.containsKey( sar ) )
                 {
-                     logger.error( "Internal project dependency resolution failure ; replaced {} in store by {}:{}:{}.",
-                                   old.toString(), g, a, v );
+                    logger.error( "Found duplicate entry within dependency list. Key of {} and dependency {}", sar, d );
+                    iterator.remove();
+                }
+                else
+                {
+                    Dependency old = resolvedDependencies.put( sar, d );
+
+                    if ( old != null )
+                    {
+                        logger.error( "Internal project dependency resolution failure ; replaced {} in store by {}:{}:{}.",
+                                      old, g, a, v );
+                        throw new ManipulationException(
+                                        "Internal project dependency resolution failure ; replaced " + old + " by " + d );
+                    }
                 }
             }
         }
@@ -542,17 +564,20 @@ public class Project
     private void resolvePlugins ( MavenSessionHandler session, List<Plugin> plugins, HashMap<ProjectVersionRef, Plugin> resolvedPlugins)
                     throws ManipulationException
     {
-        for ( Plugin p : plugins )
+        ListIterator<Plugin> iterator = plugins.listIterator( plugins.size() );
+
+        // Iterate in reverse order so later plugins take precedence
+        while ( iterator.hasPrevious() )
         {
+            Plugin p = iterator.previous();
+
             String g = PropertyResolver.resolveInheritedProperties( session, this, "${project.groupId}".equals( p.getGroupId() ) ?
                             getGroupId() :
                             p.getGroupId() );
             String a = PropertyResolver.resolveInheritedProperties( session, this, "${project.artifactId}".equals( p.getArtifactId() ) ?
                             getArtifactId() :
                             p.getArtifactId() );
-            String v = PropertyResolver.resolveInheritedProperties( session, this, "${project.version}".equals( p.getVersion() ) ?
-                            p.getVersion() :
-                            p.getVersion() );
+            String v = PropertyResolver.resolveInheritedProperties( session, this, p.getVersion() );
 
             // Its possible the internal plugin list is either abbreviated or empty. Attempt to fill in default values for
             // comparison purposes.
@@ -564,10 +589,27 @@ public class Project
             // this means managed plugins would be included which confuses things.
             if ( isNotEmpty( g ) && isNotEmpty( a ) && isNotEmpty( v ) )
             {
-                Plugin old = resolvedPlugins.put( new SimpleProjectVersionRef( g, a, v ), p );
-                if ( old != null)
+                SimpleProjectVersionRef spv = new SimpleProjectVersionRef( g, a, v );
+
+                // If the GAV already exists within the map it means we have a duplicate entry. While Maven
+                // technically allows this it does warn that this leads to unstable models. In PME case this breaks
+                // the indexing as we don't have duplicate entries. Given they are exact matches, remove older duplicate.
+                if ( resolvedPlugins.containsKey( spv ) )
                 {
-                    logger.error( "Internal project plugin resolution failure ; replaced {} within store.", old.toString() );
+                    logger.error( "Found duplicate entry within plugin list. Key of {} and plugin {}", spv, p );
+                    iterator.remove();
+                }
+                else
+                {
+                    Plugin old = resolvedPlugins.put( spv, p );
+
+                    if ( old != null )
+                    {
+                        logger.error( "Internal project plugin resolution failure ; replaced {} in store by {}.", old,
+                                      spv );
+                        throw new ManipulationException(
+                                        "Internal project plugin resolution failure ; replaced " + old + " by " + spv );
+                    }
                 }
             }
         }
@@ -733,3 +775,4 @@ public class Project
         }
     }
 }
+

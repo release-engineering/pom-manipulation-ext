@@ -580,7 +580,7 @@ public class DependencyManipulator implements Manipulator
         final boolean strict = commonState.getStrict();
 
         // Apply matching overrides to dependencies
-        for ( final ProjectVersionRef dependency : dependencies.keySet() )
+        for ( final ArtifactRef dependency : dependencies.keySet() )
         {
             ProjectRef depPr = new SimpleProjectRef( dependency.getGroupId(), dependency.getArtifactId() );
 
