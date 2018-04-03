@@ -49,6 +49,6 @@ public class ResolveArtifactTest
         Set<ArtifactRef> artifacts = RESTCollector.establishAllDependencies( session, projects, null );
 
         // NB If this test fails then check if PME deps/plugins have changed...
-        assertTrue ( artifacts.size() == 59 );
+        assertTrue ( artifacts.size() == 57 );
     }
 }

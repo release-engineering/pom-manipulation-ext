@@ -292,7 +292,7 @@
       <dependency>
         <groupId>com.jayway.jsonpath</groupId>
         <artifactId>json-path</artifactId>
-        <version>2.2.0</version>
+        <version>2.3.0</version>
       </dependency>
 
       <dependency>
@@ -414,7 +414,6 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-resources-plugin</artifactId>
-          <version>2.6</version>
           <configuration>
             <escapeString>\</escapeString>
           </configuration>
@@ -431,47 +430,21 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-shade-plugin</artifactId>
-          <version>2.4.1</version>
-          <configuration>
-            <archive>
-              <index>true</index>
-              <manifest>
-                <addDefaultSpecificationEntries>
-                  true
-                </addDefaultSpecificationEntries>
-                <addDefaultImplementationEntries>
-                  true
-                </addDefaultImplementationEntries>
-              </manifest>
-              <manifestEntries>
-                <Implementation-URL>${project.url}</Implementation-URL>
-                <Java-Version>${java.version}</Java-Version>
-                <Java-Vendor>${java.vendor}</Java-Vendor>
-                <Os-Name>${os.name}</Os-Name>
-                <Os-Arch>${os.arch}</Os-Arch>
-                <Os-Version>${os.version}</Os-Version>
-                <Scm-Url>${project.scm.url}</Scm-Url>
-                <Scm-Connection>${project.scm.connection}</Scm-Connection>
-                <Scm-Revision>${buildNumber}</Scm-Revision>
-                <Build-Timestamp>${datetime}</Build-Timestamp>
-              </manifestEntries>
-            </archive>
-          </configuration>
+          <version>3.1.0</version>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-dependency-plugin</artifactId>
-          <version>2.8</version>
+          <version>3.0.1</version>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-invoker-plugin</artifactId>
-          <version>2.0.0</version>
+          <version>3.0.1</version>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-surefire-plugin</artifactId>
-          <version>2.18.1</version>
           <configuration>
             <redirectTestOutputToFile>true</redirectTestOutputToFile>
           </configuration>
@@ -480,6 +453,11 @@
           <groupId>com.soebes.maven.plugins</groupId>
           <artifactId>iterator-maven-plugin</artifactId>
           <version>0.3</version>
+        </plugin>
+        <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>animal-sniffer-maven-plugin</artifactId>
+          <version>1.16</version>
         </plugin>
       </plugins>
     </pluginManagement>
@@ -501,7 +479,6 @@
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>animal-sniffer-maven-plugin</artifactId>
-        <version>1.14</version>
         <executions>
           <execution>
             <id>check-java-api</id>
@@ -514,8 +491,7 @@
             <configuration>
               <ignoreDependencies>true</ignoreDependencies>
               <signature>
-                <groupId>org.codehaus.mojo.signature
-                </groupId>
+                <groupId>org.codehaus.mojo.signature</groupId>
                 <artifactId>java17</artifactId>
                 <version>1.0</version>
               </signature>
@@ -523,9 +499,7 @@
           </execution>
         </executions>
       </plugin>
-
     </plugins>
-
   </build>
 
   <modules>
