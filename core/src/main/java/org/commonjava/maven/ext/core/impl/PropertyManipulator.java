@@ -15,7 +15,6 @@
  */
 package org.commonjava.maven.ext.core.impl;
 
-import org.apache.maven.model.Model;
 import org.codehaus.plexus.component.annotations.Component;
 import org.codehaus.plexus.component.annotations.Requirement;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
@@ -79,8 +78,6 @@ public class PropertyManipulator
 
         for ( final Project project : projects )
         {
-            final Model model = project.getModel();
-
             if (!overrides.isEmpty())
             {
                 // Only inject the new properties at the top level.
@@ -88,7 +85,7 @@ public class PropertyManipulator
                 {
                     logger.info( "Applying property changes to: " + ga( project ) + " with " + overrides );
 
-                    model.getProperties().putAll( overrides );
+                    project.getModel().getProperties().putAll( overrides );
 
                     changed.add( project );
                 }
@@ -96,7 +93,7 @@ public class PropertyManipulator
                 {
                     // For any matching property that exists in the current project overwrite that value.
                     @SuppressWarnings( { "unchecked", "rawtypes" } )
-                    final Set<String> keyClone = new HashSet(model.getProperties().keySet());
+                    final Set<String> keyClone = new HashSet( project.getModel().getProperties().keySet());
                     keyClone.retainAll( overrides.keySet() );
 
                     if (!keyClone.isEmpty())
@@ -106,7 +103,7 @@ public class PropertyManipulator
                         {
                             final String matchingKey = keys.next();
                             logger.info( "Overwriting property (" + matchingKey + " in: " + ga( project ) + " with value " + overrides.get( matchingKey ) );
-                            model.getProperties().put( matchingKey, overrides.get( matchingKey ) );
+                            project.getModel().getProperties().put( matchingKey, overrides.get( matchingKey ) );
 
                             changed.add( project );
                         }

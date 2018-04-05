@@ -378,7 +378,7 @@ public class DistributionEnforcingManipulator
             catch ( final GalleyMavenXMLException e )
             {
                 throw new ManipulationException( "Unable to parse config for plugin: %s in: %s", e, plugin.getId(),
-                                                 project.getId() );
+                                                 project.getKey() );
             }
         }
 

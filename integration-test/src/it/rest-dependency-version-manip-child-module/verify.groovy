@@ -39,6 +39,10 @@ dependency = pom.dependencies.dependency.find { it.artifactId.text() == "errai-c
 assert dependency != null
 assert dependency.version.text() == "1.1-Final-redhat-1"
 
+dependency = pom.dependencyManagement.dependencies.dependency.find { it.artifactId.text() == "rest-dependency-version-manip-child-module-child" }
+assert dependency != null
+assert dependency.version.text() == "1.0.0.redhat-3"
+
 def passed = false
 pom.properties.each {
     if ( it.text().contains ("3.1-redhat-1") )

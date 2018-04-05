@@ -158,7 +158,7 @@ public class RepositoryInjectionManipulator
             // If ProjectRef component contains wildcard artifact treat it differently
             for ( ProjectRef p : gaToApply)
             {
-                if ( p.getArtifactId().contains( "*" ) && p.getGroupId().equals( project.getKey().getGroupId( ) ) )
+                if ( p.getArtifactId().contains( "*" ) && p.getGroupId().equals( project.getGroupId( ) ) )
                 {
                     result = true;
                 }
