@@ -102,15 +102,13 @@ public class RESTCollector
                 // Strip SNAPSHOT from the version for matching. DA will handle OSGi conversion.
                 ProjectVersionRef newKey = new SimpleProjectVersionRef( project.getKey() );
 
-                if ( project.getKey().getVersionString().endsWith( "-SNAPSHOT" ) )
+                if ( project.getVersion().endsWith( "-SNAPSHOT" ) )
                 {
                     if ( !vs.preserveSnapshot() )
                     {
-                        newKey = new SimpleProjectVersionRef( project.getKey().asProjectRef(), project.getKey()
-                                                                                                      .getVersionString()
+                        newKey = new SimpleProjectVersionRef( project.getKey().asProjectRef(), project.getVersion()
                                                                                                       .substring( 0,
-                                                                                                                  project.getKey()
-                                                                                                                         .getVersionString()
+                                                                                                                  project.getVersion()
                                                                                                                          .indexOf( "-SNAPSHOT" ) ) );
                     }
                     else

@@ -256,7 +256,11 @@ public class DependencyManipulator implements Manipulator
                         logger.info( "Unable to find a property for {} to update", entry.getKey() );
                         logger.info( "Adding property {} with {} ", entry.getKey(), entry.getValue() );
                         // We know the inheritance root is at position 0 in the inherited list...
-                        project.getInheritedList().get( 0 ).getModel().getProperties().setProperty( entry.getKey(), entry.getValue() );
+                        project.getInheritedList()
+                               .get( 0 )
+                               .getModel()
+                               .getProperties()
+                               .setProperty( entry.getKey(), entry.getValue() );
                     }
                 }
             }
@@ -279,7 +283,11 @@ public class DependencyManipulator implements Manipulator
                         logger.info( "Unable to find a property for {} to update for explicit overrides", entry.getKey() );
                         logger.info( "Adding property {} with {} ", entry.getKey(), entry.getValue() );
                         // We know the inheritance root is at position 0 in the inherited list...
-                        project.getInheritedList().get( 0 ).getModel().getProperties().setProperty( entry.getKey(), entry.getValue() );
+                        project.getInheritedList()
+                               .get( 0 )
+                               .getModel()
+                               .getProperties()
+                               .setProperty( entry.getKey(), entry.getValue() );
                     }
                 }
             }
@@ -722,8 +730,7 @@ public class DependencyManipulator implements Manipulator
         final Map<ArtifactRef, String> reducedVersionOverrides = new LinkedHashMap<>( versionOverrides );
         for ( final Project project : session.getProjects() )
         {
-            final String reactorGA = gav( project.getModel() );
-            reducedVersionOverrides.remove( SimpleArtifactRef.parse( reactorGA ) );
+            reducedVersionOverrides.remove( SimpleArtifactRef.parse( gav( project.getModel() ) ) );
         }
         return reducedVersionOverrides;
     }

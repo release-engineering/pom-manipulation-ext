@@ -26,7 +26,7 @@ class GroovyModifier {
     Project project
 
      def execute() {
-         log.info("Running alterations... {} ", project.getId() )
+         log.info("Running alterations... {} ", project.getKey() )
 
          Properties p = project.getModel().getProperties();
 

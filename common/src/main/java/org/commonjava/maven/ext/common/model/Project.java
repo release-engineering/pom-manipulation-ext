@@ -43,6 +43,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Properties;
 
 import static org.apache.commons.lang.StringUtils.isEmpty;
 import static org.apache.commons.lang.StringUtils.isNotEmpty;
@@ -72,7 +73,11 @@ public class Project
      */
     private final Model model;
 
-    private ProjectVersionRef key;
+    /**
+     * Read-only copy of the original ProjectVersionRef. This is not updated when
+     * the model is updated.
+     */
+    private final ProjectVersionRef key;
 
     /**
      * Denotes if this Project represents the top level POM of a build.
@@ -91,25 +96,6 @@ public class Project
      */
     private Project projectParent;
 
-    private HashMap<ArtifactRef, Dependency> resolvedDependencies;
-
-    private HashMap<ArtifactRef, Dependency> allResolvedDependencies;
-
-    private HashMap<ArtifactRef, Dependency> resolvedManagedDependencies;
-
-    private HashMap<Profile, HashMap<ArtifactRef, Dependency>> resolvedProfileDependencies;
-
-    private HashMap<Profile, HashMap<ArtifactRef, Dependency>> allResolvedProfileDependencies;
-
-    private HashMap<Profile, HashMap<ArtifactRef, Dependency>> resolvedProfileManagedDependencies;
-
-    private HashMap<ProjectVersionRef, Plugin> resolvedPlugins;
-
-    private HashMap<ProjectVersionRef, Plugin> resolvedManagedPlugins;
-
-    private HashMap<Profile, HashMap<ProjectVersionRef, Plugin>> resolvedProfilePlugins;
-
-    private HashMap<Profile, HashMap<ProjectVersionRef, Plugin>> resolvedProfileManagedPlugins;
 
     public Project( final ProjectVersionRef key, final File pom, final Model model )
     {
@@ -199,24 +185,25 @@ public class Project
         return model.getParent();
     }
 
-    // Used by Interpolator
+    /**
+     * Returns the Project groupId. Uses the read-only ProjectVersionRef {@link #key}. Also used by Interpolator.
+     */
     public String getGroupId()
     {
         return key.getGroupId();
     }
 
-    // Used by Interpolator
+    /**
+     * Returns the Project artifactId. Uses the read-only ProjectVersionRef {@link #key}. Also used by Interpolator.
+     */
     public String getArtifactId()
     {
         return key.getArtifactId();
     }
 
-    public String getId()
-    {
-        return model.getId();
-    }
-
-    // Used by Interpolator
+    /**
+     * Returns the Project version. Uses the read-only ProjectVersionRef {@link #key}. Also used by Interpolator.
+     */
     public String getVersion()
     {
         return key.getVersionString();
@@ -237,19 +224,17 @@ public class Project
      */
     public HashMap<Profile, HashMap<ArtifactRef, Dependency>> getResolvedProfileDependencies( MavenSessionHandler session) throws ManipulationException
     {
-        if ( resolvedProfileDependencies == null )
+        HashMap<Profile, HashMap<ArtifactRef, Dependency>> resolvedProfileDependencies = new HashMap<>();
+
+        for ( final Profile profile : ProfileUtils.getProfiles( session, model ) )
         {
-            resolvedProfileDependencies = new HashMap<>(  );
+            HashMap<ArtifactRef, Dependency> profileDeps = new HashMap<>();
 
-            for ( final Profile profile : ProfileUtils.getProfiles( session, model ) )
-            {
-                HashMap<ArtifactRef, Dependency> profileDeps = new HashMap<>();
+            resolveDeps( session, profile.getDependencies(), false, profileDeps );
 
-                resolveDeps( session, profile.getDependencies(), false, profileDeps );
-
-                resolvedProfileDependencies.put( profile, profileDeps );
-            }
+            resolvedProfileDependencies.put( profile, profileDeps );
         }
+
         return resolvedProfileDependencies;
     }
 
@@ -268,19 +253,17 @@ public class Project
      */
     public HashMap<Profile, HashMap<ArtifactRef, Dependency>> getAllResolvedProfileDependencies( MavenSessionHandler session) throws ManipulationException
     {
-        if ( allResolvedProfileDependencies == null )
+        HashMap<Profile, HashMap<ArtifactRef, Dependency>> allResolvedProfileDependencies = new HashMap<>();
+
+        for ( final Profile profile : ProfileUtils.getProfiles( session, model ) )
         {
-            allResolvedProfileDependencies = new HashMap<>(  );
+            HashMap<ArtifactRef, Dependency> profileDeps = new HashMap<>();
 
-            for ( final Profile profile : ProfileUtils.getProfiles( session, model ) )
-            {
-                HashMap<ArtifactRef, Dependency> profileDeps = new HashMap<>();
+            resolveDeps( session, profile.getDependencies(), true, profileDeps );
 
-                resolveDeps( session, profile.getDependencies(), true, profileDeps );
-
-                allResolvedProfileDependencies.put( profile, profileDeps );
-            }
+            allResolvedProfileDependencies.put( profile, profileDeps );
         }
+
         return allResolvedProfileDependencies;
     }
 
@@ -296,21 +279,18 @@ public class Project
      */
     public HashMap<Profile, HashMap<ArtifactRef, Dependency>> getResolvedProfileManagedDependencies( MavenSessionHandler session) throws ManipulationException
     {
-        if ( resolvedProfileManagedDependencies == null )
+        HashMap<Profile, HashMap<ArtifactRef, Dependency>> resolvedProfileManagedDependencies = new HashMap<>();
+
+        for ( final Profile profile : ProfileUtils.getProfiles( session, model ) )
         {
-            resolvedProfileManagedDependencies = new HashMap<>(  );
+            HashMap<ArtifactRef, Dependency> profileDeps = new HashMap<>();
 
-            for ( final Profile profile : ProfileUtils.getProfiles( session, model ) )
+            final DependencyManagement dm = profile.getDependencyManagement();
+            if ( !( dm == null || dm.getDependencies() == null ) )
             {
-                HashMap<ArtifactRef, Dependency> profileDeps = new HashMap<>();
+                resolveDeps( session, dm.getDependencies(), false, profileDeps );
 
-                final DependencyManagement dm = profile.getDependencyManagement();
-                if ( ! ( dm == null || dm.getDependencies() == null ) )
-                {
-                    resolveDeps( session, dm.getDependencies(), false, profileDeps );
-
-                    resolvedProfileManagedDependencies.put( profile, profileDeps );
-                }
+                resolvedProfileManagedDependencies.put( profile, profileDeps );
             }
         }
         return resolvedProfileManagedDependencies;
@@ -328,15 +308,13 @@ public class Project
      */
     public HashMap<ProjectVersionRef, Plugin> getResolvedPlugins ( MavenSessionHandler session) throws ManipulationException
     {
-        if ( resolvedPlugins == null )
-        {
-            resolvedPlugins = new HashMap<>();
+        HashMap<ProjectVersionRef, Plugin> resolvedPlugins = new HashMap<>();
 
-            if ( getModel().getBuild() != null )
-            {
-                resolvePlugins( session, getModel().getBuild().getPlugins(), resolvedPlugins );
-            }
+        if ( getModel().getBuild() != null )
+        {
+            resolvePlugins( session, getModel().getBuild().getPlugins(), resolvedPlugins );
         }
+
         return resolvedPlugins;
     }
 
@@ -353,17 +331,14 @@ public class Project
      */
     public HashMap<ProjectVersionRef, Plugin> getResolvedManagedPlugins ( MavenSessionHandler session) throws ManipulationException
     {
-        if ( resolvedManagedPlugins == null )
-        {
-            resolvedManagedPlugins = new HashMap<>(  );
+        HashMap<ProjectVersionRef, Plugin> resolvedManagedPlugins = new HashMap<>();
 
-            if ( getModel().getBuild() != null )
+        if ( getModel().getBuild() != null )
+        {
+            final PluginManagement pm = getModel().getBuild().getPluginManagement();
+            if ( !( pm == null || pm.getPlugins() == null ) )
             {
-                final PluginManagement pm = getModel().getBuild().getPluginManagement();
-                if ( !( pm == null || pm.getPlugins() == null ) )
-                {
-                    resolvePlugins( session, pm.getPlugins(), resolvedManagedPlugins );
-                }
+                resolvePlugins( session, pm.getPlugins(), resolvedManagedPlugins );
             }
         }
 
@@ -383,22 +358,20 @@ public class Project
     public HashMap<Profile,HashMap<ProjectVersionRef,Plugin>> getResolvedProfilePlugins( MavenSessionHandler session )
                     throws ManipulationException
     {
-        if ( resolvedProfilePlugins == null )
+        HashMap<Profile, HashMap<ProjectVersionRef, Plugin>> resolvedProfilePlugins = new HashMap<>();
+
+        for ( final Profile profile : ProfileUtils.getProfiles( session, model ) )
         {
-            resolvedProfilePlugins = new HashMap<>();
+            HashMap<ProjectVersionRef, Plugin> profileDeps = new HashMap<>();
 
-            for ( final Profile profile : ProfileUtils.getProfiles( session, model ) )
+            if ( profile.getBuild() != null )
             {
-                HashMap<ProjectVersionRef, Plugin> profileDeps = new HashMap<>();
+                resolvePlugins( session, profile.getBuild().getPlugins(), profileDeps );
 
-                if ( profile.getBuild() != null )
-                {
-                    resolvePlugins( session, profile.getBuild().getPlugins(), profileDeps );
-
-                }
-                resolvedProfilePlugins.put( profile, profileDeps );
             }
+            resolvedProfilePlugins.put( profile, profileDeps );
         }
+
         return resolvedProfilePlugins;
     }
 
@@ -415,24 +388,21 @@ public class Project
     public HashMap<Profile,HashMap<ProjectVersionRef,Plugin>> getResolvedProfileManagedPlugins( MavenSessionHandler session )
                     throws ManipulationException
     {
-        if ( resolvedProfileManagedPlugins == null )
+        HashMap<Profile, HashMap<ProjectVersionRef, Plugin>> resolvedProfileManagedPlugins = new HashMap<>();
+
+        for ( final Profile profile : ProfileUtils.getProfiles( session, model ) )
         {
-            resolvedProfileManagedPlugins = new HashMap<>();
+            HashMap<ProjectVersionRef, Plugin> profileDeps = new HashMap<>();
 
-            for ( final Profile profile : ProfileUtils.getProfiles( session, model ) )
+            if ( profile.getBuild() != null )
             {
-                HashMap<ProjectVersionRef, Plugin> profileDeps = new HashMap<>();
-
-                if ( profile.getBuild() != null )
+                final PluginManagement pm = profile.getBuild().getPluginManagement();
+                if ( !( pm == null || pm.getPlugins() == null ) )
                 {
-                    final PluginManagement pm = profile.getBuild().getPluginManagement();
-                    if ( !( pm == null || pm.getPlugins() == null ) )
-                    {
-                        resolvePlugins( session, pm.getPlugins(), profileDeps );
-                    }
+                    resolvePlugins( session, pm.getPlugins(), profileDeps );
                 }
-                resolvedProfileManagedPlugins.put( profile, profileDeps );
             }
+            resolvedProfileManagedPlugins.put( profile, profileDeps );
         }
         return resolvedProfileManagedPlugins;
     }
@@ -450,12 +420,10 @@ public class Project
      */
     public HashMap<ArtifactRef, Dependency> getResolvedDependencies( MavenSessionHandler session) throws ManipulationException
     {
-        if ( resolvedDependencies == null )
-        {
-            resolvedDependencies = new HashMap<>();
+        HashMap<ArtifactRef, Dependency> resolvedDependencies = new HashMap<>();
 
-            resolveDeps( session, getModel().getDependencies(), false, resolvedDependencies );
-        }
+        resolveDeps( session, getModel().getDependencies(), false, resolvedDependencies );
+
         return resolvedDependencies;
     }
 
@@ -474,12 +442,10 @@ public class Project
      */
     public HashMap<ArtifactRef, Dependency> getAllResolvedDependencies( MavenSessionHandler session ) throws ManipulationException
     {
-        if ( allResolvedDependencies == null )
-        {
-            allResolvedDependencies = new HashMap<>();
+        HashMap<ArtifactRef, Dependency> allResolvedDependencies = new HashMap<>();
 
-            resolveDeps( session, getModel().getDependencies(), true, allResolvedDependencies );
-        }
+        resolveDeps( session, getModel().getDependencies(), true, allResolvedDependencies );
+
         return allResolvedDependencies;
     }
 
@@ -495,16 +461,14 @@ public class Project
      */
     public HashMap<ArtifactRef, Dependency> getResolvedManagedDependencies( MavenSessionHandler session ) throws ManipulationException
     {
-        if ( resolvedManagedDependencies == null )
-        {
-            resolvedManagedDependencies = new HashMap<>(  );
+        HashMap<ArtifactRef, Dependency> resolvedManagedDependencies = new HashMap<>();
 
-            final DependencyManagement dm = getModel().getDependencyManagement();
-            if ( ! ( dm == null || dm.getDependencies() == null ) )
-            {
-                resolveDeps( session, dm.getDependencies(), false, resolvedManagedDependencies );
-            }
+        final DependencyManagement dm = getModel().getDependencyManagement();
+        if ( !( dm == null || dm.getDependencies() == null ) )
+        {
+            resolveDeps( session, dm.getDependencies(), false, resolvedManagedDependencies );
         }
+
         return resolvedManagedDependencies;
     }
 
@@ -628,34 +592,6 @@ public class Project
         return inheritanceRoot;
     }
 
-    public static ProjectVersionRef modelKey( final Model model )
-                    throws ManipulationException
-    {
-        String g = model.getGroupId();
-        String v = model.getVersion();
-
-        if ( g == null || v == null )
-        {
-            final Parent p = model.getParent();
-            if ( p == null )
-            {
-                throw new ManipulationException( "Invalid model: " + model + " Cannot find groupId and/or version!" );
-            }
-
-            if ( g == null )
-            {
-                g = p.getGroupId();
-            }
-            if ( v == null )
-            {
-                v = p.getVersion();
-            }
-        }
-
-        final String a = model.getArtifactId();
-        return new SimpleProjectVersionRef( g, a, v );
-    }
-
     public void setExecutionRoot()
     {
         executionRoot = true;
@@ -765,14 +701,35 @@ public class Project
                 logger.debug( "Adding profile {}", profile );
                 profiles.add( profile );
             }
-
-            logger.info( "Clearing resolved profile caches to trigger rescanning..." );
-            resolvedProfileDependencies = null;
-            allResolvedProfileDependencies = null;
-            resolvedProfileManagedDependencies = null;
-            resolvedProfileManagedPlugins = null;
-            resolvedProfilePlugins = null;
         }
+    }
+
+    public static ProjectVersionRef modelKey( final Model model )
+                    throws ManipulationException
+    {
+        String g = model.getGroupId();
+        String v = model.getVersion();
+
+        if ( g == null || v == null )
+        {
+            final Parent p = model.getParent();
+            if ( p == null )
+            {
+                throw new ManipulationException( "Invalid model: " + model + " Cannot find groupId and/or version!" );
+            }
+
+            if ( g == null )
+            {
+                g = p.getGroupId();
+            }
+            if ( v == null )
+            {
+                v = p.getVersion();
+            }
+        }
+
+        final String a = model.getArtifactId();
+        return new SimpleProjectVersionRef( g, a, v );
     }
 }
 
