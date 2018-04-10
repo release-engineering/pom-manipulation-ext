@@ -21,8 +21,6 @@ import org.apache.maven.model.DependencyManagement;
 import org.apache.maven.model.Exclusion;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Profile;
-import org.codehaus.plexus.component.annotations.Component;
-import org.codehaus.plexus.component.annotations.Requirement;
 import org.commonjava.maven.atlas.ident.ref.ArtifactRef;
 import org.commonjava.maven.atlas.ident.ref.InvalidRefException;
 import org.commonjava.maven.atlas.ident.ref.ProjectRef;
@@ -42,6 +40,9 @@ import org.commonjava.maven.ext.io.ModelIO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.inject.Singleton;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -56,13 +57,13 @@ import java.util.Set;
 import static org.apache.commons.lang.StringUtils.isEmpty;
 import static org.apache.commons.lang.StringUtils.join;
 import static org.commonjava.maven.ext.core.util.IdUtils.ga;
-import static org.commonjava.maven.ext.core.util.IdUtils.gav;
 
 /**
  * {@link Manipulator} implementation that can alter dependency (and dependency management) sections in a project's pom file.
  * Configuration is stored in a {@link DependencyState} instance, which is in turn stored in the {@link ManipulationSession}.
  */
-@Component( role = Manipulator.class, hint = "project-dependency-manipulator" )
+@Named("project-dependency-manipulator")
+@Singleton
 public class DependencyManipulator implements Manipulator
 {
     private final Logger logger = LoggerFactory.getLogger( getClass() );
@@ -77,16 +78,15 @@ public class DependencyManipulator implements Manipulator
      */
     private final Map<Project,Map<String, String>> versionPropertyUpdateMap = new LinkedHashMap<>();
 
-    @Requirement
     private ModelIO effectiveModelBuilder;
 
-    /**
-     * Cache of modules we should ignore ; processed during applyModuleVersionOverrides and used
-     * for whether to post-apply any property processing.
-    private final HashSet<ProjectRef> ignoredModules = new HashSet<>();
-     */
-
     private ManipulationSession session;
+
+    @Inject
+    public DependencyManipulator(ModelIO effectiveModelBuilder)
+    {
+        this.effectiveModelBuilder = effectiveModelBuilder;
+    }
 
     /**
      * Initialize the {@link DependencyState} state holder in the {@link ManipulationSession}. This state holder detects

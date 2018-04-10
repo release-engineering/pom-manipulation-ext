@@ -16,19 +16,19 @@
 package org.commonjava.maven.ext.core.fixture;
 
 import org.apache.maven.settings.building.SettingsBuilder;
-import org.codehaus.plexus.component.annotations.Component;
-import org.codehaus.plexus.component.annotations.Requirement;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
+import javax.inject.Inject;
+import javax.inject.Named;
 
 import static org.junit.Assert.assertNotNull;
 
 @RunWith( PlexusTestRunner.class )
-@Component( role = TestWithPlexusRunner.class )
+@Named
 public class TestWithPlexusRunner
 {
-
-    @Requirement
+    @Inject
     private SettingsBuilder settingsBuilder;
 
     @Test

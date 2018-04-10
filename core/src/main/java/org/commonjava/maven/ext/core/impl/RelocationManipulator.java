@@ -19,7 +19,6 @@ import org.apache.maven.model.Dependency;
 import org.apache.maven.model.DependencyManagement;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Profile;
-import org.codehaus.plexus.component.annotations.Component;
 import org.commonjava.maven.atlas.ident.ref.ArtifactRef;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleArtifactRef;
@@ -35,6 +34,8 @@ import org.commonjava.maven.ext.core.util.WildcardMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.inject.Named;
+import javax.inject.Singleton;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -49,7 +50,8 @@ import static org.commonjava.maven.ext.core.util.IdUtils.ga;
  * delegating to dependencyExclusions.
  * Configuration is stored in a {@link PluginState} instance, which is in turn stored in the {@link ManipulationSession}.
  */
-@Component( role = Manipulator.class, hint = "relocations-manipulator" )
+@Named("relocations-manipulator")
+@Singleton
 public class RelocationManipulator
         implements Manipulator
 {

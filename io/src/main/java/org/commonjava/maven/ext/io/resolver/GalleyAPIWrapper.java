@@ -15,8 +15,6 @@
  */
 package org.commonjava.maven.ext.io.resolver;
 
-import org.codehaus.plexus.component.annotations.Component;
-import org.codehaus.plexus.component.annotations.Requirement;
 import org.commonjava.maven.atlas.ident.ref.ArtifactRef;
 import org.commonjava.maven.atlas.ident.ref.ProjectRef;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
@@ -33,6 +31,9 @@ import org.commonjava.maven.galley.model.Transfer;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.inject.Singleton;
 import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -44,7 +45,8 @@ import java.util.List;
  * 
  * @author jdcasey
  */
-@Component( role = GalleyAPIWrapper.class )
+@Named
+@Singleton
 public class GalleyAPIWrapper
 {
 
@@ -57,15 +59,10 @@ public class GalleyAPIWrapper
         private static final long serialVersionUID = 1L;
     };
 
-    @Requirement( role = ExtensionInfrastructure.class, hint = "galley" )
     private GalleyInfrastructure infra;
 
-    // For Guice
-    protected GalleyAPIWrapper()
-    {
-    }
-
-    public GalleyAPIWrapper( final GalleyInfrastructure infra )
+    @Inject
+    public GalleyAPIWrapper(@Named("galley") GalleyInfrastructure infra)
     {
         this.infra = infra;
     }

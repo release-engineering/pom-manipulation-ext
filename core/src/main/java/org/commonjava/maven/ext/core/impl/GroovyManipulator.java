@@ -20,8 +20,6 @@ import groovy.lang.MissingMethodException;
 import groovy.lang.Script;
 import org.apache.commons.io.FileUtils;
 import org.codehaus.groovy.control.CompilationFailedException;
-import org.codehaus.plexus.component.annotations.Component;
-import org.codehaus.plexus.component.annotations.Requirement;
 import org.commonjava.maven.atlas.ident.ref.ArtifactRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleArtifactRef;
 import org.commonjava.maven.ext.common.ManipulationException;
@@ -34,6 +32,9 @@ import org.commonjava.maven.ext.io.ModelIO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.inject.Singleton;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -49,22 +50,27 @@ import static org.apache.commons.lang.StringUtils.isEmpty;
  * {@link Manipulator} implementation that can resolve a remote groovy file and execute it on executionRoot. Configuration
  * is stored in a {@link org.commonjava.maven.ext.core.state.GroovyState} instance, which is in turn stored in the {@link ManipulationSession}.
  */
-@Component( role = Manipulator.class, hint = "groovy-injection" )
+@Named("groovy-injection")
+@Singleton
 public class GroovyManipulator
     implements Manipulator
 {
     private final Logger logger = LoggerFactory.getLogger( getClass() );
 
-    @Requirement
     protected ModelIO modelBuilder;
 
-    @Requirement
     private FileIO fileIO;
 
     private ManipulationSession session;
 
     private int executionIndex = 99;
 
+    @Inject
+    public GroovyManipulator(ModelIO modelIO, FileIO fileIO)
+    {
+        this.modelBuilder = modelIO;
+        this.fileIO = fileIO;
+    }
     /**
      * Initialize the {@link GroovyState} state holder in the {@link ManipulationSession}. This state holder detects
      * version-change configuration from the Maven user properties (-D properties from the CLI) and makes it available for

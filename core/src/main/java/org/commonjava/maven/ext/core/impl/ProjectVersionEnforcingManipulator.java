@@ -18,7 +18,6 @@ package org.commonjava.maven.ext.core.impl;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Profile;
-import org.codehaus.plexus.component.annotations.Component;
 import org.commonjava.maven.ext.common.model.Project;
 import org.commonjava.maven.ext.common.util.ProfileUtils;
 import org.commonjava.maven.ext.core.ManipulationSession;
@@ -27,6 +26,8 @@ import org.commonjava.maven.ext.core.state.State;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.inject.Named;
+import javax.inject.Singleton;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -41,11 +42,11 @@ import java.util.Set;
  *
  * Therefore this manipulator will automatically fix these unless it is explicitly disabled.
  */
-@Component( role = Manipulator.class, hint = "enforce-project-version" )
+@Named("enforce-project-version")
+@Singleton
 public class ProjectVersionEnforcingManipulator
     implements Manipulator
 {
-
     private static final String PROJVER = "${project.version}";
 
     private final Logger logger = LoggerFactory.getLogger( getClass() );

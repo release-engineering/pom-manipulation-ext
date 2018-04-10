@@ -17,7 +17,6 @@ package org.commonjava.maven.ext.io;
 
 import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.JsonPathException;
-import org.codehaus.plexus.component.annotations.Component;
 import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.common.model.YamlFile;
 import org.slf4j.Logger;
@@ -25,6 +24,8 @@ import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.representer.Representer;
 
+import javax.inject.Named;
+import javax.inject.Singleton;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -33,7 +34,8 @@ import java.io.InputStream;
 import java.util.Map;
 import java.util.Properties;
 
-@Component( role = ConfigIO.class )
+@Named
+@Singleton
 public class ConfigIO
 {
     private final Logger logger = LoggerFactory.getLogger( ConfigIO.class );

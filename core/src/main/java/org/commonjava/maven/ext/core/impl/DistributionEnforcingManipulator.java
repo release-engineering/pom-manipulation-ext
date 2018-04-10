@@ -24,8 +24,6 @@ import org.apache.maven.model.Plugin;
 import org.apache.maven.model.PluginExecution;
 import org.apache.maven.model.PluginManagement;
 import org.apache.maven.model.Profile;
-import org.codehaus.plexus.component.annotations.Component;
-import org.codehaus.plexus.component.annotations.Requirement;
 import org.codehaus.plexus.util.xml.Xpp3Dom;
 import org.codehaus.plexus.util.xml.Xpp3DomBuilder;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
@@ -43,6 +41,9 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.inject.Singleton;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
@@ -80,7 +81,8 @@ import static org.commonjava.maven.ext.core.util.IdUtils.ga;
  *
  * @author jdcasey
  */
-@Component( role = Manipulator.class, hint = "enforce-skip" )
+@Named("enforce-skip")
+@Singleton
 public class DistributionEnforcingManipulator
     implements Manipulator
 {
@@ -97,10 +99,15 @@ public class DistributionEnforcingManipulator
 
     private final Logger logger = LoggerFactory.getLogger( getClass() );
 
-    @Requirement
     private GalleyAPIWrapper galleyWrapper;
 
     private ManipulationSession session;
+
+    @Inject
+    public DistributionEnforcingManipulator(GalleyAPIWrapper galleyWrapper)
+    {
+        this.galleyWrapper = galleyWrapper;
+    }
 
     /**
      * Sets the mode to on, off, detect (from install plugin), or none (disabled) based on user properties.

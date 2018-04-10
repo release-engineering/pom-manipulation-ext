@@ -20,8 +20,6 @@ import org.apache.maven.model.DependencyManagement;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.ModelBase;
 import org.apache.maven.model.Parent;
-import org.codehaus.plexus.component.annotations.Component;
-import org.codehaus.plexus.component.annotations.Requirement;
 import org.commonjava.maven.atlas.ident.ref.InvalidRefException;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef;
@@ -35,6 +33,9 @@ import org.commonjava.maven.ext.core.util.PropertiesUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.inject.Singleton;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -53,22 +54,19 @@ import static org.apache.commons.lang.StringUtils.isEmpty;
  *
  * @author jdcasey
  */
-@Component( role = Manipulator.class, hint = "version-manipulator" )
+@Named("version-manipulator")
+@Singleton
 public class ProjectVersioningManipulator
     implements Manipulator
 {
     private final Logger logger = LoggerFactory.getLogger( getClass() );
 
-    @Requirement
     private VersionCalculator calculator;
 
     private ManipulationSession session;
 
-    protected ProjectVersioningManipulator()
-    {
-    }
-
-    protected ProjectVersioningManipulator( final VersionCalculator calculator )
+    @Inject
+    public ProjectVersioningManipulator( final VersionCalculator calculator )
     {
         this.calculator = calculator;
     }

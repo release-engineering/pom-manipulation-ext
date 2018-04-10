@@ -18,8 +18,6 @@ package org.commonjava.maven.ext.io.resolver;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.repository.MirrorSelector;
 import org.apache.maven.settings.Settings;
-import org.codehaus.plexus.component.annotations.Component;
-import org.codehaus.plexus.component.annotations.Requirement;
 import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.galley.TransferManager;
 import org.commonjava.maven.galley.auth.MemoryPasswordManager;
@@ -40,7 +38,7 @@ import org.commonjava.maven.galley.maven.ArtifactManager;
 import org.commonjava.maven.galley.maven.ArtifactMetadataManager;
 import org.commonjava.maven.galley.maven.internal.ArtifactManagerImpl;
 import org.commonjava.maven.galley.maven.internal.ArtifactMetadataManagerImpl;
-import org.commonjava.maven.galley.maven.internal.defaults.StandardMaven304PluginDefaults;
+import org.commonjava.maven.galley.maven.internal.defaults.StandardMaven350PluginDefaults;
 import org.commonjava.maven.galley.maven.internal.defaults.StandardMavenPluginImplications;
 import org.commonjava.maven.galley.maven.internal.type.StandardTypeMapper;
 import org.commonjava.maven.galley.maven.internal.version.VersionResolverImpl;
@@ -64,6 +62,9 @@ import org.commonjava.maven.galley.transport.TransportManagerImpl;
 import org.commonjava.maven.galley.transport.htcli.HttpClientTransport;
 import org.commonjava.maven.galley.transport.htcli.HttpImpl;
 
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.inject.Singleton;
 import java.io.File;
 import java.net.MalformedURLException;
 import java.util.Collections;
@@ -76,11 +77,11 @@ import java.util.concurrent.Executors;
  * 
  * @author jdcasey
  */
-@Component( role = ExtensionInfrastructure.class, hint = "galley" )
+@Named("galley")
+@Singleton
 public class GalleyInfrastructure
     implements ExtensionInfrastructure
 {
-    @Requirement
     private MirrorSelector mirrorSelector;
 
     private MavenPomReader pomReader;
@@ -102,8 +103,10 @@ public class GalleyInfrastructure
 
     private File cacheDir;
 
-    protected GalleyInfrastructure()
+    @Inject
+    public GalleyInfrastructure(MirrorSelector mirrorSelector)
     {
+        this.mirrorSelector = mirrorSelector;
     }
 
     public GalleyInfrastructure( final File targetDirectory, final List<ArtifactRepository> remoteRepositories, final ArtifactRepository localRepository,
@@ -203,7 +206,7 @@ public class GalleyInfrastructure
         artifactManager = new ArtifactManagerImpl( transfers, locationExpander, types, versionResolver );
 
         // TODO: auto-adjust this to the current Maven runtime!
-        final MavenPluginDefaults pluginDefaults = new StandardMaven304PluginDefaults();
+        final MavenPluginDefaults pluginDefaults = new StandardMaven350PluginDefaults();
 
         final MavenPluginImplications pluginImplications = new StandardMavenPluginImplications( xml );
 

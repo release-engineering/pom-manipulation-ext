@@ -15,8 +15,6 @@
  */
 package org.commonjava.maven.ext.core.impl;
 
-import org.codehaus.plexus.component.annotations.Component;
-import org.codehaus.plexus.component.annotations.Requirement;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.common.model.Project;
@@ -26,6 +24,9 @@ import org.commonjava.maven.ext.io.ModelIO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.inject.Singleton;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -40,16 +41,22 @@ import static org.commonjava.maven.ext.core.util.IdUtils.ga;
  * {@link Manipulator} implementation that can alter property sections in a project's pom file.
  * Configuration is stored in a {@link PropertyState} instance, which is in turn stored in the {@link ManipulationSession}.
  */
-@Component( role = Manipulator.class, hint = "property-manipulator" )
+@Named("property-manipulator")
+@Singleton
 public class PropertyManipulator
     implements Manipulator
 {
     private final Logger logger = LoggerFactory.getLogger( getClass() );
 
-    @Requirement
     private ModelIO effectiveModelBuilder;
 
     private ManipulationSession session;
+
+    @Inject
+    public PropertyManipulator(ModelIO effectiveModelBuilder)
+    {
+        this.effectiveModelBuilder = effectiveModelBuilder;
+    }
 
     @Override
     public void init( final ManipulationSession session )

@@ -15,7 +15,6 @@
  */
 package org.commonjava.maven.ext.core.io;
 
-import org.apache.commons.lang.reflect.FieldUtils;
 import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef;
 import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.core.ManipulationSession;
@@ -51,8 +50,7 @@ public class ModelResolverTest
                                       session.getSettings(), session.getActiveProfiles(), null, null, null, temp.newFolder(
                             "cache-dir" ) );
         final GalleyAPIWrapper wrapper = new GalleyAPIWrapper( galleyInfra );
-        final ModelIO model = new ModelIO();
-        FieldUtils.writeField( model, "galleyWrapper", wrapper, true );
+        final ModelIO model = new ModelIO(wrapper);
 
         model.resolveRawModel( SimpleProjectVersionRef.parse( "org.commonjava:commonjava:5"  ) );
     }

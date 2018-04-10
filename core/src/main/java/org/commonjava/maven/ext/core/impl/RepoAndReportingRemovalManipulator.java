@@ -20,8 +20,6 @@ import org.apache.maven.model.Profile;
 import org.apache.maven.model.Repository;
 import org.apache.maven.settings.Settings;
 import org.apache.maven.settings.SettingsUtils;
-import org.codehaus.plexus.component.annotations.Component;
-import org.codehaus.plexus.component.annotations.Requirement;
 import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.common.model.Project;
 import org.commonjava.maven.ext.common.util.ProfileUtils;
@@ -31,6 +29,9 @@ import org.commonjava.maven.ext.io.SettingsIO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.inject.Singleton;
 import java.io.File;
 import java.util.Collections;
 import java.util.HashSet;
@@ -45,17 +46,22 @@ import static org.commonjava.maven.ext.core.util.IdUtils.ga;
  * {@link Manipulator} implementation that can remove Reporting and Repository sections from a project's pom file.
  * Configuration is stored in a {@link RepoReportingState} instance, which is in turn stored in the {@link ManipulationSession}.
  */
-@Component( role = Manipulator.class, hint = "enforce-repo-reporting-removal" )
+@Named("enforce-repo-reporting-removal")
+@Singleton
 public class RepoAndReportingRemovalManipulator
     implements Manipulator
 {
-
     private final Logger logger = LoggerFactory.getLogger( getClass() );
 
-    @Requirement
     private SettingsIO settingsWriter;
 
     private ManipulationSession session;
+
+    @Inject
+    public RepoAndReportingRemovalManipulator(SettingsIO settingsWriter)
+    {
+        this.settingsWriter = settingsWriter;
+    }
 
     /**
      * Initialize the {@link RepoReportingState} state holder in the {@link ManipulationSession}. This state holder detects

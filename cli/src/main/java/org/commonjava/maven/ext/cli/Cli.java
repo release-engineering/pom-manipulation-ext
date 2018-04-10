@@ -36,9 +36,8 @@ import org.apache.maven.execution.MavenExecutionRequest;
 import org.apache.maven.execution.MavenExecutionRequestPopulationException;
 import org.apache.maven.execution.MavenExecutionRequestPopulator;
 import org.apache.maven.execution.MavenSession;
-import org.apache.maven.model.InputLocation;
-import org.apache.maven.model.building.ModelProblem;
 import org.apache.maven.model.building.ModelProblemCollector;
+import org.apache.maven.model.building.ModelProblemCollectorRequest;
 import org.apache.maven.model.profile.DefaultProfileActivationContext;
 import org.apache.maven.model.profile.ProfileActivationContext;
 import org.apache.maven.model.profile.ProfileSelector;
@@ -49,7 +48,9 @@ import org.apache.maven.settings.building.DefaultSettingsBuildingRequest;
 import org.apache.maven.settings.building.SettingsBuilder;
 import org.apache.maven.settings.building.SettingsBuildingException;
 import org.apache.maven.settings.building.SettingsBuildingResult;
+import org.codehaus.plexus.DefaultContainerConfiguration;
 import org.codehaus.plexus.DefaultPlexusContainer;
+import org.codehaus.plexus.PlexusConstants;
 import org.codehaus.plexus.PlexusContainer;
 import org.codehaus.plexus.PlexusContainerException;
 import org.codehaus.plexus.component.repository.exception.ComponentLookupException;
@@ -219,14 +220,17 @@ public class Cli
 
         createSession( target, settings );
 
-        final ch.qos.logback.classic.Logger root = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger( org.slf4j.Logger.ROOT_LOGGER_NAME );
+        final Logger rootLogger = LoggerFactory.getLogger( org.slf4j.Logger.ROOT_LOGGER_NAME );
+
+        final ch.qos.logback.classic.Logger root = (ch.qos.logback.classic.Logger) rootLogger;
+
         if ( cmd.hasOption( 'l' ) )
         {
             LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
             loggerContext.reset();
 
             PatternLayoutEncoder ple = new PatternLayoutEncoder();
-            ple.setPattern("%mdc{LOG-CONTEXT}%level %logger{36} %msg%n");
+            ple.setPattern( "%mdc{LOG-CONTEXT}%level %logger{36} %msg%n" );
             ple.setContext( loggerContext );
             ple.start();
 
@@ -409,7 +413,11 @@ public class Cli
     {
         try
         {
-            PlexusContainer container = new DefaultPlexusContainer();
+            final DefaultContainerConfiguration config = new DefaultContainerConfiguration();
+            config.setClassPathScanning( PlexusConstants.SCANNING_ON );
+            config.setComponentVisibility( PlexusConstants.GLOBAL_VISIBILITY );
+            config.setName( "PME-CLI" );
+            PlexusContainer container = new DefaultPlexusContainer(config);
 
             pomIO = container.lookup( PomIO.class );
             session = container.lookup( ManipulationSession.class );
@@ -513,8 +521,7 @@ public class Cli
             {
 
                 @Override
-                public void add( ModelProblem.Severity severity, String message, InputLocation location,
-                                 Exception cause )
+                public void add( ModelProblemCollectorRequest modelProblemCollectorRequest )
                 {
                     // do nothing
                 }

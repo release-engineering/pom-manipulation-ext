@@ -15,7 +15,6 @@
  */
 package org.commonjava.maven.ext.core.impl;
 
-import org.apache.commons.lang.reflect.FieldUtils;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.execution.DefaultMavenExecutionRequest;
 import org.apache.maven.execution.DefaultMavenExecutionResult;
@@ -352,7 +351,6 @@ public class DistributionEnforcingManipulatorTest
 
         final GalleyAPIWrapper wrapper = new GalleyAPIWrapper( galleyInfra );
 
-        manipulator = new DistributionEnforcingManipulator( );
-        FieldUtils.writeField (manipulator, "galleyWrapper", wrapper, true);
+        manipulator = new DistributionEnforcingManipulator( wrapper );
     }
 }

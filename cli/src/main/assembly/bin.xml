@@ -26,16 +26,25 @@
   </formats>
   <includeBaseDirectory>false</includeBaseDirectory>
   <dependencySets>
-    <dependencySet>
+      <dependencySet>
       <outputDirectory>/</outputDirectory>
       <useProjectArtifact>true</useProjectArtifact>
       <unpack>true</unpack>
       <scope>runtime</scope>
       <unpackOptions>
         <excludes>
-          <exclude>**/log4j.properties</exclude>
+          <exclude>**/javax.inject.Named</exclude>
         </excludes>
       </unpackOptions>
     </dependencySet>
   </dependencySets>
+  <fileSets>
+    <fileSet>
+      <directory>${project.build.outputDirectory}</directory>
+      <includes>
+        <include>META-INF/sisu/javax.inject.Named</include>
+      </includes>
+      <outputDirectory>/</outputDirectory>
+    </fileSet>
+   </fileSets>
 </assembly>

@@ -16,8 +16,6 @@
 package org.commonjava.maven.ext.core.impl;
 
 import org.apache.commons.lang.StringUtils;
-import org.codehaus.plexus.component.annotations.Component;
-import org.codehaus.plexus.component.annotations.Requirement;
 import org.commonjava.maven.atlas.ident.ref.ProjectRef;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleProjectRef;
@@ -32,6 +30,9 @@ import org.commonjava.maven.galley.maven.model.view.meta.MavenMetadataView;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.inject.Singleton;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -50,21 +51,15 @@ import static org.commonjava.maven.ext.core.util.IdUtils.gav;
  *
  * @author jdcasey
  */
-@Component( role = VersionCalculator.class )
+@Named
+@Singleton
 public class VersionCalculator
 {
     private final Logger logger = LoggerFactory.getLogger( getClass() );
 
-    // Used by getMetadataVersions
-    @Requirement
     private GalleyAPIWrapper readerWrapper;
 
-    // For Guice
-    protected VersionCalculator()
-    {
-    }
-
-    // Only used by test code
+    @Inject
     public VersionCalculator( final GalleyAPIWrapper readerWrapper )
     {
         this.readerWrapper = readerWrapper;

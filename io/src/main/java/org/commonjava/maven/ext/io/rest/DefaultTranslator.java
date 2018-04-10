@@ -80,6 +80,7 @@ public class DefaultTranslator
     public DefaultTranslator( String endpointUrl, RestProtocol protocol, int restMaxSize, int restMinSize,
                               String repositoryGroup, String incrementalSerialSuffix )
     {
+        Thread.dumpStack();
         this.rgm = new ReportGAVMapper( protocol, repositoryGroup, incrementalSerialSuffix );
         this.lbm = new ListingBlacklistMapper( protocol);
         this.endpointUrl = endpointUrl;

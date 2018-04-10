@@ -17,8 +17,6 @@ package org.commonjava.maven.ext.core.impl;
 
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Profile;
-import org.codehaus.plexus.component.annotations.Component;
-import org.codehaus.plexus.component.annotations.Requirement;
 import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.common.model.Project;
 import org.commonjava.maven.ext.core.ManipulationSession;
@@ -27,6 +25,9 @@ import org.commonjava.maven.ext.io.ModelIO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.inject.Singleton;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -39,16 +40,22 @@ import static org.commonjava.maven.ext.core.util.IdUtils.ga;
  * profile(s) into the current project's top level pom file. Configuration is stored in a
  * {@link ProfileInjectionState} instance, which is in turn stored in the {@link ManipulationSession}.
  */
-@Component( role = Manipulator.class, hint = "profile-injection" )
+@Named("profile-injection")
+@Singleton
 public class ProfileInjectionManipulator
     implements Manipulator
 {
     private final Logger logger = LoggerFactory.getLogger( getClass() );
 
-    @Requirement
     private ModelIO modelBuilder;
 
     private ManipulationSession session;
+
+    @Inject
+    public ProfileInjectionManipulator(ModelIO modelBuilder)
+    {
+        this.modelBuilder = modelBuilder;
+    }
 
     /**
      * Initialize the {@link ProfileInjectionState} state holder in the {@link ManipulationSession}. This state holder detects

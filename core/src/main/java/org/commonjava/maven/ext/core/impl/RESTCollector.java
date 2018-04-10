@@ -18,7 +18,6 @@ package org.commonjava.maven.ext.core.impl;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.Plugin;
 import org.apache.maven.model.Profile;
-import org.codehaus.plexus.component.annotations.Component;
 import org.commonjava.maven.atlas.ident.DependencyScope;
 import org.commonjava.maven.atlas.ident.ref.ArtifactRef;
 import org.commonjava.maven.atlas.ident.ref.ProjectRef;
@@ -39,6 +38,8 @@ import org.commonjava.maven.ext.core.util.PropertiesUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.inject.Named;
+import javax.inject.Singleton;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -57,7 +58,8 @@ import static org.apache.commons.lang.StringUtils.isEmpty;
  * and dependencies to. It will prepopulate Project GA versions into the VersioningState in case the VersioningManipulator has been activated
  * and the remote overrides into the DependencyState for those as well.
  */
-@Component( role = Manipulator.class, hint = "rest-manipulator" )
+@Named("rest-manipulator")
+@Singleton
 public class RESTCollector
                 implements Manipulator
 {

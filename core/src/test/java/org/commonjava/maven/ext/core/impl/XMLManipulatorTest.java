@@ -16,7 +16,6 @@
 package org.commonjava.maven.ext.core.impl;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang.reflect.FieldUtils;
 import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.common.model.Project;
 import org.commonjava.maven.ext.core.fixture.TestUtils;
@@ -47,7 +46,7 @@ public class XMLManipulatorTest
 {
     private final Logger logger = LoggerFactory.getLogger( getClass() );
 
-    private XMLManipulator xmlManipulator = new XMLManipulator();
+    private XMLManipulator xmlManipulator = new XMLManipulator(new XMLIO());
 
     private File xmlFile;
 
@@ -57,8 +56,6 @@ public class XMLManipulatorTest
     @Before
     public void setup() throws IOException, IllegalAccessException, URISyntaxException
     {
-        FieldUtils.writeField( xmlManipulator, "xmlIO", new XMLIO(), true);
-
         URL resource = XMLIOTest.class.getResource( "activemq-artemis-dep.xml");
         xmlFile = tf.newFile();
         FileUtils.copyURLToFile( resource, xmlFile);

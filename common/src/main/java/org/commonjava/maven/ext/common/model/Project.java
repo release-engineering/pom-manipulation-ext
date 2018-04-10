@@ -33,7 +33,7 @@ import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.common.session.MavenSessionHandler;
 import org.commonjava.maven.ext.common.util.ProfileUtils;
 import org.commonjava.maven.ext.common.util.PropertyResolver;
-import org.commonjava.maven.galley.maven.internal.defaults.StandardMaven304PluginDefaults;
+import org.commonjava.maven.galley.maven.internal.defaults.StandardMaven350PluginDefaults;
 import org.commonjava.maven.galley.maven.spi.defaults.MavenPluginDefaults;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,7 +58,7 @@ import static org.apache.commons.lang.StringUtils.isNotEmpty;
  */
 public class Project
 {
-    private static final MavenPluginDefaults PLUGIN_DEFAULTS = new StandardMaven304PluginDefaults();
+    private static final MavenPluginDefaults PLUGIN_DEFAULTS = new StandardMaven350PluginDefaults();
 
     private final Logger logger = LoggerFactory.getLogger( getClass() );
 
@@ -186,6 +186,7 @@ public class Project
 
     /**
      * Returns the Project groupId. Also used by Interpolator.
+     * @return the groupId
      */
     public String getGroupId()
     {
@@ -201,6 +202,7 @@ public class Project
 
     /**
      * Returns the Project artifactId. Also used by Interpolator.
+     * @return the artifactId
      */
     public String getArtifactId()
     {
@@ -209,6 +211,7 @@ public class Project
 
     /**
      * Returns the Project version. Also used by Interpolator.
+     * @return the version
      */
     public String getVersion()
     {
@@ -717,4 +720,3 @@ public class Project
         }
     }
 }
-

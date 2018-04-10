@@ -15,8 +15,6 @@
  */
 package org.commonjava.maven.ext.core.impl;
 
-import org.codehaus.plexus.component.annotations.Component;
-import org.codehaus.plexus.component.annotations.Requirement;
 import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.common.model.Project;
 import org.commonjava.maven.ext.core.ManipulationSession;
@@ -28,6 +26,9 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.inject.Singleton;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
@@ -44,7 +45,8 @@ import static org.apache.commons.lang.StringUtils.isEmpty;
  * {@link Manipulator} implementation that can modify XML files. Configuration
  * is stored in a {@link XMLState} instance, which is in turn stored in the {@link ManipulationSession}.
  */
-@Component( role = Manipulator.class, hint = "xml-manipulator" )
+@Named("xml-manipulator")
+@Singleton
 public class XMLManipulator
     implements Manipulator
 {
@@ -52,10 +54,15 @@ public class XMLManipulator
 
     private XPath xPath = XPathFactory.newInstance().newXPath();
 
-    @Requirement
     private XMLIO xmlIO;
 
     private ManipulationSession session;
+
+    @Inject
+    public XMLManipulator(XMLIO xmlIO)
+    {
+        this.xmlIO = xmlIO;
+    }
 
     /**
      * Initialize the {@link XMLState} state holder in the {@link ManipulationSession}. This state holder detects
