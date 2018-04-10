@@ -91,6 +91,7 @@ public class ProfileRemovalManipulator
                     {
                         logger.debug ("Removing profile {}", p.getId());
                         i.remove();
+                        changed.add( project );
                         break;
                     }
                 }

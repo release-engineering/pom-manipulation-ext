@@ -16,8 +16,6 @@
 package org.commonjava.maven.ext.core.state;
 
 import org.commonjava.maven.ext.core.impl.ProfileInjectionManipulator;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
 import java.util.List;
@@ -32,9 +30,6 @@ import static org.apache.commons.lang.StringUtils.isNotEmpty;
 public class ProfileRemovalState
     implements State
 {
-
-    private final Logger logger = LoggerFactory.getLogger( getClass() );
-
     /**
      * Suffix to enable this modder
      */

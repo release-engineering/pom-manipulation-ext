@@ -72,8 +72,8 @@ public class PluginInjectingState
      */
     public PluginInjectingState( final Properties userProperties )
     {
-        projectsourcesEnabled = !Boolean.parseBoolean( PropertiesUtils.handleDeprecatedProperty ( userProperties, PROJECT_SOURCES_SKIP_PROPERTY ) );
-        metadataEnabled = !Boolean.parseBoolean( PropertiesUtils.handleDeprecatedProperty ( userProperties, BMMP_SKIP_PROPERTY ) );
+        projectsourcesEnabled = !Boolean.parseBoolean( PropertiesUtils.handleDeprecatedProperty ( userProperties, PROJECT_SOURCES_SKIP_PROPERTY, "true" ) );
+        metadataEnabled = !Boolean.parseBoolean( PropertiesUtils.handleDeprecatedProperty ( userProperties, BMMP_SKIP_PROPERTY, "true") );
 
         projectSrcPluginVersion = PropertiesUtils.handleDeprecatedProperty (userProperties, PROJECT_SOURCES_PLUGIN_VERSION_PROPERTY, DEFAULT_PROJECT_SOURCES_PLUGIN_VERSION );
         bmmpVersion = PropertiesUtils.handleDeprecatedProperty( userProperties, BMMP_VERSION_PROPERTY, DEFAULT_BMMP_VERSION );
