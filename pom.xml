@@ -82,7 +82,7 @@
     <projectOwner>Red Hat, Inc.</projectOwner>
     <projectEmail>jcasey@redhat.com</projectEmail>
 
-    <javaVersion>1.7</javaVersion>
+    <javaVersion>1.8</javaVersion>
     <javaTestVersion>${javaVersion}</javaTestVersion>
 
     <mavenVersion>3.0.4</mavenVersion>
@@ -492,7 +492,7 @@
               <ignoreDependencies>true</ignoreDependencies>
               <signature>
                 <groupId>org.codehaus.mojo.signature</groupId>
-                <artifactId>java17</artifactId>
+                <artifactId>java18</artifactId>
                 <version>1.0</version>
               </signature>
             </configuration>

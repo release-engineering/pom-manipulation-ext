@@ -14,7 +14,7 @@ For details on usage see the documentation [here](https://release-engineering.gi
 
 ### Prequisites
 
-* Java 1.7 or later
+* Java 1.8 or later
 * Maven 3.0.4 or later.
 
 ### Commits
