@@ -16,6 +16,7 @@
 package org.commonjava.maven.ext.io.rest;
 
 import com.mashape.unirest.http.HttpResponse;
+import com.mashape.unirest.http.ObjectMapper;
 import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
 import org.apache.commons.codec.binary.Base32;
@@ -80,23 +81,26 @@ public class DefaultTranslator
     public DefaultTranslator( String endpointUrl, RestProtocol protocol, int restMaxSize, int restMinSize,
                               String repositoryGroup, String incrementalSerialSuffix )
     {
-        Thread.dumpStack();
         this.rgm = new ReportGAVMapper( protocol, repositoryGroup, incrementalSerialSuffix );
         this.lbm = new ListingBlacklistMapper( protocol);
         this.endpointUrl = endpointUrl;
         this.initialRestMaxSize = restMaxSize;
         this.initialRestMinSize = restMinSize;
+    }
 
+    private void init (ObjectMapper objectMapper)
+    {
         // According to https://github.com/Mashape/unirest-java the default connection timeout is 10000
         // and the default socketTimeout is 60000.
         // We have increased the first to 30 seconds and the second to 10 minutes.
         Unirest.setTimeouts( 30000, 600000 );
+        Unirest.setObjectMapper( objectMapper );
     }
 
     @Override
     public List<ProjectVersionRef> findBlacklisted( ProjectRef ga )
     {
-        Unirest.setObjectMapper( lbm );
+        init (lbm);
 
         final String blacklistEndpointUrl = endpointUrl + ( endpointUrl.endsWith( "/" ) ? "" : "/") + LISTING_BLACKLIST_GA;
         List<ProjectVersionRef> result;
@@ -161,7 +165,7 @@ public class DefaultTranslator
      */
     public Map<ProjectVersionRef, String> translateVersions( List<ProjectVersionRef> projects )
     {
-        Unirest.setObjectMapper( rgm );
+        init (rgm );
 
         final Map<ProjectVersionRef, String> result = new HashMap<>();
         final Queue<Task> queue = new ArrayDeque<>();
