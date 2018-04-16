@@ -99,16 +99,22 @@ If the property `pluginRemoval` (*Deprecated property `plugin-removal`*) is set,
 
 ### Project Sources / Build Metadata Plugin Injection
 
-The extension will inject an execution of [project-sources-maven-plugin](https://github.com/commonjava/project-sources-maven-plugin) and [build-metadata-plugin](https://github.com/release-engineering/buildmetadata-maven-plugin) by default. This will result in an archive being created containing all project sources **after** this extension has made any modifications to the pom.xml's. The archive will only be created in the execution-root project, and will be attached for installation and deployment using the `project-sources` classifier. The metadata plugin will create a build.properties file containing information (e.g. the command line) on the invoked project. This will also be included in the archive tar.
+<table bgcolor="#ffff00">
+<tr>
+<td>
+    <b>NOTE</b> : As of PME 3.0 (May 2018) the defaults for <i>projectSrcSkip</i> and <i>projectMetaSkip</i> have changed from false to true i.e. no plugins will be injected.
+</td>
+</tr>
+</table>
 
-**Note**: this manipulator will only be active by default if one or more other manipulators have been activated.
+The extension may optionally inject an execution of [project-sources-maven-plugin](https://github.com/commonjava/project-sources-maven-plugin) and [build-metadata-plugin](https://github.com/release-engineering/buildmetadata-maven-plugin). This will result in an archive being created containing all project sources **after** this extension has made any modifications to the pom.xml's. The archive will only be created in the execution-root project, and will be attached for installation and deployment using the `project-sources` classifier. The metadata plugin will create a build.properties file containing information (e.g. the command line) on the invoked project. This will also be included in the archive tar. A related project is the [Maven Metadata Extension](https://github.com/release-engineering/metadata-extension).
 
-To skip injection of the sources and metadata plugins, you can use the properties `projectSrcSkip` (*Deprecated property `project.src.skip`*) and `projectMetaSkip` (*Deprecated property `project.meta.skip`*):
+To activate injection of the sources and metadata plugins, you can use the properties `projectSrcSkip` (*Deprecated property `project.src.skip`*) and `projectMetaSkip` (*Deprecated property `project.meta.skip`*):
 
-    mvn install -DprojectSrcSkip=true
-    mvn install -DprojectMetaSkip=true
+    mvn install -DprojectSrcSkip=false
+    mvn install -DprojectMetaSkip=false
 
-If unspecified, default versions of the project sources and metadata plugins will be injected (currently, version 0.3 and 1.5.0 respectively). To gain more control over this injection, you can specify the versions for project sources and metadata plugins with the properties `projectSrcVersion` (*Deprecated property `project.src.version`*) and `projectMetaVersion` (*Deprecated property `project.meta.version`*):
+If unspecified no plugins will be injected. If specified, default versions of the project sources and metadata plugins will be injected (currently, version 0.3 and 1.5.0 respectively). To gain more control over this injection, you can specify the versions for project sources and metadata plugins with the properties `projectSrcVersion` (*Deprecated property `project.src.version`*) and `projectMetaVersion` (*Deprecated property `project.meta.version`*):
 
     mvn install -Dproject.src.version=x.y
     mvn install -Dproject.meta.version=x.y
