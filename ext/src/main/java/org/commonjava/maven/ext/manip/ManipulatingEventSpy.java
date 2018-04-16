@@ -35,7 +35,7 @@ import java.util.Properties;
 import static org.apache.commons.lang.StringUtils.isNotEmpty;
 
 /**
- * Implements hooks necessary to apply modificationprojectBs in the Maven bootstrap, before the build starts.
+ * Implements hooks necessary to apply modifications in the Maven bootstrap, before the build starts.
  * @author jdcasey
  */
 @Component( role = EventSpy.class, hint = "manipulation" )

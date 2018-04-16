@@ -31,6 +31,6 @@ pom.build.plugins.children().each{
 
 assert failed != true
 assert ! new File( basedir, 'build.metadata' ).exists()
-assert new File( basedir, 'target/build-metadata-plugin-disabled-1-project-sources.tar.gz').exists()
+assert ! new File( basedir, 'target/build-metadata-plugin-disabled-1-project-sources.tar.gz').exists()
 
 return true

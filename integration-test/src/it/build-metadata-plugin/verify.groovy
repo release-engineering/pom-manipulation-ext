@@ -52,3 +52,4 @@ for ( File target : zips )
     if ( failed == true ) System.out.println ("### Failed with " + target)
     assert failed == false
 }
+assert new File( basedir, 'target/build-metadata-plugin-1-project-sources.tar.gz').exists()
