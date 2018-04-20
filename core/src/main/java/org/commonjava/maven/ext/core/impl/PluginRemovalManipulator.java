@@ -18,7 +18,6 @@ package org.commonjava.maven.ext.core.impl;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Plugin;
 import org.apache.maven.model.Profile;
-import org.codehaus.plexus.component.annotations.Component;
 import org.commonjava.maven.atlas.ident.ref.ProjectRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleProjectRef;
 import org.commonjava.maven.ext.common.model.Project;
@@ -30,6 +29,8 @@ import org.commonjava.maven.ext.core.state.State;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.inject.Named;
+import javax.inject.Singleton;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -42,7 +43,8 @@ import static org.commonjava.maven.ext.core.util.IdUtils.ga;
  * {@link Manipulator} implementation that can remove specified plugins from a project's pom file.
  * Configuration is stored in a {@link PluginState} instance, which is in turn stored in the {@link ManipulationSession}.
  */
-@Component( role = Manipulator.class, hint = "plugin-removal-manipulator" )
+@Named("plugin-removal-manipulator")
+@Singleton
 public class PluginRemovalManipulator
         implements Manipulator
 {

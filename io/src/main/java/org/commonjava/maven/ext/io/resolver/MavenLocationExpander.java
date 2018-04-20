@@ -65,7 +65,6 @@ public class MavenLocationExpander
         EXPANSION_TARGET.setAttribute(Location.CONNECTION_TIMEOUT_SECONDS, 60);
     }
 
-
     private final List<Location> locations;
 
     private final Logger logger = LoggerFactory.getLogger( getClass() );

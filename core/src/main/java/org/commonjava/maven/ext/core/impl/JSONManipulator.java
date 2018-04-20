@@ -17,8 +17,6 @@ package org.commonjava.maven.ext.core.impl;
 
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPathException;
-import org.codehaus.plexus.component.annotations.Component;
-import org.codehaus.plexus.component.annotations.Requirement;
 import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.common.model.Project;
 import org.commonjava.maven.ext.core.ManipulationSession;
@@ -27,6 +25,9 @@ import org.commonjava.maven.ext.io.JSONIO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.inject.Singleton;
 import java.io.File;
 import java.util.Collections;
 import java.util.HashSet;
@@ -39,16 +40,22 @@ import static org.apache.commons.lang.StringUtils.isEmpty;
  * {@link Manipulator} implementation that can modify JSON files. Configuration
  * is stored in a {@link JSONState} instance, which is in turn stored in the {@link ManipulationSession}.
  */
-@Component( role = Manipulator.class, hint = "json-manipulator" )
+@Named("json-manipulator")
+@Singleton
 public class JSONManipulator
     implements Manipulator
 {
     private final Logger logger = LoggerFactory.getLogger( getClass() );
 
-    @Requirement
     private JSONIO jsonIO;
 
     private ManipulationSession session;
+
+    @Inject
+    public JSONManipulator(JSONIO jsonIO)
+    {
+        this.jsonIO = jsonIO;
+    }
 
     /**
      * Initialize the {@link JSONState} state holder in the {@link ManipulationSession}. This state holder detects

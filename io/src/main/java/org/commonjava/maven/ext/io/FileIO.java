@@ -16,14 +16,11 @@
 package org.commonjava.maven.ext.io;
 
 import org.apache.commons.io.FileUtils;
-import org.codehaus.plexus.component.annotations.Component;
-import org.codehaus.plexus.component.annotations.Requirement;
-import org.commonjava.maven.ext.common.ManipulationException;
-import org.commonjava.maven.ext.io.resolver.ExtensionInfrastructure;
 import org.commonjava.maven.ext.io.resolver.GalleyInfrastructure;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.inject.Singleton;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -32,13 +29,17 @@ import java.util.UUID;
 /**
  * Class to resolve Files from alternate locations
  */
-@Component( role = FileIO.class )
+@Named
+@Singleton
 public class FileIO
 {
-    private final Logger logger = LoggerFactory.getLogger( getClass() );
-
-    @Requirement( role = ExtensionInfrastructure.class, hint = "galley" )
     private GalleyInfrastructure infra;
+
+    @Inject
+    public FileIO(@Named("galley") GalleyInfrastructure infra)
+    {
+        this.infra = infra;
+    }
 
     /**
      * Read the raw file from a given URL. Useful if we need to read
@@ -46,9 +47,8 @@ public class FileIO
      *
      * @param ref the ArtifactRef to read.
      * @return the file for the URL
-     * @throws ManipulationException if an error occurs.
      */
-    public File resolveURL( final URL ref ) throws ManipulationException, IOException
+    public File resolveURL( final URL ref ) throws IOException
     {
         File cache = infra.getCacheDir();
         File result = new File( cache, UUID.randomUUID().toString() );

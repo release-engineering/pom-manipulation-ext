@@ -15,23 +15,23 @@
  */
 package org.commonjava.maven.ext.core;
 
-import org.codehaus.plexus.component.annotations.Component;
-import org.codehaus.plexus.component.annotations.Requirement;
 import org.commonjava.maven.ext.core.fixture.PlexusTestRunner;
 import org.commonjava.maven.ext.core.impl.Manipulator;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import javax.inject.Inject;
+import javax.inject.Named;
 import java.util.Map;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 @RunWith( PlexusTestRunner.class )
-@Component( role = ManipulationManagerTest.class )
+@Named
 public class ManipulationManagerTest
 {
-    @Requirement
+    @Inject
     private Map<String, Manipulator> manipulators;
 
     @Test

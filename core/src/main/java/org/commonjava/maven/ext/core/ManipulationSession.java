@@ -18,8 +18,6 @@ package org.commonjava.maven.ext.core;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.settings.Settings;
-import org.codehaus.plexus.component.annotations.Component;
-import org.codehaus.plexus.component.annotations.Requirement;
 import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.common.model.Project;
 import org.commonjava.maven.ext.common.session.MavenSessionHandler;
@@ -28,6 +26,8 @@ import org.commonjava.maven.ext.core.impl.Manipulator;
 import org.commonjava.maven.ext.core.state.State;
 import org.commonjava.maven.ext.core.state.VersioningState;
 
+import javax.inject.Named;
+import javax.inject.Singleton;
 import java.io.File;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -44,15 +44,12 @@ import java.util.Properties;
  *
  * @author jdcasey
  */
-@Component( role = ManipulationSession.class, instantiationStrategy = "singleton" )
+@Named
+@Singleton
 public class ManipulationSession
                 implements MavenSessionHandler
 {
-
     private static final String MANIPULATIONS_DISABLED_PROP = "manipulation.disable";
-
-    @Requirement( role = Manipulator.class )
-    private Map<String, Manipulator> manipulators;
 
     private final Map<Class<?>, State> states = new HashMap<>();
 
@@ -65,7 +62,7 @@ public class ManipulationSession
 
     private ManipulationException error;
 
-    public  ManipulationSession()
+    public ManipulationSession()
     {
         try
         {

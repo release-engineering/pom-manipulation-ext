@@ -24,18 +24,20 @@ import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.Option;
-import org.codehaus.plexus.component.annotations.Component;
 import org.commonjava.maven.ext.common.ManipulationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.inject.Named;
+import javax.inject.Singleton;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
 
-@Component( role = JSONIO.class )
+@Named
+@Singleton
 public class JSONIO
 {
     private final Logger logger = LoggerFactory.getLogger( getClass() );

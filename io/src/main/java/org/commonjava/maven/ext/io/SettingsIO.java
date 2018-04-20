@@ -24,12 +24,13 @@ import org.apache.maven.settings.building.DefaultSettingsBuildingRequest;
 import org.apache.maven.settings.building.SettingsBuilder;
 import org.apache.maven.settings.building.SettingsBuildingException;
 import org.apache.maven.settings.io.xpp3.SettingsXpp3Writer;
-import org.codehaus.plexus.component.annotations.Component;
-import org.codehaus.plexus.component.annotations.Requirement;
 import org.commonjava.maven.ext.common.ManipulationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.inject.Singleton;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -38,13 +39,19 @@ import java.util.Iterator;
 /**
  * @author vdedik@redhat.com
  */
-@Component( role = SettingsIO.class )
+@Named
+@Singleton
 public class SettingsIO
 {
     protected final Logger logger = LoggerFactory.getLogger( getClass() );
 
-    @Requirement
     private SettingsBuilder settingsBuilder;
+
+    @Inject
+    public SettingsIO (SettingsBuilder settingsBuilder)
+    {
+        this.settingsBuilder = settingsBuilder;
+    }
 
     public void write( Settings settings, File settingsFile )
         throws ManipulationException

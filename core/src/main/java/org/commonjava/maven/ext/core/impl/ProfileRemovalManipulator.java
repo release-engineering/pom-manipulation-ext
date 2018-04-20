@@ -17,13 +17,14 @@ package org.commonjava.maven.ext.core.impl;
 
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Profile;
-import org.codehaus.plexus.component.annotations.Component;
 import org.commonjava.maven.ext.common.model.Project;
 import org.commonjava.maven.ext.core.ManipulationSession;
 import org.commonjava.maven.ext.core.state.ProfileRemovalState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.inject.Named;
+import javax.inject.Singleton;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -36,7 +37,8 @@ import static org.commonjava.maven.ext.core.util.IdUtils.ga;
  * {@link Manipulator} implementation remove profile(s) from the project's pom file. Configuration is stored in a
  * {@link ProfileRemovalState} instance, which is in turn stored in the {@link ManipulationSession}.
  */
-@Component( role = Manipulator.class, hint = "profile-removal" )
+@Named("profile-removal")
+@Singleton
 public class ProfileRemovalManipulator
     implements Manipulator
 {

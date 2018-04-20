@@ -46,9 +46,10 @@
     <!-- External dependencies -->
 
     <dependency>
-      <groupId>ch.qos.logback</groupId>
-      <artifactId>logback-classic</artifactId>
+      <groupId>javax.inject</groupId>
+      <artifactId>javax.inject</artifactId>
     </dependency>
+
     <dependency>
       <groupId>commons-io</groupId>
       <artifactId>commons-io</artifactId>
@@ -61,44 +62,32 @@
     <dependency>
       <groupId>org.apache.maven</groupId>
       <artifactId>maven-artifact</artifactId>
-      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.maven</groupId>
       <artifactId>maven-compat</artifactId>
-      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.maven</groupId>
       <artifactId>maven-core</artifactId>
-      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.maven</groupId>
       <artifactId>maven-model</artifactId>
-      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.maven</groupId>
       <artifactId>maven-model-builder</artifactId>
-      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.maven</groupId>
       <artifactId>maven-settings</artifactId>
-      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.aether</groupId>
+      <artifactId>aether-api</artifactId>
     </dependency>
 
-    <dependency>
-      <groupId>org.codehaus.plexus</groupId>
-      <artifactId>plexus-component-annotations</artifactId>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.codehaus.plexus</groupId>
-      <artifactId>plexus-interpolation</artifactId>
-      <scope>provided</scope>
-    </dependency>
     <dependency>
       <groupId>org.codehaus.plexus</groupId>
       <artifactId>plexus-utils</artifactId>
@@ -106,10 +95,14 @@
     </dependency>
 
     <dependency>
+      <groupId>org.eclipse.sisu</groupId>
+      <artifactId>org.eclipse.sisu.plexus</artifactId>
+    </dependency>
+
+    <dependency>
       <groupId>org.commonjava.maven.atlas</groupId>
       <artifactId>atlas-identities</artifactId>
     </dependency>
-
     <dependency>
       <groupId>org.commonjava.maven.galley</groupId>
       <artifactId>galley-api</artifactId>
@@ -135,16 +128,15 @@
       <groupId>org.commonjava.maven</groupId>
       <artifactId>maven3-model-jdom-support</artifactId>
     </dependency>
-
     <dependency>
       <groupId>org.jdom</groupId>
       <artifactId>jdom2</artifactId>
     </dependency>
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-api</artifactId>
-    </dependency>
 
+    <dependency>
+      <groupId>commons-logging</groupId>
+      <artifactId>commons-logging</artifactId>
+    </dependency>
     <dependency>
       <groupId>org.codehaus.groovy</groupId>
       <artifactId>groovy</artifactId>
@@ -157,20 +149,38 @@
       <groupId>org.codehaus.groovy</groupId>
       <artifactId>groovy-xml</artifactId>
     </dependency>
+
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+      <scope>provided</scope>
+    </dependency>
   </dependencies>
 
 
   <build>
     <plugins>
       <plugin>
-        <groupId>org.codehaus.plexus</groupId>
-        <artifactId>plexus-component-metadata</artifactId>
+        <groupId>org.eclipse.sisu</groupId>
+        <artifactId>sisu-maven-plugin</artifactId>
         <executions>
           <execution>
-            <goals>
-              <goal>generate-metadata</goal>
-            </goals>
+            <id>generate-index</id>
+            <phase>not-used</phase>
+          </execution>
+          <execution>
+            <id>index-dependencies</id>
             <phase>prepare-package</phase>
+            <goals>
+              <goal>index</goal>
+            </goals>
+            <configuration>
+              <artifactSet>
+                <includes>
+                  <include>org.commonjava.*:*</include>
+                </includes>
+              </artifactSet>
+            </configuration>
           </execution>
         </executions>
       </plugin>
@@ -188,8 +198,9 @@
               <artifactSet>
                 <includes>
                   <include>org.commonjava.*:*</include>
+                  <include>javax.inject:*</include>
+                  <include>org.eclipse.*:*</include>
 
-                  <include>ch.qos.logback:*</include>
                   <include>com.fasterxml.jackson.core:*</include>
                   <include>com.jayway.jsonpath:json-path</include>
                   <include>com.mashape.unirest:unirest-java</include>
@@ -197,32 +208,23 @@
                   <include>commons-io:commons-io</include>
                   <include>commons-jxpath:commons-jxpath</include>
                   <include>commons-lang:commons-lang</include>
+                  <include>commons-logging:commons-logging</include>
                   <include>net.minidev:*</include>
                   <include>org.apache.httpcomponents:*</include>
                   <include>org.codehaus.groovy:groovy-json</include>
                   <include>org.codehaus.groovy:groovy-xml</include>
                   <include>org.codehaus.groovy:groovy</include>
-                  <include>org.codehaus.plexus:plexus-interpolation</include>
                   <include>org.jdom:jdom2</include>
                   <include>org.jsoup:jsoup</include>
                   <include>org.ow2.asm:asm</include>
-                  <include>org.slf4j:*</include>
                   <include>org.yaml:snakeyaml</include>
                 </includes>
               </artifactSet>
-              <relocations>
-                <relocation>
-                  <pattern>org.slf4j</pattern>
-                  <shadedPattern>org.commonjava.slf4j</shadedPattern>
-                </relocation>
-              </relocations>
-              <transformers>
-                <transformer implementation="org.apache.maven.plugins.shade.resource.ComponentsXmlResourceTransformer" />
-              </transformers>
             </configuration>
           </execution>
         </executions>
       </plugin>
+
     </plugins>
   </build>
 </project>

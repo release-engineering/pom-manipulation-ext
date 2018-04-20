@@ -15,7 +15,6 @@
  */
 package org.commonjava.maven.ext.common.util;
 
-import org.apache.maven.model.Profile;
 import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.common.model.Project;
 import org.commonjava.maven.ext.common.session.MavenSessionHandler;
@@ -50,10 +49,8 @@ public final class PropertyResolver
     {
         final Properties result = new Properties();
 
-        for ( Profile pr : ProfileUtils.getProfiles( session, p.getModel() ) )
-        {
-            result.putAll( pr.getProperties() );
-        }
+        ProfileUtils.getProfiles( session, p.getModel() ).forEach( pr -> result.putAll( pr.getProperties() ) );
+
         return result;
     }
 

@@ -192,6 +192,9 @@ public class TestUtils
         logger.info( "Invoking CLI with {} ", arguments );
         int result = new Cli().run( arguments.toArray( new String[arguments.size()] ) );
 
+        // Close unirest client down to prevent any hanging.
+        // Unirest.shutdown();
+
         // This is a bit of a hack. The CLI, if log-to-file is enabled resets the logging. As we don't fork and run
         // in the same process this means we need to reset it back again. The benefit of not forking is a simpler test
         // harness and it saves time when running the tests.
@@ -349,6 +352,7 @@ public class TestUtils
 
         stdout.close();
         stderr.close();
+        out.flush();
         out.close();
 
         return proc.waitFor();

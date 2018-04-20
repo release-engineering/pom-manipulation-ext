@@ -16,7 +16,6 @@
 package org.commonjava.maven.ext.io;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang.reflect.FieldUtils;
 import org.commonjava.maven.ext.io.resolver.GalleyInfrastructure;
 import org.commonjava.maven.ext.io.rest.handler.StaticResourceHandler;
 import org.commonjava.maven.ext.io.rest.rule.MockServer;
@@ -40,9 +39,7 @@ public class FileIOTest
     @Rule
     public MockServer mockServer = new MockServer( staticFile );
 
-    private FileIO fileIO = new FileIO();
-
-    private GalleyInfrastructure galleyInfra;
+    private FileIO fileIO;
 
     @Before
     public void before()
@@ -51,7 +48,7 @@ public class FileIOTest
         File res = folder.newFolder();
         GalleyInfrastructure galleyInfra = new GalleyInfrastructure
                         ( null, null, null, null, null, null, null, null, res );
-        FieldUtils.writeField( fileIO, "infra", galleyInfra, true );
+        fileIO = new FileIO( galleyInfra );
    }
 
     @Test

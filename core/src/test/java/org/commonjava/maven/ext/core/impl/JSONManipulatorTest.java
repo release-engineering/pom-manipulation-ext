@@ -27,12 +27,9 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Properties;
 
@@ -41,9 +38,7 @@ import static org.junit.Assert.assertTrue;
 
 public class JSONManipulatorTest
 {
-    private final Logger logger = LoggerFactory.getLogger( getClass() );
-
-    private JSONManipulator jsonManipulator = new JSONManipulator();
+    private JSONManipulator jsonManipulator = new JSONManipulator(new JSONIO());
     private File npmFile;
     private File pluginFile;
 
@@ -51,7 +46,7 @@ public class JSONManipulatorTest
     public TemporaryFolder tf = new TemporaryFolder(  );
 
     @Before
-    public void setup() throws IOException, IllegalAccessException, URISyntaxException
+    public void setup() throws IOException, IllegalAccessException
     {
         FieldUtils.writeField(jsonManipulator, "jsonIO", new JSONIO(), true);
 
@@ -109,7 +104,6 @@ public class JSONManipulatorTest
         Properties p = new Properties();
         p.put ("jsonUpdate",
                "amg-plugin-registry.json:$xpath-with\\:and\\,:replace with space and \\,\\:controlling\\:access_to_resources_outside_of_an_originating_domain\\,and_to_this_domain.");
-
 
         JSONState js = new JSONState( p );
     }

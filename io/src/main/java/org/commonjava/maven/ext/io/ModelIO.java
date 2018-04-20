@@ -20,8 +20,6 @@ import org.apache.maven.model.Model;
 import org.apache.maven.model.Plugin;
 import org.apache.maven.model.PluginExecution;
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
-import org.codehaus.plexus.component.annotations.Component;
-import org.codehaus.plexus.component.annotations.Requirement;
 import org.codehaus.plexus.util.xml.Xpp3Dom;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 import org.commonjava.maven.atlas.ident.ref.ArtifactRef;
@@ -39,6 +37,9 @@ import org.commonjava.maven.galley.model.Transfer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.inject.Singleton;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -58,7 +59,8 @@ import static org.apache.commons.lang.StringUtils.isNotEmpty;
 /**
  * Class to resolve artifact descriptors (pom files) from a maven repository
  */
-@Component( role = ModelIO.class )
+@Named
+@Singleton
 public class ModelIO
 {
     private enum PluginType
@@ -82,9 +84,13 @@ public class ModelIO
 
     private final Logger logger = LoggerFactory.getLogger( getClass() );
 
-    @Requirement
     private GalleyAPIWrapper galleyWrapper;
 
+    @Inject
+    public ModelIO(GalleyAPIWrapper galleyWrapper)
+    {
+        this.galleyWrapper = galleyWrapper;
+    }
 
     /**
      * Read the raw model (equivalent to the pom file on disk) from a given GAV.

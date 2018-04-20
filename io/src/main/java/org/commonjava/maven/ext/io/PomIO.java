@@ -23,7 +23,6 @@ import org.apache.maven.model.io.jdom.MavenJDOMWriter;
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 import org.apache.maven.model.io.xpp3.MavenXpp3Writer;
 import org.apache.maven.project.MavenProject;
-import org.codehaus.plexus.component.annotations.Component;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.ext.common.ManipulationException;
@@ -40,6 +39,8 @@ import org.jdom2.output.LineSeparator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.inject.Named;
+import javax.inject.Singleton;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -62,7 +63,8 @@ import static org.apache.commons.io.IOUtils.closeQuietly;
  *
  * @author jdcasey
  */
-@Component( role = PomIO.class )
+@Named
+@Singleton
 public class PomIO
 {
     private static final String MODIFIED_BY = "Modified by POM Manipulation Extension for Maven";

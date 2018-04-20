@@ -20,7 +20,6 @@ import org.commonjava.maven.atlas.ident.ref.ProjectRef;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.TreeMap;
 
@@ -134,10 +133,9 @@ public class WildcardMap<T>
         }
         else
         {
-            Iterator i = vMap.keySet().iterator();
-            while (i.hasNext())
+            for ( Object o : vMap.keySet() )
             {
-                if (i.next().equals(WILDCARD))
+                if ( o.equals( WILDCARD ) )
                 {
                     wildcard = true;
                 }

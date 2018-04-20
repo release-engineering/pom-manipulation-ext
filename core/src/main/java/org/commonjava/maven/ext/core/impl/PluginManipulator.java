@@ -22,8 +22,6 @@ import org.apache.maven.model.Plugin;
 import org.apache.maven.model.PluginExecution;
 import org.apache.maven.model.PluginManagement;
 import org.apache.maven.model.Profile;
-import org.codehaus.plexus.component.annotations.Component;
-import org.codehaus.plexus.component.annotations.Requirement;
 import org.codehaus.plexus.util.xml.Xpp3Dom;
 import org.codehaus.plexus.util.xml.Xpp3DomUtils;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
@@ -40,6 +38,9 @@ import org.commonjava.maven.ext.io.ModelIO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.inject.Singleton;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -57,7 +58,8 @@ import static org.commonjava.maven.ext.core.util.IdUtils.ga;
  * {@link Manipulator} implementation that can alter plugin sections in a project's pom file.
  * Configuration is stored in a {@link PluginState} instance, which is in turn stored in the {@link ManipulationSession}.
  */
-@Component( role = Manipulator.class, hint = "plugin-manipulator" )
+@Named("plugin-manipulator")
+@Singleton
 public class PluginManipulator
     implements Manipulator
 {
@@ -91,13 +93,18 @@ public class PluginManipulator
 
     private final Logger logger = LoggerFactory.getLogger( getClass() );
 
-    @Requirement
     private ModelIO effectiveModelBuilder;
 
     /**
      * Used to store mappings of old property to new version.
      */
     private final Map<Project,Map<String, String>> versionPropertyUpdateMap = new LinkedHashMap<>();
+
+    @Inject
+    public PluginManipulator(ModelIO effectiveModelBuilder)
+    {
+        this.effectiveModelBuilder = effectiveModelBuilder;
+    }
 
     /**
      * Initialize the {@link PluginState} state holder in the {@link ManipulationSession}. This state holder detects

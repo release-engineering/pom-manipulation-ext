@@ -18,7 +18,6 @@ package org.commonjava.maven.ext.common.model;
 
 import org.apache.maven.model.Model;
 import org.commonjava.maven.ext.common.ManipulationException;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import static org.junit.Assert.assertFalse;

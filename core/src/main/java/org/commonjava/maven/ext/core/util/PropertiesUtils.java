@@ -347,11 +347,7 @@ public final class PropertiesUtils
                     throws ManipulationException
     {
         boolean result = false;
-        Map<String,String> projectProps = versionPropertyUpdateMap.get( project );
-        if ( projectProps == null )
-        {
-            versionPropertyUpdateMap.put ( project, ( projectProps = new HashMap<>( ) ) );
-        }
+        Map<String, String> projectProps = versionPropertyUpdateMap.computeIfAbsent( project, k -> new HashMap<>() );
 
         if ( oldVersion != null && oldVersion.contains( "${" ) )
         {

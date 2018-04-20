@@ -25,8 +25,6 @@ import com.fasterxml.jackson.databind.introspect.VisibilityChecker;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.project.ProjectBuilder;
-import org.codehaus.plexus.component.annotations.Component;
-import org.codehaus.plexus.component.annotations.Requirement;
 import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.common.model.GAV;
 import org.commonjava.maven.ext.common.model.Project;
@@ -40,6 +38,9 @@ import org.commonjava.maven.ext.io.resolver.ExtensionInfrastructure;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.inject.Singleton;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -63,7 +64,8 @@ import java.util.Set;
  * 
  * @author jdcasey
  */
-@Component( role = ManipulationManager.class )
+@Named
+@Singleton
 public class ManipulationManager
 {
     private static final String MARKER_PATH = "target";
@@ -74,17 +76,23 @@ public class ManipulationManager
 
     private final Logger logger = LoggerFactory.getLogger( getClass() );
 
-    @Requirement
-    private ProjectBuilder projectBuilder;
+    private final ProjectBuilder projectBuilder;
 
-    @Requirement( role = Manipulator.class )
     private Map<String, Manipulator> manipulators;
 
-    @Requirement( role = ExtensionInfrastructure.class )
     private Map<String, ExtensionInfrastructure> infrastructure;
 
-    @Requirement
-    private PomIO pomIO;
+    private final PomIO pomIO;
+
+    @Inject
+    public ManipulationManager( ProjectBuilder projectBuilder, Map<String, Manipulator> manipulators,
+                                Map<String, ExtensionInfrastructure> infrastructure, PomIO pomIO)
+    {
+        this.projectBuilder = projectBuilder;
+        this.manipulators = manipulators;
+        this.infrastructure = infrastructure;
+        this.pomIO = pomIO;
+    }
 
     /**
      * Determined from {@link Manipulator#getExecutionIndex()} comparisons during {@link #init(ManipulationSession)}.
@@ -113,7 +121,7 @@ public class ManipulationManager
         // The RESTState depends upon the VersionState being initialised. Therefore initialise in reverse order
         // and do a final sort to run in the correct order. See the Manipulator interface for detailed discussion
         // on ordered.
-        Collections.sort( orderedManipulators, Collections.reverseOrder( new ManipulatorPriorityComparator() ) );
+        orderedManipulators.sort( Collections.reverseOrder( new ManipulatorPriorityComparator() ) );
 
         for ( final Manipulator manipulator : orderedManipulators )
         {
@@ -121,7 +129,7 @@ public class ManipulationManager
                                                                    .getSimpleName() );
             manipulator.init( session );
         }
-        Collections.sort( orderedManipulators, new ManipulatorPriorityComparator() );
+        orderedManipulators.sort( new ManipulatorPriorityComparator() );
 
         // Now init the common state
         session.setState( new CommonState( session.getUserProperties()) );
@@ -233,10 +241,9 @@ public class ManipulationManager
      * Keys with empty values are excluded.
      *
      * @param session the container session for manipulation.
-     * @throws ManipulationException if an error occurs.
      */
     private String collectResults( final ManipulationSession session )
-                    throws ManipulationException, JsonProcessingException
+                    throws JsonProcessingException
     {
         final ObjectMapper MAPPER = new ObjectMapper();
         VisibilityChecker<?> vc = MAPPER.getSerializationConfig()

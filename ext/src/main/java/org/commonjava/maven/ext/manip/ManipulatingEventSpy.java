@@ -15,13 +15,9 @@
  */
 package org.commonjava.maven.ext.manip;
 
-import ch.qos.logback.classic.Level;
 import org.apache.maven.eventspy.AbstractEventSpy;
-import org.apache.maven.eventspy.EventSpy;
 import org.apache.maven.execution.ExecutionEvent;
 import org.apache.maven.execution.ExecutionEvent.Type;
-import org.codehaus.plexus.component.annotations.Component;
-import org.codehaus.plexus.component.annotations.Requirement;
 import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.core.ManipulationManager;
 import org.commonjava.maven.ext.core.ManipulationSession;
@@ -29,6 +25,9 @@ import org.commonjava.maven.ext.io.ConfigIO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.inject.Singleton;
 import java.io.File;
 import java.util.Properties;
 
@@ -38,30 +37,34 @@ import static org.apache.commons.lang.StringUtils.isNotEmpty;
  * Implements hooks necessary to apply modifications in the Maven bootstrap, before the build starts.
  * @author jdcasey
  */
-@Component( role = EventSpy.class, hint = "manipulation" )
+@Named
+@Singleton
 public class ManipulatingEventSpy
-    extends AbstractEventSpy
+     extends AbstractEventSpy
 {
-
     private static final String REQUIRE_EXTENSION = "manipulation.required";
 
     private final Logger logger = LoggerFactory.getLogger( getClass() );
 
-    @Requirement
     private ManipulationManager manipulationManager;
 
-    @Requirement
     private ManipulationSession session;
 
-    @Requirement
     private ConfigIO configIO;
+
+    @Inject
+    public ManipulatingEventSpy(ManipulationManager manipulationManager, ManipulationSession session, ConfigIO configIO)
+    {
+        this.manipulationManager = manipulationManager;
+        this.session = session;
+        this.configIO = configIO;
+    }
 
     @Override
     public void onEvent( final Object event )
         throws Exception
     {
         boolean required = false;
-
         try
         {
             if ( event instanceof ExecutionEvent )
@@ -78,13 +81,6 @@ public class ManipulatingEventSpy
                 {
                     if ( ee.getSession() != null )
                     {
-                        if ( ee.getSession().getRequest().getLoggingLevel() == 0 )
-                        {
-                            final ch.qos.logback.classic.Logger root =
-                                            (ch.qos.logback.classic.Logger) LoggerFactory.getLogger( org.slf4j.Logger.ROOT_LOGGER_NAME );
-                            root.setLevel( Level.DEBUG );
-                        }
-
                         session.setMavenSession( ee.getSession() );
 
                         if ( ee.getSession().getRequest().getPom() != null )

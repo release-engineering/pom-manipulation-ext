@@ -19,7 +19,6 @@ import org.apache.maven.model.Dependency;
 import org.apache.maven.model.DependencyManagement;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Profile;
-import org.codehaus.plexus.component.annotations.Component;
 import org.commonjava.maven.atlas.ident.ref.ArtifactRef;
 import org.commonjava.maven.atlas.ident.ref.ProjectRef;
 import org.commonjava.maven.ext.common.ManipulationException;
@@ -31,6 +30,8 @@ import org.commonjava.maven.ext.core.state.State;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.inject.Named;
+import javax.inject.Singleton;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -43,7 +44,8 @@ import static org.commonjava.maven.ext.core.util.IdUtils.ga;
  * {@link Manipulator} implementation that can remove specified plugins from a project's pom file.
  * Configuration is stored in a {@link DependencyState} instance, which is in turn stored in the {@link ManipulationSession}.
  */
-@Component( role = Manipulator.class, hint = "dependency-removal-manipulator" )
+@Named("dependency-removal-manipulator")
+@Singleton
 public class DependencyRemovalManipulator
         implements Manipulator
 {

@@ -17,8 +17,6 @@ package org.commonjava.maven.ext.core.impl;
 
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Repository;
-import org.codehaus.plexus.component.annotations.Component;
-import org.codehaus.plexus.component.annotations.Requirement;
 import org.commonjava.maven.atlas.ident.ref.ProjectRef;
 import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.common.model.Project;
@@ -28,6 +26,9 @@ import org.commonjava.maven.ext.io.ModelIO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.inject.Singleton;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -41,16 +42,22 @@ import static org.commonjava.maven.ext.core.util.IdUtils.ga;
  * repository(s) into the current project's top level pom file. Configuration is stored in a
  * {@link RepositoryInjectionState} instance, which is in turn stored in the {@link ManipulationSession}.
  */
-@Component( role = Manipulator.class, hint = "repository-injection" )
+@Named("repository-injection")
+@Singleton
 public class RepositoryInjectionManipulator
         implements Manipulator
 {
     private final Logger logger = LoggerFactory.getLogger( getClass() );
 
-    @Requirement
     private ModelIO modelBuilder;
 
     private ManipulationSession session;
+
+    @Inject
+    public RepositoryInjectionManipulator(ModelIO modelBuilder)
+    {
+        this.modelBuilder = modelBuilder;
+    }
 
     /**
      * Initialize the {@link RepositoryInjectionState} state holder in the {@link ManipulationSession}. This state holder detects

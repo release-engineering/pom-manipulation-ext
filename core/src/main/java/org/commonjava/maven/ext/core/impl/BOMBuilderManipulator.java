@@ -21,8 +21,6 @@ import org.apache.maven.model.DependencyManagement;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Plugin;
 import org.apache.maven.model.PluginExecution;
-import org.codehaus.plexus.component.annotations.Component;
-import org.codehaus.plexus.component.annotations.Requirement;
 import org.codehaus.plexus.util.xml.Xpp3Dom;
 import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.common.model.Project;
@@ -32,6 +30,9 @@ import org.commonjava.maven.ext.io.PomIO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.inject.Singleton;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -46,7 +47,8 @@ import static org.commonjava.maven.ext.core.util.IdUtils.ga;
  * Simple manipulator that will look for all module artifacts and construct a BOM that is deployed with the root artifact. It has a predictable naming
  * scheme making it useful in automated scenarios. Configuration is documented in {@link BOMInjectingState}.
  */
-@Component( role = Manipulator.class, hint = "bom-builder" )
+@Named("bom-builder")
+@Singleton
 public class BOMBuilderManipulator
     implements Manipulator
 {
@@ -62,10 +64,15 @@ public class BOMBuilderManipulator
 
     private final Logger logger = LoggerFactory.getLogger( getClass() );
 
-    @Requirement
     private PomIO pomIO;
 
     private ManipulationSession session;
+
+    @Inject
+    public BOMBuilderManipulator(PomIO pomIO)
+    {
+        this.pomIO = pomIO;
+    }
 
     @Override
     public void init( final ManipulationSession session )

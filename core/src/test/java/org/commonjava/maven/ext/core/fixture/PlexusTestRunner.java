@@ -18,15 +18,14 @@ package org.commonjava.maven.ext.core.fixture;
 import org.codehaus.plexus.DefaultContainerConfiguration;
 import org.codehaus.plexus.DefaultPlexusContainer;
 import org.codehaus.plexus.PlexusConstants;
+import org.eclipse.sisu.plexus.PlexusAnnotatedBeanModule;
+import org.eclipse.sisu.plexus.PlexusBeanModule;
+import org.eclipse.sisu.space.ClassSpace;
+import org.eclipse.sisu.space.URLClassSpace;
 import org.junit.runners.BlockJUnit4ClassRunner;
 import org.junit.runners.model.InitializationError;
 import org.junit.runners.model.TestClass;
-import org.sonatype.guice.bean.reflect.ClassSpace;
-import org.sonatype.guice.bean.reflect.URLClassSpace;
-import org.sonatype.guice.plexus.binders.PlexusAnnotatedBeanModule;
-import org.sonatype.guice.plexus.config.PlexusBeanModule;
 
-import java.util.Arrays;
 import java.util.Collections;
 
 public class PlexusTestRunner
@@ -47,20 +46,16 @@ public class PlexusTestRunner
 
         final DefaultContainerConfiguration config = new DefaultContainerConfiguration();
 
-        config.setAutoWiring( true );
+        // TODO: Set implicitly by below??? : config.setAutoWiring( true );
         config.setClassPathScanning( PlexusConstants.SCANNING_ON );
         config.setComponentVisibility( PlexusConstants.GLOBAL_VISIBILITY );
         config.setName( testClass.getName() );
 
         final DefaultPlexusContainer container = new DefaultPlexusContainer( config );
-        final ClassSpace cs = new URLClassSpace( Thread.currentThread()
-                                                       .getContextClassLoader() );
+        final ClassSpace cs = new URLClassSpace( Thread.currentThread().getContextClassLoader() );
 
-        container.addPlexusInjector( Arrays.<PlexusBeanModule> asList( new PlexusAnnotatedBeanModule(
-                                                                                                      cs,
-                                                                                                      Collections.emptyMap() ) ) );
+        container.addPlexusInjector( Collections.<PlexusBeanModule>singletonList( new PlexusAnnotatedBeanModule( cs, Collections.emptyMap() ) ) );
 
         return container.lookup( testClass.getJavaClass() );
     }
-
 }

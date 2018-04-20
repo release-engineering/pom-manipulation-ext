@@ -16,13 +16,14 @@
 package org.commonjava.maven.ext.io;
 
 import org.apache.commons.io.FileUtils;
-import org.codehaus.plexus.component.annotations.Component;
 import org.commonjava.maven.ext.common.ManipulationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
+import javax.inject.Named;
+import javax.inject.Singleton;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -37,7 +38,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.StringWriter;
 
-@Component( role = XMLIO.class )
+@Named
+@Singleton
 public class XMLIO
 {
     private final Logger logger = LoggerFactory.getLogger( getClass() );
