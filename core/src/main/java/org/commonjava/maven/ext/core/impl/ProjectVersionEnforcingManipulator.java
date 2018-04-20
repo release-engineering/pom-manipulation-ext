@@ -19,7 +19,6 @@ import org.apache.maven.model.Dependency;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Profile;
 import org.codehaus.plexus.component.annotations.Component;
-import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.common.model.Project;
 import org.commonjava.maven.ext.common.util.ProfileUtils;
 import org.commonjava.maven.ext.core.ManipulationSession;
@@ -69,7 +68,6 @@ public class ProjectVersionEnforcingManipulator
     */
     @Override
     public Set<Project> applyChanges( final List<Project> projects )
-        throws ManipulationException
     {
         final ProjectVersionEnforcingState state = session.getState( ProjectVersionEnforcingState.class );
         if ( !session.isEnabled() ||
@@ -119,19 +117,13 @@ public class ProjectVersionEnforcingManipulator
 
     private void enforceProjectVersion( final Project project, final List<Dependency> dependencies, final Set<Project> changed )
     {
-        for ( final Dependency d : dependencies)
-        {
-            if ( d.getVersion() != null && d.getVersion().contains( PROJVER ) )
-            {
-                String newVersion =  project.getModel().getVersion() == null ?
-                                project.getModel().getParent ().getVersion () : project.getModel().getVersion ();
+        String newVersion = project.getVersion();
 
-                logger.debug( "Replacing project.version within {} for project {} with {}", d, project, newVersion);
-
-                d.setVersion( newVersion );
-                changed.add( project );
-            }
-        }
+        dependencies.stream().filter( d-> PROJVER.equals( d.getVersion() ) ).forEach( d -> {
+            logger.debug( "Replacing project.version within {} for project {} with {}", d, project, newVersion );
+            d.setVersion( newVersion );
+            changed.add( project );
+        } );
     }
 
     @Override

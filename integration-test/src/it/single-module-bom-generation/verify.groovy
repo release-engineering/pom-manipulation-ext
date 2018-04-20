@@ -57,6 +57,11 @@ assert repopomslurped.artifactId.text().endsWith ("${am}")
 assert repopomslurped.groupId.text().endsWith ("${gm}")
 assert repopom.text.contains ("PME Generated BOM")
 
+def dependency = repopomslurped.dependencyManagement.dependencies.dependency.find { it.artifactId.text() == "single-module-bom-generation" }
+assert dependency != null
+assert dependency.version.text() == "1.0.0.redhat-1"
+assert repopomslurped
+
 def bomdeploy = new File('@localRepositoryUrl@', "../local-deploy/${gm.replace('.', '/')}/pme-bom/${vm}/${am}-${v}.pom" )
 System.out.println( "Checking for deployed bom: ${bomdeploy}")
 assert bomdeploy.exists()

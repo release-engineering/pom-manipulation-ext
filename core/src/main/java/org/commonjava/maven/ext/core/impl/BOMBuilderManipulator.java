@@ -28,7 +28,6 @@ import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.common.model.Project;
 import org.commonjava.maven.ext.core.ManipulationSession;
 import org.commonjava.maven.ext.core.state.BOMInjectingState;
-import org.commonjava.maven.ext.core.util.IdUtils;
 import org.commonjava.maven.ext.io.PomIO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -70,7 +69,6 @@ public class BOMBuilderManipulator
 
     @Override
     public void init( final ManipulationSession session )
-        throws ManipulationException
     {
         this.session = session;
         session.setState( new BOMInjectingState( session.getUserProperties() ) );
@@ -169,13 +167,12 @@ public class BOMBuilderManipulator
 
     private Model createModel( Project project, String s )
     {
-       final Model model = project.getModel();
        final Model newModel = new Model();
         newModel.setModelVersion( project.getModel().getModelVersion() );
 
-        newModel.setGroupId( IdUtils.g( model ) + '.' + model.getArtifactId() );
+        newModel.setGroupId( project.getGroupId() + '.' + project.getArtifactId() );
         newModel.setArtifactId( s );
-        newModel.setVersion( model.getVersion() );
+        newModel.setVersion( project.getVersion() );
         newModel.setPackaging( "pom" );
 
         return newModel;
@@ -193,7 +190,6 @@ public class BOMBuilderManipulator
             d.setArtifactId( p.getArtifactId() );
             d.setVersion( p.getVersion() );
             d.setType( p.getModel().getPackaging() );
-
             results.add( d );
         }
         return results;

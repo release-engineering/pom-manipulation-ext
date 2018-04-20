@@ -42,7 +42,6 @@ import java.util.Map;
 import java.util.Set;
 
 import static org.apache.commons.lang.StringUtils.isEmpty;
-import static org.commonjava.maven.ext.core.util.IdUtils.gav;
 
 /**
  * {@link Manipulator} implementation that can modify a project's version with either static or calculated, incremental version qualifier. Snapshot
@@ -146,28 +145,13 @@ public class ProjectVersioningManipulator
             return false;
         }
 
+        // Model should never be null.
         final Model model = project.getModel();
-        if ( model == null )
-        {
-            return false;
-        }
-
-        String g = model.getGroupId();
-        String v = model.getVersion();
         final Parent parent = model.getParent();
+        final Map<ProjectVersionRef, String> versionsByGAV = state.getVersionsByGAVMap();
 
-        // If the groupId or version is null, it means they must be taken from the parent config
-        if ( g == null && parent != null )
-        {
-            g = parent.getGroupId();
-        }
-        if ( v == null && parent != null )
-        {
-            v = parent.getVersion();
-        }
-
+        ProjectVersionRef gav = project.getKey();
         boolean changed = false;
-        Map<ProjectVersionRef, String> versionsByGAV = state.getVersionsByGAVMap();
 
         // If the parent version is defined, it might be necessary to change it
         // If the parent version is not defined, it will be taken automatically from the project version
@@ -195,12 +179,12 @@ public class ProjectVersioningManipulator
             }
         }
 
-        ProjectVersionRef gav = new SimpleProjectVersionRef( g, model.getArtifactId(), v );
+        // Not using project.getVersion as that can return the inherited parent version
         if ( model.getVersion() != null )
         {
             final String newVersion = versionsByGAV.get( gav );
             logger.info( "Looking for new version: " + gav + " (found: " + newVersion + ")" );
-            if ( newVersion != null && model.getVersion() != null )
+            if ( newVersion != null )
             {
                 if (gav.getVersionString().startsWith( "${" ))
                 {
@@ -213,14 +197,14 @@ public class ProjectVersioningManipulator
                 {
                     model.setVersion( newVersion );
                 }
-                logger.info( "Changed main version in " + gav( model ) );
+                logger.info( "Changed main version in " + project );
                 changed = true;
             }
         }
         // If we are at the inheritance root and there is no explicit version instead
         // inheriting the version from the parent BUT the parent is not in this project
         // force inject the new version.
-        else if ( changed == false && model.getVersion() == null && project.isInheritanceRoot())
+        else if ( !changed && project.isInheritanceRoot() )
         {
             final String newVersion = versionsByGAV.get( gav );
             logger.info( "Looking to force inject new version for : " + gav + " (found: " + newVersion + ")" );

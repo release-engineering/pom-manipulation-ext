@@ -279,6 +279,8 @@
                   </goals>
                   <localRepositoryPath>${localRepositoryUrlExt}</localRepositoryPath>
                   <mavenHome>${it.maven.home}</mavenHome>
+                  <!-- Maven 3.0.0 changed defaults for cloneProjectsTo. Fixed in 3.0.2 -->
+                  <cloneProjectsTo></cloneProjectsTo>
                   <setupIncludes>
                     <setupInclude>setup/*/pom.xml</setupInclude>
                   </setupIncludes>

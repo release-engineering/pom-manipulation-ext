@@ -188,8 +188,7 @@ public class PomIO
         {
             if ( project.isExecutionRoot() )
             {
-                // Don't use project.getKey() as we want the updated model key.
-                result = new GAV( Project.modelKey( project.getModel() ) );
+                result = new GAV( project.getKey() );
             }
             logger.debug( String.format( "%s modified! Rewriting.", project ) );
             File pom = project.getPom();

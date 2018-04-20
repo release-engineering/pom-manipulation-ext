@@ -725,12 +725,11 @@ public class DependencyManipulator implements Manipulator
      * @return A new Map with the reactor GAs removed.
      */
     private Map<ArtifactRef, String> removeReactorGAs( final Map<ArtifactRef, String> versionOverrides )
-                    throws ManipulationException
     {
         final Map<ArtifactRef, String> reducedVersionOverrides = new LinkedHashMap<>( versionOverrides );
         for ( final Project project : session.getProjects() )
         {
-            reducedVersionOverrides.remove( SimpleArtifactRef.parse( gav( project.getModel() ) ) );
+            reducedVersionOverrides.remove( new SimpleArtifactRef( project.getGroupId(), project.getArtifactId(), project.getVersion(), "pom", null ) );
         }
         return reducedVersionOverrides;
     }

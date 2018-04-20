@@ -23,7 +23,6 @@ import org.commonjava.maven.atlas.ident.ref.ProjectRef;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleProjectRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef;
-import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.common.model.Project;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -119,16 +118,6 @@ public final class IdUtils
         return String.format( "%s:%s:%s", project.getGroupId(), project.getArtifactId(), project.getVersion() );
     }
 
-    public static String gav( final Model model ) throws ManipulationException
-    {
-        return Project.modelKey( model ).toString();
-    }
-
-    public static String ga( final Model model )
-    {
-        return ga( g( model ), model.getArtifactId() );
-    }
-
     public static String ga( final MavenProject project )
     {
         return ga( project.getGroupId(), project.getArtifactId() );
@@ -152,20 +141,5 @@ public final class IdUtils
     public static String gav( final String g, final String a, final String v )
     {
         return String.format( "%s:%s:%s", g, a, v );
-    }
-
-    public static String g( final Model model )
-    {
-        String g = model.getGroupId();
-
-        final Parent p = model.getParent();
-        if ( p != null )
-        {
-            if ( g == null )
-            {
-                g = p.getGroupId();
-            }
-        }
-        return g;
     }
 }

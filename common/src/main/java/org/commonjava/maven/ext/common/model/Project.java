@@ -28,6 +28,7 @@ import org.commonjava.maven.atlas.ident.ref.ArtifactRef;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleArtifactRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef;
+import org.commonjava.maven.atlas.ident.util.VersionUtils;
 import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.common.session.MavenSessionHandler;
 import org.commonjava.maven.ext.common.util.ProfileUtils;
@@ -51,7 +52,7 @@ import static org.apache.commons.lang.StringUtils.isNotEmpty;
  * Provides a convenient way of passing around related information about a Maven
  * project without passing multiple parameters. The model in this class
  * represents the model that is being modified by the extension. Also stored is
- * the key and original POM file related to these models.
+ * the original POM file related to these models.
  *
  * @author jdcasey
  */
@@ -73,12 +74,6 @@ public class Project
     private final Model model;
 
     /**
-     * Read-only copy of the original ProjectVersionRef. This is not updated when
-     * the model is updated.
-     */
-    private final ProjectVersionRef key;
-
-    /**
      * Denotes if this Project represents the top level POM of a build.
      */
     private boolean inheritanceRoot;
@@ -96,23 +91,31 @@ public class Project
     private Project projectParent;
 
 
-    public Project( final ProjectVersionRef key, final File pom, final Model model )
+    public Project( final File pom, final Model model ) throws ManipulationException
     {
         this.pom = pom;
         this.model = model;
-        this.key = key;
+
+        // Validate the model.
+        if ( model == null )
+        {
+            throw new ManipulationException( "Invalid null model." );
+        }
+        else if ( model.getVersion() == null && model.getParent() == null )
+        {
+            throw new ManipulationException( "Invalid model: " + model + " Cannot find version!" );
+        }
     }
 
-    public Project( final File pom, final Model model )
-        throws ManipulationException
-    {
-        this( modelKey( model ), pom, model );
-    }
-
+    /**
+     * Create a project with only a Model. Only used by tests currently.
+     * @param model the Model to use.
+     * @throws ManipulationException if an error occurs.
+     */
     public Project( final Model model )
         throws ManipulationException
     {
-        this( modelKey( model ), model.getPomFile(), model );
+        this( model.getPomFile(), model );
     }
 
     @Override
@@ -120,7 +123,9 @@ public class Project
     {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ( ( key == null ) ? 0 : key.hashCode() );
+        result = prime * result + getArtifactId().hashCode();
+        result = prime * result + getGroupId().hashCode();
+        result = prime * result + getVersion().hashCode();
         return result;
     }
 
@@ -140,24 +145,19 @@ public class Project
             return false;
         }
         final Project other = (Project) obj;
-        if ( key == null )
-        {
-            if ( other.key != null )
-            {
-                return false;
-            }
-        }
-        else if ( !key.equals( other.key ) )
-        {
-            return false;
-        }
-        return true;
+
+        // Simply inlined ProjectVersionRef comparison here as ProjectVersionRef are created now
+        // on demand to ensure they have the current values. However we are using VersionSpec.equals
+        // in order to maintain the same semantics as ProjectVersionRef.equals.
+        return getGroupId().equals( other.getGroupId() )
+                && getArtifactId().equals( other.getArtifactId() )
+                && VersionUtils.createFromSpec( getVersion() ).equals( VersionUtils.createFromSpec( other.getVersion() ) );
     }
 
     @Override
     public String toString()
     {
-        return key + " [pom=" + pom + "]";
+        return getKey() + " [pom=" + pom + "]";
     }
 
     public File getPom()
@@ -176,7 +176,7 @@ public class Project
 
     public ProjectVersionRef getKey()
     {
-        return key;
+        return new SimpleProjectVersionRef( getGroupId(), getArtifactId(), getVersion() );
     }
 
     public Parent getModelParent()
@@ -185,27 +185,41 @@ public class Project
     }
 
     /**
-     * Returns the Project groupId. Uses the read-only ProjectVersionRef {@link #key}. Also used by Interpolator.
+     * Returns the Project groupId. Also used by Interpolator.
      */
     public String getGroupId()
     {
-        return key.getGroupId();
+        String g = model.getGroupId();
+
+        if ( g == null )
+        {
+            // Note: reliant upon model validation that the parent is not null.
+            g = model.getParent().getGroupId();
+        }
+        return g;
     }
 
     /**
-     * Returns the Project artifactId. Uses the read-only ProjectVersionRef {@link #key}. Also used by Interpolator.
+     * Returns the Project artifactId. Also used by Interpolator.
      */
     public String getArtifactId()
     {
-        return key.getArtifactId();
+        return getModel().getArtifactId();
     }
 
     /**
-     * Returns the Project version. Uses the read-only ProjectVersionRef {@link #key}. Also used by Interpolator.
+     * Returns the Project version. Also used by Interpolator.
      */
     public String getVersion()
     {
-        return key.getVersionString();
+        String v = model.getVersion();
+
+        if ( v == null )
+        {
+            // Note: reliant upon model validation that the parent is not null.
+            v = model.getParent().getVersion();
+        }
+        return v;
     }
 
     /**
@@ -682,7 +696,7 @@ public class Project
                     }
 
                     // If we have injected profiles and one of the current profiles is using
-                    // activeByDefault it will get mistakingly deactivated due to the semantics
+                    // activeByDefault it will get mistakenly deactivated due to the semantics
                     // of activeByDefault. Therefore replace the activation.
                     if ( p.getActivation() != null && p.getActivation().isActiveByDefault() )
                     {
@@ -701,34 +715,6 @@ public class Project
                 profiles.add( profile );
             }
         }
-    }
-
-    public static ProjectVersionRef modelKey( final Model model )
-                    throws ManipulationException
-    {
-        String g = model.getGroupId();
-        String v = model.getVersion();
-
-        if ( g == null || v == null )
-        {
-            final Parent p = model.getParent();
-            if ( p == null )
-            {
-                throw new ManipulationException( "Invalid model: " + model + " Cannot find groupId and/or version!" );
-            }
-
-            if ( g == null )
-            {
-                g = p.getGroupId();
-            }
-            if ( v == null )
-            {
-                v = p.getVersion();
-            }
-        }
-
-        final String a = model.getArtifactId();
-        return new SimpleProjectVersionRef( g, a, v );
     }
 }
 

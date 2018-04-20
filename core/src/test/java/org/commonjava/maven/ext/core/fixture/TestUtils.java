@@ -44,4 +44,13 @@ public class TestUtils
         }
         return new File( resource.getPath() );
     }
+
+    public static Model getDummyModel ()
+    {
+        Model result = new Model();
+        result.setGroupId( "org.commonjava.maven.ext" );
+        result.setArtifactId( "dummy-model" );
+        result.setVersion( "1.0.0-SNAPSHOT" );
+        return result;
+    }
 }
