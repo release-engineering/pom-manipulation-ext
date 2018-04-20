@@ -440,7 +440,8 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-invoker-plugin</artifactId>
-          <version>3.0.1</version>
+          <!-- Downgrade to 2.0.0 until 3.0.2 is released -->
+          <version>2.0.0</version>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>

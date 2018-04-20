@@ -19,6 +19,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.reflect.FieldUtils;
 import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.common.model.Project;
+import org.commonjava.maven.ext.core.fixture.TestUtils;
 import org.commonjava.maven.ext.core.state.JSONState;
 import org.commonjava.maven.ext.io.JSONIO;
 import org.commonjava.maven.ext.io.JSONIOTest;
@@ -72,7 +73,7 @@ public class JSONManipulatorTest
 
         File target = tf.newFile();
         FileUtils.copyFile( npmFile, target );
-        Project project = new Project( null, target, null );
+        Project project = new Project( target, TestUtils.getDummyModel() );
 
         jsonManipulator.internalApplyChanges( project, new JSONState.JSONOperation( target.getName(), modifyPath, null) );
     }
@@ -84,7 +85,7 @@ public class JSONManipulatorTest
 
         File target = tf.newFile();
         FileUtils.copyFile( pluginFile, target );
-        Project project = new Project( null, target, null );
+        Project project = new Project( target, TestUtils.getDummyModel() );
 
         jsonManipulator.internalApplyChanges( project, new JSONState.JSONOperation( target.getName(), modifyPath,
                                                                                             "https://maven.repository.redhat.com/ga/" ) );

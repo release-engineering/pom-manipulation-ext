@@ -19,6 +19,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.reflect.FieldUtils;
 import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.common.model.Project;
+import org.commonjava.maven.ext.core.fixture.TestUtils;
 import org.commonjava.maven.ext.core.state.XMLState;
 import org.commonjava.maven.ext.io.XMLIO;
 import org.commonjava.maven.ext.io.XMLIOTest;
@@ -71,7 +72,7 @@ public class XMLManipulatorTest
         File target = tf.newFile();
         FileUtils.copyFile( xmlFile, target );
 
-        Project p = new Project( null, target, null );
+        Project p = new Project( target, TestUtils.getDummyModel() );
 
         xmlManipulator.internalApplyChanges( p, new XMLState.XMLOperation( target.getName(), path, null) );
     }
@@ -85,7 +86,7 @@ public class XMLManipulatorTest
 
         File target = tf.newFile();
         FileUtils.copyFile( xmlFile, target );
-        Project project = new Project( null, target, null );
+        Project project = new Project( target, TestUtils.getDummyModel() );
 
         xmlManipulator.internalApplyChanges( project, new XMLState.XMLOperation( target.getName(), tomcatPath, replacementGA) );
 

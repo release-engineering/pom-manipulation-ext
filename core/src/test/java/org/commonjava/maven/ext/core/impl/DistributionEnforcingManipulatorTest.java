@@ -310,7 +310,7 @@ public class DistributionEnforcingManipulatorTest
         {
             final Project project = new Project( model );
             projects.add( project );
-            manipulatedModels.put( ga( model ), model );
+            manipulatedModels.put( project.getKey().asProjectRef().toString(), model );
         }
 
         final Set<Project> changed = manipulator.applyChanges( projects );
