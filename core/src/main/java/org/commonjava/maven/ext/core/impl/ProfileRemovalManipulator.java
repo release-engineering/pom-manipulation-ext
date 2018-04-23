@@ -106,6 +106,6 @@ public class ProfileRemovalManipulator
     @Override
     public int getExecutionIndex()
     {
-        return 60;
+        return 53;
     }
 }

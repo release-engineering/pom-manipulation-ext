@@ -166,6 +166,6 @@ public class XMLManipulator
     @Override
     public int getExecutionIndex()
     {
-        return 98;
+        return 91;
     }
 }

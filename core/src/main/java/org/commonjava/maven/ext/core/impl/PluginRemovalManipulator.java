@@ -139,6 +139,6 @@ public class PluginRemovalManipulator
     @Override
     public int getExecutionIndex()
     {
-        return 55;
+        return 52;
     }
 }

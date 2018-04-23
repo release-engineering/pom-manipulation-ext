@@ -208,7 +208,7 @@ public class PluginInjectingManipulator
     @Override
     public int getExecutionIndex()
     {
-        return 65;
+        return 60;
     }
 
 }

@@ -205,7 +205,7 @@ public class BOMBuilderManipulator
     @Override
     public int getExecutionIndex()
     {
-        return 95;
+        return 80;
     }
 
 }

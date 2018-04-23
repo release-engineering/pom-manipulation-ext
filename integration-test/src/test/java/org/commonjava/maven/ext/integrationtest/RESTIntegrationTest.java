@@ -79,6 +79,13 @@ public class RESTIntegrationTest
     }
 
     @Test
+    public void testRESTVersionManipSuffixStripIncrement() throws Exception
+    {
+        String test = getDefaultTestLocation( "rest-version-manip-suffix-strip-increment" );
+        runLikeInvoker( test, mockServer.getUrl() );
+    }
+
+    @Test
     public void testRESTVersionManipBOMREST() throws Exception
     {
         String test = getDefaultTestLocation( "rest-version-manip-bomrest" );

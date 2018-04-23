@@ -23,7 +23,6 @@ import org.eclipse.jetty.server.handler.AbstractHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.BufferedReader;
@@ -45,7 +44,7 @@ public class AddSuffixJettyHandler
 {
     private static final Logger LOGGER = LoggerFactory.getLogger( AddSuffixJettyHandler.class );
 
-    public static final String DEFAULT_ENDPOINT = "/reports/lookup/gavs";
+    private static final String DEFAULT_ENDPOINT = "/reports/lookup/gavs";
 
     public static final String DEFAULT_SUFFIX = "redhat-1";
 
@@ -73,7 +72,7 @@ public class AddSuffixJettyHandler
     @Override
     public void handle( String target, Request baseRequest, HttpServletRequest request,
                                   HttpServletResponse response )
-                    throws IOException, ServletException
+                    throws IOException
     {
         LOGGER.info( "Handling with AddSuffixJettyHandler: {} {}", request.getMethod(), request.getPathInfo() );
 
@@ -123,6 +122,17 @@ public class AddSuffixJettyHandler
                     else if ( ( (String) gav.get( "artifactId" ) ).startsWith( "depMgmt2" ) )
                     {
                         bestMatchVersion = "1.0.0-" + EXTENDED_SUFFIX;
+                    }
+                    else if ( ( (String) gav.get( "artifactId" ) ).startsWith( "rest-version-manip-suffix-strip-increment" ) )
+                    {
+                        if ( version.contains( "jbossorg" ) )
+                        {
+                            bestMatchVersion = "";
+                        }
+                        else
+                        {
+                            bestMatchVersion = version + "." + EXTENDED_SUFFIX;
+                        }
                     }
                     else
                     {

@@ -74,6 +74,7 @@ public class TestUtils
         add( "rest-dependency-version-manip-profile" );
         add( "rest-version-manip-bomrest" );
         add( "rest-version-manip-only" );
+        add( "rest-version-manip-suffix-strip-increment" );
         add( "rest-version-manip-only-override" );
         add( "rest-version-manip-plugin-bomrest" );
         add( "rest-version-manip-plugin-rest" );
