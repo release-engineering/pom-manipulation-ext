@@ -157,6 +157,6 @@ public class DependencyRemovalManipulator
     @Override
     public int getExecutionIndex()
     {
-        return 55;
+        return 51;
     }
 }

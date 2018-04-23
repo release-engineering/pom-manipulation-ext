@@ -423,7 +423,7 @@ public class DistributionEnforcingManipulator
     @Override
     public int getExecutionIndex()
     {
-        return 80;
+        return 75;
     }
 
 
