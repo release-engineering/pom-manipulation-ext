@@ -61,6 +61,16 @@ The extension can detect snapshot versions and either preserve the snapshot or r
 
 This means that the SNAPSHOT suffix will be kept.
 
+### Suffix Stripping
+
+Normally the tool will manipulate the version as given within the POM. However in certain scenarios it is desired that a known suffix is stripped from the version _before_ any further manipulators (e.g. REST, Version etc) are run. To activate this pass:
+
+    -DversionSuffixStrip=
+
+This will utilise the default suffix strip configuration (in regular expression form) of `(.*)(.jbossorg-\d+)$`. To configure this to be something different simply pass e.g.:
+
+    -DversionSuffixStrip='(.*)(.MYSUFFIX)$'
+
 ### OSGi Compliance
 
 If version manipulation is enabled the extension will also attempt to format the version to be OSGi compliant. For example if the versions are:
