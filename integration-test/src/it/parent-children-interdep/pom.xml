@@ -19,11 +19,11 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>org.commonjava.maven.ext.versioning.test</groupId>
+  <groupId>org.commonjava.maven.ext.integration-test</groupId>
   <artifactId>parent-children-interdep-parent</artifactId>
   <version>1.0</version>
   <packaging>pom</packaging>
-  
+
   <modules>
     <module>child1</module>
     <module>child2</module>
@@ -35,16 +35,16 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
-  
+
   <dependencyManagement>
     <dependencies>
       <dependency>
-        <groupId>org.commonjava.maven.ext.versioning.test</groupId>
+        <groupId>org.commonjava.maven.ext.integration-test</groupId>
         <artifactId>parent-children-interdep-child1</artifactId>
         <version>1.0</version>
       </dependency>
       <dependency>
-        <groupId>org.commonjava.maven.ext.versioning.test</groupId>
+        <groupId>org.commonjava.maven.ext.integration-test</groupId>
         <artifactId>parent-children-interdep-child2</artifactId>
         <version>1.0</version>
       </dependency>

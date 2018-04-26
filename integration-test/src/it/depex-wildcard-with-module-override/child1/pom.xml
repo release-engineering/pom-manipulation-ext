@@ -18,15 +18,15 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  
+
   <parent>
-    <groupId>org.commonjava.maven.ext.versioning.test</groupId>
+    <groupId>org.commonjava.maven.ext.integration-test</groupId>
     <artifactId>depex-wildcard-with-module-override</artifactId>
     <version>1.0</version>
   </parent>
 
   <artifactId>depex-wildcard-with-module-override-child1</artifactId>
-  
+
   <dependencyManagement>
     <dependencies>
       <dependency>
