@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2012 Red Hat, Inc. (jcasey@redhat.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,7 +23,7 @@ import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 
 public class SuffixStateTest
 {

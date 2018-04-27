@@ -29,7 +29,6 @@ import static org.junit.Assert.assertTrue;
 
 public class VersionTest
 {
-
     @Test
     public void testAppendQualifierSuffix()
     {

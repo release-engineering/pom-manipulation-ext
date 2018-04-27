@@ -80,7 +80,7 @@ public class VersionCalculator
     {
         final VersioningState state = session.getState( VersioningState.class );
         final Map<ProjectVersionRef, String> versionsByGAV = new HashMap<>();
-        final Set<String> vesionsWithBuildNums = new HashSet<>();
+        final Set<String> versionsWithBuildNums = new HashSet<>();
 
         for ( final Project project : projects )
         {
@@ -96,7 +96,7 @@ public class VersionCalculator
 
             if ( Version.hasBuildNumber( modifiedVersion ) )
             {
-                vesionsWithBuildNums.add( modifiedVersion );
+                versionsWithBuildNums.add( modifiedVersion );
             }
         }
 
@@ -110,26 +110,24 @@ public class VersionCalculator
 
             // If there is only a single version there is no real need to try and find the highest matching.
             // This also fixes the problem where there is a single version and leading zeros.
-            if (vesionsWithBuildNums.size() > 1)
-            {
-                int buildNumber = findHighestMatchingBuildNumber( modifiedVersion, vesionsWithBuildNums );
+            int buildNumber = findHighestMatchingBuildNumber( modifiedVersion, versionsWithBuildNums );
 
-                // If the buildNumber is greater than zero, it means we found a match and have to
-                // set the build number to avoid version conflicts.
-                if ( buildNumber > 0 )
-                {
-                    String paddedBuildNum =
-                            StringUtils.leftPad( Integer.toString( buildNumber ), state.getIncrementalSerialSuffixPadding(), '0' );
-                    modifiedVersion = Version.setBuildNumber( modifiedVersion, paddedBuildNum );
-                }
+            // If the buildNumber is greater than zero, it means we found a match and have to
+            // set the build number to avoid version conflicts.
+            if ( buildNumber > 0 )
+            {
+                String paddedBuildNum = StringUtils.leftPad( Integer.toString( buildNumber ),
+                                                             Version.getBuildNumberPadding( state.getIncrementalSerialSuffixPadding(),
+                                                                                            versionsWithBuildNums ), '0' );
+                modifiedVersion = Version.setBuildNumber( modifiedVersion, paddedBuildNum );
             }
 
-            vesionsWithBuildNums.add( modifiedVersion );
+            versionsWithBuildNums.add( modifiedVersion );
             logger.debug( gav( project ) + " has updated version: {}. Marking for rewrite.", modifiedVersion );
 
             if ( !originalVersion.equals( modifiedVersion ) )
             {
-                versionsByGAV.put(  project.getKey(), modifiedVersion );
+                versionsByGAV.put( project.getKey(), modifiedVersion );
             }
         }
 
@@ -186,7 +184,7 @@ public class VersionCalculator
             if ( highestRemoteBuildNumPlusOne > Version.getIntegerBuildNumber( newVersion ) )
             {
                 String paddedBuildNumber = StringUtils.leftPad( Integer.toString( highestRemoteBuildNumPlusOne ),
-                        state.getIncrementalSerialSuffixPadding(), '0' );
+                                     Version.getBuildNumberPadding( state.getIncrementalSerialSuffixPadding(), versionCandidates ), '0' );
                 newVersion = Version.setBuildNumber( newVersion, paddedBuildNumber );
             }
             if ( !state.preserveSnapshot() )

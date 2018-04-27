@@ -99,6 +99,10 @@ public class Version
 
     private final static Pattern osgiPattern = Pattern.compile(OSGI_VERSION_REGEX);
 
+    private final static String PADDING = "(0*)(\\d+)$";
+
+    private final static Pattern buildPadding = Pattern.compile( PADDING );
+
     // Prevent construction.
     private Version () {}
 
@@ -110,6 +114,36 @@ public class Version
             return qualifierMatcher.group( 4 );
         }
         return EMPTY_STRING;
+    }
+
+    /**
+     * This function will examine the set of known versions and, assuming there is no forced
+     * incrementalSerialSuffixPadding override, locate the padding to apply to the new version.
+     * This allows us to maintain any existing padding transparently.
+     *
+     * @param incrementalSerialSuffixPadding if there is an explicit padding override.
+     * @param versions the candidate versions to examine.
+     * @return the amount of padding (indexed from 1) to apply.
+     */
+    public static int getBuildNumberPadding( int incrementalSerialSuffixPadding, Set<String> versions )
+    {
+        int result = incrementalSerialSuffixPadding;
+
+        // Serial padding has not been explicitly defined so determine current padding to preserve.
+        if ( result == 0 )
+        {
+            for ( String version : versions )
+            {
+                Matcher m = buildPadding.matcher( getBuildNumber( version ) );
+
+                // If we've found a match and its larger than the current match...
+                if ( m.matches() && result <= m.group( 1 ).length() )
+                {
+                    result = m.group( 1 ).length() + 1;
+                }
+            }
+        }
+        return result;
     }
 
     static String getMMM(String version)

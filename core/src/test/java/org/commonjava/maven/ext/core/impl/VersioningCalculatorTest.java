@@ -15,6 +15,7 @@
  */
 package org.commonjava.maven.ext.core.impl;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.artifact.repository.ArtifactRepositoryPolicy;
 import org.apache.maven.artifact.repository.MavenArtifactRepository;
@@ -54,11 +55,13 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Properties;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 public class VersioningCalculatorTest
 {
@@ -981,6 +984,87 @@ public class VersioningCalculatorTest
         final String result = calculate( v + os );
         assertThat( result, equalTo( "1.1" + ns ) );
     }
+
+    @Test
+    public void verifyPadding()
+                    throws Exception
+    {
+        final Properties props = new Properties();
+        setupSession( props );
+
+        int padding = Version.getBuildNumberPadding( 0, new HashSet<>( Arrays.asList( "1.2.0.GA-foo-0" ) ) );
+        assertTrue( padding == 1 );
+
+        padding = Version.getBuildNumberPadding( 0, new HashSet<>( Arrays.asList( "1.2.0.GA-foo-01" ) ) );
+        assertTrue( padding == 2 );
+
+        padding = Version.getBuildNumberPadding( 0, new HashSet<>( Arrays.asList( "1.2.0.GA-foo-101" ) ) );
+        assertTrue( padding == 1 );
+
+        padding = Version.getBuildNumberPadding( 0, new HashSet<>( Arrays.asList( "1.2.0.GA-foo-001" ) ) );
+        assertTrue( padding == 3 );
+
+        padding = Version.getBuildNumberPadding( 0, new HashSet<>( Arrays.asList( "1.2.0.GA-foo-9" ) ) );
+        assertTrue( padding == 1 );
+
+        padding = Version.getBuildNumberPadding( 0, new HashSet<>( Arrays.asList( "1.0.0.redhat-1" ) ) );
+        assertTrue( padding == 1 );
+
+        padding = Version.getBuildNumberPadding( 0, new HashSet<>( Arrays.asList( "1.0.0.Final.rebuild-01912-01" ) ) );
+        assertTrue( padding == 2 );
+    }
+
+    @Test
+    public void verifyPaddingSuffix()
+    {
+        String paddedBuildNum = StringUtils.leftPad( "1", 0, '0' );
+        System.out.println ("### got " + paddedBuildNum);
+        assertTrue( paddedBuildNum.equals( "1" ) );
+        paddedBuildNum = StringUtils.leftPad( "1", 1, '0' );
+        System.out.println ("### got " + paddedBuildNum);
+        assertTrue( paddedBuildNum.equals( "1" ) );
+        paddedBuildNum = StringUtils.leftPad( "1", 2, '0' );
+        System.out.println ("### got " + paddedBuildNum);
+        assertTrue( paddedBuildNum.equals( "01" ) );
+        paddedBuildNum = StringUtils.leftPad( "1", 3, '0' );
+        System.out.println ("### got " + paddedBuildNum);
+        assertTrue( paddedBuildNum.equals( "001" ) );
+    }
+
+    @Test
+    public void incrementExistingSerialSuffix_TwoProjects_UsingRepositoryMetadata_AvailableOnlyForOne_Padding()
+                    throws Exception
+    {
+        final String v = "1.2.0.GA";
+        final String os = "-foo-001";
+        final String ns = "foo-010";
+
+        final Model m1 = new Model();
+        m1.setGroupId( GROUP_ID );
+        m1.setArtifactId( ARTIFACT_ID );
+        m1.setVersion( v + os );
+        final Project p1 = new Project( m1 );
+
+        final String a2 = ARTIFACT_ID + "-dep";
+        final Model m2 = new Model();
+        m2.setGroupId( GROUP_ID );
+        m2.setArtifactId( a2 );
+        m2.setVersion( v + os );
+        final Project p2 = new Project( m2 );
+
+        final Properties props = new Properties();
+
+        props.setProperty( VersioningState.INCREMENT_SERIAL_SUFFIX_SYSPROP.getCurrent(), "foo" );
+        setupSession( props, "1.2.0.GA-foo-003", "1.2.0.GA-foo-002", "1.2.0.GA-foo-009" );
+
+        System.out.println ("### Calculating versioning changes for projects " + p1 + " and " + p2);
+        final Map<ProjectVersionRef, String>
+                        result = modder.calculateVersioningChanges( Arrays.asList( p1, p2 ), session );
+
+        assertThat( result.get( new SimpleProjectVersionRef( GROUP_ID, ARTIFACT_ID, v + os ) ), equalTo( v + "-" + ns ) );
+        assertThat( result.get( new SimpleProjectVersionRef( GROUP_ID, a2, v + os ) ), equalTo( v + "-" + ns ) );
+    }
+
 
     private byte[] setupMetadataVersions( final String... versions )
         throws IOException
