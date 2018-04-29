@@ -15,8 +15,8 @@
  */
 package org.commonjava.maven.ext.core.impl;
 
-import org.apache.maven.model.Model;
 import org.apache.maven.model.Profile;
+import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.common.model.Project;
 import org.commonjava.maven.ext.core.ManipulationSession;
@@ -85,18 +85,15 @@ public class ProfileInjectionManipulator
 
         final Set<Project> changed = new HashSet<>();
 
-        final Model remoteModel = modelBuilder.resolveRawModel( state.getRemoteProfileInjectionMgmt() );
-        final List<Profile> remoteProfiles = remoteModel.getProfiles();
-
-        for ( final Project project : projects )
+        for ( ProjectVersionRef p : state.getRemoteProfileInjectionMgmt() )
         {
-            if ( project.isInheritanceRoot() )
-            {
-                logger.info( "Applying changes to: {} ", ga( project ) );
-                project.updateProfiles( remoteProfiles );
-                changed.add( project );
-                break;
-            }
+            final List<Profile> remoteProfiles = modelBuilder.resolveRawModel( p ).getProfiles();
+
+            projects.stream().filter( Project::isInheritanceRoot ).forEach( project -> {
+                    logger.info( "Applying changes to: {} ", ga( project ) );
+                    project.updateProfiles( remoteProfiles );
+                    changed.add( project );
+                } );
         }
 
         return changed;

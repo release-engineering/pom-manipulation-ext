@@ -15,13 +15,13 @@
  */
 package org.commonjava.maven.ext.core.state;
 
-import org.commonjava.maven.atlas.ident.ref.InvalidRefException;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
-import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef;
 import org.commonjava.maven.ext.core.impl.ProfileInjectionManipulator;
+import org.commonjava.maven.ext.core.util.IdUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.List;
 import java.util.Properties;
 
 /**
@@ -38,26 +38,11 @@ public class ProfileInjectionState
      */
     private static final String PROFILE_INJECTION_PROPERTY = "profileInjection";
 
-    private final ProjectVersionRef profileMgmt;
+    private final List<ProjectVersionRef> profileMgmt;
 
     public ProfileInjectionState( final Properties userProps )
     {
-        final String gav = userProps.getProperty( PROFILE_INJECTION_PROPERTY );
-        ProjectVersionRef ref = null;
-        if ( gav != null && !gav.isEmpty())
-        {
-            try
-            {
-                ref = SimpleProjectVersionRef.parse( gav );
-            }
-            catch ( final InvalidRefException e )
-            {
-                logger.error( "Skipping profile injection! Got invalid profileInjection GAV: {}", gav );
-                throw e;
-            }
-        }
-
-        profileMgmt = ref;
+        profileMgmt = IdUtils.parseGAVs( userProps.getProperty( PROFILE_INJECTION_PROPERTY ) );
     }
 
     /**
@@ -69,10 +54,10 @@ public class ProfileInjectionState
     @Override
     public boolean isEnabled()
     {
-        return profileMgmt != null;
+        return profileMgmt != null && !profileMgmt.isEmpty();
     }
 
-    public ProjectVersionRef getRemoteProfileInjectionMgmt()
+    public List<ProjectVersionRef> getRemoteProfileInjectionMgmt()
     {
         return profileMgmt;
     }
