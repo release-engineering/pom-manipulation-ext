@@ -57,11 +57,11 @@ As explained above, the default is `on`.
 
 #### Profile Injection
 
-PME supports injection of profiles declared in a remote POM file. Simply supply a remote management POM:
+PME supports injection of profiles declared in multiple remote comma separated POM files. Simply supply a remote management POM:
 
-    mvn install -DprofileInjection=org.foo:profile-injection:1.0
+    mvn install -DprofileInjection=org.foo:profile-injection:1.0,org.company:pluginMgrB:2.0
 
-The extension will, for every profile in the remote POM file, replace or add it to the local top level POM file.
+The extension will, for every profile in the remote POM files, replace or add it to the local top level POM file.
 
 **Note:** for any existing profile in the modified POM that specifies `activeByDefault`, this activation option will be removed so profiles are not accidentally disabled due to its exclusive semantics.
 
