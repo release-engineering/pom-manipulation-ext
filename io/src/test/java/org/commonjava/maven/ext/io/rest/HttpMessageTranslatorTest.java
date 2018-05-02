@@ -56,7 +56,7 @@ public class HttpMessageTranslatorTest
         {
             response.setStatus(HttpServletResponse.SC_BAD_GATEWAY);
             baseRequest.setHandled( true );
-            response.getWriter().println( "{\\\"errorType\\\":\\\"Communication with remote repository failed\\\"}");
+            response.getWriter().println( "{\"errorType\":\"Communication with remote repository failed\"}");
         }
     } );
 

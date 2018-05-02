@@ -65,34 +65,32 @@ public class ReportGAVMapper
         // Rather than throwing an exception we return an empty body which allows
         // DefaultTranslator to examine the status codes.
 
-        if (s.length() == 0)
+        if ( s.length() == 0 )
         {
             errorString = "No content to read.";
             return result;
         }
-        else if (s.startsWith( "<" ))
+        else if ( s.startsWith( "<" ) )
         {
             // Read an HTML string.
-            String stripped = s.replaceAll( "<.*?>", "").replaceAll( "\n", " " ).trim();
+            String stripped = s.replaceAll( "<.*?>", "" ).replaceAll( "\n", " " ).trim();
             logger.debug( "Read HTML string '{}' rather than a JSON stream; stripping message to '{}'", s, stripped );
             errorString = stripped;
-            return result;
-        }
-        else if (s.startsWith( "{\\\"message\\\":" ) || s.startsWith( "{\"message\":" ) ||
-                        s.startsWith( "{\\\"errorType\\\":" ) || s.startsWith( "{\"errorType\":" ))
-        {
-            String endStripped = s.replace( "\\\"}", "" ).replace( "\"}", "" );
-            errorString = endStripped.substring( endStripped.lastIndexOf( "\"" ) + 1 );
-
-            logger.debug( "Read message string {}, processed to {} ", s, errorString );
-
             return result;
         }
 
         try
         {
-            @SuppressWarnings( "unchecked" )
-            List<Map<String, Object>> responseBody = objectMapper.readValue( s, List.class );
+            if ( s.startsWith( "{\"" ) )
+            {
+                errorString = objectMapper.readValue( s, ErrorMessage.class ).toString();
+
+                logger.debug( "Read message string {}, processed to {} ", s, errorString );
+
+                return result;
+            }
+
+            @SuppressWarnings( "unchecked" ) List<Map<String, Object>> responseBody = objectMapper.readValue( s, List.class );
 
             for ( Map<String, Object> gav : responseBody )
             {

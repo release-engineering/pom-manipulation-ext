@@ -42,8 +42,6 @@ import static org.junit.Assert.fail;
 
 public class HttpHeaderHeaderTest
 {
-    protected DefaultTranslator versionTranslator;
-
     @Rule
     public final SystemOutRule systemOutRule = new SystemOutRule().enableLog();
 
@@ -74,6 +72,11 @@ public class HttpHeaderHeaderTest
         }
     } );
 
+    protected DefaultTranslator versionTranslator;
+
+    protected String testResponseStart = "{\"errorType\":\"";
+    protected String testResponseEnd = "\"}";
+
     @Before
     public void before()
     {
@@ -87,9 +90,6 @@ public class HttpHeaderHeaderTest
     {
         return testResponseStart + (testResponseEnd == null ? "" : header + testResponseEnd);
     }
-
-    protected String testResponseStart = "{\\\"message\\\":\\\"";
-    protected String testResponseEnd = "\\\"}";
 
     @Test
     public void testVerifyContentHeaderMessage()
@@ -106,14 +106,14 @@ public class HttpHeaderHeaderTest
         }
         catch ( RestException ex )
         {
-            assertTrue( systemOutRule.getLog().contains( "message" ) );
+            assertTrue( systemOutRule.getLog().contains( "errorType" ) );
         }
     }
 
     @Test
     public void testVerifyContentHeaderMessageNoEscape()
     {
-        testResponseStart = "{\"message\":\"";
+        testResponseStart = "{\"errorMessage\":\"";
         testResponseEnd = "\"}";
 
         List<ProjectVersionRef> gavs = new ArrayList<ProjectVersionRef>()
@@ -128,14 +128,14 @@ public class HttpHeaderHeaderTest
         }
         catch ( RestException ex )
         {
-            assertTrue( systemOutRule.getLog().contains( "message" ) );
+            assertTrue( systemOutRule.getLog().contains( "errorMessage" ) );
         }
     }
 
     @Test
     public void testVerifyContentHeaderMessageContents()
     {
-        testResponseStart = "{\"message\":\"";
+        testResponseStart = "{\"errorType\":\"";
         testResponseEnd = "\"}";
 
         List<ProjectVersionRef> gavs = new ArrayList<ProjectVersionRef>()
@@ -151,6 +151,29 @@ public class HttpHeaderHeaderTest
         catch ( RestException ex )
         {
             assertTrue( ex.getMessage().contains( "pme-" ) );
+        }
+    }
+
+    @Test
+    public void testVerifyContentHeaderMultipleMessageContents()
+    {
+        testResponseStart = "{\"errorType\":\"MY-TYPE\",\"errorMessage\":\"MY-MESSAGE\"}";
+        testResponseEnd = null;
+
+        List<ProjectVersionRef> gavs = new ArrayList<ProjectVersionRef>()
+        {{
+            add( new SimpleProjectVersionRef( "com.example", "example", "1.0" ) );
+        }};
+
+        try
+        {
+            versionTranslator.translateVersions( gavs );
+            fail( "Failed to throw RestException." );
+        }
+        catch ( RestException ex )
+        {
+            assertTrue( systemOutRule.getLog().contains( "MY-TYPE MY-MESSAGE" ) );
+            assertTrue( ex.getMessage().contains( "MY-TYPE MY-MESSAGE" ) );
         }
     }
 
