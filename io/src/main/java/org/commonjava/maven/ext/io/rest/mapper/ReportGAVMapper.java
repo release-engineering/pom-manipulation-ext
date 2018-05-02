@@ -73,9 +73,8 @@ public class ReportGAVMapper
         else if (s.startsWith( "<" ))
         {
             // Read an HTML string.
-            String stripped = s.replaceFirst( ".*</h1>\n", "").replaceFirst( "\n</body></html>", "" );
-            logger.debug( "Read HTML string '{}' rather than a JSON stream; stripping message to {}", s, stripped );
-
+            String stripped = s.replaceAll( "<.*?>", "").replaceAll( "\n", " " ).trim();
+            logger.debug( "Read HTML string '{}' rather than a JSON stream; stripping message to '{}'", s, stripped );
             errorString = stripped;
             return result;
         }

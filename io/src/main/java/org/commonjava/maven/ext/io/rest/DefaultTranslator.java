@@ -38,6 +38,7 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.Random;
 
+import static org.apache.commons.lang.StringUtils.isNotBlank;
 import static org.apache.commons.lang.StringUtils.isNotEmpty;
 import static org.apache.http.HttpStatus.SC_OK;
 
@@ -83,7 +84,7 @@ public class DefaultTranslator
     {
         this.rgm = new ReportGAVMapper( protocol, repositoryGroup, incrementalSerialSuffix );
         this.lbm = new ListingBlacklistMapper( protocol);
-        this.endpointUrl = endpointUrl;
+        this.endpointUrl = endpointUrl + ( isNotBlank( endpointUrl ) ? endpointUrl.endsWith( "/" ) ? "" : "/" : "");
         this.initialRestMaxSize = restMaxSize;
         this.initialRestMinSize = restMinSize;
     }
@@ -102,7 +103,7 @@ public class DefaultTranslator
     {
         init (lbm);
 
-        final String blacklistEndpointUrl = endpointUrl + ( endpointUrl.endsWith( "/" ) ? "" : "/") + LISTING_BLACKLIST_GA;
+        final String blacklistEndpointUrl = endpointUrl + LISTING_BLACKLIST_GA;
         List<ProjectVersionRef> result;
         HttpResponse<List> r;
 
@@ -125,7 +126,7 @@ public class DefaultTranslator
             }
             else
             {
-                throw new RestException( String.format( "Failed to establish blacklist calling {} with error {} ", this.endpointUrl, lbm.getErrorString() ) );
+                throw new RestException( String.format( "Failed to establish blacklist calling %s with error %s", this.endpointUrl, lbm.getErrorString() ) );
             }
         }
         catch ( UnirestException e )
@@ -175,13 +176,13 @@ public class DefaultTranslator
             final List<List<ProjectVersionRef>> partition = ListUtils.partition( projects, initialRestMaxSize );
             for ( List<ProjectVersionRef> p : partition )
             {
-                queue.add( new Task( rgm, p, endpointUrl ) );
+                queue.add( new Task( rgm, p, endpointUrl + REPORTS_LOOKUP_GAVS ) );
             }
             logger.debug( "For initial sizing of {} have split the queue into {} ", initialRestMaxSize , queue.size() );
         }
         else
         {
-            queue.add( new Task( rgm, projects, endpointUrl ) );
+            queue.add( new Task( rgm, projects, endpointUrl + REPORTS_LOOKUP_GAVS ) );
         }
 
 
@@ -269,7 +270,7 @@ public class DefaultTranslator
         {
             this.pvrm = pvrm;
             this.chunk = chunk;
-            this.endpointUrl = endpointUrl + ( endpointUrl.endsWith( "/" ) ? "" : "/") + REPORTS_LOOKUP_GAVS;
+            this.endpointUrl = endpointUrl;
         }
 
         void executeTranslate()

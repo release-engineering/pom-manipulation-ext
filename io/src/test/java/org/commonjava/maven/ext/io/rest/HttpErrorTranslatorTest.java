@@ -42,6 +42,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 @FixMethodOrder( MethodSorters.NAME_ASCENDING)
@@ -64,7 +65,7 @@ public class HttpErrorTranslatorTest
         {
             response.setStatus(HttpServletResponse.SC_NOT_FOUND);
             baseRequest.setHandled( true );
-            response.getWriter().println( "<html><head><title>404</title></head></html");
+            response.getWriter().println( "<html><head><title>404</title></head></html>");
         }
     } );
 
@@ -113,6 +114,7 @@ public class HttpErrorTranslatorTest
         catch ( RestException ex )
         {
             // Pass
+            assertTrue( ex.getMessage().equals( "Received response status 404 with message: 404" ) );
         }
     }
 

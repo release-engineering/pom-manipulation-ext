@@ -42,7 +42,7 @@ import static org.junit.Assert.fail;
 
 public class HttpHeaderHeaderTest
 {
-    private DefaultTranslator versionTranslator;
+    protected DefaultTranslator versionTranslator;
 
     @Rule
     public final SystemOutRule systemOutRule = new SystemOutRule().enableLog();
@@ -58,7 +58,7 @@ public class HttpHeaderHeaderTest
                             HttpServletResponse response )
                         throws IOException, ServletException
         {
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.setStatus(HttpServletResponse.SC_GATEWAY_TIMEOUT);
 
             Enumeration<String> names = request.getHeaderNames();
             while ( names.hasMoreElements() )
@@ -88,8 +88,8 @@ public class HttpHeaderHeaderTest
         return testResponseStart + (testResponseEnd == null ? "" : header + testResponseEnd);
     }
 
-    private String testResponseStart = "{\\\"message\\\":\\\"";
-    private String testResponseEnd = "\\\"}";
+    protected String testResponseStart = "{\\\"message\\\":\\\"";
+    protected String testResponseEnd = "\\\"}";
 
     @Test
     public void testVerifyContentHeaderMessage()
@@ -174,7 +174,7 @@ public class HttpHeaderHeaderTest
         }
         catch ( RestException ex )
         {
-            assertTrue( systemOutRule.getLog().contains( "The server didn't respond in time" ) );
+            assertTrue( systemOutRule.getLog().contains( "504 Gateway Time-out The server didn't respond in time" ) );
         }
     }
 }
