@@ -22,6 +22,7 @@ import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.ConsoleAppender;
 import groovy.lang.Binding;
 import groovy.util.GroovyScriptEngine;
+import org.apache.commons.lang.StringUtils;
 import org.commonjava.maven.ext.cli.Cli;
 import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.integrationtest.invoker.DefaultExecutionParser;
@@ -128,9 +129,15 @@ public class TestUtils
             args.add( toFlagsParams( e.getFlags() ) );
 
             // Run PME-Cli
-            Integer cliExitValue = runCli( args, e.getJavaParams(), e.getLocation() );
-
-            logger.info( "Returned {} from running {} ", cliExitValue, args );
+            Integer cliExitValue = 0;
+            if ( !StringUtils.contains( e.getMvnCommand(), "manipulation.disable=true" ) )
+            {
+                cliExitValue = runCli( args, e.getJavaParams(), e.getLocation() );
+            }
+            else
+            {
+                logger.info( "Skipping running the CLI as Maven goals have the Manipulator disabled." );
+            }
             // Run Maven
             Map<String, String> mavenParams = new HashMap<>();
             mavenParams.putAll( DEFAULT_MVN_PARAMS );

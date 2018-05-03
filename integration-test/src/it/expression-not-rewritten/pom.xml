@@ -19,7 +19,7 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>org.commonjava.maven.ext.versioning.test</groupId>
+  <groupId>org.commonjava.maven.ext.integration-test</groupId>
   <artifactId>expression-not-rewritten</artifactId>
   <version>1.0</version>
   <packaging>jar</packaging>
@@ -39,15 +39,15 @@
       <scope>test</scope>
     </dependency>
   </dependencies>
-  
+
   <profiles>
     <profile>
       <id>with-expressions</id>
-      
+
       <activation>
         <file><exists>${basedir}/pom.xml</exists></file>
       </activation>
-      
+
       <dependencies>
         <dependency>
           <groupId>org.foo</groupId>
