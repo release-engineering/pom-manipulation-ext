@@ -22,3 +22,6 @@ def pom = new XmlSlurper().parse( pomFile )
 def dependency = pom.dependencyManagement.dependencies.dependency.find { it.artifactId.text() == "commons-lang" }
 assert dependency != null
 assert dependency.version.text().endsWith ("{project.version}")
+
+def buildLog = new File( basedir, 'build.log' )
+assert buildLog.text.contains("so skipping")

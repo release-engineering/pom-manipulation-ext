@@ -370,7 +370,11 @@ public class PluginManipulator
                 String oldValue = pluginsByGA.get( override.getKey() ).getVersionString();
                 plugin = plugins.get( pluginsByGA.get( override.getKey() ) );
 
-                if ( commonState.getStrict() )
+                if ( plugin.getVersion().equals( "${project.version}" ) || ( plugin.getVersion().contains( "$" ) && project.getVersion().equals( oldValue ) ))
+                {
+                    logger.warn( "Plugin {} for {} references ${project.version} so skipping.", plugin, project.getPom() );
+                }
+                else if ( commonState.getStrict() )
                 {
                     if ( !PropertiesUtils.checkStrictValue( session, oldValue, newValue ) )
                     {

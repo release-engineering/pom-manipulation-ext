@@ -295,6 +295,12 @@ public final class PropertiesUtils
                                   newValue );
 
                 }
+                else if ( oldValue.endsWith( x ) )
+                {
+                    // Might happen if the value was a resolved property to the main project version that has already been updated. The
+                    // new 'override' might have come from e.g. a BOM or from DA which would make it 'less' due to the version increment.
+                    logger.warn ("strictValueChecking with strictIgnoreSuffix found older value ({}) was newer ({}) ", oldValue, newValue);
+                }
                 else
                 {
                     logger.warn( "strictIgnoreSuffix set but unable to align from {} to {}", oldValue, newValue );
