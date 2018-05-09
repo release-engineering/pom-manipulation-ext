@@ -999,7 +999,7 @@ public class VersioningCalculatorTest
         assertTrue( padding == 2 );
 
         padding = Version.getBuildNumberPadding( 0, new HashSet<>( Arrays.asList( "1.2.0.GA-foo-101" ) ) );
-        assertTrue( padding == 1 );
+        assertTrue( padding == 3 );
 
         padding = Version.getBuildNumberPadding( 0, new HashSet<>( Arrays.asList( "1.2.0.GA-foo-001" ) ) );
         assertTrue( padding == 3 );
@@ -1012,6 +1012,9 @@ public class VersioningCalculatorTest
 
         padding = Version.getBuildNumberPadding( 0, new HashSet<>( Arrays.asList( "1.0.0.Final.rebuild-01912-01" ) ) );
         assertTrue( padding == 2 );
+
+        padding = Version.getBuildNumberPadding( 0, new HashSet<>( Arrays.asList( "1.0.0.GA.rebuild-010" ) ) );
+        assertTrue( padding == 3 );
     }
 
     @Test
@@ -1023,12 +1026,26 @@ public class VersioningCalculatorTest
         paddedBuildNum = StringUtils.leftPad( "1", 1, '0' );
         System.out.println ("### got " + paddedBuildNum);
         assertTrue( paddedBuildNum.equals( "1" ) );
+
         paddedBuildNum = StringUtils.leftPad( "1", 2, '0' );
         System.out.println ("### got " + paddedBuildNum);
         assertTrue( paddedBuildNum.equals( "01" ) );
+
         paddedBuildNum = StringUtils.leftPad( "1", 3, '0' );
         System.out.println ("### got " + paddedBuildNum);
         assertTrue( paddedBuildNum.equals( "001" ) );
+
+        paddedBuildNum = StringUtils.leftPad( "10", 3, '0' );
+        System.out.println ("### got " + paddedBuildNum);
+        assertTrue( paddedBuildNum.equals( "010" ) );
+
+        paddedBuildNum = StringUtils.leftPad( "010", 3, '0' );
+        System.out.println ("### got " + paddedBuildNum);
+        assertTrue( paddedBuildNum.equals( "010" ) );
+
+        paddedBuildNum = StringUtils.leftPad( "010", 6, '0' );
+        System.out.println ("### got " + paddedBuildNum);
+        assertTrue( paddedBuildNum.equals( "000010" ) );
     }
 
     @Test

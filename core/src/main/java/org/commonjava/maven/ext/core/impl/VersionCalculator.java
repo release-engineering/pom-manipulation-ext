@@ -102,6 +102,7 @@ public class VersionCalculator
 
         // Have to loop through the versions a second time to make sure that the versions are in sync
         // between projects in the reactor.
+        logger.debug ("Syncing projects within reactor...");
         for ( final Project project : projects )
         {
             final String originalVersion = project.getVersion();

@@ -19,6 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -99,10 +100,6 @@ public class Version
 
     private final static Pattern osgiPattern = Pattern.compile(OSGI_VERSION_REGEX);
 
-    private final static String PADDING = "(0*)(\\d+)$";
-
-    private final static Pattern buildPadding = Pattern.compile( PADDING );
-
     // Prevent construction.
     private Version () {}
 
@@ -132,17 +129,9 @@ public class Version
         // Serial padding has not been explicitly defined so determine current padding to preserve.
         if ( result == 0 )
         {
-            for ( String version : versions )
-            {
-                Matcher m = buildPadding.matcher( getBuildNumber( version ) );
-
-                // If we've found a match and its larger than the current match...
-                if ( m.matches() && result <= m.group( 1 ).length() )
-                {
-                    result = m.group( 1 ).length() + 1;
-                }
-            }
+            result = getBuildNumber( versions.stream().max( Comparator.comparing( v -> getBuildNumber( v ).length() ) ).orElse("") ).length();
         }
+        logger.debug( "Returning padding of {} ", result );
         return result;
     }
 

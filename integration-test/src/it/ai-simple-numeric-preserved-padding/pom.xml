@@ -21,7 +21,7 @@
 
   <groupId>org.commonjava.maven.ext.integration-test</groupId>
   <artifactId>simple-numeric-preserved-padding</artifactId>
-  <version>1.0.redhat-001</version>
+  <version>1.0.redhat-009</version>
   <packaging>jar</packaging>
 
   <name>simple</name>
