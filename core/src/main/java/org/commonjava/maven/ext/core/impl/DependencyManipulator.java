@@ -600,7 +600,6 @@ public class DependencyManipulator implements Manipulator
             for ( final Map.Entry<ArtifactRef, String> entry : overrides.entrySet() )
             {
                 ProjectRef groupIdArtifactId = entry.getKey().asProjectRef();
-
                 if ( depPr.equals( groupIdArtifactId ) )
                 {
                     final String oldVersion = dependencies.get( dependency ).getVersion();
@@ -614,6 +613,11 @@ public class DependencyManipulator implements Manipulator
                     else if ( isEmpty( oldVersion ) )
                     {
                         logger.debug( "Dependency is a managed version for " + groupIdArtifactId + "; ignoring" );
+                    }
+                    else if (oldVersion.equals( "${project.version}" ) || ( oldVersion.contains( "$" ) && project.getVersion().equals( resolvedValue ) ) )
+                    {
+                        logger.warn( "Dependency {} with original version {} and project version {} for {} references ${project.version} so skipping.",
+                                     dependency, oldVersion, project.getVersion(), project.getPom() );
                     }
                     // If we have an explicitOverride, this will always override the dependency changes made here.
                     // By avoiding the potential duplicate work it also avoids a possible property clash problem.
@@ -649,20 +653,9 @@ public class DependencyManipulator implements Manipulator
                     }
                     else
                     {
-                        // Too much spurious logging with project.version.
-                        if ( ! oldVersion.equals( "${project.version}" ) )
-                        {
-                            logger.info( "Updating version {} for dependency {} from {}.", overrideVersion, dependency, project.getPom() );
-                        }
-
                         if ( ! PropertiesUtils.cacheProperty( project, commonState, versionPropertyUpdateMap, oldVersion, overrideVersion, entry.getKey(), false ))
                         {
-                            if ( oldVersion.equals( "${project.version}" ) )
-                            {
-                                logger.debug( "For dependency {} ; version is built in {} so skipping inlining {}", groupIdArtifactId, oldVersion,
-                                              overrideVersion );
-                            }
-                            else if ( strict && ! PropertiesUtils.checkStrictValue( session, resolvedValue, overrideVersion) )
+                            if ( strict && ! PropertiesUtils.checkStrictValue( session, resolvedValue, overrideVersion) )
                             {
                                 if ( commonState.getFailOnStrictViolation() )
                                 {
