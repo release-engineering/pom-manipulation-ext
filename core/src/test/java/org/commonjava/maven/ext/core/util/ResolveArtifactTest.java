@@ -47,6 +47,7 @@ public class ResolveArtifactTest
         List<Project> projects = pomIO.parseProject( projectroot );
 
         Set<ArtifactRef> artifacts = RESTCollector.establishAllDependencies( session, projects, null );
-        assertTrue ( artifacts.size() == 59 );
+        System.out.println ("### artifact count is " + artifacts.size());
+        assertTrue ( artifacts.size() == 60 );
     }
 }

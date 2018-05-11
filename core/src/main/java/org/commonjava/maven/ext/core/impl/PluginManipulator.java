@@ -34,6 +34,7 @@ import org.commonjava.maven.ext.core.state.PluginState.PluginPrecedence;
 import org.commonjava.maven.ext.core.state.PluginState.Precedence;
 import org.commonjava.maven.ext.core.state.RESTState;
 import org.commonjava.maven.ext.core.util.PropertiesUtils;
+import org.commonjava.maven.ext.core.util.PropertyMapper;
 import org.commonjava.maven.ext.io.ModelIO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -98,7 +99,7 @@ public class PluginManipulator
     /**
      * Used to store mappings of old property to new version.
      */
-    private final Map<Project,Map<String, String>> versionPropertyUpdateMap = new LinkedHashMap<>();
+    private final Map<Project,Map<String, PropertyMapper>> versionPropertyUpdateMap = new LinkedHashMap<>();
 
     @Inject
     public PluginManipulator(ModelIO effectiveModelBuilder)
@@ -126,6 +127,7 @@ public class PluginManipulator
         throws ManipulationException
     {
         final PluginState state = session.getState( PluginState.class );
+        final CommonState cState = session.getState( CommonState.class );
 
         if ( !session.isEnabled() || !state.isEnabled() )
         {
@@ -157,15 +159,32 @@ public class PluginManipulator
         // If we've changed something now update any old properties with the new values.
         if (!changed.isEmpty())
         {
+            if ( cState.getStrictDependencyPropertyValidation() > 0 )
+            {
+                logger.info( "Iterating to validate plugin updates..." );
+                for ( Project p : versionPropertyUpdateMap.keySet() )
+                {
+                    validatePluginsUpdatedProperty( cState, p, p.getResolvedManagedPlugins( session ) );
+                    validatePluginsUpdatedProperty( cState, p, p.getResolvedPlugins( session ) );
+                    for ( Profile profile : p.getResolvedProfilePlugins( session ).keySet() )
+                    {
+                        validatePluginsUpdatedProperty( cState, p, p.getResolvedProfilePlugins( session ).get( profile ) );
+                    }
+                    for ( Profile profile : p.getResolvedProfileManagedPlugins( session ).keySet() )
+                    {
+                        validatePluginsUpdatedProperty( cState, p, p.getResolvedProfileManagedPlugins( session ).get( profile ) );
+                    }
+                }
+            }
             logger.info( "Iterating for standard overrides..." );
             for ( Project project : versionPropertyUpdateMap.keySet() )
             {
-                for ( final Map.Entry<String, String> entry : versionPropertyUpdateMap.get( project ).entrySet() )
+                for ( final Map.Entry<String, PropertyMapper> entry : versionPropertyUpdateMap.get( project ).entrySet() )
                 {
                     // Ignore strict alignment for plugins ; if we're attempting to use a differing plugin
                     // its unlikely to be an exact match.
                     PropertiesUtils.PropertyUpdate found =
-                                    PropertiesUtils.updateProperties( session, project, true, entry.getKey(), entry.getValue() );
+                                    PropertiesUtils.updateProperties( session, project, true, entry.getKey(), entry.getValue().getNewVersion() );
 
                     if ( found == PropertiesUtils.PropertyUpdate.NOTFOUND )
                     {
@@ -177,8 +196,8 @@ public class PluginManipulator
                         {
                             if ( p.isInheritanceRoot() )
                             {
-                                logger.info( "Adding property {} with {} ", entry.getKey(), entry.getValue() );
-                                p.getModel().getProperties().setProperty( entry.getKey(), entry.getValue() );
+                                logger.info( "Adding property {} with {} ", entry.getKey(), entry.getValue().getNewVersion() );
+                                p.getModel().getProperties().setProperty( entry.getKey(), entry.getValue().getNewVersion() );
                             }
                         }
                     }
@@ -533,6 +552,20 @@ public class PluginManipulator
                 project.getModel().getBuild().getPlugins().add( override );
                 logger.info( "For non-pluginMgmt, added plugin version : " + override.getKey() + "="
                                              + newValue );
+            }
+        }
+    }
+
+    private void validatePluginsUpdatedProperty( CommonState cState, Project p, HashMap<ProjectVersionRef, Plugin> dependencies )
+                    throws ManipulationException
+    {
+        for ( ProjectVersionRef d : dependencies.keySet() )
+        {
+            String versionProperty = dependencies.get( d ).getVersion();
+            if ( versionProperty.startsWith( "${" ) )
+            {
+                versionProperty = PropertiesUtils.extractPropertyName( versionProperty );
+                PropertiesUtils.verifyPropertyMapping( cState, p, versionPropertyUpdateMap, d, versionProperty );
             }
         }
     }

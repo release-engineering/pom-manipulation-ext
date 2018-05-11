@@ -103,7 +103,7 @@ public class PropertiesUtilsTest
     @Test
     public void testCacheProperty() throws Exception
     {
-        Map<Project,Map<String,String>> propertyMap = new HashMap<>();
+        Map<Project,Map<String,PropertyMapper>> propertyMap = new HashMap<>();
         CommonState state = new CommonState( new Properties(  ) );
         Project project = getProject();
 

@@ -164,7 +164,7 @@ public class ProjectVersioningManipulator
                 logger.debug( "Changed parent version to: " + newVersion + " in " + parent );
                 if (parentGAV.getVersionString().startsWith( "${" ))
                 {
-                    if ( PropertiesUtils.updateProperties( session, project, false, extractPropertyName( parentGAV.getVersionString() ), newVersion ) == PropertiesUtils.PropertyUpdate.NOTFOUND )
+                    if ( PropertiesUtils.updateProperties( session, project, false, PropertiesUtils.extractPropertyName( parentGAV.getVersionString() ), newVersion ) == PropertiesUtils.PropertyUpdate.NOTFOUND )
                     {
                         logger.error( "Unable to find property {} to update with version {}", parentGAV.getVersionString(), newVersion );
                     }
@@ -186,7 +186,7 @@ public class ProjectVersioningManipulator
             {
                 if (gav.getVersionString().startsWith( "${" ))
                 {
-                    if ( PropertiesUtils.updateProperties( session, project, false, extractPropertyName( gav.getVersionString() ), newVersion ) == PropertiesUtils.PropertyUpdate.NOTFOUND )
+                    if ( PropertiesUtils.updateProperties( session, project, false, PropertiesUtils.extractPropertyName( gav.getVersionString() ), newVersion ) == PropertiesUtils.PropertyUpdate.NOTFOUND )
                     {
                         logger.error( "Unable to find property {} to update with version {}", gav.getVersionString(), newVersion );
                     }
@@ -241,7 +241,7 @@ public class ProjectVersioningManipulator
                             logger.debug ("Examining dependency (from depMgmt) {} to change version to {} ", d, newVersion);
                             if (d.getVersion().startsWith( "${" ))
                             {
-                                if ( PropertiesUtils.updateProperties( session, project, false, extractPropertyName( d.getVersion() ), newVersion ) == PropertiesUtils.PropertyUpdate.NOTFOUND )
+                                if ( PropertiesUtils.updateProperties( session, project, false, PropertiesUtils.extractPropertyName( d.getVersion() ), newVersion ) == PropertiesUtils.PropertyUpdate.NOTFOUND )
                                 {
                                     logger.error( "Unable to find property {} to update with version {}", d.getVersion(), newVersion );
                                 }
@@ -284,7 +284,7 @@ public class ProjectVersioningManipulator
                             logger.debug ("Examining dependency {} to change version to {} ", d, newVersion);
                             if (d.getVersion().startsWith( "${" ))
                             {
-                                if ( PropertiesUtils.updateProperties( session, project, false, extractPropertyName( d.getVersion() ), newVersion ) == PropertiesUtils.PropertyUpdate.NOTFOUND )
+                                if ( PropertiesUtils.updateProperties( session, project, false, PropertiesUtils.extractPropertyName( d.getVersion() ), newVersion ) == PropertiesUtils.PropertyUpdate.NOTFOUND )
                                 {
                                     logger.error( "Unable to find property {} to update with version {}", d.getVersion(), newVersion );
                                 }
@@ -306,20 +306,6 @@ public class ProjectVersioningManipulator
         }
 
         return changed;
-    }
-
-    private String extractPropertyName (String version) throws ManipulationException
-    {
-        // TODO: Handle the scenario where the version might be ${....}${....}
-        final int endIndex = version.indexOf( '}' );
-
-        if ( version.indexOf( "${" ) != 0 || endIndex != version.length() - 1 )
-        {
-            throw new ManipulationException( "NYI : handling for versions (" + version
-                                                             + ") with multiple embedded properties is NYI. " );
-        }
-
-        return version.substring( 2, endIndex );
     }
 
     @Override
