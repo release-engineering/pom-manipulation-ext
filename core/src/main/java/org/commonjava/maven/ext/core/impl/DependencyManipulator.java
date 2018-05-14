@@ -907,8 +907,8 @@ public class DependencyManipulator implements Manipulator
             String versionProperty = dependencies.get( d ).getVersion();
             if ( versionProperty.startsWith( "${" ) )
             {
-                versionProperty = PropertiesUtils.extractPropertyName( versionProperty );
-                PropertiesUtils.verifyPropertyMapping( cState, p, versionPropertyUpdateMap, d, versionProperty );
+                PropertiesUtils.verifyPropertyMapping( cState, p, versionPropertyUpdateMap, d,
+                                                       PropertiesUtils.extractPropertyName( versionProperty ) );
             }
         }
     }

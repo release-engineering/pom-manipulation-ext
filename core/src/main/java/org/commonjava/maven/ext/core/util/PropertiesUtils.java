@@ -491,8 +491,6 @@ public final class PropertiesUtils
 
             if ( ! currentProjectVersionMapper.getDependencies().contains( pvr.asProjectRef() ) )
             {
-                currentProjectVersionMapper.setNewVersion( currentProjectVersionMapper.getOriginalVersion() );
-
                 logger.debug ("Scanning project {} with version {} and original value {} ", project, version, currentProjectVersionMapper.getOriginalVersion() );
 
                 if ( cState.getStrictDependencyPropertyValidation() == 2 )
