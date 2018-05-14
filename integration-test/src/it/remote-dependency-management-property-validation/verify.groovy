@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (C) 2012 Red Hat, Inc. (jcasey@redhat.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,23 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.commonjava.maven.ext.io.rest.mapper;
+def pomFile = new File( basedir, 'pom.xml' )
+System.out.println( "Slurping POM: ${pomFile.getAbsolutePath()}" )
 
-public class ErrorMessage
-{
-    public final String errorType;
-
-    public final String errorMessage;
-
-    public final String details;
-
-    public ErrorMessage()
-    {
-        details = errorMessage = errorType = "";
-    }
-
-    public String toString()
-    {
-        return errorType + " " + errorMessage + " " + details;
-    }
-}
+def buildLog = new File( basedir, 'build.log' )
+assert ! buildLog.getText().contains( 'NullPointerException' )
+assert buildLog.getText().contains( 'ManipulationException' )

@@ -55,6 +55,17 @@ public class CommonState
     public static final String STRICT_ALIGNMENT_IGNORE_SUFFIX = "strictAlignmentIgnoreSuffix";
 
     /**
+     * This aggressively checks whether, for a set of dependencies or plugins that have a common property, every dependency
+     * or plugin attempted to update the property. If one didn't this will throw an exception and fail fast. If it doesn't fail
+     * then its possible that one of the newly aligned dependencies/plugins aren't found and therefore the build will fail.
+     *
+     * If set to false (the default) this is not active.
+     * If set to true, then this will throw an exception.
+     * If set to the string 'revert' then it will revert any changes, emitting warnings.
+     */
+    private static final String DEPENDENCY_PROPERTY_VALIDATION = "strictPropertyValidation";
+
+    /**
      * Whether to override transitive as well. This is common between {@link DependencyState} and
      * {@link DependencyState}
      */
@@ -68,6 +79,11 @@ public class CommonState
 
     private final boolean ignoreSuffix;
 
+    /**
+     * For beta strictPropertyValidation ; if 2 then assume we are 'reverting'.
+     */
+    private final Integer strictDependencyPluginPropertyValidation;
+
     public CommonState( final Properties userProps )
     {
         overrideTransitive = Boolean.valueOf( userProps.getProperty( TRANSITIVE_OVERRIDE_PROPERTY, "false" ) );
@@ -75,6 +91,30 @@ public class CommonState
         strict = Boolean.valueOf( userProps.getProperty( STRICT_ALIGNMENT, "true" ) );
         ignoreSuffix = Boolean.valueOf( userProps.getProperty( STRICT_ALIGNMENT_IGNORE_SUFFIX, "true" ) );
         failOnStrictViolation = Boolean.valueOf( userProps.getProperty( STRICT_VIOLATION_FAILS, "false" ) );
+
+        switch ( userProps.getProperty( DEPENDENCY_PROPERTY_VALIDATION, "false" ).toUpperCase() )
+        {
+            case "TRUE":
+            {
+                strictDependencyPluginPropertyValidation = 1;
+                break;
+            }
+            case "FALSE":
+            {
+                strictDependencyPluginPropertyValidation = 0;
+                break;
+            }
+            case "REVERT":
+            {
+                strictDependencyPluginPropertyValidation = 2;
+                break;
+            }
+            default:
+            {
+                strictDependencyPluginPropertyValidation = 0;
+                break;
+            }
+        }
     }
 
     /**
@@ -115,5 +155,10 @@ public class CommonState
     public boolean getFailOnStrictViolation()
     {
         return failOnStrictViolation;
+    }
+
+    public Integer getStrictDependencyPropertyValidation()
+    {
+        return strictDependencyPluginPropertyValidation;
     }
 }

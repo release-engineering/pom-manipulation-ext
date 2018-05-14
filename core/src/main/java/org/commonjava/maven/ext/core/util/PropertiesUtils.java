@@ -16,7 +16,11 @@
 package org.commonjava.maven.ext.core.util;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.maven.model.Plugin;
 import org.apache.maven.model.Profile;
+import org.commonjava.maven.atlas.ident.ref.ArtifactRef;
+import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
+import org.commonjava.maven.atlas.ident.ref.SimpleProjectRef;
 import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.common.model.Project;
 import org.commonjava.maven.ext.common.util.ProfileUtils;
@@ -341,19 +345,19 @@ public final class PropertiesUtils
      * @param project the current project the needs to cache the value.
      * @param state CommonState to retrieve property clash value QoS.
      * @param versionPropertyUpdateMap the map to store any updates in
-     * @param oldVersion original property value
+     * @param oldVersion original property name
      * @param newVersion new property value
      * @param originalType that this property is used in (i.e. a plugin or a dependency)
      * @param force Whether to check for an existing property or force the insertion
      * @return true if a property was found and cached.
      * @throws ManipulationException if an error occurs.
      */
-    public static boolean cacheProperty( Project project, CommonState state, Map<Project, Map<String, String>> versionPropertyUpdateMap, String oldVersion,
+    public static boolean cacheProperty( Project project, CommonState state, Map<Project, Map<String, PropertyMapper>> versionPropertyUpdateMap, String oldVersion,
                                          String newVersion, Object originalType, boolean force )
                     throws ManipulationException
     {
+        final Map<String, PropertyMapper> projectProps = versionPropertyUpdateMap.computeIfAbsent( project, k -> new HashMap<>() );
         boolean result = false;
-        Map<String, String> projectProps = versionPropertyUpdateMap.computeIfAbsent( project, k -> new HashMap<>() );
 
         if ( oldVersion != null && oldVersion.contains( "${" ) )
         {
@@ -379,11 +383,12 @@ public final class PropertiesUtils
                               originalType, oldProperty, newVersion, project );
 
                 final String oldVersionProp = oldVersion.substring( 2, oldVersion.length() - 1 );
+                final PropertyMapper container = projectProps.computeIfAbsent( oldVersionProp, k -> new PropertyMapper(  ) );
 
                 // We check if we are replacing a property and there is already a mapping. While we don't allow
                 // a property to be updated to two different versions, if a dependencyExclusion (i.e. a force override)
                 // has been specified this will bypass the check.
-                String existingPropertyMapping = projectProps.get( oldVersionProp );
+                String existingPropertyMapping = container.getNewVersion();
 
                 if ( existingPropertyMapping != null && !existingPropertyMapping.equals( newVersion ) )
                 {
@@ -411,11 +416,30 @@ public final class PropertiesUtils
                         }
                     }
                 }
-                projectProps.put( oldVersionProp, newVersion );
+
+                if ( originalType instanceof ArtifactRef )
+                {
+                    container.getDependencies().add( ( (ArtifactRef) originalType ).asProjectRef() );
+                }
+                else if ( originalType instanceof Plugin )
+                {
+                    container.getDependencies().add( new SimpleProjectRef( ( (Plugin) originalType ).getGroupId(), ( (Plugin) originalType ).getArtifactId() ) );
+                }
+                container.setOriginalVersion( findProperty( project, oldVersionProp ) );
+                container.setNewVersion( newVersion );
+
+                logger.debug( "Container is {} ", container );
                 result = true;
             }
         }
         return result;
+    }
+
+    private static String findProperty (Project project , String prop )
+    {
+        return project.getReverseInheritedList().stream().filter
+                        ( p -> p.getModel().getProperties().containsKey( prop ) ).map
+                        ( p -> p.getModel().getProperties().getProperty( prop ) ).findAny().orElse(null);
     }
 
     public static String handleDeprecatedProperty (Properties userProps, PropertyFlag flag)
@@ -438,6 +462,66 @@ public final class PropertiesUtils
             result = userProps.getProperty( flag.getCurrent(), defaultValue );
         }
         return result;
+    }
+
+    public static String extractPropertyName( String version ) throws ManipulationException
+    {
+        // TODO: Handle the scenario where the version might be ${....}${....}
+        final int endIndex = version.indexOf( '}' );
+
+        if ( version.indexOf( "${" ) != 0 || endIndex != version.length() - 1 )
+        {
+            throw new ManipulationException( "NYI : handling for versions (" + version
+                                                             + ") with multiple embedded properties is NYI. " );
+        }
+        return version.substring( 2, endIndex );
+    }
+
+    public static void verifyPropertyMapping( CommonState cState, Project project, Map<Project, Map<String, PropertyMapper>> versionPropertyMap,
+                                                          ProjectVersionRef pvr, String version )
+                    throws ManipulationException
+    {
+        Map<String, PropertyMapper> mapping = versionPropertyMap.get( project );
+
+        // Its possible some dependencies that have versions were not updated at all and therefore are
+        // not stored here.
+        if ( mapping.containsKey( version ) )
+        {
+            PropertyMapper currentProjectVersionMapper = mapping.get( version );
+
+            if ( ! currentProjectVersionMapper.getDependencies().contains( pvr.asProjectRef() ) )
+            {
+                currentProjectVersionMapper.setNewVersion( currentProjectVersionMapper.getOriginalVersion() );
+
+                logger.debug ("Scanning project {} with version {} and original value {} ", project, version, currentProjectVersionMapper.getOriginalVersion() );
+
+                if ( cState.getStrictDependencyPropertyValidation() == 2 )
+                {
+                    for ( Project p : versionPropertyMap.keySet() )
+                    {
+                        Map<String, PropertyMapper> allProjectMapper = versionPropertyMap.get( p );
+
+                        if ( allProjectMapper.containsKey( version ) &&
+                                        // Ignore when we have already caught this scenario and original / new versions match
+                                        !currentProjectVersionMapper.getOriginalVersion()
+                                                                    .equals( allProjectMapper.get( version ).getNewVersion() ) &&
+                                        // Catch where same version property is used for different values
+                                        currentProjectVersionMapper.getOriginalVersion().equals( allProjectMapper.get( version ).getOriginalVersion() ))
+                        {
+                            logger.warn( "Project {} had a property {} that failed to validate to new version {} and is reverted to {} ",
+                                         p, version, allProjectMapper.get( version ).getNewVersion(), allProjectMapper.get( version ).getOriginalVersion() );
+                            allProjectMapper.get( version ).setNewVersion(
+                                            currentProjectVersionMapper.getOriginalVersion() );
+                        }
+                    }
+                }
+                else
+                {
+                    throw new ManipulationException( "Dependency or Plugin " + pvr + " within project " + project + " did not update property " + version
+                                                                     + " but it has been updated" );
+                }
+            }
+        }
     }
 
     /**

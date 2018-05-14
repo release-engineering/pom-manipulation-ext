@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (C) 2012 Red Hat, Inc. (jcasey@redhat.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,23 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.commonjava.maven.ext.io.rest.mapper;
+def pomFile = new File( basedir, 'pom.xml' )
+System.out.println( "Slurping POM: ${pomFile.getAbsolutePath()}" )
 
-public class ErrorMessage
-{
-    public final String errorType;
+def buildLog = new File( basedir, 'build.log' )
+assert ! buildLog.getText().contains( 'NullPointerException' )
+assert ! buildLog.getText().contains( 'ManipulationException' )
 
-    public final String errorMessage;
+def pom = new XmlSlurper().parse( pomFile )
 
-    public final String details;
+def dependency = pom.dependencies.dependency.find { it.artifactId.text() == "junit" }
+assert dependency != null
+assert dependency.version.text().contains("version.junit")
 
-    public ErrorMessage()
+def failed = false
+
+pom.properties.each {
+    if ( it.text().contains ("4.1") )
     {
-        details = errorMessage = errorType = "";
-    }
-
-    public String toString()
-    {
-        return errorType + " " + errorMessage + " " + details;
+        failed = true
     }
 }
+assert (failed == false)
