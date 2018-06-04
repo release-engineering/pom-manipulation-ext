@@ -76,6 +76,25 @@ If you want to make it more permanent, you could add it to your `settings.xml`:
 		</activeProfiles>
 	</settings>
 
+### Extension Marker Files
+
+When the extension runs it writes out two marker files in the execution root `target` directory. Firstly it writes out a marker file `pom-manip-ext-marker.txt`. If this marker file exists PME will not run a second time instead logging:
+
+    Skipping manipulation as previous execution found.
+
+The second file is a json formatted file containing the modified execution root GAV e.g.
+
+    {
+        "VersioningState": {
+            "executionRootModified": {
+                "groupId": "org.groupId",
+                "artifactId": "myArtifactId",
+                "version": "1.2.0.Final.rebuild-1"
+            }
+        }
+    }
+
+
 ### Feature Guide
 
 Below are links to more specific information about configuring sets of features in PME:
