@@ -134,13 +134,9 @@ public class ReportGAVMapper
             requestBody.add( gav );
         }
 
-        if ( protocol == Translator.RestProtocol.PNC12 || protocol == Translator.RestProtocol.CURRENT )
+        if ( protocol == Translator.RestProtocol.CURRENT )
         {
-            request = new GAVSchema( new String[]{}, new String[]{}, repositoryGroup, requestBody );
-        }
-        else if ( protocol == Translator.RestProtocol.PNC13 )
-        {
-            request = new GAV13Schema( new String[]{}, new String[]{}, repositoryGroup, versionSuffix, requestBody );
+            request = new GAVSchema( new String[]{}, new String[]{}, repositoryGroup, versionSuffix, requestBody );
         }
         else
         {

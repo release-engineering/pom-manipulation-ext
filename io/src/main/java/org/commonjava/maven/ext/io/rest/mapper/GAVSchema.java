@@ -24,6 +24,9 @@ import java.util.Map;
 public class GAVSchema
 {
     @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
+    public String versionSuffix;
+
+    @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
     public String[] productNames;
 
     @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
@@ -37,12 +40,14 @@ public class GAVSchema
 
     public GAVSchema() {}
 
-    public GAVSchema( String[] productNames, String[] productVersionIds, String repositoryGroup, List<Map<String, Object>> gavs )
+    public GAVSchema( String[] productNames, String[] productVersionIds, String repositoryGroup, String versionSuffix,
+                        List<Map<String, Object>> gavs )
     {
         this.productNames = productNames;
         this.productVersionIds = productVersionIds;
         this.repositoryGroup = repositoryGroup;
         this.gavs = gavs;
+        this.versionSuffix = versionSuffix;
     }
 
     @Override
@@ -51,6 +56,7 @@ public class GAVSchema
         return "ProductNames '" + Arrays.toString( productNames ) +
                         "' :: ProductVersionIds '" + Arrays.toString( productVersionIds )+
                         "' :: RepositoryGroup '" + repositoryGroup +
+                        "' :: versionSuffix '" + versionSuffix +
                         "' :: gavs " + gavs;
     }
 }

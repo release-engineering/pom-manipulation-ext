@@ -45,7 +45,7 @@ public class RESTState implements State
         int restMinSize = Integer.valueOf( userProps.getProperty( "restMinSize",
                                                                   String.valueOf( DefaultTranslator.CHUNK_SPLIT_COUNT ) ) );
 
-        RestProtocol protocol = RestProtocol.parse ( userProps.getProperty( "restProtocol", RestProtocol.PNC12.toString() ) );
+        RestProtocol protocol = RestProtocol.parse ( userProps.getProperty( "restProtocol", RestProtocol.CURRENT.toString() ) );
 
         restEndpoint = new DefaultTranslator( restURL, protocol, restMaxSize, restMinSize, repositoryGroup, vState.getIncrementalSerialSuffix() );
     }

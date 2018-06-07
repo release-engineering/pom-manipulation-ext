@@ -42,10 +42,7 @@ public interface Translator
     enum RestProtocol
     {
         // These two are equivalent. Keeping current for backwards compatibility.
-        CURRENT( "current" ),
-        PNC12( "1.2" ),
-
-        PNC13( "1.3" );
+        CURRENT( "current" );
 
         private String name;
 
