@@ -19,7 +19,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef;
 import org.commonjava.maven.ext.io.rest.handler.AddSuffixJettyHandler;
-import org.commonjava.maven.ext.io.rest.mapper.GAV13Schema;
+import org.commonjava.maven.ext.io.rest.mapper.GAVSchema;
 import org.commonjava.maven.ext.io.rest.rule.MockServer;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.handler.AbstractHandler;
@@ -51,7 +51,7 @@ public class RESTParametersVersionSuffixTest
 
     private DefaultTranslator versionTranslator;
 
-    private GAV13Schema gavSchema;
+    private GAVSchema gavSchema;
 
     @Rule
     public final TestName testName = new TestName();
@@ -71,7 +71,7 @@ public class RESTParametersVersionSuffixTest
             {
                 jb.append( line );
             }
-            gavSchema = objectMapper.readValue( jb.toString(), GAV13Schema.class );
+            gavSchema = objectMapper.readValue( jb.toString(), GAVSchema.class );
             LOGGER.info( "Read request body '{}' and read parameters '{}' and Group {} ", jb, request.getParameterMap(), gavSchema.repositoryGroup );
             baseRequest.setHandled( true );
 
@@ -87,7 +87,7 @@ public class RESTParametersVersionSuffixTest
     @Test
     public void testVerifySuffix()
     {
-        this.versionTranslator = new DefaultTranslator( mockServer.getUrl(), RestProtocol.PNC13, 0,
+        this.versionTranslator = new DefaultTranslator( mockServer.getUrl(), RestProtocol.CURRENT, 0,
                                                         Translator.CHUNK_SPLIT_COUNT, "", suffix );
         List<ProjectVersionRef> gavs = new ArrayList<ProjectVersionRef>()
         {{
@@ -101,7 +101,7 @@ public class RESTParametersVersionSuffixTest
     @Test
     public void testVerifyNoSuffix()
     {
-        this.versionTranslator = new DefaultTranslator( mockServer.getUrl(), RestProtocol.PNC13, 0,
+        this.versionTranslator = new DefaultTranslator( mockServer.getUrl(), RestProtocol.CURRENT, 0,
                                                         Translator.CHUNK_SPLIT_COUNT, "", "" );
         List<ProjectVersionRef> gavs = new ArrayList<ProjectVersionRef>()
         {{

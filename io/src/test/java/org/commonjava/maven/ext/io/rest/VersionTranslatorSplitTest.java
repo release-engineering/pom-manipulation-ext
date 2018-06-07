@@ -39,7 +39,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static org.commonjava.maven.ext.io.rest.Translator.RestProtocol.PNC12;
+import static org.commonjava.maven.ext.io.rest.Translator.RestProtocol.CURRENT;
 import static org.commonjava.maven.ext.io.rest.VersionTranslatorTest.loadALotOfGAVs;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -60,7 +60,7 @@ public class VersionTranslatorSplitTest
     @Parameterized.Parameters()
     public static Collection<Object[]> data()
     {
-        return Arrays.asList( new Object[][] { { PNC12 } } );
+        return Arrays.asList( new Object[][] { { CURRENT } } );
     }
 
     @Rule

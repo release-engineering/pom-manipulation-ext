@@ -87,7 +87,7 @@ public class RESTParametersTest
     @Test
     public void testVerifyGroup()
     {
-        this.versionTranslator = new DefaultTranslator( mockServer.getUrl(), RestProtocol.PNC12, 0,
+        this.versionTranslator = new DefaultTranslator( mockServer.getUrl(), RestProtocol.CURRENT, 0,
                                                         Translator.CHUNK_SPLIT_COUNT, group, "" );
         List<ProjectVersionRef> gavs = new ArrayList<ProjectVersionRef>()
         {{
@@ -101,7 +101,7 @@ public class RESTParametersTest
     @Test
     public void testVerifyNoGroup()
     {
-        this.versionTranslator = new DefaultTranslator( mockServer.getUrl(), RestProtocol.PNC12, 0,
+        this.versionTranslator = new DefaultTranslator( mockServer.getUrl(), RestProtocol.CURRENT, 0,
                                                         Translator.CHUNK_SPLIT_COUNT, "", "" );
         List<ProjectVersionRef> gavs = new ArrayList<ProjectVersionRef>()
         {{
