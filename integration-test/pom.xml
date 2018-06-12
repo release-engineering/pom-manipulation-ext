@@ -22,7 +22,7 @@
   <parent>
     <groupId>org.commonjava.maven.ext</groupId>
     <artifactId>pom-manipulation-parent</artifactId>
-    <version>2.14-SNAPSHOT</version>
+    <version>3.0</version>
   </parent>
 
   <artifactId>pom-manipulation-integration-test</artifactId>
@@ -309,7 +309,7 @@
                   <localRepositoryPath>${localRepositoryUrlExt}</localRepositoryPath>
                   <mavenHome>${it.maven.home}</mavenHome>
                   <!-- Maven 3.0.0 changed defaults for cloneProjectsTo. Fixed in 3.0.2 -->
-                  <cloneProjectsTo></cloneProjectsTo>
+                  <cloneProjectsTo />
                   <setupIncludes>
                     <setupInclude>setup/*/pom.xml</setupInclude>
                   </setupIncludes>
