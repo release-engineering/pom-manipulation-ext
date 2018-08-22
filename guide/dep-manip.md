@@ -27,7 +27,7 @@ Multiple remote dependency-management poms can be specified using a comma separa
 
     mvn install -DdependencyManagement=org.foo:my-dep-pom:1.0,org.bar:my-dep-pom:2.0
 
-**NOTE:** If the BOM is specified in the format `-DdependencyManagement=org.foo:my-dep-pom:1.0-rebuild` i.e. a rebuild suffix is specified *but without a numeric portion* then PME will automatically replace the BOM GAV with the latest suffix via a REST call. For instance, assuming the latest suffix is rebuild-3, the above will be replaced implicitly by `-DdependencyManagement=org.foo:my-dep-pom:1.0-rebuild-3`.
+**Note:** If the BOM is specified in the format `-DdependencyManagement=org.foo:my-dep-pom:1.0-rebuild` i.e. a rebuild suffix is specified *but without a numeric portion* then PME will automatically replace the BOM GAV with the latest suffix via a REST call. For instance, assuming the latest suffix is rebuild-3, the above will be replaced implicitly by `-DdependencyManagement=org.foo:my-dep-pom:1.0-rebuild-3`.
 
 #### REST Endpoint
 
@@ -114,7 +114,7 @@ The blacklist REST endpoint should follow:
 </tr>
 </table>
 
-**NOTE:** For existing dependencies that reference a property, PME will update this property with the new version. If the property can't be found (e.g. it was inherited), a new one will be injected at the top level. This update of the property's value **may** implicitly align other dependencies using the same property that were not explicitly requested to be aligned.
+**Note:** For existing dependencies that reference a property, PME will update this property with the new version. If the property can't be found (e.g. it was inherited), a new one will be injected at the top level. This update of the property's value **may** implicitly align other dependencies using the same property that were not explicitly requested to be aligned.
 
 ### Direct Dependencies
 
@@ -174,9 +174,9 @@ It is possible to flexibly override or exclude a dependency globally or on a per
 
     mvn install -DdependencyExclusion.[groupId]:[artifactId]@[moduleGroupId]:[moduleArtifactId]=[version] | ,+[group:artifact]...
 
-**NOTE:** `dependencyOverride` is an alias for `dependencyExclusion` and functions _exactly the same_. If both are set then they will be merged and an error thrown if they clash.
+**Note:** `dependencyOverride` is an alias for `dependencyExclusion` and functions _exactly the same_. If both are set then they will be merged and an error thrown if they clash.
 
-**NOTE:** Multiple exclusions may be added using multiple instances of `-DdependencyExclusion...`.
+**Note:** Multiple exclusions may be added using multiple instances of `-DdependencyExclusion...`.
 
 #### Global Version Override
 
@@ -186,7 +186,7 @@ Sometimes it is more convenient to use the command line rather than a BOM. There
 
 This will, throughout the entire project (due to the wildcard), apply the explicit 4.10-rebuild-10 version to the junit:junit dependency.
 
-**NOTE:** Explicit overrides like this will take precedence over strict alignment and the BOM.
+**Note:** Explicit overrides like this will take precedence over strict alignment and the BOM.
 
 
 #### Per-Module Version Override
@@ -195,7 +195,7 @@ However, there are certain cases where it is useful to use different versions of
 
     mvn install -DdependencyOverride.junit:junit@org.foo:moduleB=4.10
 
-**NOTE:** Explicit overrides like this will take precedence over strict alignment and the BOM.
+**Note:** Explicit overrides like this will take precedence over strict alignment and the BOM.
 
 
 #### Per-Module Prevention of Override
@@ -297,7 +297,7 @@ If the build should fail when strict-mode checks are violated set `strictViolati
 
 This will cause the build to fail with a ManipulationException, and prevent the extension from rewriting any POM files.
 
-**NOTE:** dependency exclusions they will not work if the dependency uses a version property that has been changed by another dependency modification. Explicit version override will overwrite the property value though.
+**Note:** dependency exclusions they will not work if the dependency uses a version property that has been changed by another dependency modification. Explicit version override will overwrite the property value though.
 
 #### Strict Alignment and Suffixes
 
@@ -349,7 +349,7 @@ In order to handle the situation where one GAV is changed to another (e.g. from 
 
     -DdependencyRelocations.oldGroupId:[oldArtifact]@newGroupId:[newArtifactId]=[version],...
 
-**NOTE:** Multiple relocations may be added using multiple instances of `-DdependencyRelocation...`.
+**Note:** Multiple relocations may be added using multiple instances of `-DdependencyRelocation...`.
 
 ### Dependency Removal
 

@@ -38,6 +38,7 @@ This will inject all `<pluginManagement/>` versions, executions and configuratio
 
     mvn install -DpluginManagement=org.company:pluginMgrA:1.0,org.company:pluginMgrB:2.0
 
+**Note:** If the BOM is specified in the format `-DpluginManagement=org.foo:my-dep-pom:1.0-rebuild` i.e. a rebuild suffix is specified *but without a numeric portion* then PME will automatically replace the BOM GAV with the latest suffix via a REST call. For instance, assuming the latest suffix is rebuild-3, the above will be replaced implicitly by `-DpluginManagement=org.foo:my-dep-pom:1.0-rebuild-3`.
 
 ##### REST Endpoint
 
