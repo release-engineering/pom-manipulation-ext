@@ -21,7 +21,7 @@ System.out.println( "Slurping POM: ${pomFile.getAbsolutePath()}" )
 def pom = new XmlSlurper().parse( pomFile )
 
 System.out.println( "POM Version: ${pom.version.text()}" )
-assert pom.version.text().equals( '1.0.0.redhat-3' )
+assert pom.version.text().equals( '1.0.0.Final-redhat-3' )
 
 v = pom.parent.version.text()
 System.out.println( "POM Version: ${v}" )

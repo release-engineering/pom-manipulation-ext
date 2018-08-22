@@ -131,7 +131,7 @@ public class AddSuffixJettyHandler
                         }
                         else
                         {
-                            bestMatchVersion = version + "." + EXTENDED_SUFFIX;
+                            bestMatchVersion = version + "-" + EXTENDED_SUFFIX;
                         }
                     }
                     else
