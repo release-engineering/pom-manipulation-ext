@@ -65,6 +65,8 @@ The extension will, for every profile in the remote POM files, replace or add it
 
 **Note:** for any existing profile in the modified POM that specifies `activeByDefault`, this activation option will be removed so profiles are not accidentally disabled due to its exclusive semantics.
 
+**Note:** If the POM is specified in the format `-DprofileInjection=org.foo:profile-injection:1.0-rebuild` i.e. a rebuild suffix is specified *but without a numeric portion* then PME will automatically replace the POM GAV with the latest suffix via a REST call. For instance, assuming the latest suffix is rebuild-3, the above will be replaced implicitly by `-DprofileInjection=org.foo:profile-injection:1.0-rebuild-3`.
+
 #### Profile Removal
 
 PME supports removal of profiles as indicated by a comma separated list of profile IDs.
