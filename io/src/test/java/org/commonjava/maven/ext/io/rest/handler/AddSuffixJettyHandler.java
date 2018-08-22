@@ -119,7 +119,8 @@ public class AddSuffixJettyHandler
                     {
                         bestMatchVersion = version + "-" + EXTENDED_SUFFIX;
                     }
-                    else if ( ( (String) gav.get( "artifactId" ) ).startsWith( "depMgmt2" ) )
+                    else if ( ( (String) gav.get( "artifactId" ) ).startsWith( "depMgmt2" ) ||
+                                    ( (String) gav.get( "artifactId" ) ).startsWith( "pluginMgmt3" ) )
                     {
                         bestMatchVersion = "1.0.0-" + EXTENDED_SUFFIX;
                     }
@@ -131,7 +132,7 @@ public class AddSuffixJettyHandler
                         }
                         else
                         {
-                            bestMatchVersion = version + "." + EXTENDED_SUFFIX;
+                            bestMatchVersion = version + "-" + EXTENDED_SUFFIX;
                         }
                     }
                     else

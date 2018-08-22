@@ -221,12 +221,12 @@ public final class PropertiesUtils
     /**
      * Retrieve any configured rebuild suffix.
      * @param session Current ManipulationSession
-     * @return string suffix.
+     * @return non-null string suffix.
      */
-    public static String getSuffix (ManipulationSession session)
+    public static String getSuffix ( ManipulationSession session)
     {
         final VersioningState versioningState = session.getState( VersioningState.class );
-        String suffix = null;
+        String suffix = "";
 
         if ( versioningState.getIncrementalSerialSuffix() != null && !versioningState.getIncrementalSerialSuffix().isEmpty() )
         {
