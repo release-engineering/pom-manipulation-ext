@@ -55,6 +55,12 @@ As explained above, the default is `on`.
 
 ### Build Management
 
+#### Parent Injection
+
+PME supports injection of a parent GAV declared explicitly defined by the user e.g.
+
+    mvn install -DparentInjection=org.jboss:jboss-parent:11
+
 #### Profile Injection
 
 PME supports injection of profiles declared in multiple remote comma separated POM files. Simply supply a remote management POM:
