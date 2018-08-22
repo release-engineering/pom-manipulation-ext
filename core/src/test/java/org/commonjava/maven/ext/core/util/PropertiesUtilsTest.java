@@ -45,6 +45,7 @@ import java.util.Properties;
 
 import static org.commonjava.maven.ext.core.util.PropertiesUtils.updateProperties;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 public class PropertiesUtilsTest
@@ -77,6 +78,15 @@ public class PropertiesUtilsTest
         assertFalse( PropertiesUtils.checkStrictValue( session, "1.0.Final-SNAPSHOT", "1.0.0.redhat-1" ) );
         assertTrue( PropertiesUtils.checkStrictValue( session, "1.0-SNAPSHOT", "1.0.0.redhat-1" ) );
     }
+
+    @Test
+    public void testGetSuffix() throws Exception
+    {
+        p.remove( "version.suffix" );
+        ManipulationSession session = createUpdateSession();
+        assertNotNull( PropertiesUtils.getSuffix( session ) );
+    }
+
 
     @Test
     public void testStrictWithTimeStamp() throws Exception
