@@ -20,6 +20,12 @@ Note: This will only detect those profiles explicitly activated via -P ; propert
 
 ### POM Cleanup
 
+#### Version Range Resolving
+
+PME will automatically resolve ranges in versions in plugins and dependencies. This is active by default and may be disabled by setting `resolveRanges` to false. It will replace the range by a suitable concrete version determined by resolving the remote metadata and finding the largest version that matches the range specification.
+
+**Note:** Currently ranges within properties are not supported.
+
 #### Repository And Reporting Removal
 
 If the property `repoReportingRemoval` (*Deprecated property `repo-reporting-removal`*) is set, PME will remove all reporting and repository sections (including profiles) from the POM files.
