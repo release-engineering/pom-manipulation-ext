@@ -21,7 +21,6 @@ import org.commonjava.maven.ext.core.ManipulationSession;
 import org.commonjava.maven.ext.core.fixture.TestUtils;
 import org.commonjava.maven.ext.core.impl.RESTCollector;
 import org.commonjava.maven.ext.io.PomIO;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.File;

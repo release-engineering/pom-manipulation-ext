@@ -1123,7 +1123,7 @@ public class VersioningCalculatorTest
 
         final MavenExecutionRequest req =
             new DefaultMavenExecutionRequest().setUserProperties( properties )
-                                              .setRemoteRepositories( Arrays.asList( ar ) );
+                                              .setRemoteRepositories( Collections.singletonList( ar ) );
 
         final PlexusContainer container = new DefaultPlexusContainer();
 
