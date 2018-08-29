@@ -50,6 +50,8 @@ public class AddSuffixJettyHandler
 
     private static final String EXTENDED_SUFFIX = "redhat-2";
 
+    private static final String MIXED_SUFFIX = "redhat-temporary-1";
+
     private final String endpoint;
 
     private final String suffix;
@@ -101,6 +103,7 @@ public class AddSuffixJettyHandler
 
             if ( target.equals( DEFAULT_ENDPOINT ) )
             {
+                boolean useMixedSuffix = false;
                 // Protocol analysis
                 GAVSchema gavSchema = objectMapper.readValue( jb.toString(), GAVSchema.class );
                 requestBody = gavSchema.gavs;
@@ -119,6 +122,12 @@ public class AddSuffixJettyHandler
                     {
                         bestMatchVersion = version + "-" + EXTENDED_SUFFIX;
                     }
+                    else if ( ( (String) gav.get( "artifactId" ) ).startsWith( "rest-version-manip-mixed-suffix" ) )
+                    {
+                        useMixedSuffix = true;
+                        bestMatchVersion = version + "-" + this.suffix;
+
+                    }
                     else if ( ( (String) gav.get( "artifactId" ) ).startsWith( "depMgmt2" ) ||
                                     ( (String) gav.get( "artifactId" ) ).startsWith( "pluginMgmt3" ) )
                     {
@@ -135,12 +144,16 @@ public class AddSuffixJettyHandler
                             bestMatchVersion = version + "-" + EXTENDED_SUFFIX;
                         }
                     }
+                    else if ( useMixedSuffix )
+                    {
+                        bestMatchVersion = version + "-" + MIXED_SUFFIX;
+                    }
                     else
                     {
                         bestMatchVersion = version + "-" + this.suffix;
                     }
-                    LOGGER.info( "For GA {}, requesting version {} and got bestMatch {} ", gav, version,
-                                 bestMatchVersion );
+                    LOGGER.info( "For GA {}, requesting version {} and got bestMatch {} with availableVersions {} ", gav, version,
+                                 bestMatchVersion, availableVersions );
 
                     availableVersions.add( bestMatchVersion );
 
@@ -151,6 +164,8 @@ public class AddSuffixJettyHandler
 
                     responseBody.add( gav );
                 }
+
+                LOGGER.info( "Returning response body '{}'", responseBody );
             }
             else
             {
