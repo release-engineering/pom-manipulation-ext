@@ -18,6 +18,9 @@ package org.commonjava.maven.ext.core.groovy;
 import groovy.lang.Script;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.ext.common.model.Project;
+import org.commonjava.maven.ext.common.session.MavenSessionHandler;
+import org.commonjava.maven.ext.core.ManipulationSession;
+import org.commonjava.maven.ext.io.ModelIO;
 
 import java.io.File;
 import java.util.List;
@@ -29,15 +32,19 @@ import java.util.Properties;
  */
 public abstract class BaseScript extends Script
 {
-    protected List<Project> projects;
+    private List<Project> projects;
 
-    protected Project project;
+    private Project project;
 
-    protected ProjectVersionRef gav;
+    private ProjectVersionRef gav;
 
-    protected File basedir;
+    private File basedir;
 
-    protected Properties userProperties;
+    private Properties userProperties;
+
+    private ModelIO modelIO;
+
+    private MavenSessionHandler sessionHandler;
 
     /**
      * Return the current Project
@@ -85,19 +92,40 @@ public abstract class BaseScript extends Script
     }
 
     /**
+     * Get the modelIO instance for remote artifact resolving.
+     * @return a {@link ModelIO} reference.
+     */
+    public ModelIO getModelIO()
+    {
+        return modelIO;
+    }
+
+    /**
+     * Get the MavenSessionHandler instance
+     * @return a {@link MavenSessionHandler} reference.
+     */
+    public MavenSessionHandler getSession()
+    {
+        return sessionHandler;
+    }
+
+    /**
      * Internal use only - the {@link org.commonjava.maven.ext.core.impl.GroovyManipulator} uses this to
      * initialise the values
-     * @param userProperties User properties instance
+     * @param modelIO the modelIO instance.
+     * @param session the Session instance.
      * @param projects ArrayList of Project instances
      * @param project Current project
      */
-    public void setValues(Properties userProperties, List<Project> projects, Project project)
+    public void setValues( ModelIO modelIO, ManipulationSession session, List<Project> projects, Project project )
     {
+        this.modelIO = modelIO;
+        this.sessionHandler = session;
         this.projects = projects;
         this.project = project;
         this.gav = project.getKey();
         this.basedir = project.getPom().getParentFile();
-        this.userProperties = userProperties;
+        this.userProperties = session.getUserProperties();
 
         System.out.println ("Injecting values. Project is " + project + " with basedir " + basedir + " and properties " + userProperties);
     }
