@@ -86,9 +86,11 @@ This make the following API available:
 | -------|:------------|
 | [Properties](https://docs.oracle.com/javase/7/docs/api/java/util/Properties.html) getUserProperties() | Get the user properties. |
 | [File](https://docs.oracle.com/javase/7/docs/api/java/io/File.html) getBaseDir() | Get the working directory (the execution root). |
-| [ProjectVersionRef](https://github.com/Commonjava/atlas/blob/master/identities/src/main/java/org/commonjava/maven/atlas/ident/ref/ProjectVersionRef.java)) getGAV() | Obtain the GAV of the current project |
-| [Project](https://github.com/release-engineering/pom-manipulation-ext/blob/master/common/src/main/java/org/commonjava/maven/ext/manip/model/Project.java) getProject() | Return the current Project |
+| [ProjectVersionRef](https://github.com/Commonjava/atlas/blob/master/identities/src/main/java/org/commonjava/maven/atlas/ident/ref/ProjectVersionRef.java) getGAV() | Obtain the GAV of the current project |
+| [Project](https://github.com/release-engineering/pom-manipulation-ext/blob/master/common/src/main/java/org/commonjava/maven/ext/common/model/Project.java) getProject() | Return the current Project |
 | [ArrayList](https://docs.oracle.com/javase/7/docs/api/java/util/ArrayList.html)<[ProjectVersionRef](https://github.com/Commonjava/atlas/blob/master/identities/src/main/java/org/commonjava/maven/atlas/ident/ref/ProjectVersionRef.java)> getProjects() | Returns the entire collection of Projects |
+| [MavenSessionHandler](https://github.com/release-engineering/pom-manipulation-ext/blob/master/common/src/main/java/org/commonjava/maven/ext/common/session/MavenSessionHandler.java) getSession() | Return the current session handler |
+| [ModelIO](https://github.com/release-engineering/pom-manipulation-ext/blob/master/io/src/main/java/org/commonjava/maven/ext/io/ModelIO.java) getModelIO() | Return a ModelIO instance for artifact resolving |
 
 This can then be invoked by e.g.
 
