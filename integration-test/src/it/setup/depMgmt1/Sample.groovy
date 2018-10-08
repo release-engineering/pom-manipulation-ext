@@ -19,6 +19,7 @@ import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 import groovy.transform.BaseScript
 import groovy.util.logging.Slf4j
+import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef
 
 @BaseScript org.commonjava.maven.ext.core.groovy.BaseScript pme
 
@@ -74,9 +75,11 @@ println pme.getProjects()
 println pme.getProject().getClass().getName()
 println pme.getProjects()
 println pme.getProject().getClass().getName()
+println pme.getModelIO().resolveRawModel(SimpleProjectVersionRef.parse("org.jboss:jboss-parent:10")).getScm()
+println pme.getSession().getPom()
 println "#### BASESCRIPT END"
 
 // End...
 
-def Processor sp = new Processor(basedir:pme.getBaseDir(), props:pme.getUserProperties())
+Processor sp = new Processor(basedir:pme.getBaseDir(), props:pme.getUserProperties())
 sp.execute()

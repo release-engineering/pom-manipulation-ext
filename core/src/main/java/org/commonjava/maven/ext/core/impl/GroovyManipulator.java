@@ -118,7 +118,7 @@ public class GroovyManipulator
 
                         if ( script instanceof BaseScript )
                         {
-                            ((BaseScript)script).setValues(session.getUserProperties(), projects, project);
+                            ((BaseScript)script).setValues(modelBuilder, session, projects, project);
                         }
                         else
                         {
