@@ -29,6 +29,7 @@ import org.commonjava.maven.ext.core.state.VersioningState;
 import javax.inject.Named;
 import javax.inject.Singleton;
 import java.io.File;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -189,8 +190,7 @@ public class ManipulationSession
     @Override
     public List<String> getActiveProfiles()
     {
-        return mavenSession == null || mavenSession.getRequest() == null ? null : mavenSession.getRequest()
-                                                                                              .getActiveProfiles();
+        return mavenSession == null || mavenSession.getRequest() == null ? Collections.emptyList() : mavenSession.getRequest().getActiveProfiles();
     }
 
     @Override

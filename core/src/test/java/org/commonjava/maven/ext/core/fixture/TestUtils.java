@@ -15,13 +15,22 @@
  */
 package org.commonjava.maven.ext.core.fixture;
 
+import org.apache.maven.execution.DefaultMavenExecutionRequest;
+import org.apache.maven.execution.DefaultMavenExecutionResult;
+import org.apache.maven.execution.MavenExecutionRequest;
+import org.apache.maven.execution.MavenSession;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
+import org.codehaus.plexus.DefaultPlexusContainer;
+import org.codehaus.plexus.PlexusContainer;
+import org.codehaus.plexus.PlexusContainerException;
 import org.commonjava.maven.ext.common.ManipulationException;
+import org.commonjava.maven.ext.core.ManipulationSession;
 
 import java.io.File;
 import java.io.FileReader;
 import java.net.URL;
+import java.util.Properties;
 
 public class TestUtils
 {
@@ -52,5 +61,26 @@ public class TestUtils
         result.setArtifactId( "dummy-model" );
         result.setVersion( "1.0.0-SNAPSHOT" );
         return result;
+    }
+
+    public static ManipulationSession createSession( Properties p ) throws ManipulationException
+    {
+        ManipulationSession session = new ManipulationSession();
+
+        final MavenExecutionRequest req = new DefaultMavenExecutionRequest().setUserProperties( p );
+        final PlexusContainer container;
+        try
+        {
+            container = new DefaultPlexusContainer();
+        }
+        catch ( PlexusContainerException e )
+        {
+            throw new ManipulationException( "Unable to create DefaultPlexusContainer", e );
+        }
+        final MavenSession mavenSession = new MavenSession( container, null, req, new DefaultMavenExecutionResult() );
+
+        session.setMavenSession( mavenSession );
+
+        return session;
     }
 }
