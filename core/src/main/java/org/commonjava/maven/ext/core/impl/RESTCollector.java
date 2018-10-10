@@ -105,7 +105,7 @@ public class RESTCollector
 
                 if ( project.getVersion().endsWith( "-SNAPSHOT" ) )
                 {
-                    if ( !vs.preserveSnapshot() )
+                    if ( !vs.isPreserveSnapshot() )
                     {
                         newKey = new SimpleProjectVersionRef( project.getKey().asProjectRef(), project.getVersion()
                                                                                                       .substring( 0,

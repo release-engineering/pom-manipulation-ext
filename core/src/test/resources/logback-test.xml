@@ -25,7 +25,7 @@
     </encoder>
   </appender>
 
-  <logger name="org.commonjava.maven.ext" level="DEBUG">
+  <logger name="org.commonjava.maven.ext" level="DEBUG" additivity="false">
     <appender-ref ref="STDOUT" />
   </logger>
 

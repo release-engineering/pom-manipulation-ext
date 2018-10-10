@@ -37,13 +37,18 @@ import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
+import java.util.stream.Stream;
 
+import static java.util.stream.Collectors.toSet;
 import static org.commonjava.maven.ext.core.util.PropertiesUtils.updateProperties;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -275,5 +280,89 @@ public class PropertiesUtilsTest
 
         assertTrue ( pC.getResolvedPlugins( session ).size() == 0);
         assertTrue ( pC.getResolvedManagedPlugins( session ).size() == 0);
+    }
+
+    @Test
+    public void testBuildOldValueSetWithTemporary ()
+    {
+        Properties user = new Properties();
+        user.setProperty( VersioningState.INCREMENT_SERIAL_SUFFIX_SYSPROP.getCurrent(), "temporary-redhat" );
+        final VersioningState vs = new VersioningState( user );
+
+        Set<String> found = PropertiesUtils.buildOldValueSet( vs, "1.0.0.Final-redhat-10" );
+
+        assertEquals( Stream.of( "1.0.0.Final-temporary-redhat-0", "1.0.0.Final-redhat-10" ).collect(toSet()), found );
+    }
+
+    @Test
+    public void testBuildOldValueSetWithTemporaryAndMultipleAlternatives ()
+    {
+        Properties user = new Properties();
+        user.setProperty( VersioningState.INCREMENT_SERIAL_SUFFIX_SYSPROP.getCurrent(), "temporary-redhat" );
+        user.setProperty( VersioningState.VERSION_SUFFIX_ALT, "foobar,redhat" );
+        final VersioningState vs = new VersioningState( user );
+
+        Set<String> found = PropertiesUtils.buildOldValueSet( vs, "1.0.0.Final-foobar-10" );
+        assertEquals( Stream.of( "1.0.0.Final-foobar-10", "1.0.0.Final-temporary-redhat-0" ).collect(toSet()), found );
+    }
+
+    @Test
+    public void testBuildOldValueSetWithNoAlternatives ()
+    {
+        Properties user = new Properties();
+        user.setProperty( VersioningState.INCREMENT_SERIAL_SUFFIX_SYSPROP.getCurrent(), "redhat" );
+        final VersioningState vs = new VersioningState( user );
+
+        Set<String> found = PropertiesUtils.buildOldValueSet( vs, "1.0.0.Final-temporary-redhat-10" );
+        System.out.println ("### Found " + found);
+        assertEquals( Stream.of( "1.0.0.Final-temporary-redhat-10" ).collect(toSet()), found );
+    }
+
+    @Test
+    public void testBuildOldValueSetWithNoSuffix ()
+    {
+        Properties user = new Properties();
+        final VersioningState vs = new VersioningState( user );
+
+        Set<String> found = PropertiesUtils.buildOldValueSet( vs, "1.0.0.Final-redhat-10" );
+        assertEquals( Stream.of( "1.0.0.Final-redhat-10" ).collect(toSet()), found );
+    }
+
+    @Test
+    public void testBuildOldValueSetWithNoStartSuffix ()
+    {
+        Properties user = new Properties();
+        user.setProperty( VersioningState.INCREMENT_SERIAL_SUFFIX_SYSPROP.getCurrent(), "redhat" );
+        final VersioningState vs = new VersioningState( user );
+
+        Set<String> found = PropertiesUtils.buildOldValueSet( vs, "1.0" );
+        assertEquals( Stream.of( "1.0" ).collect(toSet()), found );
+    }
+
+    @Test
+    public void testNoSuffix() throws Exception
+    {
+        p.clear();
+        ManipulationSession session = createUpdateSession();
+        VersioningState vs = session.getState( VersioningState.class );
+        assertEquals( 0, vs.getAllSuffixes().size() );
+    }
+
+    @Test
+    public void testAllSuffixWithRH() throws Exception
+    {
+        ManipulationSession session = createUpdateSession();
+        VersioningState vs = session.getState( VersioningState.class );
+        assertEquals( 1, vs.getAllSuffixes().size() );
+        assertEquals( "redhat", vs.getAllSuffixes().get( 0 ) );
+    }
+
+    @Test
+    public void testAllSuffixWithNonRH() throws Exception
+    {
+        p.setProperty( "version.suffix", "a-random-value" );
+        ManipulationSession session = createUpdateSession();
+        VersioningState vs = session.getState( VersioningState.class );
+        assertEquals( Arrays.asList( "a-random", "redhat" ), vs.getAllSuffixes() );
     }
 }

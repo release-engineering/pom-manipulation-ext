@@ -60,8 +60,8 @@ import java.util.Map;
 import java.util.Properties;
 
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
 
 public class VersioningCalculatorTest
 {
@@ -992,29 +992,29 @@ public class VersioningCalculatorTest
         final Properties props = new Properties();
         setupSession( props );
 
-        int padding = Version.getBuildNumberPadding( 0, new HashSet<>( Arrays.asList( "1.2.0.GA-foo-0" ) ) );
-        assertTrue( padding == 1 );
+        int padding = Version.getBuildNumberPadding( 0, new HashSet<>( Collections.singletonList( "1.2.0.GA-foo-0" ) ) );
+        assertEquals( 1, padding );
 
-        padding = Version.getBuildNumberPadding( 0, new HashSet<>( Arrays.asList( "1.2.0.GA-foo-01" ) ) );
-        assertTrue( padding == 2 );
+        padding = Version.getBuildNumberPadding( 0, new HashSet<>( Collections.singletonList( "1.2.0.GA-foo-01" ) ) );
+        assertEquals( 2, padding );
 
-        padding = Version.getBuildNumberPadding( 0, new HashSet<>( Arrays.asList( "1.2.0.GA-foo-101" ) ) );
-        assertTrue( padding == 3 );
+        padding = Version.getBuildNumberPadding( 0, new HashSet<>( Collections.singletonList( "1.2.0.GA-foo-101" ) ) );
+        assertEquals( 3, padding );
 
-        padding = Version.getBuildNumberPadding( 0, new HashSet<>( Arrays.asList( "1.2.0.GA-foo-001" ) ) );
-        assertTrue( padding == 3 );
+        padding = Version.getBuildNumberPadding( 0, new HashSet<>( Collections.singletonList( "1.2.0.GA-foo-001" ) ) );
+        assertEquals( 3, padding );
 
-        padding = Version.getBuildNumberPadding( 0, new HashSet<>( Arrays.asList( "1.2.0.GA-foo-9" ) ) );
-        assertTrue( padding == 1 );
+        padding = Version.getBuildNumberPadding( 0, new HashSet<>( Collections.singletonList( "1.2.0.GA-foo-9" ) ) );
+        assertEquals( 1, padding );
 
-        padding = Version.getBuildNumberPadding( 0, new HashSet<>( Arrays.asList( "1.0.0.redhat-1" ) ) );
-        assertTrue( padding == 1 );
+        padding = Version.getBuildNumberPadding( 0, new HashSet<>( Collections.singletonList( "1.0.0.redhat-1" ) ) );
+        assertEquals( 1, padding );
 
-        padding = Version.getBuildNumberPadding( 0, new HashSet<>( Arrays.asList( "1.0.0.Final.rebuild-01912-01" ) ) );
-        assertTrue( padding == 2 );
+        padding = Version.getBuildNumberPadding( 0, new HashSet<>( Collections.singletonList( "1.0.0.Final.rebuild-01912-01" ) ) );
+        assertEquals( 2, padding );
 
-        padding = Version.getBuildNumberPadding( 0, new HashSet<>( Arrays.asList( "1.0.0.GA.rebuild-010" ) ) );
-        assertTrue( padding == 3 );
+        padding = Version.getBuildNumberPadding( 0, new HashSet<>( Collections.singletonList( "1.0.0.GA.rebuild-010" ) ) );
+        assertEquals( 3, padding );
     }
 
     @Test
@@ -1022,30 +1022,30 @@ public class VersioningCalculatorTest
     {
         String paddedBuildNum = StringUtils.leftPad( "1", 0, '0' );
         System.out.println ("### got " + paddedBuildNum);
-        assertTrue( paddedBuildNum.equals( "1" ) );
+        assertEquals( "1", paddedBuildNum );
         paddedBuildNum = StringUtils.leftPad( "1", 1, '0' );
         System.out.println ("### got " + paddedBuildNum);
-        assertTrue( paddedBuildNum.equals( "1" ) );
+        assertEquals( "1", paddedBuildNum );
 
         paddedBuildNum = StringUtils.leftPad( "1", 2, '0' );
         System.out.println ("### got " + paddedBuildNum);
-        assertTrue( paddedBuildNum.equals( "01" ) );
+        assertEquals( "01", paddedBuildNum );
 
         paddedBuildNum = StringUtils.leftPad( "1", 3, '0' );
         System.out.println ("### got " + paddedBuildNum);
-        assertTrue( paddedBuildNum.equals( "001" ) );
+        assertEquals( "001", paddedBuildNum );
 
         paddedBuildNum = StringUtils.leftPad( "10", 3, '0' );
         System.out.println ("### got " + paddedBuildNum);
-        assertTrue( paddedBuildNum.equals( "010" ) );
+        assertEquals( "010", paddedBuildNum );
 
         paddedBuildNum = StringUtils.leftPad( "010", 3, '0' );
         System.out.println ("### got " + paddedBuildNum);
-        assertTrue( paddedBuildNum.equals( "010" ) );
+        assertEquals( "010", paddedBuildNum );
 
         paddedBuildNum = StringUtils.leftPad( "010", 6, '0' );
         System.out.println ("### got " + paddedBuildNum);
-        assertTrue( paddedBuildNum.equals( "000010" ) );
+        assertEquals( "000010", paddedBuildNum );
     }
 
     @Test
@@ -1101,7 +1101,7 @@ public class VersioningCalculatorTest
         throws Exception
     {
         String modifiedVersion = modder.calculate( GROUP_ID, ARTIFACT_ID, version, session );
-        if ( session.getState( VersioningState.class ).osgi() )
+        if ( session.getState( VersioningState.class ).isOsgi() )
         {
             return Version.getOsgiVersion( modifiedVersion );
         }
@@ -1164,13 +1164,6 @@ public class VersioningCalculatorTest
     public static final class TestVersionCalculator
         extends VersionCalculator
     {
-
-        public TestVersionCalculator( final ManipulationSession session )
-            throws ManipulationException
-        {
-            super( new GalleyAPIWrapper( new GalleyInfrastructure( session.getTargetDir(), session.getRemoteRepositories(),
-                                                                   session.getLocalRepository(), session.getSettings(), session.getActiveProfiles() ) ) );
-        }
 
         public TestVersionCalculator( final ManipulationSession session, final Location mdLoc, final Transport mdTrans,
                                       final File cacheDir )

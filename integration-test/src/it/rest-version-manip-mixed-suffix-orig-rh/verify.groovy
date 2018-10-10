@@ -26,17 +26,21 @@ assert pom.version.text().equals( '1.0.0.temporary-redhat-1' )
 // Currently the AddSuffixJettyHandler doesn't do OSGi compatibility.
 def dependency = pom.dependencyManagement.dependencies.dependency.find { it.artifactId.text() == "commons-lang" }
 assert dependency != null
-assert dependency.version.text() == "1.0-temporary-redhat-1"
+assert dependency.version.text() == "1.0.0.temporary-redhat-1"
 
 dependency = pom.dependencies.dependency.find { it.artifactId.text() == "errai-common" }
 assert dependency != null
 assert dependency.version.text() == "1.1-Final-temporary-redhat-1"
 
-def passed = false
-pom.properties.each {
-    if ( it.text().contains ("3.1-temporary-redhat-1") )
+def passed = 0
+pom.properties.children().each {
+    if ( it.text().contains ("3.1.0-temporary-redhat-2") && it.name() == "httpclient" )
     {
-        passed = true
+        passed++
+    }
+    if ( it.text().contains ("1.1-Final-redhat-2") && it.name() == "errai-tools" )
+    {
+        passed++
     }
 }
-assert (passed == true)
+assert (passed == 2)

@@ -695,6 +695,7 @@ public class DependencyManipulator implements Manipulator
                                 logger.debug( "Altered dependency {} : {} -> {}", groupIdArtifactId, oldVersion,
                                               overrideVersion );
 
+                                // This block handles a version that is a partial property with a value.
                                 if ( oldVersion.contains( "${" ) )
                                 {
                                     String suffix = PropertiesUtils.getSuffix( session );

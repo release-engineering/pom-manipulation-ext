@@ -138,7 +138,7 @@ public class ProjectVersioningManipulator
     protected boolean applyVersioningChanges( final Project project, final VersioningState state )
         throws ManipulationException
     {
-        if ( !state.hasVersionsByGAVMap() )
+        if ( !state.hasVersionsByGAV() )
         {
             return false;
         }
@@ -146,7 +146,7 @@ public class ProjectVersioningManipulator
         // Model should never be null.
         final Model model = project.getModel();
         final Parent parent = model.getParent();
-        final Map<ProjectVersionRef, String> versionsByGAV = state.getVersionsByGAVMap();
+        final Map<ProjectVersionRef, String> versionsByGAV = state.getVersionsByGAV();
 
         ProjectVersionRef gav = project.getKey();
         boolean changed = false;
