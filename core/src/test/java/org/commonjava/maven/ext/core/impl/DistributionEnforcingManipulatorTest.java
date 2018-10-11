@@ -29,6 +29,7 @@ import org.codehaus.plexus.DefaultPlexusContainer;
 import org.codehaus.plexus.PlexusContainer;
 import org.codehaus.plexus.util.xml.Xpp3DomBuilder;
 import org.commonjava.maven.ext.common.model.Project;
+import org.commonjava.maven.ext.common.util.ProfileUtils;
 import org.commonjava.maven.ext.core.ManipulationSession;
 import org.commonjava.maven.ext.core.fixture.TestUtils;
 import org.commonjava.maven.ext.core.state.DistributionEnforcingState;
@@ -49,6 +50,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
+import static org.commonjava.maven.ext.core.fixture.TestUtils.createSession;
 import static org.commonjava.maven.ext.core.impl.DistributionEnforcingManipulator.MAVEN_DEPLOY_ARTIFACTID;
 import static org.commonjava.maven.ext.core.impl.DistributionEnforcingManipulator.MAVEN_INSTALL_ARTIFACTID;
 import static org.commonjava.maven.ext.core.impl.DistributionEnforcingManipulator.MAVEN_PLUGIN_GROUPID;
@@ -342,6 +344,7 @@ public class DistributionEnforcingManipulatorTest
         throws Exception
     {
         userCliProperties = new Properties();
+        userCliProperties.setProperty( ProfileUtils.PROFILE_SCANNING, "false");
         session = new ManipulationSession();
 
         final GalleyInfrastructure galleyInfra =

@@ -47,6 +47,7 @@ public class FileIO
      *
      * @param ref the ArtifactRef to read.
      * @return the file for the URL
+     * @throws IOException if an error occurs.
      */
     public File resolveURL( final URL ref ) throws IOException
     {

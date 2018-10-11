@@ -24,7 +24,11 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.introspect.VisibilityChecker;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.apache.maven.execution.MavenSession;
+import org.apache.maven.profiles.DefaultProfileManager;
+import org.apache.maven.profiles.activation.ProfileActivationException;
 import org.apache.maven.project.ProjectBuilder;
+import org.codehaus.plexus.DefaultPlexusContainer;
+import org.codehaus.plexus.PlexusContainerException;
 import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.common.model.GAV;
 import org.commonjava.maven.ext.common.model.Project;
@@ -49,7 +53,12 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
+import java.util.stream.Collectors;
+
+import static org.commonjava.maven.ext.common.util.ProfileUtils.PROFILE_SCANNING;
+import static org.commonjava.maven.ext.common.util.ProfileUtils.PROFILE_SCANNING_DEFAULT;
 
 /**
  * Coordinates manipulation of the POMs in a build, by providing methods to read the project set from files ahead of the build proper (using
@@ -147,6 +156,7 @@ public class ManipulationManager
     {
         final List<Project> projects = pomIO.parseProject( session.getPom() );
 
+        session.getActiveProfiles().addAll( parseActiveProfiles( session, projects ) );
         session.setProjects( projects );
 
         for ( final Project project : projects )
@@ -192,6 +202,40 @@ public class ManipulationManager
             e.finish();
         }
         logger.info( "Maven-Manipulation-Extension: Finished." );
+    }
+
+    @SuppressWarnings( {"unchecked", "deprecation" } )
+    private Set<String> parseActiveProfiles( ManipulationSession session, List<Project> projects ) throws ManipulationException
+    {
+        final Set<String> activeProfiles = new HashSet<>();
+        final DefaultProfileManager dpm;
+        try
+        {
+            dpm = new DefaultProfileManager( new DefaultPlexusContainer(), session.getUserProperties() );
+        }
+        catch ( PlexusContainerException e )
+        {
+            throw new ManipulationException( "Unable to create DefaultProfileManager", e );
+        }
+
+        for ( Project p : projects )
+        {
+            dpm.addProfiles( p.getModel().getProfiles() );
+            try
+            {
+                List<org.apache.maven.model.Profile> ap = dpm.getActiveProfiles();
+                activeProfiles.addAll( ap.stream().map( org.apache.maven.model.Profile::getId ).collect( Collectors.toList() ) );
+            }
+            catch ( ProfileActivationException e )
+            {
+                throw new ManipulationException( "Activation detection failure", e );
+            }
+        }
+        logger.debug( "Will {}scan all profiles and returning active profiles of {} ",
+                      Boolean.parseBoolean( session.getUserProperties().getProperty( PROFILE_SCANNING, PROFILE_SCANNING_DEFAULT ) ) ? "not " : "",
+                      activeProfiles );
+
+        return activeProfiles;
     }
 
     /**

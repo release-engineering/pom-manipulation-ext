@@ -98,6 +98,8 @@ public class Cli
 
     private PomIO pomIO;
 
+    private PlexusContainer container;
+
     /**
      * Default pom file to operate against.
      */
@@ -417,13 +419,13 @@ public class Cli
             config.setClassPathScanning( PlexusConstants.SCANNING_ON );
             config.setComponentVisibility( PlexusConstants.GLOBAL_VISIBILITY );
             config.setName( "PME-CLI" );
-            PlexusContainer container = new DefaultPlexusContainer(config);
+            container = new DefaultPlexusContainer(config);
 
             pomIO = container.lookup( PomIO.class );
             session = container.lookup( ManipulationSession.class );
             manipulationManager = container.lookup( ManipulationManager.class );
 
-            final MavenExecutionRequest req = new DefaultMavenExecutionRequest().setUserProperties( System.getProperties() )
+            final MavenExecutionRequest req = new DefaultMavenExecutionRequest().setSystemProperties( System.getProperties() )
                                                                                 .setUserProperties( userProps )
                                                                                 .setRemoteRepositories( Collections.<ArtifactRepository>emptyList() );
 
@@ -494,10 +496,8 @@ public class Cli
         }
     }
 
-    private Settings parseSettings( File settings )
-        throws PlexusContainerException, ComponentLookupException, SettingsBuildingException
+    private Settings parseSettings( File settings ) throws ComponentLookupException, SettingsBuildingException
     {
-        PlexusContainer container = new DefaultPlexusContainer();
         DefaultSettingsBuildingRequest settingsRequest = new DefaultSettingsBuildingRequest();
         settingsRequest.setUserSettingsFile( settings );
         settingsRequest.setGlobalSettingsFile( DEFAULT_GLOBAL_SETTINGS_FILE );

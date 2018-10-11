@@ -25,6 +25,7 @@ import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef;
 import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.common.model.Project;
+import org.commonjava.maven.ext.common.util.ProfileUtils;
 import org.commonjava.maven.ext.core.ManipulationSession;
 import org.commonjava.maven.ext.core.state.VersioningState;
 import org.commonjava.maven.ext.io.resolver.GalleyAPIWrapper;
@@ -40,8 +41,10 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 
+import static org.commonjava.maven.ext.core.fixture.TestUtils.createSession;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
@@ -613,7 +616,9 @@ public class ProjectVersionManipulatorTest
     private TestVersioningModifier newVersioningModifier()
         throws ManipulationException
     {
-        return new TestVersioningModifier( new ManipulationSession() );
+        Properties p = new Properties( );
+        p.setProperty( ProfileUtils.PROFILE_SCANNING, "false");
+        return new TestVersioningModifier( createSession( p ) );
     }
 
     private static final class TestVersioningModifier

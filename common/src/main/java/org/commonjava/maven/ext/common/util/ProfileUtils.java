@@ -32,6 +32,8 @@ public final class ProfileUtils
      */
     public static final String PROFILE_SCANNING = "scanActiveProfiles";
 
+    public static String PROFILE_SCANNING_DEFAULT = "true";
+
     private ProfileUtils()
     {
     }
@@ -41,7 +43,7 @@ public final class ProfileUtils
     {
         final List<Profile> result = new ArrayList<>( );
         final List<Profile> profiles = model.getProfiles();
-        final boolean scanActiveProfiles = Boolean.parseBoolean( session.getUserProperties().getProperty( PROFILE_SCANNING , "false" ) );
+        final boolean scanActiveProfiles = Boolean.parseBoolean( session.getUserProperties().getProperty( PROFILE_SCANNING, PROFILE_SCANNING_DEFAULT ) );
 
         if ( profiles != null )
         {
