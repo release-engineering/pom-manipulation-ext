@@ -13,30 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-
 def pomFile = new File( basedir, 'pom.xml' )
 System.out.println( "Slurping POM: ${pomFile.getAbsolutePath()}" )
 
 def pom = new XmlSlurper().parse( pomFile )
 
-System.out.println( "POM Version: ${pom.version.text()}" )
 assert pom.version.text().equals( '1.0.0.temporary-redhat-1' )
 
-// Currently the AddSuffixJettyHandler doesn't do OSGi compatibility.
-def dependency = pom.dependencyManagement.dependencies.dependency.find { it.artifactId.text() == "commons-lang" }
+def dependency = pom.dependencies.dependency.find { it.artifactId.text() == "junit" }
 assert dependency != null
-assert dependency.version.text() == "1.0-temporary-redhat-1"
+assert dependency.version.text() == "3.8.2"
 
-dependency = pom.dependencies.dependency.find { it.artifactId.text() == "errai-common" }
+dependency = pom.dependencies.dependency.find { it.artifactId.text() == "commons-lang" }
 assert dependency != null
-assert dependency.version.text() == "1.1-Final-temporary-redhat-1"
-
-def passed = false
-pom.properties.each {
-    if ( it.text().contains ("3.1-temporary-redhat-1") )
-    {
-        passed = true
-    }
-}
-assert (passed == true)
+assert dependency.version.text() == "2.6.0.redhat-4"

@@ -16,6 +16,8 @@
 package org.commonjava.maven.ext.core.state;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Getter;
+import org.apache.commons.lang.StringUtils;
 import org.commonjava.maven.atlas.ident.ref.ProjectRef;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.ext.common.model.GAV;
@@ -23,16 +25,23 @@ import org.commonjava.maven.ext.core.impl.ProjectVersioningManipulator;
 import org.commonjava.maven.ext.core.util.PropertiesUtils;
 import org.commonjava.maven.ext.core.util.PropertyFlag;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+
+import static org.apache.commons.lang.StringUtils.isEmpty;
+import static org.apache.commons.lang.StringUtils.isNotEmpty;
 
 /**
  * Captures configuration and changes relating to the projects' versions. Used by {@link ProjectVersioningManipulator}.
  *
  * @author jdcasey
  */
+@Getter
 public class VersioningState
     implements State
 {
@@ -48,17 +57,42 @@ public class VersioningState
 
     public static final PropertyFlag VERSION_OVERRIDE_SYSPROP = new PropertyFlag( "version.override", "versionOverride");
 
+    public static final String VERSION_SUFFIX_ALT = "versionSuffixAlternatives";
+
+    /**
+     * @return the version suffix to be appended to the project version.
+     */
     private final String suffix;
 
-    private final String incrementSerialSuffix;
+    /**
+     * @return the incremental suffix that will be appended to the project version.
+     */
+    private final String incrementalSerialSuffix;
 
+    /**
+     * @return true if we should preserve the snapshot
+     */
     private final boolean preserveSnapshot;
 
+    /**
+     * @return true if we should make the versions OSGi compliant
+     */
     private final boolean osgi;
 
+    /**
+     * Forcibly override the version to a new one.
+     * @return the new version
+     */
     private final String override;
 
-    private final int incrementSerialSuffixPadding;
+    /**
+     * @return the incremental suffix padding that will be appended to the project version i.e. whether to append 001 or 1.
+     */
+    private final int incrementalSerialSuffixPadding;
+
+    private final List<String> suffixAlternatives;
+
+    private final List<String> allSuffixes;
 
     @JsonProperty
     private GAV executionRootModified;
@@ -77,61 +111,27 @@ public class VersioningState
     public VersioningState( final Properties userProps )
     {
         suffix = PropertiesUtils.handleDeprecatedProperty( userProps, VERSION_SUFFIX_SYSPROP );
-        incrementSerialSuffix = PropertiesUtils.handleDeprecatedProperty( userProps, INCREMENT_SERIAL_SUFFIX_SYSPROP );
-        incrementSerialSuffixPadding = Integer.parseInt( PropertiesUtils.handleDeprecatedProperty( userProps, INCREMENT_SERIAL_SUFFIX_PADDING_SYSPROP, "0" ) );
+        incrementalSerialSuffix = PropertiesUtils.handleDeprecatedProperty( userProps, INCREMENT_SERIAL_SUFFIX_SYSPROP );
+        incrementalSerialSuffixPadding = Integer.parseInt( PropertiesUtils.handleDeprecatedProperty( userProps, INCREMENT_SERIAL_SUFFIX_PADDING_SYSPROP, "0" ) );
         preserveSnapshot = Boolean.parseBoolean( PropertiesUtils.handleDeprecatedProperty( userProps, VERSION_SUFFIX_SNAPSHOT_SYSPROP ) );
         osgi = Boolean.parseBoolean( PropertiesUtils.handleDeprecatedProperty( userProps, VERSION_OSGI_SYSPROP, "true" ) );
         override = PropertiesUtils.handleDeprecatedProperty( userProps, VERSION_OVERRIDE_SYSPROP );
+
+        // Provide an alternative list of versionSuffixes split via a comma separator. Defaults to 'redhat' IF the current rebuild suffix is not that.
+        suffixAlternatives = Arrays.asList(
+                        StringUtils.split( userProps.getProperty(
+                                        VERSION_SUFFIX_ALT, "redhat".equals( getRebuildSuffix() ) ? "" : "redhat" ), "," ) );
+
+        allSuffixes = new ArrayList<>( );
+
+        // If no suffix is configured then don't fill in the all suffixes array.
+        if ( isNotEmpty( getRebuildSuffix() ) )
+        {
+            allSuffixes.add( getRebuildSuffix() );
+            allSuffixes.addAll( getSuffixAlternatives() );
+        }
     }
 
-    /**
-     * @return the incremental suffix that will be appended to the project version.
-     */
-    public String getIncrementalSerialSuffix()
-    {
-        return incrementSerialSuffix;
-    }
-
-    /**
-     * @return the incremental suffix padding that will be appended to the project version i.e. whether to append 001 or 1.
-     */
-    public int getIncrementalSerialSuffixPadding()
-    {
-        return incrementSerialSuffixPadding;
-    }
-
-    /**
-     * @return the version suffix to be appended to the project version.
-     */
-    public String getSuffix()
-    {
-        return suffix;
-    }
-
-    /**
-     * @return true if we should preserve the snapshot
-     */
-    public boolean preserveSnapshot()
-    {
-        return preserveSnapshot;
-    }
-
-    /**
-     * Forcibly override the version to a new one.
-     * @return the new version
-     */
-    public String getOverride()
-    {
-        return override;
-    }
-
-    /**
-     * @return true if we should make the versions OSGi compliant
-     */
-    public boolean osgi()
-    {
-        return osgi;
-    }
 
     /**
      * Enabled ONLY if either version.incremental.suffix or version.suffix is provided in the user properties / CLI -D options.
@@ -143,7 +143,7 @@ public class VersioningState
     @Override
     public boolean isEnabled()
     {
-        return incrementSerialSuffix != null || suffix != null || override != null;
+        return incrementalSerialSuffix != null || suffix != null || override != null;
     }
 
     public void setRESTMetadata( Map<ProjectRef, Set<String>> versionStates )
@@ -166,13 +166,25 @@ public class VersioningState
         this.executionRootModified = executionRootModified;
     }
 
-    public boolean hasVersionsByGAVMap()
+    public boolean hasVersionsByGAV()
     {
         return versionsByGAV != null && !versionsByGAV.isEmpty();
     }
 
-    public Map<ProjectVersionRef, String> getVersionsByGAVMap()
+    public String getRebuildSuffix()
     {
-        return versionsByGAV;
+        String suffix = "";
+
+        // Same precedence as VersionCalculator.
+        if ( ! isEmpty ( getSuffix() ) )
+        {
+            int dashIndex = getSuffix().lastIndexOf( '-' );
+            suffix = getSuffix().substring( 0, dashIndex > 0 ? dashIndex : getSuffix().length() );
+        }
+        else if ( ! isEmpty ( getIncrementalSerialSuffix() ) )
+        {
+            suffix = getIncrementalSerialSuffix();
+        }
+        return suffix;
     }
 }

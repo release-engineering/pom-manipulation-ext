@@ -36,6 +36,9 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static org.apache.commons.lang.StringUtils.isNotEmpty;
 
@@ -138,7 +141,7 @@ public final class PropertiesUtils
         final CommonState state = session.getState( CommonState.class );
         final String oldValue = props.getProperty( key );
 
-        logger.info( "Updating property {} / {} with {} ", key, oldValue, newValue );
+        logger.debug( "Examining property {} / {} (resolved {}) with {} ", key, oldValue, resolvedValue, newValue );
 
         PropertyUpdate found = PropertyUpdate.FOUND;
 
@@ -225,18 +228,7 @@ public final class PropertiesUtils
      */
     public static String getSuffix ( ManipulationSession session)
     {
-        final VersioningState versioningState = session.getState( VersioningState.class );
-        String suffix = "";
-
-        if ( versioningState.getIncrementalSerialSuffix() != null && !versioningState.getIncrementalSerialSuffix().isEmpty() )
-        {
-            suffix = versioningState.getIncrementalSerialSuffix();
-        }
-        else if ( versioningState.getSuffix() != null && !versioningState.getSuffix().isEmpty() )
-        {
-            suffix = versioningState.getSuffix().substring( 0, versioningState.getSuffix().lastIndexOf( '-' ) );
-        }
-        return suffix;
+        return session.getState( VersioningState.class ).getRebuildSuffix();
     }
 
     /**
@@ -263,76 +255,126 @@ public final class PropertiesUtils
         final VersioningState vState = session.getState( VersioningState.class );
         final boolean ignoreSuffix = cState.getStrictIgnoreSuffix();
 
-        // New value might be e.g. 3.1-rebuild-1 or 3.1.0.rebuild-1 (i.e. it *might* be OSGi compliant).
-        String newVersion = newValue;
-        String suffix = getSuffix( session );
+        /*
 
-        String v = oldValue ;
-        if ( !vState.preserveSnapshot() )
-        {
-            v = Version.removeSnapshot( v );
-        }
+        This needs to be able to handle a number of different format conversions e.g.
+            1.0.0 -> 1.0.0.temporary-redhat-n
+            1.0.0 -> 1.0.0.redhat-n
+            1.0.0.redhat-n -> 1.0.0.redhat-nn
+            1.0.0.temporary-redhat-n -> 1.0.0.temporary-redhat-nn
 
-        String osgiVersion = Version.getOsgiVersion( v );
+        If the original value is different to requested alignment then it also needs to
+        support:
+            1.0.0.redhat-n -> 1.0.0.temporary-redhat-n
 
-        if ( isNotEmpty ( suffix ))
-        {
-            // If we have been configured to ignore the suffix (e.g. rebuild-n) then, assuming that
-            // the oldValue actually contains the suffix process it.
-            if ( ignoreSuffix && oldValue.contains( suffix ) )
-            {
-                HashSet<String> s = new HashSet<>();
-                s.add( oldValue );
-                s.add( newValue );
+        However currently it will NOT support this conversion.
+            1.0.0.temporary-redhat-n -> 1.0.0.redhat-n
 
-                String x = String.valueOf( Version.findHighestMatchingBuildNumber( v, s ) );
+        Example:
 
-                // If the new value has the higher matching build number strip the old suffix to allow for strict
-                // matching.
-                if ( newValue.endsWith( x ) )
-                {
-                    String oldValueCache = oldValue;
-                    oldValue = oldValue.substring( 0, oldValue.indexOf( suffix ) - 1 );
-                    v = oldValue;
-                    osgiVersion = Version.getOsgiVersion( v );
-                    logger.debug( "Updating version to {} and for oldValue {} with newValue {} ", v, oldValueCache,
-                                  newValue );
+        suffix          orig                    new
+        tmp-rh-1    1.1.1.Final-redhat-2 --> 1.1.1.Final-temporary-redhat-1    YES
+        tmp-rh-1    1.1.1.Final-redhat-2 --> 1.1.2.Final-temporary-redhat-1     NO
 
-                }
-                else if ( oldValue.endsWith( x ) )
-                {
-                    // Might happen if the value was a resolved property to the main project version that has already been updated. The
-                    // new 'override' might have come from e.g. a BOM or from DA which would make it 'less' due to the version increment.
-                    logger.warn ("strictValueChecking with strictIgnoreSuffix found older value ({}) was newer ({}) ", oldValue, newValue);
-                }
-                else
-                {
-                    logger.warn( "strictIgnoreSuffix set but unable to align from {} to {}", oldValue, newValue );
-                }
-            }
+        tmp-rh-1    1.1.1.Final-temporary-redhat-2 --> 1.1.1.Final-temporary-redhat-3     YES
+        tmp-rh-1    1.1.redhat-2           --> 1.1.0.temporary-redhat-3     YES
+        tmp-rh-1    1.1                     --> 1.1.0.redhat-3     YES
+        tmp-rh-1    1.1                     --> 1.1.0.temporary-redhat-3     YES
 
-            // We only need to dummy up and add a suffix if there is no qualifier. This allows us
-            // to work out the OSGi version.
-            if ( !Version.hasQualifier( v ) )
-            {
-                v = Version.appendQualifierSuffix( v, suffix );
-                osgiVersion = Version.getOsgiVersion( v );
-                osgiVersion = osgiVersion.substring( 0, osgiVersion.indexOf( suffix ) - 1 );
-            }
-            if ( newValue.contains( suffix ) )
-            {
-                newVersion = newValue.substring( 0, newValue.indexOf( suffix ) - 1 );
-            }
-        }
-        logger.debug( "Comparing original version {} and OSGi variant {} with new version {} and suffix removed {} ",
-                      oldValue, osgiVersion, newValue, newVersion );
+        rh-1    1.1.1.Final-temporary-redhat-1 --> 1.1.1.Final-redhat-2         NO
+        rh-1    1.1.1.Final-temporary-redhat-2 --> 1.1.1.Final-redhat-1         NO
 
-        // We compare both an OSGi'ied oldVersion and the non-OSGi version against the possible new version (which has
-        // had its suffix stripped) in order to check whether its a valid change.
+        rh-1    1.1.1.Final-redhat-1 --> 1.1.1.Final-redhat-2         YES
+        rh-1    1.1.1.Final          --> 1.1.1.Final-redhat-2         YES
+        rh-1    1.1                  --> 1.1.0-redhat-2         YES
+
+         */
+
+        final Set<String> oldValueOptions = buildOldValueSet( vState, oldValue );
+
         boolean result = false;
-        if ( oldValue.equals( newVersion ) || osgiVersion.equals( newVersion ) )
+
+        loop:
+        for ( String origValue : oldValueOptions )
         {
-            result = true;
+            for ( String suffix : vState.getAllSuffixes() )
+            {
+                String v = origValue;
+                if ( !vState.isPreserveSnapshot() )
+                {
+                    v = Version.removeSnapshot( v );
+                }
+
+                String osgiVersion = Version.getOsgiVersion( v );
+
+                // New value might be e.g. 3.1-rebuild-1 or 3.1.0.rebuild-1 (i.e. it *might* be OSGi compliant).
+                String newVersion = newValue;
+
+                if ( isNotEmpty( suffix ) )
+                {
+                    // If we have been configured to ignore the suffix (e.g. rebuild-n) then, assuming that
+                    // the oldValue actually contains the suffix process it.
+                    if ( ignoreSuffix && origValue.contains( suffix ) )
+                    {
+                        HashSet<String> s = new HashSet<>();
+                        s.add( origValue );
+                        s.add( newValue );
+
+                        String x = String.valueOf( Version.findHighestMatchingBuildNumber( v, s ) );
+
+                        // If the new value has the higher matching build number strip the old suffix to allow for strict
+                        // matching.
+                        if ( newValue.endsWith( x ) )
+                        {
+                            String oldValueCache = origValue;
+                            origValue = origValue.substring( 0, origValue.indexOf( suffix ) - 1 );
+                            v = origValue;
+                            osgiVersion = Version.getOsgiVersion( v );
+                            logger.debug( "Updating version to {} and for oldValue {} with newValue {} ", v,
+                                          oldValueCache, newValue );
+
+                        }
+                        else if ( origValue.endsWith( x ) )
+                        {
+                            // Might happen if the value was a resolved property to the main project version that has already been updated. The
+                            // new 'override' might have come from e.g. a BOM or from DA which would make it 'less' due to the version increment.
+                            logger.warn( "strictValueChecking with strictIgnoreSuffix found older value ({}) was newer ({}) ",
+                                         origValue, newValue );
+                        }
+                        else
+                        {
+                            logger.warn( "strictIgnoreSuffix set but unable to align from {} to {}", origValue, newValue );
+                        }
+                    }
+
+                    // We only need to dummy up and add a suffix if there is no qualifier. This allows us
+                    // to work out the OSGi version.
+                    if ( !Version.hasQualifier( v ) )
+                    {
+                        v = Version.appendQualifierSuffix( v, suffix );
+                        osgiVersion = Version.getOsgiVersion( v );
+                        osgiVersion = osgiVersion.substring( 0, osgiVersion.indexOf( suffix ) - 1 );
+                    }
+                    if ( newValue.contains( suffix ) )
+                    {
+                        newVersion = newValue.substring( 0, newValue.indexOf( suffix ) - 1 );
+                    }
+                }
+
+                // We compare both an OSGi'ied oldVersion and the non-OSGi version against the possible new version (which has
+                // had its suffix stripped) in order to check whether its a valid change.
+                boolean success = ( origValue.equals( newVersion ) || osgiVersion.equals( newVersion ) );
+
+                logger.debug( "When validating original {} / new value {} comparing {} to {} and OSGi variant {} to {} (utilising suffix {}) is {}",
+                              origValue, newValue, origValue, newVersion, osgiVersion, newVersion, suffix,
+                              success ? "allowed" : "not allowed" );
+
+                if ( success )
+                {
+                    result = true;
+                    break loop;
+                }
+            }
         }
         return result;
     }
@@ -520,6 +562,35 @@ public final class PropertiesUtils
                 }
             }
         }
+    }
+
+    static Set<String> buildOldValueSet (VersioningState versioningState, String oldValue)
+    {
+        final Set<String> result = new HashSet<>();
+        result.add( oldValue );
+
+        // If there is more than one suffix (i.e. redhat and alternatives) then process the original
+        // value with the alternate suffixes in order to dummy up potential values to test the conversion
+        // against.
+        if ( versioningState.getAllSuffixes().size() > 1 )
+        {
+            versioningState.getSuffixAlternatives().forEach( s -> {
+                final String suffixStripRegExp = "(.*)([.|-])(" + s + "-\\d+)";
+                final Pattern suffixStripPattern = Pattern.compile( suffixStripRegExp );
+                final Matcher suffixMatcher = suffixStripPattern.matcher( oldValue );
+
+                if ( suffixMatcher.matches() && !oldValue.contains( versioningState.getRebuildSuffix() ) )
+                {
+                    // We could just add group(1) which would equate to a version without a suffix. But this
+                    // can clash when processing from/to that both contain the alt. suffix.
+                    //                        result.add( suffixMatcher.group( 1 ) );
+                    result.add( suffixMatcher.group( 1 ) + suffixMatcher.group( 2 ) + versioningState.getRebuildSuffix() + "-0" );
+                }
+            } );
+        }
+
+        logger.debug( "Generated original value set for matching {}", result );
+        return result;
     }
 
     /**

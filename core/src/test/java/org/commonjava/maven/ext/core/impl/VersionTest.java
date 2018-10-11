@@ -15,9 +15,11 @@
  */
 package org.commonjava.maven.ext.core.impl;
 
+import org.commonjava.maven.ext.core.state.VersioningState;
 import org.junit.Test;
 
 import java.util.HashSet;
+import java.util.Properties;
 import java.util.Set;
 
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -389,5 +391,24 @@ public class VersionTest
         assertEquals("t-20170216-223844-555-rebuild-5", Version.getQualifier( v ));
         assertEquals(".t-20170216-223844-555-rebuild-5", Version.getQualifierWithDelim( v ));
         assertEquals("t-20170216-223844-555-rebuild", Version.getQualifierBase( v ));
+    }
+
+    @Test
+    public void testStateAlternatives()
+    {
+        Properties p = new Properties();
+        VersioningState state = new VersioningState( p );
+        assertTrue ( state.getSuffixAlternatives().size() == 1 );
+        assertTrue ( state.getSuffixAlternatives().get( 0 ).equals( "redhat" ));
+
+        p.setProperty( VersioningState.VERSION_SUFFIX_SYSPROP.getCurrent(), "redhat-10" );
+        state = new VersioningState( p );
+        assertTrue ( state.getSuffixAlternatives().size() == 0 );
+
+        p.setProperty( VersioningState.VERSION_SUFFIX_SYSPROP.getCurrent(), "temporary-redhat-10" );
+        p.setProperty( VersioningState.VERSION_SUFFIX_ALT, "redhat-alt" );
+        state = new VersioningState( p );
+        assertTrue ( state.getSuffixAlternatives().size() == 1 );
+        assertTrue ( state.getSuffixAlternatives().get( 0 ).equals( "redhat-alt" ));
     }
 }

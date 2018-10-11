@@ -50,7 +50,7 @@ public class AddSuffixJettyHandler
 
     private static final String EXTENDED_SUFFIX = "redhat-2";
 
-    private static final String MIXED_SUFFIX = "redhat-temporary-1";
+    private static final String MIXED_SUFFIX = "temporary-redhat-1";
 
     private final String endpoint;
 
@@ -104,7 +104,8 @@ public class AddSuffixJettyHandler
             if ( target.equals( DEFAULT_ENDPOINT ) )
             {
                 boolean useMixedSuffix = false;
-                // Protocol analysis
+                boolean useCustomMixedSuffix = false;
+               // Protocol analysis
                 GAVSchema gavSchema = objectMapper.readValue( jb.toString(), GAVSchema.class );
                 requestBody = gavSchema.gavs;
 
@@ -116,17 +117,22 @@ public class AddSuffixJettyHandler
                     String version = (String) gav.get( "version" );
                     String bestMatchVersion;
 
+                    LOGGER.debug( "Processing artifactId {} with version {}", gav.get( "artifactId" ), version );
                     // Specific to certain integration tests. For the SNAPSHOT test we want to verify it can handle
                     // a already built version. The PME code should remove SNAPSHOT before sending it.
                     if ( ( (String) gav.get( "artifactId" ) ).startsWith( "rest-dependency-version-manip-child-module" ) )
                     {
                         bestMatchVersion = version + "-" + EXTENDED_SUFFIX;
                     }
-                    else if ( ( (String) gav.get( "artifactId" ) ).startsWith( "rest-version-manip-mixed-suffix" ) )
+                    else if ( gav.get( "artifactId" ).equals( "rest-version-manip-mixed-suffix" ) )
                     {
                         useMixedSuffix = true;
                         bestMatchVersion = version + "-" + this.suffix;
-
+                    }
+                    else if ( gav.get( "artifactId" ).equals( "rest-version-manip-mixed-suffix-orig-rh" ) )
+                    {
+                        useCustomMixedSuffix = true;
+                        bestMatchVersion = version + "-" + this.suffix;
                     }
                     else if ( ( (String) gav.get( "artifactId" ) ).startsWith( "depMgmt2" ) ||
                                     ( (String) gav.get( "artifactId" ) ).startsWith( "pluginMgmt3" ) )
@@ -142,6 +148,38 @@ public class AddSuffixJettyHandler
                         else
                         {
                             bestMatchVersion = version + "-" + EXTENDED_SUFFIX;
+                        }
+                    }
+                    else if ( useCustomMixedSuffix )
+                    {
+                        if ( gav.get( "artifactId" ).equals( "commons-lang" ) )
+                        {
+                            // We know its redhat-1 (hardcoded in the pom).
+                            int separatorIndex = version.indexOf( "redhat" ) - 1;
+                            bestMatchVersion =
+                                            version.substring( 0, separatorIndex ) + version.substring( separatorIndex,
+                                                                                                        separatorIndex + 1 )
+                                                            + MIXED_SUFFIX;
+                        }
+                        else if ( gav.get( "artifactId" ).equals( "errai-tools" ) )
+                        {
+                            int separatorIndex = version.indexOf( "redhat" ) - 1;
+                            bestMatchVersion =
+                                            version.substring( 0, separatorIndex ) + version.substring( separatorIndex,
+                                                                                                           separatorIndex + 1 )
+                                            + EXTENDED_SUFFIX;
+                        }
+                        else if ( gav.get( "artifactId" ).equals( "commons-httpclient" ) )
+                        {
+                            int separatorIndex = version.indexOf( "temporary-redhat" ) - 1;
+                            bestMatchVersion =
+                                            version.substring( 0, separatorIndex ) + version.substring( separatorIndex,
+                                                                                                           separatorIndex + 1 )
+                                            + "temporary-redhat-2";
+                        }
+                        else
+                        {
+                            bestMatchVersion = version + "-" + MIXED_SUFFIX;
                         }
                     }
                     else if ( useMixedSuffix )

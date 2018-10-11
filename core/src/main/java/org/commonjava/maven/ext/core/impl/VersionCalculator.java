@@ -87,7 +87,7 @@ public class VersionCalculator
             String originalVersion = PropertyResolver.resolveInheritedProperties( session, project, project.getVersion() );
             String modifiedVersion = calculate( project.getGroupId(), project.getArtifactId(), originalVersion, session );
 
-            if ( state.osgi() )
+            if ( state.isOsgi() )
             {
                 modifiedVersion = Version.getOsgiVersion( modifiedVersion );
             }
@@ -170,7 +170,7 @@ public class VersionCalculator
         if ( staticSuffix != null )
         {
             newVersion = Version.appendQualifierSuffix( newVersion, staticSuffix );
-            if ( !state.preserveSnapshot() )
+            if ( !state.isPreserveSnapshot() )
             {
                 newVersion = Version.removeSnapshot( newVersion );
             }
@@ -188,7 +188,7 @@ public class VersionCalculator
                                      Version.getBuildNumberPadding( state.getIncrementalSerialSuffixPadding(), versionCandidates ), '0' );
                 newVersion = Version.setBuildNumber( newVersion, paddedBuildNumber );
             }
-            if ( !state.preserveSnapshot() )
+            if ( !state.isPreserveSnapshot() )
             {
                 newVersion = Version.removeSnapshot( newVersion );
             }

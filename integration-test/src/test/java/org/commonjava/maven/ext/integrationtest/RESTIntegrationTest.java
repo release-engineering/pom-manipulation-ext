@@ -86,6 +86,13 @@ public class RESTIntegrationTest
     }
 
     @Test
+    public void testRESTVersionManipMixedOrigHasSuffix() throws Exception
+    {
+        String test = getDefaultTestLocation( "rest-version-manip-mixed-suffix-orig-rh" );
+        runLikeInvoker( test, mockServer.getUrl() );
+    }
+
+    @Test
     public void testRESTVersionManipSuffixStripIncrement() throws Exception
     {
         String test = getDefaultTestLocation( "rest-version-manip-suffix-strip-increment" );
