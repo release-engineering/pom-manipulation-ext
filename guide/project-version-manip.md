@@ -88,3 +88,6 @@ it will change to
     1.3.0.GA
 
 This is controlled by the property `versionOsgi` (*Deprecated property `version.osgi`*). The default is true (i.e. make the versions OSGi compliant).
+
+### Alternate Suffix Handling
+It is possible to pass in a comma separated list of alternate suffixes via the property `versionSuffixAlternatives`. The default value is `redhat` which will be applied _if_ the current suffix does not match that. This is used during dependency alignment to validate strict alignment between differing suffix types (from the input REST or BOM data).
