@@ -14,17 +14,21 @@ In addition to the main [project-version](project-version-manip.html), [dependen
 
 ### Profile Handling
 
+PME will by default scan every profile in the project. To restrict scanning to only those profiles that are active set `scanActiveProfiles` to true.
+
+Note: This will only detect those profiles explicitly activated via -P ; property activation will not be correctly detected.
+
 <table bgcolor="#ffff00">
 <tr>
 <td>
-    <b>NOTE</b> : As of PME 3.2 (October 2018) the default for <i>scanActiveProfiles</i> has changed from false to true.
+<b>NOTE</b> : In future ( targeted for PME 3.3 ):
+</p>
+The default for <i>scanActiveProfiles</i> will change from false to true.
+</p>
+The profile scanning will detect usage of properties, activeByDefault, environmental activation (e.g. JDK) etc. However this assumes the properties _are_ passed into the PME invocation for it to detect and process them. It is still possible to explicitly activate profiles via the CLI `-P` parameters.
 </td>
 </tr>
 </table>
-
-PME will can scan every profile in the project to process them. To restrict scanning to only those profiles that are active set `scanActiveProfiles` to true.
-
-Note: The profile scanning will detect usage of properties, activeByDefault, environmental activation (e.g. JDK) etc. However this assumes the properties _are_ passed into the PME invocation for it to detect and process them. It is still possible to explicitly activate profiles via the CLI `-P` parameters.
 
 ### POM Cleanup
 
