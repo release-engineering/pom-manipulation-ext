@@ -18,6 +18,7 @@ package org.commonjava.maven.ext.integrationtest;
 import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.io.rest.handler.AddSuffixJettyHandler;
 import org.commonjava.maven.ext.io.rest.rule.MockServer;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.junit.Test;
@@ -36,7 +37,7 @@ public class RESTIntegrationTest
 {
     private static final Logger LOGGER = LoggerFactory.getLogger( DefaultCliIntegrationTest.class );
 
-    private static AddSuffixJettyHandler handler = new AddSuffixJettyHandler( "/", AddSuffixJettyHandler.DEFAULT_SUFFIX);
+    private static AddSuffixJettyHandler handler = new AddSuffixJettyHandler( "/", null );
 
     @ClassRule
     public static MockServer mockServer = new MockServer( handler );
@@ -55,6 +56,12 @@ public class RESTIntegrationTest
                 runMaven( "install", DEFAULT_MVN_PARAMS, setupTest.toString() );
             }
         }
+    }
+
+    @Before
+    public void before()
+    {
+        handler.setSuffix (AddSuffixJettyHandler.DEFAULT_SUFFIX);
     }
 
     @Test
@@ -81,7 +88,16 @@ public class RESTIntegrationTest
     @Test
     public void testRESTVersionManipMixed() throws Exception
     {
+        handler.setSuffix( AddSuffixJettyHandler.MIXED_SUFFIX );
         String test = getDefaultTestLocation( "rest-version-manip-mixed-suffix" );
+        runLikeInvoker( test, mockServer.getUrl() );
+    }
+
+    @Test
+    public void testRESTVersionManipMixedTimestamp() throws Exception
+    {
+        handler.setSuffix( AddSuffixJettyHandler.TIMESTAMP_SUFFIX );
+        String test = getDefaultTestLocation( "rest-version-manip-mixed-suffix-timestamp" );
         runLikeInvoker( test, mockServer.getUrl() );
     }
 

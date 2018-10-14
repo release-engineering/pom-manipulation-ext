@@ -46,15 +46,19 @@ public class AddSuffixJettyHandler
 
     private static final String DEFAULT_ENDPOINT = "/reports/lookup/gavs";
 
-    public static final String DEFAULT_SUFFIX = "redhat-1";
+    public static final String SUFFIX = "redhat";
 
-    private static final String EXTENDED_SUFFIX = "redhat-2";
+    public static final String DEFAULT_SUFFIX = SUFFIX + "-1";
 
-    private static final String MIXED_SUFFIX = "temporary-redhat-1";
+    public static final String EXTENDED_SUFFIX = SUFFIX + "-2";
+
+    public static final String MIXED_SUFFIX = "temporary-" + DEFAULT_SUFFIX;
+
+    public static final String TIMESTAMP_SUFFIX = "t20180920-163311-423-" + DEFAULT_SUFFIX;
 
     private final String endpoint;
 
-    private final String suffix;
+    private String suffix;
 
     private ObjectMapper objectMapper = new ObjectMapper();
 
@@ -103,7 +107,6 @@ public class AddSuffixJettyHandler
 
             if ( target.equals( DEFAULT_ENDPOINT ) )
             {
-                boolean useMixedSuffix = false;
                 boolean useCustomMixedSuffix = false;
                // Protocol analysis
                 GAVSchema gavSchema = objectMapper.readValue( jb.toString(), GAVSchema.class );
@@ -118,16 +121,12 @@ public class AddSuffixJettyHandler
                     String bestMatchVersion;
 
                     LOGGER.debug( "Processing artifactId {} with version {}", gav.get( "artifactId" ), version );
+
                     // Specific to certain integration tests. For the SNAPSHOT test we want to verify it can handle
                     // a already built version. The PME code should remove SNAPSHOT before sending it.
                     if ( ( (String) gav.get( "artifactId" ) ).startsWith( "rest-dependency-version-manip-child-module" ) )
                     {
                         bestMatchVersion = version + "-" + EXTENDED_SUFFIX;
-                    }
-                    else if ( gav.get( "artifactId" ).equals( "rest-version-manip-mixed-suffix" ) )
-                    {
-                        useMixedSuffix = true;
-                        bestMatchVersion = version + "-" + this.suffix;
                     }
                     else if ( gav.get( "artifactId" ).equals( "rest-version-manip-mixed-suffix-orig-rh" ) )
                     {
@@ -155,7 +154,7 @@ public class AddSuffixJettyHandler
                         if ( gav.get( "artifactId" ).equals( "commons-lang" ) )
                         {
                             // We know its redhat-1 (hardcoded in the pom).
-                            int separatorIndex = version.indexOf( "redhat" ) - 1;
+                            int separatorIndex = version.indexOf( SUFFIX ) - 1;
                             bestMatchVersion =
                                             version.substring( 0, separatorIndex ) + version.substring( separatorIndex,
                                                                                                         separatorIndex + 1 )
@@ -163,7 +162,7 @@ public class AddSuffixJettyHandler
                         }
                         else if ( gav.get( "artifactId" ).equals( "errai-tools" ) )
                         {
-                            int separatorIndex = version.indexOf( "redhat" ) - 1;
+                            int separatorIndex = version.indexOf( SUFFIX ) - 1;
                             bestMatchVersion =
                                             version.substring( 0, separatorIndex ) + version.substring( separatorIndex,
                                                                                                            separatorIndex + 1 )
@@ -181,10 +180,6 @@ public class AddSuffixJettyHandler
                         {
                             bestMatchVersion = version + "-" + MIXED_SUFFIX;
                         }
-                    }
-                    else if ( useMixedSuffix )
-                    {
-                        bestMatchVersion = version + "-" + MIXED_SUFFIX;
                     }
                     else
                     {
@@ -238,5 +233,10 @@ public class AddSuffixJettyHandler
     public void setBlacklist( String s )
     {
         blacklistVersion = s;
+    }
+
+    public void setSuffix( String suffix )
+    {
+        this.suffix = suffix;
     }
 }

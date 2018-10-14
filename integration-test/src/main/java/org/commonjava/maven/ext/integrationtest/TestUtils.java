@@ -36,8 +36,12 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.nio.file.DirectoryStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -45,6 +49,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 /**
  * @author vdedik@redhat.com
@@ -66,24 +72,21 @@ public class TestUtils
             put( "maven.repo.local", LOCAL_REPO );
     }};
 
+    private static Pattern p = Pattern.compile( "rest-.*" );
     protected static final List<String> EXCLUDED_FILES = new ArrayList<String>()
     {{
         add( "setup" );
-        // Run in a separate test so a Mock server may be started.
-        add( "rest-blacklist" );
-        add( "rest-dependency-version-manip-child-module" );
-        add( "rest-dependency-version-manip-profile" );
-        add( "rest-version-manip-bomrest" );
-        add( "rest-version-manip-mixed-suffix" );
-        add( "rest-version-manip-mixed-suffix-orig-rh" );
-        add( "rest-version-manip-suffix-strip-increment" );
-        add( "rest-version-manip-only" );
-        add( "rest-version-manip-only-override" );
-        add( "rest-version-manip-plugin-bomrest" );
-        add( "rest-version-manip-plugin-rest" );
-        add( "rest-version-manip-plugin-restbom" );
-        add( "rest-version-manip-restbom" );
-        add( "rest-version-manip-restbom-autodetectbom" );
+        try ( DirectoryStream<Path> stream = Files.newDirectoryStream( new File( IT_LOCATION ).toPath(),
+                                      p -> p.getFileName().toString().startsWith( "rest-" ) ) )
+        {
+            // Run in a separate test so a Mock server may be started.
+            stream.forEach( p -> add( p.getFileName().toString() ) );
+        }
+        catch ( IOException e )
+        {
+            logger.error( "Unable to process excluded files", e );
+            throw new RuntimeException( "Unable to process excluded files", e );
+        }
         add( "groovy-manipulator-first-http" );
     }};
 
@@ -179,10 +182,8 @@ public class TestUtils
      * @param params - Map of String keys and String values representing -D arguments
      * @param workingDir - Working directory in which you want the cli to be run.
      * @return Exit value
-     * @throws Exception if an error occurs
      */
     public static Integer runCli( List<String> args, Map<String, String> params, String workingDir )
-        throws Exception
     {
         ArrayList<String> arguments = new ArrayList<>( args );
         Collections.addAll( arguments, toJavaParams( params ).split( "\\s+" ) );

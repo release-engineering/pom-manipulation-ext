@@ -21,22 +21,27 @@ System.out.println( "Slurping POM: ${pomFile.getAbsolutePath()}" )
 def pom = new XmlSlurper().parse( pomFile )
 
 System.out.println( "POM Version: ${pom.version.text()}" )
-assert pom.version.text().equals( '1.0.0.temporary-redhat-2' )
+assert pom.version.text().equals( '1.0.0.t20180920-163311-423-redhat-00002' )
 
 // Currently the AddSuffixJettyHandler doesn't do OSGi compatibility.
 def dependency = pom.dependencyManagement.dependencies.dependency.find { it.artifactId.text() == "commons-lang" }
 assert dependency != null
-assert dependency.version.text() == "1.0-temporary-redhat-1"
+assert dependency.version.text() == "1.0-t20180920-163311-423-redhat-1"
 
 dependency = pom.dependencies.dependency.find { it.artifactId.text() == "errai-common" }
 assert dependency != null
-assert dependency.version.text() == "1.1-Final-temporary-redhat-1"
+assert dependency.version.text() == "1.1-Final-t20180920-163311-423-redhat-1"
 
-def passed = false
-pom.properties.each {
-    if ( it.text().contains ("3.1-temporary-redhat-1") )
+def passed = 0
+pom.properties.children().each {
+    System.out.println ("### Got " + it.text() + " and " + it.name())
+    if ( it.text().contains ("3.1-t20180920-163311-423-redhat-1") && it.name() == "httpclient" )
     {
-        passed = true
+        passed++
+    }
+    if ( it.text().contains ("1.1-Final-t20180920-163311-423-redhat-1") && it.name() == "errai-tools" )
+    {
+        passed++
     }
 }
-assert (passed == true)
+assert (passed == 2)
