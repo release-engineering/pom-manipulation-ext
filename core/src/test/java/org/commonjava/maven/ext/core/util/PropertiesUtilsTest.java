@@ -234,6 +234,9 @@ public class PropertiesUtilsTest
 
         result = PropertyResolver.resolveProperties( session, al, "${project.version}" );
         assertTrue( result.equals( "1" ) );
+
+        result = PropertyResolver.resolveProperties( session, al, "${version.hibernate.osgi}" );
+        assertTrue( result.equals( "5.0.4.Final" ) );
     }
 
     @Test

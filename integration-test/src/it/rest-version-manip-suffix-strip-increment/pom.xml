@@ -36,9 +36,12 @@
   <name>Module to test REST manipulation of project version only</name>
 
   <properties>
-    <errai-tools>1.1-Final</errai-tools>
+    <errai-tools>1.1-Final-jbossorg-1</errai-tools>
     <httpclient>3.1</httpclient>
     <httpclient-indirect>${httpclient}</httpclient-indirect>
+
+    <compiler>maven-compiler-plugin</compiler>
+    <maven-jar-plugin>2.1</maven-jar-plugin>
   </properties>
 
   <dependencyManagement>
@@ -46,7 +49,7 @@
       <dependency>
         <groupId>commons-lang</groupId>
         <artifactId>commons-lang</artifactId>
-        <version>1.0</version>
+        <version>1.0.jbossorg-100</version>
       </dependency>
       <dependency>
         <groupId>org.jboss.errai</groupId>
@@ -68,4 +71,57 @@
       <version>1.1-Final</version>
     </dependency>
   </dependencies>
+
+  <build>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>buildnumber-maven-plugin</artifactId>
+          <version>10-jbossorg-10</version>
+          <executions>
+            <execution>
+              <id>get-build-timestamp</id>
+              <phase>initialize</phase>
+              <goals>
+                <goal>create-timestamp</goal>
+              </goals>
+              <configuration>
+                <timestampFormat>EEE, d MMM yyyy HH:mm:ss Z</timestampFormat>
+                <timestampPropertyName>build.datetime</timestampPropertyName>
+              </configuration>
+            </execution>
+          </executions>
+        </plugin>
+        <plugin>
+          <artifactId>${compiler}</artifactId>
+          <version>99-bad</version>
+          <configuration>
+            <debug>false</debug>
+            <showDeprecation>true</showDeprecation>
+            <showWarnings>true</showWarnings>
+            <testSource>${maven.compiler.source}</testSource>
+            <testTarget>${maven.compiler.source}</testTarget>
+          </configuration>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-jar-plugin</artifactId>
+          <version>${maven-jar-plugin}</version>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>${compiler}</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>buildnumber-maven-plugin</artifactId>
+      </plugin>
+    </plugins>
+  </build>
+
 </project>

@@ -36,11 +36,23 @@ dependency = pom.dependencies.dependency.find { it.artifactId.text() == "errai-c
 assert dependency != null
 assert dependency.version.text() == "1.1-Final-redhat-1"
 
-def passed = false
-pom.properties.each {
-    if ( it.text().contains ("3.1-redhat-1") )
+def plugin = pom.build.pluginManagement.plugins.plugin.find { it.artifactId.text() == "buildnumber-maven-plugin" }
+assert plugin != null
+assert plugin.version.text() == "10-redhat-1"
+
+def passed = 0
+pom.properties.children().each {
+    if ( it.text().contains ("3.1-redhat-1") && it.name() == "httpclient" )
     {
-        passed = true
+        passed++
+    }
+    if ( it.text().contains ("1.1-Final-redhat-1") && it.name() == "errai-tools" )
+    {
+        passed++
+    }
+    if ( it.text().contains ("2.1-redhat-1") && it.name() == "maven-jar-plugin")
+    {
+        passed++
     }
 }
-assert (passed == true)
+assert (passed == 3)
