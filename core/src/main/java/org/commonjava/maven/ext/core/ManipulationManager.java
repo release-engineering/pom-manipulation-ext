@@ -220,7 +220,8 @@ public class ManipulationManager
 
         for ( Project p : projects )
         {
-            dpm.addProfiles( p.getModel().getProfiles() );
+            p.getModel().getProfiles().stream().filter( newProfile -> ! dpm.getProfilesById().containsKey( newProfile.getId() ) ).
+                            forEach( dpm::addProfile );
             try
             {
                 List<org.apache.maven.model.Profile> ap = dpm.getActiveProfiles();
