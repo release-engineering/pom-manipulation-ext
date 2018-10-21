@@ -32,8 +32,8 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-    <jetty.major>8</jetty.major>
-    <jetty.qualifier>v20150415</jetty.qualifier>
+    <jetty.major>9</jetty.major>
+    <jetty.qualifier>v20180830</jetty.qualifier>
 
     <commons.lang.major>2</commons.lang.major>
     <commons.httpclient.minor>1</commons.httpclient.minor>
@@ -41,7 +41,7 @@
     <junit.artifact>junit</junit.artifact>
     <junit>3.6</junit>
 
-    <jetty>\${jetty.major}.1.17.${jetty.qualifier}</jetty>
+    <jetty>\${jetty.major}.4.12.${jetty.qualifier}</jetty>
   </properties>
 
   <dependencyManagement>

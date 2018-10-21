@@ -18,10 +18,10 @@ package org.commonjava.maven.ext.io.server;
 import org.commonjava.maven.ext.io.server.exception.ServerInternalException;
 import org.commonjava.maven.ext.io.server.exception.ServerSetupException;
 import org.commonjava.test.http.util.PortFinder;
-import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.server.nio.SelectChannelConnector;
+
+import java.net.InetSocketAddress;
 
 /**
  * @author vdedik@redhat.com
@@ -66,11 +66,7 @@ public class JettyHttpServer
 
     private Server createAndStartJetty( Integer port )
     {
-        Server jetty = new Server();
-        Connector conn = new SelectChannelConnector();
-        conn.setHost( "127.0.0.1" );
-        conn.setPort( this.port );
-        jetty.addConnector( conn );
+        Server jetty = new Server(new InetSocketAddress( "127.0.0.1", this.port ) );
         jetty.setHandler( handler );
 
         try
