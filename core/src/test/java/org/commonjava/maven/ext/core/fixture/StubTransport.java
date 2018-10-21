@@ -32,8 +32,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Map;
 
-import static org.apache.commons.io.IOUtils.closeQuietly;
-
 public class StubTransport
     implements Transport
 {
@@ -48,7 +46,6 @@ public class StubTransport
     @Override
     public DownloadJob createDownloadJob( final ConcreteResource resource, final Transfer transfer, Map<Transfer, Long> var3,
                                           final int timeoutSeconds, EventMetadata eventMetadata )
-        throws TransferException
     {
         System.out.println( "Creating download for: " + resource.getPath() );
         return new DownloadJob()
@@ -77,20 +74,12 @@ public class StubTransport
                     return null;
                 }
 
-                OutputStream out = null;
-                final InputStream in = null;
+                t = transfer;
+                t.delete( false );
 
-                try
+                try ( OutputStream out = t.openOutputStream( TransferOperation.DOWNLOAD ) )
                 {
-                    t = transfer;
-                    t.delete( false );
-                    out = t.openOutputStream( TransferOperation.DOWNLOAD );
                     out.write( data );
-                }
-                finally
-                {
-                    closeQuietly( in );
-                    closeQuietly( out );
                 }
                 return this;
             }

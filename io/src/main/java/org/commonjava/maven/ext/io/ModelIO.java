@@ -52,7 +52,6 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
-import static org.apache.commons.io.IOUtils.closeQuietly;
 import static org.apache.commons.lang.StringUtils.isEmpty;
 import static org.apache.commons.lang.StringUtils.isNotEmpty;
 
@@ -116,19 +115,13 @@ public class ModelIO
             throw new ManipulationException( "Failed to resolve POM: " + ref.asPomArtifact() );
         }
 
-        InputStream in = null;
-        try
+        try (InputStream in = transfer.openInputStream())
         {
-            in = transfer.openInputStream();
             return new MavenXpp3Reader().read( in );
         }
         catch ( final IOException | XmlPullParserException e )
         {
             throw new ManipulationException( "Failed to build model for POM: %s.\n--> %s", e, ref, e.getMessage() );
-        }
-        finally
-        {
-            closeQuietly( in );
         }
     }
 

@@ -33,9 +33,9 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Named;
 import javax.inject.Singleton;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import static org.commonjava.maven.ext.core.util.IdUtils.ga;
@@ -110,8 +110,8 @@ public class DependencyRemovalManipulator
             result = true;
         }
 
-        final HashMap<Profile, HashMap<ArtifactRef, Dependency>> pd = project.getAllResolvedProfileDependencies( session );
-        final HashMap<Profile, HashMap<ArtifactRef, Dependency>> pmd = project.getResolvedProfileManagedDependencies( session );
+        final Map<Profile, Map<ArtifactRef, Dependency>> pd = project.getAllResolvedProfileDependencies( session );
+        final Map<Profile, Map<ArtifactRef, Dependency>> pmd = project.getResolvedProfileManagedDependencies( session );
         for ( Profile profile : pd.keySet())
         {
             int index = model.getProfiles().indexOf( profile );
@@ -135,7 +135,7 @@ public class DependencyRemovalManipulator
         return result;
     }
 
-    private boolean scanDependencies( HashMap<ArtifactRef, Dependency> resolvedDependencies,
+    private boolean scanDependencies( Map<ArtifactRef, Dependency> resolvedDependencies,
                                       List<ProjectRef> dependenciesToRemove, List<Dependency> dependencies )
     {
         boolean result = false;

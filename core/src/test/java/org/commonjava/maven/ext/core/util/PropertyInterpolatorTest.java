@@ -27,6 +27,7 @@ import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 
 import static org.junit.Assert.assertFalse;
@@ -89,7 +90,7 @@ public class PropertyInterpolatorTest
         final Model model = TestUtils.resolveModelResource( RESOURCE_BASE, "infinispan-bom-8.2.0.Final.pom" );
         final Project project = new Project( model );
 
-        HashMap<ArtifactRef, Dependency> deps = project.getResolvedManagedDependencies( new ManipulationSession() );
+        Map<ArtifactRef, Dependency> deps = project.getResolvedManagedDependencies( new ManipulationSession() );
 
         assertTrue( deps.size() == 66 );
     }

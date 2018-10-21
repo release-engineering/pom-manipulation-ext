@@ -56,8 +56,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-import static org.apache.commons.io.IOUtils.closeQuietly;
-
 /**
  * Utility class used to read raw models for POMs, and rewrite any project POMs that were changed.
  *
@@ -102,20 +100,14 @@ public class PomIO
             // method on the result, BUT this seems to return models that have
             // the plugin versions set inside profiles...so they're not entirely
             // raw.
-            Model raw = null;
-            InputStream in = null;
-            try
+            Model raw;
+            try ( InputStream in = new FileInputStream( pom ) )
             {
-                in = new FileInputStream( pom );
                 raw = new MavenXpp3Reader().read( in );
             }
             catch ( final IOException | XmlPullParserException e )
             {
                 throw new ManipulationException( "Failed to build model for POM: %s.\n--> %s", e, pom, e.getMessage() );
-            }
-            finally
-            {
-                closeQuietly( in );
             }
 
             if ( raw == null )
@@ -413,9 +405,9 @@ public class PomIO
      * Search the list of project references to establish if this parent reference exists in them. This
      * determines whether the module is inheriting something inside the project or an external reference.
 
-     * @param projectrefs
-     * @param parentKey
-     * @return
+     * @param projectrefs GAVs to search
+     * @param parentKey Key to find
+     * @return whether its been found
      */
     private boolean seenThisParent(final HashSet<ProjectVersionRef> projectrefs, final ProjectVersionRef parentKey)
     {

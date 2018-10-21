@@ -44,6 +44,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Map;
 
 import static org.apache.commons.lang.StringUtils.isEmpty;
 import static org.apache.commons.lang.StringUtils.isNotEmpty;
@@ -116,6 +117,23 @@ public class Project
         throws ManipulationException
     {
         this( model.getPomFile(), model );
+    }
+
+    /**
+     * Create a project by copying another.
+     * @param original the Project to use.
+     */
+    public Project( final Project original )
+    {
+        this.pom = original.pom;
+        this.model = original.model.clone();
+        this.inheritanceRoot = original.inheritanceRoot;
+        this.executionRoot = original.executionRoot;
+        this.incrementalPME = original.incrementalPME;
+        if ( original.projectParent != null )
+        {
+            this.projectParent = new Project( original.projectParent );
+        }
     }
 
     @Override
@@ -238,13 +256,13 @@ public class Project
      * @return a list of fully resolved {@link ArtifactRef} to the original {@link Dependency}
      * @throws ManipulationException if an error occurs
      */
-    public HashMap<Profile, HashMap<ArtifactRef, Dependency>> getResolvedProfileDependencies( MavenSessionHandler session) throws ManipulationException
+    public Map<Profile, Map<ArtifactRef, Dependency>> getResolvedProfileDependencies( MavenSessionHandler session) throws ManipulationException
     {
-        HashMap<Profile, HashMap<ArtifactRef, Dependency>> resolvedProfileDependencies = new HashMap<>();
+        Map<Profile, Map<ArtifactRef, Dependency>> resolvedProfileDependencies = new HashMap<>();
 
         for ( final Profile profile : ProfileUtils.getProfiles( session, model ) )
         {
-            HashMap<ArtifactRef, Dependency> profileDeps = new HashMap<>();
+            Map<ArtifactRef, Dependency> profileDeps = new HashMap<>();
 
             resolveDeps( session, profile.getDependencies(), false, profileDeps );
 
@@ -267,9 +285,9 @@ public class Project
      * @return a list of fully resolved {@link ArtifactRef} to the original {@link Dependency}
      * @throws ManipulationException if an error occurs
      */
-    public HashMap<Profile, HashMap<ArtifactRef, Dependency>> getAllResolvedProfileDependencies( MavenSessionHandler session) throws ManipulationException
+    public Map<Profile, Map<ArtifactRef, Dependency>> getAllResolvedProfileDependencies( MavenSessionHandler session) throws ManipulationException
     {
-        HashMap<Profile, HashMap<ArtifactRef, Dependency>> allResolvedProfileDependencies = new HashMap<>();
+        Map<Profile, Map<ArtifactRef, Dependency>> allResolvedProfileDependencies = new HashMap<>();
 
         for ( final Profile profile : ProfileUtils.getProfiles( session, model ) )
         {
@@ -293,21 +311,22 @@ public class Project
      * @return a list of fully resolved {@link ArtifactRef} to the original {@link Dependency} (that were within DependencyManagement)
      * @throws ManipulationException if an error occurs
      */
-    public HashMap<Profile, HashMap<ArtifactRef, Dependency>> getResolvedProfileManagedDependencies( MavenSessionHandler session) throws ManipulationException
+    public Map<Profile, Map<ArtifactRef, Dependency>> getResolvedProfileManagedDependencies( MavenSessionHandler session) throws ManipulationException
     {
-        HashMap<Profile, HashMap<ArtifactRef, Dependency>> resolvedProfileManagedDependencies = new HashMap<>();
+        Map<Profile, Map<ArtifactRef, Dependency>> resolvedProfileManagedDependencies = new HashMap<>();
 
         for ( final Profile profile : ProfileUtils.getProfiles( session, model ) )
         {
-            HashMap<ArtifactRef, Dependency> profileDeps = new HashMap<>();
+            Map<ArtifactRef, Dependency> profileDeps = new HashMap<>();
 
             final DependencyManagement dm = profile.getDependencyManagement();
-            if ( !( dm == null || dm.getDependencies() == null ) )
+
+            if ( dm != null )
             {
                 resolveDeps( session, dm.getDependencies(), false, profileDeps );
-
-                resolvedProfileManagedDependencies.put( profile, profileDeps );
             }
+
+            resolvedProfileManagedDependencies.put( profile, profileDeps );
         }
         return resolvedProfileManagedDependencies;
     }
@@ -322,9 +341,9 @@ public class Project
      * @return a list of fully resolved {@link ProjectVersionRef} to the original {@link Plugin}
      * @throws ManipulationException if an error occurs
      */
-    public HashMap<ProjectVersionRef, Plugin> getResolvedPlugins ( MavenSessionHandler session) throws ManipulationException
+    public Map<ProjectVersionRef, Plugin> getResolvedPlugins ( MavenSessionHandler session) throws ManipulationException
     {
-        HashMap<ProjectVersionRef, Plugin> resolvedPlugins = new HashMap<>();
+        Map<ProjectVersionRef, Plugin> resolvedPlugins = new HashMap<>();
 
         if ( getModel().getBuild() != null )
         {
@@ -345,9 +364,9 @@ public class Project
      * @return a list of fully resolved {@link ProjectVersionRef} to the original {@link Plugin}
      * @throws ManipulationException if an error occurs
      */
-    public HashMap<ProjectVersionRef, Plugin> getResolvedManagedPlugins ( MavenSessionHandler session) throws ManipulationException
+    public Map<ProjectVersionRef, Plugin> getResolvedManagedPlugins ( MavenSessionHandler session) throws ManipulationException
     {
-        HashMap<ProjectVersionRef, Plugin> resolvedManagedPlugins = new HashMap<>();
+        Map<ProjectVersionRef, Plugin> resolvedManagedPlugins = new HashMap<>();
 
         if ( getModel().getBuild() != null )
         {
@@ -371,10 +390,10 @@ public class Project
      * @return a list of fully resolved {@link ProjectVersionRef} to the original {@link Plugin}
      * @throws ManipulationException if an error occurs
      */
-    public HashMap<Profile,HashMap<ProjectVersionRef,Plugin>> getResolvedProfilePlugins( MavenSessionHandler session )
+    public Map<Profile,Map<ProjectVersionRef,Plugin>> getResolvedProfilePlugins( MavenSessionHandler session )
                     throws ManipulationException
     {
-        HashMap<Profile, HashMap<ProjectVersionRef, Plugin>> resolvedProfilePlugins = new HashMap<>();
+        Map<Profile, Map<ProjectVersionRef, Plugin>> resolvedProfilePlugins = new HashMap<>();
 
         for ( final Profile profile : ProfileUtils.getProfiles( session, model ) )
         {
@@ -401,19 +420,20 @@ public class Project
      * @return a list of fully resolved {@link ProjectVersionRef} to the original {@link Plugin}
      * @throws ManipulationException if an error occurs
      */
-    public HashMap<Profile,HashMap<ProjectVersionRef,Plugin>> getResolvedProfileManagedPlugins( MavenSessionHandler session )
+    public Map<Profile,Map<ProjectVersionRef,Plugin>> getResolvedProfileManagedPlugins( MavenSessionHandler session )
                     throws ManipulationException
     {
-        HashMap<Profile, HashMap<ProjectVersionRef, Plugin>> resolvedProfileManagedPlugins = new HashMap<>();
+        Map<Profile, Map<ProjectVersionRef, Plugin>> resolvedProfileManagedPlugins = new HashMap<>();
 
         for ( final Profile profile : ProfileUtils.getProfiles( session, model ) )
         {
-            HashMap<ProjectVersionRef, Plugin> profileDeps = new HashMap<>();
+            Map<ProjectVersionRef, Plugin> profileDeps = new HashMap<>();
 
             if ( profile.getBuild() != null )
             {
                 final PluginManagement pm = profile.getBuild().getPluginManagement();
-                if ( !( pm == null || pm.getPlugins() == null ) )
+
+                if ( pm != null )
                 {
                     resolvePlugins( session, pm.getPlugins(), profileDeps );
                 }
@@ -434,9 +454,9 @@ public class Project
      * @return a list of fully resolved {@link ArtifactRef} to the original {@link Dependency}
      * @throws ManipulationException if an error occurs
      */
-    public HashMap<ArtifactRef, Dependency> getResolvedDependencies( MavenSessionHandler session) throws ManipulationException
+    public Map<ArtifactRef, Dependency> getResolvedDependencies( MavenSessionHandler session) throws ManipulationException
     {
-        HashMap<ArtifactRef, Dependency> resolvedDependencies = new HashMap<>();
+        Map<ArtifactRef, Dependency> resolvedDependencies = new HashMap<>();
 
         resolveDeps( session, getModel().getDependencies(), false, resolvedDependencies );
 
@@ -456,9 +476,9 @@ public class Project
      * @return a list of fully resolved {@link ArtifactRef} to the original {@link Dependency}
      * @throws ManipulationException if an error occurs
      */
-    public HashMap<ArtifactRef, Dependency> getAllResolvedDependencies( MavenSessionHandler session ) throws ManipulationException
+    public Map<ArtifactRef, Dependency> getAllResolvedDependencies( MavenSessionHandler session ) throws ManipulationException
     {
-        HashMap<ArtifactRef, Dependency> allResolvedDependencies = new HashMap<>();
+        Map<ArtifactRef, Dependency> allResolvedDependencies = new HashMap<>();
 
         resolveDeps( session, getModel().getDependencies(), true, allResolvedDependencies );
 
@@ -475,9 +495,9 @@ public class Project
      * @return a list of fully resolved {@link ArtifactRef} to the original {@link Dependency} (that were within DependencyManagement)
      * @throws ManipulationException if an error occurs
      */
-    public HashMap<ArtifactRef, Dependency> getResolvedManagedDependencies( MavenSessionHandler session ) throws ManipulationException
+    public Map<ArtifactRef, Dependency> getResolvedManagedDependencies( MavenSessionHandler session ) throws ManipulationException
     {
-        HashMap<ArtifactRef, Dependency> resolvedManagedDependencies = new HashMap<>();
+        Map<ArtifactRef, Dependency> resolvedManagedDependencies = new HashMap<>();
 
         final DependencyManagement dm = getModel().getDependencyManagement();
         if ( !( dm == null || dm.getDependencies() == null ) )
@@ -490,7 +510,7 @@ public class Project
 
 
     private void resolveDeps( MavenSessionHandler session, List<Dependency> deps, boolean includeManagedDependencies,
-                              HashMap<ArtifactRef, Dependency> resolvedDependencies )
+                              Map<ArtifactRef, Dependency> resolvedDependencies )
                     throws ManipulationException
     {
         ListIterator<Dependency> iterator = deps.listIterator( deps.size() );
@@ -541,7 +561,7 @@ public class Project
     }
 
 
-    private void resolvePlugins ( MavenSessionHandler session, List<Plugin> plugins, HashMap<ProjectVersionRef, Plugin> resolvedPlugins)
+    private void resolvePlugins ( MavenSessionHandler session, List<Plugin> plugins, Map<ProjectVersionRef, Plugin> resolvedPlugins)
                     throws ManipulationException
     {
         ListIterator<Plugin> iterator = plugins.listIterator( plugins.size() );
