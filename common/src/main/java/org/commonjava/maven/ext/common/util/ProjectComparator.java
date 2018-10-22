@@ -28,6 +28,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -42,6 +43,11 @@ import static org.commonjava.maven.ext.common.util.ProjectComparator.Type.PROFIL
 
 public class ProjectComparator
 {
+    /**
+     * Denotes whether we only scan active profiles. Default is false (we scan ALL profiles).
+     */
+    private static final String REPORT_NON_ALIGNED = "reportNonAligned";
+
     private static final Logger logger = LoggerFactory.getLogger( ProjectComparator.class );
 
     enum Type
@@ -85,6 +91,8 @@ public class ProjectComparator
     public static void compareProjects( MavenSessionHandler session, List<Project> originalProjects, List<Project> newProjects )
                     throws ManipulationException
     {
+        final boolean reportNonAligned = Boolean.parseBoolean( session.getUserProperties().getProperty( REPORT_NON_ALIGNED, "false") );
+
         try
         {
             newProjects.forEach(
@@ -110,10 +118,11 @@ public class ProjectComparator
                             logger.info( "" );
 
                             compareDependencies( DEPENDENCIES,
+                                                 reportNonAligned,
                                                  handleDependencies( session, originalProject, null, DEPENDENCIES ),
                                                  handleDependencies( session, newProject, null, DEPENDENCIES ) );
 
-                            compareDependencies( MANAGED_DEPENDENCIES,
+                            compareDependencies( MANAGED_DEPENDENCIES, reportNonAligned,
                                                  handleDependencies( session, originalProject, null,
                                                                      MANAGED_DEPENDENCIES ),
                                                  handleDependencies( session, newProject, null, MANAGED_DEPENDENCIES ) );
@@ -121,12 +130,13 @@ public class ProjectComparator
                             logger.info( "" );
 
                             comparePlugins( PLUGINS,
+                                                 reportNonAligned,
                                                  handlePlugins( session, originalProject, null, PLUGINS ),
                                                  handlePlugins( session, newProject, null, PLUGINS ) );
-                            comparePlugins( MANAGED_PLUGINS,
-                                                 handlePlugins( session, originalProject, null,
-                                                                     MANAGED_PLUGINS ),
-                                                 handlePlugins( session, newProject, null, MANAGED_PLUGINS ) );
+                            comparePlugins( MANAGED_PLUGINS, reportNonAligned,
+                                            handlePlugins( session, originalProject, null,
+                                                           MANAGED_PLUGINS ),
+                                            handlePlugins( session, newProject, null, MANAGED_PLUGINS ) );
 
                             logger.info( "" );
 
@@ -148,26 +158,28 @@ public class ProjectComparator
 
                                 logger.info( "" );
 
-                                compareDependencies( PROFILE_DEPENDENCIES,
+                                compareDependencies( PROFILE_DEPENDENCIES, reportNonAligned,
                                                      handleDependencies( session, originalProject, oldProfile, PROFILE_DEPENDENCIES ),
                                                      handleDependencies( session, newProject, newProfile, PROFILE_DEPENDENCIES ) );
 
-                                compareDependencies( PROFILE_MANAGED_DEPENDENCIES, handleDependencies( session, originalProject,
-                                                                                                       oldProfile,
-                                                                                                       PROFILE_MANAGED_DEPENDENCIES ),
+                                compareDependencies( PROFILE_MANAGED_DEPENDENCIES, reportNonAligned,
+                                                     handleDependencies( session, originalProject,
+                                                                         oldProfile,
+                                                                         PROFILE_MANAGED_DEPENDENCIES ),
                                                      handleDependencies( session, newProject, newProfile,
                                                                          PROFILE_MANAGED_DEPENDENCIES ) );
 
                                 logger.info( "" );
 
-                                comparePlugins( PROFILE_PLUGINS,
-                                                     handlePlugins( session, originalProject, oldProfile, PROFILE_PLUGINS ),
-                                                     handlePlugins( session, newProject, newProfile, PROFILE_PLUGINS ) );
+                                comparePlugins( PROFILE_PLUGINS, reportNonAligned,
+                                                handlePlugins( session, originalProject, oldProfile, PROFILE_PLUGINS ),
+                                                handlePlugins( session, newProject, newProfile, PROFILE_PLUGINS ) );
 
-                                comparePlugins( PROFILE_MANAGED_PLUGINS, handlePlugins( session, originalProject,
-                                                                                                       oldProfile,
-                                                                                                       PROFILE_MANAGED_PLUGINS ),
-                                                     handlePlugins( session, newProject, newProfile,
+                                comparePlugins( PROFILE_MANAGED_PLUGINS, reportNonAligned,
+                                                handlePlugins( session, originalProject,
+                                                               oldProfile,
+                                                               PROFILE_MANAGED_PLUGINS ),
+                                                handlePlugins( session, newProject, newProfile,
                                                                          PROFILE_MANAGED_PLUGINS ) );
                             } ) );
                         } ) );
@@ -179,16 +191,55 @@ public class ProjectComparator
     }
 
 
-    private static void compareDependencies( Type type, Set<ArtifactRef> originalDeps, Set<ArtifactRef> newDeps )
+    private static void compareDependencies( Type type, boolean reportNonAligned, Set<ArtifactRef> originalDeps, Set<ArtifactRef> newDeps )
     {
+        Set<ArtifactRef> nonAligned = new HashSet<>( );
         originalDeps.forEach( originalArtifact -> newDeps.stream().filter(
                         newArtifact -> ( newArtifact.getGroupId().equals( originalArtifact.getGroupId() ) &&
                                         newArtifact.getArtifactId().equals( originalArtifact.getArtifactId() ) &&
                                         newArtifact.getType().equals( originalArtifact.getType() ) &&
-                                        StringUtils.equals(newArtifact.getClassifier(), originalArtifact.getClassifier() ) &&
-                                        ! newArtifact.getVersionString().equals( originalArtifact.getVersionString() ) ) ).forEach( newArtifact ->
-                          logger.info( "\t{} : {} --> {} ", type, originalArtifact, newArtifact )
+                                        StringUtils.equals(newArtifact.getClassifier(), originalArtifact.getClassifier() ) ) ).forEach( newArtifact ->
+                    {
+                        if ( ! newArtifact.getVersionString().equals( originalArtifact.getVersionString() ) )
+                        {
+                            logger.info( "\t{} : {} --> {} ", type, originalArtifact, newArtifact );
+                        }
+                        else if ( reportNonAligned )
+                        {
+                            nonAligned.add( originalArtifact );
+                        }
+                    }
          ) );
+
+        if ( nonAligned.size() > 0 )
+        {
+            logger.info( "" );
+            nonAligned.forEach( na -> logger.info( "\tNon-Aligned {} : {} ", type, na ) );
+        }
+    }
+
+    private static void comparePlugins( Type type, boolean reportNonAligned, Set<ProjectVersionRef> originalPlugins, Set<ProjectVersionRef> newPlugins )
+    {
+        Set<ProjectVersionRef> nonAligned = new HashSet<>( );
+        originalPlugins.forEach( originalPVR -> newPlugins.stream().filter(
+                        newPVR -> ( newPVR.getGroupId().equals( originalPVR.getGroupId() ) &&
+                                        newPVR.getArtifactId().equals( originalPVR.getArtifactId() ) ) ).forEach( newArtifact ->
+                {
+                    if ( ! newArtifact.getVersionString().equals( originalPVR.getVersionString() ) )
+                    {
+                        logger.info( "\t{} : {} --> {} ", type, originalPVR, newArtifact );
+                    }
+                    else if ( reportNonAligned )
+                    {
+                        nonAligned.add( originalPVR );
+                    }
+                }
+        ) );
+        if ( nonAligned.size() > 0 )
+        {
+            logger.info( "" );
+            nonAligned.forEach( pv -> logger.info( "\tNon-Aligned {} : {} ", type, pv ) );
+        }
     }
 
     private static Set<ArtifactRef> handleDependencies( MavenSessionHandler session, Project project, Profile profile,
@@ -225,16 +276,6 @@ public class ProjectComparator
         {
             throw new ManipulationUncheckedException( e );
         }
-    }
-
-    private static void comparePlugins( Type type, Set<ProjectVersionRef> originalPlugins, Set<ProjectVersionRef> newPlugins )
-    {
-        originalPlugins.forEach( originalArtifact -> newPlugins.stream().filter(
-                        newArtifact -> ( newArtifact.getGroupId().equals( originalArtifact.getGroupId() ) &&
-                                        newArtifact.getArtifactId().equals( originalArtifact.getArtifactId() ) &&
-                                        ! newArtifact.getVersionString().equals( originalArtifact.getVersionString() ) ) ).forEach( newArtifact ->
-            logger.info( "\t{} : {} --> {} ", type, originalArtifact, newArtifact )
-        ) );
     }
 
     private static Set<ProjectVersionRef> handlePlugins( MavenSessionHandler session, Project project, Profile profile,
