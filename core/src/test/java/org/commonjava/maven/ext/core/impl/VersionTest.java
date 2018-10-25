@@ -310,6 +310,9 @@ public class VersionTest
         assertThat( Version.removeSnapshot( "1.snaPsHot" ), equalTo( "1" ) );
         assertThat( Version.removeSnapshot( "SNAPSHOT" ), equalTo( "" ) );
         assertThat( Version.removeSnapshot( "1.0.snapshot.beta1" ), equalTo( "1.0.snapshot.beta1" ) );
+
+        assertThat( Version.removeSnapshot( "1.0.0.redhat-1" ), equalTo( "1.0.0.redhat-1" ) );
+
     }
 
     @Test
