@@ -329,7 +329,7 @@ public class DependencyManipulator implements Manipulator
         final DependencyState dependencyState = session.getState( DependencyState.class );
         final CommonState commonState = session.getState( CommonState.class );
 
-        logger.info ("Processing project {} ", projectGA);
+        logger.debug ("Processing project {} ", projectGA);
 
         Map<ArtifactRef, String> moduleOverrides = new LinkedHashMap<>( overrides );
         moduleOverrides = removeReactorGAs( moduleOverrides );
@@ -488,8 +488,8 @@ public class DependencyManipulator implements Manipulator
             applyOverrides( project, project.getResolvedDependencies( session ), explicitOverrides, moduleOverrides );
             applyExplicitOverrides( project, project.getResolvedDependencies( session ), explicitOverrides, commonState, explicitVersionPropertyUpdateMap );
 
-            final HashMap<Profile, HashMap<ArtifactRef, Dependency>> pd = project.getResolvedProfileDependencies( session );
-            final HashMap<Profile, HashMap<ArtifactRef, Dependency>> pmd = project.getResolvedProfileManagedDependencies( session );
+            final Map<Profile, Map<ArtifactRef, Dependency>> pd = project.getResolvedProfileDependencies( session );
+            final Map<Profile, Map<ArtifactRef, Dependency>> pmd = project.getResolvedProfileManagedDependencies( session );
 
             for ( Profile p : pd.keySet())
             {
@@ -520,7 +520,7 @@ public class DependencyManipulator implements Manipulator
      * @param versionPropertyUpdateMap properties to update
      * @throws ManipulationException if an error occurs
      */
-    private void applyExplicitOverrides( final Project project, final HashMap<ArtifactRef, Dependency> dependencies,
+    private void applyExplicitOverrides( final Project project, final Map<ArtifactRef, Dependency> dependencies,
                                          final WildcardMap<String> explicitOverrides, final CommonState state,
                                          final Map<Project, Map<String, PropertyMapper>> versionPropertyUpdateMap )
                     throws ManipulationException
@@ -593,7 +593,7 @@ public class DependencyManipulator implements Manipulator
      * @return The map of overrides that were not matched in the dependencies
      * @throws ManipulationException if an error occurs
      */
-    private Map<ArtifactRef, String> applyOverrides( final Project project, final HashMap<ArtifactRef, Dependency> dependencies,
+    private Map<ArtifactRef, String> applyOverrides( final Project project, final Map<ArtifactRef, Dependency> dependencies,
                                                      final WildcardMap<String> explicitOverrides, final Map<ArtifactRef, String> overrides )
                     throws ManipulationException
     {
@@ -637,7 +637,7 @@ public class DependencyManipulator implements Manipulator
                     }
                     else if (oldVersion.equals( "${project.version}" ) || ( oldVersion.contains( "$" ) && project.getVersion().equals( resolvedValue ) ) )
                     {
-                        logger.warn( "Dependency {} with original version {} and project version {} for {} references ${project.version} so skipping.",
+                        logger.debug( "Dependency {} with original version {} and project version {} for {} references ${project.version} so skipping.",
                                      dependency, oldVersion, project.getVersion(), project.getPom() );
                     }
                     // If we have an explicitOverride, this will always override the dependency changes made here.
@@ -900,7 +900,7 @@ public class DependencyManipulator implements Manipulator
         }
     }
 
-    private void validateDependenciesUpdatedProperty( CommonState cState, Project p, HashMap<ArtifactRef, Dependency> dependencies )
+    private void validateDependenciesUpdatedProperty( CommonState cState, Project p, Map<ArtifactRef, Dependency> dependencies )
                     throws ManipulationException
     {
         for ( ArtifactRef d : dependencies.keySet() )

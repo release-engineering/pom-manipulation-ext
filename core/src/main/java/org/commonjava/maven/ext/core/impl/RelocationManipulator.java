@@ -41,6 +41,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import static org.commonjava.maven.ext.core.util.IdUtils.ga;
@@ -130,7 +131,7 @@ public class RelocationManipulator
         return result;
     }
 
-    private boolean updateDependencies( WildcardMap<ProjectVersionRef> relocations, HashMap<ArtifactRef, Dependency> dependencies )
+    private boolean updateDependencies( WildcardMap<ProjectVersionRef> relocations, Map<ArtifactRef, Dependency> dependencies )
     {
         boolean result = false;
         final HashMap<ArtifactRef, Dependency> postFixUp = new HashMap<>(  );

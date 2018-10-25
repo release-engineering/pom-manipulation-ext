@@ -293,7 +293,7 @@ public class PluginManipulator
     private void apply( final Project project, final Model model, PluginType type, final Set<Plugin> override )
         throws ManipulationException
     {
-        logger.info( "Applying plugin changes for {} to: {} ", type, ga( project ) );
+        logger.debug( "Applying plugin changes for {} to: {} ", type, ga( project ) );
 
         if ( project.isInheritanceRoot() )
         {
@@ -322,8 +322,8 @@ public class PluginManipulator
 
         applyOverrides( project, type, PluginType.LocalP, project.getResolvedPlugins( session ), override );
 
-        final HashMap<Profile, HashMap<ProjectVersionRef, Plugin>> pd = project.getResolvedProfilePlugins( session );
-        final HashMap<Profile, HashMap<ProjectVersionRef, Plugin>> pmd = project.getResolvedProfileManagedPlugins( session );
+        final Map<Profile, Map<ProjectVersionRef, Plugin>> pd = project.getResolvedProfilePlugins( session );
+        final Map<Profile, Map<ProjectVersionRef, Plugin>> pmd = project.getResolvedProfileManagedPlugins( session );
 
         logger.debug ("Processing profiles with plugin management");
         for ( Profile p : pmd.keySet() )
@@ -355,7 +355,7 @@ public class PluginManipulator
      * @param pluginVersionOverrides The list of version overrides to apply to the plugins
      * @throws ManipulationException if an error occurs.
      */
-    private void applyOverrides( Project project, PluginType remotePluginType, final PluginType localPluginType, final HashMap<ProjectVersionRef, Plugin> plugins,
+    private void applyOverrides( Project project, PluginType remotePluginType, final PluginType localPluginType, final Map<ProjectVersionRef, Plugin> plugins,
                                  final Set<Plugin> pluginVersionOverrides ) throws ManipulationException
     {
         if ( plugins == null )
@@ -556,7 +556,7 @@ public class PluginManipulator
         }
     }
 
-    private void validatePluginsUpdatedProperty( CommonState cState, Project p, HashMap<ProjectVersionRef, Plugin> dependencies )
+    private void validatePluginsUpdatedProperty( CommonState cState, Project p, Map<ProjectVersionRef, Plugin> dependencies )
                     throws ManipulationException
     {
         for ( ProjectVersionRef d : dependencies.keySet() )

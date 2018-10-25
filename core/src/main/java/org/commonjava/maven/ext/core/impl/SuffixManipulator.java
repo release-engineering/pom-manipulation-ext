@@ -37,6 +37,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -91,7 +92,7 @@ public class SuffixManipulator
 
                 if ( m.matches() )
                 {
-                    logger.info( "Stripping suffix and resetting parent version from {} to {}", parent.getVersion(), m.group( 1 ) );
+                    logger.info( "Stripping suffix for {} and resetting parent version from {} to {}", project.getKey(), parent.getVersion(), m.group( 1 ) );
                     parent.setVersion( m.group( 1 ) );
                     changed.add( project );
                 }
@@ -126,7 +127,7 @@ public class SuffixManipulator
     }
 
     private void processPlugins( Pattern suffixStripPattern, Project project,
-                                 HashMap<ProjectVersionRef, Plugin> plugins ) throws ManipulationException
+                                 Map<ProjectVersionRef, Plugin> plugins ) throws ManipulationException
     {
         try
         {
@@ -161,7 +162,7 @@ public class SuffixManipulator
         }
     }
 
-    private void processDependencies( Pattern suffixStripPattern, Project project, HashMap<ArtifactRef, Dependency> deps )
+    private void processDependencies( Pattern suffixStripPattern, Project project, Map<ArtifactRef, Dependency> deps )
                     throws ManipulationException
     {
         try

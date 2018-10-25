@@ -22,13 +22,16 @@ import org.commonjava.maven.ext.common.model.Project;
 import org.commonjava.maven.ext.core.ManipulationSession;
 import org.commonjava.maven.ext.core.fixture.TestUtils;
 import org.commonjava.maven.ext.io.PomIO;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.contrib.java.lang.system.SystemOutRule;
 
 import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -199,7 +202,7 @@ public class ProjectInheritanceTest
         {
             if ( p.getPom().equals( projectroot ) )
             {
-                HashMap<ArtifactRef, Dependency> deps = p.getResolvedManagedDependencies( session );
+                Map<ArtifactRef, Dependency> deps = p.getResolvedManagedDependencies( session );
                 for ( ArtifactRef a : deps.keySet())
                 {
                     assertFalse ( a.getVersionString().contains( "project.version" ));

@@ -32,6 +32,7 @@ import org.codehaus.plexus.PlexusContainerException;
 import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.common.model.GAV;
 import org.commonjava.maven.ext.common.model.Project;
+import org.commonjava.maven.ext.common.util.ProjectComparator;
 import org.commonjava.maven.ext.core.impl.Manipulator;
 import org.commonjava.maven.ext.core.state.CommonState;
 import org.commonjava.maven.ext.core.state.State;
@@ -53,7 +54,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -143,6 +143,7 @@ public class ManipulationManager
         // Now init the common state
         session.setState( new CommonState( session.getUserProperties()) );
 
+
     }
 
     /**
@@ -154,22 +155,24 @@ public class ManipulationManager
     public void scanAndApply( final ManipulationSession session )
                     throws ManipulationException
     {
-        final List<Project> projects = pomIO.parseProject( session.getPom() );
+        final List<Project> currentProjects = pomIO.parseProject( session.getPom() );
+        final List<Project> originalProjects = new ArrayList<>(  );
+        currentProjects.forEach( p -> originalProjects.add( new Project( p ) ) );
 
-        session.getActiveProfiles().addAll( parseActiveProfiles( session, projects ) );
-        session.setProjects( projects );
+        session.getActiveProfiles().addAll( parseActiveProfiles( session, currentProjects ) );
+        session.setProjects( currentProjects );
 
-        for ( final Project project : projects )
+        for ( final Project project : currentProjects )
         {
             logger.debug( "Got " + project + " (POM: " + project.getPom() + ")" );
         }
 
-        Set<Project> changed = applyManipulations( projects );
+        Set<Project> changed = applyManipulations( currentProjects );
 
         // Create a marker file if we made some changes to prevent duplicate runs.
         if ( !changed.isEmpty() )
         {
-            logger.info( "Maven-Manipulation-Extension: Rewrite changed: " + projects );
+            logger.info( "Maven-Manipulation-Extension: Rewrite changed: " + currentProjects );
 
             GAV gav = pomIO.rewritePOMs( changed );
 
@@ -178,13 +181,11 @@ public class ManipulationManager
                 final VersioningState state = session.getState( VersioningState.class );
                 state.setExecutionRootModified( gav );
 
-                new File( session.getTargetDir().getParentFile(),
-                          ManipulationManager.MARKER_PATH ).mkdirs();
+                new File( session.getTargetDir().getParentFile(), ManipulationManager.MARKER_PATH ).mkdirs();
 
-                new File( session.getTargetDir().getParentFile(),
-                          ManipulationManager.MARKER_FILE ).createNewFile();
+                new File( session.getTargetDir().getParentFile(), ManipulationManager.MARKER_FILE ).createNewFile();
 
-                try (FileWriter writer = new FileWriter( new File ( session.getTargetDir().getParentFile(), RESULT_FILE ) ) )
+                try (FileWriter writer = new FileWriter( new File( session.getTargetDir().getParentFile(), RESULT_FILE ) ))
                 {
                     writer.write( collectResults( session ) );
                 }
@@ -197,12 +198,16 @@ public class ManipulationManager
         }
 
         // Ensure shutdown of GalleyInfrastructure Executor Service
-        for (ExtensionInfrastructure e : infrastructure.values())
+        for ( ExtensionInfrastructure e : infrastructure.values() )
         {
             e.finish();
         }
+
+        ProjectComparator.compareProjects( session, originalProjects, currentProjects );
+
         logger.info( "Maven-Manipulation-Extension: Finished." );
     }
+
 
     @SuppressWarnings( {"unchecked", "deprecation" } )
     private Set<String> parseActiveProfiles( ManipulationSession session, List<Project> projects ) throws ManipulationException

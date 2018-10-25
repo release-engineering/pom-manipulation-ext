@@ -38,7 +38,6 @@ public final class ProfileUtils
     {
     }
 
-
     public static List<Profile> getProfiles ( MavenSessionHandler session, Model model)
     {
         final List<Profile> result = new ArrayList<>( );

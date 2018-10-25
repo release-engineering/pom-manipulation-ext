@@ -151,7 +151,7 @@ public class RESTCollector
         {
             printFinishTime( start, (restResult != null));
         }
-        logger.debug ("REST Client returned {} ", restResult);
+        logger.info ("REST Client returned {} ", restResult);
 
         vs.setRESTMetadata (parseVersions(session, projects, state, newProjectKeys, restResult));
 
@@ -355,11 +355,11 @@ public class RESTCollector
                             continue;
                         }
                         recordDependencies( session, project, localDeps,
-                                                    project.getResolvedProfileManagedDependencies( session ).get( p ) );
+                                            project.getResolvedProfileManagedDependencies( session ).getOrDefault (p, Collections.emptyMap()) );
                         recordDependencies( session, project, localDeps,
-                                            project.getResolvedProfileDependencies( session ).get( p ) );
-                        recordPlugins( localDeps, project.getResolvedProfileManagedPlugins( session ).get( p ) );
-                        recordPlugins( localDeps, project.getResolvedProfilePlugins( session ).get( p ) );
+                                             project.getResolvedProfileDependencies( session ).getOrDefault( p, Collections.emptyMap() ) );
+                        recordPlugins( localDeps, project.getResolvedProfileManagedPlugins( session ).getOrDefault( p, Collections.emptyMap() ) );
+                        recordPlugins( localDeps, project.getResolvedProfilePlugins( session ).getOrDefault( p, Collections.emptyMap() ) );
 
                     }
                 }
@@ -373,13 +373,8 @@ public class RESTCollector
      * @param deps the list of ArtifactRefs to return
      * @param plugins the plugins to transform.
      */
-    private static void recordPlugins( Set<ArtifactRef> deps, HashMap<ProjectVersionRef, Plugin> plugins )
+    private static void recordPlugins( Set<ArtifactRef> deps, Map<ProjectVersionRef, Plugin> plugins )
     {
-        if ( plugins == null )
-        {
-            return;
-        }
-
         for ( ProjectVersionRef pvr : plugins.keySet() )
         {
             deps.add( new SimpleScopedArtifactRef( pvr, new SimpleTypeAndClassifier( "maven-plugin", null ),
@@ -396,14 +391,9 @@ public class RESTCollector
      * @param dependencies dependencies to examine
      */
     private static void recordDependencies( ManipulationSession session, Project project, Set<ArtifactRef> deps,
-                                            HashMap<ArtifactRef, Dependency> dependencies )
+                                            Map<ArtifactRef, Dependency> dependencies )
                     throws ManipulationException
     {
-        if ( dependencies == null )
-        {
-            return;
-        }
-
         for ( ArtifactRef pvr : dependencies.keySet() )
         {
             Dependency d = dependencies.get( pvr );
