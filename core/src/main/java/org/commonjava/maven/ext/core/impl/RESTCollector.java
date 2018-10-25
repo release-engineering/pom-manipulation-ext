@@ -92,7 +92,6 @@ public class RESTCollector
 
         final ArrayList<ProjectVersionRef> restParam = new ArrayList<>();
         final ArrayList<ProjectVersionRef> newProjectKeys = new ArrayList<>();
-
         final String override = vs.getOverride();
 
         for ( final Project project : projects )
@@ -101,23 +100,7 @@ public class RESTCollector
             {
                 // TODO: Check this : For the rest API I think we need to check every project GA not just inheritance root.
                 // Strip SNAPSHOT from the version for matching. DA will handle OSGi conversion.
-                ProjectVersionRef newKey = new SimpleProjectVersionRef( project.getKey() );
-
-                if ( project.getVersion().endsWith( "-SNAPSHOT" ) )
-                {
-                    if ( !vs.isPreserveSnapshot() )
-                    {
-                        newKey = new SimpleProjectVersionRef( project.getKey().asProjectRef(), project.getVersion()
-                                                                                                      .substring( 0,
-                                                                                                                  project.getVersion()
-                                                                                                                         .indexOf( "-SNAPSHOT" ) ) );
-                    }
-                    else
-                    {
-                        logger.warn( "SNAPSHOT detected for REST call but preserve-snapshots is enabled." );
-                    }
-                }
-                newProjectKeys.add( newKey );
+                newProjectKeys.add( new SimpleProjectVersionRef( project.getKey().asProjectRef(), handlePotentialSnapshotVersion( vs, project.getVersion() ) ) );
             }
             else if ( project.isExecutionRoot() )
             {
@@ -185,12 +168,7 @@ public class RESTCollector
             if ( restResult.containsKey( p ) )
             {
                 // Found part of the current project to store in Versioning State
-                Set<String> versions = versionStates.get( p.asProjectRef() );
-                if (versions == null)
-                {
-                    versions = new HashSet<>();
-                    versionStates.put( p.asProjectRef(), versions );
-                }
+                Set<String> versions = versionStates.computeIfAbsent( p.asProjectRef(), k -> new HashSet<>() );
                 versions.add( restResult.get( p ) );
             }
         }
@@ -240,12 +218,7 @@ public class RESTCollector
                     }
 
                     // Found part of the current project to store in Versioning State
-                    Set<String> versions = versionStates.get( p.getKey().asProjectRef() );
-                    if ( versions == null )
-                    {
-                        versions = new HashSet<>();
-                        versionStates.put( p.getKey().asProjectRef(), versions );
-                    }
+                    Set<String> versions = versionStates.computeIfAbsent( p.getKey().asProjectRef(), k -> new HashSet<>() );
                     for ( ProjectVersionRef b : blacklist )
                     {
                         versions.add( b.getVersionString() );
@@ -293,6 +266,8 @@ public class RESTCollector
      */
     public static Set<ArtifactRef> establishAllDependencies( ManipulationSession session, final List<Project> projects, Set<String> activeProfiles ) throws ManipulationException
     {
+        final VersioningState vs = session.getState( VersioningState.class );
+
         Set<ArtifactRef> localDeps = new TreeSet<>();
         Set<String> activeModules = new HashSet<>();
         boolean scanAll = false;
@@ -336,14 +311,14 @@ public class RESTCollector
                 {
                     SimpleProjectVersionRef parent = new SimpleProjectVersionRef( project.getModelParent().getGroupId(),
                                                                                   project.getModelParent().getArtifactId(),
-                                                                                  project.getModelParent().getVersion() );
+                                                                                  handlePotentialSnapshotVersion( vs, project.getModelParent().getVersion() ) );
                     localDeps.add( new SimpleArtifactRef( parent, new SimpleTypeAndClassifier( "pom", null ) ) );
                 }
 
                 recordDependencies( session, project, localDeps, project.getResolvedManagedDependencies( session ) );
                 recordDependencies( session, project, localDeps, project.getResolvedDependencies( session ) );
-                recordPlugins( localDeps, project.getResolvedManagedPlugins( session ) );
-                recordPlugins( localDeps, project.getResolvedPlugins( session ) );
+                recordPlugins( session, localDeps, project.getResolvedManagedPlugins( session ) );
+                recordPlugins( session, localDeps, project.getResolvedPlugins( session ) );
 
                 List<Profile> profiles = project.getModel().getProfiles();
                 if ( profiles != null )
@@ -358,8 +333,8 @@ public class RESTCollector
                                             project.getResolvedProfileManagedDependencies( session ).getOrDefault (p, Collections.emptyMap()) );
                         recordDependencies( session, project, localDeps,
                                              project.getResolvedProfileDependencies( session ).getOrDefault( p, Collections.emptyMap() ) );
-                        recordPlugins( localDeps, project.getResolvedProfileManagedPlugins( session ).getOrDefault( p, Collections.emptyMap() ) );
-                        recordPlugins( localDeps, project.getResolvedProfilePlugins( session ).getOrDefault( p, Collections.emptyMap() ) );
+                        recordPlugins( session, localDeps, project.getResolvedProfileManagedPlugins( session ).getOrDefault( p, Collections.emptyMap() ) );
+                        recordPlugins( session, localDeps, project.getResolvedProfilePlugins( session ).getOrDefault( p, Collections.emptyMap() ) );
 
                     }
                 }
@@ -370,15 +345,19 @@ public class RESTCollector
 
     /**
      * Translate a given set of pvr:plugins into ArtifactRefs.
+     * @param session the current Session.
      * @param deps the list of ArtifactRefs to return
      * @param plugins the plugins to transform.
      */
-    private static void recordPlugins( Set<ArtifactRef> deps, Map<ProjectVersionRef, Plugin> plugins )
+    private static void recordPlugins( ManipulationSession session, Set<ArtifactRef> deps, Map<ProjectVersionRef, Plugin> plugins )
     {
+        final VersioningState vs = session.getState( VersioningState.class );
+
         for ( ProjectVersionRef pvr : plugins.keySet() )
         {
-            deps.add( new SimpleScopedArtifactRef( pvr, new SimpleTypeAndClassifier( "maven-plugin", null ),
-                                                   DependencyScope.compile.realName() ) );
+            deps.add( new SimpleScopedArtifactRef(
+                            new SimpleProjectVersionRef( pvr.asProjectRef(), handlePotentialSnapshotVersion( vs, pvr.getVersionString() ) ),
+                            new SimpleTypeAndClassifier( "maven-plugin", null ), DependencyScope.compile.realName() ) );
         }
     }
 
@@ -394,11 +373,14 @@ public class RESTCollector
                                             Map<ArtifactRef, Dependency> dependencies )
                     throws ManipulationException
     {
+        final VersioningState vs = session.getState( VersioningState.class );
+
         for ( ArtifactRef pvr : dependencies.keySet() )
         {
             Dependency d = dependencies.get( pvr );
-            deps.add( new SimpleScopedArtifactRef( pvr, new SimpleTypeAndClassifier( d.getType(), d.getClassifier() ),
-                                                   isEmpty( d.getScope() ) ?
+            deps.add( new SimpleScopedArtifactRef(
+                            new SimpleProjectVersionRef( pvr.asProjectRef(), handlePotentialSnapshotVersion( vs, pvr.getVersionString() ) ),
+                            new SimpleTypeAndClassifier( d.getType(), d.getClassifier() ), isEmpty( d.getScope() ) ?
                                                                    DependencyScope.compile.realName() :
                                                                    PropertyResolver.resolveInheritedProperties( session,
                                                                                                                 project,
@@ -406,6 +388,15 @@ public class RESTCollector
         }
     }
 
+
+    private static String handlePotentialSnapshotVersion( VersioningState vs, String version )
+    {
+        if ( vs != null && ! vs.isPreserveSnapshot() )
+        {
+            return Version.removeSnapshot( version );
+        }
+        return version;
+    }
 
     private void printFinishTime( long start, boolean finished )
     {

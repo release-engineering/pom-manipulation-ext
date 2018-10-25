@@ -86,6 +86,13 @@ public class RESTIntegrationTest
     }
 
     @Test
+    public void testRESTVersionManipSnapshot() throws Exception
+    {
+        String test = getDefaultTestLocation( "rest-version-manip-snapshot" );
+        runLikeInvoker( test, mockServer.getUrl() );
+    }
+
+    @Test
     public void testRESTVersionManipMixed() throws Exception
     {
         handler.setSuffix( AddSuffixJettyHandler.MIXED_SUFFIX );
