@@ -47,6 +47,6 @@ public class ResolveArtifactTest
 
         Set<ArtifactRef> artifacts = RESTCollector.establishAllDependencies( session, projects, null );
         System.out.println ("### artifact count is " + artifacts.size());
-        assertTrue ( artifacts.size() == 60 );
+        assertTrue ( artifacts.size() == 61 );
     }
 }

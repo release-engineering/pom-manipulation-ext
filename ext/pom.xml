@@ -149,6 +149,10 @@
       <groupId>org.codehaus.groovy</groupId>
       <artifactId>groovy-xml</artifactId>
     </dependency>
+    <dependency>
+      <groupId>org.apache.ivy</groupId>
+      <artifactId>ivy</artifactId>
+    </dependency>
 
     <dependency>
       <groupId>org.slf4j</groupId>
@@ -211,6 +215,7 @@
                   <include>commons-logging:commons-logging</include>
                   <include>net.minidev:*</include>
                   <include>org.apache.httpcomponents:*</include>
+                  <include>org.apache.ivy:*</include>
                   <include>org.codehaus.groovy:groovy-json</include>
                   <include>org.codehaus.groovy:groovy-xml</include>
                   <include>org.codehaus.groovy:groovy</include>

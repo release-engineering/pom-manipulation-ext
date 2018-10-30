@@ -90,7 +90,6 @@ public class RESTCollector
             return;
         }
 
-        final ArrayList<ProjectVersionRef> restParam = new ArrayList<>();
         final ArrayList<ProjectVersionRef> newProjectKeys = new ArrayList<>();
         final String override = vs.getOverride();
 
@@ -110,9 +109,10 @@ public class RESTCollector
                 newProjectKeys.add( new SimpleProjectVersionRef( p.getGroupId(), p.getArtifactId(), override ) );
             }
         }
-        restParam.addAll( newProjectKeys );
 
-        Set<ArtifactRef> localDeps = establishAllDependencies( session, projects, null );
+        final ArrayList<ProjectVersionRef> restParam = new ArrayList<>( newProjectKeys );
+        final Set<ArtifactRef> localDeps = establishAllDependencies( session, projects, null );
+
         // Ok we now have a defined list of top level project plus a unique list of all possible dependencies.
         // Need to send that to the rest interface to get a translation.
         for ( ArtifactRef p : localDeps )
