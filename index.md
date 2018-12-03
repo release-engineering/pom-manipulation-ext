@@ -95,6 +95,10 @@ The second file is a json formatted file containing the modified execution root 
     }
 
 
+### Logging Summary
+
+PME will output a summary of its changes at the end of the run. As well as reporting dependency and plugin alignment it is also possible to report what _hasn't_ been aligned by setting the property `reportNonAligned=true`.
+
 ### Feature Guide
 
 Below are links to more specific information about configuring sets of features in PME:
