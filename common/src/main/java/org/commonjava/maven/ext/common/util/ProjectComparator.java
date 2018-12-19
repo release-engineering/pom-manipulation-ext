@@ -43,9 +43,6 @@ import static org.commonjava.maven.ext.common.util.ProjectComparator.Type.PROFIL
 
 public class ProjectComparator
 {
-    /**
-     * Denotes whether we only scan active profiles. Default is false (we scan ALL profiles).
-     */
     private static final String REPORT_NON_ALIGNED = "reportNonAligned";
 
     private static final Logger logger = LoggerFactory.getLogger( ProjectComparator.class );

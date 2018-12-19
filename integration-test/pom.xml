@@ -128,7 +128,6 @@
   </dependencies>
 
   <properties>
-    <mavenVersion>3.1.1</mavenVersion>
     <it.maven.home>${project.build.directory}/apache-maven-${mavenVersion}</it.maven.home>
     <cliIter>cli</cliIter>
     <extIter>ext</extIter>
