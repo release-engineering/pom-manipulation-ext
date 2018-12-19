@@ -61,8 +61,11 @@
 
   <profiles>
     <profile>
+      <id>ibmjdk</id>
       <activation>
-        <activeByDefault>true</activeByDefault>
+        <file>
+          <exists>\${java.home}/../lib/tools.jar</exists>
+        </file>
       </activation>
 
       <dependencies>

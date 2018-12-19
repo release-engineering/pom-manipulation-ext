@@ -70,7 +70,7 @@ import static org.commonjava.maven.ext.common.util.ProfileUtils.PROFILE_SCANNING
  *   <li>{@link #init(ManipulationSession)}</li>
  *   <li>{@link #applyManipulations(List)}</li>
  * </ol>
- * 
+ *
  * @author jdcasey
  */
 @Named
@@ -225,8 +225,11 @@ public class ManipulationManager
 
         for ( Project p : projects )
         {
+            // We clone the original profile here to prevent the DefaultProfileManager affecting the original list
+            // during its activation calculation.
             p.getModel().getProfiles().stream().filter( newProfile -> ! dpm.getProfilesById().containsKey( newProfile.getId() ) ).
-                            forEach( dpm::addProfile );
+                            forEach( newProfile -> dpm.addProfile( newProfile.clone() ) );
+
             try
             {
                 List<org.apache.maven.model.Profile> ap = dpm.getActiveProfiles();

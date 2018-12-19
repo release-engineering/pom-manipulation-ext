@@ -33,3 +33,5 @@ assert dependency.version.text() == "1.0.0.redhat-1"
 dependency = pom.dependencyManagement.dependencies.dependency.find { it.artifactId.text() == "commons-net" }
 assert dependency != null
 assert dependency.version.text() == "2.0"
+
+assert pomFile.text.contains("java.home")
