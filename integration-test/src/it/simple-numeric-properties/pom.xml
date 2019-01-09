@@ -34,12 +34,14 @@
     <module>child</module>
   </modules>
 
-  <dependencies>
-    <dependency>
-      <groupId>org.commonjava.maven.ext.integration-test</groupId>
-      <artifactId>simple-numeric-properties</artifactId>
-      <version>\${project.version}</version>
-    </dependency>
-  </dependencies>
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>org.commonjava.maven.ext.integration-test</groupId>
+        <artifactId>simple-numeric-properties</artifactId>
+        <version>\${project.version}</version>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
 
 </project>

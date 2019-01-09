@@ -39,9 +39,9 @@ pom.properties.each {
         passed = true
     }
 }
-
 assert (passed == true)
 
+assert pom.dependencyManagement.dependencies.dependency[0].version.text().equals(v)
 
 System.out.println( "Checking child output..." )
 
@@ -55,3 +55,4 @@ a = pom.artifactId.text()
 
 System.out.println( "POM Version: ${v}" )
 assert v.contains( '${version.sal}' )
+assert pom.dependencyManagement.dependencies.dependency[0].version.text().equals(v)
