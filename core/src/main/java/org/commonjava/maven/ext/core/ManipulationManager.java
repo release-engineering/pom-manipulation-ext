@@ -27,8 +27,6 @@ import org.apache.maven.execution.MavenSession;
 import org.apache.maven.profiles.DefaultProfileManager;
 import org.apache.maven.profiles.activation.ProfileActivationException;
 import org.apache.maven.project.ProjectBuilder;
-import org.codehaus.plexus.DefaultPlexusContainer;
-import org.codehaus.plexus.PlexusContainerException;
 import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.common.model.GAV;
 import org.commonjava.maven.ext.common.model.Project;
@@ -195,6 +193,8 @@ public class ManipulationManager
                 logger.error( "Unable to create marker or result file", e );
                 throw new ManipulationException( "Marker/result file creation failed", e );
             }
+
+            ProjectComparator.compareProjects( session, originalProjects, currentProjects );
         }
 
         // Ensure shutdown of GalleyInfrastructure Executor Service
@@ -202,8 +202,6 @@ public class ManipulationManager
         {
             e.finish();
         }
-
-        ProjectComparator.compareProjects( session, originalProjects, currentProjects );
 
         logger.info( "Maven-Manipulation-Extension: Finished." );
     }
@@ -213,15 +211,7 @@ public class ManipulationManager
     private Set<String> parseActiveProfiles( ManipulationSession session, List<Project> projects ) throws ManipulationException
     {
         final Set<String> activeProfiles = new HashSet<>();
-        final DefaultProfileManager dpm;
-        try
-        {
-            dpm = new DefaultProfileManager( new DefaultPlexusContainer(), session.getUserProperties() );
-        }
-        catch ( PlexusContainerException e )
-        {
-            throw new ManipulationException( "Unable to create DefaultProfileManager", e );
-        }
+        final DefaultProfileManager dpm = new DefaultProfileManager( session.getSession().getContainer(), session.getUserProperties() );
 
         for ( Project p : projects )
         {

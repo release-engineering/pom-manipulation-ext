@@ -225,4 +225,11 @@ public class ManipulationSession
         return result;
     }
 
+    /**
+     * @return Returns the current MavenSession
+     */
+    MavenSession getSession()
+    {
+        return mavenSession;
+    }
 }
