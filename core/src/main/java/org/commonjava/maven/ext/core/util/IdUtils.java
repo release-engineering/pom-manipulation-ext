@@ -63,16 +63,7 @@ public final class IdUtils
             final List<ProjectVersionRef> refs = new ArrayList<>();
             for ( final String gav : gavs )
             {
-                try
-                {
-                    final ProjectVersionRef ref = SimpleProjectVersionRef.parse( gav );
-                    refs.add( ref );
-                }
-                catch ( final InvalidRefException e )
-                {
-                    logger.error( "Skipping invalid remote management GAV: " + gav );
-                    throw e;
-                }
+                refs.add( SimpleProjectVersionRef.parse( gav ) );
             }
 
             return refs;

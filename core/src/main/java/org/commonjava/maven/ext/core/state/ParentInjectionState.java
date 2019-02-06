@@ -47,16 +47,7 @@ public class ParentInjectionState
 
         if ( gav != null )
         {
-            ProjectVersionRef ref;
-            try
-            {
-                ref = SimpleProjectVersionRef.parse( gav );
-            }
-            catch ( final InvalidRefException e )
-            {
-                logger.error( "Skipping parent injection! Got invalid GAV: {}", gav );
-                throw e;
-            }
+            ProjectVersionRef ref = SimpleProjectVersionRef.parse( gav );
             parent = new Parent();
             parent.setGroupId( ref.getGroupId() );
             parent.setArtifactId( ref.getArtifactId() );

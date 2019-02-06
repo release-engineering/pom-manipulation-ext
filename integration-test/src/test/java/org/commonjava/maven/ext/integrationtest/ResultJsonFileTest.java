@@ -62,6 +62,27 @@ public class ResultJsonFileTest
     public TemporaryFolder tmpFolderWorkingRule = new TemporaryFolder(new File ( workingDirectory, "target" ) );
 
     @Test
+    public void testCliExitValue()
+                    throws Exception
+    {
+        // given
+
+        File baseDir = tmpFolderRule.newFolder();
+        File pomFile = getResourceFile( "result-json-test/pom.xml" );
+        copyFile( pomFile, new File( baseDir, "pom.xml" ) );
+
+        // when
+
+        Map<String, String> params = new HashMap<>();
+        params.put( "version.incremental.suffix", "redhat" );
+        params.put( "dependencyOverride.org.apache.qpid-proton-j-parent@*", "0.31.0.redhat-00001" );
+
+        Integer exitValue = runCli( Collections.<String>emptyList(), params, baseDir.getCanonicalPath() );
+
+        assertEquals( 10, exitValue.intValue() );
+    }
+
+    @Test
     public void testVersioningStateOutputJsonFile()
                     throws Exception
     {

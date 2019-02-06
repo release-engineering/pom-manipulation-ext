@@ -55,6 +55,7 @@ import org.codehaus.plexus.PlexusContainer;
 import org.codehaus.plexus.PlexusContainerException;
 import org.codehaus.plexus.component.repository.exception.ComponentLookupException;
 import org.commonjava.maven.atlas.ident.ref.ArtifactRef;
+import org.commonjava.maven.atlas.ident.ref.InvalidRefException;
 import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.common.model.SimpleScopedArtifactRef;
 import org.commonjava.maven.ext.core.ManipulationManager;
@@ -120,7 +121,7 @@ public class Cli
         System.exit ( new Cli().run( args ) );
     }
 
-    public int run( String[] args )
+    private int run( String[] args )
     {
         Options options = new Options();
         options.addOption( "h", false, "Print this help message." );
@@ -393,8 +394,7 @@ public class Cli
         }
         catch ( ManipulationException e )
         {
-            logger.error( "POM Manipulation failed; original error is {}", e.getMessage() );
-            logger.debug( "POM Manipulation error trace is", e );
+            logger.error( "POM Manipulation failed; original error is: {}", e.getMessage(), e );
             return 10;
         }
         catch ( RestException e )
@@ -402,6 +402,11 @@ public class Cli
             logger.error ( "REST communication with {} failed. {}", userProps.getProperty( "restURL" ), e.getMessage () );
             logger.trace ( "Exception trace is", e);
             return 100;
+        }
+        catch ( InvalidRefException e )
+        {
+            logger.error( "POM Manipulation failed; original error is: {}", e.getMessage(), e );
+            return 10;
         }
         catch ( Exception e )
         {

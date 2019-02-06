@@ -257,6 +257,7 @@ public class ProjectVersioningManipulator
                     catch ( InvalidRefException ire)
                     {
                         logger.debug( "Unable to change version for dependency {} due to {} ", d.toString(), ire );
+                        throw ire;
                     }
                 }
             }
@@ -300,6 +301,7 @@ public class ProjectVersioningManipulator
                     catch ( InvalidRefException ire)
                     {
                         logger.debug( "Unable to change version for dependency {} due to {} ", d.toString(), ire );
+                        throw ire;
                     }
                 }
             }
