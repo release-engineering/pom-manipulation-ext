@@ -51,22 +51,7 @@ public class RepositoryInjectionState
     {
         final String gav = userProps.getProperty( REPOSITORY_INJECTION_PROPERTY );
         groupArtifact = IdUtils.parseGAs( userProps.getProperty( REPOSITORY_INJECTION_POMS ) );
-
-        ProjectVersionRef ref = null;
-        if ( gav != null )
-        {
-            try
-            {
-                ref = SimpleProjectVersionRef.parse( gav );
-            }
-            catch ( final InvalidRefException e )
-            {
-                logger.error( "Skipping repository injection! Got invalid repositoryInjection GAV: {}", gav );
-                throw e;
-            }
-        }
-
-        repoMgmt = ref;
+        repoMgmt = gav == null ? null : SimpleProjectVersionRef.parse( gav );
     }
 
     /**

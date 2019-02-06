@@ -39,6 +39,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.lang.reflect.Method;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -50,7 +51,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.regex.Pattern;
-import java.util.stream.Stream;
 
 /**
  * @author vdedik@redhat.com
@@ -183,7 +183,7 @@ public class TestUtils
      * @param workingDir - Working directory in which you want the cli to be run.
      * @return Exit value
      */
-    public static Integer runCli( List<String> args, Map<String, String> params, String workingDir )
+    public static Integer runCli( List<String> args, Map<String, String> params, String workingDir ) throws Exception
     {
         ArrayList<String> arguments = new ArrayList<>( args );
         Collections.addAll( arguments, toJavaParams( params ).split( "\\s+" ) );
@@ -201,7 +201,8 @@ public class TestUtils
             arguments.add( "--file=" + workingDir + File.separator + "pom.xml" );
         }
         logger.info( "Invoking CLI with {} ", arguments );
-        int result = new Cli().run( arguments.toArray( new String[arguments.size()] ) );
+        Cli cli = new Cli();
+        Integer result = (Integer) executeMethod( cli, "run", new Object[]{arguments.toArray( new String[0] )} );
 
         // Close unirest client down to prevent any hanging.
         // Unirest.shutdown();
@@ -404,5 +405,26 @@ public class TestUtils
         }
 
         return map;
+    }
+
+    /**
+     * Executes a method on an object instance.  The name and parameters of
+     * the method are specified.  The method will be executed and the value
+     * of it returned, even if the method would have private or protected access.
+     */
+    private static Object executeMethod( Object instance, String name, Object[] params ) throws Exception
+    {
+        Class c = instance.getClass();
+
+        // Fetch the Class types of all method parameters
+        Class[] types = new Class[params.length];
+
+        for ( int i = 0; i < params.length; i++ )
+            types[i] = params[i].getClass();
+
+        Method m = c.getDeclaredMethod( name, types );
+        m.setAccessible( true );
+
+        return m.invoke( instance, params );
     }
 }
