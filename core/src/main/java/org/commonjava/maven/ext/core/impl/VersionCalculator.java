@@ -92,6 +92,9 @@ public class VersionCalculator
                 modifiedVersion = Version.getOsgiVersion( modifiedVersion );
             }
 
+            logger.debug ("Caching version against project {} with parent {} and modified version {}",
+                          project.getKey(), project.getModelParent(), modifiedVersion);
+
             versionsByGAV.put( project.getKey(), modifiedVersion );
 
             if ( Version.hasBuildNumber( modifiedVersion ) )
@@ -155,7 +158,7 @@ public class VersionCalculator
         final String staticSuffix = state.getSuffix();
         final String override = state.getOverride();
 
-        logger.debug( "Got the following original version: {}", version );
+        logger.debug( "Got the following original version: {} for groupId:artifactId {}:{} ", version, groupId, artifactId);
         logger.debug( "Got the following version suffixes:\n  Static: {}\n  Incremental: {}",
                       staticSuffix, incrementalSuffix );
         logger.debug( "Got the following version override: {}", override);
