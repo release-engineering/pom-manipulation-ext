@@ -1,0 +1,16 @@
+{
+  "name": "apiman-manager-ui",
+  "version": "1.2.0",
+  "dependencies": {
+    "angular": {
+      "version": "1.4.7",
+      "from": "angular@1.4.7",
+      "resolved": "https://registry.npmjs.org/angular/-/angular-1.4.7.tgz"
+    },
+    "angular-file-upload": {
+      "version": "2.1.4",
+      "from": "angular-file-upload@2.1.4",
+      "resolved": "https://registry.npmjs.org/angular-file-upload/-/angular-file-upload-2.1.4.tgz"
+    }
+  }
+}
