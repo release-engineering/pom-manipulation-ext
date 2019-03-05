@@ -362,3 +362,7 @@ If the property `-DbomBuilder=true` is set, then the PME BOM Builder will be act
     PWD=<project two> ; mvn -DdependencyManagement=org.projectOne.artifactOne:pme-bom:1.0.0 -Dversion.suffix=rebuild-1 clean install
 
 **Note:** The new BOM will be installed and deployed via a custom plugin that is added to the top level project. The plugin is configured to only run on the top level POM and will not fail if the BOM POM does not exist.
+
+### Scope Exclusion
+
+If the property `-DexcludedScopes=<scope>,....` is set, PME will **ignore** any dependency with the specified scope. This means that, if for example the property was set to `test` then alignment (**and** any other relevant manipulation) would not happen for test scoped dependencies. Note that valid scopes are those specified in [Maven Scopes](https://maven.apache.org/guides/introduction/introduction-to-dependency-mechanism.html#Dependency_Scope) and if an invalid scope is passed in an exception will be thrown.
