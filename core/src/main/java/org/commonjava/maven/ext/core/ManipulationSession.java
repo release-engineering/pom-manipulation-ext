@@ -23,6 +23,7 @@ import org.commonjava.maven.ext.common.model.Project;
 import org.commonjava.maven.ext.common.session.MavenSessionHandler;
 import org.commonjava.maven.ext.common.util.ManifestUtils;
 import org.commonjava.maven.ext.core.impl.Manipulator;
+import org.commonjava.maven.ext.core.state.CommonState;
 import org.commonjava.maven.ext.core.state.State;
 import org.commonjava.maven.ext.core.state.VersioningState;
 
@@ -69,7 +70,7 @@ public class ManipulationSession
         {
             System.out.println( "[INFO] Maven-Manipulation-Extension " + ManifestUtils.getManifestInformation() );
         }
-        catch ( ManipulationException e )
+        catch ( ManipulationException ignored )
         {
         }
     }
@@ -93,8 +94,9 @@ public class ManipulationSession
         states.put( state.getClass(), state );
     }
 
-    public HashSet<Entry<Class<?>, State>> getStatesCopy() {
-        return new HashSet<Entry<Class<?>, State>>( states.entrySet() );
+    HashSet<Entry<Class<?>, State>> getStatesCopy()
+    {
+        return new HashSet<>( states.entrySet() );
     }
 
     public <T extends State> T getState( final Class<T> stateType )
@@ -223,6 +225,17 @@ public class ManipulationSession
             }
         }
         return result;
+    }
+
+    @Override
+    public List<String> getExcludedScopes()
+    {
+        // In some tests, CommonState is not available so check for it first.
+        if ( states.containsKey( CommonState.class ) )
+        {
+            return getState( CommonState.class ).getExcludedScopes();
+        }
+        return Collections.emptyList();
     }
 
     /**

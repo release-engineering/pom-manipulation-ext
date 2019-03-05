@@ -38,4 +38,6 @@ public interface MavenSessionHandler
     List<String> getActiveProfiles();
 
     Settings getSettings();
+
+    List<String> getExcludedScopes();
 }

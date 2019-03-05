@@ -242,7 +242,7 @@ public class DependencyManipulator implements Manipulator
         // If we've changed something now update any old properties with the new values.
         if (!result.isEmpty())
         {
-            if ( cState.getStrictDependencyPropertyValidation() > 0 )
+            if ( cState.getStrictDependencyPluginPropertyValidation() > 0 )
             {
                 logger.info( "Iterating to validate dependency updates..." );
                 for ( Project p : versionPropertyUpdateMap.keySet() )
@@ -360,11 +360,11 @@ public class DependencyManipulator implements Manipulator
 
                     if ( entry.getKey().asProjectRef().equals( SimpleProjectRef.parse( ga(project.getModelParent()) ) ))
                     {
-                        if ( commonState.getStrict() )
+                        if ( commonState.isStrict() )
                         {
                             if ( !PropertiesUtils.checkStrictValue( session, oldValue, newValue ) )
                             {
-                                if ( commonState.getFailOnStrictViolation() )
+                                if ( commonState.isFailOnStrictViolation() )
                                 {
                                     throw new ManipulationException(
                                                     "Parent reference {} replacement: {} of original version: {} violates the strict version-alignment rule!",
@@ -415,7 +415,7 @@ public class DependencyManipulator implements Manipulator
                 applyExplicitOverrides( project, project.getResolvedManagedDependencies( session ), explicitOverrides,
                                         commonState, explicitVersionPropertyUpdateMap );
 
-                if ( commonState.getOverrideTransitive() )
+                if ( commonState.isOverrideTransitive() )
                 {
                     final List<Dependency> extraDeps = new ArrayList<>();
 
@@ -606,7 +606,7 @@ public class DependencyManipulator implements Manipulator
         }
 
         final CommonState commonState = session.getState( CommonState.class );
-        final boolean strict = commonState.getStrict();
+        final boolean strict = commonState.isStrict();
 
         // Apply matching overrides to dependencies
         for ( final ArtifactRef dependency : dependencies.keySet() )
@@ -660,7 +660,7 @@ public class DependencyManipulator implements Manipulator
                     {
                         logger.debug ("Original fully resolved version {} of {} does not match override version {} -> {} so ignoring",
                                       resolvedValue, dependency, entry.getKey(), overrideVersion);
-                        if ( commonState.getFailOnStrictViolation() )
+                        if ( commonState.isFailOnStrictViolation() )
                         {
                             throw new ManipulationException(
                                             "For {} replacing original property version {} (fully resolved: {} ) with new version {} for {} violates the strict version-alignment rule!",
@@ -678,7 +678,7 @@ public class DependencyManipulator implements Manipulator
                         {
                             if ( strict && ! PropertiesUtils.checkStrictValue( session, resolvedValue, overrideVersion) )
                             {
-                                if ( commonState.getFailOnStrictViolation() )
+                                if ( commonState.isFailOnStrictViolation() )
                                 {
                                     throw new ManipulationException(
                                                      "Replacing original version {} in dependency {} with new version {} violates the strict version-alignment rule!",
@@ -701,7 +701,7 @@ public class DependencyManipulator implements Manipulator
                                     String suffix = PropertiesUtils.getSuffix( session );
                                     String replaceVersion;
 
-                                    if ( commonState.getStrictIgnoreSuffix() && oldVersion.contains( suffix ) )
+                                    if ( commonState.isStrictIgnoreSuffix() && oldVersion.contains( suffix ) )
                                     {
                                         replaceVersion = StringUtils.substringBefore( oldVersion, suffix );
                                         replaceVersion += suffix + StringUtils.substringAfter( overrideVersion, suffix );

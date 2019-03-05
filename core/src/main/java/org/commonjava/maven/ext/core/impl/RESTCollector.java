@@ -15,10 +15,10 @@
  */
 package org.commonjava.maven.ext.core.impl;
 
+import org.apache.maven.artifact.ArtifactScopeEnum;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.Plugin;
 import org.apache.maven.model.Profile;
-import org.commonjava.maven.atlas.ident.DependencyScope;
 import org.commonjava.maven.atlas.ident.ref.ArtifactRef;
 import org.commonjava.maven.atlas.ident.ref.ProjectRef;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
@@ -357,7 +357,7 @@ public class RESTCollector
         {
             deps.add( new SimpleScopedArtifactRef(
                             new SimpleProjectVersionRef( pvr.asProjectRef(), handlePotentialSnapshotVersion( vs, pvr.getVersionString() ) ),
-                            new SimpleTypeAndClassifier( "maven-plugin", null ), DependencyScope.compile.realName() ) );
+                            new SimpleTypeAndClassifier( "maven-plugin", null ), ArtifactScopeEnum.compile.name() ) );
         }
     }
 
@@ -381,7 +381,7 @@ public class RESTCollector
             deps.add( new SimpleScopedArtifactRef(
                             new SimpleProjectVersionRef( pvr.asProjectRef(), handlePotentialSnapshotVersion( vs, pvr.getVersionString() ) ),
                             new SimpleTypeAndClassifier( d.getType(), d.getClassifier() ), isEmpty( d.getScope() ) ?
-                                                                   DependencyScope.compile.realName() :
+                                                                   ArtifactScopeEnum.compile.name() :
                                                                    PropertyResolver.resolveInheritedProperties( session,
                                                                                                                 project,
                                                                                                                 d.getScope() ) ) );

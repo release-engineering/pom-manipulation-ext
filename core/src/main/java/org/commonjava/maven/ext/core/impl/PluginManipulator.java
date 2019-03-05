@@ -159,7 +159,7 @@ public class PluginManipulator
         // If we've changed something now update any old properties with the new values.
         if (!changed.isEmpty())
         {
-            if ( cState.getStrictDependencyPropertyValidation() > 0 )
+            if ( cState.getStrictDependencyPluginPropertyValidation() > 0 )
             {
                 logger.info( "Iterating to validate plugin updates..." );
                 for ( Project p : versionPropertyUpdateMap.keySet() )
@@ -342,7 +342,7 @@ public class PluginManipulator
      *
      * Currently this method takes the remote plugin type (note that remote plugins are deprecated) and the local plugin type.
      * It will ONLY apply configurations, executions and dependencies from the remote pluginMgmt to the local pluginMgmt.
-     *   If the local pluginMgmt does not have a matching plugin then, if {@link CommonState#getOverrideTransitive()} is true
+     *   If the local pluginMgmt does not have a matching plugin then, if {@link CommonState#isOverrideTransitive()} is true
      * then it will inject a new plugin into the local pluginMgmt.
      *   It will however apply version changes to both local pluginMgmt and local plugins.
      * Note that if the deprecated injectRemotePlugins is enabled then remote plugin version, executions, dependencies and
@@ -393,11 +393,11 @@ public class PluginManipulator
                 {
                     logger.warn( "Plugin {} for {} references ${project.version} so skipping.", plugin, project.getPom() );
                 }
-                else if ( commonState.getStrict() )
+                else if ( commonState.isStrict() )
                 {
                     if ( !PropertiesUtils.checkStrictValue( session, oldValue, newValue ) )
                     {
-                        if ( commonState.getFailOnStrictViolation() )
+                        if ( commonState.isFailOnStrictViolation() )
                         {
                             throw new ManipulationException(
                                             "Plugin reference {} replacement: {} of original version: {} violates the strict version-alignment rule!",
@@ -537,7 +537,7 @@ public class PluginManipulator
             }
             // If the plugin doesn't exist but has a configuration section in the remote inject it so we
             // get the correct config.
-            else if ( remotePluginType == PluginType.RemotePM && localPluginType == PluginType.LocalPM && commonState.getOverrideTransitive() && ( override.getConfiguration() != null
+            else if ( remotePluginType == PluginType.RemotePM && localPluginType == PluginType.LocalPM && commonState.isOverrideTransitive() && ( override.getConfiguration() != null
                             || override.getExecutions().size() > 0 ) )
             {
                 project.getModel().getBuild().getPluginManagement().getPlugins().add( override );

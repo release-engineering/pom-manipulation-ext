@@ -15,35 +15,22 @@
  */
 package org.commonjava.maven.ext.common.model;
 
-import org.commonjava.maven.atlas.ident.DependencyScope;
+import lombok.Getter;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleArtifactRef;
 import org.commonjava.maven.atlas.ident.ref.TypeAndClassifier;
-import org.commonjava.maven.atlas.ident.version.VersionSpec;
 
 /**
  * Wrapper around SimpleArtifactRef to also store the scope of the dependency.
  */
 public class SimpleScopedArtifactRef extends SimpleArtifactRef
 {
-
-    private final DependencyScope scope;
-
-    public SimpleScopedArtifactRef( final String groupId, final String artifactId, final VersionSpec version,
-                              final String type, final String classifier, final String scope)
-    {
-        super( groupId, artifactId, version, type, classifier);
-        this.scope = DependencyScope.getScope( scope );
-    }
+    @Getter
+    private final String scope;
 
     public SimpleScopedArtifactRef( final ProjectVersionRef ref, final TypeAndClassifier tc, final String scope )
     {
         super( ref, tc );
-        this.scope = DependencyScope.getScope( scope );
-    }
-
-    public String getScope()
-    {
-        return ( scope == null ? "" : scope.realName() );
+        this.scope = scope;
     }
 }
