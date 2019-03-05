@@ -140,8 +140,6 @@ public class ManipulationManager
 
         // Now init the common state
         session.setState( new CommonState( session.getUserProperties()) );
-
-
     }
 
     /**

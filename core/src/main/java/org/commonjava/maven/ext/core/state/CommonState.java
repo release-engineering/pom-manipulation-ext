@@ -15,18 +15,26 @@
  */
 package org.commonjava.maven.ext.core.state;
 
+import lombok.Getter;
+import org.apache.maven.artifact.ArtifactScopeEnum;
+import org.commonjava.maven.ext.common.ManipulationException;
+import org.commonjava.maven.ext.core.impl.DependencyManipulator;
 import org.commonjava.maven.ext.core.impl.PluginManipulator;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Properties;
 
 /**
- * Captures configuration relating to plugin alignment from the POMs. Used by {@link PluginManipulator}.
+ * Captures configuration relating to plugin/dependency alignment from the POMs.
+ * Used by {@link PluginManipulator} and {@link DependencyManipulator}
  */
+@Getter()
 public class CommonState
     implements State
 {
     /**
-     * Whether to override dependencies that are not directly specified in the project
+     * Whether to override dependencies/plugins that are not directly specified in the project
      */
     private static final String TRANSITIVE_OVERRIDE_PROPERTY = "overrideTransitive";
 
@@ -55,6 +63,11 @@ public class CommonState
     public static final String STRICT_ALIGNMENT_IGNORE_SUFFIX = "strictAlignmentIgnoreSuffix";
 
     /**
+     * Comma separated list of scopes to exclude and ignore when operating.
+     */
+    public static final String EXCLUDED_SCOPES = "excludedScopes";
+
+    /**
      * This aggressively checks whether, for a set of dependencies or plugins that have a common property, every dependency
      * or plugin attempted to update the property. If one didn't this will throw an exception and fail fast. If it doesn't fail
      * then its possible that one of the newly aligned dependencies/plugins aren't found and therefore the build will fail.
@@ -77,20 +90,35 @@ public class CommonState
 
     private final boolean failOnStrictViolation;
 
-    private final boolean ignoreSuffix;
+    private final boolean strictIgnoreSuffix;
 
     /**
      * For beta strictPropertyValidation ; if 2 then assume we are 'reverting'.
      */
     private final Integer strictDependencyPluginPropertyValidation;
 
-    public CommonState( final Properties userProps )
+    private final List<String> excludedScopes;
+
+    public CommonState( final Properties userProps ) throws ManipulationException
     {
         overrideTransitive = Boolean.valueOf( userProps.getProperty( TRANSITIVE_OVERRIDE_PROPERTY, "false" ) );
         propertyClashFails = Boolean.valueOf( userProps.getProperty( PROPERTY_CLASH_FAILS, "true" ) );
         strict = Boolean.valueOf( userProps.getProperty( STRICT_ALIGNMENT, "true" ) );
-        ignoreSuffix = Boolean.valueOf( userProps.getProperty( STRICT_ALIGNMENT_IGNORE_SUFFIX, "true" ) );
+        strictIgnoreSuffix = Boolean.valueOf( userProps.getProperty( STRICT_ALIGNMENT_IGNORE_SUFFIX, "true" ) );
         failOnStrictViolation = Boolean.valueOf( userProps.getProperty( STRICT_VIOLATION_FAILS, "false" ) );
+        excludedScopes = Arrays.asList( userProps.getProperty( EXCLUDED_SCOPES, "" ).length() > 0 ?
+                                                        userProps.getProperty( EXCLUDED_SCOPES).split( "," ) : new String[0]);
+        for ( String s : excludedScopes )
+        {
+            try
+            {
+                ArtifactScopeEnum.valueOf( s );
+            }
+            catch ( IllegalArgumentException e )
+            {
+                throw new ManipulationException( "Illegal scope value " + s );
+            }
+        }
 
         switch ( userProps.getProperty( DEPENDENCY_PROPERTY_VALIDATION, "false" ).toUpperCase() )
         {
@@ -126,39 +154,5 @@ public class CommonState
     public boolean isEnabled()
     {
         return false;
-    }
-
-    public boolean getPropertyClashFails()
-    {
-        return propertyClashFails;
-    }
-
-    /**
-     * @return whether to override unmanaged transitive plugins in the build. Has the effect of adding (or not) new entries
-     * to dependency management when no matching dependency is found in the pom. Defaults to true.
-     */
-    public boolean getOverrideTransitive()
-    {
-        return overrideTransitive;
-    }
-
-    public boolean getStrict()
-    {
-        return strict;
-    }
-
-    public boolean getStrictIgnoreSuffix()
-    {
-        return ignoreSuffix;
-    }
-
-    public boolean getFailOnStrictViolation()
-    {
-        return failOnStrictViolation;
-    }
-
-    public Integer getStrictDependencyPropertyValidation()
-    {
-        return strictDependencyPluginPropertyValidation;
     }
 }

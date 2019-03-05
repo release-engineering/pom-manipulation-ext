@@ -181,6 +181,7 @@ public class TestUtils
      * @param args - List of additional command line arguments
      * @param params - Map of String keys and String values representing -D arguments
      * @param workingDir - Working directory in which you want the cli to be run.
+     * @throws Exception if an error occurs.
      * @return Exit value
      */
     public static Integer runCli( List<String> args, Map<String, String> params, String workingDir ) throws Exception

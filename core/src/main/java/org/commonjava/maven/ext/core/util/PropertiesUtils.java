@@ -166,11 +166,11 @@ public final class PropertiesUtils
         }
         else
         {
-            if ( state.getStrict() && !ignoreStrict )
+            if ( state.isStrict() && !ignoreStrict )
             {
                 if ( !checkStrictValue( session, resolvedValue, newValue ) )
                 {
-                    if ( state.getFailOnStrictViolation() )
+                    if ( state.isFailOnStrictViolation() )
                     {
                         throw new ManipulationException(
                                         "Replacing original property version {} (fully resolved: {} ) with new version {} for {} violates the strict version-alignment rule!",
@@ -253,7 +253,7 @@ public final class PropertiesUtils
 
         final CommonState cState = session.getState( CommonState.class );
         final VersioningState vState = session.getState( VersioningState.class );
-        final boolean ignoreSuffix = cState.getStrictIgnoreSuffix();
+        final boolean ignoreSuffix = cState.isStrictIgnoreSuffix();
 
         /*
 
@@ -441,7 +441,7 @@ public final class PropertiesUtils
                     }
                     else
                     {
-                        if ( state.getPropertyClashFails() )
+                        if ( state.isPropertyClashFails() )
                         {
                             logger.error( "Replacing property '{}' with a new version but the existing version does not match. Old value is {} and new is {}",
                                           oldVersionProp, existingPropertyMapping, newVersion );
@@ -535,7 +535,7 @@ public final class PropertiesUtils
             {
                 logger.debug ("Scanning project {} with version {} and original value {} ", project, version, currentProjectVersionMapper.getOriginalVersion() );
 
-                if ( cState.getStrictDependencyPropertyValidation() == 2 )
+                if ( cState.getStrictDependencyPluginPropertyValidation() == 2 )
                 {
                     for ( Project p : versionPropertyMap.keySet() )
                     {

@@ -520,6 +520,12 @@ public class Project
         {
             Dependency d = iterator.previous();
 
+            if ( session.getExcludedScopes().contains( d.getScope() ) )
+            {
+                logger.debug( "Ignoring dependency {} as scope matched {}", d, session.getExcludedScopes());
+                continue;
+            }
+
             String g = PropertyResolver.resolveInheritedProperties( session, this, "${project.groupId}".equals( d.getGroupId() ) ?
                             getGroupId() :
                             d.getGroupId() );
