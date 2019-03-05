@@ -21,7 +21,7 @@ Note: This will only detect those profiles explicitly activated via -P ; propert
 <table bgcolor="#ffff00">
 <tr>
 <td>
-<p><b>NOTE</b>: As of PME 3.3 (December 2018) the default for <i>scanActiveProfiles</i> will change from false to true.</p>
+<p><b>NOTE</b>: As of PME 3.3 (December 2018) the default for <i>scanActiveProfiles</i> has changed from false to true.</p>
 The profile scanning will detect usage of properties, activeByDefault, environmental activation (e.g. JDK) etc. However this assumes the properties _are_ passed into the PME invocation for it to detect and process them. It is still possible to explicitly activate profiles via the CLI `-P` parameters.
 </td>
 </tr>
