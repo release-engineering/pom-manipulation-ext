@@ -61,14 +61,17 @@ The deployed file can then be used with e.g.
 
 ### Groovy Scripts
 
-The groovy script will be run once on the execution root (i.e. where Maven is invoked). By default groovy script will run **after** all the other Manipulators have run.
+Each groovy script will be run on the execution root (i.e. where Maven is invoked).
 
-It is possible to configure it to run before all other manipulators by setting `groovyManipulatorPrecedence` to `FIRST` instead of the default `LAST` value.
-
-Each script should use the [BaseScript](http://docs.groovy-lang.org/latest/html/gapi/groovy/transform/BaseScript.html)
-annotation:
-
-    @BaseScript org.commonjava.maven.ext.core.groovy.BaseScript pme
+<table bgcolor="#ffff00">
+<tr>
+<td>
+    <b>NOTE</b> : Prior to PME 3.5 groovy manipulator precendence was controlled via a flag ; by setting <i>groovyManipulatorPrecedence</i> to <i>FIRST</i> instead of the default <i>LAST</i> value. Further, annotation was different; the scripts used the <a href="http://docs.groovy-lang.org/latest/html/gapi/groovy/transform/BaseScript.html">BaseScript</a> annotation e.g.
+<br/>
+<i>@BaseScript org.commonjava.maven.ext.core.groovy.BaseScript pme</i>
+</td>
+</tr>
+</table>
 
 <table bgcolor="#ffff00">
 <tr>
@@ -78,8 +81,23 @@ annotation:
 </tr>
 </table>
 
+Each script <b>must</b> use the following annotations:
 
-This make the following API available:
+```
+
+import org.commonjava.maven.ext.core.groovy.PMEBaseScript
+import org.commonjava.maven.ext.core.groovy.PMEInvocationPoint
+...
+
+@PMEInvocationPoint(invocationPoint = InvocationStage.FIRST)
+@PMEBaseScript BaseScript pme
+```
+
+where InvocationStage may be `FIRST`, `LAST` or `BOTH`. This denotes whether the script is ran
+before all other manipulators, after or both. The script therefore encodes how and when it is run.
+
+<br/>
+The following API is made available:
 
 
 | Method | Description |
@@ -91,6 +109,7 @@ This make the following API available:
 | [ArrayList](https://docs.oracle.com/javase/7/docs/api/java/util/ArrayList.html)<[ProjectVersionRef](https://github.com/Commonjava/atlas/blob/master/identities/src/main/java/org/commonjava/maven/atlas/ident/ref/ProjectVersionRef.java)> getProjects() | Returns the entire collection of Projects |
 | [MavenSessionHandler](https://github.com/release-engineering/pom-manipulation-ext/blob/master/common/src/main/java/org/commonjava/maven/ext/common/session/MavenSessionHandler.java) getSession() | Return the current session handler |
 | [ModelIO](https://github.com/release-engineering/pom-manipulation-ext/blob/master/io/src/main/java/org/commonjava/maven/ext/io/ModelIO.java) getModelIO() | Return a ModelIO instance for artifact resolving |
+| [InvocationStage](https://github.com/release-engineering/pom-manipulation-ext/blob/master/core/src/main/java/org/commonjava/maven/ext/core/groovy/InvocationStage.java) getInvocationStage() | Return the current stage of the groovy manipulation. |
 
 This can then be invoked by e.g.
 
@@ -102,10 +121,12 @@ A typical groovy script that alters a JSON file on disk might be:
 
     import groovy.json.JsonOutput
     import groovy.json.JsonSlurper
-    import groovy.transform.BaseScript
     import groovy.util.logging.Slf4j
+    import org.commonjava.maven.ext.core.groovy.PMEBaseScript
+    import org.commonjava.maven.ext.core.groovy.PMEInvocationPoint
 
-    @BaseScript org.commonjava.maven.ext.core.groovy.BaseScript pme
+    @PMEInvocationPoint(invocationPoint = InvocationStage.FIRST)
+    @PMEBaseScript BaseScript pme
 
     @Slf4j
     public class Processor
