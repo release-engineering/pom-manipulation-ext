@@ -15,18 +15,21 @@
  */
 package org.commonjava.maven.ext.depMgmt1
 
-/*Grab('org.yaml:snakeyaml:1.17')*/
 @Grab('org.zeroturnaround:zt-exec:1.10')
 
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
-import groovy.transform.BaseScript
 import groovy.util.logging.Slf4j
-import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef
-import org.yaml.snakeyaml.Yaml
-import org.zeroturnaround.exec.ProcessExecutor;
+import org.commonjava.maven.ext.core.groovy.BaseScript
+import org.commonjava.maven.ext.core.groovy.InvocationStage
 
-@BaseScript org.commonjava.maven.ext.core.groovy.BaseScript pme
+import org.commonjava.maven.ext.core.groovy.PMEBaseScript
+import org.commonjava.maven.ext.core.groovy.PMEInvocationPoint
+import org.yaml.snakeyaml.Yaml
+import org.zeroturnaround.exec.ProcessExecutor
+
+@PMEInvocationPoint(invocationPoint = InvocationStage.FIRST)
+@PMEBaseScript BaseScript pme
 
 @Slf4j
 class Processor {
@@ -73,7 +76,7 @@ class Processor {
 def parser = new Yaml()
 def ProcessExecutor pe = new ProcessExecutor()
 
-// These are both debug AND test statements - do NOT remove. If the injection (in GroovyManipulator)
+// These are both debug AND test statements - do NOT remove. If the injection (in InitialGroovyManipulator)
 // fails these prints will cause the test to fail.
 println "#### BASESCRIPT:"
 println pme.getBaseDir()
@@ -84,7 +87,6 @@ println pme.getProjects()
 println pme.getProject().getClass().getName()
 println pme.getProjects()
 println pme.getProject().getClass().getName()
-println pme.getModelIO().resolveRawModel(SimpleProjectVersionRef.parse("org.jboss:jboss-parent:10")).getScm()
 println pme.getSession().getPom()
 println "Parser is " + parser.toString()
 println "ProcessExecutor is " + pe.getCommand()

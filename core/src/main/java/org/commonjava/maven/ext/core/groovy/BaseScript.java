@@ -20,6 +20,7 @@ import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.ext.common.model.Project;
 import org.commonjava.maven.ext.common.session.MavenSessionHandler;
 import org.commonjava.maven.ext.core.ManipulationSession;
+import org.commonjava.maven.ext.core.impl.InitialGroovyManipulator;
 import org.commonjava.maven.ext.io.ModelIO;
 
 import java.io.File;
@@ -45,6 +46,8 @@ public abstract class BaseScript extends Script
     private ModelIO modelIO;
 
     private MavenSessionHandler sessionHandler;
+
+    private InvocationStage stage;
 
     /**
      * Return the current Project
@@ -110,14 +113,25 @@ public abstract class BaseScript extends Script
     }
 
     /**
-     * Internal use only - the {@link org.commonjava.maven.ext.core.impl.GroovyManipulator} uses this to
+     * Get the current stage
+     * @return a {@link InvocationStage} reference.
+     */
+    public InvocationStage getInvocationStage()
+    {
+        return stage;
+    }
+
+    /**
+     * Internal use only - the {@link InitialGroovyManipulator} uses this to
      * initialise the values
      * @param modelIO the modelIO instance.
      * @param session the Session instance.
      * @param projects ArrayList of Project instances
      * @param project Current project
+     * @param stage the current InvocationStage of the groovy script
      */
-    public void setValues( ModelIO modelIO, ManipulationSession session, List<Project> projects, Project project )
+    public void setValues( ModelIO modelIO, ManipulationSession session, List<Project> projects, Project project,
+                           InvocationStage stage )
     {
         this.modelIO = modelIO;
         this.sessionHandler = session;
@@ -126,6 +140,7 @@ public abstract class BaseScript extends Script
         this.gav = project.getKey();
         this.basedir = project.getPom().getParentFile();
         this.userProperties = session.getUserProperties();
+        this.stage = stage;
 
         System.out.println ("Injecting values. Project is " + project + " with basedir " + basedir + " and properties " + userProperties);
     }

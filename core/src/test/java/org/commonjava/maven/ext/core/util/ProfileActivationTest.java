@@ -27,7 +27,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
@@ -65,9 +64,9 @@ public class ProfileActivationTest
         ManipulationSession ms = TestUtils.createSession( null );
         m.init( ms );
 
-        Set<String> activeProfiles = (Set<String>) executeMethod( m, "parseActiveProfiles",
-                                                                  new Class[] { ManipulationSession.class, List.class },
-                                                                  new Object[] { ms, p } );
+        Set<String> activeProfiles = (Set<String>) TestUtils.executeMethod( m, "parseActiveProfiles",
+                                                                            new Class[] { ManipulationSession.class, List.class },
+                                                                            new Object[] { ms, p } );
 
         logger.info( "Returning active profiles of {} ", activeProfiles );
 
@@ -84,9 +83,9 @@ public class ProfileActivationTest
         ManipulationSession ms = TestUtils.createSession( properties );
         m.init( ms );
 
-        Set<String> activeProfiles = (Set<String>) executeMethod( m, "parseActiveProfiles",
-                                                                  new Class[] { ManipulationSession.class, List.class },
-                                                                  new Object[] { ms, p } );
+        Set<String> activeProfiles = (Set<String>) TestUtils.executeMethod( m, "parseActiveProfiles",
+                                                                            new Class[] { ManipulationSession.class, List.class },
+                                                                            new Object[] { ms, p } );
 
         activeProfiles.stream().forEach( i -> System.out.println( "Active list is " + i ) );
 
@@ -95,18 +94,4 @@ public class ProfileActivationTest
 
     }
 
-        /**
-     * Executes a method on an object instance.  The name and parameters of
-     * the method are specified.  The method will be executed and the value
-     * of it returned, even if the method would have private or protected access.
-     */
-    private Object executeMethod( Object instance, String name, Class[] types, Object[] params ) throws Exception
-    {
-        Class c = instance.getClass();
-
-        Method m = c.getDeclaredMethod( name, types );
-        m.setAccessible( true );
-
-        return m.invoke( instance, params );
-    }
 }
