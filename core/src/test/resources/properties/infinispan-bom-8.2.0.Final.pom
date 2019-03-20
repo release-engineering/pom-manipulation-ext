@@ -108,6 +108,19 @@
       </snapshotRepository>
    </distributionManagement>
 
+   <dependencies>
+      <dependency>
+         <groupId>${project.groupId}</groupId>
+         <artifactId>infinispan-cachestore-jdbc</artifactId>
+         <version>${project.version}</version>
+      </dependency>
+      <dependency>
+         <groupId>${project.groupId}</groupId>
+         <artifactId>infinispan-cachestore-jpa</artifactId>
+         <version>${project.version}</version>
+      </dependency>
+   </dependencies>
+
    <dependencyManagement>
       <dependencies>
          
