@@ -15,7 +15,6 @@
  */
 package org.commonjava.maven.ext.core.util;
 
-import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.execution.DefaultMavenExecutionRequest;
 import org.apache.maven.execution.DefaultMavenExecutionResult;
 import org.apache.maven.execution.MavenExecutionRequest;
@@ -25,17 +24,21 @@ import org.codehaus.plexus.DefaultPlexusContainer;
 import org.codehaus.plexus.PlexusContainer;
 import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.common.model.Project;
+import org.commonjava.maven.ext.common.util.ProjectComparator;
 import org.commonjava.maven.ext.common.util.PropertyResolver;
 import org.commonjava.maven.ext.core.ManipulationSession;
 import org.commonjava.maven.ext.core.fixture.TestUtils;
 import org.commonjava.maven.ext.core.state.CommonState;
 import org.commonjava.maven.ext.core.state.DependencyState;
 import org.commonjava.maven.ext.core.state.VersioningState;
+import org.commonjava.maven.ext.io.PomIO;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.contrib.java.lang.system.SystemOutRule;
 import org.junit.rules.TemporaryFolder;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -51,11 +54,16 @@ import static org.commonjava.maven.ext.core.util.PropertiesUtils.updatePropertie
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
 public class PropertiesUtilsTest
 {
     private static final String RESOURCE_BASE = "properties/";
+
+    @Rule
+    public final SystemOutRule systemRule = new SystemOutRule().enableLog().muteForSuccessfulTests();
 
     @Rule
     public TemporaryFolder temp = new TemporaryFolder();
@@ -100,7 +108,7 @@ public class PropertiesUtilsTest
         p.setProperty( "version.suffix", suffix + "-1" );
         ManipulationSession session = createUpdateSession();
 
-        assertTrue( PropertiesUtils.getSuffix( session ).equals( suffix ) );
+        assertEquals( PropertiesUtils.getSuffix( session ), suffix );
         assertTrue( PropertiesUtils.checkStrictValue( session, "1.0.0.Final", "1.0.0.Final-t-20170216-223844-555-rebuild-1" ) );
         assertTrue( PropertiesUtils.checkStrictValue( session, "1.0", "1.0.0.t-20170216-223844-555-rebuild-1" ) );
         assertTrue( PropertiesUtils.checkStrictValue( session, "1.0-SNAPSHOT", "1.0.0.t-20170216-223844-555-rebuild-1" ) );
@@ -109,7 +117,7 @@ public class PropertiesUtilsTest
         p.setProperty( "version.suffix", suffix + "-2" );
         session = createUpdateSession();
 
-        assertTrue( PropertiesUtils.getSuffix( session ).equals( suffix ) );
+        assertEquals( PropertiesUtils.getSuffix( session ), suffix );
         assertTrue( PropertiesUtils.checkStrictValue( session, "1.0.0.Final", "1.0.0.Final-t20170216223844555-rebuild-2" ) );
         assertTrue( PropertiesUtils.checkStrictValue( session, "1.0", "1.0.0.t20170216223844555-rebuild-2" ) );
         assertTrue( PropertiesUtils.checkStrictValue( session, "1.0-SNAPSHOT", "1.0.0.t20170216223844555-rebuild-2" ) );
@@ -156,9 +164,11 @@ public class PropertiesUtilsTest
         Project pP = getProject();
         ManipulationSession session = createUpdateSession();
 
-        assertTrue( updateProperties( session, pP, false, "version.hibernate.core", "5.0.4.Final-redhat-1" ) == PropertiesUtils.PropertyUpdate.FOUND);
+        assertSame( updateProperties( session, pP, false, "version.hibernate.core", "5.0.4.Final-redhat-1" ),
+                    PropertiesUtils.PropertyUpdate.FOUND );
 
-        assertTrue( updateProperties( session, pP, false, "version.scala", "2.11.7.redhat-1" ) == PropertiesUtils.PropertyUpdate.FOUND);
+        assertSame( updateProperties( session, pP, false, "version.scala", "2.11.7.redhat-1" ),
+                    PropertiesUtils.PropertyUpdate.FOUND );
         try
         {
             updateProperties( session, pP, false, "version.scala", "3.11.7-redhat-1" );
@@ -176,9 +186,11 @@ public class PropertiesUtilsTest
 
         ManipulationSession session = createUpdateSession();
 
-        assertTrue( updateProperties( session, pP, false, "version.hibernate.osgi", "5.0.4.Final-redhat-1" ) == PropertiesUtils.PropertyUpdate.FOUND);
+        assertSame( updateProperties( session, pP, false, "version.hibernate.osgi", "5.0.4.Final-redhat-1" ),
+                    PropertiesUtils.PropertyUpdate.FOUND );
 
-        assertFalse( updateProperties( session, pP, false, "version.scala", "2.11.7" ) == PropertiesUtils.PropertyUpdate.FOUND);
+        assertNotSame( updateProperties( session, pP, false, "version.scala", "2.11.7" ),
+                       PropertiesUtils.PropertyUpdate.FOUND );
     }
 
     @Test
@@ -190,11 +202,13 @@ public class PropertiesUtilsTest
 
         ManipulationSession session = createUpdateSession();
 
-        assertTrue( updateProperties( session, pP, false, "perfectus-build", "610379.redhat-1" ) == PropertiesUtils.PropertyUpdate.FOUND);
+        assertSame( updateProperties( session, pP, false, "perfectus-build", "610379.redhat-1" ),
+                    PropertiesUtils.PropertyUpdate.FOUND );
 
         try
         {
-            assertTrue( updateProperties( session, pP, false, "perfectus-build", "610.NOTTHEVALUE.redhat-1" ) == PropertiesUtils.PropertyUpdate.FOUND);
+            assertSame( updateProperties( session, pP, false, "perfectus-build", "610.NOTTHEVALUE.redhat-1" ),
+                        PropertiesUtils.PropertyUpdate.FOUND );
         }
         catch ( ManipulationException e )
         {
@@ -203,7 +217,8 @@ public class PropertiesUtilsTest
         }
         try
         {
-            assertTrue( updateProperties( session, pP, true, "perfectus-build", "610.NOTTHEVALUE.redhat-1" ) == PropertiesUtils.PropertyUpdate.FOUND);
+            assertSame( updateProperties( session, pP, true, "perfectus-build", "610.NOTTHEVALUE.redhat-1" ),
+                        PropertiesUtils.PropertyUpdate.FOUND );
         }
         catch ( ManipulationException e )
         {
@@ -226,17 +241,17 @@ public class PropertiesUtilsTest
         al.add( pP );
 
         String result = PropertyResolver.resolveProperties( session, al, "${version.scala.major}.${version.scala.minor}" );
-        assertTrue( result.equals( "2.11.7" ) );
+        assertEquals( "2.11.7", result );
 
         result = PropertyResolver.resolveProperties( session, al,
                                                      "TestSTART.and.${version.scala.major}.now.${version.scala.minor}" );
-        assertTrue( result.equals( "TestSTART.and.2.11.now.7" ) );
+        assertEquals( "TestSTART.and.2.11.now.7", result );
 
         result = PropertyResolver.resolveProperties( session, al, "${project.version}" );
-        assertTrue( result.equals( "1" ) );
+        assertEquals( "1", result );
 
         result = PropertyResolver.resolveProperties( session, al, "${version.hibernate.osgi}" );
-        assertTrue( result.equals( "5.0.4.Final" ) );
+        assertEquals( "5.0.4.Final", result );
     }
 
     @Test
@@ -246,8 +261,29 @@ public class PropertiesUtilsTest
 
         ManipulationSession session = createUpdateSession();
 
-        assertFalse( updateProperties( session, pP, false, "project.version", "5.0.4.Final-redhat-1" ) == PropertiesUtils.PropertyUpdate.FOUND);
+        assertNotSame( updateProperties( session, pP, false, "project.version", "5.0.4.Final-redhat-1" ),
+                       PropertiesUtils.PropertyUpdate.FOUND );
     }
+
+    @Test
+    public void testCompareProjects() throws Exception
+    {
+        final File projectroot = TestUtils.resolveFileResource( RESOURCE_BASE, "infinispan-bom-8.2.0.Final.pom" );
+        ManipulationSession session = createUpdateSession();
+
+        PomIO pomIO = new PomIO();
+        List<Project> projects = pomIO.parseProject( projectroot );
+
+        List<Project> newprojects = pomIO.parseProject( projectroot );
+
+        ProjectComparator.compareProjects( session, projects, newprojects );
+
+        assertTrue( systemRule.getLog().contains( "[main] INFO  o.c.m.e.c.util.ProjectComparator - ------------------- project org.infinispan:infinispan-bom \n"
+                                                      + "[main] INFO  o.c.m.e.c.util.ProjectComparator - \n"
+                                                      + "[main] INFO  o.c.m.e.c.util.ProjectComparator - \n"
+                                                      + "[main] INFO  o.c.m.e.c.util.ProjectComparator - \n" ) );
+    }
+
 
     private Project getProject() throws Exception
     {
@@ -255,6 +291,7 @@ public class PropertiesUtilsTest
         return new Project( modelParent );
     }
 
+    @SuppressWarnings( "deprecation" )
     private ManipulationSession createUpdateSession() throws Exception
     {
         ManipulationSession session = new ManipulationSession();
@@ -264,7 +301,7 @@ public class PropertiesUtilsTest
         session.setState( new CommonState( p ) );
 
         final MavenExecutionRequest req =
-                        new DefaultMavenExecutionRequest().setUserProperties( p ).setRemoteRepositories( Collections.<ArtifactRepository>emptyList() );
+                        new DefaultMavenExecutionRequest().setUserProperties( p ).setRemoteRepositories( Collections.emptyList() );
 
         final PlexusContainer container = new DefaultPlexusContainer();
         final MavenSession mavenSession = new MavenSession( container, null, req, new DefaultMavenExecutionResult() );
@@ -281,8 +318,8 @@ public class PropertiesUtilsTest
         ManipulationSession session = createUpdateSession();
         Project pC = new Project( modelChild );
 
-        assertTrue ( pC.getResolvedPlugins( session ).size() == 0);
-        assertTrue ( pC.getResolvedManagedPlugins( session ).size() == 0);
+        assertEquals( 0, pC.getResolvedPlugins( session ).size() );
+        assertEquals( 0, pC.getResolvedManagedPlugins( session ).size() );
     }
 
     @Test

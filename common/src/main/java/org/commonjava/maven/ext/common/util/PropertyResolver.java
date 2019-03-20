@@ -16,6 +16,7 @@
 package org.commonjava.maven.ext.common.util;
 
 import org.commonjava.maven.ext.common.ManipulationException;
+import org.commonjava.maven.ext.common.ManipulationUncheckedException;
 import org.commonjava.maven.ext.common.model.Project;
 import org.commonjava.maven.ext.common.session.MavenSessionHandler;
 
@@ -52,6 +53,27 @@ public final class PropertyResolver
         ProfileUtils.getProfiles( session, p.getModel() ).forEach( pr -> result.putAll( pr.getProperties() ) );
 
         return result;
+    }
+
+    /**
+     * This is a wrapper around {@link #resolveProperties(MavenSessionHandler, List, String)}. It simply
+     * wraps any checked exception inside an unchecked exception.
+     *
+     * @param session the current session
+     * @param projects set of projects
+     * @param value value to check
+     * @return the version string
+     */
+    public static String resolvePropertiesUnchecked( MavenSessionHandler session, List<Project> projects, String value )
+    {
+        try
+        {
+            return resolveProperties( session, projects, value );
+        }
+        catch ( ManipulationException e )
+        {
+            throw new ManipulationUncheckedException( e );
+        }
     }
 
     /**

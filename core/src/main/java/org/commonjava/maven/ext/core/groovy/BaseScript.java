@@ -16,12 +16,19 @@
 package org.commonjava.maven.ext.core.groovy;
 
 import groovy.lang.Script;
+import org.commonjava.maven.atlas.ident.ref.ProjectRef;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
+import org.commonjava.maven.atlas.ident.ref.SimpleProjectRef;
+import org.commonjava.maven.ext.common.ManipulationException;
+import org.commonjava.maven.ext.common.ManipulationUncheckedException;
 import org.commonjava.maven.ext.common.model.Project;
 import org.commonjava.maven.ext.common.session.MavenSessionHandler;
+import org.commonjava.maven.ext.common.util.PropertyResolver;
 import org.commonjava.maven.ext.core.ManipulationSession;
 import org.commonjava.maven.ext.core.impl.InitialGroovyManipulator;
 import org.commonjava.maven.ext.io.ModelIO;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.util.List;
@@ -33,6 +40,8 @@ import java.util.Properties;
  */
 public abstract class BaseScript extends Script
 {
+    private final Logger logger = LoggerFactory.getLogger( BaseScript.class );
+
     private List<Project> projects;
 
     private Project project;
@@ -142,6 +151,41 @@ public abstract class BaseScript extends Script
         this.userProperties = session.getUserProperties();
         this.stage = stage;
 
-        System.out.println ("Injecting values. Project is " + project + " with basedir " + basedir + " and properties " + userProperties);
+        logger.info ("Injecting values. Project is " + project + " with basedir " + basedir + " and properties " + userProperties);
+    }
+
+    /**
+     * Allows the specified group:artifact property to be inlined. This is useful to split up properties that cover multiple separate projects.
+     * @param currentProject The current project we are operating on.
+     * @param groupArtifact The group and artifact (separated by a colon) of the dependency (or managed dependency) that we wish to inline.
+     * @throws ManipulationException if an error occurs.
+     */
+    public void inlineProperty ( Project currentProject, String groupArtifact ) throws ManipulationException
+    {
+        ProjectRef target = SimpleProjectRef.parse( groupArtifact );
+
+        try
+        {
+            currentProject.getResolvedManagedDependencies( sessionHandler )
+                          .entrySet().stream()
+                          .filter( a -> a.getKey().asProjectRef().equals( target ) && a.getValue().getVersion().contains( "$" ) )
+                          .forEach( a -> {
+                              logger.info( "Found managed artifact {} (original dependency {})", a.getKey(), a.getValue() );
+                              a.getValue().setVersion(
+                                              PropertyResolver.resolvePropertiesUnchecked( sessionHandler, currentProject.getInheritedList(), a.getValue().getVersion() ) );
+                          } );
+            currentProject.getResolvedDependencies( sessionHandler )
+                          .entrySet().stream()
+                          .filter( a -> a.getKey().asProjectRef().equals( target ) && a.getValue().getVersion().contains( "$" ) )
+                          .forEach( a -> {
+                              logger.info( "Found artifact {} (original dependency {})", a.getKey(), a.getValue() );
+                              a.getValue().setVersion(
+                                              PropertyResolver.resolvePropertiesUnchecked( sessionHandler, currentProject.getInheritedList(), a.getValue().getVersion() ) );
+                          } );
+        }
+        catch (ManipulationUncheckedException e)
+        {
+            throw (ManipulationException)e.getCause();
+        }
     }
 }
