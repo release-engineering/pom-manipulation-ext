@@ -112,7 +112,7 @@ public class VersioningCalculatorTest
         props.setProperty( VersioningState.VERSION_SUFFIX_SYSPROP.getCurrent(), s );
         setupSession( props );
 
-        String data[][] = new String[][] {
+        String[][] data = new String[][] {
             {"1", "1.0.0"},
             {"6.2.0-SNAPSHOT", "6.2.0"},
             {"1.21", "1.21.0"},
@@ -156,7 +156,7 @@ public class VersioningCalculatorTest
         props.setProperty( VersioningState.VERSION_SUFFIX_SYSPROP.getCurrent(), s );
         setupSession( props );
 
-        String data[][] = new String[][] {
+        String[][] data = new String[][] {
             {"GA-1-GA", "GA-1-GA"},
             {"1.0.0.0.0-GA", "1.0.0.0-0-GA"}  };
 
@@ -666,11 +666,11 @@ public class VersioningCalculatorTest
     {
         final Properties props = new Properties();
 
-        props.setProperty( VersioningState.INCREMENT_SERIAL_SUFFIX_SYSPROP.getCurrent(), "foo" );
+        props.setProperty( VersioningState.INCREMENT_SERIAL_SUFFIX_SYSPROP.getCurrent(), "foo-bar" );
         setupSession( props );
 
-        final String v = "7.0.0.beta1";
-        final String newVersion = "7.0.0.beta1-foo-1";
+        final String v = "7.0.0.beta-foo-bar-1";
+        final String newVersion = "7.0.0.beta-foo-bar-1";
 
         final String result = calculate( v );
         assertThat( result, equalTo( newVersion ) );
@@ -1082,6 +1082,50 @@ public class VersioningCalculatorTest
         assertThat( result.get( new SimpleProjectVersionRef( GROUP_ID, a2, v + os ) ), equalTo( v + "-" + ns ) );
     }
 
+    @Test
+    public void checkVersionStripping ()
+    {
+        final Properties props = new Properties();
+        props.setProperty( VersioningState.INCREMENT_SERIAL_SUFFIX_SYSPROP.getCurrent(), "temporary-redhat" );
+        props.setProperty( VersioningState.INCREMENT_SERIAL_SUFFIX_PADDING_SYSPROP.getCurrent(), "5" );
+        props.setProperty( VersioningState.VERSION_SUFFIX_ALT, "redhat" );
+
+        VersioningState vState = new VersioningState( props );
+
+        assertEquals( "1.0.0.temporary-redhat-1", VersionCalculator.handleAlternate( vState, "1.0.0.temporary-redhat-1" ) );
+        assertEquals( "1.0.0", VersionCalculator.handleAlternate( vState, "1.0.0" ) );
+        assertEquals( "1.0.0", VersionCalculator.handleAlternate( vState, "1.0.0.redhat-10" ) );
+
+        props.setProperty( VersioningState.INCREMENT_SERIAL_SUFFIX_SYSPROP.getCurrent(), "redhat" );
+        props.remove( VersioningState.VERSION_SUFFIX_ALT );
+        vState = new VersioningState( props );
+
+        assertEquals( "1.0.0.temporary-redhat-1", VersionCalculator.handleAlternate( vState, "1.0.0.temporary-redhat-1" ) );
+        assertEquals( "1.0.0", VersionCalculator.handleAlternate( vState, "1.0.0" ) );
+        assertEquals( "1.0.0.redhat-10", VersionCalculator.handleAlternate( vState, "1.0.0.redhat-10" ) );
+
+    }
+
+
+    @Test
+    public void incrementExistingSuffixWithTemporary()
+                    throws Exception
+    {
+        final Properties props = new Properties();
+
+        props.setProperty( VersioningState.INCREMENT_SERIAL_SUFFIX_SYSPROP.getCurrent(), "temporary-redhat" );
+        props.setProperty( VersioningState.INCREMENT_SERIAL_SUFFIX_PADDING_SYSPROP.getCurrent(), "5" );
+        props.setProperty( VersioningState.VERSION_SUFFIX_ALT, "redhat" );
+
+        setupSession( props, "1.2.0.redhat-00002", "1.2.0.temporary-redhat-00001", "1.2.0.temporary-redhat-00002" );
+        String oldValue = "1.2.0.redhat-00001";
+
+        final String v = "1.2.0.temporary-redhat-00003";
+
+        final String result = calculate( oldValue );
+        assertThat( result, equalTo( v ) );
+    }
+
 
     private byte[] setupMetadataVersions( final String... versions )
         throws IOException
@@ -1100,20 +1144,16 @@ public class VersioningCalculatorTest
     private String calculate( final String version )
         throws Exception
     {
-        String modifiedVersion = modder.calculate( GROUP_ID, ARTIFACT_ID, version, session );
-        if ( session.getState( VersioningState.class ).isOsgi() )
-        {
-            return Version.getOsgiVersion( modifiedVersion );
-        }
-        return modifiedVersion;
+        return modder.calculate( GROUP_ID, ARTIFACT_ID, version, session );
     }
 
     private VersioningState setupSession( final Properties properties, final String... versions )
         throws Exception
     {
-        return setupSession( properties, Collections.<ProjectRef, String[]> singletonMap( new SimpleProjectRef( GROUP_ID, ARTIFACT_ID ), versions ) );
+        return setupSession( properties, Collections.singletonMap( new SimpleProjectRef( GROUP_ID, ARTIFACT_ID ), versions ) );
     }
 
+    @SuppressWarnings( "deprecation" )
     private VersioningState setupSession( final Properties properties, final Map<ProjectRef, String[]> versionMap )
         throws Exception
     {
@@ -1165,8 +1205,8 @@ public class VersioningCalculatorTest
         extends VersionCalculator
     {
 
-        public TestVersionCalculator( final ManipulationSession session, final Location mdLoc, final Transport mdTrans,
-                                      final File cacheDir )
+        TestVersionCalculator( final ManipulationSession session, final Location mdLoc, final Transport mdTrans,
+                               final File cacheDir )
             throws ManipulationException
         {
             super( new GalleyAPIWrapper( new GalleyInfrastructure( session.getTargetDir(), session.getRemoteRepositories(),

@@ -24,7 +24,7 @@
 
   <groupId>org.commonjava.maven.ext.integration-test</groupId>
   <artifactId>rest-version-manip-mixed-suffix-orig-rh</artifactId>
-  <version>1.0.0</version>
+  <version>1.0.0.redhat-2</version>
   <packaging>pom</packaging>
 
   <name>Module to test REST manipulation of project version only</name>

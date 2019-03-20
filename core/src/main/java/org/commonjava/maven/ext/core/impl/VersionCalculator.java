@@ -38,6 +38,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static org.commonjava.maven.ext.core.impl.Version.findHighestMatchingBuildNumber;
 import static org.commonjava.maven.ext.core.util.IdUtils.gav;
@@ -86,11 +88,6 @@ public class VersionCalculator
         {
             String originalVersion = PropertyResolver.resolveInheritedProperties( session, project, project.getVersion() );
             String modifiedVersion = calculate( project.getGroupId(), project.getArtifactId(), originalVersion, session );
-
-            if ( state.isOsgi() )
-            {
-                modifiedVersion = Version.getOsgiVersion( modifiedVersion );
-            }
 
             logger.debug ("Caching version against project {} with parent {} and modified version {}",
                           project.getKey(), project.getModelParent(), modifiedVersion);
@@ -145,7 +142,7 @@ public class VersionCalculator
      * @param artifactId the artifactId to search for.
      * @param version the original version to search for.
      * @param session the container session.
-     * @return a Version object allowing the modified version to be extracted.
+     * @return the new version string
      * @throws ManipulationException if an error occurs.
      */
     protected String calculate( final String groupId, final String artifactId, final String version,
@@ -153,17 +150,24 @@ public class VersionCalculator
         throws ManipulationException
     {
         final VersioningState state = session.getState( VersioningState.class );
-
         final String incrementalSuffix = state.getIncrementalSerialSuffix();
         final String staticSuffix = state.getSuffix();
         final String override = state.getOverride();
 
-        logger.debug( "Got the following original version: {} for groupId:artifactId {}:{} ", version, groupId, artifactId);
-        logger.debug( "Got the following version suffixes:\n  Static: {}\n  Incremental: {}",
-                      staticSuffix, incrementalSuffix );
-        logger.debug( "Got the following version override: {}", override);
+        logger.debug( "Got the following original version: {} for groupId:artifactId {}:{} ", version, groupId,
+                      artifactId );
+        logger.debug( "Got the following version suffixes:\n  Static: {}\n  Incremental: {}", staticSuffix,
+                      incrementalSuffix );
+        logger.debug( "Got the following version override: {}", override );
 
         String newVersion = version;
+
+        if ( state.getSuffixAlternatives().size() > 0 )
+        {
+            logger.debug( "Got alternate suffixes of {}", state.getSuffixAlternatives() );
+            newVersion = handleAlternate( state, version );
+            logger.debug( "Resetting version {} to {}", version, newVersion);
+        }
 
         if ( override != null )
         {
@@ -173,10 +177,6 @@ public class VersionCalculator
         if ( staticSuffix != null )
         {
             newVersion = Version.appendQualifierSuffix( newVersion, staticSuffix );
-            if ( !state.isPreserveSnapshot() )
-            {
-                newVersion = Version.removeSnapshot( newVersion );
-            }
         }
         else if ( incrementalSuffix != null )
         {
@@ -191,12 +191,15 @@ public class VersionCalculator
                                      Version.getBuildNumberPadding( state.getIncrementalSerialSuffixPadding(), versionCandidates ), '0' );
                 newVersion = Version.setBuildNumber( newVersion, paddedBuildNumber );
             }
-            if ( !state.isPreserveSnapshot() )
-            {
-                newVersion = Version.removeSnapshot( newVersion );
-            }
         }
-        logger.debug( "Returning version: {}", newVersion );
+        if ( !state.isPreserveSnapshot() )
+        {
+            newVersion = Version.removeSnapshot( newVersion );
+        }
+        if ( state.isOsgi() )
+        {
+            newVersion = Version.getOsgiVersion( newVersion );
+        }
 
         return newVersion;
     }
@@ -257,5 +260,31 @@ public class VersionCalculator
         {
             throw new ManipulationException( "Failed to resolve metadata for: %s:%s.", e, groupId, artifactId );
         }
+    }
+
+    /**
+     * This is used by the calculator and {@link RESTCollector}. It takes a version and examines the
+     * alternate suffixes. If for example we have an incremental suffix of "foo" and the alternate
+     * contains "bar" then this will strip the alternate suffix from the version. That will allow
+     * the alignment / interaction with DA to correctly work.
+     *
+     * @param state the current VersioningState
+     * @param version the current version
+     * @return a processed version
+     */
+    static String handleAlternate( VersioningState state, String version )
+    {
+        for ( String suffix : state.getSuffixAlternatives() )
+        {
+            final String suffixStripRegExp = "(.*)([.|-])(" + suffix + "-\\d+)";
+            final Pattern suffixStripPattern = Pattern.compile( suffixStripRegExp );
+            final Matcher suffixMatcher = suffixStripPattern.matcher( version );
+
+            if ( suffixMatcher.matches() && !version.contains( state.getRebuildSuffix() ) )
+            {
+                return suffixMatcher.group( 1 );
+            }
+        }
+        return version;
     }
 }
