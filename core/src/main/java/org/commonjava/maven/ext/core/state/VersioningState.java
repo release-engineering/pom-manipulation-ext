@@ -168,14 +168,14 @@ public class VersioningState
 
     public boolean hasVersionsByGAV()
     {
-        return versionsByGAV != null && !versionsByGAV.isEmpty();
+        return !versionsByGAV.isEmpty();
     }
 
     public String getRebuildSuffix()
     {
         String suffix = "";
 
-        // Same precedence as VersionCalculator.
+        // Same precedence as VersionCalculator::calculate
         if ( ! isEmpty ( getSuffix() ) )
         {
             int dashIndex = getSuffix().lastIndexOf( '-' );
