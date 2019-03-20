@@ -29,6 +29,7 @@ import org.commonjava.maven.ext.core.ManipulationSession;
 
 import java.io.File;
 import java.io.FileReader;
+import java.lang.reflect.Method;
 import java.net.URL;
 import java.util.Properties;
 
@@ -63,6 +64,7 @@ public class TestUtils
         return result;
     }
 
+    @SuppressWarnings( "deprecation" )
     public static ManipulationSession createSession( Properties p ) throws ManipulationException
     {
         ManipulationSession session = new ManipulationSession();
@@ -82,5 +84,31 @@ public class TestUtils
         session.setMavenSession( mavenSession );
 
         return session;
+    }
+
+    /**
+     * Executes a method on an object instance.  The name and parameters of
+     * the method are specified.  The method will be executed and the value
+     * of it returned, even if the method would have private or protected access.
+     */
+    @SuppressWarnings( "unchecked" )
+    public static Object executeMethod( Object instance, String name, Class[] types, Object[] params ) throws Exception
+    {
+        Class c = instance.getClass();
+
+        Method m;
+        try
+        {
+            m = c.getDeclaredMethod( name, types );
+        }
+        catch ( NoSuchMethodException e)
+        {
+            c = c.getSuperclass();
+            m = c.getDeclaredMethod( name, types );
+        }
+
+        m.setAccessible( true );
+
+        return m.invoke( instance, params );
     }
 }

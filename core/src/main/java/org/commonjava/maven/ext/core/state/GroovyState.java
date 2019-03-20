@@ -15,6 +15,8 @@
  */
 package org.commonjava.maven.ext.core.state;
 
+import org.commonjava.maven.ext.common.ManipulationException;
+
 import java.util.Properties;
 
 /**
@@ -31,30 +33,17 @@ public class GroovyState
      */
     private static final String GROOVY_SCRIPT = "groovyScripts";
 
-    private static final String GROOVY_MANIPULATION_PRIORITY = "groovyManipulatorPrecedence";
-
-    private enum GroovyPrecendence
-    {
-        FIRST( "1" ), LAST( "99" );
-
-        private String index;
-
-        GroovyPrecendence( String index )
-        {
-            this.index = index;
-        }
-    }
-
     private final String groovyScripts;
 
-    private final int executionIndex;
-
-    public GroovyState( final Properties userProps )
+    public GroovyState( final Properties userProps ) throws ManipulationException
     {
         groovyScripts = userProps.getProperty( GROOVY_SCRIPT );
-        executionIndex = Integer.parseInt
-                ( GroovyPrecendence.valueOf
-                                ( userProps.getProperty( GROOVY_MANIPULATION_PRIORITY, GroovyPrecendence.LAST.toString() ).toUpperCase() ).index );
+
+        // Catch old style groovy configuration.
+        if ( userProps.getProperty( "groovyManipulatorPrecedence" ) != null )
+        {
+            throw new ManipulationException( "groovyManipulatorPrecedence is no longer valid" );
+        }
     }
 
     /**
@@ -71,10 +60,5 @@ public class GroovyState
     public String getGroovyScripts()
     {
         return groovyScripts;
-    }
-
-    public int getExecutionIndex()
-    {
-        return executionIndex;
     }
 }

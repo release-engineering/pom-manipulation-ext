@@ -29,7 +29,7 @@ import java.util.Properties;
  * Captures configuration relating to plugin/dependency alignment from the POMs.
  * Used by {@link PluginManipulator} and {@link DependencyManipulator}
  */
-@Getter()
+@Getter
 public class CommonState
     implements State
 {
