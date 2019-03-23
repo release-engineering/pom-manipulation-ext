@@ -166,6 +166,7 @@ public class VersionTest
         assertThat( Version.getMMM( "1.0.beta.1" ), equalTo( "1.0" ) );
         assertThat( Version.getMMM( "Beta1" ), equalTo( "" ) );
         assertThat( Version.getMMM( "1.x.2.beta1" ), equalTo( "1" ) );
+        assertThat( Version.getMMM( "7.18.1.20190312-prod" ), equalTo( "7.18.1" ) );
     }
 
     @Test
@@ -178,6 +179,8 @@ public class VersionTest
         assertThat( Version.getOsgiMMM( "2", true ), equalTo( "2.0.0" ) );
         assertThat( Version.getOsgiMMM( "beta1", false ), equalTo( "" ) );
         assertThat( Version.getOsgiMMM( "GA-1-GA-foo", true ), equalTo( "" ) );
+        assertThat( Version.getOsgiMMM( "1.2.3.foo-final-1", true ), equalTo( "1.2.3" ) );
+        assertThat( Version.getOsgiMMM( "1.2.final-1", true ), equalTo( "1.2.0" ) );
     }
 
     @Test
@@ -229,11 +232,13 @@ public class VersionTest
         assertTrue( Version.hasQualifier( "1.0.0.Final" ) );
         assertTrue( Version.hasQualifier( "1.0.Final-rebuild" ) );
         assertTrue( Version.hasQualifier( "1.0.Final-rebuild-1" ) );
+        assertTrue( Version.hasQualifier( "7.18.1.20190312-prod" ) );
     }
 
     @Test
     public void testHasBuildNum()
     {
+        assertFalse( Version.hasBuildNumber( "7.18.1.20190312-prod" ) );
         assertFalse( Version.hasBuildNumber( "1.0-SNAPSHOT" ) );
         assertFalse( Version.hasBuildNumber( "1.0.0" ) );
         assertFalse( Version.hasBuildNumber( "1.0.0.Final" ) );
@@ -292,7 +297,6 @@ public class VersionTest
 
     @Test
     public void testIsEmpty()
-            throws Exception
     {
         assertTrue( Version.isEmpty(null) );
         assertTrue( Version.isEmpty("") );
@@ -356,7 +360,6 @@ public class VersionTest
 
     @Test
     public void testValidOsgi()
-        throws Exception
     {
         assertTrue( Version.isValidOSGi("1") );
         assertTrue( Version.isValidOSGi("1.2") );
@@ -377,12 +380,11 @@ public class VersionTest
 
     @Test
     public void testTimestampedVersion()
-        throws Exception
     {
         String v = "1.0.0.t20170216-223844-555-redhat-1";
         assertEquals("1.0.0", Version.getMMM( v ));
         assertEquals("1.0.0", Version.getOsgiMMM( v, false ));
-        assertTrue(Integer.parseInt( "1" ) == Version.getIntegerBuildNumber( v ));
+        assertEquals( Integer.parseInt( "1" ), Version.getIntegerBuildNumber( v ) );
         assertEquals("t20170216-223844-555-redhat-1", Version.getQualifier( v ));
         assertEquals(".t20170216-223844-555-redhat-1", Version.getQualifierWithDelim( v ));
         assertEquals("t20170216-223844-555-redhat", Version.getQualifierBase( v ));
@@ -390,7 +392,7 @@ public class VersionTest
         v = "1.0.t-20170216-223844-555-rebuild-5";
         assertEquals("1.0", Version.getMMM( v ));
         assertEquals("1.0.0", Version.getOsgiMMM( v, true ));
-        assertTrue(Integer.parseInt( "5" ) == Version.getIntegerBuildNumber( v ));
+        assertEquals( Integer.parseInt( "5" ), Version.getIntegerBuildNumber( v ) );
         assertEquals("t-20170216-223844-555-rebuild-5", Version.getQualifier( v ));
         assertEquals(".t-20170216-223844-555-rebuild-5", Version.getQualifierWithDelim( v ));
         assertEquals("t-20170216-223844-555-rebuild", Version.getQualifierBase( v ));
@@ -401,17 +403,17 @@ public class VersionTest
     {
         Properties p = new Properties();
         VersioningState state = new VersioningState( p );
-        assertTrue ( state.getSuffixAlternatives().size() == 1 );
-        assertTrue ( state.getSuffixAlternatives().get( 0 ).equals( "redhat" ));
+        assertEquals( 1, state.getSuffixAlternatives().size() );
+        assertEquals( "redhat", state.getSuffixAlternatives().get( 0 ) );
 
         p.setProperty( VersioningState.VERSION_SUFFIX_SYSPROP.getCurrent(), "redhat-10" );
         state = new VersioningState( p );
-        assertTrue ( state.getSuffixAlternatives().size() == 0 );
+        assertEquals( 0, state.getSuffixAlternatives().size() );
 
         p.setProperty( VersioningState.VERSION_SUFFIX_SYSPROP.getCurrent(), "temporary-redhat-10" );
         p.setProperty( VersioningState.VERSION_SUFFIX_ALT, "redhat-alt" );
         state = new VersioningState( p );
-        assertTrue ( state.getSuffixAlternatives().size() == 1 );
-        assertTrue ( state.getSuffixAlternatives().get( 0 ).equals( "redhat-alt" ));
+        assertEquals( 1, state.getSuffixAlternatives().size() );
+        assertEquals( "redhat-alt", state.getSuffixAlternatives().get( 0 ) );
     }
 }

@@ -31,6 +31,7 @@ import java.util.regex.Pattern;
  * OSGi versioning. Parses versions into the following format: &lt;major&gt;.&lt;minor&gt;.&lt;micro&gt;
  * .&lt;qualifierBase&gt;-&lt;buildnumber&gt;-&lt;buildnumber&gt;-&lt;snapshot&gt;
  */
+@SuppressWarnings("WeakerAccess") // Public API.
 public class Version
 {
     private static final Logger logger = LoggerFactory.getLogger( Version.class );
@@ -135,7 +136,13 @@ public class Version
         return result;
     }
 
-    static String getMMM(String version)
+    /**
+     * Returns the initial numeric portion (which may be up to 3 digits long) excluding
+     * any delimeter suffix.
+     * @param version the version to examine
+     * @return a parsed string version.
+     */
+    public static String getMMM(String version)
     {
         Matcher versionMatcher = versionPattern.matcher( version );
         if ( versionMatcher.matches() )
@@ -283,11 +290,7 @@ public class Version
 
     public static boolean isEmpty( String string )
     {
-        if ( string == null || string.trim().equals( EMPTY_STRING ) )
-        {
-            return true;
-        }
-        return false;
+        return ( string == null || EMPTY_STRING.equals( string.trim() ) );
     }
 
     public static boolean isSnapshot( String version )
@@ -596,9 +599,9 @@ public class Version
         {
             return Integer.parseInt( buildNumber );
         }
-        catch(NumberFormatException e) {
+        catch(NumberFormatException e)
+        {
             return 0;
         }
     }
-
 }
