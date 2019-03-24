@@ -23,6 +23,7 @@ import org.apache.maven.settings.SettingsUtils;
 import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.common.model.Project;
 import org.commonjava.maven.ext.common.util.ProfileUtils;
+import org.commonjava.maven.ext.common.util.PropertyResolver;
 import org.commonjava.maven.ext.core.ManipulationSession;
 import org.commonjava.maven.ext.core.state.RepoReportingState;
 import org.commonjava.maven.ext.io.SettingsIO;
@@ -106,8 +107,10 @@ public class RepoAndReportingRemovalManipulator
             while (it.hasNext())
             {
                 Repository repository = it.next();
+
                 if (removeRepository( state, repository ))
                 {
+                    repository.setUrl( PropertyResolver.resolveInheritedProperties( session, project, repository.getUrl() ) );
                     backupProfile.addRepository( repository );
                     it.remove();
                     changed.add( project );
@@ -120,6 +123,7 @@ public class RepoAndReportingRemovalManipulator
                 Repository repository = it.next();
                 if (removeRepository( state, repository ))
                 {
+                    repository.setUrl( PropertyResolver.resolveInheritedProperties( session, project, repository.getUrl() ) );
                     backupProfile.addPluginRepository( repository );
                     it.remove();
                     changed.add( project );
@@ -133,13 +137,14 @@ public class RepoAndReportingRemovalManipulator
                 changed.add( project );
             }
 
-            // remove repositories in the profiles as well
+            // Remove repositories in the profiles as well
             final List<Profile> profiles = ProfileUtils.getProfiles( session, model );
 
             for ( final Profile profile : profiles )
             {
                 Profile repoProfile = new Profile();
                 repoProfile.setId( profile.getId() );
+                backupSettings.addActiveProfile( profile.getId() );
 
                 it = profile.getRepositories().iterator();
                 while ( it.hasNext() )
@@ -147,6 +152,7 @@ public class RepoAndReportingRemovalManipulator
                     Repository repository = it.next();
                     if ( removeRepository( state, repository ) )
                     {
+                        repository.setUrl( PropertyResolver.resolveInheritedProperties( session, project, repository.getUrl() ) );
                         repoProfile.addRepository( repository );
                         it.remove();
                         changed.add( project );
@@ -159,6 +165,7 @@ public class RepoAndReportingRemovalManipulator
                     Repository repository = it.next();
                     if ( removeRepository( state, repository ) )
                     {
+                        repository.setUrl( PropertyResolver.resolveInheritedProperties( session, project, repository.getUrl() ) );
                         repoProfile.addPluginRepository( repository );
                         it.remove();
                         changed.add( project );
