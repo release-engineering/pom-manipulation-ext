@@ -49,10 +49,20 @@ assert settings.profiles.children().find( { it.id.text() == 'removed-by-pme' } )
 profile = settings.profiles.children().find { it.id.text() == 'removed-by-pme' }
 assert profile.repositories.text().size() != 0
 
+assert !settings.text().contains("dummy-profile")
 assert !settings.text().contains("\$")
 assert settings.text().contains("https://repository.jboss.org/nexus/content/groups/public/")
 
 int counter = 0
+settingsFile.eachLine { String line ->
+    if ( line.contains('jboss-public-repository-group<'))
+        {
+        counter++;
+    }
+}
+assert counter==2
+
+counter = 0
 settings.activeProfiles.children().each{
     if ( it.text() == 'removed-by-pme')
         {

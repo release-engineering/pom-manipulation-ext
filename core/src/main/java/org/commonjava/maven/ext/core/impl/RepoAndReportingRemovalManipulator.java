@@ -110,8 +110,11 @@ public class RepoAndReportingRemovalManipulator
 
                 if (removeRepository( state, repository ))
                 {
-                    repository.setUrl( PropertyResolver.resolveInheritedProperties( session, project, repository.getUrl() ) );
-                    backupProfile.addRepository( repository );
+                    processRepository ( session, project, repository );
+                    if ( ! backupProfile.getRepositories().contains( repository ) )
+                    {
+                        backupProfile.addRepository( repository );
+                    }
                     it.remove();
                     changed.add( project );
                 }
@@ -123,8 +126,11 @@ public class RepoAndReportingRemovalManipulator
                 Repository repository = it.next();
                 if (removeRepository( state, repository ))
                 {
-                    repository.setUrl( PropertyResolver.resolveInheritedProperties( session, project, repository.getUrl() ) );
-                    backupProfile.addPluginRepository( repository );
+                    processRepository ( session, project, repository );
+                    if ( ! backupProfile.getPluginRepositories().contains( repository ) )
+                    {
+                        backupProfile.addPluginRepository( repository );
+                    }
                     it.remove();
                     changed.add( project );
                 }
@@ -144,7 +150,6 @@ public class RepoAndReportingRemovalManipulator
             {
                 Profile repoProfile = new Profile();
                 repoProfile.setId( profile.getId() );
-                backupSettings.addActiveProfile( profile.getId() );
 
                 it = profile.getRepositories().iterator();
                 while ( it.hasNext() )
@@ -152,8 +157,15 @@ public class RepoAndReportingRemovalManipulator
                     Repository repository = it.next();
                     if ( removeRepository( state, repository ) )
                     {
-                        repository.setUrl( PropertyResolver.resolveInheritedProperties( session, project, repository.getUrl() ) );
-                        repoProfile.addRepository( repository );
+                        processRepository ( session, project, repository );
+                        if ( ! repoProfile.getRepositories().contains( repository ) )
+                        {
+                            repoProfile.addRepository( repository );
+                        }
+                        if ( ! backupSettings.getActiveProfiles().contains( profile.getId() ) )
+                        {
+                            backupSettings.addActiveProfile( profile.getId() );
+                        }
                         it.remove();
                         changed.add( project );
                     }
@@ -165,8 +177,15 @@ public class RepoAndReportingRemovalManipulator
                     Repository repository = it.next();
                     if ( removeRepository( state, repository ) )
                     {
-                        repository.setUrl( PropertyResolver.resolveInheritedProperties( session, project, repository.getUrl() ) );
-                        repoProfile.addPluginRepository( repository );
+                        processRepository ( session, project, repository );
+                        if ( ! repoProfile.getPluginRepositories().contains( repository ) )
+                        {
+                            repoProfile.addPluginRepository( repository );
+                        }
+                        if ( ! backupSettings.getActiveProfiles().contains( profile.getId() ) )
+                        {
+                            backupSettings.addActiveProfile( profile.getId() );
+                        }
                         it.remove();
                         changed.add( project );
                     }
@@ -212,6 +231,14 @@ public class RepoAndReportingRemovalManipulator
         }
 
         return changed;
+    }
+
+    private void processRepository( ManipulationSession session, Project project, Repository repository )
+                    throws ManipulationException
+    {
+        repository.setUrl( PropertyResolver.resolveInheritedProperties( session, project, repository.getUrl() ) );
+        repository.setId( PropertyResolver.resolveInheritedProperties( session, project, repository.getId() ) );
+        repository.setName( PropertyResolver.resolveInheritedProperties( session, project, repository.getName() ) );
     }
 
     /**

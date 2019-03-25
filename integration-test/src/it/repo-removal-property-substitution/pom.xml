@@ -31,6 +31,7 @@
       <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
       <jboss>https://repository.jboss.org/nexus/content/groups/public</jboss>
       <jboss-profile>${jboss}</jboss-profile>
+      <id>jboss-public-repository-group</id>
     </properties>
 
     <repositories>
