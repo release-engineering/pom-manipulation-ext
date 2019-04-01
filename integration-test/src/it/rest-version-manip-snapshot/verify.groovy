@@ -44,3 +44,6 @@ pom.properties.each {
     }
 }
 assert (passed == true)
+
+def buildLog = new File( basedir, 'build.log' )
+assert ! buildLog.text.contains("org.foobar")

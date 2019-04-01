@@ -28,7 +28,7 @@ import java.util.List;
 public final class ProfileUtils
 {
     /**
-     * Denotes whether we only scan active profiles. Default is false (we scan ALL profiles).
+     * Denotes whether we only scan active profiles. Default is true (we scan only active profiles).
      */
     public static final String PROFILE_SCANNING = "scanActiveProfiles";
 

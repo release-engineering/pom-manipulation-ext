@@ -380,13 +380,17 @@ public class RESTCollector
         for ( ArtifactRef pvr : dependencies.keySet() )
         {
             Dependency d = dependencies.get( pvr );
-            deps.add( new SimpleScopedArtifactRef(
+            SimpleScopedArtifactRef sa = new SimpleScopedArtifactRef(
                             new SimpleProjectVersionRef( pvr.asProjectRef(), handlePotentialSnapshotVersion( vs, pvr.getVersionString() ) ),
                             new SimpleTypeAndClassifier( d.getType(), d.getClassifier() ), isEmpty( d.getScope() ) ?
                                                                    ArtifactScopeEnum.compile.name() :
                                                                    PropertyResolver.resolveInheritedProperties( session,
                                                                                                                 project,
-                                                                                                                d.getScope() ) ) );
+                                                                                                                d.getScope() ) );
+            if ( ! sa.getVersionString().contains( "$" ) )
+            {
+                deps.add( sa );
+            }
         }
     }
 

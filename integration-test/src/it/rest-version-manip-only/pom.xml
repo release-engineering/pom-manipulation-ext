@@ -53,6 +53,11 @@
         <artifactId>errai-tools</artifactId>
         <version>${errai-tools}</version>
       </dependency>
+      <dependency>
+        <groupId>org.foobar</groupId>
+        <artifactId>my-artifact</artifactId>
+        <version>${exist}</version>
+    </dependency>
     </dependencies>
   </dependencyManagement>
 
