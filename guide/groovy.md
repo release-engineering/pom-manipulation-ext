@@ -71,9 +71,6 @@ Each groovy script will be run on the execution root (i.e. where Maven is invoke
 <i>@BaseScript org.commonjava.maven.ext.core.groovy.BaseScript pme</i>
 </td>
 </tr>
-</table>
-
-<table bgcolor="#ffff00">
 <tr>
 <td>
     <b>NOTE</b> : As of PME 3.0 the API has changed: <i>org.commonjava.maven.ext.core.groovy.BaseScript</i> instead of <i>org.commonjava.maven.ext.manip.groovy.BaseScript</i> and <i>org.commonjava.maven.ext.common.model.Project</i> instead of <i>org.commonjava.maven.ext.manip.model.Project</i>
@@ -85,6 +82,8 @@ Each script <b>must</b> use the following annotations:
 
 ```
 
+import org.commonjava.maven.ext.core.groovy.BaseScript
+import org.commonjava.maven.ext.core.groovy.InvocationStage
 import org.commonjava.maven.ext.core.groovy.PMEBaseScript
 import org.commonjava.maven.ext.core.groovy.PMEInvocationPoint
 ...
@@ -124,6 +123,8 @@ A typical groovy script that alters a JSON file on disk might be:
     import groovy.json.JsonOutput
     import groovy.json.JsonSlurper
     import groovy.util.logging.Slf4j
+    import org.commonjava.maven.ext.core.groovy.BaseScript
+    import org.commonjava.maven.ext.core.groovy.InvocationStage
     import org.commonjava.maven.ext.core.groovy.PMEBaseScript
     import org.commonjava.maven.ext.core.groovy.PMEInvocationPoint
 
