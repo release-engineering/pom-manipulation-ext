@@ -36,8 +36,6 @@ import org.apache.maven.execution.MavenExecutionRequest;
 import org.apache.maven.execution.MavenExecutionRequestPopulationException;
 import org.apache.maven.execution.MavenExecutionRequestPopulator;
 import org.apache.maven.execution.MavenSession;
-import org.apache.maven.model.building.ModelProblemCollector;
-import org.apache.maven.model.building.ModelProblemCollectorRequest;
 import org.apache.maven.model.profile.DefaultProfileActivationContext;
 import org.apache.maven.model.profile.ProfileActivationContext;
 import org.apache.maven.model.profile.ProfileSelector;
@@ -76,6 +74,7 @@ import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathFactory;
 import java.io.File;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -121,7 +120,13 @@ public class Cli
         System.exit ( new Cli().run( args ) );
     }
 
-    private int run( String[] args )
+    /**
+     * Main method to invoke the cli tool. Note this is public as it may be called by external tools.
+     * @param args ; an array of string arguments.
+     * @return the exit code.
+     */
+    @SuppressWarnings("WeakerAccess") // Public API.
+    public int run( String[] args )
     {
         Options options = new Options();
         options.addOption( "h", false, "Print this help message." );
@@ -307,9 +312,9 @@ public class Cli
             logger.debug( "Using local repository \n{} and found global settings file in {} with contents \n{} and user settings file in {} with contents \n{}",
                           session.getLocalRepository(),
                           DEFAULT_GLOBAL_SETTINGS_FILE, DEFAULT_GLOBAL_SETTINGS_FILE.exists() ? FileUtils.readFileToString
-                                          ( DEFAULT_GLOBAL_SETTINGS_FILE ) : "** File does not exist **",
+                                          ( DEFAULT_GLOBAL_SETTINGS_FILE, Charset.defaultCharset() ) : "** File does not exist **",
                           settings,
-                          (settings != null && settings.exists()) ? FileUtils.readFileToString( settings ) : "** File does not exist **"
+                          (settings != null && settings.exists()) ? FileUtils.readFileToString( settings, Charset.defaultCharset() ) : "** File does not exist **"
                           );
 
             manipulationManager.init( session );
@@ -367,11 +372,11 @@ public class Cli
                     {
                         if ( cmd.hasOption( "printGAVTC" ) )
                         {
-                            FileUtils.writeStringToFile( output, String.format( "%-80s%10s\n", a, scope ), true );
+                            FileUtils.writeStringToFile( output, String.format( "%-80s%10s\n", a, scope ), Charset.defaultCharset(), true );
                         }
                         else
                         {
-                            FileUtils.writeStringToFile( output, a.asProjectVersionRef().toString() + '\n', true );
+                            FileUtils.writeStringToFile( output, a.asProjectVersionRef().toString() + '\n', Charset.defaultCharset(), true );
                         }
                     }
                     else
@@ -416,6 +421,7 @@ public class Cli
         return 0;
     }
 
+    @SuppressWarnings( "deprecation" )
     private void createSession( File target, File settings )
     {
         try
@@ -432,7 +438,7 @@ public class Cli
 
             final MavenExecutionRequest req = new DefaultMavenExecutionRequest().setSystemProperties( System.getProperties() )
                                                                                 .setUserProperties( userProps )
-                                                                                .setRemoteRepositories( Collections.<ArtifactRepository>emptyList() );
+                                                                                .setRemoteRepositories( Collections.emptyList() );
 
             ArtifactRepository ar = null;
             if ( settings == null )
@@ -475,13 +481,7 @@ public class Cli
 
             session.setMavenSession( mavenSession );
         }
-        catch ( ComponentLookupException e )
-        {
-            logger.debug( "Caught problem instantiating ", e );
-            System.err.println( "Unable to start Cli subsystem" );
-            System.exit( 100 );
-        }
-        catch ( PlexusContainerException e )
+        catch ( ComponentLookupException | PlexusContainerException e )
         {
             logger.debug( "Caught problem instantiating ", e );
             System.err.println( "Unable to start Cli subsystem" );
@@ -522,15 +522,10 @@ public class Cli
             modelProfiles.add( SettingsUtils.convertFromSettingsProfile( profile ) );
         }
         List<org.apache.maven.model.Profile> activeModelProfiles =
-            profileSelector.getActiveProfiles( modelProfiles, profileActivationContext, new ModelProblemCollector()
-            {
-
-                @Override
-                public void add( ModelProblemCollectorRequest modelProblemCollectorRequest )
-                {
-                    // do nothing
-                }
-            } );
+            profileSelector.getActiveProfiles( modelProfiles, profileActivationContext,
+                                               modelProblemCollectorRequest -> {
+                                                   // do nothing
+                                               } );
         List<String> activeProfiles = new ArrayList<>();
         for ( org.apache.maven.model.Profile profile : activeModelProfiles )
         {
