@@ -271,11 +271,16 @@ Multiple exclusions to a dependency may be added using comma separators e.g.
     <b>NOTE</b> : As of PME 2.13 (October 2017) the default for <i>strictAlignment</i> has changed from false to true.
 </td>
 </tr>
+<tr style="background-color:green" >
+<td>
+    It is <b>highly recommended</b> to keep this value set to true.
+</td>
+</tr>
 </table>
 
 When aligning dependency versions to some shared standard, it's possible to introduce incompatibilities that stem from changing the version. This may be due to unexpected API changes. While _in general_ it might be safe to revise a dependency's version from 1.5 to 1.5.1, it may not be safe to revise it to 2.0, or even 1.6.
 
-By default strict-mode version alignment checks are enabled. This is recommended for cases where this is a concern, and for dependencies whose versions are aligned via a BOM or REST source (not via explicit overrides, as explained above).
+By default strict-mode version alignment checks are enabled. This is **highly recommended** to prevent API conflicts and when dependencies are aligned via a BOM or REST source (not via explicit overrides, as explained above).
 
 Strict-mode alignment will detect cases where the adjusted version, once OSGi and suffix are handled, does not match with the old version, **not** do the alignment and report the mismatch as a warning in the build's console output. For example, if the incremental or manual suffix is configured to be `rebuild` then these are valid changes.
 
