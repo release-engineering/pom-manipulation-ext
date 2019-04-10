@@ -51,6 +51,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.apache.commons.lang.StringUtils.isEmpty;
 import static org.apache.commons.lang.StringUtils.isNotEmpty;
@@ -184,6 +185,20 @@ public class ModelIO
         }
 
         return versionOverrides;
+    }
+
+    public Map<ProjectRef, String> getRemoteDependencyVersionOverridesByProject( final ProjectVersionRef ref )
+        throws ManipulationException
+    {
+        Map<ArtifactRef, String> byArtifact = getRemoteDependencyVersionOverrides( ref );
+        return byArtifact.entrySet()
+                         .stream()
+                         .collect( Collectors.toMap( e -> e.getKey()
+                                                           .asProjectRef(),
+                                                     Map.Entry::getValue, ( key1, key2 ) -> {
+                                                         // Avoid problem where a ProjectRef leads to duplicates when the ArtifactRef didn't
+                                                         return key1;
+                                                     } ) );
     }
 
     public Properties getRemotePropertyMappingOverrides( final ProjectVersionRef ref )

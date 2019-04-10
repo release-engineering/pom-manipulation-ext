@@ -134,6 +134,9 @@ public class DependencyManipulator implements Manipulator
         final RESTState restState = session.getState( RESTState.class );
         final List<ProjectVersionRef> gavs = depState.getRemoteBOMDepMgmt();
 
+        final Map<String, ProjectVersionRef> extraGAVs = depState.getExtraBOMs();
+        final Map<String, Map<ProjectRef, String>> extraBOMOverrides = depState.getExtraBOMDepMgmts();
+
         // While in theory we are only mapping ProjectRef -> NewVersion if we store key as ProjectRef we can't then have
         // org.foo:foobar -> 1.2.0.redhat-2
         // org.foo:foobar -> 2.0.0.redhat-2
@@ -155,6 +158,13 @@ public class DependencyManipulator implements Manipulator
                 // for strict override. However, it is undefined if strict is not enabled.
                 bomOverrides.putAll( rBom );
             }
+        }
+
+        // Load extra BOMs into seperate maps for accessing later, when applying the dependencyExclusions.
+        for ( Map.Entry<String, ProjectVersionRef> entry : extraGAVs.entrySet() )
+        {
+            extraBOMOverrides.put( entry.getKey(),
+                                   effectiveModelBuilder.getRemoteDependencyVersionOverridesByProject( entry.getValue() ) );
         }
 
         if ( depState.getPrecedence() == DependencyPrecedence.BOM )
@@ -338,7 +348,8 @@ public class DependencyManipulator implements Manipulator
         {
             moduleOverrides = applyModuleVersionOverrides( projectGA,
                                                            dependencyState.getDependencyExclusions(),
-                                                           moduleOverrides, explicitOverrides );
+                                                           moduleOverrides, explicitOverrides,
+                                                           dependencyState.getExtraBOMDepMgmts() );
             logger.debug( "Module overrides are:\n{}", moduleOverrides );
             logger.debug( "Explicit overrides are:\n{}", explicitOverrides);
         }
@@ -758,13 +769,15 @@ public class DependencyManipulator implements Manipulator
      * @param originalOverrides The full list of version overrides, both global and module specific
      * @param moduleOverrides are individual overrides e.g. group:artifact@groupId:artifactId :: value
      * @param explicitOverrides a custom map to handle wildcard overrides
+     * @param extraBOMOverrides a nested map of additional overrides, keyed on a String
      * @return The map of global and module specific overrides which apply to the given module
      * @throws ManipulationException if an error occurs
      */
     private Map<ArtifactRef, String> applyModuleVersionOverrides( final String projectGA,
                                                                   final Map<String, String> moduleOverrides,
                                                                   Map<ArtifactRef, String> originalOverrides,
-                                                                  final WildcardMap explicitOverrides )
+                                                                  final WildcardMap explicitOverrides,
+                                                                  final Map<String, Map<ProjectRef, String>> extraBOMOverrides )
                     throws ManipulationException
     {
         final Map<ArtifactRef, String> remainingOverrides = new LinkedHashMap<>( originalOverrides );
@@ -793,6 +806,8 @@ public class DependencyManipulator implements Manipulator
                 final boolean isModuleWildcard = currentKey.endsWith( "@*" );
                 logger.debug( "Is wildcard? {} and in module wildcard mode? {} ", isModuleWildcard, aWildcardMode );
 
+                String artifactGA = null;
+                boolean replace = false;
                 // process module-specific overrides (first)
                 if ( !aWildcardMode )
                 {
@@ -808,7 +823,7 @@ public class DependencyManipulator implements Manipulator
                     {
                         throw new ManipulationException( "Invalid format for exclusion key " + currentKey );
                     }
-                    final String artifactGA = artifactAndModule[0];
+                    artifactGA = artifactAndModule[0];
                     final ProjectRef moduleGA = SimpleProjectRef.parse( artifactAndModule[1] );
 
                     logger.debug( "For artifact override: {}, comparing parsed module: {} to current project: {}",
@@ -823,7 +838,7 @@ public class DependencyManipulator implements Manipulator
                     {
                         if ( currentValue != null && !currentValue.isEmpty() )
                         {
-                            explicitOverrides.put( SimpleProjectRef.parse( artifactGA ), currentValue );
+                            replace = true;
                             logger.debug( "Overriding module dependency for {} with {} : {}", moduleGA, artifactGA,
                                           currentValue );
                         }
@@ -845,7 +860,7 @@ public class DependencyManipulator implements Manipulator
                         continue;
                     }
 
-                    final String artifactGA = currentKey.substring( 0, currentKey.length() - 2 );
+                    artifactGA = currentKey.substring( 0, currentKey.length() - 2 );
                     logger.debug( "For artifact override: {}, checking if current overrides already contain a module-specific version.",
                                   artifactGA );
 
@@ -861,7 +876,7 @@ public class DependencyManipulator implements Manipulator
                     {
                         logger.debug( "Overriding module dependency for {} with {} : {}", projectGA, artifactGA,
                                       currentValue );
-                        explicitOverrides.put( SimpleProjectRef.parse( artifactGA ), currentValue );
+                        replace = true;
                     }
                     else
                     {
@@ -870,6 +885,30 @@ public class DependencyManipulator implements Manipulator
                         removeGA( remainingOverrides, SimpleProjectRef.parse( artifactGA ) );
                         logger.debug( "Removing artifactGA " + artifactGA + " from overrides" );
                     }
+                }
+
+                if ( replace )
+                {
+                    ProjectRef projectRef = SimpleProjectRef.parse( artifactGA );
+                    String newArtifactValue;
+                    // Expand values that reference an extra BOM
+                    Map<ProjectRef, String> extraBOM = extraBOMOverrides.get( currentValue );
+                    if ( extraBOM == null )
+                    {
+                        newArtifactValue = currentValue;
+                    }
+                    else
+                    {
+                        newArtifactValue = extraBOM.get( projectRef );
+                        if ( newArtifactValue == null )
+                        {
+                            throw new ManipulationException( "Extra BOM {} does not define a version for artifact {} targeted by {}",
+                                                             currentValue, artifactGA, currentKey );
+                        }
+                        logger.debug( "Dereferenced value {} for {} from extra BOM {}", newArtifactValue, artifactGA,
+                                      currentValue );
+                    }
+                    explicitOverrides.put( projectRef, newArtifactValue );
                 }
             }
         }
