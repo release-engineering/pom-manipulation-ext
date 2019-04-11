@@ -262,6 +262,20 @@ Multiple exclusions to a dependency may be added using comma separators e.g.
 
     mvn install -DdependencyOverride.junit:junit@*=+slf4j:slf4j,+commons-lang:commons-lang
 
+#### Using a version from a Remote POM
+
+While the `dependencyManagement` property does accept multiple remote POMs on its own, sometimes you might want a more limited effect from one of these extra remote POMs. For example, to align just one module of your project, or to align only certain artifacts to the versions defined in that POM.
+
+1. Set a property with the prefix `dependencyManagement.`, suffixed by a unique ID string of your choice. The value of the property follows the same format as a standard `dependencyManagement` property, but only accepts one POM per ID string. You can define multiple POMs by repeating this `dependencyManagement.` property, but with a different ID suffix for each instance.
+2. Reference this ID string as the version of your `dependencyOverride` properties.
+
+For example:
+
+    mvn install -DdependencyManagement=org.foo:my-dep-pom:1.0 -DdependencyManagement.xyzzy=org.foo:my-dep-pom:2.0 -DdependencyOverride.commons-lang:commons-lang:*@*=xyzzy
+
+An error will be produced when the remote POM does not define a version for the group and artifact defined in the `dependencyOverride`.
+
+These extra BOMs have no affect unless referenced by one or more `dependencyOverride`s.
 
 ### Strict Mode Version Alignment
 
