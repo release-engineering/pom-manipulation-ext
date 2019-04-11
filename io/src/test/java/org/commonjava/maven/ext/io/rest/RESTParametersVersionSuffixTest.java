@@ -35,11 +35,11 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import static org.commonjava.maven.ext.io.rest.Translator.RestProtocol;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 public class RESTParametersVersionSuffixTest
 {
@@ -89,13 +89,11 @@ public class RESTParametersVersionSuffixTest
     {
         this.versionTranslator = new DefaultTranslator( mockServer.getUrl(), RestProtocol.CURRENT, 0,
                                                         Translator.CHUNK_SPLIT_COUNT, "", suffix );
-        List<ProjectVersionRef> gavs = new ArrayList<ProjectVersionRef>()
-        {{
-            add( new SimpleProjectVersionRef( "com.example", "example", "1.0" ) );
-        }};
+        List<ProjectVersionRef> gavs = Collections.singletonList(
+            new SimpleProjectVersionRef( "com.example", "example", "1.0" ) );
 
         versionTranslator.translateVersions( gavs );
-        assertTrue( suffix.equals( gavSchema.versionSuffix ) );
+        assertEquals( suffix, gavSchema.versionSuffix );
     }
 
     @Test
@@ -103,12 +101,10 @@ public class RESTParametersVersionSuffixTest
     {
         this.versionTranslator = new DefaultTranslator( mockServer.getUrl(), RestProtocol.CURRENT, 0,
                                                         Translator.CHUNK_SPLIT_COUNT, "", "" );
-        List<ProjectVersionRef> gavs = new ArrayList<ProjectVersionRef>()
-        {{
-            add( new SimpleProjectVersionRef( "com.example", "example", "1.0" ) );
-        }};
+        List<ProjectVersionRef> gavs = Collections.singletonList(
+            new SimpleProjectVersionRef( "com.example", "example", "1.0" ) );
 
         versionTranslator.translateVersions( gavs );
-        assertTrue ( gavSchema.versionSuffix == null );
+        assertNull( gavSchema.versionSuffix );
     }
 }

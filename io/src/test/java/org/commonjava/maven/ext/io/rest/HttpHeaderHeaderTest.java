@@ -32,7 +32,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
 
@@ -94,10 +94,8 @@ public class HttpHeaderHeaderTest
     @Test
     public void testVerifyContentHeaderMessage()
     {
-        List<ProjectVersionRef> gavs = new ArrayList<ProjectVersionRef>()
-        {{
-            add( new SimpleProjectVersionRef( "com.example", "example", "1.0" ) );
-        }};
+        List<ProjectVersionRef> gavs = Collections.singletonList(
+            new SimpleProjectVersionRef( "com.example", "example", "1.0" ));
 
         try
         {
@@ -116,10 +114,8 @@ public class HttpHeaderHeaderTest
         testResponseStart = "{\"errorMessage\":\"";
         testResponseEnd = "\"}";
 
-        List<ProjectVersionRef> gavs = new ArrayList<ProjectVersionRef>()
-        {{
-            add( new SimpleProjectVersionRef( "com.example", "example", "1.0" ) );
-        }};
+        List<ProjectVersionRef> gavs = Collections.singletonList(
+            new SimpleProjectVersionRef( "com.example", "example", "1.0" ) );
 
         try
         {
@@ -138,10 +134,8 @@ public class HttpHeaderHeaderTest
         testResponseStart = "{\"errorType\":\"";
         testResponseEnd = "\"}";
 
-        List<ProjectVersionRef> gavs = new ArrayList<ProjectVersionRef>()
-        {{
-            add( new SimpleProjectVersionRef( "com.example", "example", "1.0" ) );
-        }};
+        List<ProjectVersionRef> gavs = Collections.singletonList(
+            new SimpleProjectVersionRef( "com.example", "example", "1.0" ) );
 
         try
         {
@@ -160,10 +154,8 @@ public class HttpHeaderHeaderTest
         testResponseStart = "{\"errorType\":\"MY-TYPE\",\"errorMessage\":\"MY-MESSAGE\"}";
         testResponseEnd = null;
 
-        List<ProjectVersionRef> gavs = new ArrayList<ProjectVersionRef>()
-        {{
-            add( new SimpleProjectVersionRef( "com.example", "example", "1.0" ) );
-        }};
+        List<ProjectVersionRef> gavs = Collections.singletonList(
+            new SimpleProjectVersionRef( "com.example", "example", "1.0" ) );
 
         try
         {
@@ -185,10 +177,8 @@ public class HttpHeaderHeaderTest
             "</body></html>";
         testResponseEnd = null;
 
-        List<ProjectVersionRef> gavs = new ArrayList<ProjectVersionRef>()
-        {{
-            add( new SimpleProjectVersionRef( "com.example", "example", "1.0" ) );
-        }};
+        List<ProjectVersionRef> gavs = Collections.singletonList(
+            new SimpleProjectVersionRef( "com.example", "example", "1.0" ) );
 
         try
         {
