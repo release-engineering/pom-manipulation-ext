@@ -23,7 +23,7 @@ import org.jboss.byteman.contrib.bmunit.BMUnitRunner;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.Assert.assertTrue;
@@ -53,17 +53,15 @@ public class HttpEndpointTest extends HttpHeaderHeaderTest
             "</body></html>";
         testResponseEnd = null;
 
-        List<ProjectVersionRef> gavs = new ArrayList<ProjectVersionRef>()
-        {{
-            add( new SimpleProjectVersionRef( "com.example", "example", "1.0" ) );
-            add( new SimpleProjectVersionRef( "com.example", "example-one", "1.1" ) );
-            add( new SimpleProjectVersionRef( "com.example", "example-two", "1.0" ) );
-            add( new SimpleProjectVersionRef( "com.example", "example-three", "1.1" ) );
-            add( new SimpleProjectVersionRef( "com.example", "example-four", "1.0" ) );
-            add( new SimpleProjectVersionRef( "com.example", "example-five", "1.1" ) );
-            add( new SimpleProjectVersionRef( "com.example", "example-six", "1.0" ) );
-            add( new SimpleProjectVersionRef( "com.example", "example-seven", "1.1" ) );
-        }};
+        List<ProjectVersionRef> gavs = Arrays.asList(
+             new SimpleProjectVersionRef( "com.example", "example", "1.0" ),
+             new SimpleProjectVersionRef( "com.example", "example-one", "1.1" ),
+             new SimpleProjectVersionRef( "com.example", "example-two", "1.0" ),
+             new SimpleProjectVersionRef( "com.example", "example-three", "1.1" ),
+             new SimpleProjectVersionRef( "com.example", "example-four", "1.0" ),
+             new SimpleProjectVersionRef( "com.example", "example-five", "1.1" ),
+             new SimpleProjectVersionRef( "com.example", "example-six", "1.0" ),
+             new SimpleProjectVersionRef( "com.example", "example-seven", "1.1" ));
 
         try
         {

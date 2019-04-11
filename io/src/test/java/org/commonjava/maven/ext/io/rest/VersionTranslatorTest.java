@@ -37,13 +37,7 @@ import org.junit.runners.Parameterized;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Scanner;
+import java.util.*;
 
 import static org.commonjava.maven.ext.io.rest.Translator.RestProtocol;
 import static org.hamcrest.CoreMatchers.is;
@@ -112,13 +106,11 @@ public class VersionTranslatorTest
     @Test
     public void testTranslateVersions()
     {
-        List<ProjectVersionRef> gavs = new ArrayList<ProjectVersionRef>()
-        {{
-            add( new SimpleProjectVersionRef( "com.example", "example", "1.0" ) );
-            add( new SimpleProjectVersionRef( "com.example", "example-dep", "2.0" ) );
-            add( new SimpleProjectVersionRef( "org.commonjava", "example", "1.0" ) );
-            add( new SimpleProjectVersionRef( "org.commonjava", "example", "1.1" ) );
-        }};
+        List<ProjectVersionRef> gavs = Arrays.asList(
+            new SimpleProjectVersionRef( "com.example", "example", "1.0" ),
+            new SimpleProjectVersionRef( "com.example", "example-dep", "2.0" ),
+            new SimpleProjectVersionRef( "org.commonjava", "example", "1.0" ),
+            new SimpleProjectVersionRef( "org.commonjava", "example", "1.1" ));
 
         Map<ProjectVersionRef, String> actualResult = versionTranslator.translateVersions( gavs );
         Map<ProjectVersionRef, String> expectedResult = new HashMap<ProjectVersionRef, String>()
@@ -140,10 +132,8 @@ public class VersionTranslatorTest
                                                        Translator.CHUNK_SPLIT_COUNT, "",
                                                        "" );
 
-        List<ProjectVersionRef> gavs = new ArrayList<ProjectVersionRef>()
-        {{
-            add( new SimpleProjectVersionRef( "com.example", "example", "1.0" ) );
-        }};
+        List<ProjectVersionRef> gavs = Collections.singletonList(
+            new SimpleProjectVersionRef( "com.example", "example", "1.0" ) );
 
         try
         {

@@ -32,7 +32,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import static org.commonjava.maven.ext.io.rest.Translator.RestProtocol;
@@ -72,10 +72,8 @@ public class HttpMessageTranslatorTest
     @Test
     public void testTranslateVersionsWithMessage()
     {
-        List<ProjectVersionRef> gavs = new ArrayList<ProjectVersionRef>()
-        {{
-            add( new SimpleProjectVersionRef( "com.example", "example", "1.0" ) );
-        }};
+        List<ProjectVersionRef> gavs = Collections.singletonList(
+            new SimpleProjectVersionRef( "com.example", "example", "1.0" ) );
 
         try
         {

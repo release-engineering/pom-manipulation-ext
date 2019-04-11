@@ -37,10 +37,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Scanner;
+import java.util.*;
 
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -100,11 +97,9 @@ public class HttpErrorTranslatorTest
     @Test
     public void testTranslateVersionsWith404()
     {
-        List<ProjectVersionRef> gavs = new ArrayList<ProjectVersionRef>()
-        {{
-            add( new SimpleProjectVersionRef( "com.example", "example", "1.0" ) );
-            add( new SimpleProjectVersionRef( "org.commonjava", "example", "1.1" ) );
-        }};
+        List<ProjectVersionRef> gavs = Arrays.asList(
+            new SimpleProjectVersionRef( "com.example", "example", "1.0" ),
+            new SimpleProjectVersionRef( "org.commonjava", "example", "1.1" ));
 
         try
         {
