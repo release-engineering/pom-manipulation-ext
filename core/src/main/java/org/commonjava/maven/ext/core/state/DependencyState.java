@@ -16,7 +16,9 @@
 package org.commonjava.maven.ext.core.state;
 
 import org.commonjava.maven.atlas.ident.ref.ArtifactRef;
+import org.commonjava.maven.atlas.ident.ref.ProjectRef;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
+import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef;
 import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.core.impl.DependencyManipulator;
 import org.commonjava.maven.ext.core.util.IdUtils;
@@ -83,11 +85,26 @@ public class DependencyState
      */
     private static final String DEPENDENCY_MANAGEMENT_POM_PROPERTY = "dependencyManagement";
 
+    /**
+     * The String that needs to be prepended a system property to make it an extra BOM.
+     * For example, used to align only parts of a project to a different BOM
+     * <pre>
+     * <code>-DdependencyManagement:org.foo:bar-dep-mgmt:1.0</code>
+     * <code>-DdependencyManagement.xyzzy=org.foo:bar-dep-mgmt:2.0<code/>
+     * <code>-DdependencyExclusion.junit:junit@org.groupId:artifactId=xyzzy</code>
+     * </pre>
+     */
+    private static final String EXTRA_BOM_PREFIX = DEPENDENCY_MANAGEMENT_POM_PROPERTY + ".";
+
     private static final Logger logger = LoggerFactory.getLogger( DependencyState.class );
 
     private final boolean overrideDependencies;
 
     private final List<ProjectVersionRef> remoteBOMdepMgmt;
+
+    private final Map<String, ProjectVersionRef> extraBOMs;
+
+    private Map<String, Map<ProjectRef, String>> extraBOMDepMgmts;
 
     private Map<String, String> dependencyExclusions;
 
@@ -103,6 +120,13 @@ public class DependencyState
         }
         overrideDependencies = Boolean.valueOf( userProps.getProperty( "overrideDependencies", "true" ) );
         remoteBOMdepMgmt = IdUtils.parseGAVs( userProps.getProperty( DEPENDENCY_MANAGEMENT_POM_PROPERTY ) );
+
+        extraBOMs = new HashMap<>();
+        for ( Map.Entry<String, String> extra : getPropertiesByPrefix( userProps, EXTRA_BOM_PREFIX ).entrySet() )
+        {
+            extraBOMs.put( extra.getKey(), SimpleProjectVersionRef.parse( extra.getValue() ) );
+        }
+
         dependencyExclusions = getPropertiesByPrefix( userProps, DEPENDENCY_EXCLUSION_PREFIX );
 
         Map<String, String> oP = PropertiesUtils.getPropertiesByPrefix( userProps, DEPENDENCY_OVERRIDE_PREFIX );
@@ -159,6 +183,20 @@ public class DependencyState
     public List<ProjectVersionRef> getRemoteBOMDepMgmt()
     {
         return remoteBOMdepMgmt;
+    }
+
+    public Map<String, ProjectVersionRef> getExtraBOMs()
+    {
+        return extraBOMs;
+    }
+
+    public Map<String, Map<ProjectRef, String>> getExtraBOMDepMgmts( )
+    {
+        if ( extraBOMDepMgmts == null )
+        {
+            extraBOMDepMgmts = new HashMap<>(  );
+        }
+        return extraBOMDepMgmts;
     }
 
     /**
