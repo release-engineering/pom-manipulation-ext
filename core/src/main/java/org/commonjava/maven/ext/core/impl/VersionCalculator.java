@@ -149,7 +149,24 @@ public class VersionCalculator
                                  final ManipulationSession session )
         throws ManipulationException
     {
-        final VersioningState state = session.getState( VersioningState.class );
+        return calculate( groupId, artifactId, version, session.getState( VersioningState.class ) );
+    }
+
+    /**
+     * Calculate the version modification for a given GAV. Convenience method to avoid
+     * creating a manipulation session.
+     *
+     * @param groupId the groupId to search for
+     * @param artifactId the artifactId to search for.
+     * @param version the original version to search for.
+     * @param state the VersioningState
+     * @return the new version string
+     * @throws ManipulationException if an error occurs.
+     */
+    protected String calculate( final String groupId, final String artifactId, final String version,
+                                final VersioningState state )
+                    throws ManipulationException
+    {
         final String incrementalSuffix = state.getIncrementalSerialSuffix();
         final String staticSuffix = state.getSuffix();
         final String override = state.getOverride();
@@ -180,7 +197,7 @@ public class VersionCalculator
         }
         else if ( incrementalSuffix != null )
         {
-            final Set<String> versionCandidates = this.getVersionCandidates(state, groupId, artifactId);
+            final Set<String> versionCandidates = getVersionCandidates(state, groupId, artifactId);
 
             newVersion = Version.appendQualifierSuffix( newVersion, incrementalSuffix );
             int highestRemoteBuildNumPlusOne = findHighestMatchingBuildNumber( newVersion, versionCandidates ) + 1;
@@ -207,7 +224,7 @@ public class VersionCalculator
     /**
      * Find matching version strings in the remote repo.
      */
-    private Set<String> getVersionCandidates(VersioningState state, String groupId, String artifactId)
+    protected Set<String> getVersionCandidates(VersioningState state, String groupId, String artifactId)
             throws ManipulationException
     {
         final Set<String> versionCandidates = new HashSet<>();
@@ -272,7 +289,7 @@ public class VersionCalculator
      * @param version the current version
      * @return a processed version
      */
-    static String handleAlternate( VersioningState state, String version )
+    protected static String handleAlternate( VersioningState state, String version )
     {
         for ( String suffix : state.getSuffixAlternatives() )
         {

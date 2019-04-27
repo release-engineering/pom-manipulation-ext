@@ -104,6 +104,11 @@ public class VersionTest
         versionSet.clear();
         versionSet.add( "1.2-foo-4" );
         assertThat( Version.findHighestMatchingBuildNumber( version, versionSet ), equalTo( 4 ) );
+
+        version = "1.2";
+        versionSet.clear();
+        versionSet.add( "1.2" );
+        assertThat( Version.findHighestMatchingBuildNumber( version, versionSet ), equalTo( 0 ) );
     }
 
     @Test
