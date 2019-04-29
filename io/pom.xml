@@ -22,7 +22,7 @@
   <parent>
     <groupId>org.commonjava.maven.ext</groupId>
     <artifactId>pom-manipulation-parent</artifactId>
-    <version>3.6-SNAPSHOT</version>
+    <version>3.6</version>
   </parent>
 
   <artifactId>pom-manipulation-io</artifactId>
