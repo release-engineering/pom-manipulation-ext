@@ -22,9 +22,18 @@ import java.util.Properties;
 
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertTrue;
+import static org.commonjava.maven.ext.core.state.DependencyState.DEPENDENCY_SOURCE;
 
 public class CommonStateTest
 {
+    @Test
+    public void testEnum() throws ManipulationException
+    {
+        Properties p = new Properties(  );
+        p.setProperty( DEPENDENCY_SOURCE, "" );
+        new DependencyState( p );
+    }
+
     @Test
     public void excludedScopes() throws ManipulationException
     {

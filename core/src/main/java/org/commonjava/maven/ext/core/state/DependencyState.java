@@ -15,6 +15,7 @@
  */
 package org.commonjava.maven.ext.core.state;
 
+import org.apache.commons.lang.StringUtils;
 import org.commonjava.maven.atlas.ident.ref.ArtifactRef;
 import org.commonjava.maven.atlas.ident.ref.ProjectRef;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
@@ -60,6 +61,7 @@ public class DependencyState
      * <code>REST</code> Solely restURL.
      * <code>RESTBOM</code> Merges the information but takes the rest as precedence.
      * <code>BOMREST</code> Merges the information but takes the bom as precedence.
+     * <code>NONE</code> No remote alignment.
      * </pre>
      * Configured by the property <code>-DdependencySource=[REST|BOM|RESTBOM|BOMREST]</code>
      */
@@ -68,7 +70,8 @@ public class DependencyState
         REST,
         BOM,
         RESTBOM,
-        BOMREST
+        BOMREST,
+        NONE
     }
 
     /**
@@ -137,8 +140,13 @@ public class DependencyState
                 throw new ManipulationException( "Property clash between dependencyOverride and dependencyExclusion for " + s );
             }
         }
-        switch ( DependencyPrecedence.valueOf( userProps.getProperty( DEPENDENCY_SOURCE,
-                                                            DependencyPrecedence.BOM.toString() ).toUpperCase() ) )
+        String sourceValue = userProps.getProperty( DEPENDENCY_SOURCE,
+                                                            DependencyPrecedence.BOM.toString() ).toUpperCase();
+        if ( StringUtils.isEmpty(sourceValue))
+        {
+            sourceValue = "NONE";
+        }
+        switch ( DependencyPrecedence.valueOf( sourceValue ) )
         {
             case REST:
             {
@@ -160,6 +168,11 @@ public class DependencyState
                 precedence = DependencyPrecedence.BOMREST;
                 break;
             }
+            case NONE:
+            {
+                precedence = DependencyPrecedence.NONE;
+                break;
+            }
             default:
             {
                 throw new ManipulationException( "Unknown value {} for {}", userProps.getProperty( DEPENDENCY_SOURCE ), DEPENDENCY_SOURCE);
@@ -175,7 +188,8 @@ public class DependencyState
     @Override
     public boolean isEnabled()
     {
-        return ( ( remoteBOMdepMgmt != null && !remoteBOMdepMgmt.isEmpty()   ) ||
+        return ( ( ! ( precedence == DependencyPrecedence.NONE ) ) &&
+                 ( remoteBOMdepMgmt != null && !remoteBOMdepMgmt.isEmpty()   ) ||
                  ( remoteRESTdepMgmt != null && !remoteRESTdepMgmt.isEmpty() ) ||
                  (!dependencyExclusions.isEmpty()) );
     }
