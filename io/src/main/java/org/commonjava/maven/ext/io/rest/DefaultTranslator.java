@@ -28,7 +28,6 @@ import org.commonjava.maven.ext.io.rest.mapper.ListingBlacklistMapper;
 import org.commonjava.maven.ext.io.rest.mapper.ReportGAVMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.MDC;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -230,13 +229,17 @@ public class DefaultTranslator
         return result;
     }
 
-    private String getHeaderContext ()
+    /**
+     * Returns the current log header. Protected so it can be overridden.
+     * @return a String header
+     */
+    protected String getHeaderContext ()
     {
         String headerContext;
 
-        if ( isNotEmpty( MDC.get( "LOG-CONTEXT" ) ) )
+        if ( isNotEmpty( org.slf4j.MDC.get( "LOG-CONTEXT" ) ) )
         {
-            headerContext = MDC.get( "LOG-CONTEXT" );
+            headerContext = org.slf4j.MDC.get( "LOG-CONTEXT" );
         }
         else
         {
