@@ -20,7 +20,6 @@ import java.text.MessageFormat;
 public class ManipulationException
     extends Exception
 {
-
     private static final long serialVersionUID = 1L;
 
     private Object[] params;

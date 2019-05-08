@@ -20,8 +20,18 @@ public class ManipulationUncheckedException
 {
     private static final long serialVersionUID = 1L;
 
+    public ManipulationUncheckedException( final String string )
+    {
+        super( string );
+    }
+
     public ManipulationUncheckedException( final Throwable cause )
     {
         super( cause );
+    }
+
+    public ManipulationUncheckedException( final String message, final Throwable cause )
+    {
+        super( message, cause );
     }
 }
