@@ -115,7 +115,7 @@ public class DependencyManipulator implements Manipulator
 
         if ( !session.isEnabled() || !state.isEnabled() )
         {
-            logger.debug( getClass().getSimpleName() + ": Nothing to do!" );
+            logger.debug("{}: Nothing to do!", getClass().getSimpleName());
             return Collections.emptySet();
         }
         return internalApplyChanges( projects, loadRemoteOverrides() );
@@ -199,6 +199,7 @@ public class DependencyManipulator implements Manipulator
             mergedOverrides.putAll( bomOverrides );
         }
         logger.info ( "Remote precedence is {}", depState.getPrecedence() );
+
         logger.debug ("Final remote override list is {}", mergedOverrides);
         return mergedOverrides;
     }
@@ -640,11 +641,11 @@ public class DependencyManipulator implements Manipulator
 
                     if ( isEmpty( overrideVersion ) )
                     {
-                        logger.warn( "Unable to align with an empty override version for " + groupIdArtifactId + "; ignoring" );
+                        logger.warn( "Unable to align with an empty override version for {}; ignoring", groupIdArtifactId );
                     }
                     else if ( isEmpty( oldVersion ) )
                     {
-                        logger.debug( "Dependency is a managed version for " + groupIdArtifactId + "; ignoring" );
+                        logger.debug( "Dependency is a managed version for {}; ignoring", groupIdArtifactId );
                     }
                     else if (oldVersion.equals( "${project.version}" ) || ( oldVersion.contains( "$" ) && project.getVersion().equals( resolvedValue ) ) )
                     {
@@ -782,8 +783,11 @@ public class DependencyManipulator implements Manipulator
     {
         final Map<ArtifactRef, String> remainingOverrides = new LinkedHashMap<>( originalOverrides );
 
-        logger.debug( "Calculating module-specific version overrides. Starting with:\n  {}",
-                      join( remainingOverrides.entrySet(), "\n  " ) );
+        if (logger.isDebugEnabled())
+        {
+            logger.debug("Calculating module-specific version overrides. Starting with:\n  {}",
+                    join(remainingOverrides.entrySet(), "\n  "));
+        }
 
         // These modes correspond to two different kinds of passes over the available override properties:
         // 1. Module-specific: Don't process wildcard overrides here, allow module-specific settings to take precedence.
@@ -883,7 +887,7 @@ public class DependencyManipulator implements Manipulator
                         // If we have a wildcard artifact we want to replace any prior explicit overrides
                         // with this one i.e. this takes precedence.
                         removeGA( remainingOverrides, SimpleProjectRef.parse( artifactGA ) );
-                        logger.debug( "Removing artifactGA " + artifactGA + " from overrides" );
+                        logger.debug( "Removing artifactGA {} from overrides", artifactGA );
                     }
                 }
 

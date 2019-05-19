@@ -158,9 +158,10 @@ public class ManipulationManager
         session.getActiveProfiles().addAll( parseActiveProfiles( session, currentProjects ) );
         session.setProjects( currentProjects );
 
-        for ( final Project project : currentProjects )
-        {
-            logger.debug( "Got " + project + " (POM: " + project.getPom() + ")" );
+        if (logger.isDebugEnabled()) {
+            for (final Project project : currentProjects) {
+                logger.debug("Got {} (POM: {})", project, project.getPom());
+            }
         }
 
         Set<Project> changed = applyManipulations( currentProjects );
@@ -168,7 +169,7 @@ public class ManipulationManager
         // Create a marker file if we made some changes to prevent duplicate runs.
         if ( !changed.isEmpty() )
         {
-            logger.info( "Maven-Manipulation-Extension: Rewrite changed: " + currentProjects );
+            logger.info( "Maven-Manipulation-Extension: Rewrite changed: {}", currentProjects );
 
             GAV gav = pomIO.rewritePOMs( changed );
 
@@ -228,9 +229,14 @@ public class ManipulationManager
                 throw new ManipulationException( "Activation detection failure", e );
             }
         }
-        logger.debug( "Will {}scan all profiles and returning active profiles of {} ",
-                      Boolean.parseBoolean( session.getUserProperties().getProperty( PROFILE_SCANNING, PROFILE_SCANNING_DEFAULT ) ) ? "not " : "",
-                      activeProfiles );
+
+
+        if (logger.isDebugEnabled())
+        {
+            logger.debug("Will {}scan all profiles and returning active profiles of {} ",
+                    Boolean.parseBoolean(session.getUserProperties().getProperty(PROFILE_SCANNING, PROFILE_SCANNING_DEFAULT)) ? "not " : "",
+                    activeProfiles);
+        }
 
         return activeProfiles;
     }

@@ -87,7 +87,7 @@ public class XMLManipulator
         final XMLState state = session.getState( XMLState.class );
         if ( !session.isEnabled() || !state.isEnabled() )
         {
-            logger.debug( getClass().getSimpleName() + ": Nothing to do!" );
+            logger.debug("{}: Nothing to do!", getClass().getSimpleName());
             return Collections.emptySet();
         }
 
@@ -128,7 +128,7 @@ public class XMLManipulator
             {
                 if ( project.isIncrementalPME() )
                 {
-                    logger.warn ("Did not locate XML using XPath " + operation.getXPath() );
+                    logger.warn ("Did not locate XML using XPath {}", operation.getXPath() );
                     return;
                 }
                 else

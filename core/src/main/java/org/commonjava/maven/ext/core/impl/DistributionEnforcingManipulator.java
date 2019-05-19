@@ -171,7 +171,7 @@ public class DistributionEnforcingManipulator
                 continue;
             }
 
-            logger.debug( "Applying skip-flag enforcement mode of: " + mode + " to: " + ga );
+            logger.debug( "Applying skip-flag enforcement mode of: {} to: {}", mode, ga );
 
             final Model model = project.getModel();
 

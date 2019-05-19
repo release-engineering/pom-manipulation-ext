@@ -91,9 +91,10 @@ public class BOMBuilderManipulator
     {
         final BOMInjectingState state = session.getState( BOMInjectingState.class );
 
+
         if ( !session.isEnabled() || !state.isEnabled() )
         {
-            logger.debug( getClass().getSimpleName() + ": Nothing to do!" );
+            logger.debug("{}: Nothing to do!", getClass().getSimpleName() );
             return Collections.emptySet();
         }
 

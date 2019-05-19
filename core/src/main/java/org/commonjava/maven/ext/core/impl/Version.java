@@ -199,7 +199,7 @@ public class Version
         String mmm = getOsgiMMM( version, !isEmpty( qualifier ) );
         if ( isEmpty( mmm ) )
         {
-            logger.warn( "Unable to parse version for OSGi: " + version );
+            logger.warn( "Unable to parse version for OSGi: {}", version );
             return version;
         }
         return mmm + qualifier;
@@ -476,8 +476,7 @@ public class Version
     {
         if ( !isNumeric( buildNumber ) )
         {
-            logger.warn("Failed attempt to set non-numeric build number '" + buildNumber + "' for version '"
-                    + version + "'");
+            logger.warn("Failed attempt to set non-numeric build number '{}' for version '{}'", buildNumber, version);
             return version;
         }
         if ( isEmpty( buildNumber ) )

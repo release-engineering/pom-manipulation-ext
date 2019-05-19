@@ -83,7 +83,7 @@ public class RangeResolver
 
         if ( !session.isEnabled() || !session.anyStateEnabled( State.activeByDefault ) || state == null || !state.isEnabled() )
         {
-            logger.debug( getClass().getSimpleName() + ": Nothing to do!" );
+            logger.debug("{}: Nothing to do!", getClass().getSimpleName());
             return Collections.emptySet();
         }
 

@@ -121,8 +121,13 @@ public class PomIO
 
             if ( executionRoot.equals( pom ))
             {
-                logger.debug( "Setting execution root to {} with file {}" +
-                      (project.isInheritanceRoot() ? " and is the inheritance root. ": ""), project, pom );
+
+                if (logger.isDebugEnabled())
+                {
+                    logger.debug("Setting execution root to {} with file {}" +
+                            (project.isInheritanceRoot() ? " and is the inheritance root. " : ""), project, pom);
+                }
+
                 project.setExecutionRoot ();
 
                 try
@@ -184,12 +189,17 @@ public class PomIO
             {
                 result = new GAV( project.getKey() );
             }
-            logger.debug( String.format( "%s modified! Rewriting.", project ) );
+
+            if (logger.isDebugEnabled())
+            {
+                logger.debug(String.format("%s modified! Rewriting.", project));
+            }
+
             File pom = project.getPom();
 
             final Model model = project.getModel();
-            logger.trace( "Rewriting: " + model.getId() + " in place of: " + project.getKey()
-                         + "\n       to POM: " + pom );
+
+            logger.trace("Rewriting: {} in place of: {}\n       to POM: {}", model.getId(), project.getKey(), pom);
 
             write( project, pom, model );
 
@@ -301,7 +311,7 @@ public class PomIO
                 final File pom = pendingPoms.removeFirst();
                 seen.add( pom );
 
-                logger.debug( "PEEK: " + pom );
+                logger.debug("PEEK: {}", pom);
 
                 final PomPeek peek = new PomPeek( pom );
                 final ProjectVersionRef key = peek.getKey();
@@ -314,7 +324,8 @@ public class PomIO
                     final String relPath = peek.getParentRelativePath();
                     if ( relPath != null )
                     {
-                        logger.debug( "Found parent relativePath: " + relPath + " in pom: " + pom );
+                        logger.debug("Found parent relativePath: {} in pom: {}", relPath, pom);
+
                         File parent = new File( dir, relPath );
                         if ( parent.isDirectory() )
                         {
@@ -328,13 +339,14 @@ public class PomIO
                             && !pendingPoms.contains( parent ) )
                         {
                             topLevelParent = parent;
-                            logger.debug( "Possible top level parent " + parent );
+
+                            logger.debug("Possible top level parent {}", parent);
                             pendingPoms.add( parent );
                         }
                         else
                         {
-                            logger.debug( "Skipping reference to non-existent parent relativePath: '" + relPath
-                                + "' in: " + pom );
+                            logger.debug("Skipping reference to non-existent parent relativePath: '{}' in: {}",
+                                    relPath, pom);
                         }
                     }
 
@@ -343,7 +355,10 @@ public class PomIO
                     {
                         for ( final String module : modules )
                         {
-                            logger.debug( "Found module: " + module + " in pom: " + pom );
+                            if (logger.isDebugEnabled())
+                            {
+                                logger.debug("Found module: {} in pom: {}", module, pom);
+                            }
 
                             File modPom = new File( dir, module );
                             if ( modPom.isDirectory() )
@@ -358,14 +373,15 @@ public class PomIO
                             }
                             else
                             {
-                                logger.debug( "Skipping reference to non-existent module: '" + module + "' in: " + pom );
+                                logger.debug("Skipping reference to non-existent module: '{}' in: {}", module, pom);
                             }
                         }
                     }
                 }
                 else
                 {
-                    logger.debug( "Skipping " + pom + " as its a template file." );
+                    logger.debug( "Skipping {} as its a template file.", pom);
+
                 }
             }
 
@@ -378,7 +394,7 @@ public class PomIO
                 if ( p.getPom()
                       .equals( topLevelParent ) )
                 {
-                    logger.debug( "Setting top level parent to " + p.getPom() + " :: " + p.getKey() );
+                    logger.debug("Setting top level parent to {} :: {}", p.getPom(), p.getKey());
                     p.setInheritanceRoot( true );
                 }
             }
@@ -388,7 +404,9 @@ public class PomIO
                 if ( p.getParentKey() == null ||
                      ! seenThisParent(projectrefs, p.getParentKey()))
                 {
-                    logger.debug( "Found a standalone pom " + p.getPom() + " :: " + p.getKey() );
+
+                    logger.debug( "Found a standalone pom {} :: {}", p.getPom(), p.getKey() );
+
                     p.setInheritanceRoot( true );
                 }
             }
