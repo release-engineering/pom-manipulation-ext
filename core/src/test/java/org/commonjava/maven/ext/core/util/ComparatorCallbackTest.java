@@ -22,7 +22,7 @@ import org.apache.maven.execution.MavenSession;
 import org.codehaus.plexus.DefaultPlexusContainer;
 import org.codehaus.plexus.PlexusContainer;
 import org.commonjava.maven.ext.common.model.Project;
-import org.commonjava.maven.ext.common.util.ProjectComparator;
+import org.commonjava.maven.ext.common.callbacks.ComparatorCallback;
 import org.commonjava.maven.ext.core.ManipulationSession;
 import org.commonjava.maven.ext.core.fixture.TestUtils;
 import org.commonjava.maven.ext.core.state.CommonState;
@@ -41,7 +41,7 @@ import java.util.Properties;
 import static junit.framework.TestCase.assertTrue;
 import static org.junit.Assert.assertFalse;
 
-public class ProjectComparatorTest
+public class ComparatorCallbackTest
 {
     private static final String RESOURCE_BASE = "properties/";
 
@@ -63,7 +63,9 @@ public class ProjectComparatorTest
         List<Project> projectOriginal = pomIO.parseProject( projectroot );
         List<Project> projectNew = pomIO.parseProject( projectroot );
 
-        ProjectComparator.compareProjects( session, projectOriginal, projectNew );
+        ComparatorCallback comparatorCallback = new ComparatorCallback();
+
+        comparatorCallback.call( session, projectOriginal, projectNew );
 
         assertFalse( systemOutRule.getLog().contains( "-->" ) );
     }
@@ -92,8 +94,9 @@ public class ProjectComparatorTest
             }
         } );
 
-        ProjectComparator.compareProjects( session, projectOriginal, projectNew );
+        ComparatorCallback comparatorCallback = new ComparatorCallback();
 
+        comparatorCallback.call( session, projectOriginal, projectNew );
 
         assertTrue( systemOutRule.getLog().contains( "Managed dependencies :" ) );
         assertTrue( systemOutRule.getLog().contains( "Project version :" ) );

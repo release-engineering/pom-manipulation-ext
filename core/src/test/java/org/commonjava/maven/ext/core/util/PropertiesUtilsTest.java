@@ -24,7 +24,7 @@ import org.codehaus.plexus.DefaultPlexusContainer;
 import org.codehaus.plexus.PlexusContainer;
 import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.common.model.Project;
-import org.commonjava.maven.ext.common.util.ProjectComparator;
+import org.commonjava.maven.ext.common.callbacks.ComparatorCallback;
 import org.commonjava.maven.ext.common.util.PropertyResolver;
 import org.commonjava.maven.ext.core.ManipulationSession;
 import org.commonjava.maven.ext.core.fixture.TestUtils;
@@ -276,12 +276,14 @@ public class PropertiesUtilsTest
 
         List<Project> newprojects = pomIO.parseProject( projectroot );
 
-        ProjectComparator.compareProjects( session, projects, newprojects );
+        ComparatorCallback comparatorCallback = new ComparatorCallback();
 
-        assertTrue( systemRule.getLog().contains( "[main] INFO  o.c.m.e.c.util.ProjectComparator - ------------------- project org.infinispan:infinispan-bom \n"
-                                                      + "[main] INFO  o.c.m.e.c.util.ProjectComparator - \n"
-                                                      + "[main] INFO  o.c.m.e.c.util.ProjectComparator - \n"
-                                                      + "[main] INFO  o.c.m.e.c.util.ProjectComparator - \n" ) );
+        comparatorCallback.call( session, projects, newprojects );
+
+        assertTrue( systemRule.getLog().contains( "[main] INFO  o.c.m.e.c.c.ComparatorCallback - ------------------- project org.infinispan:infinispan-bom \n"
+                                                      + "[main] INFO  o.c.m.e.c.c.ComparatorCallback - \n"
+                                                      + "[main] INFO  o.c.m.e.c.c.ComparatorCallback - \n"
+                                                      + "[main] INFO  o.c.m.e.c.c.ComparatorCallback - \n" ) );
     }
 
 

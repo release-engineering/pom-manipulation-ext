@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (C) 2012 Red Hat, Inc. (jcasey@redhat.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.commonjava.maven.ext.common.util;
+package org.commonjava.maven.ext.common.callbacks;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.maven.model.Profile;
@@ -24,6 +24,7 @@ import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.common.ManipulationUncheckedException;
 import org.commonjava.maven.ext.common.model.Project;
 import org.commonjava.maven.ext.common.session.MavenSessionHandler;
+import org.commonjava.maven.ext.common.util.ProfileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,20 +33,20 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static org.commonjava.maven.ext.common.util.ProjectComparator.Type.DEPENDENCIES;
-import static org.commonjava.maven.ext.common.util.ProjectComparator.Type.MANAGED_DEPENDENCIES;
-import static org.commonjava.maven.ext.common.util.ProjectComparator.Type.MANAGED_PLUGINS;
-import static org.commonjava.maven.ext.common.util.ProjectComparator.Type.PLUGINS;
-import static org.commonjava.maven.ext.common.util.ProjectComparator.Type.PROFILE_DEPENDENCIES;
-import static org.commonjava.maven.ext.common.util.ProjectComparator.Type.PROFILE_MANAGED_DEPENDENCIES;
-import static org.commonjava.maven.ext.common.util.ProjectComparator.Type.PROFILE_MANAGED_PLUGINS;
-import static org.commonjava.maven.ext.common.util.ProjectComparator.Type.PROFILE_PLUGINS;
+import static org.commonjava.maven.ext.common.callbacks.ComparatorCallback.Type.DEPENDENCIES;
+import static org.commonjava.maven.ext.common.callbacks.ComparatorCallback.Type.MANAGED_DEPENDENCIES;
+import static org.commonjava.maven.ext.common.callbacks.ComparatorCallback.Type.MANAGED_PLUGINS;
+import static org.commonjava.maven.ext.common.callbacks.ComparatorCallback.Type.PLUGINS;
+import static org.commonjava.maven.ext.common.callbacks.ComparatorCallback.Type.PROFILE_DEPENDENCIES;
+import static org.commonjava.maven.ext.common.callbacks.ComparatorCallback.Type.PROFILE_MANAGED_DEPENDENCIES;
+import static org.commonjava.maven.ext.common.callbacks.ComparatorCallback.Type.PROFILE_MANAGED_PLUGINS;
+import static org.commonjava.maven.ext.common.callbacks.ComparatorCallback.Type.PROFILE_PLUGINS;
 
-public class ProjectComparator
+public class ComparatorCallback implements PostAlignmentCallback
 {
     private static final String REPORT_NON_ALIGNED = "reportNonAligned";
 
-    private static final Logger logger = LoggerFactory.getLogger( ProjectComparator.class );
+    private static final Logger logger = LoggerFactory.getLogger( ComparatorCallback.class );
 
     enum Type
     {
@@ -85,7 +86,12 @@ public class ProjectComparator
         }
     }
 
-    public static void compareProjects( MavenSessionHandler session, List<Project> originalProjects, List<Project> newProjects )
+    @Override
+    public void call(MavenSessionHandler session, List<Project> originalProjects, List<Project> newProjects) throws ManipulationException {
+        compareProjects(session, originalProjects, newProjects);
+    }
+
+    private void compareProjects(MavenSessionHandler session, List<Project> originalProjects, List<Project> newProjects )
                     throws ManipulationException
     {
         final boolean reportNonAligned = Boolean.parseBoolean( session.getUserProperties().getProperty( REPORT_NON_ALIGNED, "false") );
@@ -188,7 +194,7 @@ public class ProjectComparator
     }
 
 
-    private static void compareDependencies( Type type, boolean reportNonAligned, Set<ArtifactRef> originalDeps, Set<ArtifactRef> newDeps )
+    private void compareDependencies( Type type, boolean reportNonAligned, Set<ArtifactRef> originalDeps, Set<ArtifactRef> newDeps )
     {
         Set<ArtifactRef> nonAligned = new HashSet<>( );
         originalDeps.forEach( originalArtifact -> newDeps.stream().filter(
@@ -215,7 +221,7 @@ public class ProjectComparator
         }
     }
 
-    private static void comparePlugins( Type type, boolean reportNonAligned, Set<ProjectVersionRef> originalPlugins, Set<ProjectVersionRef> newPlugins )
+    private void comparePlugins( Type type, boolean reportNonAligned, Set<ProjectVersionRef> originalPlugins, Set<ProjectVersionRef> newPlugins )
     {
         Set<ProjectVersionRef> nonAligned = new HashSet<>( );
         originalPlugins.forEach( originalPVR -> newPlugins.stream().filter(
@@ -239,7 +245,7 @@ public class ProjectComparator
         }
     }
 
-    private static Set<ArtifactRef> handleDependencies( MavenSessionHandler session, Project project, Profile profile,
+    private Set<ArtifactRef> handleDependencies( MavenSessionHandler session, Project project, Profile profile,
                                                         Type type )
                     throws ManipulationUncheckedException
     {

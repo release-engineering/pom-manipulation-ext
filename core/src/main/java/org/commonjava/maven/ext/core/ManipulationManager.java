@@ -30,7 +30,7 @@ import org.apache.maven.project.ProjectBuilder;
 import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.common.model.GAV;
 import org.commonjava.maven.ext.common.model.Project;
-import org.commonjava.maven.ext.common.util.ProjectComparator;
+import org.commonjava.maven.ext.common.callbacks.ComparatorCallback;
 import org.commonjava.maven.ext.core.impl.Manipulator;
 import org.commonjava.maven.ext.core.state.CommonState;
 import org.commonjava.maven.ext.core.state.State;
@@ -192,7 +192,9 @@ public class ManipulationManager
                 throw new ManipulationException( "Marker/result file creation failed", e );
             }
 
-            ProjectComparator.compareProjects( session, originalProjects, currentProjects );
+            ComparatorCallback comparatorCallback = new ComparatorCallback();
+
+            comparatorCallback.call( session, originalProjects, currentProjects );
         }
 
         // Ensure shutdown of GalleyInfrastructure Executor Service
