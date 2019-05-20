@@ -21,6 +21,7 @@ import org.apache.maven.execution.MavenExecutionRequest;
 import org.apache.maven.execution.MavenSession;
 import org.codehaus.plexus.DefaultPlexusContainer;
 import org.codehaus.plexus.PlexusContainer;
+import org.commonjava.maven.ext.common.callbacks.LogReporter;
 import org.commonjava.maven.ext.common.model.Project;
 import org.commonjava.maven.ext.common.callbacks.ComparatorCallback;
 import org.commonjava.maven.ext.core.ManipulationSession;
@@ -63,7 +64,7 @@ public class ComparatorCallbackTest
         List<Project> projectOriginal = pomIO.parseProject( projectroot );
         List<Project> projectNew = pomIO.parseProject( projectroot );
 
-        ComparatorCallback comparatorCallback = new ComparatorCallback();
+        ComparatorCallback comparatorCallback = new ComparatorCallback(new LogReporter());
 
         comparatorCallback.call( session, projectOriginal, projectNew );
 
@@ -94,7 +95,7 @@ public class ComparatorCallbackTest
             }
         } );
 
-        ComparatorCallback comparatorCallback = new ComparatorCallback();
+        ComparatorCallback comparatorCallback = new ComparatorCallback(new LogReporter());
 
         comparatorCallback.call( session, projectOriginal, projectNew );
 

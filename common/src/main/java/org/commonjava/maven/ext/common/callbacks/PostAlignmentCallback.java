@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2012 Red Hat, Inc. (jcasey@redhat.com)
+ * Copyright (C) 2019 Red Hat, Inc. (opiske@redhat.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,5 +23,13 @@ import org.commonjava.maven.ext.common.session.MavenSessionHandler;
 import java.util.List;
 
 public interface PostAlignmentCallback extends Callback {
+
+    /**
+     * Executes a callback after the alignment is complete
+     * @param session the Maven session handler
+     * @param originalProjects the original unmodified project
+     * @param newProjects the new modified project
+     * @throws ManipulationException
+     */
     void call(MavenSessionHandler session, List<Project> originalProjects, List<Project> newProjects) throws ManipulationException;
 }

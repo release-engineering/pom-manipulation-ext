@@ -28,6 +28,8 @@ import org.apache.maven.profiles.DefaultProfileManager;
 import org.apache.maven.profiles.activation.ProfileActivationException;
 import org.apache.maven.project.ProjectBuilder;
 import org.commonjava.maven.ext.common.ManipulationException;
+import org.commonjava.maven.ext.common.callbacks.LogReporter;
+import org.commonjava.maven.ext.common.callbacks.PostAlignmentCallback;
 import org.commonjava.maven.ext.common.model.GAV;
 import org.commonjava.maven.ext.common.model.Project;
 import org.commonjava.maven.ext.common.callbacks.ComparatorCallback;
@@ -89,6 +91,8 @@ public class ManipulationManager
 
     private Map<String, ExtensionInfrastructure> infrastructure;
 
+    private final ArrayList<PostAlignmentCallback> postAlignmentCallbacks = new ArrayList<>();
+
     private final PomIO pomIO;
 
     @Inject
@@ -99,6 +103,8 @@ public class ManipulationManager
         this.manipulators = manipulators;
         this.infrastructure = infrastructure;
         this.pomIO = pomIO;
+
+        postAlignmentCallbacks.add(new ComparatorCallback(new LogReporter()));
     }
 
     /**
@@ -192,12 +198,12 @@ public class ManipulationManager
                 throw new ManipulationException( "Marker/result file creation failed", e );
             }
 
-            ComparatorCallback comparatorCallback = new ComparatorCallback();
-
-            comparatorCallback.call( session, originalProjects, currentProjects );
+            for (PostAlignmentCallback postAlignmentCallback : postAlignmentCallbacks) {
+                postAlignmentCallback.call(session, originalProjects, currentProjects);
+            }
         }
 
-        // Ensure shutdown of GalleyInfrastructure Executor Service
+        // Ensure reset of GalleyInfrastructure Executor Service
         for ( ExtensionInfrastructure e : infrastructure.values() )
         {
             e.finish();
@@ -309,5 +315,9 @@ public class ManipulationManager
         }
 
         return MAPPER.writeValueAsString( root );
+    }
+
+    public ArrayList<PostAlignmentCallback> getPostAlignmentCallbacks() {
+        return postAlignmentCallbacks;
     }
 }

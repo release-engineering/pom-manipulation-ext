@@ -23,6 +23,7 @@ import org.apache.maven.model.Model;
 import org.codehaus.plexus.DefaultPlexusContainer;
 import org.codehaus.plexus.PlexusContainer;
 import org.commonjava.maven.ext.common.ManipulationException;
+import org.commonjava.maven.ext.common.callbacks.LogReporter;
 import org.commonjava.maven.ext.common.model.Project;
 import org.commonjava.maven.ext.common.callbacks.ComparatorCallback;
 import org.commonjava.maven.ext.common.util.PropertyResolver;
@@ -276,14 +277,16 @@ public class PropertiesUtilsTest
 
         List<Project> newprojects = pomIO.parseProject( projectroot );
 
-        ComparatorCallback comparatorCallback = new ComparatorCallback();
+        ComparatorCallback comparatorCallback = new ComparatorCallback(new LogReporter());
 
         comparatorCallback.call( session, projects, newprojects );
 
-        assertTrue( systemRule.getLog().contains( "[main] INFO  o.c.m.e.c.c.ComparatorCallback - ------------------- project org.infinispan:infinispan-bom \n"
-                                                      + "[main] INFO  o.c.m.e.c.c.ComparatorCallback - \n"
-                                                      + "[main] INFO  o.c.m.e.c.c.ComparatorCallback - \n"
-                                                      + "[main] INFO  o.c.m.e.c.c.ComparatorCallback - \n" ) );
+        String log = systemRule.getLog();
+
+        assertTrue( log.contains( "[main] INFO  o.c.m.e.common.callbacks.LogReporter - ------------------- project org.infinispan:infinispan-bom \n"
+                                                      + "[main] INFO  o.c.m.e.common.callbacks.LogReporter - \n"
+                                                      + "[main] INFO  o.c.m.e.common.callbacks.LogReporter - \n"
+                                                      + "[main] INFO  o.c.m.e.common.callbacks.LogReporter - \n") );
     }
 
 

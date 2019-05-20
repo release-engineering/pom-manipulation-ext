@@ -206,7 +206,7 @@ public class TestUtils
         Integer result = (Integer) executeMethod( cli, "run", new Object[]{arguments.toArray( new String[0] )} );
 
         // Close unirest client down to prevent any hanging.
-        // Unirest.shutdown();
+        // Unirest.reset();
 
         // This is a bit of a hack. The CLI, if log-to-file is enabled resets the logging. As we don't fork and run
         // in the same process this means we need to reset it back again. The benefit of not forking is a simpler test

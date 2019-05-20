@@ -55,6 +55,8 @@ import org.codehaus.plexus.component.repository.exception.ComponentLookupExcepti
 import org.commonjava.maven.atlas.ident.ref.ArtifactRef;
 import org.commonjava.maven.atlas.ident.ref.InvalidRefException;
 import org.commonjava.maven.ext.common.ManipulationException;
+import org.commonjava.maven.ext.common.callbacks.ComparatorCallback;
+import org.commonjava.maven.ext.common.callbacks.FileReporter;
 import org.commonjava.maven.ext.common.model.SimpleScopedArtifactRef;
 import org.commonjava.maven.ext.core.ManipulationManager;
 import org.commonjava.maven.ext.core.ManipulationSession;
@@ -181,6 +183,11 @@ public class Cli
                                  .numberOfArgs( 2 )
                                  .desc( "XPath tester ( file : xpath )" )
                                  .build() );
+        options.addOption( Option.builder( "" )
+                .longOpt( "report-dir" )
+                .desc( "Creates a report with all the alignment changes and saves to the given file" )
+                .numberOfArgs( 1 )
+                .build() );
 
         CommandLineParser parser = new DefaultParser();
         CommandLine cmd;
@@ -394,6 +401,11 @@ public class Cli
             }
             else
             {
+                if (cmd.hasOption( "report-dir" )) {
+                    String dir = cmd.getOptionValue( "report-dir" );
+                    manipulationManager.getPostAlignmentCallbacks().add(new ComparatorCallback(new FileReporter(dir)));
+                }
+
                 manipulationManager.scanAndApply( session );
             }
         }
