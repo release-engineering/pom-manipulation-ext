@@ -76,6 +76,7 @@ import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathFactory;
 import java.io.File;
+import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -186,6 +187,11 @@ public class Cli
         options.addOption( Option.builder( "" )
                 .longOpt( "report-dir" )
                 .desc( "Creates a report with all the alignment changes and saves to the given file" )
+                .numberOfArgs( 1 )
+                .build() );
+        options.addOption( Option.builder( "" )
+                .longOpt( "overrides-from-file" )
+                .desc( "Reads the overrides, in GAV format, one per-line, from a file" )
                 .numberOfArgs( 1 )
                 .build() );
 
@@ -304,6 +310,11 @@ public class Cli
                         session.getUserProperties().setProperty( key, config.getProperty(key) );
                     }
                 }
+            }
+
+            if (cmd.hasOption("overrides-from-file"))
+            {
+                loadOverridesFromFile(cmd);
             }
         }
         catch ( ManipulationException e )
@@ -431,6 +442,22 @@ public class Cli
             return 100;
         }
         return 0;
+    }
+
+    private void loadOverridesFromFile(CommandLine cmd) throws ManipulationException {
+        File file = new File(cmd.getOptionValue("overrides-from-file"));
+
+        try
+        {
+            List<String> lines = FileUtils.readLines(file, Charset.defaultCharset());
+            for (String line : lines) {
+                String kv[] = line.split("=");
+                session.getUserProperties().setProperty( "dependencyOverride." + kv[0], kv[1] );
+            }
+        } catch (IOException e)
+        {
+            throw new ManipulationException("Unable to read overrides file", e);
+        }
     }
 
     @SuppressWarnings( "deprecation" )
