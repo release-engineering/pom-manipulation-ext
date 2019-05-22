@@ -189,7 +189,7 @@ public class Cli
                 .desc( "Creates a report with all the alignment changes and saves to the given file" )
                 .numberOfArgs( 1 )
                 .build() );
-        options.addOption( Option.builder( "" )
+        options.addOption( Option.builder()
                 .longOpt( "overrides-from-file" )
                 .desc( "Reads the overrides, in GAV format, one per-line, from a file" )
                 .numberOfArgs( 1 )
