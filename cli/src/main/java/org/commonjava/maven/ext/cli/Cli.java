@@ -183,7 +183,7 @@ public class Cli
                                  .numberOfArgs( 2 )
                                  .desc( "XPath tester ( file : xpath )" )
                                  .build() );
-        options.addOption( Option.builder( "" )
+        options.addOption( Option.builder()
                 .longOpt( "report-dir" )
                 .desc( "Creates a report with all the alignment changes and saves to the given file" )
                 .numberOfArgs( 1 )
