@@ -40,6 +40,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import static org.apache.commons.lang.StringUtils.isBlank;
 import static org.apache.commons.lang.StringUtils.isEmpty;
 import static org.commonjava.maven.ext.core.util.IdUtils.ga;
 
@@ -239,6 +240,10 @@ public class RepoAndReportingRemovalManipulator
         repository.setUrl( PropertyResolver.resolveInheritedProperties( session, project, repository.getUrl() ) );
         repository.setId( PropertyResolver.resolveInheritedProperties( session, project, repository.getId() ) );
         repository.setName( PropertyResolver.resolveInheritedProperties( session, project, repository.getName() ) );
+        if (isBlank( repository.getName() ) )
+        {
+            repository.setName( repository.getId() );
+        }
     }
 
     /**

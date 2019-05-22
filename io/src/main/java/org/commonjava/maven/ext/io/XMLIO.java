@@ -37,6 +37,7 @@ import javax.xml.transform.stream.StreamResult;
 import java.io.File;
 import java.io.IOException;
 import java.io.StringWriter;
+import java.nio.charset.Charset;
 
 @Named
 @Singleton
@@ -86,7 +87,7 @@ public class XMLIO
         }
         catch ( SAXException | IOException e )
         {
-            logger.error( "Unable to parse XML File {} ", e );
+            logger.error( "Unable to parse XML File", e );
             throw new ManipulationException( "Unable to parse XML File", e );
         }
         return doc;
@@ -104,7 +105,7 @@ public class XMLIO
             String result = convert( contents );
             // Adjust for comment before root node and possibly insert a newline.
             result = result.replaceFirst("(?s)(<!--.*-->)<", "$1\n<");
-            FileUtils.writeStringToFile(target, result);
+            FileUtils.writeStringToFile( target, result, Charset.defaultCharset());
         }
         catch ( IOException e )
         {
