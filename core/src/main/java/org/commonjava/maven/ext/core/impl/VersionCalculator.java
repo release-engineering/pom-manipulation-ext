@@ -124,7 +124,12 @@ public class VersionCalculator
             }
 
             versionsWithBuildNums.add( modifiedVersion );
-            logger.debug( gav( project ) + " has updated version: {}. Marking for rewrite.", modifiedVersion );
+
+            if (logger.isDebugEnabled())
+            {
+                logger.debug("{} has updated version: {}. Marking for rewrite.", gav( project ), modifiedVersion );
+            }
+
 
             if ( !originalVersion.equals( modifiedVersion ) )
             {
@@ -171,11 +176,16 @@ public class VersionCalculator
         final String staticSuffix = state.getSuffix();
         final String override = state.getOverride();
 
-        logger.debug( "Got the following original version: {} for groupId:artifactId {}:{} ", version, groupId,
-                      artifactId );
-        logger.debug( "Got the following version suffixes:\n  Static: {}\n  Incremental: {}", staticSuffix,
-                      incrementalSuffix );
-        logger.debug( "Got the following version override: {}", override );
+
+        if (logger.isDebugEnabled())
+        {
+            logger.debug( "Got the following original version: {} for groupId:artifactId {}:{} ", version, groupId,
+                    artifactId );
+            logger.debug( "Got the following version suffixes:\n  Static: {}\n  Incremental: {}", staticSuffix,
+                    incrementalSuffix );
+            logger.debug( "Got the following version override: {}", override );
+        }
+
 
         String newVersion = version;
 

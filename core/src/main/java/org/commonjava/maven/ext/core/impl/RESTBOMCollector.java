@@ -87,7 +87,7 @@ public class RESTBOMCollector
 
         if ( !session.isEnabled() || !state.isEnabled() )
         {
-            logger.debug( getClass().getSimpleName() + ": Nothing to do!" );
+            logger.debug("{}: Nothing to do!", getClass().getSimpleName());
             return;
         }
 

@@ -76,7 +76,7 @@ public class PropertyManipulator
 
         if ( !session.isEnabled() || !state.isEnabled() )
         {
-            logger.debug( getClass().getSimpleName() + ": Nothing to do!" );
+            logger.debug("{}: Nothing to do!", getClass().getSimpleName() );
             return Collections.emptySet();
         }
 
@@ -90,7 +90,7 @@ public class PropertyManipulator
                 // Only inject the new properties at the top level.
                 if ( project.isInheritanceRoot() )
                 {
-                    logger.info( "Applying property changes to: " + ga( project ) + " with " + overrides );
+                    logger.info( "Applying property changes to: {} with {}", ga( project ), overrides );
 
                     project.getModel().getProperties().putAll( overrides );
 
@@ -109,7 +109,7 @@ public class PropertyManipulator
                         while (keys.hasNext())
                         {
                             final String matchingKey = keys.next();
-                            logger.info( "Overwriting property (" + matchingKey + " in: " + ga( project ) + " with value " + overrides.get( matchingKey ) );
+                            logger.info( "Overwriting property ({} in: {} with value {}", matchingKey, ga( project ), overrides.get( matchingKey ));
                             project.getModel().getProperties().put( matchingKey, overrides.get( matchingKey ) );
 
                             changed.add( project );

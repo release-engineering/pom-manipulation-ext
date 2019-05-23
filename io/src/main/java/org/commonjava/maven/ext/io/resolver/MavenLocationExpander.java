@@ -91,8 +91,9 @@ public class MavenLocationExpander
         addSettingsProfileRepositoriesTo( locs, settings, activeProfiles, mirrorSelector );
         addRequestRepositoriesTo( locs, artifactRepositories, settings, mirrorSelector );
 
-        if ( locs.size() > 0 )
-            logger.debug( "Configured to use Maven locations:\n  {}", new JoinString( "\n  ", locs ) );
+        if ( locs.size() > 0 && logger.isDebugEnabled()) {
+            logger.debug("Configured to use Maven locations:\n  {}", new JoinString("\n  ", locs));
+        }
         this.locations = new ArrayList<>( locs );
     }
 
@@ -241,7 +242,10 @@ public class MavenLocationExpander
             expandSingle( loc, result );
         }
 
-        logger.debug( "Expanded to:\n {}", new JoinString( "\n  ", result ) );
+        if (logger.isDebugEnabled()) {
+            logger.debug("Expanded to:\n {}", new JoinString("\n  ", result));
+        }
+
         return result;
     }
 
@@ -262,7 +266,10 @@ public class MavenLocationExpander
             }
         }
 
-        logger.debug( "Expanded to:\n {}", new JoinString( "\n  ", result ) );
+        if (logger.isDebugEnabled())
+        {
+            logger.debug("Expanded to:\n {}", new JoinString("\n  ", result));
+        }
         return new VirtualResource( result );
     }
 

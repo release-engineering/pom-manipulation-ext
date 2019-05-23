@@ -293,7 +293,10 @@ public class PluginManipulator
     private void apply( final Project project, final Model model, PluginType type, final Set<Plugin> override )
         throws ManipulationException
     {
-        logger.debug( "Applying plugin changes for {} to: {} ", type, ga( project ) );
+        if (logger.isDebugEnabled())
+        {
+            logger.debug("Applying plugin changes for {} to: {} ", type, ga(project));
+        }
 
         if ( project.isInheritanceRoot() )
         {
@@ -304,7 +307,7 @@ public class PluginManipulator
             {
                 build = new Build();
                 model.setBuild( build );
-                logger.debug( "Created new Build for model " + model.getId() );
+                logger.debug( "Created new Build for model {}", model.getId() );
             }
 
             PluginManagement pluginManagement = model.getBuild().getPluginManagement();
@@ -313,7 +316,7 @@ public class PluginManipulator
             {
                 pluginManagement = new PluginManagement();
                 model.getBuild().setPluginManagement( pluginManagement );
-                logger.debug( "Created new Plugin Management for model " + model.getId() );
+                logger.debug( "Created new Plugin Management for model {}", model.getId() );
             }
 
             // Override plugin management versions
@@ -423,15 +426,15 @@ public class PluginManipulator
                 {
                     if ( override.getConfiguration() != null )
                     {
-                        logger.debug( "Injecting plugin configuration" + override.getConfiguration() );
+                        logger.debug( "Injecting plugin configuration {}", override.getConfiguration() );
                         if ( plugin.getConfiguration() == null )
                         {
                             plugin.setConfiguration( override.getConfiguration() );
-                            logger.debug( "Altered plugin configuration: " + plugin.getKey() + "=" + plugin.getConfiguration() );
+                            logger.debug( "Altered plugin configuration: {}={}", plugin.getKey(), plugin.getConfiguration() );
                         }
                         else if ( plugin.getConfiguration() != null )
                         {
-                            logger.debug( "Existing plugin configuration: " + plugin.getConfiguration() );
+                            logger.debug( "Existing plugin configuration: {}", plugin.getConfiguration() );
 
                             if ( !( plugin.getConfiguration() instanceof Xpp3Dom ) || !( override.getConfiguration() instanceof Xpp3Dom ) )
                             {
@@ -451,12 +454,12 @@ public class PluginManipulator
                                 plugin.setConfiguration( Xpp3DomUtils.mergeXpp3Dom( (Xpp3Dom) plugin.getConfiguration(),
                                                                                     (Xpp3Dom) override.getConfiguration() ) );
                             }
-                            logger.debug( "Altered plugin configuration: " + plugin.getKey() + "=" + plugin.getConfiguration() );
+                            logger.debug( "Altered plugin configuration: {}={}", plugin.getKey(), plugin.getConfiguration() );
                         }
                     }
                     else
                     {
-                        logger.debug( "No remote configuration to inject from " + override.toString() );
+                        logger.debug( "No remote configuration to inject from {}", override.toString() );
                     }
 
                     if ( override.getExecutions() != null )
@@ -468,7 +471,8 @@ public class PluginManipulator
                         {
                             if ( originalExecutions.containsKey( pe.getId() ) )
                             {
-                                logger.warn( "Unable to inject execution " + pe.getId() + " as it clashes with an existing execution" );
+                                logger.warn( "Unable to inject execution {} as it clashes with an existing execution",
+                                        pe.getId());
                             }
                             else
                             {
@@ -479,7 +483,7 @@ public class PluginManipulator
                     }
                     else
                     {
-                        logger.debug( "No remote executions to inject from " + override.toString() );
+                        logger.debug( "No remote executions to inject from {}", override.toString() );
                     }
 
                     if ( !override.getDependencies().isEmpty() )
@@ -531,7 +535,7 @@ public class PluginManipulator
                     else
                     {
                         plugin.setVersion( newValue );
-                        logger.info( "Altered plugin version: " + override.getKey() + "=" + newValue );
+                        logger.info( "Altered plugin version: {}={}", override.getKey(), newValue );
                     }
                 }
             }
@@ -541,7 +545,7 @@ public class PluginManipulator
                             || override.getExecutions().size() > 0 ) )
             {
                 project.getModel().getBuild().getPluginManagement().getPlugins().add( override );
-                logger.info( "Added plugin version: " + override.getKey() + "=" + newValue );
+                logger.info( "Added plugin version: {}={}", override.getKey(), newValue );
             }
             // If the plugin in <plugins> doesn't exist but has a configuration section in the remote inject it so we
             // get the correct config.
@@ -550,8 +554,7 @@ public class PluginManipulator
                             || override.getExecutions().size() > 0 ) )
             {
                 project.getModel().getBuild().getPlugins().add( override );
-                logger.info( "For non-pluginMgmt, added plugin version : " + override.getKey() + "="
-                                             + newValue );
+                logger.info( "For non-pluginMgmt, added plugin version : {}={}", override.getKey(), newValue );
             }
         }
     }

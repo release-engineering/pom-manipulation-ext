@@ -97,7 +97,11 @@ public class PluginRemovalManipulator
     {
         final PluginRemovalState state = session.getState( PluginRemovalState.class );
 
-        logger.debug( "Applying plugin changes to: " + ga( project ) );
+        if (logger.isDebugEnabled())
+        {
+            logger.debug( "Applying plugin changes to: {}", ga( project ) );
+        }
+
 
         boolean result = false;
         List<ProjectRef> pluginsToRemove = state.getPluginRemoval();

@@ -65,6 +65,8 @@ public class SuffixManipulator
         session.setState( new SuffixState( session.getUserProperties() ) );
     }
 
+
+
     /**
      * Apply the property changes to the list of {@link Project}'s given.
      */
@@ -75,7 +77,7 @@ public class SuffixManipulator
 
         if ( !session.isEnabled() || !state.isEnabled() )
         {
-            logger.debug( getClass().getSimpleName() + ": Nothing to do!" );
+            logger.debug("{}: Nothing to do!", getClass().getSimpleName());
             return Collections.emptySet();
         }
 

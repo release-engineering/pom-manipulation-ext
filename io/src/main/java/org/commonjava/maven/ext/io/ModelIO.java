@@ -293,12 +293,12 @@ public class ModelIO
 
             if ( type == PluginType.PluginMgmt && m.getBuild().getPluginManagement() != null )
             {
-                logger.debug( "Returning override of " + m.getBuild().getPluginManagement().getPlugins() );
+                logger.debug( "Returning override of {}", m.getBuild().getPluginManagement().getPlugins() );
                 plit = m.getBuild().getPluginManagement().getPlugins().iterator();
             }
             else if ( type == PluginType.Plugins && m.getBuild().getPlugins() != null)
             {
-                logger.debug( "Returning override of " + m.getBuild().getPlugins() );
+                logger.debug( "Returning override of {}", m.getBuild().getPlugins() );
                 plit = m.getBuild().getPlugins().iterator();
             }
 
@@ -319,8 +319,7 @@ public class ModelIO
                         newVersion = pluginOverridesPomView.get( pr ).getVersionString();
                     }
 
-                    logger.debug( "Replacing plugin override version " + p.getVersion() +
-                                                  " with " + newVersion );
+                    logger.debug( "Replacing plugin override version {} with {}", p.getVersion(), newVersion );
                      p.setVersion( newVersion );
                 }
 
@@ -362,8 +361,11 @@ public class ModelIO
                     }
                 }
 
-                logger.debug( "Added plugin override for {} with configuration \n" + p.getConfiguration() + " and executions "
-                                              + p.getExecutions() + " and dependencies " + p.getDependencies(), p.getId() );
+                if (logger.isDebugEnabled()) {
+                    logger.debug( "Added plugin override for {} with configuration \n{} and executions {} and dependencies {}",
+                            p.getId(), p.getExecutions(), p.getDependencies());
+                }
+
             }
         }
         else
@@ -396,7 +398,7 @@ public class ModelIO
 
                 if ( replacement != null && !replacement.isEmpty() )
                 {
-                    logger.debug( "Replacing child value " + child.getValue() + " with " + replacement );
+                    logger.debug( "Replacing child value {} with {}", child.getValue(), replacement );
                     child.setValue( replacement );
                 }
             }

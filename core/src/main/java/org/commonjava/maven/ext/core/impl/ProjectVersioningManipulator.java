@@ -161,7 +161,7 @@ public class ProjectVersioningManipulator
             if ( versionsByGAV.containsKey( parentGAV ) )
             {
                 final String newVersion = versionsByGAV.get( parentGAV );
-                logger.debug( "Changed parent version to: " + newVersion + " in " + parent );
+                logger.debug( "Changed parent version to: {} in {}", newVersion, parent );
                 if (parentGAV.getVersionString().startsWith( "${" ))
                 {
                     if ( PropertiesUtils.updateProperties( session, project, false, PropertiesUtils.extractPropertyName( parentGAV.getVersionString() ), newVersion ) == PropertiesUtils.PropertyUpdate.NOTFOUND )
@@ -181,7 +181,7 @@ public class ProjectVersioningManipulator
         if ( model.getVersion() != null )
         {
             final String newVersion = versionsByGAV.get( gav );
-            logger.info( "Looking for new version: " + gav + " (found: " + newVersion + ")" );
+            logger.info( "Looking for new version: {} (found: {})", gav, newVersion );
             if ( newVersion != null )
             {
                 if (gav.getVersionString().startsWith( "${" ))
@@ -195,7 +195,7 @@ public class ProjectVersioningManipulator
                 {
                     model.setVersion( newVersion );
                 }
-                logger.info( "Changed main version in " + project );
+                logger.info( "Changed main version in {}", project );
                 changed = true;
             }
         }
@@ -205,7 +205,7 @@ public class ProjectVersioningManipulator
         else if ( !changed && project.isInheritanceRoot() )
         {
             final String newVersion = versionsByGAV.get( gav );
-            logger.info( "Looking to force inject new version for : " + gav + " (found: " + newVersion + ")" );
+            logger.info( "Looking to force inject new version for : {} (found: {})", gav, newVersion );
             if (newVersion != null)
             {
                 model.setVersion( newVersion );
@@ -227,7 +227,7 @@ public class ProjectVersioningManipulator
                 {
                     if ( isEmpty (pi.interp( d.getVersion() )))
                     {
-                        logger.trace( "Skipping dependency " + d + " as empty version." );
+                        logger.trace( "Skipping dependency {} as empty version.", d);
                         continue;
                     }
                     try
@@ -249,7 +249,7 @@ public class ProjectVersioningManipulator
                             else
                             {
                                 d.setVersion( newVersion );
-                                logger.info( "Changed managed: " + d + " in " + base + " to " + newVersion + " from " + gav.getVersionString() );
+                                logger.info( "Changed managed: {} in {} to {} from {}", d, base, newVersion, gav.getVersionString() );
                             }
                             changed = true;
                         }
@@ -270,7 +270,7 @@ public class ProjectVersioningManipulator
                     {
                         if ( isEmpty (pi.interp( d.getVersion() )))
                         {
-                            logger.trace( "Skipping dependency " + d + " as empty version." );
+                            logger.trace( "Skipping dependency {} as empty version.", d );
                             continue;
                         }
 
@@ -293,7 +293,7 @@ public class ProjectVersioningManipulator
                             else
                             {
                                 d.setVersion( newVersion );
-                                logger.info( "Changed: " + d + " in " + base + " to " + newVersion + " from " + gav.getVersionString());
+                                logger.info( "Changed: {} in {} to {} from {}", d, base, newVersion, gav.getVersionString());
                             }
                             changed = true;
                         }
