@@ -81,6 +81,8 @@
     <atlasVersion>0.17.1</atlasVersion>
     <galleyVersion>0.16.3</galleyVersion>
 
+    <jacksonVersion>2.9.9</jacksonVersion>
+
     <enforceBestPractices>false</enforceBestPractices>
   </properties>
 
@@ -302,17 +304,17 @@
       <dependency>
         <groupId>com.fasterxml.jackson.core</groupId>
         <artifactId>jackson-core</artifactId>
-        <version>2.9.8</version>
+        <version>${jacksonVersion}</version>
       </dependency>
       <dependency>
         <groupId>com.fasterxml.jackson.core</groupId>
         <artifactId>jackson-databind</artifactId>
-        <version>2.9.8</version>
+        <version>${jacksonVersion}</version>
       </dependency>
       <dependency>
         <groupId>com.fasterxml.jackson.core</groupId>
         <artifactId>jackson-annotations</artifactId>
-        <version>2.9.8</version>
+        <version>${jacksonVersion}</version>
       </dependency>
 
       <dependency>
