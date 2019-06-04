@@ -71,7 +71,7 @@ public class DefaultTranslator
 
     private final ListingBlacklistMapper lbm;
 
-    private final int RETRY_WAIT_DURATION = 30;
+    private int retryDuration = 30;
 
     /**
      * @param endpointUrl is the URL to talk to.
@@ -206,9 +206,9 @@ public class DefaultTranslator
                     if (task.getStatus() == HttpStatus.SC_SERVICE_UNAVAILABLE)
                     {
                         logger.info("The DA server is unavailable. Waiting {} before splitting the tasks and retrying",
-                                RETRY_WAIT_DURATION);
+                                retryDuration);
 
-                        waitBeforeRetry(RETRY_WAIT_DURATION);
+                        waitBeforeRetry(retryDuration);
                     }
 
                     List<Task> tasks = task.split();
@@ -387,5 +387,13 @@ public class DefaultTranslator
         {
             return chunk.size();
         }
+    }
+
+    public int getRetryDuration() {
+        return retryDuration;
+    }
+
+    public void setRetryDuration(int retryDuration) {
+        this.retryDuration = retryDuration;
     }
 }
