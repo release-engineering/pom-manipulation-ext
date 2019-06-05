@@ -20,6 +20,7 @@ import com.mashape.unirest.http.ObjectMapper;
 import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
 import org.apache.commons.codec.binary.Base32;
+import org.apache.http.HttpStatus;
 import org.commonjava.maven.atlas.ident.ref.ProjectRef;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.ext.common.util.ListUtils;
@@ -36,6 +37,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Random;
+import java.util.concurrent.TimeUnit;
 
 import static org.apache.commons.lang.StringUtils.isNotBlank;
 import static org.apache.commons.lang.StringUtils.isNotEmpty;
@@ -68,6 +70,8 @@ public class DefaultTranslator
     private final int initialRestMinSize;
 
     private final ListingBlacklistMapper lbm;
+
+    private int retryDuration = 30;
 
     /**
      * @param endpointUrl is the URL to talk to.
@@ -136,6 +140,8 @@ public class DefaultTranslator
         return result;
     }
 
+
+
     /**
      * Translate the versions.
      * <pre>{@code
@@ -195,8 +201,16 @@ public class DefaultTranslator
             }
             else
             {
-                if ( task.canSplit() && task.getStatus() == 504)
+                if ( task.canSplit() && isRecoverable(task.getStatus()))
                 {
+                    if (task.getStatus() == HttpStatus.SC_SERVICE_UNAVAILABLE)
+                    {
+                        logger.info("The DA server is unavailable. Waiting {} before splitting the tasks and retrying",
+                                retryDuration);
+
+                        waitBeforeRetry(retryDuration);
+                    }
+
                     List<Task> tasks = task.split();
 
                     logger.warn( "Failed to translate versions for task @{} due to {}, splitting and retrying. Chunk size was: {} and new chunk size {} in {} segments.",
@@ -227,6 +241,19 @@ public class DefaultTranslator
             }
         }
         return result;
+    }
+
+    private boolean isRecoverable(int httpErrorCode)
+    {
+        return httpErrorCode == HttpStatus.SC_GATEWAY_TIMEOUT || httpErrorCode == HttpStatus.SC_SERVICE_UNAVAILABLE;
+    }
+
+    private void waitBeforeRetry(int seconds) {
+        try {
+            Thread.sleep(TimeUnit.SECONDS.toMillis(seconds));
+        } catch (InterruptedException e) {
+
+        }
     }
 
     /**
@@ -360,5 +387,13 @@ public class DefaultTranslator
         {
             return chunk.size();
         }
+    }
+
+    public int getRetryDuration() {
+        return retryDuration;
+    }
+
+    public void setRetryDuration(int retryDuration) {
+        this.retryDuration = retryDuration;
     }
 }
