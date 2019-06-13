@@ -40,7 +40,7 @@ PME will then call the following endpoints
     reports/lookup/gavs
     listings/blacklist/ga
 
-It will initially call the `lookup/gavs` endpoint. By default PME will pass *all* the GAVs to the endpoint ; it can be configured to split them into initial batches via `-DrestMaxSize=<...>`. If the endpoint returns a 504 timeout the batch is automatically split into smaller chunks in an attempt to reduce load on the endpoint. It will by default chunk down to size of 4 before aborting. This can be configured with `-DrestMinSize=<...>`. An optional `restRepositoryGroup` parameter may be specified so that the endpoint can use a particular repository group.
+It will initially call the `lookup/gavs` endpoint. By default PME will pass *all* the GAVs to the endpoint auto-sizing the data sent to DA according to the project size; it can be configured to split them into initial batches via `-DrestMaxSize=<...>`. If the endpoint returns a 504 timeout the batch is automatically split into smaller chunks in an attempt to reduce load on the endpoint. It will by default chunk down to size of 4 before aborting. This can be configured with `-DrestMinSize=<...>`. An optional `restRepositoryGroup` parameter may be specified so that the endpoint can use a particular repository group.
 
 Finally it will call the `blacklist/ga` endpoint in order to check that the version being build is not in the blacklist.
 
