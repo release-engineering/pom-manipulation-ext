@@ -101,6 +101,71 @@ public class DefaultTranslator
         Unirest.setObjectMapper( objectMapper );
     }
 
+    public void partition(List<ProjectVersionRef> projects, Queue<Task> queue) {
+        if ( initialRestMaxSize != 0 )
+        {
+            if (initialRestMaxSize == -1)
+            {
+                autoPartition(projects, queue);
+            }
+            else
+            {
+                userDefinedPartition(projects, queue);
+            }
+        }
+        else
+        {
+            noOpPartition(projects, queue);
+        }
+    }
+
+    private void noOpPartition(List<ProjectVersionRef> projects, Queue<Task> queue) {
+        logger.info("Using NO-OP partition strategy");
+
+        queue.add(new Task(rgm, projects, endpointUrl + REPORTS_LOOKUP_GAVS));
+    }
+
+    private void userDefinedPartition(List<ProjectVersionRef> projects, Queue<Task> queue) {
+        logger.info("Using user defined partition strategy");
+
+        // Presplit
+        final List<List<ProjectVersionRef>> partition = ListUtils.partition( projects, initialRestMaxSize );
+
+        for ( List<ProjectVersionRef> p : partition )
+        {
+            queue.add( new Task( rgm, p, endpointUrl + REPORTS_LOOKUP_GAVS ) );
+        }
+
+        logger.debug( "For initial sizing of {} have split the queue into {} ", initialRestMaxSize , queue.size() );
+    }
+
+    private void autoPartition(List<ProjectVersionRef> projects, Queue<Task> queue) {
+        List<List<ProjectVersionRef>> partition;
+
+        if (projects.size() < 600)
+        {
+            logger.info("Using auto partition strategy: {} projects divided in chunks with {} each", projects.size(), 128);
+            partition = ListUtils.partition( projects, 128 );
+        }
+        else {
+            if (projects.size() > 600 && projects.size() < 1200)
+            {
+                logger.info("Using auto partition strategy: {} projects divided in chunks with {} each", projects.size(), 64);
+                partition = ListUtils.partition( projects, 64 );
+            }
+            else
+            {
+                logger.info("Using auto partition strategy: {} projects divided in chunks with {} each", projects.size(), 32);
+                partition = ListUtils.partition( projects, 32 );
+            }
+        }
+
+        for ( List<ProjectVersionRef> p : partition )
+        {
+            queue.add( new Task( rgm, p, endpointUrl + REPORTS_LOOKUP_GAVS ) );
+        }
+    }
+
     @Override
     public List<ProjectVersionRef> findBlacklisted( ProjectRef ga )
     {
@@ -175,21 +240,8 @@ public class DefaultTranslator
 
         final Map<ProjectVersionRef, String> result = new HashMap<>();
         final Queue<Task> queue = new ArrayDeque<>();
-        if ( initialRestMaxSize != 0 )
-        {
-            // Presplit
-            final List<List<ProjectVersionRef>> partition = ListUtils.partition( projects, initialRestMaxSize );
-            for ( List<ProjectVersionRef> p : partition )
-            {
-                queue.add( new Task( rgm, p, endpointUrl + REPORTS_LOOKUP_GAVS ) );
-            }
-            logger.debug( "For initial sizing of {} have split the queue into {} ", initialRestMaxSize , queue.size() );
-        }
-        else
-        {
-            queue.add( new Task( rgm, projects, endpointUrl + REPORTS_LOOKUP_GAVS ) );
-        }
 
+        partition(projects, queue);
 
         while ( !queue.isEmpty() )
         {

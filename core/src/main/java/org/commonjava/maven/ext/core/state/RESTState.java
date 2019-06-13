@@ -41,7 +41,7 @@ public class RESTState implements State
         restURL = userProps.getProperty( "restURL" );
 
         String repositoryGroup = userProps.getProperty( "restRepositoryGroup", "" );
-        int restMaxSize = Integer.valueOf( userProps.getProperty( "restMaxSize", "0" ) );
+        int restMaxSize = Integer.valueOf( userProps.getProperty( "restMaxSize", "-1" ) );
         int restMinSize = Integer.valueOf( userProps.getProperty( "restMinSize",
                                                                   String.valueOf( DefaultTranslator.CHUNK_SPLIT_COUNT ) ) );
 
