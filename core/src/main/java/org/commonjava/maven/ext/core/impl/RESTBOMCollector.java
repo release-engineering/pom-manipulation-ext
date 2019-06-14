@@ -87,7 +87,7 @@ public class RESTBOMCollector
 
         if ( !session.isEnabled() || !state.isEnabled() )
         {
-            logger.debug("{}: Nothing to do!", getClass().getSimpleName());
+            logger.debug( "{}: Nothing to do!", getClass().getSimpleName() );
             return;
         }
 
@@ -99,20 +99,30 @@ public class RESTBOMCollector
         populateRestParam( restParam, "pluginManagement", ps.getRemotePluginMgmt() );
         populateRestParam( restParam, "profileInjectionManagement", pis.getRemoteProfileInjectionMgmt() );
 
-        // Call the REST to populate the result.
-        logger.debug ("Passing {} BOM GAVs following into the REST client api {} ", restParam.size(), restParam);
-        logger.info ("Calling REST client for BOMs...");
-        Map<ProjectVersionRef, String> restResult = state.getVersionTranslator().translateVersions( restParam );
-        logger.debug ("REST Client returned for BOMs {} ", restResult);
+        if ( restParam.size() > 0 )
+        {
+            // Call the REST to populate the result.
+            logger.debug( "Passing {} BOM GAVs following into the REST client api {} ", restParam.size(), restParam );
+            logger.info( "Calling REST client for BOMs..." );
+            Map<ProjectVersionRef, String> restResult = state.getVersionTranslator().translateVersions( restParam );
+            logger.debug( "REST Client returned for BOMs {} ", restResult );
 
-        final ListIterator<ProjectVersionRef> emptyIterator = Collections.<ProjectVersionRef>emptyList().listIterator();
+            final ListIterator<ProjectVersionRef> emptyIterator = Collections.<ProjectVersionRef>emptyList().listIterator();
 
-        // Process rest result for boms
-        updateBOM ( (ds.getRemoteBOMDepMgmt() == null ? emptyIterator : ds.getRemoteBOMDepMgmt().listIterator()), restResult);
-        updateBOM ( (ps.getRemotePluginMgmt() == null ? emptyIterator : ps.getRemotePluginMgmt().listIterator()), restResult);
-        updateBOM ( (pis.getRemoteProfileInjectionMgmt() == null ? emptyIterator : pis.getRemoteProfileInjectionMgmt().listIterator()), restResult);
+            // Process rest result for boms
+            updateBOM( ( ds.getRemoteBOMDepMgmt() == null ? emptyIterator : ds.getRemoteBOMDepMgmt().listIterator() ),
+                       restResult );
+            updateBOM( ( ps.getRemotePluginMgmt() == null ? emptyIterator : ps.getRemotePluginMgmt().listIterator() ),
+                       restResult );
+            updateBOM( ( pis.getRemoteProfileInjectionMgmt() == null ?
+                            emptyIterator :
+                            pis.getRemoteProfileInjectionMgmt().listIterator() ), restResult );
+        }
+        else
+        {
+            logger.debug( "No BOM GAVS to pass into REST client." );
+        }
     }
-
 
     private void populateRestParam( final ArrayList<ProjectVersionRef> restParam, final String log, final List<ProjectVersionRef> bomMgmt )
     {

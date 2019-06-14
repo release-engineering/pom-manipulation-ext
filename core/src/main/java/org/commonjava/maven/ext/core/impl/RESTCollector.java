@@ -47,7 +47,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeSet;
 import java.util.concurrent.TimeUnit;
 
 import static org.apache.commons.lang.StringUtils.isEmpty;
@@ -112,15 +111,17 @@ public class RESTCollector
             }
         }
 
-        final ArrayList<ProjectVersionRef> restParam = new ArrayList<>( newProjectKeys );
+        final Set<ProjectVersionRef> restParamSet = new HashSet<>( );
         final Set<ArtifactRef> localDeps = establishAllDependencies( session, projects, null );
 
         // Ok we now have a defined list of top level project plus a unique list of all possible dependencies.
         // Need to send that to the rest interface to get a translation.
         for ( ArtifactRef p : localDeps )
         {
-            restParam.add( p.asProjectVersionRef() );
+            restParamSet.add( p.asProjectVersionRef() );
         }
+        final List<ProjectVersionRef> restParam = new ArrayList<>(newProjectKeys);
+        restParam.addAll( restParamSet );
 
         // Call the REST to populate the result.
         logger.debug ("Passing {} GAVs following into the REST client api {} ", restParam.size(), restParam);
@@ -160,8 +161,8 @@ public class RESTCollector
      * Parse the rest result for the project GAs and store them in versioning state for use
      * there by incremental suffix calculation.
      */
-    private Map<ProjectRef, Set<String>> parseVersions( ManipulationSession session, List<Project> projects, RESTState state, ArrayList<ProjectVersionRef> newProjectKeys,
-                                                        Map<ProjectVersionRef, String> restResult )
+    private Map<ProjectRef, Set<String>> parseVersions( ManipulationSession session, List<Project> projects, RESTState state,
+                                                        List<ProjectVersionRef> newProjectKeys, Map<ProjectVersionRef, String> restResult )
                     throws ManipulationException
     {
         Map<ProjectRef, Set<String>> versionStates = new HashMap<>();
@@ -270,7 +271,7 @@ public class RESTCollector
     {
         final VersioningState vs = session.getState( VersioningState.class );
 
-        Set<ArtifactRef> localDeps = new TreeSet<>();
+        Set<ArtifactRef> localDeps = new HashSet<>();
         Set<String> activeModules = new HashSet<>();
         boolean scanAll = false;
 

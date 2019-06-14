@@ -15,7 +15,9 @@
  */
 package org.commonjava.maven.ext.common.model;
 
-import lombok.Getter;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleArtifactRef;
 import org.commonjava.maven.atlas.ident.ref.TypeAndClassifier;
@@ -23,9 +25,11 @@ import org.commonjava.maven.atlas.ident.ref.TypeAndClassifier;
 /**
  * Wrapper around SimpleArtifactRef to also store the scope of the dependency.
  */
+@Data
+@ToString( callSuper = true )
+@EqualsAndHashCode( callSuper = true )
 public class SimpleScopedArtifactRef extends SimpleArtifactRef
 {
-    @Getter
     private final String scope;
 
     public SimpleScopedArtifactRef( final ProjectVersionRef ref, final TypeAndClassifier tc, final String scope )
