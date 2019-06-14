@@ -57,7 +57,7 @@
         <groupId>org.foobar</groupId>
         <artifactId>my-artifact</artifactId>
         <version>${exist}</version>
-    </dependency>
+      </dependency>
     </dependencies>
   </dependencyManagement>
 
@@ -71,6 +71,13 @@
       <groupId>org.jboss.errai</groupId>
       <artifactId>errai-common</artifactId>
       <version>1.1-Final</version>
+    </dependency>
+    <dependency>
+      <groupId>commons-lang</groupId>
+      <artifactId>commons-lang</artifactId>
+      <version>1.0</version>
+      <scope>test</scope>
+      <classifier>sources</classifier>
     </dependency>
   </dependencies>
 </project>

@@ -37,7 +37,6 @@ import static org.apache.commons.lang.StringUtils.isEmpty;
 /**
  * @author vdedik@redhat.com
  */
-@SuppressWarnings( "unchecked" )
 public class AddSuffixJettyHandler
                 extends AbstractHandler
                 implements Handler
@@ -224,9 +223,8 @@ public class AddSuffixJettyHandler
         }
         else
         {
-            LOGGER.info( "Handling: {} {} with AddSuffixJettyHandler failed,"
-                                         + " because expected method was {} and endpoint {}", request.getMethod(),
-                         request.getPathInfo(), this.endpoint );
+            LOGGER.info( "Handling: {} with AddSuffixJettyHandler failed, because expected method was {} and endpoint {}",
+                         request.getMethod(), request.getPathInfo(), this.endpoint );
         }
     }
 

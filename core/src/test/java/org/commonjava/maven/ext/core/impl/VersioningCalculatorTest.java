@@ -43,6 +43,7 @@ import org.commonjava.maven.ext.core.state.VersioningState;
 import org.commonjava.maven.ext.io.resolver.GalleyAPIWrapper;
 import org.commonjava.maven.ext.io.resolver.GalleyInfrastructure;
 import org.commonjava.maven.ext.io.resolver.MavenLocationExpander;
+import org.commonjava.maven.ext.io.rest.handler.AddSuffixJettyHandler;
 import org.commonjava.maven.galley.model.Location;
 import org.commonjava.maven.galley.spi.transport.Transport;
 import org.junit.Rule;
@@ -873,8 +874,7 @@ public class VersioningCalculatorTest
         setupSession( props, "0.0.1", "0.0.2", "0.0.3", "0.0.4", "0.0.5", "0.0.6", "0.0.7", "0.0.7.redhat-1" );
 
         final String v = "0.0.7";
-        //        final String os = "-redhat-2";
-        final String ns = "redhat-2";
+        final String ns = AddSuffixJettyHandler.EXTENDED_SUFFIX;
 
         final String result = calculate( v );
         assertThat( result, equalTo( v + "." + ns ) );
