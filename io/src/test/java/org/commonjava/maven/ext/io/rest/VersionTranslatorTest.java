@@ -30,6 +30,7 @@ import org.junit.BeforeClass;
 import org.junit.FixMethodOrder;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.contrib.java.lang.system.SystemOutRule;
 import org.junit.rules.TestName;
 import org.junit.runner.RunWith;
 import org.junit.runners.MethodSorters;
@@ -68,6 +69,9 @@ public class VersionTranslatorTest
 
     @Rule
     public MockServer mockServer = new MockServer( new AddSuffixJettyHandler() );
+
+    @Rule
+    public final SystemOutRule systemOutRule = new SystemOutRule().enableLog().muteForSuccessfulTests();
 
     @BeforeClass
     public static void startUp()
@@ -152,7 +156,7 @@ public class VersionTranslatorTest
         }
     }
 
-    @Test( timeout = 500 )
+    @Test( timeout = 2000 )
     public void testTranslateVersionsPerformance()
     {
         // Disable logging for this test as impacts timing.

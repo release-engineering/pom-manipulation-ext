@@ -42,7 +42,7 @@ import static org.junit.Assert.assertTrue;
 /**
  * Manipulators may output data in a structured form in a JSON file
  * for further processing, by allowing some of the state fields to be serialized.
- * This test verifies that this works in case of {@link VersioningState#executionRootModified}.
+ * This test verifies that this works in case of {@link VersioningState}.
  *
  * @author Jakub Senko
  */
@@ -68,16 +68,16 @@ public class ResultJsonFileTest
         // given
 
         File baseDir = tmpFolderRule.newFolder();
-        File pomFile = getResourceFile( "result-json-test/pom.xml" );
+        File pomFile = getResourceFile();
         copyFile( pomFile, new File( baseDir, "pom.xml" ) );
 
         // when
 
         Map<String, String> params = new HashMap<>();
-        params.put( "version.incremental.suffix", "redhat" );
+        params.put( "version.incremental.suffix", AddSuffixJettyHandler.SUFFIX );
         params.put( "dependencyOverride.org.apache.qpid-proton-j-parent@*", "0.31.0.redhat-00001" );
 
-        Integer exitValue = runCli( Collections.<String>emptyList(), params, baseDir.getCanonicalPath() );
+        Integer exitValue = runCli( Collections.emptyList(), params, baseDir.getCanonicalPath() );
 
         assertEquals( 10, exitValue.intValue() );
     }
@@ -89,16 +89,16 @@ public class ResultJsonFileTest
         // given
 
         File baseDir = tmpFolderRule.newFolder();
-        File pomFile = getResourceFile( "result-json-test/pom.xml" );
+        File pomFile = getResourceFile();
         copyFile( pomFile, new File( baseDir, "pom.xml" ) );
 
         // when
 
         Map<String, String> params = new HashMap<>();
         params.put( "restURL", mockServer.getUrl() );
-        params.put( "version.incremental.suffix", "redhat" );
+        params.put( "version.incremental.suffix", AddSuffixJettyHandler.SUFFIX );
 
-        Integer exitValue = runCli( Collections.<String>emptyList(), params, baseDir.getCanonicalPath() );
+        Integer exitValue = runCli( Collections.emptyList(), params, baseDir.getCanonicalPath() );
 
         // then
 
@@ -134,14 +134,14 @@ public class ResultJsonFileTest
         // given
 
         File baseDir = tmpFolderWorkingRule.newFolder();
-        File pomFile = getResourceFile( "result-json-test/pom.xml" );
+        File pomFile = getResourceFile();
         copyFile( pomFile, new File( baseDir, "pom.xml" ) );
 
         // when
 
         Map<String, String> params = new HashMap<>();
         params.put( "restURL", mockServer.getUrl() );
-        params.put( "version.incremental.suffix", "redhat" );
+        params.put( "version.incremental.suffix", AddSuffixJettyHandler.SUFFIX );
 
         List<String> args = new ArrayList<>();
         args.add( "--file=" + Paths.get(workingDirectory.getCanonicalPath()).relativize(
@@ -183,7 +183,7 @@ public class ResultJsonFileTest
         // given
 
         File baseDir = tmpFolderRule.newFolder();
-        File pomFile = getResourceFile( "result-json-test/pom.xml" );
+        File pomFile = getResourceFile();
         copyFile( pomFile, new File( baseDir, "pom.xml" ) );
 
         // when
@@ -192,7 +192,7 @@ public class ResultJsonFileTest
         params.put( "restURL", mockServer.getUrl() );
         params.put( "repo-reporting-removal", "true" );
 
-        Integer exitValue = runCli( Collections.<String>emptyList(), params, baseDir.getCanonicalPath() );
+        Integer exitValue = runCli( Collections.emptyList(), params, baseDir.getCanonicalPath() );
 
         // then
 
@@ -221,9 +221,10 @@ public class ResultJsonFileTest
         assertEquals( "1.0", version.textValue() );
     }
 
-    private File getResourceFile( String path )
+    @SuppressWarnings( "ConstantConditions" )
+    private File getResourceFile()
     {
         ClassLoader classLoader = getClass().getClassLoader();
-        return new File( classLoader.getResource( path ).getFile() );
+        return new File( classLoader.getResource( "result-json-test/pom.xml" ).getFile() );
     }
 }

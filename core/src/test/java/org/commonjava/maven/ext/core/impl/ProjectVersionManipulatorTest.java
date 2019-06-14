@@ -30,6 +30,7 @@ import org.commonjava.maven.ext.core.ManipulationSession;
 import org.commonjava.maven.ext.core.state.VersioningState;
 import org.commonjava.maven.ext.io.resolver.GalleyAPIWrapper;
 import org.commonjava.maven.ext.io.resolver.GalleyInfrastructure;
+import org.commonjava.maven.ext.io.rest.handler.AddSuffixJettyHandler;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -64,7 +65,7 @@ public class ProjectVersionManipulatorTest
 
         final Model eff = orig.clone();
 
-        final String suff = "redhat-1";
+        final String suff = AddSuffixJettyHandler.DEFAULT_SUFFIX;
         final String mv = orig.getVersion() + "." + suff;
 
         final Map<ProjectVersionRef, String> versionsByGAV = new HashMap<>();
@@ -102,7 +103,7 @@ public class ProjectVersionManipulatorTest
 
         final Model eff = orig.clone();
 
-        final String suff = "redhat-1";
+        final String suff = AddSuffixJettyHandler.DEFAULT_SUFFIX;
         final String mv = orig.getVersion() + "." + suff;
 
         final Map<ProjectVersionRef, String> versionsByGA = new HashMap<>();
@@ -183,7 +184,7 @@ public class ProjectVersionManipulatorTest
         mgmt.addDependency( managed );
         orig.setDependencyManagement( mgmt );
 
-        final String suff = "redhat-1";
+        final String suff = AddSuffixJettyHandler.DEFAULT_SUFFIX;
         final String mv = orig.getVersion() + "." + suff;
 
         final Map<ProjectVersionRef, String> versionsByGA = new HashMap<>();
@@ -296,7 +297,7 @@ public class ProjectVersionManipulatorTest
         mgmt.addDependency( managed );
         orig.setDependencyManagement( mgmt );
 
-        final String suff = "redhat-1";
+        final String suff = AddSuffixJettyHandler.DEFAULT_SUFFIX;
         final String mv = orig.getVersion() + "." + suff;
 
         final Map<ProjectVersionRef, String> versionsByGA = new HashMap<>();
@@ -413,7 +414,7 @@ public class ProjectVersionManipulatorTest
         mgmt.addDependency( managed );
         p.setDependencyManagement( mgmt );
 
-        final String suff = "redhat-1";
+        final String suff = AddSuffixJettyHandler.DEFAULT_SUFFIX;
         final String mv = orig.getVersion() + "." + suff;
 
         final Map<ProjectVersionRef, String> versionsByGA = new HashMap<>();
@@ -533,7 +534,7 @@ public class ProjectVersionManipulatorTest
         mgmt.addDependency( managed );
         p.setDependencyManagement( mgmt );
 
-        final String suff = "redhat-1";
+        final String suff = AddSuffixJettyHandler.DEFAULT_SUFFIX;
         final String mv = orig.getVersion() + "." + suff;
 
         final Map<ProjectVersionRef, String> versionsByGA = new HashMap<>();
