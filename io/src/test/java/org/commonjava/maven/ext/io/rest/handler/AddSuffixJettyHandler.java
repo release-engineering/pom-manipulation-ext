@@ -106,10 +106,11 @@ public class AddSuffixJettyHandler
 
             if ( target.equals( DEFAULT_ENDPOINT ) )
             {
-                boolean useCustomMixedSuffix = false;
                // Protocol analysis
                 GAVSchema gavSchema = objectMapper.readValue( jb.toString(), GAVSchema.class );
                 requestBody = gavSchema.gavs;
+
+                boolean useCustomMixedSuffix = requestBody.stream().anyMatch( r -> r.get( "artifactId" ).equals( "rest-version-manip-mixed-suffix-orig-rh" ) );
 
                 // Prepare Response
                 for ( Map<String, Object> gav : requestBody )
@@ -129,7 +130,6 @@ public class AddSuffixJettyHandler
                     }
                     else if ( gav.get( "artifactId" ).equals( "rest-version-manip-mixed-suffix-orig-rh" ) )
                     {
-                        useCustomMixedSuffix = true;
                         bestMatchVersion = version + "-" + this.suffix;
                     }
                     else if ( ( (String) gav.get( "artifactId" ) ).startsWith( "depMgmt2" ) ||

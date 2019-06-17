@@ -111,7 +111,7 @@ public class RESTCollector
             }
         }
 
-        final Set<ProjectVersionRef> restParamSet = new HashSet<>( );
+        final Set<ProjectVersionRef> restParamSet = new HashSet<>( newProjectKeys );
         final Set<ArtifactRef> localDeps = establishAllDependencies( session, projects, null );
 
         // Ok we now have a defined list of top level project plus a unique list of all possible dependencies.
@@ -120,12 +120,11 @@ public class RESTCollector
         {
             restParamSet.add( p.asProjectVersionRef() );
         }
-        final List<ProjectVersionRef> restParam = new ArrayList<>(newProjectKeys);
-        restParam.addAll( restParamSet );
+        final List<ProjectVersionRef> restParam = new ArrayList<>( restParamSet );
 
         // Call the REST to populate the result.
-        logger.debug ("Passing {} GAVs following into the REST client api {} ", restParam.size(), restParam);
-        logger.info ("Calling REST client...");
+        logger.debug ("Passing {} GAVs into the REST client api {} ", restParam.size(), restParam);
+        logger.info ("Calling REST client... (with {} GAVs)", restParam.size());
         long start = System.nanoTime();
         Map<ProjectVersionRef, String> restResult = null;
 
@@ -146,7 +145,7 @@ public class RESTCollector
         // Convert the loaded remote ProjectVersionRefs to the original ArtifactRefs
         for (ArtifactRef a : localDeps )
         {
-            if (restResult.containsKey( a.asProjectVersionRef() ))
+            if (restResult != null && restResult.containsKey( a.asProjectVersionRef() ))
             {
                 overrides.put( a, restResult.get( a.asProjectVersionRef()));
             }
