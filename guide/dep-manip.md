@@ -13,7 +13,7 @@ PME can override a set of dependency versions using a remote source which may be
 
 #### BOM and REST
 
-There are two sources of dependencies used to align to in PME. The property `dependencySource` is used to alter the behaviour of how PME handles the multiple sources of dependency information. The `BOM` value (the default and the behaviour if this property is not specified) is that PME will use the BOM (i.e. Remote POM) source. Alternatively the `REST` source may be specified to use only the REST Endpoint information. However by setting the property to either `RESTBOM` or `BOMREST` it will instead merge the two sets of values. With `RESTBOM` precendence is given to the REST information and for `BOMREST` precendence is given to the BOM information.
+There are two sources of dependencies used to align to in PME. The property `dependencySource` is used to alter the behaviour of how PME handles the multiple sources of dependency information. The `BOM` value (the default and the behaviour if this property is not specified) is that PME will use the BOM (i.e. Remote POM) source. Alternatively the `REST` source may be specified to use only the REST Endpoint information. However by setting the property to either `RESTBOM` or `BOMREST` it will instead merge the two sets of values. With `RESTBOM` precendence is given to the REST information and for `BOMREST` precendence is given to the BOM information. If the setting is `NONE` no remote alignment will be performned.
 
 #### Remote POM
 
