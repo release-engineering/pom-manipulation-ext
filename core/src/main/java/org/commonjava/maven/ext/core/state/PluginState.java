@@ -54,7 +54,8 @@ public class PluginState
         REST,
         BOM,
         RESTBOM,
-        BOMREST
+        BOMREST,
+        NONE
     }
     /**
      * The name of the property which contains the GAV of the remote pom from which to retrieve plugin management
@@ -139,6 +140,11 @@ public class PluginState
                 precedence = PluginPrecedence.BOMREST;
                 break;
             }
+            case NONE:
+            {
+                precedence = PluginPrecedence.NONE;
+                break;
+            }
             default:
             {
                 throw new ManipulationException( "Unknown value {} for {}", userProps.getProperty( PLUGIN_SOURCE ),
@@ -155,8 +161,9 @@ public class PluginState
     @Override
     public boolean isEnabled()
     {
-        return ( pluginMgmt != null && !pluginMgmt.isEmpty() ) ||
-               ( remoteRESTplugins != null && !remoteRESTplugins.isEmpty() );
+        return ( ! ( precedence == PluginPrecedence.NONE ) ) &&
+                        ( pluginMgmt != null && !pluginMgmt.isEmpty() ) ||
+                        ( remoteRESTplugins != null && !remoteRESTplugins.isEmpty() );
     }
 
     public List<ProjectVersionRef> getRemotePluginMgmt()
