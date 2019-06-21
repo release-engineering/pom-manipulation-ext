@@ -23,7 +23,7 @@ PME can align plugin versions and configuration using a similar pattern to [depe
 
 ##### BOM and REST
 
-There are two sources of plugins used to align to in PME. The property `pluginSource` is used to alter the behaviour of how PME handles the multiple sources of plugin information. The `BOM` value is that PME will use the BOM (i.e. Remote POM) source. Alternatively the `REST` source may be specified to use only the REST Endpoint information. However by setting the property to either `RESTBOM` or `BOMREST` it will instead merge the two sets of values. With `RESTBOM` precendence is given to the REST information and for `BOMREST` precendence is given to the BOM information.
+There are two sources of plugins used to align to in PME. The property `pluginSource` is used to alter the behaviour of how PME handles the multiple sources of plugin information. The `BOM` value is that PME will use the BOM (i.e. Remote POM) source. Alternatively the `REST` source may be specified to use only the REST Endpoint information. However by setting the property to either `RESTBOM` or `BOMREST` it will instead merge the two sets of values. With `RESTBOM` precendence is given to the REST information and for `BOMREST` precendence is given to the BOM information. If the setting is `NONE` no remote alignment will be performned.
 
 **Note**: If this is not specified the default value for `pluginSource` will match the value for `dependencySource`. Therefore it is only necessary to set `pluginSource` if a *different* value to `dependencySource` is needed.
 
