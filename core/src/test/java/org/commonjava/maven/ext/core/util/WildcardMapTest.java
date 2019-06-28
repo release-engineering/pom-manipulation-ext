@@ -22,11 +22,15 @@ import org.commonjava.maven.atlas.ident.ref.ProjectRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleProjectRef;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.contrib.java.lang.system.SystemOutRule;
 import org.slf4j.LoggerFactory;
 
 import static org.hamcrest.Matchers.containsString;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
@@ -35,8 +39,11 @@ public class WildcardMapTest
     private WildcardMap<String> map;
     private ListAppender<ILoggingEvent> m_listAppender;
 
+    @Rule
+    public final SystemOutRule systemOutRule = new SystemOutRule().enableLog().muteForSuccessfulTests();
+
     @Before
-    public void setUp() throws Exception
+    public void setUp()
     {
         m_listAppender = new ListAppender<>();
         m_listAppender.start();
@@ -48,16 +55,14 @@ public class WildcardMapTest
     }
 
     @After
-    public void tearDown() throws Exception
+    public void tearDown()
     {
-        map = null;
-
         Logger root = (Logger) LoggerFactory.getLogger(WildcardMap.class);
         root.detachAppender(m_listAppender);
     }
 
     @Test
-    public void testContainsKey() throws Exception
+    public void testContainsKey()
     {
         map.put( SimpleProjectRef.parse( "org.group:new-artifact" ), "1.2");
 
@@ -66,7 +71,7 @@ public class WildcardMapTest
     }
 
     @Test
-    public void testGet() throws Exception
+    public void testGet()
     {
         final String value = "1.2";
         ProjectRef key1 = SimpleProjectRef.parse( "org.group:new-artifact" );
@@ -75,22 +80,22 @@ public class WildcardMapTest
         map.put(key1, value);
         map.put(key2, value);
 
-        assertTrue(value.equals(map.get(key1)));
-        assertTrue(value.equals(map.get(key2)));
+        assertEquals( value, map.get( key1 ) );
+        assertEquals( value, map.get( key2 ) );
     }
 
     @Test
-    public void testGetSingle() throws Exception
+    public void testGetSingle()
     {
         final String value = "1.2";
 
         map.put( SimpleProjectRef.parse( "org.group:new-artifact" ), value);
 
-        assertFalse(value.equals(map.get( SimpleProjectRef.parse( "org.group:i-dont-exist-artifact" ))));
+        assertNotEquals( value, map.get( SimpleProjectRef.parse( "org.group:i-dont-exist-artifact" ) ) );
     }
 
     @Test
-    public void testPut() throws Exception
+    public void testPut()
     {
         ProjectRef key = SimpleProjectRef.parse( "foo:bar" );
 
@@ -99,7 +104,7 @@ public class WildcardMapTest
     }
 
     @Test
-    public void testPutWildcard() throws Exception
+    public void testPutWildcard()
     {
         ProjectRef key1 = SimpleProjectRef.parse( "org.group:*" );
         ProjectRef key2 = SimpleProjectRef.parse( "org.group:artifact" );
@@ -121,7 +126,7 @@ public class WildcardMapTest
     }
 
     @Test
-    public void testPutWildcardSecond() throws Exception
+    public void testPutWildcardSecond()
     {
         ProjectRef key1 = SimpleProjectRef.parse( "org.group:artifact" );
         ProjectRef key2 = SimpleProjectRef.parse( "org.group:*" );
@@ -131,7 +136,7 @@ public class WildcardMapTest
 
         assertTrue("Should have retrieved explicit value via wildcard", map.containsKey(key1));
         assertTrue("Should have retrieved wildcard value", map.containsKey(key2));
-        assertFalse("Should not have retrieved value 1.1", map.get(key1).equals("1.1"));
+        assertNotEquals( "Should not have retrieved value 1.1", "1.1", map.get( key1 ) );
 
         assertThat(m_listAppender.list.toString(),
                 containsString("Emptying map with keys [artifact] as replacing with wildcard mapping org.group:*"));

@@ -46,7 +46,7 @@ public class ProjectComparatorTest
     private static final String RESOURCE_BASE = "properties/";
 
     @Rule
-    public final SystemOutRule systemOutRule = new SystemOutRule().enableLog();
+    public final SystemOutRule systemOutRule = new SystemOutRule().enableLog().muteForSuccessfulTests();
 
     @Test
     public void testCompareNoChanges() throws Exception
@@ -91,6 +91,12 @@ public class ProjectComparatorTest
                 project.getModel().getDependencyManagement().getDependencies().forEach( dependency -> dependency.setVersion( dependency.getVersion() + "-redhat-1" ) );
             }
         } );
+        projectNew.forEach( project -> project.getModel().getDependencies().forEach( dependency -> {
+            if ( dependency.getGroupId().equals( "ch.qos.logback" ))
+            {
+                dependency.setGroupId( "org.foobar.logback" );
+            }
+        } ) );
 
         ProjectComparator.compareProjects( session, projectOriginal, projectNew );
 
@@ -99,6 +105,8 @@ public class ProjectComparatorTest
         assertTrue( systemOutRule.getLog().contains( "Project version :" ) );
         assertTrue( systemOutRule.getLog().contains( "-redhat-1" ) );
         assertTrue( systemOutRule.getLog().contains( "-->" ) );
+        assertTrue( systemOutRule.getLog().contains( "Non-versioned dependencies" ) );
+        assertTrue( systemOutRule.getLog().contains( "org.foobar" ) );
     }
 
     @SuppressWarnings( "deprecation" )

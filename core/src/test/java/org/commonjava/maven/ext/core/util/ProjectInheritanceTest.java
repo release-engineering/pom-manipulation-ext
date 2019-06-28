@@ -22,7 +22,9 @@ import org.commonjava.maven.ext.common.model.Project;
 import org.commonjava.maven.ext.core.ManipulationSession;
 import org.commonjava.maven.ext.core.fixture.TestUtils;
 import org.commonjava.maven.ext.io.PomIO;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.contrib.java.lang.system.SystemOutRule;
 
 import java.io.File;
 import java.nio.file.Path;
@@ -30,12 +32,17 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 public class ProjectInheritanceTest
 {
     private static final String RESOURCE_BASE = "properties/";
+
+    @Rule
+    public final SystemOutRule systemOutRule = new SystemOutRule().enableLog().muteForSuccessfulTests();
 
     @Test
     public void testVerifyInheritance() throws Exception
@@ -52,7 +59,7 @@ public class ProjectInheritanceTest
         {
             if ( ! p.getPom().equals( projectroot ) )
             {
-                assertTrue ( p.getProjectParent().getPom().equals( projectroot ) );
+                assertEquals( p.getProjectParent().getPom(), projectroot );
             }
         }
     }
@@ -76,21 +83,21 @@ public class ProjectInheritanceTest
             if ( i == 0 )
             {
                 // First project should be root
-                assertTrue ( projects.get( i ).getProjectParent() == null );
-                assertTrue ( projects.get( i ).getPom().equals( projectroot ) );
-                assertTrue ( projects.get( i ).getInheritedList().size() == 1 );
+                assertNull( projects.get( i ).getProjectParent() );
+                assertEquals( projects.get( i ).getPom(), projectroot );
+                assertEquals( 1, projects.get( i ).getInheritedList().size() );
             }
             else if ( i == 1 )
             {
                 List<Project> inherited = projects.get( i ).getInheritedList();
-                assertTrue (inherited.size() == 2 );
-                assertTrue ( inherited.get( 1 ).getProjectParent().getPom().equals( projectroot ) );
+                assertEquals( 2, inherited.size() );
+                assertEquals( inherited.get( 1 ).getProjectParent().getPom(), projectroot );
             }
             else if ( i == 2 )
             {
                 List<Project> inherited = projects.get( i ).getInheritedList();
-                assertTrue (inherited.size() == 3 );
-                assertTrue ( inherited.get( 0 ).getPom().equals( projectroot ) );
+                assertEquals( 3, inherited.size() );
+                assertEquals( inherited.get( 0 ).getPom(), projectroot );
             }
         }
     }
@@ -139,7 +146,7 @@ public class ProjectInheritanceTest
 
         List<Project> projects = pomIO.parseProject( relative.toFile() );
 
-        assertTrue( projects.size() == 1 );
+        assertEquals( 1, projects.size() );
         assertTrue( projects.get( 0 ).isExecutionRoot() );
     }
 
@@ -161,21 +168,21 @@ public class ProjectInheritanceTest
             if ( i == 0 )
             {
                 // First project should be root
-                assertTrue ( projects.get( i ).getProjectParent() == null );
-                assertTrue ( projects.get( i ).getPom().equals( projectroot ) );
-                assertTrue ( projects.get( i ).getReverseInheritedList().size() == 1 );
+                assertNull( projects.get( i ).getProjectParent() );
+                assertEquals( projects.get( i ).getPom(), projectroot );
+                assertEquals( 1, projects.get( i ).getReverseInheritedList().size() );
             }
             else if ( i == 1 )
             {
                 List<Project> inherited = projects.get( i ).getReverseInheritedList();
-                assertTrue (inherited.size() == 2 );
-                assertTrue ( inherited.get( 0 ).getProjectParent().getPom().equals( projectroot ) );
+                assertEquals( 2, inherited.size() );
+                assertEquals( inherited.get( 0 ).getProjectParent().getPom(), projectroot );
             }
             else if ( i == 2 )
             {
                 List<Project> inherited = projects.get( i ).getReverseInheritedList();
-                assertTrue (inherited.size() == 3 );
-                assertTrue ( inherited.get( 2 ).getPom().equals( projectroot ) );
+                assertEquals( 3, inherited.size() );
+                assertEquals( inherited.get( 2 ).getPom(), projectroot );
             }
         }
     }
@@ -205,14 +212,14 @@ public class ProjectInheritanceTest
                     assertFalse ( a.getVersionString().contains( "project.version" ));
                 }
                 deps = p.getResolvedDependencies( session );
-                assertTrue( deps.size() == 1 );
+                assertEquals( 1, deps.size() );
                 for ( ArtifactRef a : deps.keySet())
                 {
                     assertFalse ( a.getVersionString().contains( "project.version" ));
                 }
-                assertFalse( deps.containsKey(  "org.mockito:mockito-all:jar:*" ));
+                assertFalse( deps.containsKey(  SimpleArtifactRef.parse( "org.mockito:mockito-all:jar:*" )));
                 deps = p.getAllResolvedDependencies( session );
-                assertTrue( deps.size() == 3 );
+                assertEquals( 3, deps.size() );
                 for ( ArtifactRef a : deps.keySet())
                 {
                     assertFalse ( a.getVersionString().contains( "project.version" ));

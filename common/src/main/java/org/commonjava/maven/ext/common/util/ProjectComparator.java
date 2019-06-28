@@ -31,12 +31,15 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.commonjava.maven.ext.common.util.ProjectComparator.Type.DEPENDENCIES;
+import static org.commonjava.maven.ext.common.util.ProjectComparator.Type.DEPENDENCIES_UNVERSIONED;
 import static org.commonjava.maven.ext.common.util.ProjectComparator.Type.MANAGED_DEPENDENCIES;
 import static org.commonjava.maven.ext.common.util.ProjectComparator.Type.MANAGED_PLUGINS;
 import static org.commonjava.maven.ext.common.util.ProjectComparator.Type.PLUGINS;
 import static org.commonjava.maven.ext.common.util.ProjectComparator.Type.PROFILE_DEPENDENCIES;
+import static org.commonjava.maven.ext.common.util.ProjectComparator.Type.PROFILE_DEPENDENCIES_UNVERSIONED;
 import static org.commonjava.maven.ext.common.util.ProjectComparator.Type.PROFILE_MANAGED_DEPENDENCIES;
 import static org.commonjava.maven.ext.common.util.ProjectComparator.Type.PROFILE_MANAGED_PLUGINS;
 import static org.commonjava.maven.ext.common.util.ProjectComparator.Type.PROFILE_PLUGINS;
@@ -50,8 +53,10 @@ public class ProjectComparator
     enum Type
     {
         DEPENDENCIES,
+        DEPENDENCIES_UNVERSIONED,
         MANAGED_DEPENDENCIES,
         PROFILE_DEPENDENCIES,
+        PROFILE_DEPENDENCIES_UNVERSIONED,
         PROFILE_MANAGED_DEPENDENCIES,
         PLUGINS,
         MANAGED_PLUGINS,
@@ -65,10 +70,14 @@ public class ProjectComparator
             {
                 case DEPENDENCIES:
                     return "Dependencies";
+                case DEPENDENCIES_UNVERSIONED:
+                    return "Non-versioned dependencies";
                 case MANAGED_DEPENDENCIES:
                     return "Managed dependencies";
                 case PROFILE_DEPENDENCIES:
                     return "Profile dependencies";
+                case PROFILE_DEPENDENCIES_UNVERSIONED:
+                    return "Profile non-versioned dependencies";
                 case PROFILE_MANAGED_DEPENDENCIES:
                     return "Profile managed dependencies";
                 case PLUGINS:
@@ -124,6 +133,10 @@ public class ProjectComparator
                                                                      MANAGED_DEPENDENCIES ),
                                                  handleDependencies( session, newProject, null, MANAGED_DEPENDENCIES ) );
 
+                            compareDependencies( DEPENDENCIES_UNVERSIONED, reportNonAligned,
+                                                 handleDependencies( session, originalProject, null, DEPENDENCIES_UNVERSIONED ),
+                                                 handleDependencies( session, newProject, null, DEPENDENCIES_UNVERSIONED ) );
+
                             logger.info( "" );
 
                             comparePlugins( PLUGINS,
@@ -166,6 +179,11 @@ public class ProjectComparator
                                                      handleDependencies( session, newProject, newProfile,
                                                                          PROFILE_MANAGED_DEPENDENCIES ) );
 
+                                compareDependencies( PROFILE_DEPENDENCIES_UNVERSIONED, reportNonAligned,
+                                                     handleDependencies( session, originalProject, oldProfile, PROFILE_DEPENDENCIES_UNVERSIONED ),
+                                                     handleDependencies( session, newProject, newProfile, PROFILE_DEPENDENCIES_UNVERSIONED ) );
+
+
                                 logger.info( "" );
 
                                 comparePlugins( PROFILE_PLUGINS, reportNonAligned,
@@ -191,22 +209,42 @@ public class ProjectComparator
     private static void compareDependencies( Type type, boolean reportNonAligned, Set<ArtifactRef> originalDeps, Set<ArtifactRef> newDeps )
     {
         Set<ArtifactRef> nonAligned = new HashSet<>( );
-        originalDeps.forEach( originalArtifact -> newDeps.stream().filter(
-                        newArtifact -> ( newArtifact.getGroupId().equals( originalArtifact.getGroupId() ) &&
-                                        newArtifact.getArtifactId().equals( originalArtifact.getArtifactId() ) &&
-                                        newArtifact.getType().equals( originalArtifact.getType() ) &&
-                                        StringUtils.equals(newArtifact.getClassifier(), originalArtifact.getClassifier() ) ) ).forEach( newArtifact ->
-                    {
-                        if ( ! newArtifact.getVersionString().equals( originalArtifact.getVersionString() ) )
+
+        if ( type == PROFILE_DEPENDENCIES_UNVERSIONED || type == DEPENDENCIES_UNVERSIONED)
+        {
+            HashSet<ArtifactRef> left = new HashSet<>( originalDeps );
+            left.removeIf( newDeps::contains );
+            HashSet<ArtifactRef> right = new HashSet<>( newDeps );
+            right.removeIf( originalDeps::contains );
+
+            if ( left.size() != right.size() )
+            {
+                logger.error( "Unable to accurately output changes due to differing sizes between new and old collections." );
+            }
+            else if ( left.size() > 0 )
+            {
+                logger.info( "\t{} : {} --> {} ", type, left, right );
+            }
+        }
+        else
+        {
+            originalDeps.forEach( originalArtifact -> newDeps.stream().filter(
+                            newArtifact -> ( newArtifact.getGroupId().equals( originalArtifact.getGroupId() ) &&
+                                            newArtifact.getArtifactId().equals( originalArtifact.getArtifactId() ) &&
+                                            newArtifact.getType().equals( originalArtifact.getType() ) &&
+                                            StringUtils.equals(newArtifact.getClassifier(), originalArtifact.getClassifier() ) ) ).forEach( newArtifact ->
                         {
-                            logger.info( "\t{} : {} --> {} ", type, originalArtifact, newArtifact );
+                            if ( ! newArtifact.getVersionString().equals( originalArtifact.getVersionString() ) )
+                            {
+                                logger.info( "\t{} : {} --> {} ", type, originalArtifact, newArtifact );
+                            }
+                            else if ( reportNonAligned )
+                            {
+                                nonAligned.add( originalArtifact );
+                            }
                         }
-                        else if ( reportNonAligned )
-                        {
-                            nonAligned.add( originalArtifact );
-                        }
-                    }
-         ) );
+             ) );
+        }
 
         if ( nonAligned.size() > 0 )
         {
@@ -262,6 +300,17 @@ public class ProjectComparator
                 case PROFILE_MANAGED_DEPENDENCIES:
                 {
                     return project.getResolvedProfileManagedDependencies( session ).getOrDefault( profile, Collections.emptyMap() ).keySet();
+                }
+                case DEPENDENCIES_UNVERSIONED:
+                {
+                    return project.getAllResolvedDependencies( session ).
+                                                  keySet().stream().filter( a -> a.getVersionString().equals( "*" ) ).collect( Collectors.toSet() );
+                }
+                case PROFILE_DEPENDENCIES_UNVERSIONED:
+                {
+                    return project.getAllResolvedProfileDependencies( session ).
+                                    getOrDefault( profile, Collections.emptyMap() ).
+                                                  keySet().stream().filter( a -> a.getVersionString().equals( "*" ) ).collect( Collectors.toSet() );
                 }
                 default:
                 {
