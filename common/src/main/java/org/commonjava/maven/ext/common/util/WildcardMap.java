@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.commonjava.maven.ext.core.util;
+package org.commonjava.maven.ext.common.util;
 
 import org.apache.maven.model.Dependency;
 import org.commonjava.maven.atlas.ident.ref.ProjectRef;

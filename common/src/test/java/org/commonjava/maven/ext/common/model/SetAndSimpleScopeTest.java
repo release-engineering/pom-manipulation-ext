@@ -13,11 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.commonjava.maven.ext.core.util;
+package org.commonjava.maven.ext.common.model;
 
 import org.commonjava.maven.atlas.ident.ref.ArtifactRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleArtifactRef;
-import org.commonjava.maven.ext.common.model.SimpleScopedArtifactRef;
 import org.junit.Test;
 
 import java.util.HashSet;

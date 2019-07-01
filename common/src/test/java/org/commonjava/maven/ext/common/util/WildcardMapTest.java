@@ -13,26 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.commonjava.maven.ext.core.util;
+package org.commonjava.maven.ext.common.util;
 
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
 import org.commonjava.maven.atlas.ident.ref.ProjectRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleProjectRef;
+import org.hamcrest.Matchers;
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.contrib.java.lang.system.SystemOutRule;
 import org.slf4j.LoggerFactory;
-
-import static org.hamcrest.Matchers.containsString;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
 
 public class WildcardMapTest
 {
@@ -66,8 +61,8 @@ public class WildcardMapTest
     {
         map.put( SimpleProjectRef.parse( "org.group:new-artifact" ), "1.2");
 
-        assertFalse(map.containsKey( SimpleProjectRef.parse( "org.group:*" )));
-        assertFalse(map.containsKey( SimpleProjectRef.parse( "org.group:old-artifact" )));
+        Assert.assertFalse( map.containsKey( SimpleProjectRef.parse( "org.group:*" )));
+        Assert.assertFalse( map.containsKey( SimpleProjectRef.parse( "org.group:old-artifact" )));
     }
 
     @Test
@@ -80,8 +75,8 @@ public class WildcardMapTest
         map.put(key1, value);
         map.put(key2, value);
 
-        assertEquals( value, map.get( key1 ) );
-        assertEquals( value, map.get( key2 ) );
+        Assert.assertEquals( value, map.get( key1 ) );
+        Assert.assertEquals( value, map.get( key2 ) );
     }
 
     @Test
@@ -91,7 +86,7 @@ public class WildcardMapTest
 
         map.put( SimpleProjectRef.parse( "org.group:new-artifact" ), value);
 
-        assertNotEquals( value, map.get( SimpleProjectRef.parse( "org.group:i-dont-exist-artifact" ) ) );
+        Assert.assertNotEquals( value, map.get( SimpleProjectRef.parse( "org.group:i-dont-exist-artifact" ) ) );
     }
 
     @Test
@@ -100,7 +95,7 @@ public class WildcardMapTest
         ProjectRef key = SimpleProjectRef.parse( "foo:bar" );
 
         map.put(key, "value");
-        assertTrue("Should have retrieved value", map.containsKey(key));
+        Assert.assertTrue( "Should have retrieved value", map.containsKey( key));
     }
 
     @Test
@@ -112,16 +107,16 @@ public class WildcardMapTest
 
         map.put(key1, "1.1");
 
-        assertTrue("Should have retrieved wildcard value", map.containsKey(key2));
-        assertTrue("Should have retrieved wildcard value", map.containsKey(key1));
+        Assert.assertTrue( "Should have retrieved wildcard value", map.containsKey( key2));
+        Assert.assertTrue( "Should have retrieved wildcard value", map.containsKey( key1));
 
         map.put(key3, "1.2");
 
-        assertTrue("Should have retrieved wildcard value", map.containsKey(key2));
-        assertTrue("Should have retrieved wildcard value", map.containsKey(key1));
+        Assert.assertTrue( "Should have retrieved wildcard value", map.containsKey( key2));
+        Assert.assertTrue( "Should have retrieved wildcard value", map.containsKey( key1));
 
-        assertThat(m_listAppender.list.toString(),
-                containsString("Unable to add org.group:new-artifact with value 1.2 as wildcard mapping for org.group already exists"));
+        Assert.assertThat( m_listAppender.list.toString(),
+                           Matchers.containsString( "Unable to add org.group:new-artifact with value 1.2 as wildcard mapping for org.group already exists"));
 
     }
 
@@ -134,12 +129,12 @@ public class WildcardMapTest
         map.put(key1, "1.1");
         map.put(key2, "1.2");
 
-        assertTrue("Should have retrieved explicit value via wildcard", map.containsKey(key1));
-        assertTrue("Should have retrieved wildcard value", map.containsKey(key2));
-        assertNotEquals( "Should not have retrieved value 1.1", "1.1", map.get( key1 ) );
+        Assert.assertTrue( "Should have retrieved explicit value via wildcard", map.containsKey( key1));
+        Assert.assertTrue( "Should have retrieved wildcard value", map.containsKey( key2));
+        Assert.assertNotEquals( "Should not have retrieved value 1.1", "1.1", map.get( key1 ) );
 
-        assertThat(m_listAppender.list.toString(),
-                containsString("Emptying map with keys [artifact] as replacing with wildcard mapping org.group:*"));
+        Assert.assertThat( m_listAppender.list.toString(),
+                           Matchers.containsString( "Emptying map with keys [artifact] as replacing with wildcard mapping org.group:*"));
 
     }
 }

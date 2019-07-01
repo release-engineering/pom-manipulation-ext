@@ -30,7 +30,7 @@ import org.commonjava.maven.ext.core.state.DependencyState;
 import org.commonjava.maven.ext.core.state.PluginState;
 import org.commonjava.maven.ext.core.state.RelocationState;
 import org.commonjava.maven.ext.core.state.State;
-import org.commonjava.maven.ext.core.util.WildcardMap;
+import org.commonjava.maven.ext.common.util.WildcardMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
