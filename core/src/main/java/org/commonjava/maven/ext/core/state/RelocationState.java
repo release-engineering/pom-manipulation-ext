@@ -21,7 +21,7 @@ import org.commonjava.maven.atlas.ident.ref.SimpleProjectRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef;
 import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.core.util.PropertiesUtils;
-import org.commonjava.maven.ext.core.util.WildcardMap;
+import org.commonjava.maven.ext.common.util.WildcardMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -129,7 +129,7 @@ public class RelocationState
     @Override
     public boolean isEnabled()
     {
-        return dependencyRelocations != null && !dependencyRelocations.isEmpty();
+        return !dependencyRelocations.isEmpty();
     }
 
     public WildcardMap<ProjectVersionRef> getDependencyRelocations()

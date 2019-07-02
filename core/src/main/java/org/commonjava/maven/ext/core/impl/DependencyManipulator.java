@@ -36,7 +36,7 @@ import org.commonjava.maven.ext.core.state.DependencyState.DependencyPrecedence;
 import org.commonjava.maven.ext.core.state.RESTState;
 import org.commonjava.maven.ext.core.util.PropertiesUtils;
 import org.commonjava.maven.ext.core.util.PropertyMapper;
-import org.commonjava.maven.ext.core.util.WildcardMap;
+import org.commonjava.maven.ext.common.util.WildcardMap;
 import org.commonjava.maven.ext.io.ModelIO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -777,7 +777,7 @@ public class DependencyManipulator implements Manipulator
     private Map<ArtifactRef, String> applyModuleVersionOverrides( final String projectGA,
                                                                   final Map<String, String> moduleOverrides,
                                                                   Map<ArtifactRef, String> originalOverrides,
-                                                                  final WildcardMap explicitOverrides,
+                                                                  final WildcardMap<String> explicitOverrides,
                                                                   final Map<String, Map<ProjectRef, String>> extraBOMOverrides )
                     throws ManipulationException
     {
@@ -792,7 +792,7 @@ public class DependencyManipulator implements Manipulator
         // These modes correspond to two different kinds of passes over the available override properties:
         // 1. Module-specific: Don't process wildcard overrides here, allow module-specific settings to take precedence.
         // 2. Wildcards: Add these IF there is no corresponding module-specific override.
-        final boolean wildcardMode[] = { false, true };
+        final boolean[] wildcardMode = { false, true };
         for ( boolean aWildcardMode : wildcardMode )
         {
             for ( final String currentKey : new HashSet<>( moduleOverrides.keySet() ) )
@@ -810,7 +810,7 @@ public class DependencyManipulator implements Manipulator
                 final boolean isModuleWildcard = currentKey.endsWith( "@*" );
                 logger.debug( "Is wildcard? {} and in module wildcard mode? {} ", isModuleWildcard, aWildcardMode );
 
-                String artifactGA = null;
+                String artifactGA;
                 boolean replace = false;
                 // process module-specific overrides (first)
                 if ( !aWildcardMode )

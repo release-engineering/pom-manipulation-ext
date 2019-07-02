@@ -21,12 +21,15 @@ import org.apache.maven.execution.MavenExecutionRequest;
 import org.apache.maven.execution.MavenSession;
 import org.codehaus.plexus.DefaultPlexusContainer;
 import org.codehaus.plexus.PlexusContainer;
+import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.ext.common.model.Project;
 import org.commonjava.maven.ext.common.util.ProjectComparator;
+import org.commonjava.maven.ext.common.util.WildcardMap;
 import org.commonjava.maven.ext.core.ManipulationSession;
 import org.commonjava.maven.ext.core.fixture.TestUtils;
 import org.commonjava.maven.ext.core.state.CommonState;
 import org.commonjava.maven.ext.core.state.DependencyState;
+import org.commonjava.maven.ext.core.state.RelocationState;
 import org.commonjava.maven.ext.core.state.VersioningState;
 import org.commonjava.maven.ext.io.PomIO;
 import org.junit.Rule;
@@ -46,7 +49,9 @@ public class ProjectComparatorTest
     private static final String RESOURCE_BASE = "properties/";
 
     @Rule
-    public final SystemOutRule systemOutRule = new SystemOutRule().enableLog();
+    public final SystemOutRule systemOutRule = new SystemOutRule().enableLog();//.muteForSuccessfulTests();
+
+    private WildcardMap<ProjectVersionRef> map = new WildcardMap<>();
 
     @Test
     public void testCompareNoChanges() throws Exception
@@ -63,7 +68,9 @@ public class ProjectComparatorTest
         List<Project> projectOriginal = pomIO.parseProject( projectroot );
         List<Project> projectNew = pomIO.parseProject( projectroot );
 
-        ProjectComparator.compareProjects( session, projectOriginal, projectNew );
+        ProjectComparator.compareProjects( session,
+                                           map,
+                                           projectOriginal, projectNew );
 
         assertFalse( systemOutRule.getLog().contains( "-->" ) );
     }
@@ -72,6 +79,9 @@ public class ProjectComparatorTest
     public void testCompareChanges() throws Exception
     {
         ManipulationSession session = createUpdateSession();
+        session.getUserProperties().put( RelocationState.DEPENDENCY_RELOCATIONS + "ch.qos.logback:@org.foobar.logback:", "" );
+        RelocationState relocationState = new RelocationState( session.getUserProperties() );
+        session.setState( relocationState );
 
         // Locate the PME project pom file. Use that to verify inheritance tracking.
         final File projectroot = new File (TestUtils.resolveFileResource( RESOURCE_BASE, "" )
@@ -91,14 +101,24 @@ public class ProjectComparatorTest
                 project.getModel().getDependencyManagement().getDependencies().forEach( dependency -> dependency.setVersion( dependency.getVersion() + "-redhat-1" ) );
             }
         } );
+        projectNew.forEach( project -> project.getModel().getDependencies().forEach( dependency -> {
+            if ( dependency.getGroupId().equals( "ch.qos.logback" ))
+            {
+                dependency.setGroupId( "org.foobar.logback" );
+            }
+        } ) );
 
-        ProjectComparator.compareProjects( session, projectOriginal, projectNew );
+        ProjectComparator.compareProjects( session,
+                                           relocationState.getDependencyRelocations(),
+                                           projectOriginal, projectNew );
 
 
         assertTrue( systemOutRule.getLog().contains( "Managed dependencies :" ) );
         assertTrue( systemOutRule.getLog().contains( "Project version :" ) );
         assertTrue( systemOutRule.getLog().contains( "-redhat-1" ) );
         assertTrue( systemOutRule.getLog().contains( "-->" ) );
+        assertTrue( systemOutRule.getLog().contains( "Unversioned relocation" ) );
+        assertTrue( systemOutRule.getLog().contains( "org.foobar" ) );
     }
 
     @SuppressWarnings( "deprecation" )

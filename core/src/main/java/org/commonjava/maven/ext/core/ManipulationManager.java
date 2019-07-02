@@ -27,12 +27,15 @@ import org.apache.maven.execution.MavenSession;
 import org.apache.maven.profiles.DefaultProfileManager;
 import org.apache.maven.profiles.activation.ProfileActivationException;
 import org.apache.maven.project.ProjectBuilder;
+import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.common.model.GAV;
 import org.commonjava.maven.ext.common.model.Project;
 import org.commonjava.maven.ext.common.util.ProjectComparator;
+import org.commonjava.maven.ext.common.util.WildcardMap;
 import org.commonjava.maven.ext.core.impl.Manipulator;
 import org.commonjava.maven.ext.core.state.CommonState;
+import org.commonjava.maven.ext.core.state.RelocationState;
 import org.commonjava.maven.ext.core.state.State;
 import org.commonjava.maven.ext.core.state.VersioningState;
 import org.commonjava.maven.ext.core.util.ManipulatorPriorityComparator;
@@ -193,7 +196,8 @@ public class ManipulationManager
                 throw new ManipulationException( "Marker/result file creation failed", e );
             }
 
-            ProjectComparator.compareProjects( session, originalProjects, currentProjects );
+            WildcardMap<ProjectVersionRef> map = (session.getState( RelocationState.class) == null ? new WildcardMap<>() : session.getState( RelocationState.class ).getDependencyRelocations());
+            ProjectComparator.compareProjects( session, map , originalProjects, currentProjects );
         }
 
         // Ensure shutdown of GalleyInfrastructure Executor Service

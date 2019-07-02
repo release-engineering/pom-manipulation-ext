@@ -22,14 +22,17 @@ import org.apache.maven.execution.MavenSession;
 import org.apache.maven.model.Model;
 import org.codehaus.plexus.DefaultPlexusContainer;
 import org.codehaus.plexus.PlexusContainer;
+import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.common.model.Project;
 import org.commonjava.maven.ext.common.util.ProjectComparator;
 import org.commonjava.maven.ext.common.util.PropertyResolver;
+import org.commonjava.maven.ext.common.util.WildcardMap;
 import org.commonjava.maven.ext.core.ManipulationSession;
 import org.commonjava.maven.ext.core.fixture.TestUtils;
 import org.commonjava.maven.ext.core.state.CommonState;
 import org.commonjava.maven.ext.core.state.DependencyState;
+import org.commonjava.maven.ext.core.state.RelocationState;
 import org.commonjava.maven.ext.core.state.VersioningState;
 import org.commonjava.maven.ext.io.PomIO;
 import org.junit.Before;
@@ -63,7 +66,7 @@ public class PropertiesUtilsTest
     private static final String RESOURCE_BASE = "properties/";
 
     @Rule
-    public final SystemOutRule systemRule = new SystemOutRule().enableLog().muteForSuccessfulTests();
+    public final SystemOutRule systemRule = new SystemOutRule().enableLog();//.muteForSuccessfulTests();
 
     @Rule
     public TemporaryFolder temp = new TemporaryFolder();
@@ -276,12 +279,12 @@ public class PropertiesUtilsTest
 
         List<Project> newprojects = pomIO.parseProject( projectroot );
 
-        ProjectComparator.compareProjects( session, projects, newprojects );
+        WildcardMap<ProjectVersionRef> map = (session.getState( RelocationState.class) == null ? new WildcardMap<>() : session.getState( RelocationState.class ).getDependencyRelocations());
+        ProjectComparator.compareProjects( session,
+                                           map,
+                                           projects, newprojects );
 
-        assertTrue( systemRule.getLog().contains( "[main] INFO  o.c.m.e.c.util.ProjectComparator - ------------------- project org.infinispan:infinispan-bom \n"
-                                                      + "[main] INFO  o.c.m.e.c.util.ProjectComparator - \n"
-                                                      + "[main] INFO  o.c.m.e.c.util.ProjectComparator - \n"
-                                                      + "[main] INFO  o.c.m.e.c.util.ProjectComparator - \n" ) );
+        assertTrue( systemRule.getLog().contains( "[main] INFO  o.c.m.e.c.util.ProjectComparator - ------------------- project org.infinispan:infinispan-bom \n"  ) );
     }
 
 

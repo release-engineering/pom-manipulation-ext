@@ -20,11 +20,11 @@ import org.commonjava.maven.ext.core.ManipulationSession;
 import org.commonjava.maven.ext.core.state.CommonState;
 import org.commonjava.maven.ext.core.state.VersioningState;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.contrib.java.lang.system.SystemOutRule;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -37,7 +37,8 @@ public class CheckStrictValueTest
 {
     private static final ManipulationSession session = new ManipulationSession();
 
-    private static final Logger LOGGER = LoggerFactory.getLogger( CheckStrictValueTest.class );
+    @Rule
+    public final SystemOutRule systemOutRule = new SystemOutRule().enableLog().muteForSuccessfulTests();
 
     @Before
     public void beforeTest() throws ManipulationException
@@ -108,8 +109,6 @@ public class CheckStrictValueTest
     @Test
     public void testCheckStrictValue()
     {
-        LOGGER.info ("Testing source {} to target {}", source, target);
-
         assertEquals( result, PropertiesUtils.checkStrictValue( session, source, target ) );
     }
 }
