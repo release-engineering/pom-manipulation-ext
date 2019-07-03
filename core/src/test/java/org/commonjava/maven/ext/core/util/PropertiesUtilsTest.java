@@ -284,7 +284,7 @@ public class PropertiesUtilsTest
                                            map,
                                            projects, newprojects );
 
-        assertTrue( systemRule.getLog().contains( "[main] INFO  o.c.m.e.c.util.ProjectComparator - ------------------- project org.infinispan:infinispan-bom \n"  ) );
+        assertTrue( systemRule.getLog().contains( "[main] INFO  o.c.m.e.c.util.ProjectComparator - ------------------- project org.infinispan:infinispan-bom\n"  ) );
     }
 
 

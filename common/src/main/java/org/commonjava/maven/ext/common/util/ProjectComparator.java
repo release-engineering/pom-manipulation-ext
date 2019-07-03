@@ -16,6 +16,7 @@
 
 package org.commonjava.maven.ext.common.util;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.maven.model.Profile;
 import org.commonjava.maven.atlas.ident.ref.ArtifactRef;
@@ -27,7 +28,11 @@ import org.commonjava.maven.ext.common.model.Project;
 import org.commonjava.maven.ext.common.session.MavenSessionHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.helpers.MessageFormatter;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -35,6 +40,7 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
+import static org.apache.commons.lang.StringUtils.isNotEmpty;
 import static org.commonjava.maven.ext.common.util.ProjectComparator.Type.DEPENDENCIES;
 import static org.commonjava.maven.ext.common.util.ProjectComparator.Type.DEPENDENCIES_UNVERSIONED;
 import static org.commonjava.maven.ext.common.util.ProjectComparator.Type.MANAGED_DEPENDENCIES;
@@ -48,11 +54,18 @@ import static org.commonjava.maven.ext.common.util.ProjectComparator.Type.PROFIL
 
 public class ProjectComparator
 {
-    private static final String REPORT_NON_ALIGNED = "reportNonAligned";
-
     private static final Logger logger = LoggerFactory.getLogger( ProjectComparator.class );
 
+    public static final String REPORT_NON_ALIGNED = "reportNonAligned";
+
+    public static final String REPORT_OUTPUT_FILE = "reportOutputFile";
+
+
+    /**
+     * Used as toggle within lamdas to denote whether to add a new line or not.
+     */
     private static final AtomicBoolean spacerLine = new AtomicBoolean();
+
 
     enum Type
     {
@@ -103,6 +116,8 @@ public class ProjectComparator
                     throws ManipulationException
     {
         final boolean reportNonAligned = Boolean.parseBoolean( session.getUserProperties().getProperty( REPORT_NON_ALIGNED, "false") );
+        final String reportOutputFile = session.getUserProperties().getProperty( REPORT_OUTPUT_FILE, "");
+        final StringBuilder builder = new StringBuilder( 500 );
 
         try
         {
@@ -111,51 +126,53 @@ public class ProjectComparator
                                         filter( originalProject -> newProject.getArtifactId().equals( originalProject.getArtifactId() )
                                                                            && newProject.getGroupId().equals( originalProject.getGroupId() ) ).forEach( originalProject ->
                         {
-                            logger.info( "------------------- project {} ", newProject.getKey().asProjectRef() );
+                            append( builder, "------------------- project {}", newProject.getKey().asProjectRef() );
                             if ( ! originalProject.getVersion().equals( newProject.getVersion() ) )
                             {
-                                logger.info( "\tProject version : {} ---> {}", originalProject.getVersion(), newProject.getVersion() );
+                                append( builder, "\tProject version : {} ---> {}", originalProject.getVersion(), newProject.getVersion() );
                                 spacerLine.set( true );
                             }
-                            injectSpacerLine();
+                            injectSpacerLine(builder);
 
                             newProject.getModel().getProperties().forEach( ( nKey, nValue ) ->
                                 originalProject.getModel().getProperties().forEach( ( oKey, oValue ) -> {
                                     if ( oKey != null && oKey.equals( nKey ) &&  oValue != null &&  !oValue.equals( nValue ) )
                                     {
-                                        logger.info( "\tProperty : key {} ; value {} ---> {}", oKey, oValue, nValue );
+                                        append( builder, "\tProperty : key {} ; value {} ---> {}", oKey, oValue, nValue);
                                         spacerLine.set( true );
                                     }
                                 } )
                             );
-                            injectSpacerLine();
+                            injectSpacerLine( builder );
 
                             compareDependencies( DEPENDENCIES,
+                                                 builder,
                                                  dependencyRelocations,
                                                  reportNonAligned,
                                                  handleDependencies( session, originalProject, null, DEPENDENCIES ),
                                                  handleDependencies( session, newProject, null, DEPENDENCIES ) );
 
-                            injectSpacerLine();
+                            injectSpacerLine( builder );
 
-                            compareDependencies( MANAGED_DEPENDENCIES, dependencyRelocations, reportNonAligned,
+                            compareDependencies( MANAGED_DEPENDENCIES, builder, dependencyRelocations, reportNonAligned,
                                                  handleDependencies( session, originalProject, null,
                                                                      MANAGED_DEPENDENCIES ),
                                                  handleDependencies( session, newProject, null, MANAGED_DEPENDENCIES ) );
 
-                            injectSpacerLine();
+                            injectSpacerLine( builder );
 
-                            compareDependencies( DEPENDENCIES_UNVERSIONED, dependencyRelocations, reportNonAligned,
+                            compareDependencies( DEPENDENCIES_UNVERSIONED, builder, dependencyRelocations, reportNonAligned,
                                                  handleDependencies( session, originalProject, null, DEPENDENCIES_UNVERSIONED ),
                                                  handleDependencies( session, newProject, null, DEPENDENCIES_UNVERSIONED ) );
 
-                            injectSpacerLine();
+                            injectSpacerLine( builder );
 
                             comparePlugins( PLUGINS,
+                                                 builder,
                                                  reportNonAligned,
                                                  handlePlugins( session, originalProject, null, PLUGINS ),
                                                  handlePlugins( session, newProject, null, PLUGINS ) );
-                            comparePlugins( MANAGED_PLUGINS, reportNonAligned,
+                            comparePlugins( MANAGED_PLUGINS, builder, reportNonAligned,
                                             handlePlugins( session, originalProject, null,
                                                            MANAGED_PLUGINS ),
                                             handlePlugins( session, newProject, null, MANAGED_PLUGINS ) );
@@ -171,21 +188,21 @@ public class ProjectComparator
                                     oldProfile.getProperties().forEach( ( oKey, oValue ) -> {
                                         if ( oKey != null && oKey.equals( nKey ) &&  oValue != null &&  !oValue.equals( nValue ) )
                                         {
-                                            logger.info( "\tProfile property : key {} ; value {} ---> {}", oKey, oValue, nValue );
+                                            append( builder, "\tProfile property : key {} ; value {} ---> {}", oKey, oValue, nValue );
                                             spacerLine.set( true );
                                         }
                                     } )
                                 );
 
-                                injectSpacerLine();
+                                injectSpacerLine( builder );
 
-                                compareDependencies( PROFILE_DEPENDENCIES, dependencyRelocations, reportNonAligned,
+                                compareDependencies( PROFILE_DEPENDENCIES, builder, dependencyRelocations, reportNonAligned,
                                                      handleDependencies( session, originalProject, oldProfile, PROFILE_DEPENDENCIES ),
                                                      handleDependencies( session, newProject, newProfile, PROFILE_DEPENDENCIES ) );
 
-                                injectSpacerLine();
+                                injectSpacerLine( builder );
 
-                                compareDependencies( PROFILE_MANAGED_DEPENDENCIES, dependencyRelocations,
+                                compareDependencies( PROFILE_MANAGED_DEPENDENCIES, builder, dependencyRelocations,
                                                      reportNonAligned,
                                                      handleDependencies( session, originalProject,
                                                                          oldProfile,
@@ -193,22 +210,22 @@ public class ProjectComparator
                                                      handleDependencies( session, newProject, newProfile,
                                                                          PROFILE_MANAGED_DEPENDENCIES ) );
 
-                                injectSpacerLine();
+                                injectSpacerLine( builder );
 
-                                compareDependencies( PROFILE_DEPENDENCIES_UNVERSIONED, dependencyRelocations,
+                                compareDependencies( PROFILE_DEPENDENCIES_UNVERSIONED, builder, dependencyRelocations,
                                                      reportNonAligned,
                                                      handleDependencies( session, originalProject, oldProfile, PROFILE_DEPENDENCIES_UNVERSIONED ),
                                                      handleDependencies( session, newProject, newProfile, PROFILE_DEPENDENCIES_UNVERSIONED ) );
 
-                                injectSpacerLine();
+                                injectSpacerLine( builder );
 
-                                comparePlugins( PROFILE_PLUGINS, reportNonAligned,
+                                comparePlugins( PROFILE_PLUGINS, builder, reportNonAligned,
                                                 handlePlugins( session, originalProject, oldProfile, PROFILE_PLUGINS ),
                                                 handlePlugins( session, newProject, newProfile, PROFILE_PLUGINS ) );
 
-                                injectSpacerLine();
+                                injectSpacerLine( builder );
 
-                                comparePlugins( PROFILE_MANAGED_PLUGINS, reportNonAligned,
+                                comparePlugins( PROFILE_MANAGED_PLUGINS, builder, reportNonAligned,
                                                 handlePlugins( session, originalProject,
                                                                oldProfile,
                                                                PROFILE_MANAGED_PLUGINS ),
@@ -216,15 +233,22 @@ public class ProjectComparator
                                                                          PROFILE_MANAGED_PLUGINS ) );
                             } ) );
                         } ) );
+            if ( isNotEmpty( reportOutputFile ) )
+            {
+                File report = new File ( reportOutputFile);
+                FileUtils.writeStringToFile( report, builder.toString(), Charset.defaultCharset() );
+            }
+            logger.info( builder.toString() );
         }
-        catch (ManipulationUncheckedException e)
+        catch ( ManipulationUncheckedException | IOException e)
         {
             throw (ManipulationException)e.getCause();
         }
     }
 
 
-    private static void compareDependencies( Type type, WildcardMap<ProjectVersionRef> dependencyRelocations, boolean reportNonAligned, Set<ArtifactRef> originalDeps,
+    private static void compareDependencies( Type type, StringBuilder builder, WildcardMap<ProjectVersionRef> dependencyRelocations,
+                                             boolean reportNonAligned, Set<ArtifactRef> originalDeps,
                                              Set<ArtifactRef> newDeps )
     {
         Set<ArtifactRef> nonAligned = new HashSet<>();
@@ -237,12 +261,12 @@ public class ProjectComparator
                 if ( dependencyRelocations.containsKey( orig ) )
                 {
                     ProjectVersionRef p = dependencyRelocations.get( orig );
-                    logger.info( "\tUnversioned relocation : {} ---> {}:{}:{}", originalDep, p.getGroupId(),
-                                 p.getArtifactId().equals( "*" ) ? orig.getArtifactId() : p.getArtifactId(), p.getVersionString() );
+                    append( builder, "\tUnversioned relocation : {} ---> {}:{}:{}", originalDep, p.getGroupId(),
+                            p.getArtifactId().equals( "*" ) ? orig.getArtifactId() : p.getArtifactId(), p.getVersionString() );
                     spacerLine.set( true );
                 }
             } );
-            injectSpacerLine();
+            injectSpacerLine( builder );
         }
         else
         {
@@ -255,8 +279,7 @@ public class ProjectComparator
                                                              .forEach( newArtifact -> {
                                                                  if ( !newArtifact.getVersionString().equals( originalArtifact.getVersionString() ) )
                                                                  {
-                                                                     logger.info( "\t{} : {} --> {} ", type,
-                                                                                  originalArtifact, newArtifact );
+                                                                     append( builder, "\t{} : {} --> {}", type, originalArtifact, newArtifact);
                                                                      spacerLine.set( true );
                                                                  }
                                                                  else if ( reportNonAligned )
@@ -267,15 +290,16 @@ public class ProjectComparator
 
             if ( dependencyRelocations.size() > 0 )
             {
-                injectSpacerLine();
+                injectSpacerLine( builder );
 
                 originalDeps.forEach( originalDep -> {
                     ProjectRef orig = originalDep.asProjectRef();
                     if ( dependencyRelocations.containsKey( orig ) )
                     {
                         ProjectVersionRef p = dependencyRelocations.get( orig );
-                        logger.info( "\tRelocation : {} ---> {}:{}:{}", originalDep, p.getGroupId(),
-                                     p.getArtifactId().equals( "*" ) ? orig.getArtifactId() : p.getArtifactId(), p.getVersionString() );
+                        append( builder, "\tRelocation : {} ---> {}:{}:{}", originalDep, p.getGroupId(),
+                                p.getArtifactId().equals( "*" ) ? orig.getArtifactId() : p.getArtifactId(),
+                                p.getVersionString() );
                         spacerLine.set( true );
                     }
                 } );
@@ -284,13 +308,12 @@ public class ProjectComparator
 
         if ( nonAligned.size() > 0 )
         {
-            nonAligned.forEach( na -> logger.info( "\tNon-Aligned {} : {} ", type, na ) );
-            logger.info( "" );
+            nonAligned.forEach( na -> append( builder, "\tNon-Aligned {} : {}", type, na));
+            builder.append( System.lineSeparator() );
         }
     }
 
-
-    private static void comparePlugins( Type type, boolean reportNonAligned, Set<ProjectVersionRef> originalPlugins, Set<ProjectVersionRef> newPlugins )
+    private static void comparePlugins( Type type, StringBuilder builder, boolean reportNonAligned, Set<ProjectVersionRef> originalPlugins, Set<ProjectVersionRef> newPlugins )
     {
         Set<ProjectVersionRef> nonAligned = new HashSet<>( );
         AtomicBoolean spacerLine = new AtomicBoolean();
@@ -301,7 +324,7 @@ public class ProjectComparator
                 {
                     if ( ! newArtifact.getVersionString().equals( originalPVR.getVersionString() ) )
                     {
-                        logger.info( "\t{} : {} --> {} ", type, originalPVR, newArtifact );
+                        append( builder, "\t{} : {} --> {}", type, originalPVR, newArtifact );
                         spacerLine.set( true );
                     }
                     else if ( reportNonAligned )
@@ -313,9 +336,30 @@ public class ProjectComparator
 
         if ( nonAligned.size() > 0 )
         {
-            nonAligned.forEach( pv -> logger.info( "\tNon-Aligned {} : {} ", type, pv ) );
-            logger.info( "" );
+            nonAligned.forEach( pv -> append( builder, "\tNon-Aligned {} : {}", type, pv ));
+            builder.append( System.lineSeparator() );
         }
+    }
+
+    private static void injectSpacerLine( StringBuilder builder )
+    {
+        if ( spacerLine.get() )
+        {
+            builder.append( System.lineSeparator() );
+            spacerLine.set( false );
+        }
+    }
+
+    /**
+     * Wraps appending to the string builder using SLF4J style substitutions.
+     * @param builder the string builder
+     * @param message the message (possibly with parameters)
+     * @param args optional parameters.
+     */
+    private static void append (StringBuilder builder, String message, Object ...args)
+    {
+        builder.append( MessageFormatter.arrayFormat( message, args ).getMessage() );
+        builder.append( System.lineSeparator() );
     }
 
     private static Set<ArtifactRef> handleDependencies( MavenSessionHandler session, Project project, Profile profile,
@@ -398,15 +442,6 @@ public class ProjectComparator
         catch ( ManipulationException e )
         {
             throw new ManipulationUncheckedException( e );
-        }
-    }
-
-    private static void injectSpacerLine()
-    {
-        if ( spacerLine.get() )
-        {
-            logger.info( "" );
-            spacerLine.set( false );
         }
     }
 }
