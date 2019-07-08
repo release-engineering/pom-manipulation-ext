@@ -15,7 +15,6 @@
  */
 package org.commonjava.maven.ext.core.impl;
 
-import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.execution.DefaultMavenExecutionRequest;
 import org.apache.maven.execution.DefaultMavenExecutionResult;
 import org.apache.maven.execution.MavenExecutionRequest;
@@ -50,7 +49,6 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
-import static org.commonjava.maven.ext.core.fixture.TestUtils.createSession;
 import static org.commonjava.maven.ext.core.impl.DistributionEnforcingManipulator.MAVEN_DEPLOY_ARTIFACTID;
 import static org.commonjava.maven.ext.core.impl.DistributionEnforcingManipulator.MAVEN_INSTALL_ARTIFACTID;
 import static org.commonjava.maven.ext.core.impl.DistributionEnforcingManipulator.MAVEN_PLUGIN_GROUPID;
@@ -147,7 +145,7 @@ public class DistributionEnforcingManipulatorTest
         model.setBuild( build );
 
         applyTest( off, model, model );
-        assertSkip( model, null, true, Boolean.FALSE );
+        assertSkip( model, null );
     }
 
     @Test
@@ -157,7 +155,7 @@ public class DistributionEnforcingManipulatorTest
         final Model model = TestUtils.resolveModelResource( RESOURCE_BASE, "simple-deploy-skip.pom" );
 
         applyTest( off, model, model );
-        assertSkip( model, null, true, Boolean.FALSE );
+        assertSkip( model, null );
     }
 
     @Test
@@ -167,7 +165,7 @@ public class DistributionEnforcingManipulatorTest
         final Model model = TestUtils.resolveModelResource( RESOURCE_BASE, "simple-deploy-skip.pom" );
 
         applyTest( detect, model, model );
-        assertSkip( model, null, true, Boolean.FALSE );
+        assertSkip( model, null );
     }
 
     @Test
@@ -177,7 +175,7 @@ public class DistributionEnforcingManipulatorTest
         final Model model = TestUtils.resolveModelResource( RESOURCE_BASE, "simple-detect-skip.pom" );
 
         applyTest( detect, model, model );
-        assertSkip( model, null, true, Boolean.FALSE );
+        assertSkip( model, null );
     }
 
     @Test
@@ -187,7 +185,7 @@ public class DistributionEnforcingManipulatorTest
         final Model model = TestUtils.resolveModelResource( RESOURCE_BASE, "exec-detect-skip.pom" );
 
         applyTest( detect, model, model );
-        assertSkip( model, null, true, Boolean.FALSE );
+        assertSkip( model, null );
     }
 
     @Test
@@ -197,7 +195,7 @@ public class DistributionEnforcingManipulatorTest
         final Model model = TestUtils.resolveModelResource( RESOURCE_BASE, "profile-deploy-skip.pom" );
 
         applyTest( off, model, model );
-        assertSkip( model, "test", true, Boolean.FALSE );
+        assertSkip( model, "test" );
     }
 
     private void initTest( final EnforcingMode mode, final boolean enabled )
@@ -231,7 +229,7 @@ public class DistributionEnforcingManipulatorTest
     {
         final MavenExecutionRequest req =
             new DefaultMavenExecutionRequest().setUserProperties( userCliProperties )
-                                              .setRemoteRepositories( Collections.<ArtifactRepository> emptyList() );
+                                              .setRemoteRepositories( Collections.emptyList() );
 
         final PlexusContainer container = new DefaultPlexusContainer();
         final MavenSession mavenSession = new MavenSession( container, null, req, new DefaultMavenExecutionResult() );
@@ -240,7 +238,7 @@ public class DistributionEnforcingManipulatorTest
 
     }
 
-    private void assertSkip( final Model model, final String profileId, final boolean deploy, final boolean state )
+    private void assertSkip( final Model model, final String profileId )
     {
         BuildBase build = null;
         if ( profileId != null )
@@ -266,13 +264,13 @@ public class DistributionEnforcingManipulatorTest
 
         final Plugin plugin =
             build.getPluginsAsMap()
-                 .get( ga( MAVEN_PLUGIN_GROUPID, deploy ? MAVEN_DEPLOY_ARTIFACTID : MAVEN_INSTALL_ARTIFACTID ) );
+                 .get( ga( MAVEN_PLUGIN_GROUPID, true ? MAVEN_DEPLOY_ARTIFACTID : MAVEN_INSTALL_ARTIFACTID ) );
 
         assertThat( plugin, notNullValue() );
 
         assertThat( plugin.getConfiguration()
                           .toString()
-                          .contains( "<skip>" + state + "</skip>" ), equalTo( true ) );
+                          .contains( "<skip>" + Boolean.FALSE + "</skip>" ), equalTo( true ) );
     }
 
     private void applyTest( final EnforcingMode mode, final Model model, final Model expectChanged )
@@ -348,9 +346,7 @@ public class DistributionEnforcingManipulatorTest
         session = new ManipulationSession();
 
         final GalleyInfrastructure galleyInfra =
-            new GalleyInfrastructure( session.getTargetDir(), session.getRemoteRepositories(),
-                            session.getLocalRepository(), session.getSettings(), session.getActiveProfiles(),
-                            null, null, null, temp.newFolder( "cache-dir" ) );
+            new GalleyInfrastructure( session, null).init( null, null, temp.newFolder( "cache-dir" ) );
 
         final GalleyAPIWrapper wrapper = new GalleyAPIWrapper( galleyInfra );
 

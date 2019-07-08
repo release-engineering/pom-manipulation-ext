@@ -123,8 +123,7 @@ public class ManipulationManager
 
         for ( final ExtensionInfrastructure infra : infrastructure.values() )
         {
-            infra.init( session.getTargetDir(), session.getRemoteRepositories(), session.getLocalRepository(),
-                        session.getSettings(), session.getActiveProfiles() );
+            infra.init( );
         }
 
         orderedManipulators = new ArrayList<>( manipulators.values() );

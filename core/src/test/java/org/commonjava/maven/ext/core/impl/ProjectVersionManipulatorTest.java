@@ -633,8 +633,7 @@ public class ProjectVersionManipulatorTest
         TestVersioningModifier( final ManipulationSession session )
             throws ManipulationException
         {
-            super( new VersionCalculator( new GalleyAPIWrapper( new GalleyInfrastructure( session.getTargetDir(), session.getRemoteRepositories(),
-                                                                                          session.getLocalRepository(), session.getSettings(), session.getActiveProfiles() ) ) ) );
+            super( new VersionCalculator( new GalleyAPIWrapper( new GalleyInfrastructure( session, null).init() ) ) );
             this.session = session;
             init (session);
         }

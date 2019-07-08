@@ -1209,8 +1209,7 @@ public class VersioningCalculatorTest
                                final File cacheDir )
             throws ManipulationException
         {
-            super( new GalleyAPIWrapper( new GalleyInfrastructure( session.getTargetDir(), session.getRemoteRepositories(),
-                                                                   session.getLocalRepository(), session.getSettings(), session.getActiveProfiles(), new DefaultMirrorSelector(), mdLoc,
+            super( new GalleyAPIWrapper( new GalleyInfrastructure( session, new DefaultMirrorSelector()).init(mdLoc,
                                                                    mdTrans, cacheDir ) ) );
         }
 

@@ -15,13 +15,12 @@
  */
 package org.commonjava.maven.ext.io.resolver;
 
-import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.execution.MavenSession;
-import org.apache.maven.settings.Settings;
 import org.commonjava.maven.ext.common.ManipulationException;
+import org.commonjava.maven.galley.model.Location;
+import org.commonjava.maven.galley.spi.transport.Transport;
 
 import java.io.File;
-import java.util.List;
 
 /**
  * Represents a piece of extension infrastructure that gets initialized when the {@link MavenSession} becomes available.
@@ -30,9 +29,9 @@ import java.util.List;
  */
 public interface ExtensionInfrastructure
 {
-    void init( final File targetDirectory, final List<ArtifactRepository> remoteRepositories,
-               final ArtifactRepository localRepository, final Settings settings, final List<String> activeProfiles)
-        throws ManipulationException;
+    ExtensionInfrastructure init( ) throws ManipulationException;
 
-    void finish ();
+    ExtensionInfrastructure init( final Location customLocation, final Transport customTransport, File cacheDir ) throws ManipulationException;
+
+    void finish();
 }

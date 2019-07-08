@@ -26,6 +26,7 @@ import org.junit.rules.TemporaryFolder;
 
 import java.io.File;
 import java.net.URL;
+import java.nio.charset.Charset;
 
 import static org.junit.Assert.assertEquals;
 
@@ -47,14 +48,14 @@ public class FileIOTest
     {
         File res = folder.newFolder();
         GalleyInfrastructure galleyInfra = new GalleyInfrastructure
-                        ( null, null, null, null, null, null, null, null, res );
+                        ( null, null).init( null, null, res );
         fileIO = new FileIO( galleyInfra );
    }
 
     @Test
     public void testReadURL() throws Exception
     {
-        String urlPom = FileUtils.readFileToString( fileIO.resolveURL( new URL ( mockServer.getUrl()) ) );
+        String urlPom = FileUtils.readFileToString( fileIO.resolveURL( new URL ( mockServer.getUrl()) ), Charset.defaultCharset() );
         String filePom = FileUtils.readFileToString( new File ( new File (FileIOTest.class.getResource( "/" ).getPath())
                                           .getParentFile().getParentFile(), "pom.xml"), "UTF-8" );
 

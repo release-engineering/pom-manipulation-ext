@@ -80,7 +80,7 @@ public class GalleyAPIWrapper
         final Document document = infra.getXml()
                                        .parseDocument( xml, new ByteArrayInputStream( xml.getBytes(StandardCharsets.UTF_8) ) );
 
-        final DocRef<ProjectRef> ref = new DocRef<ProjectRef>( new SimpleProjectRef( "unknown", "unknown" ), xml, document );
+        final DocRef<ProjectRef> ref = new DocRef<>( new SimpleProjectRef( "unknown", "unknown" ), xml, document );
         return new MavenXmlView<>( Collections.singletonList( ref ), infra.getXPath(), infra.getXml() );
     }
 

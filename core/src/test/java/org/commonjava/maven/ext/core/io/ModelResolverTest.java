@@ -46,8 +46,7 @@ public class ModelResolverTest
     {
         final ManipulationSession session = new ManipulationSession();
         final GalleyInfrastructure galleyInfra =
-            new GalleyInfrastructure( session.getTargetDir(), session.getRemoteRepositories(), session.getLocalRepository(),
-                                      session.getSettings(), session.getActiveProfiles(), null, null, null, temp.newFolder(
+            new GalleyInfrastructure( session, null).init( null, null, temp.newFolder(
                             "cache-dir" ) );
         final GalleyAPIWrapper wrapper = new GalleyAPIWrapper( galleyInfra );
         final ModelIO model = new ModelIO(wrapper);

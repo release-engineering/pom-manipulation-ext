@@ -128,33 +128,41 @@ public class GalleyInfrastructure
         this.sessionHandler = session;
     }
 
-    // Used by tests only.
-    public GalleyInfrastructure( final File targetDirectory, final List<ArtifactRepository> remoteRepositories, final ArtifactRepository localRepository,
-                                 final Settings settings, final List<String> activeProfiles)
-        throws ManipulationException
-    {
-        init( targetDirectory, remoteRepositories, localRepository, settings, activeProfiles);
-    }
 
-    // Used by tests only.
-    public GalleyInfrastructure( final File targetDirectory, final List<ArtifactRepository> remoteRepositories, final ArtifactRepository localRepository,
-                                 final Settings settings, final List<String> activeProfiles, final MirrorSelector mirrorSelector,
-                                 final Location customLocation, final Transport customTransport, final File cacheDir )
-        throws ManipulationException
+    @Override
+    public GalleyInfrastructure init()
+                    throws ManipulationException
     {
-        this.mirrorSelector = mirrorSelector;
-        init( targetDirectory, remoteRepositories, localRepository, settings, activeProfiles, customLocation, customTransport, cacheDir );
+        if ( sessionHandler == null )
+        {
+            return init( null, null, null, null, null,
+                         null, null, null );
+        }
+        else
+        {
+            return init( sessionHandler.getTargetDir(), sessionHandler.getRemoteRepositories(), sessionHandler.getLocalRepository(),
+                         sessionHandler.getSettings(), sessionHandler.getActiveProfiles(), null, null, null );
+        }
     }
 
     @Override
-    public void init( final File targetDirectory, final List<ArtifactRepository> remoteRepositories, final ArtifactRepository localRepository,
-                      final Settings settings, final List<String> activeProfiles)
-        throws ManipulationException
+    public GalleyInfrastructure init(final Location customLocation, final Transport customTransport, File cacheDir )
+                    throws ManipulationException
     {
-        init( targetDirectory, remoteRepositories, localRepository, settings, activeProfiles, null, null, null );
+        if ( sessionHandler == null )
+        {
+            return init( null, null, null, null, null,
+                         customLocation, customTransport, cacheDir );
+        }
+        else
+        {
+            return init( sessionHandler.getTargetDir(), sessionHandler.getRemoteRepositories(), sessionHandler.getLocalRepository(),
+                         sessionHandler.getSettings(), sessionHandler.getActiveProfiles(), customLocation, customTransport, cacheDir );
+        }
     }
 
-    private void init( final File targetDirectory, final List<ArtifactRepository> remoteRepositories, final ArtifactRepository localRepository,
+
+    private GalleyInfrastructure init( final File targetDirectory, final List<ArtifactRepository> remoteRepositories, final ArtifactRepository localRepository,
                       final Settings settings, final List<String> activeProfiles, final Location customLocation,
                        final Transport customTransport, File cacheDir_ )
         throws ManipulationException
@@ -288,6 +296,8 @@ public class GalleyInfrastructure
             new MavenPomReader( xml, locationExpander, artifactManager, xpaths, pluginDefaults, pluginImplications );
 
         metadataReader = new MavenMetadataReader( xml, locationExpander, metadataManager, xpaths );
+
+        return this;
     }
 
     private boolean localMetadataScanningEnabled()
