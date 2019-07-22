@@ -81,7 +81,7 @@
     <atlasVersion>0.17.1</atlasVersion>
     <galleyVersion>0.16.3</galleyVersion>
 
-    <jacksonVersion>2.9.9.1</jacksonVersion>
+    <jacksonVersion>2.10.0.pr1</jacksonVersion>
 
     <enforceBestPractices>false</enforceBestPractices>
   </properties>

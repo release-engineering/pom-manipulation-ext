@@ -174,7 +174,7 @@ public class ProjectComparatorTest
         assertTrue( systemOutRule.getLog().contains( "-redhat-1" ) );
         assertTrue( systemOutRule.getLog().contains( "-->" ) );
         assertFalse( systemOutRule.getLog().contains( "org.foobar" ) );
-        assertTrue( systemOutRule.getLog().contains( "Non-Aligned Managed dependencies : com.fasterxml.jackson.core:jackson-annotations:jar:2.9.9" ) );
+        assertTrue( systemOutRule.getLog().contains( "Non-Aligned Managed dependencies : com.fasterxml.jackson.core:jackson-annotations:jar:2." ) );
         assertTrue( systemOutRule.getLog().contains( "Non-Aligned Managed plugins : org.codehaus.mojo:animal-sniffer-maven-plugin:1.1" ) );
     }
 

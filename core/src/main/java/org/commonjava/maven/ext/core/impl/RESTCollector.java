@@ -387,6 +387,8 @@ public class RESTCollector
                                                                    PropertyResolver.resolveInheritedProperties( session,
                                                                                                                 project,
                                                                                                                 d.getScope() ) );
+
+            // sa.getVersionString().contains( vs.getRebuildSuffix() ) || vs.getSuffixAlternatives().stream().anyMatch( s -> sa.getVersionString().contains( s ) )
             if ( ! sa.getVersionString().contains( "$" ) )
             {
                 deps.add( sa );
