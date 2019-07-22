@@ -388,4 +388,12 @@ If the property `-DexcludedScopes=<scope>,....` is set, PME will **ignore** any 
 
 ### REST and Suffix Alignment
 
+<table bgcolor="#ffff00">
+<tr>
+<td>
+    <b>NOTE</b> : Available from version 3.8
+</td>
+</tr>
+</table>
+
 If the property `-DrestSuffixAlign` is set to false (default: true) then PME will **not** attempt to align any dependency that has an existing suffix. This _only_ applies during REST alignment. The use-case for this is where some dependencies have already been manually aligned to specific values and the user does not wish them to be changed.
