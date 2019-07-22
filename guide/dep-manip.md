@@ -385,3 +385,15 @@ If the property `-DbomBuilder=true` is set, then the PME BOM Builder will be act
 ### Scope Exclusion
 
 If the property `-DexcludedScopes=<scope>,....` is set, PME will **ignore** any dependency with the specified scope. This means that, if for example the property was set to `test` then alignment (**and** any other relevant manipulation) would not happen for test scoped dependencies. Note that valid scopes are those specified in [Maven Scopes](https://maven.apache.org/guides/introduction/introduction-to-dependency-mechanism.html#Dependency_Scope) and if an invalid scope is passed in an exception will be thrown.
+
+### REST and Suffix Alignment
+
+<table bgcolor="#ffff00">
+<tr>
+<td>
+    <b>NOTE</b> : Available from version 3.8
+</td>
+</tr>
+</table>
+
+If the property `-DrestSuffixAlign` is set to false (default: true) then PME will **not** attempt to align any dependency that has an existing suffix. This _only_ applies during REST alignment. The use-case for this is where some dependencies have already been manually aligned to specific values and the user does not wish them to be changed.
