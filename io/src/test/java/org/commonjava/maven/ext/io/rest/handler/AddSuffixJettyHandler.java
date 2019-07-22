@@ -111,6 +111,7 @@ public class AddSuffixJettyHandler
                 requestBody = gavSchema.gavs;
 
                 boolean useCustomMixedSuffix = requestBody.stream().anyMatch( r -> r.get( "artifactId" ).equals( "rest-version-manip-mixed-suffix-orig-rh" ) );
+                boolean usePartialCustomMixedSuffix = requestBody.stream().anyMatch( r -> r.get( "artifactId" ).equals( "rest-version-manip-mixed-suffix-orig-rh-norhalign" ) );
 
                 // Prepare Response
                 for ( Map<String, Object> gav : requestBody )
@@ -148,9 +149,9 @@ public class AddSuffixJettyHandler
                             bestMatchVersion = version + "-" + EXTENDED_SUFFIX;
                         }
                     }
-                    else if ( useCustomMixedSuffix )
+                    else if ( useCustomMixedSuffix || usePartialCustomMixedSuffix)
                     {
-                        if ( gav.get( "artifactId" ).equals( "commons-lang" ) )
+                        if ( useCustomMixedSuffix && gav.get( "artifactId" ).equals( "commons-lang" ) )
                         {
                             // We know its redhat-1 (hardcoded in the pom).
                             int separatorIndex = version.indexOf( SUFFIX ) - 1;
@@ -159,7 +160,7 @@ public class AddSuffixJettyHandler
                                                                                                         separatorIndex + 1 )
                                                             + MIXED_SUFFIX;
                         }
-                        else if ( gav.get( "artifactId" ).equals( "errai-tools" ) )
+                        else if ( useCustomMixedSuffix && gav.get( "artifactId" ).equals( "errai-tools" ) )
                         {
                             int separatorIndex = version.indexOf( SUFFIX ) - 1;
                             bestMatchVersion =
@@ -167,7 +168,7 @@ public class AddSuffixJettyHandler
                                                                                                            separatorIndex + 1 )
                                             + EXTENDED_SUFFIX;
                         }
-                        else if ( gav.get( "artifactId" ).equals( "commons-httpclient" ) )
+                        else if ( useCustomMixedSuffix && gav.get( "artifactId" ).equals( "commons-httpclient" ) )
                         {
                             int separatorIndex = version.indexOf( "temporary-redhat" ) - 1;
                             bestMatchVersion =

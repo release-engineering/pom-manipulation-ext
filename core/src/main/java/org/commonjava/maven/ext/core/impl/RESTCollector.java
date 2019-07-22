@@ -376,6 +376,7 @@ public class RESTCollector
                     throws ManipulationException
     {
         final VersioningState vs = session.getState( VersioningState.class );
+        final RESTState state = session.getState( RESTState.class );
 
         for ( ArtifactRef pvr : dependencies.keySet() )
         {
@@ -388,8 +389,22 @@ public class RESTCollector
                                                                                                                 project,
                                                                                                                 d.getScope() ) );
 
-            // sa.getVersionString().contains( vs.getRebuildSuffix() ) || vs.getSuffixAlternatives().stream().anyMatch( s -> sa.getVersionString().contains( s ) )
-            if ( ! sa.getVersionString().contains( "$" ) )
+            boolean validate = true;
+
+            // Don't bother adding an artifact with a property that couldn't be resolved.
+            if (sa.getVersionString().contains( "$" ))
+            {
+                validate = false;
+            }
+            // If we are not (re)aligning suffixed dependencies then ignore them.
+            // Null check to avoid problems with some tests where state is not instantiated.
+            if ( state != null && !state.isRestSuffixAlign() &&
+                            ( sa.getVersionString().contains( vs.getRebuildSuffix() ) ||
+                                            vs.getSuffixAlternatives().stream().anyMatch( s -> sa.getVersionString().contains( s ) ) ) )
+            {
+                validate = false;
+            }
+            if (validate)
             {
                 deps.add( sa );
             }

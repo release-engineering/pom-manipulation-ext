@@ -33,6 +33,8 @@ public class RESTState implements State
 
     private final Translator restEndpoint;
 
+    private final boolean restSuffixAlign;
+
     public RESTState( final ManipulationSession session ) throws ManipulationException
     {
         final VersioningState vState = session.getState( VersioningState.class );
@@ -41,9 +43,10 @@ public class RESTState implements State
         restURL = userProps.getProperty( "restURL" );
 
         String repositoryGroup = userProps.getProperty( "restRepositoryGroup", "" );
-        int restMaxSize = Integer.valueOf( userProps.getProperty( "restMaxSize", "-1" ) );
-        int restMinSize = Integer.valueOf( userProps.getProperty( "restMinSize",
-                                                                  String.valueOf( DefaultTranslator.CHUNK_SPLIT_COUNT ) ) );
+        int restMaxSize = Integer.parseInt( userProps.getProperty( "restMaxSize", "-1" ) );
+        int restMinSize = Integer.parseInt( userProps.getProperty( "restMinSize",
+                                                                   String.valueOf( DefaultTranslator.CHUNK_SPLIT_COUNT ) ) );
+        restSuffixAlign = Boolean.parseBoolean( userProps.getProperty( "restSuffixAlign", "true" ) );
 
         RestProtocol protocol = RestProtocol.parse ( userProps.getProperty( "restProtocol", RestProtocol.CURRENT.toString() ) );
 
@@ -64,5 +67,10 @@ public class RESTState implements State
     public Translator getVersionTranslator()
     {
         return restEndpoint;
+    }
+
+    public boolean isRestSuffixAlign()
+    {
+        return restSuffixAlign;
     }
 }
