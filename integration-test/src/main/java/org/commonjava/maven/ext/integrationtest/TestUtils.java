@@ -64,7 +64,7 @@ public class TestUtils
 
     private static final String LOCAL_REPO = System.getProperty( "localRepositoryPath" );
 
-    static final String IT_LOCATION = BUILD_DIR + "/it-cli";
+    static final File IT_LOCATION = new File( BUILD_DIR, "/it-cli");
 
     static final Map<String, String> DEFAULT_MVN_PARAMS = new HashMap<String, String>()
     {{
@@ -74,17 +74,20 @@ public class TestUtils
     static final List<String> EXCLUDED_FILES = new ArrayList<String>()
     {{
         add( "setup" );
-        try ( DirectoryStream<Path> stream = Files.newDirectoryStream( new File( IT_LOCATION ).toPath(),
-                                      p -> p.getFileName().toString().startsWith( "rest-" ) ||
-                        p.getFileName().toString().startsWith( "circular-" ) ) )
+        if ( IT_LOCATION.exists() )
         {
-            // Run in a separate test so a Mock server may be started.
-            stream.forEach( p -> add( p.getFileName().toString() ) );
-        }
-        catch ( IOException e )
-        {
-            logger.error( "Unable to process excluded files", e );
-            throw new RuntimeException( "Unable to process excluded files", e );
+            try ( DirectoryStream<Path> stream = Files.newDirectoryStream
+                            ( IT_LOCATION.toPath(), p -> p.getFileName().toString().startsWith( "rest-" ) ||
+                                            p.getFileName().toString().startsWith( "circular-" ) ) )
+            {
+                // Run in a separate test so a Mock server may be started.
+                stream.forEach( p -> add( p.getFileName().toString() ) );
+            }
+            catch ( IOException e )
+            {
+                logger.error( "Unable to process excluded files", e );
+                throw new RuntimeException( "Unable to process excluded files", e );
+            }
         }
         add( "groovy-manipulator-first-http" );
     }};
@@ -279,7 +282,7 @@ public class TestUtils
      */
     static String getDefaultTestLocation( String test )
     {
-        return String.format( "%s/%s", IT_LOCATION, test );
+        return String.format( "%s/%s", IT_LOCATION.getAbsolutePath(), test );
     }
 
     /**

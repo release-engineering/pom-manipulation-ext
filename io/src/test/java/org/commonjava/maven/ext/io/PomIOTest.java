@@ -17,7 +17,7 @@ package org.commonjava.maven.ext.io;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.maven.model.Model;
-import org.commonjava.maven.ext.common.model.GAV;
+import org.commonjava.maven.ext.common.json.GAV;
 import org.commonjava.maven.ext.common.model.Project;
 import org.junit.Before;
 import org.junit.Rule;
@@ -102,9 +102,9 @@ public class PomIOTest
 
         GAV gav = pomIO.rewritePOMs( changed );
 
-        assertTrue( gav.version.equals( "1.0" ));
-        assertTrue( gav.groupId.equals( "org.commonjava.maven.ext.versioning.test" ));
-        assertTrue( gav.artifactId.equals( "dospom" ));
+        assertTrue( gav.getVersion().equals( "1.0" ));
+        assertTrue( gav.getGroupId().equals( "org.commonjava.maven.ext.versioning.test" ));
+        assertTrue( gav.getArtifactId().equals( "dospom" ));
     }
 
 

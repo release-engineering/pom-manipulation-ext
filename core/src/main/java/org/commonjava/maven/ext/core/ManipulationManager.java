@@ -15,29 +15,24 @@
  */
 package org.commonjava.maven.ext.core;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.databind.introspect.VisibilityChecker;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.profiles.DefaultProfileManager;
 import org.apache.maven.profiles.activation.ProfileActivationException;
 import org.apache.maven.project.ProjectBuilder;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.ext.common.ManipulationException;
-import org.commonjava.maven.ext.common.model.GAV;
+import org.commonjava.maven.ext.common.json.PME;
+import org.commonjava.maven.ext.common.json.GAV;
 import org.commonjava.maven.ext.common.model.Project;
 import org.commonjava.maven.ext.common.util.ProjectComparator;
 import org.commonjava.maven.ext.common.util.WildcardMap;
 import org.commonjava.maven.ext.core.impl.Manipulator;
 import org.commonjava.maven.ext.core.state.CommonState;
 import org.commonjava.maven.ext.core.state.RelocationState;
-import org.commonjava.maven.ext.core.state.State;
-import org.commonjava.maven.ext.core.state.VersioningState;
 import org.commonjava.maven.ext.core.util.ManipulatorPriorityComparator;
 import org.commonjava.maven.ext.io.PomIO;
 import org.commonjava.maven.ext.io.resolver.ExtensionInfrastructure;
@@ -82,7 +77,8 @@ public class ManipulationManager
 
     public static final String MARKER_FILE =  MARKER_PATH + File.separatorChar + "pom-manip-ext-marker.txt";
 
-    public static final String RESULT_FILE = MARKER_PATH + File.separatorChar + "pom-manip-ext-result.json";
+    // TODO: Configurable location?
+    public static final String RESULT_FILE = File.separatorChar + "pom-manip-ext-result.json";
 
     private final Logger logger = LoggerFactory.getLogger( getClass() );
 
@@ -93,6 +89,8 @@ public class ManipulationManager
     private Map<String, ExtensionInfrastructure> infrastructure;
 
     private final PomIO pomIO;
+
+    private final PME jsonReport = new PME();
 
     @Inject
     public ManipulationManager( ProjectBuilder projectBuilder, Map<String, Manipulator> manipulators,
@@ -177,12 +175,15 @@ public class ManipulationManager
 
             try
             {
-                final VersioningState state = session.getState( VersioningState.class );
-                state.setExecutionRootModified( gav );
+                jsonReport.setGAV( gav );
 
                 new File( session.getTargetDir().getParentFile(), ManipulationManager.MARKER_PATH ).mkdirs();
 
                 new File( session.getTargetDir().getParentFile(), ManipulationManager.MARKER_FILE ).createNewFile();
+
+
+                WildcardMap<ProjectVersionRef> map = (session.getState( RelocationState.class) == null ? new WildcardMap<>() : session.getState( RelocationState.class ).getDependencyRelocations());
+                ProjectComparator. compareProjects( session, jsonReport, map , originalProjects, currentProjects );
 
                 try (FileWriter writer = new FileWriter( new File( session.getTargetDir().getParentFile(), RESULT_FILE ) ))
                 {
@@ -194,9 +195,6 @@ public class ManipulationManager
                 logger.error( "Unable to create marker or result file", e );
                 throw new ManipulationException( "Marker/result file creation failed", e );
             }
-
-            WildcardMap<ProjectVersionRef> map = (session.getState( RelocationState.class) == null ? new WildcardMap<>() : session.getState( RelocationState.class ).getDependencyRelocations());
-            ProjectComparator.compareProjects( session, map , originalProjects, currentProjects );
         }
 
         // Ensure shutdown of GalleyInfrastructure Executor Service
@@ -286,38 +284,15 @@ public class ManipulationManager
      * to provide caller with a structured, computer-readable output or summary of the changes.
      * This is done in the form of a JSON document stored in the root target
      * directory.
-     * The output data are generated from the fields of the state objects,
-     * which must be actively marked by {@link JsonProperty} annotation
-     * to be processed.
-     * The result is a map from short state class names
-     * to the result of the state serialization.
-     * Keys with empty values are excluded.
-     *
      * @param session the container session for manipulation.
      */
     private String collectResults( final ManipulationSession session )
                     throws JsonProcessingException
     {
         final ObjectMapper MAPPER = new ObjectMapper();
-        VisibilityChecker<?> vc = MAPPER.getSerializationConfig()
-                                        .getDefaultVisibilityChecker()
-                                        .withCreatorVisibility( JsonAutoDetect.Visibility.NONE )
-                                        .withFieldVisibility( JsonAutoDetect.Visibility.NONE )
-                                        .withGetterVisibility( JsonAutoDetect.Visibility.NONE )
-                                        .withIsGetterVisibility( JsonAutoDetect.Visibility.NONE )
-                                        .withSetterVisibility( JsonAutoDetect.Visibility.NONE );
-        MAPPER.setVisibility( vc );
         MAPPER.configure( SerializationFeature.FAIL_ON_EMPTY_BEANS, false );
-        ObjectNode root = MAPPER.createObjectNode();
-        for ( final Map.Entry<Class<?>, State> stateEntry : session.getStatesCopy() )
-        {
-            JsonNode node = MAPPER.convertValue( stateEntry.getValue(), JsonNode.class );
-            if ( node.isObject() && node.size() != 0 )
-            {
-                root.set( stateEntry.getKey().getSimpleName(), node );
-            }
-        }
-
-        return MAPPER.writeValueAsString( root );
+        MAPPER.setSerializationInclusion( JsonInclude.Include.NON_NULL );
+        MAPPER.setSerializationInclusion( JsonInclude.Include.NON_EMPTY );
+        return MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString( jsonReport );
     }
 }

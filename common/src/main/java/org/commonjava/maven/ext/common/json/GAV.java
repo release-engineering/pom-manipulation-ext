@@ -13,21 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.commonjava.maven.ext.common.model;
+package org.commonjava.maven.ext.common.json;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Getter;
+import lombok.Setter;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 
+@Getter
 public class GAV
 {
-    @JsonProperty
-    public final String groupId;
+    private final String groupId;
 
-    @JsonProperty
-    public final String artifactId;
+    private final String artifactId;
 
-    @JsonProperty
-    public final String version;
+    private final String version;
+
+    @Setter
+    private String oldVersion;
 
     public GAV( ProjectVersionRef pvr )
     {

@@ -17,6 +17,7 @@ package org.commonjava.maven.ext.integrationtest;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.io.FileUtils;
 import org.commonjava.maven.ext.core.state.VersioningState;
 import org.commonjava.maven.ext.io.rest.handler.AddSuffixJettyHandler;
 import org.commonjava.maven.ext.io.rest.rule.MockServer;
@@ -26,6 +27,7 @@ import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
 import java.io.File;
+import java.nio.charset.Charset;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -104,15 +106,14 @@ public class ResultJsonFileTest
 
         assertEquals( (Integer) 0, exitValue );
 
-        File outputJsonFile = new File( baseDir, "/target/pom-manip-ext-result.json" );
+        File outputJsonFile = new File( baseDir, "/pom-manip-ext-result.json" );
         assertTrue( outputJsonFile.exists() );
+
+        System.out.println ("#### \n" + FileUtils.readFileToString( outputJsonFile, Charset.defaultCharset() ) );
 
         JsonNode rootNode = MAPPER.readTree( outputJsonFile );
 
-        JsonNode versioningState = rootNode.get( "VersioningState" );
-        assertNotNull( versioningState );
-
-        JsonNode executionRootModified = versioningState.get( "executionRootModified" );
+        JsonNode executionRootModified = rootNode.get( "rootGAV" );
         assertNotNull( executionRootModified );
 
         JsonNode groupId = executionRootModified.get( "groupId" );
@@ -153,15 +154,12 @@ public class ResultJsonFileTest
 
         assertEquals( (Integer) 0, exitValue );
 
-        File outputJsonFile = new File( baseDir, "/target/pom-manip-ext-result.json" );
+        File outputJsonFile = new File( baseDir, "/pom-manip-ext-result.json" );
         assertTrue( outputJsonFile.exists() );
 
         JsonNode rootNode = MAPPER.readTree( outputJsonFile );
 
-        JsonNode versioningState = rootNode.get( "VersioningState" );
-        assertNotNull( versioningState );
-
-        JsonNode executionRootModified = versioningState.get( "executionRootModified" );
+        JsonNode executionRootModified = rootNode.get( "rootGAV" );
         assertNotNull( executionRootModified );
 
         JsonNode groupId = executionRootModified.get( "groupId" );
@@ -198,15 +196,12 @@ public class ResultJsonFileTest
 
         assertEquals( (Integer) 0, exitValue );
 
-        File outputJsonFile = new File( baseDir, "/target/pom-manip-ext-result.json" );
+        File outputJsonFile = new File( baseDir, "/pom-manip-ext-result.json" );
         assertTrue( outputJsonFile.exists() );
 
         JsonNode rootNode = MAPPER.readTree( outputJsonFile );
 
-        JsonNode versioningState = rootNode.get( "VersioningState" );
-        assertNotNull( versioningState );
-
-        JsonNode executionRootModified = versioningState.get( "executionRootModified" );
+        JsonNode executionRootModified = rootNode.get( "rootGAV" );
         assertNotNull( executionRootModified );
 
         JsonNode groupId = executionRootModified.get( "groupId" );

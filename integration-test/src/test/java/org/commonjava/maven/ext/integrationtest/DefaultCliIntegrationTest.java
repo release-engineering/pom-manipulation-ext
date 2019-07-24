@@ -54,7 +54,7 @@ public class DefaultCliIntegrationTest
         }
         else
         {
-            for ( File rl : new File( IT_LOCATION ).listFiles() )
+            for ( File rl : IT_LOCATION.listFiles() )
             {
                 if ( rl.isDirectory() && !TestUtils.EXCLUDED_FILES.contains( rl.getName() ) )
                 {

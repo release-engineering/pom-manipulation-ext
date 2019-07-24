@@ -23,6 +23,7 @@ import org.apache.maven.execution.MavenSession;
 import org.codehaus.plexus.DefaultPlexusContainer;
 import org.codehaus.plexus.PlexusContainer;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
+import org.commonjava.maven.ext.common.json.PME;
 import org.commonjava.maven.ext.common.model.Project;
 import org.commonjava.maven.ext.common.util.ProjectComparator;
 import org.commonjava.maven.ext.common.util.WildcardMap;
@@ -77,8 +78,7 @@ public class ProjectComparatorTest
         List<Project> projectOriginal = pomIO.parseProject( projectroot );
         List<Project> projectNew = pomIO.parseProject( projectroot );
 
-        ProjectComparator.compareProjects( session,
-                                           map,
+        ProjectComparator.compareProjects( session, new PME(), map,
                                            projectOriginal, projectNew );
 
         assertFalse( systemOutRule.getLog().contains( "-->" ) );
@@ -117,8 +117,7 @@ public class ProjectComparatorTest
             }
         } ) );
 
-        ProjectComparator.compareProjects( session,
-                                           relocationState.getDependencyRelocations(),
+        ProjectComparator.compareProjects( session, new PME(), relocationState.getDependencyRelocations(),
                                            projectOriginal, projectNew );
 
 
@@ -164,8 +163,7 @@ public class ProjectComparatorTest
             }
         } );
 
-        ProjectComparator.compareProjects( session,
-                                           relocationState.getDependencyRelocations(),
+        ProjectComparator.compareProjects( session, new PME(), relocationState.getDependencyRelocations(),
                                            projectOriginal, projectNew );
 
 
@@ -215,8 +213,7 @@ public class ProjectComparatorTest
             }
         } ) );
 
-        ProjectComparator.compareProjects( session,
-                                           relocationState.getDependencyRelocations(),
+        ProjectComparator.compareProjects( session, new PME(), relocationState.getDependencyRelocations(),
                                            projectOriginal, projectNew );
 
 

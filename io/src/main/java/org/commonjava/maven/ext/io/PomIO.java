@@ -26,7 +26,7 @@ import org.apache.maven.project.MavenProject;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.ext.common.ManipulationException;
-import org.commonjava.maven.ext.common.model.GAV;
+import org.commonjava.maven.ext.common.json.GAV;
 import org.commonjava.maven.ext.common.model.Project;
 import org.commonjava.maven.ext.common.util.ManifestUtils;
 import org.commonjava.maven.galley.maven.parse.PomPeek;
