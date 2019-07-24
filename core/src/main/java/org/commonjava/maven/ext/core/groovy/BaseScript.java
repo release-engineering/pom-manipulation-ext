@@ -18,7 +18,6 @@ package org.commonjava.maven.ext.core.groovy;
 import groovy.lang.Script;
 import org.commonjava.maven.atlas.ident.ref.ProjectRef;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
-import org.commonjava.maven.atlas.ident.ref.SimpleProjectRef;
 import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.common.ManipulationUncheckedException;
 import org.commonjava.maven.ext.common.model.Project;
@@ -157,18 +156,16 @@ public abstract class BaseScript extends Script
     /**
      * Allows the specified group:artifact property to be inlined. This is useful to split up properties that cover multiple separate projects.
      * @param currentProject The current project we are operating on.
-     * @param groupArtifact The group and artifact (separated by a colon) of the dependency (or managed dependency) that we wish to inline.
+     * @param groupArtifact A ProjectRef corresponding to the group and artifact of the dependency (or managed dependency) that we wish to inline.
      * @throws ManipulationException if an error occurs.
      */
-    public void inlineProperty ( Project currentProject, String groupArtifact ) throws ManipulationException
+    public void inlineProperty ( Project currentProject, ProjectRef groupArtifact ) throws ManipulationException
     {
-        ProjectRef target = SimpleProjectRef.parse( groupArtifact );
-
         try
         {
             currentProject.getResolvedManagedDependencies( sessionHandler )
                           .entrySet().stream()
-                          .filter( a -> a.getKey().asProjectRef().equals( target ) && a.getValue().getVersion().contains( "$" ) )
+                          .filter( a -> a.getKey().asProjectRef().equals( groupArtifact ) && a.getValue().getVersion().contains( "$" ) )
                           .forEach( a -> {
                               logger.info( "Found managed artifact {} (original dependency {})", a.getKey(), a.getValue() );
                               a.getValue().setVersion(
@@ -176,7 +173,41 @@ public abstract class BaseScript extends Script
                           } );
             currentProject.getResolvedDependencies( sessionHandler )
                           .entrySet().stream()
-                          .filter( a -> a.getKey().asProjectRef().equals( target ) && a.getValue().getVersion().contains( "$" ) )
+                          .filter( a -> a.getKey().asProjectRef().equals( groupArtifact ) && a.getValue().getVersion().contains( "$" ) )
+                          .forEach( a -> {
+                              logger.info( "Found artifact {} (original dependency {})", a.getKey(), a.getValue() );
+                              a.getValue().setVersion(
+                                              PropertyResolver.resolvePropertiesUnchecked( sessionHandler, currentProject.getInheritedList(), a.getValue().getVersion() ) );
+                          } );
+        }
+        catch (ManipulationUncheckedException e)
+        {
+            throw (ManipulationException)e.getCause();
+        }
+    }
+
+    /**
+     * Allows the specified property to be inlined. This is useful to split up properties that cover multiple separate projects.
+
+     * @param currentProject The current project we are operating on.
+     * @param propertyKey The property which is within the dependencies (or managed dependencies) that we wish to inline.
+     * @throws ManipulationException if an error occurs.
+     */
+    public void inlineProperty ( Project currentProject, String propertyKey ) throws ManipulationException
+    {
+        try
+        {
+            currentProject.getResolvedManagedDependencies( sessionHandler )
+                          .entrySet().stream()
+                          .filter( a -> a.getValue().getVersion().equals( "${" + propertyKey + "}" ) )
+                          .forEach( a -> {
+                              logger.info( "Found managed artifact {} (original dependency {})", a.getKey(), a.getValue() );
+                              a.getValue().setVersion(
+                                              PropertyResolver.resolvePropertiesUnchecked( sessionHandler, currentProject.getInheritedList(), a.getValue().getVersion() ) );
+                          } );
+            currentProject.getResolvedDependencies( sessionHandler )
+                          .entrySet().stream()
+                          .filter( a -> a.getValue().getVersion().equals( "${" + propertyKey + "}" ) )
                           .forEach( a -> {
                               logger.info( "Found artifact {} (original dependency {})", a.getKey(), a.getValue() );
                               a.getValue().setVersion(

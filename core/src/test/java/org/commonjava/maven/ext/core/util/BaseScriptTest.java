@@ -15,6 +15,7 @@
  */
 package org.commonjava.maven.ext.core.util;
 
+import org.commonjava.maven.atlas.ident.ref.SimpleProjectRef;
 import org.commonjava.maven.ext.common.model.Project;
 import org.commonjava.maven.ext.core.ManipulationManager;
 import org.commonjava.maven.ext.core.ManipulationSession;
@@ -123,7 +124,7 @@ public class BaseScriptTest
         ManipulationSession ms = TestUtils.createSession( null );
         m.init( ms );
 
-        Project root = projects.stream().filter( p -> p.getProjectParent() == null ).findAny().get();
+        Project root = projects.stream().filter( p -> p.getProjectParent() == null ).findAny().orElseThrow(Exception::new);
 
         logger.info( "Found project root {}", root );
 
@@ -137,7 +138,7 @@ public class BaseScriptTest
         };
         bs.setValues( null, ms, projects, root, null );
 
-        bs.inlineProperty( root, "org.commonjava.maven.atlas:atlas-identities" );
+        bs.inlineProperty( root, SimpleProjectRef.parse( "org.commonjava.maven.atlas:atlas-identities" ) );
 
         assertEquals( "0.17.1", root.getModel()
                                     .getDependencyManagement()
@@ -145,8 +146,22 @@ public class BaseScriptTest
                                     .stream()
                                     .filter( d -> d.getArtifactId().equals( "atlas-identities" ) )
                                     .findFirst()
-                                    .get()
+                                    .orElseThrow(Exception::new)
                                     .getVersion() );
+
+        bs.inlineProperty( root, "jacksonVersion" );
+
+        assertFalse( root.getModel()
+                         .getDependencyManagement()
+                         .getDependencies()
+                         .stream()
+                         .filter( d -> d.getArtifactId().equals( "jackson-databind" ) )
+                         .findFirst()
+                         .orElseThrow(Exception::new)
+                         .getVersion()
+                         .contains( "$" ) );
+
+
     }
 }
 
