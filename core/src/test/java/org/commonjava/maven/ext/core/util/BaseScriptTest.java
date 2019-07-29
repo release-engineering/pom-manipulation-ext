@@ -57,7 +57,7 @@ public class BaseScriptTest
     private final Logger logger = LoggerFactory.getLogger( getClass() );
 
     @Rule
-    public final SystemOutRule systemRule = new SystemOutRule().enableLog();//.muteForSuccessfulTests();
+    public final SystemOutRule systemRule = new SystemOutRule().enableLog().muteForSuccessfulTests();
 
     @Test
     public void testGroovyAnnotation() throws Exception

@@ -17,15 +17,21 @@ package org.commonjava.maven.ext.core.groovy;
 
 import groovy.lang.Script;
 import org.commonjava.maven.atlas.ident.ref.ProjectRef;
+import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.common.ManipulationUncheckedException;
 import org.commonjava.maven.ext.common.model.Project;
 import org.commonjava.maven.ext.common.util.PropertyResolver;
 import org.commonjava.maven.ext.core.ManipulationSession;
 import org.commonjava.maven.ext.core.state.RESTState;
+import org.commonjava.maven.ext.core.state.VersioningState;
 import org.commonjava.maven.ext.io.rest.Translator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Abstract class that contains useful utility functions for developers wishing to implement groovy scripts
@@ -122,10 +128,33 @@ public abstract class BaseScriptUtils extends Script implements BaseScriptAPI
     }
 
 
-    public Translator getRESTAPI() throws ManipulationException
+    protected Translator getRESTAPI() throws ManipulationException
     {
         validateSession();
         RESTState rs = ((ManipulationSession)getSession()).getState( RESTState.class );
         return rs.getVersionTranslator();
+    }
+
+
+    public void overrideProjectVersion (ProjectVersionRef gav) throws ManipulationException
+    {
+        // Wrapper function to locate latest build of group:artifact:version and then replace the incrementalSuffix
+        // by a versionSuffix instead.
+
+        List<ProjectVersionRef> source = Collections.singletonList( gav);
+        Map<ProjectVersionRef, String> restResult = getRESTAPI().translateVersions( source );
+
+        if ( restResult.size() > 1 )
+        {
+            logger.error( "REST result was {}", restResult );
+            throw new ManipulationException( "Multiple results returned ; unable to reset version." );
+        }
+
+        String newVersion = restResult.get( gav );
+        String newSuffix = newVersion.substring( gav.getVersionString().length() + 1 );
+        logger.info ("From version {}, updating versionSuffix to {}", newVersion, newSuffix );
+        getUserProperties().put( VersioningState.VERSION_SUFFIX_SYSPROP.getCurrent(), newSuffix );
+
+        reinitialiseSessionStates();
     }
 }
