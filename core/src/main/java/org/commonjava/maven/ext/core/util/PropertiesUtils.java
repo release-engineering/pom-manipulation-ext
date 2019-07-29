@@ -564,7 +564,7 @@ public final class PropertiesUtils
         }
     }
 
-    public static Set<String> buildOldValueSet (VersioningState versioningState, String oldValue)
+    static Set<String> buildOldValueSet( VersioningState versioningState, String oldValue )
     {
         final Set<String> result = new HashSet<>();
         result.add( oldValue );

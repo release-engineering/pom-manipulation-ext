@@ -55,6 +55,7 @@ import static org.commonjava.maven.ext.core.util.IdUtils.gav;
  */
 @Named
 @Singleton
+@SuppressWarnings("WeakerAccess") // Public API.
 public class VersionCalculator
 {
     private final Logger logger = LoggerFactory.getLogger( getClass() );

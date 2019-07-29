@@ -33,7 +33,6 @@ import java.io.File;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -227,13 +226,9 @@ public class ManipulationSession
     {
         boolean result = false;
 
-        Iterator<Class<?>> i = states.keySet().iterator();
-
-        while (i.hasNext())
+        for ( Class<?> c : states.keySet() )
         {
-            Class<?> c = i.next();
-
-            if ( ! ignoreList.contains( c )  && states.get(c).isEnabled() )
+            if ( !ignoreList.contains( c ) && states.get( c ).isEnabled() )
             {
                 result = true;
                 break;

@@ -15,9 +15,12 @@
  */
 package org.commonjava.maven.ext.core.util;
 
+import lombok.Getter;
+
 /**
  * Wrapper to hold mapping of deprecated property name and current name
  */
+@Getter
 public class PropertyFlag
 {
     private final String deprecated;
@@ -32,15 +35,5 @@ public class PropertyFlag
     {
         this.deprecated = deprecated;
         this.current = currentName;
-    }
-
-    public String getDeprecated()
-    {
-        return deprecated;
-    }
-
-    public String getCurrent()
-    {
-        return current;
     }
 }
