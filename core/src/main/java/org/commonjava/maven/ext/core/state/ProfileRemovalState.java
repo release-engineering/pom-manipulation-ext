@@ -35,9 +35,14 @@ public class ProfileRemovalState
      */
     private static final String PROFILE_REMOVAL_PROPERTY = "profileRemoval";
 
-    private final List<String> profiles;
+    private List<String> profiles;
 
     public ProfileRemovalState( final Properties userProps )
+    {
+        initialise( userProps );
+    }
+
+    public void initialise( Properties userProps )
     {
         final String p = userProps.getProperty( PROFILE_REMOVAL_PROPERTY );
 

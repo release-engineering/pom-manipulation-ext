@@ -41,13 +41,18 @@ public class RepoReportingState
      */
     private static final PropertyFlag RR_SETTINGS_SFX_SYSPROP = new PropertyFlag( "repo-removal-backup", "repoRemovalBackup" );
 
-    private final boolean removal;
+    private boolean removal;
 
-    private final String settings;
+    private String settings;
 
-    private final boolean ignoreLocal;
+    private boolean ignoreLocal;
 
     public RepoReportingState( final Properties userProps )
+    {
+        initialise( userProps );
+    }
+
+    public void initialise( Properties userProps )
     {
         removal = Boolean.parseBoolean( PropertiesUtils.handleDeprecatedProperty ( userProps, RR_SUFFIX_SYSPROP ) );
         ignoreLocal = Boolean.parseBoolean( PropertiesUtils.handleDeprecatedProperty( userProps, RR_SUFFIX_SYSPROP_LOCAL ) );

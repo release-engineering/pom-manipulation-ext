@@ -39,9 +39,14 @@ public class ParentInjectionState
      */
     private static final String PARENT_INJECTION_PROPERTY = "parentInjection";
 
-    private final Parent parent;
+    private Parent parent = new Parent();
 
     public ParentInjectionState( final Properties userProps )
+    {
+        initialise( userProps );
+    }
+
+    public void initialise( Properties userProps )
     {
         final String gav = userProps.getProperty( PARENT_INJECTION_PROPERTY );
 

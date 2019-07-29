@@ -86,13 +86,29 @@ public class ManipulationSession
      */
     public boolean isEnabled()
     {
-        return !Boolean.valueOf( getUserProperties().getProperty( MANIPULATIONS_DISABLED_PROP, "false" ) );
+        return !Boolean.parseBoolean( getUserProperties().getProperty( MANIPULATIONS_DISABLED_PROP, "false" ) );
     }
 
     public void setState( final State state )
     {
         states.put( state.getClass(), state );
     }
+
+    /**
+     * This will re-initialise any state linked to this session. This is useful if the control properties have been
+     * updated.
+     *
+     * @throws ManipulationException if an error occurs
+     */
+    @Override
+    public void reinitialiseStates() throws ManipulationException
+    {
+        for (State s : states.values() )
+        {
+            s.initialise( getUserProperties() );
+        }
+    }
+
 
     HashSet<Entry<Class<?>, State>> getStatesCopy()
     {

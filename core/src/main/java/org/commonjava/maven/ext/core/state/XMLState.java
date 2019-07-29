@@ -54,6 +54,11 @@ public class XMLState
     public XMLState( final Properties userProps )
                     throws ManipulationException
     {
+        initialise( userProps );
+    }
+
+    public void initialise( Properties userProps ) throws ManipulationException
+    {
         String property = userProps.getProperty( XML_PROPERTY );
 
         if ( isNotEmpty( property ) )
@@ -89,7 +94,7 @@ public class XMLState
     @Override
     public boolean isEnabled()
     {
-        return xmlOperations != null && !xmlOperations.isEmpty();
+        return !xmlOperations.isEmpty();
     }
 
     public List<XMLOperation> getXMLOperations()

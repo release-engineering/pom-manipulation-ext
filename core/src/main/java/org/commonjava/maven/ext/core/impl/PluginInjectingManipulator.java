@@ -20,7 +20,6 @@ import org.apache.maven.model.Model;
 import org.apache.maven.model.Plugin;
 import org.apache.maven.model.PluginExecution;
 import org.codehaus.plexus.util.xml.Xpp3Dom;
-import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.common.model.Project;
 import org.commonjava.maven.ext.core.ManipulationSession;
 import org.commonjava.maven.ext.core.state.PluginInjectingState;
@@ -69,7 +68,7 @@ public class PluginInjectingManipulator
 
     private static final String PROJECT_SOURCES_EXEC_ID = "project-sources-archive";
 
-    private static final String INITIALIZE_PHASE = "initialize";
+    private static final String INITIALISE_PHASE = "initialize";
 
     private final Logger logger = LoggerFactory.getLogger( getClass() );
 
@@ -77,7 +76,6 @@ public class PluginInjectingManipulator
 
     @Override
     public void init( final ManipulationSession session )
-        throws ManipulationException
     {
         this.session = session;
         session.setState( new PluginInjectingState( session.getUserProperties() ) );
@@ -90,7 +88,6 @@ public class PluginInjectingManipulator
      */
     @Override
     public Set<Project> applyChanges( final List<Project> projects )
-        throws ManipulationException
     {
         final PluginInjectingState state = session.getState( PluginInjectingState.class );
 
@@ -118,7 +115,7 @@ public class PluginInjectingManipulator
                     {
                         final PluginExecution execution = new PluginExecution();
                         execution.setId( PROJECT_SOURCES_EXEC_ID );
-                        execution.setPhase( INITIALIZE_PHASE );
+                        execution.setPhase( INITIALISE_PHASE );
                         execution.setGoals( Collections.singletonList( PROJECT_SOURCES_GOAL ) );
 
                         final Plugin plugin = new Plugin();
@@ -136,7 +133,7 @@ public class PluginInjectingManipulator
                     {
                         final PluginExecution execution = new PluginExecution();
                         execution.setId( BMMP_EXEC_ID );
-                        execution.setPhase( INITIALIZE_PHASE );
+                        execution.setPhase( INITIALISE_PHASE );
                         execution.setGoals( Collections.singletonList( BMMP_GOAL ) );
 
                         final Xpp3Dom xml = new Xpp3Dom( "configuration" );

@@ -29,16 +29,24 @@ import java.util.Properties;
  */
 public class RESTState implements State
 {
-    private final String restURL;
+    private final ManipulationSession session;
 
-    private final Translator restEndpoint;
+    private String restURL;
 
-    private final boolean restSuffixAlign;
+    private Translator restEndpoint;
+
+    private boolean restSuffixAlign;
 
     public RESTState( final ManipulationSession session ) throws ManipulationException
     {
+        this.session = session;
+
+        initialise( session.getUserProperties() );
+    }
+
+    public void initialise( Properties userProps ) throws ManipulationException
+    {
         final VersioningState vState = session.getState( VersioningState.class );
-        final Properties userProps = session.getUserProperties();
 
         restURL = userProps.getProperty( "restURL" );
 

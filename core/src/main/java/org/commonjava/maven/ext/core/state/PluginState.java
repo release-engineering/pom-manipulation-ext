@@ -80,15 +80,15 @@ public class PluginState
         LOCAL
     }
 
-    private final List<ProjectVersionRef> pluginMgmt;
+    private List<ProjectVersionRef> pluginMgmt;
 
-    private final Precedence configPrecedence;
+    private Precedence configPrecedence;
 
     /**
      * Denote whether to inject plugin sections from a remote bom. This is separate to injecting
      * pluginMgmt.
      */
-    private final boolean injectRemotePlugins;
+    private boolean injectRemotePlugins;
 
     private Set<Plugin> remoteRESTplugins = new HashSet<>(  );
 
@@ -96,8 +96,13 @@ public class PluginState
 
     public PluginState( final Properties userProps ) throws ManipulationException
     {
+        initialise( userProps );
+    }
+
+    public void initialise( Properties userProps ) throws ManipulationException
+    {
         pluginMgmt = IdUtils.parseGAVs( userProps.getProperty( PLUGIN_MANAGEMENT_POM_PROPERTY ) );
-        injectRemotePlugins = Boolean.valueOf( userProps.getProperty( "injectRemotePlugins", "false" ) );
+        injectRemotePlugins = Boolean.parseBoolean( userProps.getProperty( "injectRemotePlugins", "false" ) );
         switch ( Precedence.valueOf( userProps.getProperty( "pluginManagementPrecedence",
                                                             Precedence.REMOTE.toString() ).toUpperCase() ) )
         {

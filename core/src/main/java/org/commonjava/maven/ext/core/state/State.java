@@ -15,9 +15,11 @@
  */
 package org.commonjava.maven.ext.core.state;
 
+import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.core.impl.Manipulator;
 
 import java.util.ArrayList;
+import java.util.Properties;
 
 /**
  * Basic list of methods that state collections related to different {@link Manipulator}'s should implement. This is also a marker interface to 
@@ -39,4 +41,6 @@ public interface State
      * @return true if this State is enabled.
      */
     boolean isEnabled();
+
+    void initialise ( Properties userProperties) throws ManipulationException;
 }

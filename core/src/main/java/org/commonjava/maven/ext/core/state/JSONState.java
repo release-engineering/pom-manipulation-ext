@@ -54,6 +54,11 @@ public class JSONState
     public JSONState( final Properties userProps )
                     throws ManipulationException
     {
+        initialise( userProps );
+    }
+
+    public void initialise( Properties userProps ) throws ManipulationException
+    {
         String property = userProps.getProperty( JSON_PROPERTY );
 
         if ( isNotEmpty( property ) )

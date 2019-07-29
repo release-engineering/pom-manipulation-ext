@@ -38,9 +38,14 @@ public class ProfileInjectionState
      */
     private static final String PROFILE_INJECTION_PROPERTY = "profileInjection";
 
-    private final List<ProjectVersionRef> profileMgmt;
+    private List<ProjectVersionRef> profileMgmt;
 
     public ProfileInjectionState( final Properties userProps )
+    {
+        initialise( userProps );
+    }
+
+    public void initialise( Properties userProps )
     {
         profileMgmt = IdUtils.parseGAVs( userProps.getProperty( PROFILE_INJECTION_PROPERTY ) );
     }

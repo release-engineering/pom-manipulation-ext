@@ -62,37 +62,37 @@ public class VersioningState
     /**
      * @return the version suffix to be appended to the project version.
      */
-    private final String suffix;
+    private String suffix;
 
     /**
      * @return the incremental suffix that will be appended to the project version.
      */
-    private final String incrementalSerialSuffix;
+    private String incrementalSerialSuffix;
 
     /**
      * @return true if we should preserve the snapshot
      */
-    private final boolean preserveSnapshot;
+    private boolean preserveSnapshot;
 
     /**
      * @return true if we should make the versions OSGi compliant
      */
-    private final boolean osgi;
+    private boolean osgi;
 
     /**
      * Forcibly override the version to a new one.
      * @return the new version
      */
-    private final String override;
+    private String override;
 
     /**
      * @return the incremental suffix padding that will be appended to the project version i.e. whether to append 001 or 1.
      */
-    private final int incrementalSerialSuffixPadding;
+    private int incrementalSerialSuffixPadding;
 
-    private final List<String> suffixAlternatives;
+    private List<String> suffixAlternatives;
 
-    private final List<String> allSuffixes;
+    private List<String> allSuffixes;
 
     @JsonProperty
     private GAV executionRootModified;
@@ -109,6 +109,11 @@ public class VersioningState
     private Map<ProjectRef, Set<String>> restMetaData;
 
     public VersioningState( final Properties userProps )
+    {
+        initialise( userProps );
+    }
+
+    public void initialise( Properties userProps )
     {
         suffix = PropertiesUtils.handleDeprecatedProperty( userProps, VERSION_SUFFIX_SYSPROP );
         incrementalSerialSuffix = PropertiesUtils.handleDeprecatedProperty( userProps, INCREMENT_SERIAL_SUFFIX_SYSPROP );
@@ -131,6 +136,7 @@ public class VersioningState
             allSuffixes.addAll( getSuffixAlternatives() );
         }
     }
+
 
 
     /**

@@ -82,30 +82,35 @@ public class CommonState
      * Whether to override transitive as well. This is common between {@link DependencyState} and
      * {@link DependencyState}
      */
-    private final boolean overrideTransitive;
+    private boolean overrideTransitive;
 
-    private final boolean propertyClashFails;
+    private boolean propertyClashFails;
 
-    private final boolean strict;
+    private boolean strict;
 
-    private final boolean failOnStrictViolation;
+    private boolean failOnStrictViolation;
 
-    private final boolean strictIgnoreSuffix;
+    private boolean strictIgnoreSuffix;
 
     /**
      * For beta strictPropertyValidation ; if 2 then assume we are 'reverting'.
      */
-    private final Integer strictDependencyPluginPropertyValidation;
+    private Integer strictDependencyPluginPropertyValidation;
 
-    private final List<String> excludedScopes;
+    private List<String> excludedScopes;
 
     public CommonState( final Properties userProps ) throws ManipulationException
     {
-        overrideTransitive = Boolean.valueOf( userProps.getProperty( TRANSITIVE_OVERRIDE_PROPERTY, "false" ) );
-        propertyClashFails = Boolean.valueOf( userProps.getProperty( PROPERTY_CLASH_FAILS, "true" ) );
-        strict = Boolean.valueOf( userProps.getProperty( STRICT_ALIGNMENT, "true" ) );
-        strictIgnoreSuffix = Boolean.valueOf( userProps.getProperty( STRICT_ALIGNMENT_IGNORE_SUFFIX, "true" ) );
-        failOnStrictViolation = Boolean.valueOf( userProps.getProperty( STRICT_VIOLATION_FAILS, "false" ) );
+        initialise( userProps );
+    }
+
+    public void initialise( Properties userProps ) throws ManipulationException
+    {
+        overrideTransitive = Boolean.parseBoolean( userProps.getProperty( TRANSITIVE_OVERRIDE_PROPERTY, "false" ) );
+        propertyClashFails = Boolean.parseBoolean( userProps.getProperty( PROPERTY_CLASH_FAILS, "true" ) );
+        strict = Boolean.parseBoolean( userProps.getProperty( STRICT_ALIGNMENT, "true" ) );
+        strictIgnoreSuffix = Boolean.parseBoolean( userProps.getProperty( STRICT_ALIGNMENT_IGNORE_SUFFIX, "true" ) );
+        failOnStrictViolation = Boolean.parseBoolean( userProps.getProperty( STRICT_VIOLATION_FAILS, "false" ) );
         excludedScopes = Arrays.asList( userProps.getProperty( EXCLUDED_SCOPES, "" ).length() > 0 ?
                                                         userProps.getProperty( EXCLUDED_SCOPES).split( "," ) : new String[0]);
         for ( String s : excludedScopes )
