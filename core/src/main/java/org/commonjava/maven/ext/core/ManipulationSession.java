@@ -100,7 +100,6 @@ public class ManipulationSession
      *
      * @throws ManipulationException if an error occurs
      */
-    @Override
     public void reinitialiseStates() throws ManipulationException
     {
         for (State s : states.values() )

@@ -57,7 +57,7 @@ public class BaseScriptTest
     private final Logger logger = LoggerFactory.getLogger( getClass() );
 
     @Rule
-    public final SystemOutRule systemRule = new SystemOutRule().enableLog().muteForSuccessfulTests();
+    public final SystemOutRule systemRule = new SystemOutRule().enableLog();//.muteForSuccessfulTests();
 
     @Test
     public void testGroovyAnnotation() throws Exception
@@ -224,8 +224,10 @@ public class BaseScriptTest
         gm.init( session );
         TestUtils.executeMethod( gm, "applyGroovyScript", new Class[] { List.class, Project.class, File.class },
                                  new Object[] { projects, root, groovy } );
-        assertTrue( systemRule.getLog().contains( "BASESCRIPT" ) );
 
+        assertTrue( systemRule.getLog().contains( "BASESCRIPT" ) );
+        assertTrue( systemRule.getLog().contains( "STAGE FIRST" ) );
+        assertTrue( systemRule.getLog().contains( "MODELIO null" ) );
         assertEquals( "rebuild-5", state.getSuffix() );
     }
 }

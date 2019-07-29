@@ -40,6 +40,11 @@ println "#### BASESCRIPT END" + pme.getUserProperties()
 
 pme.getUserProperties().setProperty ("versionSuffix", "rebuild-5")
 
-pme.getSession().reinitialiseStates()
+pme.reinitialiseSessionStates()
+
+println "### STAGE " + pme.getInvocationStage()
+println "### MODELIO " + pme.getModelIO()
+
+println ("Accessing directly: " + pme.getGAV())
 
 // End...

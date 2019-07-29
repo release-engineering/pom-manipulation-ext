@@ -40,12 +40,4 @@ public interface MavenSessionHandler
     Settings getSettings();
 
     List<String> getExcludedScopes();
-
-    /**
-     * This will re-initialise any state linked to this session. This is useful if the control properties have been
-     * updated.
-     *
-     * @throws ManipulationException if an error occurs
-     */
-    void reinitialiseStates() throws ManipulationException;
 }
