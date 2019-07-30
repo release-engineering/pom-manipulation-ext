@@ -23,13 +23,14 @@ import org.commonjava.maven.ext.common.ManipulationUncheckedException;
 import org.commonjava.maven.ext.common.model.Project;
 import org.commonjava.maven.ext.common.util.PropertyResolver;
 import org.commonjava.maven.ext.core.ManipulationSession;
+import org.commonjava.maven.ext.core.impl.Version;
 import org.commonjava.maven.ext.core.state.RESTState;
 import org.commonjava.maven.ext.core.state.VersioningState;
 import org.commonjava.maven.ext.io.rest.Translator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -128,31 +129,56 @@ public abstract class BaseScriptUtils extends Script implements BaseScriptAPI
     }
 
 
-    protected Translator getRESTAPI() throws ManipulationException
+    // TODO: Does this need to be public/protected?
+    private Translator getRESTAPI() throws ManipulationException
     {
         validateSession();
         RESTState rs = ((ManipulationSession)getSession()).getState( RESTState.class );
         return rs.getVersionTranslator();
     }
 
-
+    /**
+     * This is useful for a series of builds with circular dependencies. It will allow a developer
+     * to use an original 'target' build to align the project version to. The engineer should pass
+     * in the unaligned GAV (i.e. without the rebuild suffix) of the first SCM root build. Then the
+     * subsequent builds, rather than using incremental suffix which can cause issues with circular
+     * dependencies, will use versionSuffix and lock to the root build version. This function will query
+     * DA to obtain the correct current suffix to use.
+     *
+     * @param gav the target build to obtain the suffix to align to.
+     * @throws ManipulationException if an error occurs.
+     */
     public void overrideProjectVersion (ProjectVersionRef gav) throws ManipulationException
     {
         // Wrapper function to locate latest build of group:artifact:version and then replace the incrementalSuffix
         // by a versionSuffix instead.
 
-        List<ProjectVersionRef> source = Collections.singletonList( gav);
-        Map<ProjectVersionRef, String> restResult = getRESTAPI().translateVersions( source );
+        List<ProjectVersionRef> source = new ArrayList<>();
+        source.add( gav );
+        source.add( getGAV() );
 
-        if ( restResult.size() > 1 )
+        Map<ProjectVersionRef, String> restResult = getRESTAPI().translateVersions( source );
+        String targetBuild = restResult.get( gav );
+        String thisMapping = restResult.get( getGAV() );
+
+        if ( targetBuild == null )
         {
             logger.error( "REST result was {}", restResult );
             throw new ManipulationException( "Multiple results returned ; unable to reset version." );
         }
+        if ( thisMapping != null )
+        {
+            // TODO: Validate that this project < target gav
+            logger.debug( "Comparing target GAV build {} to this build {} ", targetBuild, thisMapping );
+            if ( Version.getIntegerBuildNumber( thisMapping ) < Version.getIntegerBuildNumber( targetBuild ) )
+            {
+                logger.error( "Alignment failure: Target is {} and this is {}", Version.getIntegerBuildNumber( thisMapping ), Version.getIntegerBuildNumber( targetBuild ) );
+                throw new ManipulationException( "Unable to set version suffix as dependent build has been built more times than the original target" );
+            }
+        }
 
-        String newVersion = restResult.get( gav );
-        String newSuffix = newVersion.substring( gav.getVersionString().length() + 1 );
-        logger.info ("From version {}, updating versionSuffix to {}", newVersion, newSuffix );
+        String newSuffix = targetBuild.substring( gav.getVersionString().length() + 1 );
+        logger.info ("From version {}, updating versionSuffix to {}", targetBuild, newSuffix );
         getUserProperties().put( VersioningState.VERSION_SUFFIX_SYSPROP.getCurrent(), newSuffix );
 
         reinitialiseSessionStates();
