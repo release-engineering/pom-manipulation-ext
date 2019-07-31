@@ -2,6 +2,9 @@
 title: Groovy Script Injection
 ---
 
+* Contents
+{:toc}
+
 ### Overview
 
 PME offers the ability to run arbitrary groovy scripts on the sources prior to running the build. This allows PME to be extensible by the user and to process other files not just Maven POMs.
@@ -95,8 +98,9 @@ import org.commonjava.maven.ext.core.groovy.PMEInvocationPoint
 where InvocationStage may be `FIRST`, `LAST` or `BOTH`. This denotes whether the script is ran
 before all other manipulators, after or both. The script therefore encodes how and when it is run.
 
-<br/>
-The following API is made available:
+### API
+
+The following API is available:
 
 
 | Method | Description |
@@ -120,13 +124,41 @@ The following API is made available:
 </table>
 
 | void inlineProperty([Project](https://github.com/release-engineering/pom-manipulation-ext/blob/master/common/src/main/java/org/commonjava/maven/ext/common/model/Project.java), [ProjectRef](https://github.com/Commonjava/atlas/blob/master/identities/src/main/java/org/commonjava/atlas/maven/ident/ref/ProjectRef.java)) | Allows the specified group:artifact property to be inlined in any depedencies/dependencyManagement. This is useful to split up properties that cover multiple separate projects. |
-| void inlineProperty([Project](https://github.com/release-engineering/pom-manipulation-ext/blob/master/common/src/main/java/org/commonjava/maven/ext/common/model/Project.java), String "propertyKey") | Allows the specified property to be inlined in any depedencies/dependencyManagement. This is useful to split up properties that cover multiple separate projects. |
+
+<table bgcolor="#ffff00">
+<tr>
+<td>
+    <b>NOTE</b> : From version 3.8 the following extra API is available:
+</td>
+</tr>
+</table>
+
+| void reinitialiseSessionStates() | This will re-initialise any State linked to this session. This is useful if the groovy scripts have altered the user properties. |
+| void overrideProjectVersion ([ProjectVersionRef](https://github.com/Commonjava/atlas/blob/master/identities/src/main/java/org/commonjava/atlas/maven/ident/ref/ProjectVersionRef.java)) | The specified GAV will be queried from DA for its current suffix and that suffix be used in [versionSuffix](project-version-manip.html#manual-version-suffix) instead of any [versionIncrementalSuffix](project-version-manip.html#automatic-version-increment). |
 
 
 This can then be invoked by e.g.
 
     pme.getBaseDir()
 
+
+### Utility Functions
+
+Currently two main utility functions are provided:
+
+#### inlineProperty
+
+This function is typically used to deal with the problem where an upstream may use a single property for several distinct SCM Builds. This can lead to issues, so by 'inlining' the property it can avoid them.
+
+#### overrideProjectVersion
+
+Occasionally upstream projects have circular dependencies in their build. This can typically happen if the first build creates a BOM that is used by multiple subsequent builds. If rebuilds (primarily with a suffix) occur then the versions can get out of sync and build errors arise. This function effectively 'locks' the subsequent builds to the suffix value of the first.
+
+![circular example][circular]
+
+The above diagram shows two different SCM builds. The first has a sub-module that is a BOM that references the following SCM builds. This BOM is imported into the parent's `dependencyManagement`. The second SCM build inherits this parent. If the first has been rebuilt twice (hence the `rebuild-2` suffix) then the BOM will refer to the incorrect version of SCM Build 2 (`1.0.rebuild-2` instead of `1.0.rebuild-1`). By using `overrideProjectVersion` it is possible to force SCM Build 2 to use suffix `rebuild-2` therebye making it have the correct version.
+
+### Example
 
 A typical groovy script that alters a JSON file on disk might be:
 
@@ -194,3 +226,5 @@ If a developer wishes to setup an IDE to write the groovy script we would recomm
         </dependencies>
       </profile>
     </profiles>
+
+[circular]: ../images/circular.png "Circular Example"
