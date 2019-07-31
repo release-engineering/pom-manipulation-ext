@@ -116,22 +116,6 @@ The blacklist REST endpoint should follow:
 
 **Note:** For existing dependencies that reference a property, PME will update this property with the new version. If the property can't be found (e.g. it was inherited), a new one will be injected at the top level. This update of the property's value **may** implicitly align other dependencies using the same property that were not explicitly requested to be aligned.
 
-### Direct Dependencies
-
-By default the extension will override dependencies using declarations from the remote BOM. However, by setting the property `overrideDependencies` to `false`, the behavior can be disabled:
-
-    mvn install -DdependencyManagement=org.foo:my-dep-pom:1.0 -DoverrideDependencies=false
-
-Note that this will still alter any external parent references.
-
-<table bgcolor="#ff3333">
-<tr>
-<td>
-    <b>NOTE</b> : This option is deprecated as of PME 2.12 (July 2017) and may be removed in a future release.
-</td>
-</tr>
-</table>
-
 ### Direct/Transitive Dependencies
 
 <table bgcolor="#ffff00">
