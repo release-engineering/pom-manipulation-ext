@@ -24,8 +24,6 @@ import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.core.impl.DependencyManipulator;
 import org.commonjava.maven.ext.core.util.IdUtils;
 import org.commonjava.maven.ext.core.util.PropertiesUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.List;
@@ -99,10 +97,6 @@ public class DependencyState
      */
     private static final String EXTRA_BOM_PREFIX = DEPENDENCY_MANAGEMENT_POM_PROPERTY + ".";
 
-    private static final Logger logger = LoggerFactory.getLogger( DependencyState.class );
-
-    private final boolean overrideDependencies;
-
     private final List<ProjectVersionRef> remoteBOMdepMgmt;
 
     private final Map<String, ProjectVersionRef> extraBOMs;
@@ -117,11 +111,6 @@ public class DependencyState
 
     public DependencyState( final Properties userProps ) throws ManipulationException
     {
-        if ( userProps.containsKey( "overrideDependencies" ) )
-        {
-            logger.error ("overrideDependencies is deprecated.");
-        }
-        overrideDependencies = Boolean.valueOf( userProps.getProperty( "overrideDependencies", "true" ) );
         remoteBOMdepMgmt = IdUtils.parseGAVs( userProps.getProperty( DEPENDENCY_MANAGEMENT_POM_PROPERTY ) );
 
         extraBOMs = new HashMap<>();
@@ -211,15 +200,6 @@ public class DependencyState
             extraBOMDepMgmts = new HashMap<>(  );
         }
         return extraBOMDepMgmts;
-    }
-
-    /**
-     * @return whether to override managed dependencies in the build. Defaults to true.
-     * @deprecated
-     */
-    public boolean getOverrideDependencies()
-    {
-        return overrideDependencies;
     }
 
     public DependencyPrecedence getPrecedence()

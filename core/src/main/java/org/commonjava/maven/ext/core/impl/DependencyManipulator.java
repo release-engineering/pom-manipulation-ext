@@ -29,6 +29,7 @@ import org.commonjava.maven.atlas.ident.ref.SimpleArtifactRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleProjectRef;
 import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.common.model.Project;
+import org.commonjava.maven.ext.common.util.WildcardMap;
 import org.commonjava.maven.ext.core.ManipulationSession;
 import org.commonjava.maven.ext.core.state.CommonState;
 import org.commonjava.maven.ext.core.state.DependencyState;
@@ -36,7 +37,6 @@ import org.commonjava.maven.ext.core.state.DependencyState.DependencyPrecedence;
 import org.commonjava.maven.ext.core.state.RESTState;
 import org.commonjava.maven.ext.core.util.PropertiesUtils;
 import org.commonjava.maven.ext.core.util.PropertyMapper;
-import org.commonjava.maven.ext.common.util.WildcardMap;
 import org.commonjava.maven.ext.io.ModelIO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -340,19 +340,18 @@ public class DependencyManipulator implements Manipulator
         final DependencyState dependencyState = session.getState( DependencyState.class );
         final CommonState commonState = session.getState( CommonState.class );
 
-        logger.debug ("Processing project {} ", projectGA);
+        logger.debug( "Processing project {} ", projectGA );
 
         Map<ArtifactRef, String> moduleOverrides = new LinkedHashMap<>( overrides );
         moduleOverrides = removeReactorGAs( moduleOverrides );
 
         try
         {
-            moduleOverrides = applyModuleVersionOverrides( projectGA,
-                                                           dependencyState.getDependencyExclusions(),
+            moduleOverrides = applyModuleVersionOverrides( projectGA, dependencyState.getDependencyExclusions(),
                                                            moduleOverrides, explicitOverrides,
                                                            dependencyState.getExtraBOMDepMgmts() );
             logger.debug( "Module overrides are:\n{}", moduleOverrides );
-            logger.debug( "Explicit overrides are:\n{}", explicitOverrides);
+            logger.debug( "Explicit overrides are:\n{}", explicitOverrides );
         }
         catch ( InvalidRefException e )
         {
@@ -363,14 +362,16 @@ public class DependencyManipulator implements Manipulator
         if ( project.isInheritanceRoot() )
         {
             // Handle the situation where the top level parent refers to a prior build that is in the BOM.
-            if ( project.getModelParent() != null)
+            if ( project.getModelParent() != null )
             {
                 for ( Map.Entry<ArtifactRef, String> entry : moduleOverrides.entrySet() )
                 {
                     String oldValue = project.getModelParent().getVersion();
                     String newValue = entry.getValue();
 
-                    if ( entry.getKey().asProjectRef().equals( SimpleProjectRef.parse( ga(project.getModelParent()) ) ))
+                    if ( entry.getKey()
+                              .asProjectRef()
+                              .equals( SimpleProjectRef.parse( ga( project.getModelParent() ) ) ) )
                     {
                         if ( commonState.isStrict() )
                         {
@@ -402,121 +403,103 @@ public class DependencyManipulator implements Manipulator
 
                 // Apply any explicit overrides to the top level parent. Convert it to a simulated
                 // dependency so we can reuse applyExplicitOverrides.
-                HashMap<ArtifactRef, Dependency> pDepMap = new HashMap<>(  );
+                HashMap<ArtifactRef, Dependency> pDepMap = new HashMap<>();
                 Dependency d = new Dependency();
                 d.setGroupId( project.getModelParent().getGroupId() );
                 d.setArtifactId( project.getModelParent().getArtifactId() );
                 d.setVersion( project.getModelParent().getVersion() );
                 pDepMap.put( SimpleArtifactRef.parse( d.getManagementKey() ), d );
-                applyExplicitOverrides( project, pDepMap, explicitOverrides, commonState, explicitVersionPropertyUpdateMap );
+                applyExplicitOverrides( project, pDepMap, explicitOverrides, commonState,
+                                        explicitVersionPropertyUpdateMap );
                 project.getModelParent().setVersion( d.getVersion() );
             }
 
-            if ( session.getState( DependencyState.class ).getOverrideDependencies() )
+            // Apply overrides to project dependency management
+            logger.debug( "Applying overrides to managed dependencies for: {}", projectGA );
+
+            final Map<ArtifactRef, String> nonMatchingVersionOverrides =
+                            applyOverrides( project, project.getResolvedManagedDependencies( session ),
+                                            explicitOverrides, moduleOverrides );
+
+            final Map<ArtifactRef, String> matchedOverrides = new LinkedHashMap<>( moduleOverrides );
+            matchedOverrides.keySet().removeAll( nonMatchingVersionOverrides.keySet() );
+
+            applyExplicitOverrides( project, project.getResolvedManagedDependencies( session ), explicitOverrides,
+                                    commonState, explicitVersionPropertyUpdateMap );
+
+            if ( commonState.isOverrideTransitive() )
             {
-                // Apply overrides to project dependency management
-                logger.debug( "Applying overrides to managed dependencies for: {}", projectGA );
+                final List<Dependency> extraDeps = new ArrayList<>();
 
-                final Map<ArtifactRef, String> nonMatchingVersionOverrides =
-                                applyOverrides( project, project.getResolvedManagedDependencies( session ),
-                                                explicitOverrides, moduleOverrides );
-
-                final Map<ArtifactRef, String> matchedOverrides = new LinkedHashMap<>( moduleOverrides );
-                matchedOverrides.keySet().removeAll( nonMatchingVersionOverrides.keySet() );
-
-                applyExplicitOverrides( project, project.getResolvedManagedDependencies( session ), explicitOverrides,
-                                        commonState, explicitVersionPropertyUpdateMap );
-
-                if ( commonState.isOverrideTransitive() )
+                // Add dependencies to Dependency Management which did not match any existing dependency
+                for ( final ArtifactRef var : overrides.keySet() )
                 {
-                    final List<Dependency> extraDeps = new ArrayList<>();
-
-                    // Add dependencies to Dependency Management which did not match any existing dependency
-                    for ( final ArtifactRef var : overrides.keySet() )
+                    if ( !nonMatchingVersionOverrides.containsKey( var ) )
                     {
-                        if ( !nonMatchingVersionOverrides.containsKey( var ) )
-                        {
-                            // This one in the remote pom was already dealt with ; continue.
-                            continue;
-                        }
-
-                        final Dependency newDependency = new Dependency();
-                        newDependency.setGroupId( var.getGroupId() );
-                        newDependency.setArtifactId( var.getArtifactId() );
-                        newDependency.setType( var.getType() );
-                        newDependency.setClassifier( var.getClassifier() );
-
-                        final String artifactVersion = moduleOverrides.get( var );
-                        newDependency.setVersion( artifactVersion );
-
-                        extraDeps.add( newDependency );
-                        logger.debug( "New entry added to <DependencyManagement/> - {} : {} ", var, artifactVersion );
+                        // This one in the remote pom was already dealt with ; continue.
+                        continue;
                     }
 
-                    // If the model doesn't have any Dependency Management set by default, create one for it
-                    DependencyManagement dependencyManagement = model.getDependencyManagement();
-                    if ( extraDeps.size() > 0 )
-                    {
-                        if ( dependencyManagement == null )
-                        {
-                            dependencyManagement = new DependencyManagement();
-                            model.setDependencyManagement( dependencyManagement );
-                            logger.debug( "Added <DependencyManagement/> for current project" );
-                        }
-                        dependencyManagement.getDependencies().addAll( 0, extraDeps );
-                    }
+                    final Dependency newDependency = new Dependency();
+                    newDependency.setGroupId( var.getGroupId() );
+                    newDependency.setArtifactId( var.getArtifactId() );
+                    newDependency.setType( var.getType() );
+                    newDependency.setClassifier( var.getClassifier() );
+
+                    final String artifactVersion = moduleOverrides.get( var );
+                    newDependency.setVersion( artifactVersion );
+
+                    extraDeps.add( newDependency );
+                    logger.debug( "New entry added to <DependencyManagement/> - {} : {} ", var, artifactVersion );
                 }
-                else
+
+                // If the model doesn't have any Dependency Management set by default, create one for it
+                DependencyManagement dependencyManagement = model.getDependencyManagement();
+                if ( extraDeps.size() > 0 )
                 {
-                    logger.debug( "Non-matching dependencies ignored." );
+                    if ( dependencyManagement == null )
+                    {
+                        dependencyManagement = new DependencyManagement();
+                        model.setDependencyManagement( dependencyManagement );
+                        logger.debug( "Added <DependencyManagement/> for current project" );
+                    }
+                    dependencyManagement.getDependencies().addAll( 0, extraDeps );
                 }
             }
             else
             {
-                logger.debug( "NOT applying overrides to managed dependencies for top-pom: {}", projectGA );
+                logger.debug( "Non-matching dependencies ignored." );
             }
         }
         else
         {
-            // If a child module has a depMgmt section we'll change that as well.
-            if ( session.getState( DependencyState.class ).getOverrideDependencies()  )
-            {
-                logger.debug( "Applying overrides to managed dependencies for: {}", projectGA );
-                applyOverrides( project, project.getResolvedManagedDependencies( session ), explicitOverrides,
-                                moduleOverrides );
-                applyExplicitOverrides( project, project.getResolvedManagedDependencies( session ), explicitOverrides,
-                                        commonState, explicitVersionPropertyUpdateMap );
-            }
-            else
-            {
-                logger.debug( "NOT applying overrides to managed dependencies for: {}", projectGA );
-            }
+            logger.debug( "Applying overrides to managed dependencies for: {}", projectGA );
+            applyOverrides( project, project.getResolvedManagedDependencies( session ), explicitOverrides,
+                            moduleOverrides );
+            applyExplicitOverrides( project, project.getResolvedManagedDependencies( session ), explicitOverrides,
+                                    commonState, explicitVersionPropertyUpdateMap );
         }
 
-        if ( session.getState( DependencyState.class ).getOverrideDependencies() )
+        logger.debug( "Applying overrides to concrete dependencies for: {}", projectGA );
+        // Apply overrides to project direct dependencies
+        applyOverrides( project, project.getResolvedDependencies( session ), explicitOverrides, moduleOverrides );
+        applyExplicitOverrides( project, project.getResolvedDependencies( session ), explicitOverrides, commonState,
+                                explicitVersionPropertyUpdateMap );
+
+        final Map<Profile, Map<ArtifactRef, Dependency>> pd = project.getResolvedProfileDependencies( session );
+        final Map<Profile, Map<ArtifactRef, Dependency>> pmd = project.getResolvedProfileManagedDependencies( session );
+
+        for ( Profile p : pd.keySet() )
         {
-            logger.debug( "Applying overrides to concrete dependencies for: {}", projectGA );
-            // Apply overrides to project direct dependencies
-            applyOverrides( project, project.getResolvedDependencies( session ), explicitOverrides, moduleOverrides );
-            applyExplicitOverrides( project, project.getResolvedDependencies( session ), explicitOverrides, commonState, explicitVersionPropertyUpdateMap );
-
-            final Map<Profile, Map<ArtifactRef, Dependency>> pd = project.getResolvedProfileDependencies( session );
-            final Map<Profile, Map<ArtifactRef, Dependency>> pmd = project.getResolvedProfileManagedDependencies( session );
-
-            for ( Profile p : pd.keySet())
-            {
-                applyOverrides( project, pd.get( p ), explicitOverrides, moduleOverrides );
-                applyExplicitOverrides( project, pd.get( p ), explicitOverrides, commonState, explicitVersionPropertyUpdateMap );
-            }
-            for ( Profile p : pmd.keySet())
-            {
-                applyOverrides( project, pmd.get( p ), explicitOverrides, moduleOverrides );
-                applyExplicitOverrides( project, pmd.get( p ), explicitOverrides, commonState, explicitVersionPropertyUpdateMap );
-            }
+            applyOverrides( project, pd.get( p ), explicitOverrides, moduleOverrides );
+            applyExplicitOverrides( project, pd.get( p ), explicitOverrides, commonState,
+                                    explicitVersionPropertyUpdateMap );
         }
-        else
+        for ( Profile p : pmd.keySet() )
         {
-            logger.debug( "NOT applying overrides to concrete dependencies for: {}", projectGA );
+            applyOverrides( project, pmd.get( p ), explicitOverrides, moduleOverrides );
+            applyExplicitOverrides( project, pmd.get( p ), explicitOverrides, commonState,
+                                    explicitVersionPropertyUpdateMap );
         }
     }
 
