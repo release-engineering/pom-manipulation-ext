@@ -129,6 +129,10 @@ public class AddSuffixJettyHandler
                     {
                         bestMatchVersion = version + "-" + EXTENDED_SUFFIX;
                     }
+                    else if ( gav.get( "groupId" ).equals( "org.goots.maven.circulardependencies-test-parent" ) )
+                    {
+                        bestMatchVersion = version + "." + SUFFIX + "-3";
+                    }
                     else if ( gav.get( "artifactId" ).equals( "rest-version-manip-mixed-suffix-orig-rh" ) )
                     {
                         bestMatchVersion = version + "-" + this.suffix;

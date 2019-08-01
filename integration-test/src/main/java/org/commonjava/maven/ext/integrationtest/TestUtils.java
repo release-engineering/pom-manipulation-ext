@@ -50,7 +50,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.regex.Pattern;
 
 /**
  * @author vdedik@redhat.com
@@ -65,19 +64,19 @@ public class TestUtils
 
     private static final String LOCAL_REPO = System.getProperty( "localRepositoryPath" );
 
-    protected static final String IT_LOCATION = BUILD_DIR + "/it-cli";
+    static final String IT_LOCATION = BUILD_DIR + "/it-cli";
 
-    protected static final Map<String, String> DEFAULT_MVN_PARAMS = new HashMap<String, String>()
+    static final Map<String, String> DEFAULT_MVN_PARAMS = new HashMap<String, String>()
     {{
             put( "maven.repo.local", LOCAL_REPO );
     }};
 
-    private static Pattern p = Pattern.compile( "rest-.*" );
-    protected static final List<String> EXCLUDED_FILES = new ArrayList<String>()
+    static final List<String> EXCLUDED_FILES = new ArrayList<String>()
     {{
         add( "setup" );
         try ( DirectoryStream<Path> stream = Files.newDirectoryStream( new File( IT_LOCATION ).toPath(),
-                                      p -> p.getFileName().toString().startsWith( "rest-" ) ) )
+                                      p -> p.getFileName().toString().startsWith( "rest-" ) ||
+                        p.getFileName().toString().startsWith( "circular-" ) ) )
         {
             // Run in a separate test so a Mock server may be started.
             stream.forEach( p -> add( p.getFileName().toString() ) );
@@ -90,7 +89,7 @@ public class TestUtils
         add( "groovy-manipulator-first-http" );
     }};
 
-    protected static final Map<String, String> LOCATION_REWRITE = new HashMap<String, String>()
+    static final Map<String, String> LOCATION_REWRITE = new HashMap<String, String>()
     {{
             put( "simple-numeric-directory-path", "simple-numeric-directory-path/parent" );
     }};
@@ -102,7 +101,7 @@ public class TestUtils
      * @param url The URL to either the REST server that manages versions, or HTTP server for static Groovy scripts or null
      * @throws Exception if an error occurs
      */
-    public static void runLikeInvoker( String workingDir, String url )
+    static void runLikeInvoker( String workingDir, String url )
         throws Exception
     {
         ExecutionParser executionParser = new DefaultExecutionParser( DefaultExecutionParser.DEFAULT_HANDLERS );
@@ -147,7 +146,7 @@ public class TestUtils
             Map<String, String> mavenParams = new HashMap<>();
             mavenParams.putAll( DEFAULT_MVN_PARAMS );
             mavenParams.putAll( e.getJavaParams() );
-            Integer mavenExitValue = runMaven( e.getMvnCommand(), mavenParams, e.getLocation() );
+            int mavenExitValue = runMaven( e.getMvnCommand(), mavenParams, e.getLocation() );
 
             // Test return codes
             if ( e.isSuccess() )
@@ -184,7 +183,7 @@ public class TestUtils
      * @throws Exception if an error occurs.
      * @return Exit value
      */
-    public static Integer runCli( List<String> args, Map<String, String> params, String workingDir ) throws Exception
+    static Integer runCli( List<String> args, Map<String, String> params, String workingDir ) throws Exception
     {
         ArrayList<String> arguments = new ArrayList<>( args );
         Collections.addAll( arguments, toJavaParams( params ).split( "\\s+" ) );
@@ -194,6 +193,7 @@ public class TestUtils
             if ( s.startsWith( "--file" ) )
             {
                 argsContainsFile = true;
+                break;
             }
         }
         if ( ! argsContainsFile )
@@ -203,7 +203,7 @@ public class TestUtils
         }
         logger.info( "Invoking CLI with {} ", arguments );
         Cli cli = new Cli();
-        Integer result = (Integer) executeMethod( cli, "run", new Object[]{arguments.toArray( new String[0] )} );
+        Integer result = (Integer) executeMethod( cli, new Object[]{arguments.toArray( new String[0] )} );
 
         // Close unirest client down to prevent any hanging.
         // Unirest.shutdown();
@@ -241,7 +241,7 @@ public class TestUtils
      * @return Exit value
      * @throws Exception if an error occurs
      */
-    public static Integer runMaven( String commands, Map<String, String> params, String workingDir )
+    static Integer runMaven( String commands, Map<String, String> params, String workingDir )
         throws Exception
     {
         String stringParams = toJavaParams( params );
@@ -277,7 +277,7 @@ public class TestUtils
      * @param test - Test name.
      * @return Default location of integration test, e.g. ~/pom-manipulation-ext/integration-test/target/it-cli/it-test
      */
-    public static String getDefaultTestLocation( String test )
+    static String getDefaultTestLocation( String test )
     {
         return String.format( "%s/%s", IT_LOCATION, test );
     }
@@ -295,12 +295,12 @@ public class TestUtils
             return "";
         }
 
-        String stringParams = "";
+        StringBuilder stringParams = new StringBuilder();
         for ( String key : params.keySet() )
         {
-            stringParams += String.format( "-D%s=%s ", key, params.get( key ) );
+            stringParams.append( String.format( "-D%s=%s ", key, params.get( key ) ) );
         }
-        return stringParams;
+        return stringParams.toString();
     }
 
     /**
@@ -316,12 +316,12 @@ public class TestUtils
             return "";
         }
 
-        String stringParams = "";
+        StringBuilder stringParams = new StringBuilder();
         for ( String key : params.keySet() )
         {
-            stringParams += String.format( "--%s=%s ", key, params.get( key ) );
+            stringParams.append( String.format( "--%s=%s ", key, params.get( key ) ) );
         }
-        return stringParams;
+        return stringParams.toString();
     }
 
     /**
@@ -329,7 +329,7 @@ public class TestUtils
      *
      * @param command - Command to be run in another process, e.g. "mvn clean install"
      * @param workingDir - Working directory in which to run the command.
-     * @param extraPath
+     * @param extraPath - Extra path settings
      * @return exit value.
      * @throws Exception if an error occurs
      */
@@ -349,7 +349,7 @@ public class TestUtils
         BufferedReader stderr = new BufferedReader( new InputStreamReader( proc.getErrorStream() ) );
         PrintWriter out = new PrintWriter( new BufferedWriter( new FileWriter( buildlog, true ) ) );
 
-        String line = null;
+        String line;
         String errline = null;
         while ( ( line = stdout.readLine() ) != null || ( errline = stderr.readLine() ) != null )
         {
@@ -413,7 +413,8 @@ public class TestUtils
      * the method are specified.  The method will be executed and the value
      * of it returned, even if the method would have private or protected access.
      */
-    private static Object executeMethod( Object instance, String name, Object[] params ) throws Exception
+    @SuppressWarnings( "unchecked" )
+    private static Object executeMethod( Object instance, Object[] params ) throws Exception
     {
         Class c = instance.getClass();
 
@@ -423,7 +424,7 @@ public class TestUtils
         for ( int i = 0; i < params.length; i++ )
             types[i] = params[i].getClass();
 
-        Method m = c.getDeclaredMethod( name, types );
+        Method m = c.getDeclaredMethod( "run", types );
         m.setAccessible( true );
 
         return m.invoke( instance, params );

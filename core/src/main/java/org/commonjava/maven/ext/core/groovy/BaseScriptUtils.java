@@ -168,17 +168,16 @@ public abstract class BaseScriptUtils extends Script implements BaseScriptAPI
         }
         if ( thisMapping != null )
         {
-            // TODO: Validate that this project < target gav
-            logger.debug( "Comparing target GAV build {} to this build {} ", targetBuild, thisMapping );
-            if ( Version.getIntegerBuildNumber( thisMapping ) < Version.getIntegerBuildNumber( targetBuild ) )
+            logger.info( "Comparing target GAV build {} to this build {} ", targetBuild, thisMapping );
+            if ( Version.getIntegerBuildNumber( thisMapping ) >= Version.getIntegerBuildNumber( targetBuild ) )
             {
-                logger.error( "Alignment failure: Target is {} and this is {}", Version.getIntegerBuildNumber( thisMapping ), Version.getIntegerBuildNumber( targetBuild ) );
-                throw new ManipulationException( "Unable to set version suffix as dependent build has been built more times than the original target" );
+                logger.error( "Alignment failure: Target is {} and this is {}", Version.getIntegerBuildNumber( targetBuild ), Version.getIntegerBuildNumber( thisMapping ) );
+                throw new ManipulationException( "Unable to set version suffix as dependent build has been built more or the same number of times than the original target" );
             }
         }
 
         String newSuffix = targetBuild.substring( gav.getVersionString().length() + 1 );
-        logger.info ("From version {}, updating versionSuffix to {}", targetBuild, newSuffix );
+        logger.info( "From version {}, updating versionSuffix to {}", targetBuild, newSuffix );
         getUserProperties().put( VersioningState.VERSION_SUFFIX_SYSPROP.getCurrent(), newSuffix );
 
         reinitialiseSessionStates();

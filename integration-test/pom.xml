@@ -321,6 +321,8 @@
                   <pomExcludes>
                     <!-- Only run by JUnit as we need a Mock REST server started -->
                     <pomExclude>rest-*/pom.xml</pomExclude>
+                    <!-- Only run by JUnit as they are linked -->
+                    <pomExclude>circular-*/pom.xml</pomExclude>
                     <pomExclude>groovy-manipulator-first-http/pom.xml</pomExclude>
                   </pomExcludes>
                   <projectsDirectory>${project.build.directory}/it-${extIter}</projectsDirectory>
