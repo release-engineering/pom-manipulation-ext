@@ -25,6 +25,7 @@ import org.codehaus.plexus.PlexusContainer;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.ext.common.json.PME;
 import org.commonjava.maven.ext.common.model.Project;
+import org.commonjava.maven.ext.common.util.JSONUtils;
 import org.commonjava.maven.ext.common.util.ProjectComparator;
 import org.commonjava.maven.ext.common.util.WildcardMap;
 import org.commonjava.maven.ext.core.ManipulationSession;
@@ -117,9 +118,18 @@ public class ProjectComparatorTest
             }
         } ) );
 
-        ProjectComparator.compareProjects( session, new PME(), relocationState.getDependencyRelocations(),
+        PME json = new PME();
+//        json.setGAV( new GAV() );
+//        json.getGAV().setGav( projectNew.get( 0 ).getKey() );
+
+        ProjectComparator.compareProjects( session, json, relocationState.getDependencyRelocations(),
                                            projectOriginal, projectNew );
 
+        String jsonString = JSONUtils.jsonToString(json);
+        assertTrue( jsonString.contains( "org.commonjava.maven.galley:galley-maven:0.16.3\" : {" ) );
+        assertTrue( jsonString.contains( "\"version\" : \"0.16.3-redhat-1\"" ) );
+
+        System.out.println (jsonString);
 
         assertTrue( systemOutRule.getLog().contains( "Managed dependencies :" ) );
         assertTrue( systemOutRule.getLog().contains( "Project version :" ) );

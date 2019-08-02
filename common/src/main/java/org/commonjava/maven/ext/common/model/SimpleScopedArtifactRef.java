@@ -28,7 +28,7 @@ import org.commonjava.maven.atlas.ident.ref.TypeAndClassifier;
 @Data
 @ToString( callSuper = true )
 @EqualsAndHashCode( callSuper = true )
-public class SimpleScopedArtifactRef extends SimpleArtifactRef
+public class SimpleScopedArtifactRef extends SimpleArtifactRef implements ScopedArtifactRef
 {
     private final String scope;
 

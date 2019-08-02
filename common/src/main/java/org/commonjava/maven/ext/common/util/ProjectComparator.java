@@ -22,11 +22,14 @@ import org.apache.maven.model.Profile;
 import org.commonjava.maven.atlas.ident.ref.ArtifactRef;
 import org.commonjava.maven.atlas.ident.ref.ProjectRef;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
+import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef;
 import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.common.ManipulationUncheckedException;
+import org.commonjava.maven.ext.common.json.ManagedDependenciesItem;
+import org.commonjava.maven.ext.common.json.ManagedPluginsItem;
 import org.commonjava.maven.ext.common.json.ModulesItem;
 import org.commonjava.maven.ext.common.json.PME;
-import org.commonjava.maven.ext.common.json.PropertiesItem;
+import org.commonjava.maven.ext.common.json.ProfileItem;
 import org.commonjava.maven.ext.common.model.Project;
 import org.commonjava.maven.ext.common.session.MavenSessionHandler;
 import org.slf4j.Logger;
@@ -39,6 +42,7 @@ import java.nio.charset.Charset;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
@@ -131,8 +135,9 @@ public class ProjectComparator
                                                                            && newProject.getGroupId().equals( originalProject.getGroupId() ) ).forEach( originalProject ->
                         {
 
-                            ModulesItem module = new ModulesItem(newProject.getKey(), originalProject.getVersion());
+                            ModulesItem module = new ModulesItem();
                             modules.add( module );
+                            module.setGav( originalProject.getKey() );
 
                             append( builder, "------------------- project {}", newProject.getKey().asProjectRef() );
                             if ( ! originalProject.getVersion().equals( newProject.getVersion() ) )
@@ -147,7 +152,7 @@ public class ProjectComparator
                                 originalProject.getModel().getProperties().forEach( ( oKey, oValue ) -> {
                                     if ( oKey != null && oKey.equals( nKey ) &&  oValue != null &&  !oValue.equals( nValue ) )
                                     {
-                                        module.getProperties().add( new PropertiesItem( oKey.toString(), oValue.toString(), nValue.toString() ) );
+//                                        module.getProperties().add( new PropertiesItem( oKey.toString(), oValue.toString(), nValue.toString() ) );
                                         append( builder, "\tProperty : key {} ; value {} ---> {}", oKey, oValue, nValue);
                                         spacerLine.set( true );
                                     }
@@ -156,7 +161,7 @@ public class ProjectComparator
                             injectSpacerLine( builder );
 
                             compareDependencies( DEPENDENCIES,
-                                                 jsonReport,
+                                                 module.getDependencies(),
                                                  builder,
                                                  dependencyRelocations,
                                                  reportNonAligned,
@@ -165,25 +170,32 @@ public class ProjectComparator
 
                             injectSpacerLine( builder );
 
-                            compareDependencies( MANAGED_DEPENDENCIES, jsonReport, builder, dependencyRelocations, reportNonAligned,
+                            ManagedDependenciesItem mgdDeps = new ManagedDependenciesItem();
+                            module.setManagedDependencies( mgdDeps );
+                            compareDependencies( MANAGED_DEPENDENCIES, mgdDeps.getDependencies(), builder, dependencyRelocations, reportNonAligned,
                                                  handleDependencies( session, originalProject, null,
                                                                      MANAGED_DEPENDENCIES ),
                                                  handleDependencies( session, newProject, null, MANAGED_DEPENDENCIES ) );
 
                             injectSpacerLine( builder );
 
-                            compareDependencies( DEPENDENCIES_UNVERSIONED, jsonReport, builder, dependencyRelocations, reportNonAligned,
+                            compareDependencies( DEPENDENCIES_UNVERSIONED, module.getDependencies(), builder, dependencyRelocations, reportNonAligned,
                                                  handleDependencies( session, originalProject, null, DEPENDENCIES_UNVERSIONED ),
                                                  handleDependencies( session, newProject, null, DEPENDENCIES_UNVERSIONED ) );
 
                             injectSpacerLine( builder );
 
                             comparePlugins( PLUGINS,
+                                                 module.getPlugins(),
                                                  builder,
                                                  reportNonAligned,
                                                  handlePlugins( session, originalProject, null, PLUGINS ),
                                                  handlePlugins( session, newProject, null, PLUGINS ) );
-                            comparePlugins( MANAGED_PLUGINS, builder, reportNonAligned,
+
+                            ManagedPluginsItem mgdPlugins = new ManagedPluginsItem();
+                            module.setManagedPlugins( mgdPlugins );
+
+                            comparePlugins( MANAGED_PLUGINS, mgdPlugins.getPlugins(), builder, reportNonAligned,
                                             handlePlugins( session, originalProject, null,
                                                            MANAGED_PLUGINS ),
                                             handlePlugins( session, newProject, null, MANAGED_PLUGINS ) );
@@ -195,8 +207,12 @@ public class ProjectComparator
                                             filter( oldProfile -> newProfile.getId().equals( oldProfile.getId() ) ).
                                                                                           forEach( oldProfile ->
                             {
+                                ProfileItem profileItem = new ProfileItem();
+                                module.getProfiles().add( profileItem );
+
                                 newProfile.getProperties().forEach( ( nKey, nValue ) ->
                                     oldProfile.getProperties().forEach( ( oKey, oValue ) -> {
+
                                         if ( oKey != null && oKey.equals( nKey ) &&  oValue != null &&  !oValue.equals( nValue ) )
                                         {
                                             append( builder, "\tProfile property : key {} ; value {} ---> {}", oKey, oValue, nValue );
@@ -207,13 +223,16 @@ public class ProjectComparator
 
                                 injectSpacerLine( builder );
 
-                                compareDependencies( PROFILE_DEPENDENCIES, jsonReport, builder, dependencyRelocations, reportNonAligned,
+                                compareDependencies( PROFILE_DEPENDENCIES, profileItem.getDependencies(), builder, dependencyRelocations, reportNonAligned,
                                                      handleDependencies( session, originalProject, oldProfile, PROFILE_DEPENDENCIES ),
                                                      handleDependencies( session, newProject, newProfile, PROFILE_DEPENDENCIES ) );
 
                                 injectSpacerLine( builder );
 
-                                compareDependencies( PROFILE_MANAGED_DEPENDENCIES, jsonReport, builder, dependencyRelocations,
+                                ManagedDependenciesItem mgdProfileDeps = new ManagedDependenciesItem();
+                                profileItem.getManagedDependencies().add( mgdProfileDeps );
+
+                                compareDependencies( PROFILE_MANAGED_DEPENDENCIES, mgdProfileDeps.getDependencies(), builder, dependencyRelocations,
                                                      reportNonAligned,
                                                      handleDependencies( session, originalProject,
                                                                          oldProfile,
@@ -223,20 +242,23 @@ public class ProjectComparator
 
                                 injectSpacerLine( builder );
 
-                                compareDependencies( PROFILE_DEPENDENCIES_UNVERSIONED, jsonReport, builder, dependencyRelocations,
+                                compareDependencies( PROFILE_DEPENDENCIES_UNVERSIONED, profileItem.getDependencies(), builder, dependencyRelocations,
                                                      reportNonAligned,
                                                      handleDependencies( session, originalProject, oldProfile, PROFILE_DEPENDENCIES_UNVERSIONED ),
                                                      handleDependencies( session, newProject, newProfile, PROFILE_DEPENDENCIES_UNVERSIONED ) );
 
                                 injectSpacerLine( builder );
 
-                                comparePlugins( PROFILE_PLUGINS, builder, reportNonAligned,
+                                comparePlugins( PROFILE_PLUGINS, profileItem.getPlugins(), builder, reportNonAligned,
                                                 handlePlugins( session, originalProject, oldProfile, PROFILE_PLUGINS ),
                                                 handlePlugins( session, newProject, newProfile, PROFILE_PLUGINS ) );
 
                                 injectSpacerLine( builder );
 
-                                comparePlugins( PROFILE_MANAGED_PLUGINS, builder, reportNonAligned,
+                                ManagedPluginsItem mgdProfilePlugins = new ManagedPluginsItem();
+                                module.setManagedPlugins( mgdProfilePlugins );
+
+                                comparePlugins( PROFILE_MANAGED_PLUGINS, mgdProfilePlugins.getPlugins(), builder, reportNonAligned,
                                                 handlePlugins( session, originalProject,
                                                                oldProfile,
                                                                PROFILE_MANAGED_PLUGINS ),
@@ -258,7 +280,7 @@ public class ProjectComparator
     }
 
 
-    private static void compareDependencies( Type type, PME jsonReport, StringBuilder builder, WildcardMap<ProjectVersionRef> dependencyRelocations,
+    private static void compareDependencies( Type type, Map<String, ProjectVersionRef> alignedDependencies, StringBuilder builder, WildcardMap<ProjectVersionRef> dependencyRelocations,
                                              boolean reportNonAligned, Set<ArtifactRef> originalDeps,
                                              Set<ArtifactRef> newDeps )
     {
@@ -268,12 +290,19 @@ public class ProjectComparator
                         || type == DEPENDENCIES_UNVERSIONED )
         {
             originalDeps.forEach( originalDep -> {
+
                 ProjectRef orig = originalDep.asProjectRef();
+
                 if ( dependencyRelocations.containsKey( orig ) )
                 {
                     ProjectVersionRef p = dependencyRelocations.get( orig );
-                    append( builder, "\tUnversioned relocation : {} ---> {}:{}:{}", originalDep, p.getGroupId(),
-                            p.getArtifactId().equals( "*" ) ? orig.getArtifactId() : p.getArtifactId(), p.getVersionString() );
+                    ProjectVersionRef n = new SimpleProjectVersionRef( p.getGroupId(),
+                                                                       p.getArtifactId().equals( "*" ) ? orig.getArtifactId() : p.getArtifactId(),
+                                                                       p.getVersionString() );
+
+                    alignedDependencies.put( originalDep.asProjectVersionRef().toString(), n );
+
+                    append( builder, "\tUnversioned relocation : {} ---> {}", originalDep, n );
                     spacerLine.set( true );
                 }
             } );
@@ -290,6 +319,8 @@ public class ProjectComparator
                                                              .forEach( newArtifact -> {
                                                                  if ( !newArtifact.getVersionString().equals( originalArtifact.getVersionString() ) )
                                                                  {
+                                                                     alignedDependencies.put( originalArtifact.asProjectVersionRef().toString(), newArtifact.asProjectVersionRef() );
+
                                                                      append( builder, "\t{} : {} --> {}", type, originalArtifact, newArtifact);
                                                                      spacerLine.set( true );
                                                                  }
@@ -324,7 +355,8 @@ public class ProjectComparator
         }
     }
 
-    private static void comparePlugins( Type type, StringBuilder builder, boolean reportNonAligned, Set<ProjectVersionRef> originalPlugins, Set<ProjectVersionRef> newPlugins )
+    private static void comparePlugins( Type type, Map<String, ProjectVersionRef> plugins, StringBuilder builder, boolean reportNonAligned,
+                                        Set<ProjectVersionRef> originalPlugins, Set<ProjectVersionRef> newPlugins )
     {
         Set<ProjectVersionRef> nonAligned = new HashSet<>( );
         AtomicBoolean spacerLine = new AtomicBoolean();
@@ -335,6 +367,8 @@ public class ProjectComparator
                 {
                     if ( ! newArtifact.getVersionString().equals( originalPVR.getVersionString() ) )
                     {
+                        plugins.put( originalPVR.toString(), newArtifact );
+
                         append( builder, "\t{} : {} --> {}", type, originalPVR, newArtifact );
                         spacerLine.set( true );
                     }

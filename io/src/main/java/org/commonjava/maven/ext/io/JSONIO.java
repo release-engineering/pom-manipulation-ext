@@ -30,6 +30,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.inject.Named;
 import javax.inject.Singleton;
+import javax.print.Doc;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -61,18 +62,17 @@ public class JSONIO
         }
         catch ( IOException e )
         {
-            logger.error( "Unable to parse JSON File {} ", e );
+            logger.error( "Unable to parse JSON File", e );
             throw new ManipulationException( "Unable to parse JSON File", e );
         }
         return doc;
     }
 
-
-    public void writeJSON (File target, String contents) throws ManipulationException
+    public void writeJSON (File target, DocumentContext contents) throws ManipulationException
     {
         try
         {
-            String pretty = mapper.writer(dpp).writeValueAsString( mapper.readValue( contents, Object.class ) );
+            String pretty = mapper.writer(dpp).writeValueAsString( mapper.readValue( contents.jsonString(), Object.class ) );
 
             FileOutputStream fileOutputStream = new FileOutputStream(target);
             try (OutputStreamWriter p = new OutputStreamWriter(fileOutputStream, StandardCharsets.UTF_8) )

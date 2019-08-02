@@ -17,7 +17,7 @@ package org.commonjava.maven.ext.io;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.maven.model.Model;
-import org.commonjava.maven.ext.common.json.GAV;
+import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.ext.common.model.Project;
 import org.junit.Before;
 import org.junit.Rule;
@@ -26,6 +26,7 @@ import org.junit.rules.TemporaryFolder;
 
 import java.io.File;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.util.HashSet;
 
 import static org.junit.Assert.assertEquals;
@@ -100,11 +101,11 @@ public class PomIOTest
         HashSet<Project> changed = new HashSet<>();
         changed.add( p );
 
-        GAV gav = pomIO.rewritePOMs( changed );
+        ProjectVersionRef gav = pomIO.rewritePOMs( changed );
 
-        assertTrue( gav.getVersion().equals( "1.0" ));
-        assertTrue( gav.getGroupId().equals( "org.commonjava.maven.ext.versioning.test" ));
-        assertTrue( gav.getArtifactId().equals( "dospom" ));
+        assertEquals( "1.0", gav.getVersionString() );
+        assertEquals( "org.commonjava.maven.ext.versioning.test", gav.getGroupId() );
+        assertEquals( "dospom", gav.getArtifactId() );
     }
 
 
@@ -137,6 +138,6 @@ public class PomIOTest
 
         pomIO.writeModel( model, targetFile );
         assertTrue( targetFile.exists() );
-        assertEquals( sb, FileUtils.readFileToString( targetFile ) );
+        assertEquals( sb, FileUtils.readFileToString( targetFile, Charset.defaultCharset() ) );
     }
 }

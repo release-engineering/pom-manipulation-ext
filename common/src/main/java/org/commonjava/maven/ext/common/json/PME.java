@@ -21,18 +21,26 @@ package org.commonjava.maven.ext.common.json;
  */
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.Getter;
 import lombok.Setter;
+import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
+import org.commonjava.maven.ext.common.util.JSONUtils;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Setter
+@Getter
+@JsonPropertyOrder( {"rootGAV", "modules" } )
 public class PME
 {
     @JsonProperty( "rootGAV" )
-    private GAV GAV;
+    @JsonDeserialize( using = JSONUtils.ProjectVersionRefDeserializer.class )
+    @JsonSerialize( using = JSONUtils.ProjectVersionRefSerializer.class )
+    private ProjectVersionRef rootGAV;
 
-    @Getter
     private List<ModulesItem> modules = new ArrayList<>();
 }

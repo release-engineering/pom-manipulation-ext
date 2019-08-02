@@ -26,7 +26,6 @@ import org.apache.maven.project.MavenProject;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.ext.common.ManipulationException;
-import org.commonjava.maven.ext.common.json.GAV;
 import org.commonjava.maven.ext.common.model.Project;
 import org.commonjava.maven.ext.common.util.ManifestUtils;
 import org.commonjava.maven.galley.maven.parse.PomPeek;
@@ -47,6 +46,7 @@ import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -132,7 +132,7 @@ public class PomIO
 
                 try
                 {
-                    if ( FileUtils.readFileToString( pom ).contains( MODIFIED_BY ) )
+                    if ( FileUtils.readFileToString( pom, Charset.defaultCharset() ).contains( MODIFIED_BY ) )
                     {
                         project.setIncrementalPME (true);
                     }
@@ -178,16 +178,16 @@ public class PomIO
      * @return gav execution root GAV
      * @throws ManipulationException if an error occurs.
      */
-    public GAV rewritePOMs( final Set<Project> changed )
+    public ProjectVersionRef rewritePOMs( final Set<Project> changed )
         throws ManipulationException
     {
-        GAV result = null;
+        ProjectVersionRef result = null;
 
         for ( final Project project : changed )
         {
             if ( project.isExecutionRoot() )
             {
-                result = new GAV( project.getKey() );
+                result = project.getKey();
             }
 
             if (logger.isDebugEnabled())

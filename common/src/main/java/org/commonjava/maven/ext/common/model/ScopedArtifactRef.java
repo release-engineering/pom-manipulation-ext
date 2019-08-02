@@ -13,28 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.commonjava.maven.ext.common.json;
 
-import lombok.Getter;
-import lombok.Setter;
+package org.commonjava.maven.ext.common.model;
+
+import org.commonjava.maven.atlas.ident.ref.ArtifactRef;
+import org.commonjava.maven.atlas.ident.ref.ProjectRef;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
+import org.commonjava.maven.atlas.ident.ref.VersionedRef;
 
-@Getter
-public class GAV
+import java.io.Serializable;
+
+public interface ScopedArtifactRef extends ArtifactRef
+
 {
-    private final String groupId;
-
-    private final String artifactId;
-
-    private final String version;
-
-    @Setter
-    private String oldVersion;
-
-    public GAV( ProjectVersionRef pvr )
-    {
-        groupId = pvr.getGroupId();
-        artifactId = pvr.getArtifactId();
-        version = pvr.getVersionString();
-    }
+    String getScope();
 }

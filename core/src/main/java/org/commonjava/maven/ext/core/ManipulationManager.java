@@ -15,10 +15,6 @@
  */
 package org.commonjava.maven.ext.core;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.profiles.DefaultProfileManager;
 import org.apache.maven.profiles.activation.ProfileActivationException;
@@ -26,8 +22,8 @@ import org.apache.maven.project.ProjectBuilder;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.common.json.PME;
-import org.commonjava.maven.ext.common.json.GAV;
 import org.commonjava.maven.ext.common.model.Project;
+import org.commonjava.maven.ext.common.util.JSONUtils;
 import org.commonjava.maven.ext.common.util.ProjectComparator;
 import org.commonjava.maven.ext.common.util.WildcardMap;
 import org.commonjava.maven.ext.core.impl.Manipulator;
@@ -158,12 +154,6 @@ public class ManipulationManager
         session.getActiveProfiles().addAll( parseActiveProfiles( session, currentProjects ) );
         session.setProjects( currentProjects );
 
-        if (logger.isDebugEnabled()) {
-            for (final Project project : currentProjects) {
-                logger.debug("Got {} (POM: {})", project, project.getPom());
-            }
-        }
-
         Set<Project> changed = applyManipulations( currentProjects );
 
         // Create a marker file if we made some changes to prevent duplicate runs.
@@ -171,23 +161,21 @@ public class ManipulationManager
         {
             logger.info( "Maven-Manipulation-Extension: Rewrite changed: {}", currentProjects );
 
-            GAV gav = pomIO.rewritePOMs( changed );
+            jsonReport.setRootGAV( pomIO.rewritePOMs( changed ) );
 
             try
             {
-                jsonReport.setGAV( gav );
-
                 new File( session.getTargetDir().getParentFile(), ManipulationManager.MARKER_PATH ).mkdirs();
 
                 new File( session.getTargetDir().getParentFile(), ManipulationManager.MARKER_FILE ).createNewFile();
 
 
                 WildcardMap<ProjectVersionRef> map = (session.getState( RelocationState.class) == null ? new WildcardMap<>() : session.getState( RelocationState.class ).getDependencyRelocations());
-                ProjectComparator. compareProjects( session, jsonReport, map , originalProjects, currentProjects );
+                ProjectComparator.compareProjects( session, jsonReport, map , originalProjects, currentProjects );
 
                 try (FileWriter writer = new FileWriter( new File( session.getTargetDir().getParentFile(), RESULT_FILE ) ))
                 {
-                    writer.write( collectResults( session ) );
+                    writer.write( JSONUtils.jsonToString( jsonReport ) );
                 }
             }
             catch ( IOException e )
@@ -279,20 +267,4 @@ public class ManipulationManager
         return changed;
     }
 
-    /**
-     * After the modifications are applied, it may be useful for manipulators
-     * to provide caller with a structured, computer-readable output or summary of the changes.
-     * This is done in the form of a JSON document stored in the root target
-     * directory.
-     * @param session the container session for manipulation.
-     */
-    private String collectResults( final ManipulationSession session )
-                    throws JsonProcessingException
-    {
-        final ObjectMapper MAPPER = new ObjectMapper();
-        MAPPER.configure( SerializationFeature.FAIL_ON_EMPTY_BEANS, false );
-        MAPPER.setSerializationInclusion( JsonInclude.Include.NON_NULL );
-        MAPPER.setSerializationInclusion( JsonInclude.Include.NON_EMPTY );
-        return MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString( jsonReport );
-    }
 }

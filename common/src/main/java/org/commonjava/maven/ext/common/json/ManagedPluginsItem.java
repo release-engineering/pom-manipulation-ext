@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2012 Red Hat, Inc. (jcasey@redhat.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,16 +16,27 @@
 
 package org.commonjava.maven.ext.common.json;
 
-/**
+/*
  * Created by JacksonGenerator on 23/07/2019.
  */
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import lombok.Getter;
+import lombok.Setter;
+import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
+import org.commonjava.maven.ext.common.util.JSONUtils;
 
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
+@Setter
+@Getter
 public class ManagedPluginsItem
 {
     @JsonProperty( "plugins" )
-    private List<PluginsItem> plugins;
+    @JsonDeserialize( contentUsing = JSONUtils.ProjectVersionRefDeserializer.class )
+    @JsonSerialize( contentUsing = JSONUtils.ProjectVersionRefSerializer.class )
+    private Map<String, ProjectVersionRef> plugins = new HashMap<>();
 }

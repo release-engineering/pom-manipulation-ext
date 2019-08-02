@@ -28,15 +28,35 @@ import lombok.Setter;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.ext.common.util.JSONUtils;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Getter
 @Setter
-public class ManagedDependenciesItem
+public class ProfileItem
 {
+
+    // TODO: Ident for profile id?
+
+    @JsonProperty( "managedPlugins" )
+    private List<ManagedPluginsItem> managedPlugins = new ArrayList<>();
+
+    @JsonProperty( "managedDependencies" )
+    private List<ManagedDependenciesItem> managedDependencies = new ArrayList<>();
+
+    @JsonProperty( "plugins" )
+    @JsonDeserialize( contentUsing = JSONUtils.ProjectVersionRefDeserializer.class )
+    @JsonSerialize( contentUsing = JSONUtils.ProjectVersionRefSerializer.class )
+    private Map<String, ProjectVersionRef> plugins = new HashMap<>();
+
+    @JsonProperty( "properties" )
+    private List<PropertiesItem> properties = new ArrayList<>();
+
     @JsonProperty( "dependencies" )
     @JsonDeserialize( contentUsing = JSONUtils.ProjectVersionRefDeserializer.class )
     @JsonSerialize( contentUsing = JSONUtils.ProjectVersionRefSerializer.class )
     private Map<String, ProjectVersionRef> dependencies = new HashMap<>();
+
 }

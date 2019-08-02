@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2012 Red Hat, Inc. (jcasey@redhat.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,44 +16,57 @@
 
 package org.commonjava.maven.ext.common.json;
 
-/**
+/*
  * Created by JacksonGenerator on 23/07/2019.
  */
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Data;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import lombok.Getter;
+import lombok.Setter;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
+import org.commonjava.maven.ext.common.util.JSONUtils;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-@Data
+@Getter
+@Setter
+@JsonPropertyOrder( {"gav" } )
 public class ModulesItem
 {
+    /**
+     * Represents the new root GAV of the build.
+     */
     @JsonProperty( "gav" )
-    private GAV gav;
+    @JsonDeserialize( using = JSONUtils.ProjectVersionRefDeserializer.class )
+    @JsonSerialize( using = JSONUtils.ProjectVersionRefSerializer.class )
+    private ProjectVersionRef gav;
 
-    @JsonProperty( "managedPlugins" )
-    private List<ManagedPluginsItem> managedPlugins = new ArrayList<>();
-
-    @JsonProperty( "managedDependencies" )
-    private List<ManagedDependenciesItem> managedDependencies = new ArrayList<>();
-
-    @JsonProperty( "plugins" )
-    private List<PluginsItem> plugins = new ArrayList<>();
-
-    @JsonProperty( "profiles" )
-    private List<ProfilesItem> profiles = new ArrayList<>();
-
+    // TODO: Complete properties
     @JsonProperty( "properties" )
     private List<PropertiesItem> properties = new ArrayList<>();
 
-    @JsonProperty( "dependencies" )
-    private List<DependenciesItem> dependencies = new ArrayList<>();
+    @JsonProperty( "managedPlugins" )
+    private ManagedPluginsItem managedPlugins;
 
-    public ModulesItem( ProjectVersionRef newPVR, String oldVersion )
-    {
-        gav = new GAV( newPVR );
-        gav.setOldVersion( oldVersion );
-    }
+    @JsonProperty( "managedDependencies" )
+    private ManagedDependenciesItem managedDependencies;
+
+    @JsonProperty( "plugins" )
+    @JsonDeserialize( contentUsing = JSONUtils.ProjectVersionRefDeserializer.class )
+    @JsonSerialize( contentUsing = JSONUtils.ProjectVersionRefSerializer.class )
+    private Map<String, ProjectVersionRef> plugins = new HashMap<>();
+
+    @JsonProperty( "dependencies" )
+    @JsonDeserialize( contentUsing = JSONUtils.ProjectVersionRefDeserializer.class )
+    @JsonSerialize( contentUsing = JSONUtils.ProjectVersionRefSerializer.class )
+    private Map<String, ProjectVersionRef> dependencies = new HashMap<>();
+
+    @JsonProperty( "profiles" )
+    private List<ProfileItem> profiles = new ArrayList<>();
 }
