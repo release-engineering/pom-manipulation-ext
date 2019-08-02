@@ -40,16 +40,21 @@ public class DistributionEnforcingState
      */
     private static final String PROJECT_EXCLUSION_PREFIX = "enforceSkip.";
     
-    private final EnforcingMode mode;
+    private EnforcingMode mode;
 
-    private final Map<String, String> excludedProjects;
+    private Map<String, String> excludedProjects;
 
     public DistributionEnforcingState( final Properties userProps )
     {
+        initialise( userProps );
+    }
+
+    public void initialise( Properties userProps )
+    {
         final String value = PropertiesUtils.handleDeprecatedProperty (userProps, ENFORCE_SYSPROP );
 
-        this.excludedProjects = getPropertiesByPrefix( userProps, DistributionEnforcingState.PROJECT_EXCLUSION_PREFIX );
-        this.mode = EnforcingMode.getMode( value );
+        excludedProjects = getPropertiesByPrefix( userProps, DistributionEnforcingState.PROJECT_EXCLUSION_PREFIX );
+        mode = EnforcingMode.getMode( value );
     }
     
     public EnforcingMode getEnforcingMode()

@@ -39,9 +39,14 @@ public class PropertyState
      */
     private static final String PROPERTY_MANAGEMENT_POM_PROPERTY = "propertyManagement";
 
-    private final List<ProjectVersionRef> propertyMgmt;
+    private List<ProjectVersionRef> propertyMgmt;
 
     public PropertyState( final Properties userProps )
+    {
+        initialise( userProps );
+    }
+
+    public void initialise( Properties userProps )
     {
         propertyMgmt = IdUtils.parseGAVs( userProps.getProperty( PROPERTY_MANAGEMENT_POM_PROPERTY ) );
     }

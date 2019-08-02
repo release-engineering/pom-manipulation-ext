@@ -421,9 +421,6 @@ public class DependencyManipulator implements Manipulator
                             applyOverrides( project, project.getResolvedManagedDependencies( session ),
                                             explicitOverrides, moduleOverrides );
 
-            final Map<ArtifactRef, String> matchedOverrides = new LinkedHashMap<>( moduleOverrides );
-            matchedOverrides.keySet().removeAll( nonMatchingVersionOverrides.keySet() );
-
             applyExplicitOverrides( project, project.getResolvedManagedDependencies( session ), explicitOverrides,
                                     commonState, explicitVersionPropertyUpdateMap );
 

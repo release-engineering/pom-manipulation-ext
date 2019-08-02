@@ -48,6 +48,11 @@ public class SuffixState
 
     public SuffixState( final Properties userProps )
     {
+        initialise( userProps );
+    }
+
+    public void initialise( Properties userProps )
+    {
         suffixStrip = userProps.getProperty( SUFFIX_STRIP_PROPERTY );
 
         if ( StringUtils.isEmpty( suffixStrip ) && userProps.containsKey( SUFFIX_STRIP_PROPERTY ) )

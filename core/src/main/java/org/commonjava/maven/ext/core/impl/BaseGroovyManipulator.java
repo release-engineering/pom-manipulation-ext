@@ -179,6 +179,8 @@ public abstract class BaseGroovyManipulator
                 logger.info ("Executing {} on {} at invocation point {}", groovyScript, project, stage);
 
                 script.run();
+
+                logger.info ("Completed {}.", groovyScript);
             }
             catch ( Exception e )
             {

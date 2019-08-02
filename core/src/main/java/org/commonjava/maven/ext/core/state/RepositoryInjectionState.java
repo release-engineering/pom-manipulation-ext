@@ -43,11 +43,16 @@ public class RepositoryInjectionState
 
     private static final String REPOSITORY_INJECTION_POMS = "repositoryInjectionPoms";
 
-    private final ProjectVersionRef repoMgmt;
+    private ProjectVersionRef repoMgmt;
 
-    private final List<ProjectRef> groupArtifact;
+    private List<ProjectRef> groupArtifact;
 
     public RepositoryInjectionState( final Properties userProps )
+    {
+        initialise( userProps );
+    }
+
+    public void initialise( Properties userProps )
     {
         final String gav = userProps.getProperty( REPOSITORY_INJECTION_PROPERTY );
         groupArtifact = IdUtils.parseGAs( userProps.getProperty( REPOSITORY_INJECTION_POMS ) );

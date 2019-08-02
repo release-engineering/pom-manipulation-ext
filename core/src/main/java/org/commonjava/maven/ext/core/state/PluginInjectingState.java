@@ -52,13 +52,13 @@ public class PluginInjectingState
 
     private static final String DEFAULT_BMMP_VERSION = "1.7.0";
 
-    private final boolean projectsourcesEnabled;
+    private boolean projectsourcesEnabled;
 
-    private final boolean metadataEnabled;
+    private boolean metadataEnabled;
 
-    private final String projectSrcPluginVersion;
+    private String projectSrcPluginVersion;
 
-    private final String bmmpVersion;
+    private String bmmpVersion;
 
     static
     {
@@ -71,6 +71,11 @@ public class PluginInjectingState
      * @param userProperties the properties for the manipulator
      */
     public PluginInjectingState( final Properties userProperties )
+    {
+        initialise( userProperties );
+    }
+
+    public void initialise( Properties userProperties )
     {
         projectsourcesEnabled = !Boolean.parseBoolean( PropertiesUtils.handleDeprecatedProperty ( userProperties, PROJECT_SOURCES_SKIP_PROPERTY, "true" ) );
         metadataEnabled = !Boolean.parseBoolean( PropertiesUtils.handleDeprecatedProperty ( userProperties, BMMP_SKIP_PROPERTY, "true") );

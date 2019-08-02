@@ -23,7 +23,7 @@ import org.commonjava.maven.galley.spi.transport.Transport;
 import java.io.File;
 
 /**
- * Represents a piece of extension infrastructure that gets initialized when the {@link MavenSession} becomes available.
+ * Represents a piece of extension infrastructure that gets initialised when the {@link MavenSession} becomes available.
  * 
  * @author jdcasey
  */

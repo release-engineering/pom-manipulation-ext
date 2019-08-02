@@ -241,6 +241,7 @@
               </execution>
             </executions>
           </plugin>
+
           <plugin>
             <groupId>com.soebes.maven.plugins</groupId>
             <artifactId>iterator-maven-plugin</artifactId>
@@ -268,7 +269,7 @@
                         <resources>
                           <resource>
                             <directory>src/it</directory>
-                            <filtering>true</filtering>
+                             <filtering>true</filtering>
                             <excludes>
                               <exclude>expression-not-rewritten/pom.xml</exclude>
                             </excludes>
@@ -280,6 +281,14 @@
                             <includes>
                               <include>expression-not-rewritten/pom.xml</include>
                             </includes>
+                            <targetPath>it-${testMode}</targetPath>
+                          </resource>
+                          <resource>
+                            <directory>src/it</directory>
+                            <includes>
+                              <include>settings.xml</include>
+                            </includes>
+                            <filtering>true</filtering>
                             <targetPath>it-${testMode}</targetPath>
                           </resource>
                         </resources>
@@ -321,12 +330,14 @@
                   <pomExcludes>
                     <!-- Only run by JUnit as we need a Mock REST server started -->
                     <pomExclude>rest-*/pom.xml</pomExclude>
+                    <!-- Only run by JUnit as they are linked -->
+                    <pomExclude>circular-*/pom.xml</pomExclude>
                     <pomExclude>groovy-manipulator-first-http/pom.xml</pomExclude>
                   </pomExcludes>
                   <projectsDirectory>${project.build.directory}/it-${extIter}</projectsDirectory>
                   <preBuildHookScript>setup</preBuildHookScript>
                   <postBuildHookScript>verify</postBuildHookScript>
-                  <settingsFile>src/it/settings.xml</settingsFile>
+                  <settingsFile>target/it-${testMode}/settings.xml</settingsFile>
                 </configuration>
               </execution>
             </executions>

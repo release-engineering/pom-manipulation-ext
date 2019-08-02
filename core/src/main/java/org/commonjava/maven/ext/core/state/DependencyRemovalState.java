@@ -35,9 +35,14 @@ public class DependencyRemovalState
      */
     private static final String DEPENDENCY_REMOVAL_PROPERTY = "dependencyRemoval";
 
-    private final List<ProjectRef> dependencyRemoval;
+    private List<ProjectRef> dependencyRemoval;
 
     public DependencyRemovalState(final Properties userProps)
+    {
+        initialise( userProps );
+    }
+
+    public void initialise( Properties userProps )
     {
         dependencyRemoval = IdUtils.parseGAs( userProps.getProperty( DEPENDENCY_REMOVAL_PROPERTY ) );
     }

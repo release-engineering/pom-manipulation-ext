@@ -33,9 +33,14 @@ public class GroovyState
      */
     private static final String GROOVY_SCRIPT = "groovyScripts";
 
-    private final String groovyScripts;
+    private String groovyScripts;
 
     public GroovyState( final Properties userProps ) throws ManipulationException
+    {
+        initialise( userProps );
+    }
+
+    public void initialise( Properties userProps ) throws ManipulationException
     {
         groovyScripts = userProps.getProperty( GROOVY_SCRIPT );
 

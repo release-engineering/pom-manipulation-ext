@@ -97,9 +97,9 @@ public class DependencyState
      */
     private static final String EXTRA_BOM_PREFIX = DEPENDENCY_MANAGEMENT_POM_PROPERTY + ".";
 
-    private final List<ProjectVersionRef> remoteBOMdepMgmt;
+    private List<ProjectVersionRef> remoteBOMdepMgmt;
 
-    private final Map<String, ProjectVersionRef> extraBOMs;
+    private Map<String, ProjectVersionRef> extraBOMs;
 
     private Map<String, Map<ProjectRef, String>> extraBOMDepMgmts;
 
@@ -110,6 +110,11 @@ public class DependencyState
     private DependencyPrecedence precedence;
 
     public DependencyState( final Properties userProps ) throws ManipulationException
+    {
+        initialise( userProps );
+    }
+
+    public void initialise( Properties userProps ) throws ManipulationException
     {
         remoteBOMdepMgmt = IdUtils.parseGAVs( userProps.getProperty( DEPENDENCY_MANAGEMENT_POM_PROPERTY ) );
 

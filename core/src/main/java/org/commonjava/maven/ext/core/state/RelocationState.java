@@ -61,6 +61,11 @@ public class RelocationState
     public RelocationState( final Properties userProps )
                     throws ManipulationException
     {
+        initialise( userProps );
+    }
+
+    public void initialise( Properties userProps ) throws ManipulationException
+    {
         // This contains everything before the equals and a possibly null set of values. We now need to further
         // post-process this into something useful i.e. establish whether we are relocating groupIds and artifactIds.
         Map<String,String> propRelocs = PropertiesUtils.getPropertiesByPrefix( userProps, DEPENDENCY_RELOCATIONS );

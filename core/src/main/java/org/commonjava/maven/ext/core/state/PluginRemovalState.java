@@ -37,9 +37,14 @@ public class PluginRemovalState
      */
     private static final PropertyFlag PLUGIN_REMOVAL_PROPERTY = new PropertyFlag( "plugin-removal", "pluginRemoval");
 
-    private final List<ProjectRef> pluginRemoval;
+    private List<ProjectRef> pluginRemoval;
 
     public PluginRemovalState( final Properties userProps )
+    {
+        initialise( userProps );
+    }
+
+    public void initialise( Properties userProps )
     {
         pluginRemoval = IdUtils.parseGAs( PropertiesUtils.handleDeprecatedProperty ( userProps, PLUGIN_REMOVAL_PROPERTY ) );
     }

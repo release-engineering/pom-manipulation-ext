@@ -42,6 +42,11 @@ public class ProjectVersionEnforcingState
 
     public ProjectVersionEnforcingState( final Properties userProps )
     {
+        initialise( userProps );
+    }
+
+    public void initialise( Properties userProps )
+    {
         final String value = PropertiesUtils.handleDeprecatedProperty ( userProps, ENFORCE_PROJECT_VERSION );
         if ( value != null )
         {

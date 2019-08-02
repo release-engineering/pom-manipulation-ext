@@ -27,7 +27,7 @@ public class BOMInjectingState
     /** Set this property to true using <code>-DbomBuilder=true</code> to activate BOM Builder Plugin */
     public static final String BOM_BUILDER = "bomBuilder";
 
-    private final boolean builderEnabled;
+    private boolean builderEnabled;
 
     /**
      * Detects whether this state is enabled..
@@ -35,6 +35,11 @@ public class BOMInjectingState
      * @param userProperties the properties for the manipulator
      */
     public BOMInjectingState( final Properties userProperties )
+    {
+        initialise( userProperties );
+    }
+
+    public void initialise( Properties userProperties )
     {
         builderEnabled = Boolean.parseBoolean( userProperties.getProperty( BOM_BUILDER, "false" ) );
     }

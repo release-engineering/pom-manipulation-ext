@@ -34,9 +34,14 @@ public class RangeResolverState
         State.activeByDefault.add( RangeResolverState.class );
     }
 
-    private final Boolean enabled;
+    private Boolean enabled;
 
     public RangeResolverState( final Properties userProps )
+    {
+        initialise( userProps );
+    }
+
+    public void initialise( Properties userProps )
     {
          enabled = Boolean.parseBoolean( userProps.getProperty( RESOLVE_RANGES_PROPERTY, "true" ) );
     }

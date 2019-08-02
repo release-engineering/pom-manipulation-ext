@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (C) 2012 Red Hat, Inc. (jcasey@redhat.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,27 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.commonjava.maven.ext.core.util;
 
-import lombok.Getter;
 
-/**
- * Wrapper to hold mapping of deprecated property name and current name
- */
-@Getter
-public class PropertyFlag
-{
-    private final String deprecated;
+def pomFile = new File( basedir, 'pom.xml' )
+System.out.println( "Slurping POM: ${pomFile.getAbsolutePath()}" )
 
-    private final String current;
 
-    /**
-     * @param deprecated the original deprecated property key.
-     * @param currentName the new property key.
-     */
-    public PropertyFlag( String deprecated, String currentName )
-    {
-        this.deprecated = deprecated;
-        this.current = currentName;
-    }
-}
+def pom = new XmlSlurper().parse( pomFile )
+
+System.out.println( "POM Version: ${pom.version.text()}" )
+assert pom.version.text().endsWith( '.redhat-3' )
+
+v = pom.parent.version.text()
+System.out.println( "POM Version: ${v}" )
+assert v.endsWith( '.redhat-3' )
+
+
+def buildLog = new File( basedir, 'build.log' )
+assert buildLog.getText().contains( 'InitialGroovyManipulator InvocationPoint is FIRST' )
+assert buildLog.getText().contains( 'updating versionSuffix to redhat-3')
