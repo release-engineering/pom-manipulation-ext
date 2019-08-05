@@ -281,10 +281,11 @@ public class PropertiesUtilsTest
         List<Project> newprojects = pomIO.parseProject( projectroot );
 
         WildcardMap<ProjectVersionRef> map = (session.getState( RelocationState.class) == null ? new WildcardMap<>() : session.getState( RelocationState.class ).getDependencyRelocations());
-        ProjectComparator.compareProjects( session, new PME(), map,
+        String result = ProjectComparator.compareProjects( session, new PME(), map,
                                            projects, newprojects );
+        System.out.println (result);
 
-        assertTrue( systemRule.getLog().contains( "[main] INFO  o.c.m.e.c.util.ProjectComparator - ------------------- project org.infinispan:infinispan-bom\n"  ) );
+        assertTrue( systemRule.getLog().contains( "------------------- project org.infinispan:infinispan-bom\n"  ) );
     }
 
 

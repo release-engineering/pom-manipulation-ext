@@ -16,7 +16,6 @@
 
 package org.commonjava.maven.ext.common.util;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.maven.model.Profile;
 import org.commonjava.maven.atlas.ident.ref.ArtifactRef;
@@ -32,13 +31,8 @@ import org.commonjava.maven.ext.common.json.PME;
 import org.commonjava.maven.ext.common.json.ProfileItem;
 import org.commonjava.maven.ext.common.model.Project;
 import org.commonjava.maven.ext.common.session.MavenSessionHandler;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.slf4j.helpers.MessageFormatter;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.charset.Charset;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -47,7 +41,6 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
-import static org.apache.commons.lang.StringUtils.isNotEmpty;
 import static org.commonjava.maven.ext.common.util.ProjectComparator.Type.DEPENDENCIES;
 import static org.commonjava.maven.ext.common.util.ProjectComparator.Type.DEPENDENCIES_UNVERSIONED;
 import static org.commonjava.maven.ext.common.util.ProjectComparator.Type.MANAGED_DEPENDENCIES;
@@ -61,12 +54,7 @@ import static org.commonjava.maven.ext.common.util.ProjectComparator.Type.PROFIL
 
 public class ProjectComparator
 {
-    private static final Logger logger = LoggerFactory.getLogger( ProjectComparator.class );
-
     public static final String REPORT_NON_ALIGNED = "reportNonAligned";
-
-    public static final String REPORT_OUTPUT_FILE = "reportOutputFile";
-
 
     /**
      * Used as toggle within lamdas to denote whether to add a new line or not.
@@ -118,12 +106,11 @@ public class ProjectComparator
         }
     }
 
-    public static void compareProjects( MavenSessionHandler session, PME jsonReport, WildcardMap<ProjectVersionRef> dependencyRelocations,
-                                        List<Project> originalProjects, List<Project> newProjects )
+    public static String compareProjects( MavenSessionHandler session, PME jsonReport, WildcardMap<ProjectVersionRef> dependencyRelocations,
+                                          List<Project> originalProjects, List<Project> newProjects )
                     throws ManipulationException
     {
         final boolean reportNonAligned = Boolean.parseBoolean( session.getUserProperties().getProperty( REPORT_NON_ALIGNED, "false") );
-        final String reportOutputFile = session.getUserProperties().getProperty( REPORT_OUTPUT_FILE, "");
         final StringBuilder builder = new StringBuilder( 500 );
         final List<ModulesItem> modules = jsonReport.getModules();
 
@@ -137,7 +124,8 @@ public class ProjectComparator
 
                             ModulesItem module = new ModulesItem();
                             modules.add( module );
-                            module.setGav( originalProject.getKey() );
+                            module.setOriginalGAV( originalProject.getKey().toString() );
+                            module.setGav( newProject.getKey() );
 
                             append( builder, "------------------- project {}", newProject.getKey().asProjectRef() );
                             if ( ! originalProject.getVersion().equals( newProject.getVersion() ) )
@@ -266,14 +254,10 @@ public class ProjectComparator
                                                                          PROFILE_MANAGED_PLUGINS ) );
                             } ) );
                         } ) );
-            if ( isNotEmpty( reportOutputFile ) )
-            {
-                File report = new File ( reportOutputFile);
-                FileUtils.writeStringToFile( report, builder.toString(), Charset.defaultCharset() );
-            }
-            logger.info( builder.toString() );
+
+            return builder.toString();
         }
-        catch ( ManipulationUncheckedException | IOException e)
+        catch ( ManipulationUncheckedException e)
         {
             throw (ManipulationException)e.getCause();
         }

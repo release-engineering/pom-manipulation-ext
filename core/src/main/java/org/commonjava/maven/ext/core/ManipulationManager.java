@@ -15,6 +15,7 @@
  */
 package org.commonjava.maven.ext.core;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.profiles.DefaultProfileManager;
 import org.apache.maven.profiles.activation.ProfileActivationException;
@@ -41,6 +42,7 @@ import javax.inject.Singleton;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -49,6 +51,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static org.apache.commons.lang.StringUtils.isNotEmpty;
 import static org.commonjava.maven.ext.common.util.ProfileUtils.PROFILE_SCANNING;
 import static org.commonjava.maven.ext.common.util.ProfileUtils.PROFILE_SCANNING_DEFAULT;
 
@@ -73,12 +76,13 @@ public class ManipulationManager
 
     public static final String MARKER_FILE =  MARKER_PATH + File.separatorChar + "pom-manip-ext-marker.txt";
 
-    // TODO: Configurable location?
-    public static final String RESULT_FILE = File.separatorChar + "pom-manip-ext-result.json";
+    private static final String REPORT_JSON_DEFAULT = MARKER_PATH + File.separatorChar + "pom-manip-ext-result.json";
+
+    public static final String REPORT_TXT_OUTPUT_FILE = "reportTxtOutputFile";
+
+    private static final String REPORT_JSON_OUTPUT_FILE = "reportJSONOutputFile";
 
     private final Logger logger = LoggerFactory.getLogger( getClass() );
-
-    private final ProjectBuilder projectBuilder;
 
     private Map<String, Manipulator> manipulators;
 
@@ -89,10 +93,9 @@ public class ManipulationManager
     private final PME jsonReport = new PME();
 
     @Inject
-    public ManipulationManager( ProjectBuilder projectBuilder, Map<String, Manipulator> manipulators,
+    public ManipulationManager( Map<String, Manipulator> manipulators,
                                 Map<String, ExtensionInfrastructure> infrastructure, PomIO pomIO)
     {
-        this.projectBuilder = projectBuilder;
         this.manipulators = manipulators;
         this.infrastructure = infrastructure;
         this.pomIO = pomIO;
@@ -144,6 +147,7 @@ public class ManipulationManager
      * @param session the container session for manipulation.
      * @throws ManipulationException if an error occurs.
      */
+    @SuppressWarnings("ResultOfMethodCallIgnored")
     public void scanAndApply( final ManipulationSession session )
                     throws ManipulationException
     {
@@ -162,18 +166,31 @@ public class ManipulationManager
             logger.info( "Maven-Manipulation-Extension: Rewrite changed: {}", currentProjects );
 
             jsonReport.setRootGAV( pomIO.rewritePOMs( changed ) );
+            jsonReport.setOriginalGAV( originalProjects.get( 0 ).getKey().toString() );
+            if ( ! originalProjects.get( 0 ).isExecutionRoot() )
+            {
+                throw new ManipulationException( "First project is not execution root : " + originalProjects.toString() );
+            }
 
             try
             {
                 new File( session.getTargetDir().getParentFile(), ManipulationManager.MARKER_PATH ).mkdirs();
-
                 new File( session.getTargetDir().getParentFile(), ManipulationManager.MARKER_FILE ).createNewFile();
 
-
                 WildcardMap<ProjectVersionRef> map = (session.getState( RelocationState.class) == null ? new WildcardMap<>() : session.getState( RelocationState.class ).getDependencyRelocations());
-                ProjectComparator.compareProjects( session, jsonReport, map , originalProjects, currentProjects );
+                String report = ProjectComparator.compareProjects( session, jsonReport, map , originalProjects, currentProjects );
+                logger.info( report );
 
-                try (FileWriter writer = new FileWriter( new File( session.getTargetDir().getParentFile(), RESULT_FILE ) ))
+                final String reportTxtOutputFile = session.getUserProperties().getProperty( REPORT_TXT_OUTPUT_FILE, "");
+                if ( isNotEmpty( reportTxtOutputFile ) )
+                {
+                    File reportFile = new File ( reportTxtOutputFile);
+                    FileUtils.writeStringToFile( reportFile, report, Charset.defaultCharset() );
+                }
+                final String reportJsonOutputFile = session.getUserProperties().getProperty( REPORT_JSON_OUTPUT_FILE,
+                                                                                             session.getTargetDir().getParentFile() + File.separator + REPORT_JSON_DEFAULT);
+
+                try (FileWriter writer = new FileWriter( new File( reportJsonOutputFile ) ) )
                 {
                     writer.write( JSONUtils.jsonToString( jsonReport ) );
                 }

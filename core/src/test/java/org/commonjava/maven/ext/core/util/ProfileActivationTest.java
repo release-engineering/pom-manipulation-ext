@@ -60,7 +60,7 @@ public class ProfileActivationTest
     public void testVerifyProfile1() throws Exception
     {
         List<Project> p = getProject();
-        ManipulationManager m = new ManipulationManager( null, Collections.emptyMap(), Collections.emptyMap(), null );
+        ManipulationManager m = new ManipulationManager( Collections.emptyMap(), Collections.emptyMap(), null );
         ManipulationSession ms = TestUtils.createSession( null );
         m.init( ms );
 
@@ -77,7 +77,7 @@ public class ProfileActivationTest
     public void testVerifyProfile2() throws Exception
     {
         List<Project> p = getProject();
-        ManipulationManager m = new ManipulationManager( null, Collections.emptyMap(), Collections.emptyMap(), null );
+        ManipulationManager m = new ManipulationManager( Collections.emptyMap(), Collections.emptyMap(), null );
         Properties properties = new Properties(  );
         properties.setProperty( "testProperty", "testvalue" );
         ManipulationSession ms = TestUtils.createSession( properties );

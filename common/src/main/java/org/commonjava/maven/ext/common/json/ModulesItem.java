@@ -36,7 +36,7 @@ import java.util.Map;
 
 @Getter
 @Setter
-@JsonPropertyOrder( {"gav" } )
+@JsonPropertyOrder( {"gav", "originalGAV" } )
 public class ModulesItem
 {
     /**
@@ -46,6 +46,9 @@ public class ModulesItem
     @JsonDeserialize( using = JSONUtils.ProjectVersionRefDeserializer.class )
     @JsonSerialize( using = JSONUtils.ProjectVersionRefSerializer.class )
     private ProjectVersionRef gav;
+
+    @JsonProperty( "originalGAV" )
+    private String originalGAV;
 
     // TODO: Complete properties
     @JsonProperty( "properties" )

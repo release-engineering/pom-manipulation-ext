@@ -34,10 +34,13 @@ import java.util.List;
 
 @Setter
 @Getter
-@JsonPropertyOrder( {"rootGAV", "modules" } )
+@JsonPropertyOrder( {"rootGAV", "originalGAV", "modules" } )
 public class PME
 {
-    @JsonProperty( "rootGAV" )
+    @JsonProperty( "originalGAV" )
+    private String originalGAV;
+
+    @JsonProperty( "executionRoot" )
     @JsonDeserialize( using = JSONUtils.ProjectVersionRefDeserializer.class )
     @JsonSerialize( using = JSONUtils.ProjectVersionRefSerializer.class )
     private ProjectVersionRef rootGAV;
