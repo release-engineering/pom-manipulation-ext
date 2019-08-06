@@ -29,6 +29,7 @@ import org.commonjava.maven.ext.common.json.ManagedPluginsItem;
 import org.commonjava.maven.ext.common.json.ModulesItem;
 import org.commonjava.maven.ext.common.json.PME;
 import org.commonjava.maven.ext.common.json.ProfileItem;
+import org.commonjava.maven.ext.common.json.PropertiesItem;
 import org.commonjava.maven.ext.common.model.Project;
 import org.commonjava.maven.ext.common.session.MavenSessionHandler;
 import org.slf4j.helpers.MessageFormatter;
@@ -124,8 +125,8 @@ public class ProjectComparator
 
                             ModulesItem module = new ModulesItem();
                             modules.add( module );
-                            module.setOriginalGAV( originalProject.getKey().toString() );
-                            module.setGav( newProject.getKey() );
+                            module.getGav().setOriginalGAV( originalProject.getKey().toString() );
+                            module.getGav().setGAV( newProject.getKey() );
 
                             append( builder, "------------------- project {}", newProject.getKey().asProjectRef() );
                             if ( ! originalProject.getVersion().equals( newProject.getVersion() ) )
@@ -140,7 +141,7 @@ public class ProjectComparator
                                 originalProject.getModel().getProperties().forEach( ( oKey, oValue ) -> {
                                     if ( oKey != null && oKey.equals( nKey ) &&  oValue != null &&  !oValue.equals( nValue ) )
                                     {
-//                                        module.getProperties().add( new PropertiesItem( oKey.toString(), oValue.toString(), nValue.toString() ) );
+                                        module.getProperties().put( oKey.toString(), new PropertiesItem( oValue.toString(), nValue.toString() ) );
                                         append( builder, "\tProperty : key {} ; value {} ---> {}", oKey, oValue, nValue);
                                         spacerLine.set( true );
                                     }
@@ -196,6 +197,7 @@ public class ProjectComparator
                                                                                           forEach( oldProfile ->
                             {
                                 ProfileItem profileItem = new ProfileItem();
+                                profileItem.setId( newProfile.getId() );
                                 module.getProfiles().add( profileItem );
 
                                 newProfile.getProperties().forEach( ( nKey, nValue ) ->

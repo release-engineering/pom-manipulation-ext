@@ -20,17 +20,23 @@ package org.commonjava.maven.ext.common.json;
  * Created by JacksonGenerator on 23/07/2019.
  */
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.Setter;
+import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 
-@Setter
 @Getter
-public class PropertiesItem
+@Setter
+public class GAV
 {
-    @JsonProperty( "oldValue" )
-    private String oldValue;
+    private String groupId;
+    private String artifactId;
+    private String version;
+    private String originalGAV;
 
-    @JsonProperty( "value" )
-    private String newValue;
+    public void setGAV( ProjectVersionRef p )
+    {
+        setGroupId( p.getGroupId() );
+        setArtifactId( p.getArtifactId() );
+        setVersion( p.getVersionString() );
+    }
 }

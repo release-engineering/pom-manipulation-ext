@@ -155,6 +155,12 @@ public class ManipulationManager
         final List<Project> originalProjects = new ArrayList<>(  );
         currentProjects.forEach( p -> originalProjects.add( new Project( p ) ) );
 
+        final Project originalExecutionRoot = originalProjects.get( 0 );
+        if ( ! originalExecutionRoot.isExecutionRoot() )
+        {
+            throw new ManipulationException( "First project is not execution root : " + originalProjects.toString() );
+        }
+
         session.getActiveProfiles().addAll( parseActiveProfiles( session, currentProjects ) );
         session.setProjects( currentProjects );
 
@@ -165,12 +171,11 @@ public class ManipulationManager
         {
             logger.info( "Maven-Manipulation-Extension: Rewrite changed: {}", currentProjects );
 
-            jsonReport.setRootGAV( pomIO.rewritePOMs( changed ) );
-            jsonReport.setOriginalGAV( originalProjects.get( 0 ).getKey().toString() );
-            if ( ! originalProjects.get( 0 ).isExecutionRoot() )
-            {
-                throw new ManipulationException( "First project is not execution root : " + originalProjects.toString() );
-            }
+            ProjectVersionRef executionRoot = pomIO.rewritePOMs( changed );
+
+            jsonReport.getGav().setGAV( executionRoot );
+            jsonReport.getGav().setOriginalGAV( originalExecutionRoot.getKey().toString() );
+
 
             try
             {

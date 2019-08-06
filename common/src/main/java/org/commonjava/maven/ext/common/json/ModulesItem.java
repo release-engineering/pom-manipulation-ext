@@ -36,23 +36,17 @@ import java.util.Map;
 
 @Getter
 @Setter
-@JsonPropertyOrder( {"gav", "originalGAV" } )
+@JsonPropertyOrder( {"gav" } )
 public class ModulesItem
 {
     /**
      * Represents the new root GAV of the build.
      */
     @JsonProperty( "gav" )
-    @JsonDeserialize( using = JSONUtils.ProjectVersionRefDeserializer.class )
-    @JsonSerialize( using = JSONUtils.ProjectVersionRefSerializer.class )
-    private ProjectVersionRef gav;
+    private GAV gav = new GAV();
 
-    @JsonProperty( "originalGAV" )
-    private String originalGAV;
-
-    // TODO: Complete properties
     @JsonProperty( "properties" )
-    private List<PropertiesItem> properties = new ArrayList<>();
+    private Map<String, PropertiesItem> properties = new HashMap<>();
 
     @JsonProperty( "managedPlugins" )
     private ManagedPluginsItem managedPlugins;

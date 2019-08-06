@@ -21,6 +21,7 @@ package org.commonjava.maven.ext.common.json;
  */
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.Getter;
@@ -35,10 +36,11 @@ import java.util.Map;
 
 @Getter
 @Setter
+@JsonPropertyOrder( "profileId" )
 public class ProfileItem
 {
-
-    // TODO: Ident for profile id?
+    @JsonProperty( "profileId" )
+    private String id;
 
     @JsonProperty( "managedPlugins" )
     private List<ManagedPluginsItem> managedPlugins = new ArrayList<>();
@@ -52,11 +54,10 @@ public class ProfileItem
     private Map<String, ProjectVersionRef> plugins = new HashMap<>();
 
     @JsonProperty( "properties" )
-    private List<PropertiesItem> properties = new ArrayList<>();
+    private Map<String, PropertiesItem> properties = new HashMap<>();
 
     @JsonProperty( "dependencies" )
     @JsonDeserialize( contentUsing = JSONUtils.ProjectVersionRefDeserializer.class )
     @JsonSerialize( contentUsing = JSONUtils.ProjectVersionRefSerializer.class )
     private Map<String, ProjectVersionRef> dependencies = new HashMap<>();
-
 }
