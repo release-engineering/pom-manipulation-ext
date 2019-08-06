@@ -74,13 +74,13 @@ public class ManipulationManager
 {
     private static final String MARKER_PATH = "target";
 
-    public static final String MARKER_FILE =  MARKER_PATH + File.separatorChar + "pom-manip-ext-marker.txt";
+    public static final String MARKER_FILE = MARKER_PATH + File.separatorChar + "pom-manip-ext-marker.txt";
 
-    private static final String REPORT_JSON_DEFAULT = MARKER_PATH + File.separatorChar + "pom-manip-ext-result.json";
+    private static final String REPORT_JSON_DEFAULT = File.separatorChar + "pom-manip-ext-result.json";
 
     public static final String REPORT_TXT_OUTPUT_FILE = "reportTxtOutputFile";
 
-    private static final String REPORT_JSON_OUTPUT_FILE = "reportJSONOutputFile";
+    public static final String REPORT_JSON_OUTPUT_FILE = "reportJSONOutputFile";
 
     private final Logger logger = LoggerFactory.getLogger( getClass() );
 
@@ -173,13 +173,13 @@ public class ManipulationManager
 
             ProjectVersionRef executionRoot = pomIO.rewritePOMs( changed );
 
-            jsonReport.getGav().setGAV( executionRoot );
+            jsonReport.getGav().setPVR( executionRoot );
             jsonReport.getGav().setOriginalGAV( originalExecutionRoot.getKey().toString() );
 
 
             try
             {
-                new File( session.getTargetDir().getParentFile(), ManipulationManager.MARKER_PATH ).mkdirs();
+                session.getTargetDir().mkdir();
                 new File( session.getTargetDir().getParentFile(), ManipulationManager.MARKER_FILE ).createNewFile();
 
                 WildcardMap<ProjectVersionRef> map = (session.getState( RelocationState.class) == null ? new WildcardMap<>() : session.getState( RelocationState.class ).getDependencyRelocations());
@@ -193,7 +193,7 @@ public class ManipulationManager
                     FileUtils.writeStringToFile( reportFile, report, Charset.defaultCharset() );
                 }
                 final String reportJsonOutputFile = session.getUserProperties().getProperty( REPORT_JSON_OUTPUT_FILE,
-                                                                                             session.getTargetDir().getParentFile() + File.separator + REPORT_JSON_DEFAULT);
+                                                                                             session.getTargetDir() + File.separator + REPORT_JSON_DEFAULT);
 
                 try (FileWriter writer = new FileWriter( new File( reportJsonOutputFile ) ) )
                 {

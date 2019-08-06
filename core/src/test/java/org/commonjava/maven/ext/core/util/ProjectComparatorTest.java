@@ -120,8 +120,6 @@ public class ProjectComparatorTest
         } ) );
 
         PME json = new PME();
-//        json.setGAV( new GAV() );
-//        json.getGAV().setGav( projectNew.get( 0 ).getKey() );
 
         String result = ProjectComparator.compareProjects( session, json, relocationState.getDependencyRelocations(),
                                            projectOriginal, projectNew );

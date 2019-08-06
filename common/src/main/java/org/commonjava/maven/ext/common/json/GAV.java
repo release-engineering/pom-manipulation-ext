@@ -20,9 +20,11 @@ package org.commonjava.maven.ext.common.json;
  * Created by JacksonGenerator on 23/07/2019.
  */
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.Setter;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
+import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef;
 
 @Getter
 @Setter
@@ -33,10 +35,17 @@ public class GAV
     private String version;
     private String originalGAV;
 
-    public void setGAV( ProjectVersionRef p )
+    @JsonIgnore
+    public void setPVR( ProjectVersionRef p )
     {
         setGroupId( p.getGroupId() );
         setArtifactId( p.getArtifactId() );
         setVersion( p.getVersionString() );
+    }
+
+    @JsonIgnore
+    public ProjectVersionRef getPVR()
+    {
+        return new SimpleProjectVersionRef( groupId, artifactId, version );
     }
 }

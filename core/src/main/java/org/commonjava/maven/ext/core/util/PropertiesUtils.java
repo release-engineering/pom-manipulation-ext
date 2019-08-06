@@ -509,12 +509,13 @@ public final class PropertiesUtils
     public static String extractPropertyName( String version ) throws ManipulationException
     {
         // TODO: Handle the scenario where the version might be ${....}${....}
+
         final int endIndex = version.indexOf( '}' );
 
         if ( version.indexOf( "${" ) != 0 || endIndex != version.length() - 1 )
         {
             throw new ManipulationException( "NYI : handling for versions (" + version
-                                                             + ") with multiple embedded properties is NYI. " );
+                                                             + ") with either multiple embedded properties or embedded property and hardcoded string is NYI. " );
         }
         return version.substring( 2, endIndex );
     }

@@ -29,7 +29,9 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef;
+import org.commonjava.maven.ext.common.json.PME;
 
+import java.io.File;
 import java.io.IOException;
 
 public class JSONUtils
@@ -59,6 +61,19 @@ public class JSONUtils
     {
         return MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString( jsonReport );
     }
+
+    /**
+     * Converts JSON document to POJO form.
+     *
+     * @param jsonFile the file to read
+     * @return PME ; the root of the JSON hierarchy.
+     */
+    @SuppressWarnings("WeakerAccess") // Public API.
+    public static PME fileToJSON( File jsonFile ) throws IOException
+    {
+        return MAPPER.readValue( jsonFile, PME.class );
+    }
+
 
     public static class ProjectVersionRefDeserializer extends JsonDeserializer<ProjectVersionRef>
     {
