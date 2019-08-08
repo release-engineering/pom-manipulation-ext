@@ -71,6 +71,19 @@ This will utilise the default suffix strip configuration (in regular expression 
 
     -DversionSuffixStrip='(.*)(.MYSUFFIX)$'
 
+<table bgcolor="#ffff00">
+<tr>
+<td>
+    <b>NOTE</b> : From version 3.9 disabling is possible as follows:
+</td>
+</tr>
+</table>
+
+If the special keyword of `NONE` is used this will also disable the suffix (after it has been enabled) i.e.
+
+    -DversionSuffixStrip= -DversionSuffixStrip=NONE
+
+
 ### OSGi Compliance
 
 If version manipulation is enabled the extension will also attempt to format the version to be OSGi compliant. For example if the versions are:
