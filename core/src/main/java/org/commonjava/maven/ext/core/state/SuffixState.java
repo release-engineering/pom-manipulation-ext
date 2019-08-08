@@ -59,6 +59,10 @@ public class SuffixState
         {
             suffixStrip = DEFAULT_SUFFIX_STRIP;
         }
+        if ( "NONE".equals( suffixStrip ) )
+        {
+            suffixStrip = "";
+        }
     }
 
     /**
