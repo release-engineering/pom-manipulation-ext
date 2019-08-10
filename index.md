@@ -62,42 +62,53 @@ You can disable PME using the `manipulation.disable` property:
 
 If you want to make it more permanent, you could add it to your `settings.xml`:
 
-	<settings>
-		<profiles>
-			<profile>
-				<id>disable-pme</id>
-				<properties>
-					<manipulation.disable>true</manipulation.disable>
-				</properties>
-			</profile>
-		</profiles>
-		<activeProfiles>
-			<activeProfile>disable-pme</activeProfile>
-		</activeProfiles>
-	</settings>
+    <settings>
+        <profiles>
+            <profile>
+                <id>disable-pme</id>
+                <properties>
+                    <manipulation.disable>true</manipulation.disable>
+                </properties>
+            </profile>
+        </profiles>
+        <activeProfiles>
+            <activeProfile>disable-pme</activeProfile>
+        </activeProfiles>
+    </settings>
 
-### Extension Marker Files
+### Extension Marker File
 
-When the extension runs it writes out two marker files in the execution root `target` directory. Firstly it writes out a marker file `pom-manip-ext-marker.txt`. If this marker file exists PME will not run a second time instead logging:
+When the extension runs it writes out a control marker file in the execution root `target` directory. This is named `pom-manip-ext-marker.txt`. If this marker file exists PME will not run a second time instead logging:
 
     Skipping manipulation as previous execution found.
 
-The second file is a json formatted file containing the modified execution root GAV e.g.
+Removing the target directory will allow PME to be run again.
+
+### Summary Logging
+
+PME will output a summary of its changes at the end of the run. As well as reporting version, property, dependency and plugin alignment it is also possible to report what _hasn't_ been aligned by setting the property `reportNonAligned=true`. This summary may also be output to a file if `reportTxtOutputFile` is set.
+
+Finally it will also output the comparator summary as a JSON file. By default this report will be placed within the execution root `target` directory (next to the marker file above). However it may be configured by setting `reportJSONOutputFile`.
 
     {
-        "VersioningState": {
-            "executionRootModified": {
-                "groupId": "org.groupId",
-                "artifactId": "myArtifactId",
-                "version": "1.2.0.Final.rebuild-1"
-            }
-        }
-    }
+      "executionRoot" : {
+        "groupId" : "org.foo",
+        "artifactId" : "foo-parent",
+        "version" : "7.0.0.Final-rebuild-1",
+        "originalGAV" : "org.foo:foo-parent:7.0.0.Final"
+      },
+      "modules" : [ {
+        "gav" : {
+          "groupId" : "org.foo",
+          "artifactId" : "foo-parent",
+          "version" : "7.0.0.Final-rebuild-1",
+          "originalGAV" : "org.foo:foo-parent:7.0.0.Final"
+        },
+        "properties" : {
+        ...
 
+This JSON file may be read as POJO by using the [JSONUtils](https://github.com/release-engineering/pom-manipulation-ext/blob/master/common/src/main/java/org/commonjava/maven/ext/common/util/JSONUtils.java) class which utilises the [json](https://github.com/release-engineering/pom-manipulation-ext/blob/master/common/src/main/java/org/commonjava/maven/ext/common/json) package.
 
-### Logging Summary
-
-PME will output a summary of its changes at the end of the run. As well as reporting dependency and plugin alignment it is also possible to report what _hasn't_ been aligned by setting the property `reportNonAligned=true`.
 
 ### Feature Guide
 
