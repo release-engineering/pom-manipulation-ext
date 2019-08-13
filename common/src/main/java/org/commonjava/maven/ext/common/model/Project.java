@@ -123,6 +123,7 @@ public class Project
      * Create a project by copying another.
      * @param original the Project to use.
      */
+    @SuppressWarnings( "IncompleteCopyConstructor" )
     public Project( final Project original )
     {
         this.pom = original.pom;
@@ -139,12 +140,25 @@ public class Project
     @Override
     public int hashCode()
     {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + getArtifactId().hashCode();
-        result = prime * result + getGroupId().hashCode();
-        result = prime * result + getVersion().hashCode();
-        return result;
+        // The interpolated-pom.xml check is to avoid problems in the integration tests.
+        if ( pom != null && !"interpolated-pom.xml".equals( pom.getName() ) )
+        {
+            // Previously was using a hash of the artifact, group and version but as the
+            // version (and potentially the others) could mutate during the process this is
+            // not reliable. Therefore use the location (i.e. file path) of this project.
+            return pom.hashCode();
+        }
+        else
+        {
+            // Fallback to using the original GAV method. This fallback should never happen in production
+            // but can happen in integration tests/manually constructed models in tests.
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + getArtifactId().hashCode();
+            result = prime * result + getGroupId().hashCode();
+            result = prime * result + getVersion().hashCode();
+            return result;
+        }
     }
 
     @Override

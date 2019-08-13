@@ -85,6 +85,13 @@ public class ProjectVersionEnforcingManipulator
         {
             final Model model = project.getModel();
 
+            model.getProperties().stringPropertyNames().stream().filter( k -> model.getProperties().getProperty( k ).equals( PROJVER ) ).
+                            forEach( k -> {
+                                logger.debug( "Replacing project.version within properties for project {} with key {}", project, k );
+                                model.getProperties().setProperty( k, project.getVersion() );
+                                changed.add( project );
+                            } );
+
             if ( model.getPackaging().equals( "pom" ) )
             {
                 enforceProjectVersion( project, model.getDependencies(), changed );
@@ -95,17 +102,14 @@ public class ProjectVersionEnforcingManipulator
                 }
 
                 final List<Profile> profiles = ProfileUtils.getProfiles( session, model);
-                if ( profiles != null )
+                for ( final Profile profile : profiles )
                 {
-                    for ( final Profile profile : profiles )
+                    enforceProjectVersion( project, profile.getDependencies(), changed );
+                    if ( profile.getDependencyManagement() != null )
                     {
-                        enforceProjectVersion( project, profile.getDependencies(), changed );
-                        if ( profile.getDependencyManagement() != null )
-                        {
-                            enforceProjectVersion( project, profile.getDependencyManagement().getDependencies(),
-                                                   changed );
-                        }
+                        enforceProjectVersion( project, profile.getDependencyManagement().getDependencies(), changed );
                     }
+
                 }
             }
         }

@@ -36,7 +36,7 @@ class GroovyModifier {
          for ( String prop : p.stringPropertyNames() )
          {
              log.debug( "Found property {} ", prop )
-             if ( prop.equals("mavenVersion"))
+             if ( prop.equals("myMavenVersion"))
              {
                  // Split it to prevent it being interpolated by integration tests.
                  p.setProperty(prop, '${project' + '.version}')

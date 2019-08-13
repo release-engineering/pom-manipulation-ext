@@ -35,3 +35,11 @@ assert dependency != null
 assert dependency.version.text() == "2.0"
 
 assert pomFile.text.contains("java.home")
+
+def passed = false
+pomFile.eachLine {
+    if (it.contains( "1.0.0.redhat-1</prop")) {
+         passed = true
+    }
+}
+assert (passed == true)

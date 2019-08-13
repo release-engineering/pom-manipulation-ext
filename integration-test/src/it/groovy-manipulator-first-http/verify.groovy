@@ -24,9 +24,17 @@ assert pom.version.text().endsWith( '.redhat-1' )
 def passed = false
 pom.properties.each {
 
-    if ( it.text().contains ("project.version") )
+    // Note the project versioning will remove project version and replace will full value
+    if ( it.text().contains ("3.5.0.redhat-1") )
     {
         passed = true
     }
 }
 assert (passed == true)
+
+def mavenDep = pom.dependencyManagement.dependencies.dependency.find { it.artifactId.text() == "maven-artifact" }
+assert mavenDep != null
+assert mavenDep.version.text().contains ("myMavenVersion")
+
+def buildLog = new File( basedir, 'build.log' )
+assert buildLog.getText().contains( 'Replacing project.version within properties for project' )

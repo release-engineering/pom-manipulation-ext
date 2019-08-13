@@ -30,6 +30,7 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <my.project.version>1.0</my.project.version>
+    <prop>\${project.version}</prop>
   </properties>
 
   <dependencyManagement>
