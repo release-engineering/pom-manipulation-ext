@@ -37,3 +37,6 @@ assert dependency.version.text() == "2.5"
 // Test overrideTransitive=false
 def junitDependency = profile.dependencyManagement.dependencies.dependency.find { it.artifactId.text() == "junit" }
 assert junitDependency.size() == 0
+
+def buildLog = new File( basedir, 'build.log' )
+assert buildLog.getText().contains( 'Will not scan all profiles and returning active profiles of [zero, two]' )

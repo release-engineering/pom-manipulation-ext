@@ -113,6 +113,12 @@
       </dependency>
       <dependency>
         <groupId>org.commonjava.maven.ext</groupId>
+        <artifactId>pom-manipulation-core</artifactId>
+        <version>3.9-SNAPSHOT</version>
+        <type>test-jar</type>
+      </dependency>
+      <dependency>
+        <groupId>org.commonjava.maven.ext</groupId>
         <artifactId>pom-manipulation-ext</artifactId>
         <version>3.9-SNAPSHOT</version>
       </dependency>

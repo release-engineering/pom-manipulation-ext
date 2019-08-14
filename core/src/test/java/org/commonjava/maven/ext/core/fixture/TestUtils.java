@@ -111,4 +111,23 @@ public class TestUtils
 
         return m.invoke( instance, params );
     }
+
+    /**
+     * Executes a method on an object instance.  The name and parameters of
+     * the method are specified.  The method will be executed and the value
+     * of it returned, even if the method would have private or protected access.
+     */
+    @SuppressWarnings( "unchecked" )
+    public static Object executeMethod( Object instance, String name, Object[] params ) throws Exception
+    {
+        // Fetch the Class types of all method parameters
+        Class[] types = new Class[params.length];
+
+        for ( int i = 0; i < params.length; i++ )
+        {
+            types[i] = params[i].getClass();
+        }
+
+        return executeMethod( instance, name, types, params );
+    }
 }

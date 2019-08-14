@@ -215,6 +215,9 @@ public class ManipulationManager
         final Set<String> activeProfiles = new HashSet<>();
         final DefaultProfileManager dpm = new DefaultProfileManager( session.getSession().getContainer(), session.getUserProperties() );
 
+        logger.debug("Explicitly activating {}", session.getActiveProfiles());
+        dpm.explicitlyActivate( session.getActiveProfiles() );
+
         for ( Project p : projects )
         {
             // We clone the original profile here to prevent the DefaultProfileManager affecting the original list

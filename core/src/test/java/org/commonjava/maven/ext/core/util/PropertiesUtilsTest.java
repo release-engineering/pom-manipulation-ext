@@ -66,7 +66,7 @@ public class PropertiesUtilsTest
     private static final String RESOURCE_BASE = "properties/";
 
     @Rule
-    public final SystemOutRule systemRule = new SystemOutRule().enableLog();//.muteForSuccessfulTests();
+    public final SystemOutRule systemRule = new SystemOutRule().enableLog().muteForSuccessfulTests();
 
     @Rule
     public TemporaryFolder temp = new TemporaryFolder();

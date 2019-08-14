@@ -42,6 +42,12 @@
       <groupId>org.commonjava.maven.ext</groupId>
       <artifactId>pom-manipulation-io</artifactId>
     </dependency>
+    <dependency>
+      <groupId>org.commonjava.maven.ext</groupId>
+      <artifactId>pom-manipulation-core</artifactId>
+      <type>test-jar</type>
+      <scope>test</scope>
+    </dependency>
 
     <!-- External dependencies -->
     <dependency>
@@ -141,6 +147,11 @@
       <artifactId>ivy</artifactId>
     </dependency>
 
+    <dependency>
+      <groupId>com.github.stefanbirkner</groupId>
+      <artifactId>system-rules</artifactId>
+      <scope>test</scope>
+    </dependency>
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>

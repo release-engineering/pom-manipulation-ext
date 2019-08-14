@@ -15,26 +15,26 @@
  */
 package org.commonjava.maven.ext.cli;
 
-import ch.qos.logback.classic.Level;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.reflect.FieldUtils;
 import org.apache.maven.execution.MavenSession;
 import org.commonjava.maven.ext.core.ManipulationSession;
-import org.junit.Before;
+import org.commonjava.maven.ext.core.fixture.TestUtils;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.contrib.java.lang.system.SystemOutRule;
 import org.junit.rules.TemporaryFolder;
-import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.Method;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.UUID;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 public class CliTest
@@ -42,13 +42,9 @@ public class CliTest
     @Rule
     public TemporaryFolder temp = new TemporaryFolder( );
 
-    @Before
-    public void before()
-    {
-        final ch.qos.logback.classic.Logger root =
-                        (ch.qos.logback.classic.Logger) LoggerFactory.getLogger( org.slf4j.Logger.ROOT_LOGGER_NAME );
-        root.setLevel( Level.OFF );
-    }
+    @Rule
+    public final SystemOutRule systemRule = new SystemOutRule().enableLog().muteForSuccessfulTests();
+
 
     private File writeSettings (File f) throws IOException
     {
@@ -56,7 +52,7 @@ public class CliTest
                         + "<settings xmlns=\"http://maven.apache.org/SETTINGS/1.0.0\""
                         + "xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\""
                         + "xsi:schemaLocation=\"http://maven.apache.org/SETTINGS/1.0.0 http://maven.apache.org/xsd/settings-1.0.0.xsd\">"
-                        + "</settings>" );
+                        + "</settings>", Charset.defaultCharset() );
         return f;
     }
 
@@ -67,10 +63,10 @@ public class CliTest
         File pom1 = temp.newFile( );
         File settings = writeSettings( temp.newFile( ));
 
-        executeMethod( c, "createSession", new Object[] { pom1, settings } );
+        TestUtils.executeMethod( c, "createSession", new Object[] { pom1, settings } );
 
-        assertTrue( "Session file should match",
-                    pom1.equals( ( (ManipulationSession) FieldUtils.readField( c, "session", true ) ).getPom() ) );
+        assertEquals( "Session file should match", pom1,
+                      ( (ManipulationSession) FieldUtils.readField( c, "session", true ) ).getPom() );
     }
 
     @Test
@@ -79,10 +75,10 @@ public class CliTest
         Cli c = new Cli();
         File pom1 = temp.newFile( );
 
-        executeMethod( c, "run", new Object[] { new String[] { "-f", pom1.toString() } } );
+        TestUtils.executeMethod( c, "run", new Object[] { new String[] { "-f", pom1.toString() } } );
 
-        assertTrue( "Session file should match",
-                    pom1.equals( ( (ManipulationSession) FieldUtils.readField( c, "session", true ) ).getPom() ) );
+        assertEquals( "Session file should match", pom1,
+                      ( (ManipulationSession) FieldUtils.readField( c, "session", true ) ).getPom() );
     }
 
     @Test
@@ -90,12 +86,12 @@ public class CliTest
     {
         Cli c = new Cli();
 
-        executeMethod( c, "run", new Object[] { new String[] {} } );
+        TestUtils.executeMethod( c, "run", new Object[] { new String[] {} } );
 
         ManipulationSession session = (ManipulationSession) FieldUtils.readField( c, "session", true );
         File defaultTarget = (File) FieldUtils.readField( c, "target", true );
 
-        assertTrue( "Session file should match", defaultTarget.equals( session.getPom() ) );
+        assertEquals( "Session file should match", defaultTarget, session.getPom() );
     }
 
     @Test
@@ -104,16 +100,18 @@ public class CliTest
         Cli c = new Cli();
         File settings = writeSettings( temp.newFile());
 
-        executeMethod( c, "run", new Object[] { new String[] { "-s", settings.toString()} } );
+        TestUtils.executeMethod( c, "run", new Object[] { new String[] { "-s", settings.toString()} } );
 
         ManipulationSession session = (ManipulationSession) FieldUtils.readField( c, "session", true );
         MavenSession ms = (MavenSession)FieldUtils.readField( session, "mavenSession", true );
 
-        assertTrue( ms.getRequest().getLocalRepository().getBasedir().equals( ms.getRequest().getLocalRepositoryPath().toString() ) );
-        assertTrue ( "File " + new File ( ms.getRequest().getLocalRepository().getBasedir() ).getParentFile().toString() +
-                                     " was not equal to " + System.getProperty( "user.home" ) + File.separatorChar + ".m2",
-                        new File ( ms.getRequest().getLocalRepository().getBasedir() ).getParentFile().toString().
-                        equals( System.getProperty( "user.home" ) + File.separatorChar + ".m2" ) );
+        assertEquals( ms.getRequest().getLocalRepository().getBasedir(),
+                      ms.getRequest().getLocalRepositoryPath().toString() );
+        assertEquals( "File " + new File( ms.getRequest().getLocalRepository().getBasedir() ).getParentFile().toString()
+                                      + " was not equal to " + System.getProperty( "user.home" ) + File.separatorChar
+                                      + ".m2",
+                      new File( ms.getRequest().getLocalRepository().getBasedir() ).getParentFile().toString(),
+                      System.getProperty( "user.home" ) + File.separatorChar + ".m2" );
 
     }
 
@@ -136,16 +134,15 @@ public class CliTest
             Files.copy( tmpSettings, source );
 
             Cli c = new Cli();
-            executeMethod( c, "run", new Object[] { new String[] {} } );
+            TestUtils.executeMethod( c, "run", new Object[] { new String[] {} } );
 
             ManipulationSession session = (ManipulationSession) FieldUtils.readField( c, "session", true );
             MavenSession ms = (MavenSession) FieldUtils.readField( session, "mavenSession", true );
 
-            assertTrue( ms.getRequest()
-                          .getLocalRepository()
-                          .getBasedir()
-                          .equals( ms.getRequest().getLocalRepositoryPath().toString() ) );
-            assertTrue( ms.getLocalRepository().getBasedir().equals( System.getProperty( "user.home" ) + File.separatorChar + ".m2-mead-test" ) );
+            assertEquals( ms.getRequest().getLocalRepository().getBasedir(),
+                          ms.getRequest().getLocalRepositoryPath().toString() );
+            assertEquals( ms.getLocalRepository().getBasedir(),
+                          System.getProperty( "user.home" ) + File.separatorChar + ".m2-mead-test" );
 
         }
         finally
@@ -162,15 +159,40 @@ public class CliTest
     }
 
     @Test
+    public void checkProfileActivation() throws Exception
+    {
+        File folder = temp.newFolder();
+        File target = temp.newFile( );
+        // Locate the PME project pom file. Use that to verify inheritance tracking.
+        final File projectroot = new File ( TestUtils.resolveFileResource( "", "" )
+                                                     .getParentFile()
+                                                     .getParentFile()
+                                                     .getParentFile(), "integration-test/pom.xml" );
+        FileUtils.copyFile( projectroot, target );
+
+        Cli c = new Cli();
+        TestUtils.executeMethod( c, "run", new Object[] {
+                        new String[] { "-d", "--settings=" + getClass().getResource( "/settings-test.xml" ).getFile(),
+                                        "-Dmaven.repo.local=" + folder.toString(), "-Prun-its", "--file",
+                                        target.getAbsolutePath() } });
+
+        assertTrue (systemRule.getLog().contains( "Explicitly activating [run-its]" ));
+        assertTrue (systemRule.getLog().contains( "Will not scan all profiles and returning active profiles of [run-its]" ));
+
+    }
+
+
+    @Test
     public void checkLocalRepositoryWithSettings() throws Exception
     {
         Cli c = new Cli();
-        executeMethod( c, "run", new Object[] { new String[] { "-settings=" + getClass().getResource("/settings-test.xml").getFile() }} );
+        TestUtils.executeMethod( c, "run", new Object[] { new String[] { "-settings=" + getClass().getResource( "/settings-test.xml").getFile() }} );
 
         ManipulationSession session = (ManipulationSession) FieldUtils.readField( c, "session", true );
         MavenSession ms = (MavenSession)FieldUtils.readField( session, "mavenSession", true );
 
-        assertTrue( ms.getRequest().getLocalRepository().getBasedir().equals( ms.getRequest().getLocalRepositoryPath().toString() ) );
+        assertEquals( ms.getRequest().getLocalRepository().getBasedir(),
+                      ms.getRequest().getLocalRepositoryPath().toString() );
     }
 
     @Test
@@ -178,12 +200,13 @@ public class CliTest
     {
         File folder = temp.newFolder();
         Cli c = new Cli();
-        executeMethod( c, "run", new Object[] { new String[] { "-Dmaven.repo.local=" + folder.toString() }} );
+        TestUtils.executeMethod( c, "run", new Object[] { new String[] { "-Dmaven.repo.local=" + folder.toString() }} );
 
         ManipulationSession session = (ManipulationSession) FieldUtils.readField( c, "session", true );
         MavenSession ms = (MavenSession)FieldUtils.readField( session, "mavenSession", true );
 
-        assertTrue( ms.getRequest().getLocalRepository().getBasedir().equals( ms.getRequest().getLocalRepositoryPath().toString() ) );
+        assertEquals( ms.getRequest().getLocalRepository().getBasedir(),
+                      ms.getRequest().getLocalRepositoryPath().toString() );
     }
 
     @Test
@@ -191,35 +214,15 @@ public class CliTest
     {
         File folder = temp.newFolder();
         Cli c = new Cli();
-        executeMethod( c, "run", new Object[] { new String[]
-                        { "-settings=" + getClass().getResource("/settings-test.xml").getFile(),
+        TestUtils.executeMethod( c, "run", new Object[] { new String[]
+                        { "--settings=" + getClass().getResource("/settings-test.xml").getFile(),
                                         "-Dmaven.repo.local=" + folder.toString() }} );
 
         ManipulationSession session = (ManipulationSession) FieldUtils.readField( c, "session", true );
         MavenSession ms = (MavenSession)FieldUtils.readField( session, "mavenSession", true );
 
-        assertTrue( ms.getLocalRepository().getBasedir().equals( folder.toString() ) );
-        assertTrue( ms.getRequest().getLocalRepository().getBasedir().equals( ms.getRequest().getLocalRepositoryPath().toString() ) );
-    }
-
-    /**
-     * Executes a method on an object instance.  The name and parameters of
-     * the method are specified.  The method will be executed and the value
-     * of it returned, even if the method would have private or protected access.
-     */
-    private Object executeMethod( Object instance, String name, Object[] params ) throws Exception
-    {
-        Class c = instance.getClass();
-
-        // Fetch the Class types of all method parameters
-        Class[] types = new Class[params.length];
-
-        for ( int i = 0; i < params.length; i++ )
-            types[i] = params[i].getClass();
-
-        Method m = c.getDeclaredMethod( name, types );
-        m.setAccessible( true );
-
-        return m.invoke( instance, params );
+        assertEquals( ms.getLocalRepository().getBasedir(), folder.toString() );
+        assertEquals( ms.getRequest().getLocalRepository().getBasedir(),
+                      ms.getRequest().getLocalRepositoryPath().toString() );
     }
 }
