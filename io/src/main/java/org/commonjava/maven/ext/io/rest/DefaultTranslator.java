@@ -57,7 +57,7 @@ public class DefaultTranslator
 
     private static final Random RANDOM = new Random();
 
-    private static final Base32 CODEC = new Base32();
+    protected static final Base32 CODEC = new Base32();
 
     private final Logger logger = LoggerFactory.getLogger( getClass() );
 
