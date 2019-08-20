@@ -13,22 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.commonjava.maven.ext.core.util;
+package org.commonjava.maven.ext.core.groovy;
 
-import org.apache.maven.execution.DefaultMavenExecutionRequest;
-import org.apache.maven.execution.DefaultMavenExecutionResult;
-import org.apache.maven.execution.MavenExecutionRequest;
-import org.apache.maven.execution.MavenSession;
-import org.codehaus.plexus.DefaultContainerConfiguration;
-import org.codehaus.plexus.DefaultPlexusContainer;
-import org.codehaus.plexus.PlexusConstants;
-import org.codehaus.plexus.PlexusContainer;
 import org.commonjava.maven.atlas.ident.ref.SimpleProjectRef;
 import org.commonjava.maven.ext.common.model.Project;
 import org.commonjava.maven.ext.core.ManipulationManager;
 import org.commonjava.maven.ext.core.ManipulationSession;
 import org.commonjava.maven.ext.core.fixture.TestUtils;
-import org.commonjava.maven.ext.core.groovy.BaseScript;
 import org.commonjava.maven.ext.core.impl.FinalGroovyManipulator;
 import org.commonjava.maven.ext.core.impl.InitialGroovyManipulator;
 import org.commonjava.maven.ext.core.state.VersioningState;
@@ -178,7 +169,6 @@ public class BaseScriptTest
     }
 
     @Test
-    @SuppressWarnings( "deprecation" )
     public void testGroovyOverrideProperties() throws Exception
     {
         // Locate the PME project pom file. Use that to verify inheritance tracking.
@@ -188,27 +178,12 @@ public class BaseScriptTest
                                                     .getParentFile()
                                                     .getParentFile()
                                                     .getParentFile(), "pom.xml" );
-        final DefaultContainerConfiguration config = new DefaultContainerConfiguration();
-        config.setClassPathScanning( PlexusConstants.SCANNING_ON );
-        config.setComponentVisibility( PlexusConstants.GLOBAL_VISIBILITY );
-        config.setName( "PME-CLI" );
-        PlexusContainer container = new DefaultPlexusContainer( config);
 
-        PomIO pomIO = container.lookup( PomIO.class );
-        List<Project> projects = pomIO.parseProject( projectroot );
+        List<Project> projects = new PomIO().parseProject( projectroot );
 
         Properties userProperties = new Properties(  );
         userProperties.setProperty( "versionIncrementalSuffix", "rebuild" );
-
-        ManipulationManager manipulationManager = container.lookup( ManipulationManager.class );
-        ManipulationSession session = container.lookup( ManipulationSession.class );
-        MavenExecutionRequest req = new DefaultMavenExecutionRequest().setSystemProperties( System.getProperties() )
-                                                                      .setUserProperties( userProperties )
-                                                                      .setRemoteRepositories( Collections.emptyList() );
-        MavenSession mavenSession = new MavenSession( container, null, req, new DefaultMavenExecutionResult() );
-        session.setMavenSession( mavenSession );
-        manipulationManager.init( session );
-
+        ManipulationSession session = TestUtils.createSession( userProperties );
 
         VersioningState state = session.getState( VersioningState.class );
         assertNotNull( state );

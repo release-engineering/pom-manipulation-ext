@@ -38,6 +38,7 @@ import java.util.Map;
  * Abstract class that contains useful utility functions for developers wishing to implement groovy scripts
  * for PME.
  */
+@SuppressWarnings("WeakerAccess") // Public API.
 public abstract class BaseScriptUtils extends Script implements BaseScriptAPI
 {
     protected final Logger logger = LoggerFactory.getLogger( BaseScriptUtils.class );
@@ -122,15 +123,14 @@ public abstract class BaseScriptUtils extends Script implements BaseScriptAPI
      * This will re-initialise any state linked to this session. This is useful if the user properties have been
      * updated.
      */
-    public void reinitialiseSessionStates() throws ManipulationException
+    protected void reinitialiseSessionStates() throws ManipulationException
     {
         validateSession();
         ((ManipulationSession)getSession()).reinitialiseStates();
     }
 
 
-    // TODO: Does this need to be public/protected?
-    private Translator getRESTAPI() throws ManipulationException
+    protected Translator getRESTAPI() throws ManipulationException
     {
         validateSession();
         RESTState rs = ((ManipulationSession)getSession()).getState( RESTState.class );
@@ -168,8 +168,14 @@ public abstract class BaseScriptUtils extends Script implements BaseScriptAPI
         }
         if ( thisMapping != null )
         {
-            logger.info( "Comparing target GAV build {} to this build {} ", targetBuild, thisMapping );
-            if ( Version.getIntegerBuildNumber( thisMapping ) >= Version.getIntegerBuildNumber( targetBuild ) )
+            logger.info( "Comparing requested GAV {} with target GAV build {} to this GAV {} with known build {} ",
+                         gav, targetBuild, getGAV(), thisMapping );
+            if ( ! gav.getVersionString().equals( getGAV().getVersionString() ) )
+            {
+                logger.error( "Alignment failure: Target is {} and this is {}", gav.getVersionString(), getGAV() );
+                throw new ManipulationException( "Unable to set version suffix as versions do not match" );
+            }
+            else if ( Version.getIntegerBuildNumber( thisMapping ) >= Version.getIntegerBuildNumber( targetBuild ) )
             {
                 logger.error( "Alignment failure: Target is {} and this is {}", Version.getIntegerBuildNumber( targetBuild ), Version.getIntegerBuildNumber( thisMapping ) );
                 throw new ManipulationException( "Unable to set version suffix as dependent build has been built more or the same number of times than the original target" );
