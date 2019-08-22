@@ -21,10 +21,14 @@ import org.apache.maven.execution.MavenExecutionRequest;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
+import org.codehaus.plexus.DefaultContainerConfiguration;
 import org.codehaus.plexus.DefaultPlexusContainer;
+import org.codehaus.plexus.PlexusConstants;
 import org.codehaus.plexus.PlexusContainer;
 import org.codehaus.plexus.PlexusContainerException;
+import org.codehaus.plexus.component.repository.exception.ComponentLookupException;
 import org.commonjava.maven.ext.common.ManipulationException;
+import org.commonjava.maven.ext.core.ManipulationManager;
 import org.commonjava.maven.ext.core.ManipulationSession;
 
 import java.io.File;
@@ -71,17 +75,25 @@ public class TestUtils
 
         final MavenExecutionRequest req = new DefaultMavenExecutionRequest().setUserProperties( p );
         final PlexusContainer container;
+        final ManipulationManager manipulationManager;
+        final DefaultContainerConfiguration config = new DefaultContainerConfiguration();
+
+        config.setClassPathScanning( PlexusConstants.SCANNING_ON );
+        config.setComponentVisibility( PlexusConstants.GLOBAL_VISIBILITY );
+        config.setName( "PME" );
         try
         {
-            container = new DefaultPlexusContainer();
+            container = new DefaultPlexusContainer(config);
+            manipulationManager = container.lookup( ManipulationManager.class );
         }
-        catch ( PlexusContainerException e )
+        catch ( PlexusContainerException | ComponentLookupException e )
         {
             throw new ManipulationException( "Unable to create DefaultPlexusContainer", e );
         }
         final MavenSession mavenSession = new MavenSession( container, null, req, new DefaultMavenExecutionResult() );
 
         session.setMavenSession( mavenSession );
+        manipulationManager.init( session );
 
         return session;
     }
@@ -117,7 +129,6 @@ public class TestUtils
      * the method are specified.  The method will be executed and the value
      * of it returned, even if the method would have private or protected access.
      */
-    @SuppressWarnings( "unchecked" )
     public static Object executeMethod( Object instance, String name, Object[] params ) throws Exception
     {
         // Fetch the Class types of all method parameters
