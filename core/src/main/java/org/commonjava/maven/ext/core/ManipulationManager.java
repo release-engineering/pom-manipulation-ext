@@ -76,7 +76,7 @@ public class ManipulationManager
 
     public static final String MARKER_FILE = MARKER_PATH + File.separatorChar + "pom-manip-ext-marker.txt";
 
-    private static final String REPORT_JSON_DEFAULT = File.separatorChar + "pom-manip-ext-result.json";
+    private static final String REPORT_JSON_DEFAULT = File.separatorChar + "manipulation.json";
 
     public static final String REPORT_TXT_OUTPUT_FILE = "reportTxtOutputFile";
 

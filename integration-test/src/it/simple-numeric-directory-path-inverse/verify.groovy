@@ -53,6 +53,6 @@ buildLog.eachLine {
 }
 assert executionRoot == true
 
-File json = new File( basedir, 'target/pom-manip-ext-result.json' )
+File json = new File( basedir, 'target/manipulation.json' )
 assert json.exists()
 assert json.text.contains("redhat-1")
