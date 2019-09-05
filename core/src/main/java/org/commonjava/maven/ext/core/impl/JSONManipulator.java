@@ -151,7 +151,7 @@ public class JSONManipulator
                 dc.set( operation.getXPath(), operation.getUpdate() );
             }
 
-            jsonIO.writeJSON( target, dc.jsonString() );
+            jsonIO.writeJSON( target, dc );
         }
         catch ( JsonPathException e )
         {

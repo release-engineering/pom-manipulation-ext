@@ -66,7 +66,7 @@ public class BaseScriptTest
                                                     .getParentFile(), "pom.xml" );
         PomIO pomIO = new PomIO();
         List<Project> projects = pomIO.parseProject( projectroot );
-        ManipulationManager m = new ManipulationManager( null, Collections.emptyMap(), Collections.emptyMap(), null );
+        ManipulationManager m = new ManipulationManager( Collections.emptyMap(), Collections.emptyMap(), null );
         ManipulationSession ms = TestUtils.createSession( null );
         m.init( ms );
 
@@ -97,7 +97,7 @@ public class BaseScriptTest
 
         PomIO pomIO = new PomIO();
         List<Project> projects = pomIO.parseProject( projectroot );
-        ManipulationManager m = new ManipulationManager( null, Collections.emptyMap(), Collections.emptyMap(), null );
+        ManipulationManager m = new ManipulationManager( Collections.emptyMap(), Collections.emptyMap(), null );
         ManipulationSession ms = TestUtils.createSession( null );
         m.init( ms );
 
@@ -124,7 +124,7 @@ public class BaseScriptTest
                                                     .getParentFile(), "pom.xml" );
         PomIO pomIO = new PomIO();
         List<Project> projects = pomIO.parseProject( projectroot );
-        ManipulationManager m = new ManipulationManager( null, Collections.emptyMap(), Collections.emptyMap(), null );
+        ManipulationManager m = new ManipulationManager( Collections.emptyMap(), Collections.emptyMap(), null );
         ManipulationSession ms = TestUtils.createSession( null );
         m.init( ms );
 

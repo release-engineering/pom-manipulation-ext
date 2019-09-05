@@ -29,10 +29,13 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.util.List;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 public class JSONIOTest
@@ -47,7 +50,7 @@ public class JSONIOTest
     public TemporaryFolder tf = new TemporaryFolder(  );
 
     @Before
-    public void setup() throws IOException
+    public void setup()
     {
         jsonIO = new JSONIO();
         URL resource = this.getClass().getResource( "npm-shrinkwrap.json");
@@ -64,22 +67,22 @@ public class JSONIOTest
     {
         DocumentContext o = jsonIO.parseJSON( npmFile );
         logger.debug ("Read {} ", o.jsonString());
-        logger.debug ("File {}", FileUtils.readFileToString( npmFile ));
+        logger.debug ("File {}", FileUtils.readFileToString( npmFile, Charset.defaultCharset() ));
         // They won't be equal as jsonString is not pretty printed.
-        assertNotEquals( o.jsonString(), FileUtils.readFileToString( npmFile ) );
-        assertTrue ( o != null);
+        assertNotEquals( o.jsonString(), FileUtils.readFileToString( npmFile, Charset.defaultCharset() ) );
+        assertNotNull( o );
     }
 
     @Test
-    public void writeFile () throws ManipulationException, IOException
+    public void writeFileShrinkwrap () throws ManipulationException, IOException
     {
         DocumentContext doc = jsonIO.parseJSON( npmFile );
 
         File target = tf.newFile();
 
-        jsonIO.writeJSON( target, doc.jsonString() );
+        jsonIO.writeJSON( target, doc );
 
-        assertTrue ( FileUtils.contentEquals( npmFile, target ) );
+        assertTrue( FileUtils.contentEquals( npmFile, target ) );
     }
 
     @Test
@@ -91,7 +94,7 @@ public class JSONIOTest
 
         File target = tf.newFile();
 
-        jsonIO.writeJSON( target, doc.jsonString() );
+        jsonIO.writeJSON( target, doc );
 
         assertFalse ( FileUtils.contentEquals( npmFile, target ) );
     }
@@ -106,7 +109,7 @@ public class JSONIOTest
 
         File target = tf.newFile();
 
-        jsonIO.writeJSON( target, doc.jsonString() );
+        jsonIO.writeJSON( target, doc );
 
         assertFalse ( doc.jsonString().contains( "https://registry.npmjs.org/agent-base/-/agent-base-2.0.1.tgz" ) );
         assertTrue ( doc.jsonString().contains( "resolved" ) );
@@ -124,9 +127,9 @@ public class JSONIOTest
 
         File target = tf.newFile();
 
-        jsonIO.writeJSON( target, doc.jsonString() );
+        jsonIO.writeJSON( target, doc );
 
-        assertTrue ( ! doc.jsonString().contains( "1.2.2-SNAPSHOT" ));
+        assertFalse( doc.jsonString().contains( "1.2.2-SNAPSHOT" ) );
         assertTrue ( doc.jsonString().contains( "1.3.0.rebuild-1" ));
         assertFalse ( FileUtils.contentEquals( pluginFile, target ) );
     }
@@ -143,7 +146,7 @@ public class JSONIOTest
 
         File target = tf.newFile();
 
-        jsonIO.writeJSON( target, doc.jsonString() );
+        jsonIO.writeJSON( target, doc );
 
         assertTrue ( doc.jsonString().contains( "https://maven.repository.redhat.com/ga/" ));
         assertTrue ( doc.jsonString().contains( "1.2.2-SNAPSHOT" ));
@@ -152,7 +155,7 @@ public class JSONIOTest
 
 
     @Test (expected = ManipulationException.class)
-    public void updateWithInvalidPath () throws ManipulationException, IOException
+    public void updateWithInvalidPath () throws ManipulationException
     {
         String modifyPath = "$.I.really.do.not.exist.repository.url";
         try
@@ -167,7 +170,7 @@ public class JSONIOTest
     }
 
     @Test
-    public void countMatches () throws ManipulationException, IOException
+    public void countMatches () throws ManipulationException
     {
         String pluginsPath = "$..plugins";
         String reposURLPath = "$.repository.url";
@@ -176,10 +179,10 @@ public class JSONIOTest
             DocumentContext doc = jsonIO.parseJSON( pluginFile );
 
             List o = doc.read ( pluginsPath );
-            assertTrue( o.size() == 1 );
+            assertEquals( 1, o.size() );
 
             o = doc.read ( reposURLPath );
-            assertTrue( o.size() == 1 );
+            assertEquals( 1, o.size() );
         }
         catch (JsonPathException e)
         {

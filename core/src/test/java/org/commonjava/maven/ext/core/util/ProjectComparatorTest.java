@@ -23,9 +23,12 @@ import org.apache.maven.execution.MavenSession;
 import org.codehaus.plexus.DefaultPlexusContainer;
 import org.codehaus.plexus.PlexusContainer;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
+import org.commonjava.maven.ext.common.json.PME;
 import org.commonjava.maven.ext.common.model.Project;
+import org.commonjava.maven.ext.common.util.JSONUtils;
 import org.commonjava.maven.ext.common.util.ProjectComparator;
 import org.commonjava.maven.ext.common.util.WildcardMap;
+import org.commonjava.maven.ext.core.ManipulationManager;
 import org.commonjava.maven.ext.core.ManipulationSession;
 import org.commonjava.maven.ext.core.fixture.TestUtils;
 import org.commonjava.maven.ext.core.state.CommonState;
@@ -77,8 +80,7 @@ public class ProjectComparatorTest
         List<Project> projectOriginal = pomIO.parseProject( projectroot );
         List<Project> projectNew = pomIO.parseProject( projectroot );
 
-        ProjectComparator.compareProjects( session,
-                                           map,
+        ProjectComparator.compareProjects( session, new PME(), map,
                                            projectOriginal, projectNew );
 
         assertFalse( systemOutRule.getLog().contains( "-->" ) );
@@ -117,10 +119,17 @@ public class ProjectComparatorTest
             }
         } ) );
 
-        ProjectComparator.compareProjects( session,
-                                           relocationState.getDependencyRelocations(),
-                                           projectOriginal, projectNew );
+        PME json = new PME();
 
+        String result = ProjectComparator.compareProjects( session, json, relocationState.getDependencyRelocations(),
+                                           projectOriginal, projectNew );
+        System.out.println (result);
+
+        String jsonString = JSONUtils.jsonToString(json);
+        assertTrue( jsonString.contains( "org.commonjava.maven.galley:galley-maven:0.16.3\" : {" ) );
+        assertTrue( jsonString.contains( "\"version\" : \"0.16.3-redhat-1\"" ) );
+
+        System.out.println (jsonString);
 
         assertTrue( systemOutRule.getLog().contains( "Managed dependencies :" ) );
         assertTrue( systemOutRule.getLog().contains( "Project version :" ) );
@@ -164,9 +173,9 @@ public class ProjectComparatorTest
             }
         } );
 
-        ProjectComparator.compareProjects( session,
-                                           relocationState.getDependencyRelocations(),
+        String result = ProjectComparator.compareProjects( session, new PME(), relocationState.getDependencyRelocations(),
                                            projectOriginal, projectNew );
+        System.out.println (result);
 
 
         assertTrue( systemOutRule.getLog().contains( "Managed dependencies :" ) );
@@ -185,7 +194,7 @@ public class ProjectComparatorTest
 
         ManipulationSession session = createUpdateSession();
         session.getUserProperties().put( RelocationState.DEPENDENCY_RELOCATIONS + "ch.qos.logback:@org.foobar.logback:", "" );
-        session.getUserProperties().put( ProjectComparator.REPORT_OUTPUT_FILE,  resultFile.getAbsolutePath());
+        session.getUserProperties().put( ManipulationManager.REPORT_TXT_OUTPUT_FILE, resultFile.getAbsolutePath());
 
         RelocationState relocationState = new RelocationState( session.getUserProperties() );
         session.setState( relocationState );
@@ -215,10 +224,10 @@ public class ProjectComparatorTest
             }
         } ) );
 
-        ProjectComparator.compareProjects( session,
-                                           relocationState.getDependencyRelocations(),
+        String result = ProjectComparator.compareProjects( session, new PME(), relocationState.getDependencyRelocations(),
                                            projectOriginal, projectNew );
-
+        System.out.println (result);
+        FileUtils.writeStringToFile( resultFile, result, Charset.defaultCharset() );
 
         assertTrue( systemOutRule.getLog().contains( "Managed dependencies :" ) );
         assertTrue( systemOutRule.getLog().contains( "Project version :" ) );

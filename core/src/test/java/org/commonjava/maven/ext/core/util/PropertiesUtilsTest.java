@@ -24,6 +24,7 @@ import org.codehaus.plexus.DefaultPlexusContainer;
 import org.codehaus.plexus.PlexusContainer;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.ext.common.ManipulationException;
+import org.commonjava.maven.ext.common.json.PME;
 import org.commonjava.maven.ext.common.model.Project;
 import org.commonjava.maven.ext.common.util.ProjectComparator;
 import org.commonjava.maven.ext.common.util.PropertyResolver;
@@ -280,11 +281,11 @@ public class PropertiesUtilsTest
         List<Project> newprojects = pomIO.parseProject( projectroot );
 
         WildcardMap<ProjectVersionRef> map = (session.getState( RelocationState.class) == null ? new WildcardMap<>() : session.getState( RelocationState.class ).getDependencyRelocations());
-        ProjectComparator.compareProjects( session,
-                                           map,
+        String result = ProjectComparator.compareProjects( session, new PME(), map,
                                            projects, newprojects );
+        System.out.println (result);
 
-        assertTrue( systemRule.getLog().contains( "[main] INFO  o.c.m.e.c.util.ProjectComparator - ------------------- project org.infinispan:infinispan-bom\n"  ) );
+        assertTrue( systemRule.getLog().contains( "------------------- project org.infinispan:infinispan-bom\n"  ) );
     }
 
 

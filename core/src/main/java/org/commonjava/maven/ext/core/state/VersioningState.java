@@ -15,12 +15,10 @@
  */
 package org.commonjava.maven.ext.core.state;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import org.apache.commons.lang.StringUtils;
 import org.commonjava.maven.atlas.ident.ref.ProjectRef;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
-import org.commonjava.maven.ext.common.model.GAV;
 import org.commonjava.maven.ext.core.impl.ProjectVersioningManipulator;
 import org.commonjava.maven.ext.core.util.PropertiesUtils;
 import org.commonjava.maven.ext.core.util.PropertyFlag;
@@ -94,9 +92,6 @@ public class VersioningState
 
     private List<String> allSuffixes;
 
-    @JsonProperty
-    private GAV executionRootModified;
-
     /**
      * Record the versions to change. Essentially this contains a mapping of original
      * project GAV to new version to change.
@@ -165,11 +160,6 @@ public class VersioningState
     public void setVersionsByGAVMap( Map<ProjectVersionRef, String> versionsByGAV )
     {
         this.versionsByGAV.putAll( versionsByGAV );
-    }
-
-    public void setExecutionRootModified( GAV executionRootModified )
-    {
-        this.executionRootModified = executionRootModified;
     }
 
     public boolean hasVersionsByGAV()

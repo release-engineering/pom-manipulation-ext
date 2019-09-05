@@ -17,6 +17,8 @@ package org.commonjava.maven.ext.integrationtest;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.io.FileUtils;
+import org.commonjava.maven.ext.core.ManipulationManager;
 import org.commonjava.maven.ext.core.state.VersioningState;
 import org.commonjava.maven.ext.io.rest.handler.AddSuffixJettyHandler;
 import org.commonjava.maven.ext.io.rest.rule.MockServer;
@@ -26,6 +28,7 @@ import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
 import java.io.File;
+import java.nio.charset.Charset;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -104,15 +107,14 @@ public class ResultJsonFileTest
 
         assertEquals( (Integer) 0, exitValue );
 
-        File outputJsonFile = new File( baseDir, "/target/pom-manip-ext-result.json" );
+        File outputJsonFile = new File( baseDir, "/target/manipulation.json" );
         assertTrue( outputJsonFile.exists() );
+
+        System.out.println ("#### \n" + FileUtils.readFileToString( outputJsonFile, Charset.defaultCharset() ) );
 
         JsonNode rootNode = MAPPER.readTree( outputJsonFile );
 
-        JsonNode versioningState = rootNode.get( "VersioningState" );
-        assertNotNull( versioningState );
-
-        JsonNode executionRootModified = versioningState.get( "executionRootModified" );
+        JsonNode executionRootModified = rootNode.get( "executionRoot" );
         assertNotNull( executionRootModified );
 
         JsonNode groupId = executionRootModified.get( "groupId" );
@@ -153,15 +155,12 @@ public class ResultJsonFileTest
 
         assertEquals( (Integer) 0, exitValue );
 
-        File outputJsonFile = new File( baseDir, "/target/pom-manip-ext-result.json" );
+        File outputJsonFile = new File( baseDir, "/target/manipulation.json" );
         assertTrue( outputJsonFile.exists() );
 
         JsonNode rootNode = MAPPER.readTree( outputJsonFile );
 
-        JsonNode versioningState = rootNode.get( "VersioningState" );
-        assertNotNull( versioningState );
-
-        JsonNode executionRootModified = versioningState.get( "executionRootModified" );
+        JsonNode executionRootModified = rootNode.get( "executionRoot" );
         assertNotNull( executionRootModified );
 
         JsonNode groupId = executionRootModified.get( "groupId" );
@@ -198,15 +197,12 @@ public class ResultJsonFileTest
 
         assertEquals( (Integer) 0, exitValue );
 
-        File outputJsonFile = new File( baseDir, "/target/pom-manip-ext-result.json" );
+        File outputJsonFile = new File( baseDir, "/target/manipulation.json" );
         assertTrue( outputJsonFile.exists() );
 
         JsonNode rootNode = MAPPER.readTree( outputJsonFile );
 
-        JsonNode versioningState = rootNode.get( "VersioningState" );
-        assertNotNull( versioningState );
-
-        JsonNode executionRootModified = versioningState.get( "executionRootModified" );
+        JsonNode executionRootModified = rootNode.get( "executionRoot" );
         assertNotNull( executionRootModified );
 
         JsonNode groupId = executionRootModified.get( "groupId" );
@@ -227,4 +223,52 @@ public class ResultJsonFileTest
         ClassLoader classLoader = getClass().getClassLoader();
         return new File( classLoader.getResource( "result-json-test/pom.xml" ).getFile() );
     }
+
+
+
+    @Test
+    public void testVersioningStateCustomOutputJsonFile()
+                    throws Exception
+    {
+        // given
+
+        File outputDir = tmpFolderRule.newFolder();
+
+        File baseDir = tmpFolderRule.newFolder();
+        File pomFile = getResourceFile();
+        copyFile( pomFile, new File( baseDir, "pom.xml" ) );
+
+        // when
+
+        Map<String, String> params = new HashMap<>();
+        params.put( "restURL", mockServer.getUrl() );
+        params.put( "version.incremental.suffix", AddSuffixJettyHandler.SUFFIX );
+        params.put( ManipulationManager.REPORT_JSON_OUTPUT_FILE, outputDir.toString() + "/manipulation.json" );
+
+        Integer exitValue = runCli( Collections.emptyList(), params, baseDir.getCanonicalPath() );
+
+        // then
+
+        assertEquals( (Integer) 0, exitValue );
+
+        File outputJsonFile = new File( outputDir, "/manipulation.json" );
+        assertTrue( outputJsonFile.exists() );
+
+        JsonNode rootNode = MAPPER.readTree( outputJsonFile );
+
+        JsonNode executionRootModified = rootNode.get( "executionRoot" );
+        assertNotNull( executionRootModified );
+
+        JsonNode groupId = executionRootModified.get( "groupId" );
+        JsonNode artifactId = executionRootModified.get( "artifactId" );
+        JsonNode version = executionRootModified.get( "version" );
+        assertNotNull( groupId );
+        assertNotNull( artifactId );
+        assertNotNull( version );
+
+        assertEquals( "org.commonjava.maven.ext.versioning.test", groupId.textValue() );
+        assertEquals( "project-version", artifactId.textValue() );
+        assertEquals( "1.0.0.redhat-2", version.textValue() );
+    }
+
 }

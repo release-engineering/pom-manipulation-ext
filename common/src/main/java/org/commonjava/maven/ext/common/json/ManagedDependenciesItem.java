@@ -13,26 +13,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.commonjava.maven.ext.common.model;
+
+package org.commonjava.maven.ext.common.json;
+
+/*
+ * Created by JacksonGenerator on 23/07/2019.
+ */
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import lombok.Getter;
+import lombok.Setter;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
+import org.commonjava.maven.ext.common.util.JSONUtils;
 
-public class GAV
+import java.util.HashMap;
+import java.util.Map;
+
+@Getter
+@Setter
+public class ManagedDependenciesItem
 {
-    @JsonProperty
-    public final String groupId;
-
-    @JsonProperty
-    public final String artifactId;
-
-    @JsonProperty
-    public final String version;
-
-    public GAV( ProjectVersionRef pvr )
-    {
-        groupId = pvr.getGroupId();
-        artifactId = pvr.getArtifactId();
-        version = pvr.getVersionString();
-    }
+    @JsonProperty( "dependencies" )
+    @JsonDeserialize( contentUsing = JSONUtils.ProjectVersionRefDeserializer.class )
+    @JsonSerialize( contentUsing = JSONUtils.ProjectVersionRefSerializer.class )
+    private Map<String, ProjectVersionRef> dependencies = new HashMap<>();
 }

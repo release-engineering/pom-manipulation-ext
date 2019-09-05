@@ -15,29 +15,21 @@
  */
 package org.commonjava.maven.ext.core;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.databind.introspect.VisibilityChecker;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import org.apache.commons.io.FileUtils;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.profiles.DefaultProfileManager;
 import org.apache.maven.profiles.activation.ProfileActivationException;
 import org.apache.maven.project.ProjectBuilder;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.ext.common.ManipulationException;
-import org.commonjava.maven.ext.common.model.GAV;
+import org.commonjava.maven.ext.common.json.PME;
 import org.commonjava.maven.ext.common.model.Project;
+import org.commonjava.maven.ext.common.util.JSONUtils;
 import org.commonjava.maven.ext.common.util.ProjectComparator;
 import org.commonjava.maven.ext.common.util.WildcardMap;
 import org.commonjava.maven.ext.core.impl.Manipulator;
 import org.commonjava.maven.ext.core.state.CommonState;
 import org.commonjava.maven.ext.core.state.RelocationState;
-import org.commonjava.maven.ext.core.state.State;
-import org.commonjava.maven.ext.core.state.VersioningState;
 import org.commonjava.maven.ext.core.util.ManipulatorPriorityComparator;
 import org.commonjava.maven.ext.io.PomIO;
 import org.commonjava.maven.ext.io.resolver.ExtensionInfrastructure;
@@ -50,6 +42,7 @@ import javax.inject.Singleton;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -58,6 +51,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static org.apache.commons.lang.StringUtils.isNotEmpty;
 import static org.commonjava.maven.ext.common.util.ProfileUtils.PROFILE_SCANNING;
 import static org.commonjava.maven.ext.common.util.ProfileUtils.PROFILE_SCANNING_DEFAULT;
 
@@ -80,13 +74,15 @@ public class ManipulationManager
 {
     private static final String MARKER_PATH = "target";
 
-    public static final String MARKER_FILE =  MARKER_PATH + File.separatorChar + "pom-manip-ext-marker.txt";
+    public static final String MARKER_FILE = MARKER_PATH + File.separatorChar + "pom-manip-ext-marker.txt";
 
-    public static final String RESULT_FILE = MARKER_PATH + File.separatorChar + "pom-manip-ext-result.json";
+    private static final String REPORT_JSON_DEFAULT = File.separatorChar + "manipulation.json";
+
+    public static final String REPORT_TXT_OUTPUT_FILE = "reportTxtOutputFile";
+
+    public static final String REPORT_JSON_OUTPUT_FILE = "reportJSONOutputFile";
 
     private final Logger logger = LoggerFactory.getLogger( getClass() );
-
-    private final ProjectBuilder projectBuilder;
 
     private Map<String, Manipulator> manipulators;
 
@@ -94,11 +90,12 @@ public class ManipulationManager
 
     private final PomIO pomIO;
 
+    private final PME jsonReport = new PME();
+
     @Inject
-    public ManipulationManager( ProjectBuilder projectBuilder, Map<String, Manipulator> manipulators,
+    public ManipulationManager( Map<String, Manipulator> manipulators,
                                 Map<String, ExtensionInfrastructure> infrastructure, PomIO pomIO)
     {
-        this.projectBuilder = projectBuilder;
         this.manipulators = manipulators;
         this.infrastructure = infrastructure;
         this.pomIO = pomIO;
@@ -150,6 +147,7 @@ public class ManipulationManager
      * @param session the container session for manipulation.
      * @throws ManipulationException if an error occurs.
      */
+    @SuppressWarnings("ResultOfMethodCallIgnored")
     public void scanAndApply( final ManipulationSession session )
                     throws ManipulationException
     {
@@ -157,14 +155,14 @@ public class ManipulationManager
         final List<Project> originalProjects = new ArrayList<>(  );
         currentProjects.forEach( p -> originalProjects.add( new Project( p ) ) );
 
+        final Project originalExecutionRoot = originalProjects.get( 0 );
+        if ( ! originalExecutionRoot.isExecutionRoot() )
+        {
+            throw new ManipulationException( "First project is not execution root : " + originalProjects.toString() );
+        }
+
         session.getActiveProfiles().addAll( parseActiveProfiles( session, currentProjects ) );
         session.setProjects( currentProjects );
-
-        if (logger.isDebugEnabled()) {
-            for (final Project project : currentProjects) {
-                logger.debug("Got {} (POM: {})", project, project.getPom());
-            }
-        }
 
         Set<Project> changed = applyManipulations( currentProjects );
 
@@ -173,20 +171,33 @@ public class ManipulationManager
         {
             logger.info( "Maven-Manipulation-Extension: Rewrite changed: {}", currentProjects );
 
-            GAV gav = pomIO.rewritePOMs( changed );
+            ProjectVersionRef executionRoot = pomIO.rewritePOMs( changed );
+
+            jsonReport.getGav().setPVR( executionRoot );
+            jsonReport.getGav().setOriginalGAV( originalExecutionRoot.getKey().toString() );
+
 
             try
             {
-                final VersioningState state = session.getState( VersioningState.class );
-                state.setExecutionRootModified( gav );
-
-                new File( session.getTargetDir().getParentFile(), ManipulationManager.MARKER_PATH ).mkdirs();
-
+                session.getTargetDir().mkdir();
                 new File( session.getTargetDir().getParentFile(), ManipulationManager.MARKER_FILE ).createNewFile();
 
-                try (FileWriter writer = new FileWriter( new File( session.getTargetDir().getParentFile(), RESULT_FILE ) ))
+                WildcardMap<ProjectVersionRef> map = (session.getState( RelocationState.class) == null ? new WildcardMap<>() : session.getState( RelocationState.class ).getDependencyRelocations());
+                String report = ProjectComparator.compareProjects( session, jsonReport, map , originalProjects, currentProjects );
+                logger.info( report );
+
+                final String reportTxtOutputFile = session.getUserProperties().getProperty( REPORT_TXT_OUTPUT_FILE, "");
+                if ( isNotEmpty( reportTxtOutputFile ) )
                 {
-                    writer.write( collectResults( session ) );
+                    File reportFile = new File ( reportTxtOutputFile);
+                    FileUtils.writeStringToFile( reportFile, report, Charset.defaultCharset() );
+                }
+                final String reportJsonOutputFile = session.getUserProperties().getProperty( REPORT_JSON_OUTPUT_FILE,
+                                                                                             session.getTargetDir() + File.separator + REPORT_JSON_DEFAULT);
+
+                try (FileWriter writer = new FileWriter( new File( reportJsonOutputFile ) ) )
+                {
+                    writer.write( JSONUtils.jsonToString( jsonReport ) );
                 }
             }
             catch ( IOException e )
@@ -194,9 +205,6 @@ public class ManipulationManager
                 logger.error( "Unable to create marker or result file", e );
                 throw new ManipulationException( "Marker/result file creation failed", e );
             }
-
-            WildcardMap<ProjectVersionRef> map = (session.getState( RelocationState.class) == null ? new WildcardMap<>() : session.getState( RelocationState.class ).getDependencyRelocations());
-            ProjectComparator.compareProjects( session, map , originalProjects, currentProjects );
         }
 
         // Ensure shutdown of GalleyInfrastructure Executor Service
@@ -281,43 +289,4 @@ public class ManipulationManager
         return changed;
     }
 
-    /**
-     * After the modifications are applied, it may be useful for manipulators
-     * to provide caller with a structured, computer-readable output or summary of the changes.
-     * This is done in the form of a JSON document stored in the root target
-     * directory.
-     * The output data are generated from the fields of the state objects,
-     * which must be actively marked by {@link JsonProperty} annotation
-     * to be processed.
-     * The result is a map from short state class names
-     * to the result of the state serialization.
-     * Keys with empty values are excluded.
-     *
-     * @param session the container session for manipulation.
-     */
-    private String collectResults( final ManipulationSession session )
-                    throws JsonProcessingException
-    {
-        final ObjectMapper MAPPER = new ObjectMapper();
-        VisibilityChecker<?> vc = MAPPER.getSerializationConfig()
-                                        .getDefaultVisibilityChecker()
-                                        .withCreatorVisibility( JsonAutoDetect.Visibility.NONE )
-                                        .withFieldVisibility( JsonAutoDetect.Visibility.NONE )
-                                        .withGetterVisibility( JsonAutoDetect.Visibility.NONE )
-                                        .withIsGetterVisibility( JsonAutoDetect.Visibility.NONE )
-                                        .withSetterVisibility( JsonAutoDetect.Visibility.NONE );
-        MAPPER.setVisibility( vc );
-        MAPPER.configure( SerializationFeature.FAIL_ON_EMPTY_BEANS, false );
-        ObjectNode root = MAPPER.createObjectNode();
-        for ( final Map.Entry<Class<?>, State> stateEntry : session.getStatesCopy() )
-        {
-            JsonNode node = MAPPER.convertValue( stateEntry.getValue(), JsonNode.class );
-            if ( node.isObject() && node.size() != 0 )
-            {
-                root.set( stateEntry.getKey().getSimpleName(), node );
-            }
-        }
-
-        return MAPPER.writeValueAsString( root );
-    }
 }
