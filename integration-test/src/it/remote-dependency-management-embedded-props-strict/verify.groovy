@@ -32,11 +32,20 @@ def message = 0
 
 pomFile.eachLine {
     if ( it.contains ( "{commons.lang.major}.6.0.redhat-4" ) ) {
+        message+=10
+    }
+    if ( it.contains ( "2.6.0.redhat-4" ) ) {
         message++
     }
     if ( it.contains ( "{jetty.qualifier}-redhat-1" ) ) {
         message++
     }
+    if ( it.contains ( "3.5.0<" ) ) {
+        message++
+    }
+    if ( it.contains ( "{mavenVersion}<" ) ) {
+        message++
+    }
 }
 
-assert message == 2
+assert message == 4

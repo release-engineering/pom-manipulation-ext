@@ -693,6 +693,7 @@ public class DependencyManipulator implements Manipulator
                                     String suffix = PropertiesUtils.getSuffix( session );
                                     String replaceVersion;
 
+                                    // Handles ${...}...-rebuild-n -> ${...}...-rebuild-n+1
                                     if ( commonState.isStrictIgnoreSuffix() && oldVersion.contains( suffix ) )
                                     {
                                         replaceVersion = StringUtils.substringBefore( oldVersion, suffix );
@@ -700,7 +701,10 @@ public class DependencyManipulator implements Manipulator
                                     }
                                     else
                                     {
-                                        replaceVersion = oldVersion + StringUtils.removeStart( overrideVersion, resolvedValue );
+                                        // It is feasible that even though ${foo}.x-suffix may look appropriate, foo may have
+                                        // been updated by another dependency to foo-suffix so that we end up with
+                                        // foo-suffix.x-suffix. Therefore just replace with overrideVersion
+                                        replaceVersion = overrideVersion;
                                     }
                                     logger.debug ( "Resolved value is {} and replacement version is {} ", resolvedValue, replaceVersion );
 
