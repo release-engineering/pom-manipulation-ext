@@ -151,6 +151,8 @@ public class ProjectVersioningManipulator
         ProjectVersionRef gav = project.getKey();
         boolean changed = false;
 
+        logger.debug ("Examining {} for applyVersioningChanges.", project);
+
         // If the parent version is defined, it might be necessary to change it
         // If the parent version is not defined, it will be taken automatically from the project version
         if ( parent != null && parent.getVersion() != null )
@@ -161,7 +163,7 @@ public class ProjectVersioningManipulator
             if ( versionsByGAV.containsKey( parentGAV ) )
             {
                 final String newVersion = versionsByGAV.get( parentGAV );
-                logger.debug( "Changed parent version to: {} in {}", newVersion, parent );
+                logger.debug( "Changed parent (GAV {}) version to: {}", parent, newVersion );
                 if (parentGAV.getVersionString().startsWith( "${" ))
                 {
                     if ( PropertiesUtils.updateProperties( session, project, false, PropertiesUtils.extractPropertyName( parentGAV.getVersionString() ), newVersion ) == PropertiesUtils.PropertyUpdate.NOTFOUND )
