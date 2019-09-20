@@ -68,8 +68,8 @@ public class PluginManipulator
 
     private enum PluginType
     {
+        // Attempting to configure using remote plugins is not supported - just remote plugin management (like dependencyManagement).
         RemotePM,
-        RemoteP,
         LocalPM,
         LocalP;
 
@@ -80,8 +80,6 @@ public class PluginManipulator
             {
                 case RemotePM:
                     return "RemotePluginManagement";
-                case RemoteP:
-                    return "Plugins";
                 case LocalPM:
                     return "LocalPluginManagement";
                 case LocalP:
@@ -136,8 +134,7 @@ public class PluginManipulator
         }
 
         final Set<Project> changed = new HashSet<>();
-        final Set<Plugin> mgmtOverrides = loadRemoteBOM( PluginType.RemotePM );
-        final Set<Plugin> pluginOverrides = loadRemoteBOM( PluginType.RemoteP );
+        final Set<Plugin> mgmtOverrides = loadRemoteBOM();
 
         for ( final Project project : projects )
         {
@@ -145,13 +142,7 @@ public class PluginManipulator
 
             if (!mgmtOverrides.isEmpty())
             {
-                apply( project, model, PluginType.RemotePM, mgmtOverrides );
-
-                changed.add( project );
-            }
-            if (!pluginOverrides.isEmpty())
-            {
-                apply( project, model, PluginType.RemoteP, pluginOverrides );
+                apply( project, model, mgmtOverrides );
 
                 changed.add( project );
             }
@@ -208,7 +199,7 @@ public class PluginManipulator
     }
 
 
-    private Set<Plugin> loadRemoteBOM( PluginType type )
+    private Set<Plugin> loadRemoteBOM()
         throws ManipulationException
     {
         final RESTState rState = session.getState( RESTState.class );
@@ -231,71 +222,50 @@ public class PluginManipulator
             while ( iter.hasNext() )
             {
                 final ProjectVersionRef ref = iter.next();
-                if ( type == PluginType.RemotePM )
-                {
-                    bomOverrides.addAll( effectiveModelBuilder.getRemotePluginManagementVersionOverrides( ref,
-                                                                                                          exclusions ) );
-                }
-                else
-                {
-                    bomOverrides.addAll( effectiveModelBuilder.getRemotePluginVersionOverrides( ref, exclusions ) );
-                }
+                bomOverrides.addAll( effectiveModelBuilder.getRemotePluginManagementVersionOverrides( ref, exclusions ) );
             }
         }
 
-
-        // TODO: Remote Plugin (as opposed to Remote PluginManagement) alignment is deprecated. Therefore we don't support combining it with REST.
-        if ( type == PluginType.RemoteP )
+        if ( pState.getPrecedence() == PluginPrecedence.BOM )
         {
-            if ( pState.getPrecedence() != PluginPrecedence.BOM )
-            {
-                logger.warn( "Remote plugin alignment is only supported with precedence type of BOM" );
-            }
             mergedOverrides = bomOverrides;
+            if ( mergedOverrides.isEmpty() )
+            {
+                String msg = rState.isEnabled() ? "pluginSource for restURL" : "pluginManagement";
+
+                logger.warn( "No dependencies found for pluginSource {}. Has {} been configured? ", pState.getPrecedence(), msg );
+            }
         }
-        else
+        if ( pState.getPrecedence() == PluginPrecedence.REST )
         {
-            if ( pState.getPrecedence() == PluginPrecedence.BOM )
+            mergedOverrides = restOverrides;
+            if ( mergedOverrides.isEmpty() )
             {
-                mergedOverrides = bomOverrides;
-                if ( mergedOverrides.isEmpty() )
-                {
-                    String msg = rState.isEnabled() ? "pluginSource for restURL" : "pluginManagement";
-
-                    logger.warn( "No dependencies found for pluginSource {}. Has {} been configured? ", pState.getPrecedence(), msg );
-                }
-            }
-            if ( pState.getPrecedence() == PluginPrecedence.REST )
-            {
-                mergedOverrides = restOverrides;
-                if ( mergedOverrides.isEmpty() )
-                {
-                    logger.warn( "No dependencies found for pluginSource {}. Has restURL been configured? ", pState.getPrecedence() );
-                }
-            }
-            else if ( pState.getPrecedence() == PluginPrecedence.RESTBOM )
-            {
-                mergedOverrides = restOverrides;
-                mergedOverrides.addAll( bomOverrides );
-            }
-            else if ( pState.getPrecedence() == PluginPrecedence.BOMREST )
-            {
-                mergedOverrides = bomOverrides;
-                mergedOverrides.addAll( restOverrides );
+                logger.warn( "No dependencies found for pluginSource {}. Has restURL been configured? ", pState.getPrecedence() );
             }
         }
+        else if ( pState.getPrecedence() == PluginPrecedence.RESTBOM )
+        {
+            mergedOverrides = restOverrides;
+            mergedOverrides.addAll( bomOverrides );
+        }
+        else if ( pState.getPrecedence() == PluginPrecedence.BOMREST )
+        {
+            mergedOverrides = bomOverrides;
+            mergedOverrides.addAll( restOverrides );
+        }
 
-        logger.debug ("Final remote override list for type {} with precedence {} is {}", type.toString(), pState.getPrecedence(), mergedOverrides);
+        logger.debug( "Final remote override list for type {} with precedence {} is {}", PluginType.RemotePM.toString(), pState.getPrecedence(), mergedOverrides );
 
         return mergedOverrides;
     }
 
-    private void apply( final Project project, final Model model, PluginType type, final Set<Plugin> override )
+    private void apply( final Project project, final Model model, final Set<Plugin> override )
         throws ManipulationException
     {
         if (logger.isDebugEnabled())
         {
-            logger.debug("Applying plugin changes for {} to: {} ", type, ga(project));
+            logger.debug( "Applying plugin changes for {} to: {} ", PluginType.RemotePM, ga( project));
         }
 
         if ( project.isInheritanceRoot() )
@@ -320,10 +290,10 @@ public class PluginManipulator
             }
 
             // Override plugin management versions
-            applyOverrides( project, type, PluginType.LocalPM, project.getResolvedManagedPlugins( session ), override );
+            applyOverrides( project, PluginType.LocalPM, project.getResolvedManagedPlugins( session ), override );
         }
 
-        applyOverrides( project, type, PluginType.LocalP, project.getResolvedPlugins( session ), override );
+        applyOverrides( project, PluginType.LocalP, project.getResolvedPlugins( session ), override );
 
         final Map<Profile, Map<ProjectVersionRef, Plugin>> pd = project.getResolvedProfilePlugins( session );
         final Map<Profile, Map<ProjectVersionRef, Plugin>> pmd = project.getResolvedProfileManagedPlugins( session );
@@ -331,12 +301,12 @@ public class PluginManipulator
         logger.debug ("Processing profiles with plugin management");
         for ( Profile p : pmd.keySet() )
         {
-            applyOverrides( project, type, PluginType.LocalPM, pmd.get( p ), override );
+            applyOverrides( project, PluginType.LocalPM, pmd.get( p ), override );
         }
         logger.debug ("Processing profiles with plugins");
         for ( Profile p : pd.keySet() )
         {
-            applyOverrides( project, type, PluginType.LocalP, pd.get( p ), override );
+            applyOverrides( project, PluginType.LocalP, pd.get( p ), override );
         }
     }
 
@@ -352,13 +322,12 @@ public class PluginManipulator
      * configurations will also be applied to the local plugins.
      *
      * @param project the current project
-     * @param remotePluginType The type of the remote plugin (mgmt or plugins)
      * @param localPluginType The type of local block (mgmt or plugins). Only used to determine whether to inject configs/deps/executions.
      * @param plugins The list of plugins to modify
      * @param pluginVersionOverrides The list of version overrides to apply to the plugins
      * @throws ManipulationException if an error occurs.
      */
-    private void applyOverrides( Project project, PluginType remotePluginType, final PluginType localPluginType, final Map<ProjectVersionRef, Plugin> plugins,
+    private void applyOverrides( Project project, final PluginType localPluginType, final Map<ProjectVersionRef, Plugin> plugins,
                                  final Set<Plugin> pluginVersionOverrides ) throws ManipulationException
     {
         if ( plugins == null )
@@ -418,7 +387,8 @@ public class PluginManipulator
                 }
             }
 
-            logger.debug( "Plugin override {} and local plugin {} with remotePluginType {} / localPluginType {}", override.getId(), plugin, remotePluginType, localPluginType );
+            logger.debug( "Plugin override {} and local plugin {} with remotePluginType {} / localPluginType {}", override.getId(), plugin,
+                          PluginType.RemotePM, localPluginType );
 
             if ( plugin != null )
             {
@@ -495,11 +465,10 @@ public class PluginManipulator
                         while ( originalIt.hasNext() )
                         {
                             Dependency originalD = originalIt.next();
-                            Iterator<Dependency> overrideIt = override.getDependencies().iterator();
-                            while ( overrideIt.hasNext() )
+                            for ( Dependency newD : override.getDependencies() )
                             {
-                                Dependency newD = overrideIt.next();
-                                if ( originalD.getGroupId().equals( newD.getGroupId() ) && originalD.getArtifactId().equals( newD.getArtifactId() ) )
+                                if ( originalD.getGroupId().equals( newD.getGroupId() ) && originalD.getArtifactId()
+                                                                                                    .equals( newD.getArtifactId() ) )
                                 {
                                     logger.debug( "Removing original dependency {} in favour of {} ", originalD, newD );
                                     originalIt.remove();
@@ -541,20 +510,11 @@ public class PluginManipulator
             }
             // If the plugin doesn't exist but has a configuration section in the remote inject it so we
             // get the correct config.
-            else if ( remotePluginType == PluginType.RemotePM && localPluginType == PluginType.LocalPM && commonState.isOverrideTransitive() && ( override.getConfiguration() != null
+            else if ( localPluginType == PluginType.LocalPM && commonState.isOverrideTransitive() && ( override.getConfiguration() != null
                             || override.getExecutions().size() > 0 ) )
             {
                 project.getModel().getBuild().getPluginManagement().getPlugins().add( override );
                 logger.info( "Added plugin version: {}={}", override.getKey(), newValue );
-            }
-            // If the plugin in <plugins> doesn't exist but has a configuration section in the remote inject it so we
-            // get the correct config.
-            // TODO: Deprecated section.
-            else if ( remotePluginType == PluginType.RemoteP && localPluginType == PluginType.LocalP && pluginState.getInjectRemotePlugins() && ( override.getConfiguration() != null
-                            || override.getExecutions().size() > 0 ) )
-            {
-                project.getModel().getBuild().getPlugins().add( override );
-                logger.info( "For non-pluginMgmt, added plugin version : {}={}", override.getKey(), newValue );
             }
         }
     }

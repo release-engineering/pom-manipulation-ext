@@ -122,6 +122,7 @@ public abstract class BaseScriptUtils extends Script implements BaseScriptAPI
     /**
      * This will re-initialise any state linked to this session. This is useful if the user properties have been
      * updated.
+     * @throws ManipulationException if an error occurs.
      */
     protected void reinitialiseSessionStates() throws ManipulationException
     {

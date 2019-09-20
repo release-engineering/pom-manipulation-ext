@@ -23,10 +23,3 @@ assert plugin != null
 assert plugin.version.text() == "3.1"
 
 assert pom.build.pluginManagement.plugins.list().size() == 1
-
-plugin = pom.build.plugins.plugin.find { it.artifactId.text() == "maven-bundle-plugin" }
-assert plugin != null
-assert plugin.version.text() == "2.5.4"
-
-System.out.println (" pom.build.plugins.size " + pom.build.plugins.size())
-assert pom.build.plugins.list().size() == 1

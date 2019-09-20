@@ -19,7 +19,6 @@ package org.commonjava.maven.ext.common.util;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -55,9 +54,11 @@ public class JSONUtils
      *
      * @param jsonReport The JSON POJO to convert to a string.
      * @return A string with the converted JSON.
+     * @throws IOException if an error occurs.
      */
+    // Public API.
     public static String jsonToString( Object jsonReport )
-                    throws JsonProcessingException
+                    throws IOException
     {
         return MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString( jsonReport );
     }
@@ -67,6 +68,7 @@ public class JSONUtils
      *
      * @param jsonFile the file to read
      * @return PME ; the root of the JSON hierarchy.
+     * @throws IOException if an error occurs
      */
     @SuppressWarnings("WeakerAccess") // Public API.
     public static PME fileToJSON( File jsonFile ) throws IOException

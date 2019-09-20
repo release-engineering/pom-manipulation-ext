@@ -84,12 +84,6 @@ public class PluginState
 
     private Precedence configPrecedence;
 
-    /**
-     * Denote whether to inject plugin sections from a remote bom. This is separate to injecting
-     * pluginMgmt.
-     */
-    private boolean injectRemotePlugins;
-
     private Set<Plugin> remoteRESTplugins = new HashSet<>(  );
 
     private PluginPrecedence precedence;
@@ -102,7 +96,6 @@ public class PluginState
     public void initialise( Properties userProps ) throws ManipulationException
     {
         pluginMgmt = IdUtils.parseGAVs( userProps.getProperty( PLUGIN_MANAGEMENT_POM_PROPERTY ) );
-        injectRemotePlugins = Boolean.parseBoolean( userProps.getProperty( "injectRemotePlugins", "false" ) );
         switch ( Precedence.valueOf( userProps.getProperty( "pluginManagementPrecedence",
                                                             Precedence.REMOTE.toString() ).toUpperCase() ) )
         {
@@ -179,15 +172,6 @@ public class PluginState
     public Precedence getConfigPrecedence()
     {
         return configPrecedence;
-    }
-
-    /**
-     * @return whether to inject plugins found in the remote pom.
-     * @deprecated
-     */
-    public boolean getInjectRemotePlugins()
-    {
-        return injectRemotePlugins;
     }
 
     public void setRemoteRESTOverrides( Map<ArtifactRef, String> overrides )
