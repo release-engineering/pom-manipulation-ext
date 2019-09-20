@@ -1,8 +1,12 @@
 sudo: required
 
 language: java
+
 jdk:
    - openjdk8
+cache:
+  directories:
+    - $HOME/.m2
 
 install: /bin/true
-script: mvn clean install -V -Prun-its -B -e
+script: travis_wait 60 mvn clean install -V -Prun-its -B -e
