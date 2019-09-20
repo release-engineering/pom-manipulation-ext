@@ -142,6 +142,7 @@ This can then be invoked by e.g.
 
     pme.getBaseDir()
 
+<b>NOTE</b> : Be careful not to use <code>pme.getProperties()</code> or <code>pme.getProject().getProperties()</code> as that actually calls http://docs.groovy-lang.org/latest/html/api/org/codehaus/groovy/runtime/DefaultGroovyMethods.html#getProperties(java.lang.Object)
 
 ### Utility Functions
 

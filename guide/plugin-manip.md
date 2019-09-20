@@ -67,16 +67,6 @@ Default is `REMOTE` which means the remote configuration takes precedence over l
 
 If when attempting to merge the remote execution blocks into local, the `<id>`'s clash an exception will be thrown.
 
-<table bgcolor="#ff3333">
-<tr>
-<td>
-    <b>NOTE</b> : As of PME 2.13 (October 2017) the default for <i>injectRemotePlugins</i> has changed from true to false. This option and the corresponding functionality is now marked as deprecated and may be removed in a future release.
-</td>
-</tr>
-</table>
-
-If `injectRemotePlugins` is set to true, PME will also inject any `<plugin/>` that has execution or configuration sections found in the remote BOM.
-
 ### Install and Deploy Skip Flag Alignment
 
 By default, this extension will disable the skip flag on the install and deploy plugins. This is useful for build environments that compare the results of install with those from deploy as a validation step. More generally, suppressing installation or deployment tends to be an aesthetic decision that can have subtle functional consequences. It's usually not really worth the hassle.
