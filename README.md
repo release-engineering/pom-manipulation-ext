@@ -1,4 +1,7 @@
-https://travis-ci.org/release-engineering/pom-manipulation-ext.svg?branch=master
+
+
+[![Build Status (Travis CI)](https://travis-ci.org/release-engineering/pom-manipulation-ext.svg?branch=master)](https://travis-ci.org/release-engineering/pom-manipulation-ext.svg?branch=master)
+
 
 # Overview
 
