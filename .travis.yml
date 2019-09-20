@@ -7,6 +7,14 @@ jdk:
 cache:
   directories:
     - $HOME/.m2
+    - $HOME/bin
+
+before_install: |
+  # https://github.com/crazy-max/travis-wait-enhanced
+  if ! [ -f $HOME/bin/travis-wait-enhanced ]; then
+  wget -qO- "https://github.com/crazy-max/travis-wait-enhanced/releases/download/v0.2.0/travis-wait-enhanced_0.2.0_linux_x86_64.tar.gz" | tar -zxvf - $HOME/bin/travis-wait-enhanced
+  travis-wait-enhanced --version
+  fi
 
 install: /bin/true
-script: travis_wait 60 mvn clean install -V -Prun-its -B -e
+script: travis-wait-enhanced --timeout=60m --interval=4m mvn clean install -Prun-its
