@@ -9,12 +9,12 @@ cache:
     - $HOME/.m2
     - $HOME/bin
 
+# https://github.com/crazy-max/travis-wait-enhanced
 before_install: |
-  # https://github.com/crazy-max/travis-wait-enhanced
   if ! [ -f $HOME/bin/travis-wait-enhanced ]; then
-  wget -qO- "https://github.com/crazy-max/travis-wait-enhanced/releases/download/v0.2.0/travis-wait-enhanced_0.2.0_linux_x86_64.tar.gz" | tar -zxvf - $HOME/bin/travis-wait-enhanced
-  travis-wait-enhanced --version
+  wget -qO- "https://github.com/crazy-max/travis-wait-enhanced/releases/download/v0.2.0/travis-wait-enhanced_0.2.0_linux_x86_64.tar.gz" | tar -zxvf - travis-wait-enhanced
+  mv travis-wait-enhanced $HOME/bin
   fi
 
 install: /bin/true
-script: travis-wait-enhanced --timeout=60m --interval=4m mvn clean install -Prun-its
+script: travis-wait-enhanced --timeout=60m --interval=4m -- mvn -V clean install -Prun-its
