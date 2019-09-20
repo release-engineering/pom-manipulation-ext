@@ -2,7 +2,7 @@ sudo: required
 
 language: java
 jdk:
-   - oraclejdk7
+   - openjdk8
 
 cache:
    directories:
@@ -10,4 +10,4 @@ cache:
 
 before_install: sudo rm /etc/mavenrc
 install: /bin/true
-script: mvn clean install -V -Prun-its -B -e 
+script: mvn clean install -V -Prun-its -B -e
