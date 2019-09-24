@@ -21,7 +21,15 @@ The extension is configured using the property `versionIncrementalSuffix` (*Depr
 
 #### Version increment padding
 
-When using the automatic increment it is also possible to configure padding for the increment. For instance, by setting `versionIncrementalSuffixPadding` (*Deprecated property `version.incremental.suffix.padding`*)to `3` the version will be `rebuild-003`.
+<table bgcolor="#ffff00">
+<tr>
+<td>
+    <b>NOTE</b> : For PME versions <b>after</b> 3.8, the default for <i>versionIncrementalSuffixPadding</i> has changed from 0 to 5.
+</td>
+</tr>
+</table>
+
+When using the automatic increment it is also possible to configure padding for the increment. For instance, by setting `versionIncrementalSuffixPadding` (*Deprecated property `version.incremental.suffix.padding`*)to `3` the version will be `rebuild-003`. Default for PME &le; 3.8 is 0 and for PME after 3.8 is 5.
 
 #### Version Increment Metadata
 
