@@ -118,9 +118,11 @@ public class VersionCalculator
             // set the build number to avoid version conflicts.
             if ( buildNumber > 0 )
             {
-                String paddedBuildNum = StringUtils.leftPad( Integer.toString( buildNumber ),
-                                                             Version.getBuildNumberPadding( state.getIncrementalSerialSuffixPadding(),
-                                                                                            versionsWithBuildNums ), '0' );
+                // We ONLY pass the incrementalSerialSuffixPadding if we are using incrementalSuffix (i.e. not static suffix).
+                // This keeps it consistent with the 'calculate' method..
+                String paddedBuildNum = StringUtils.leftPad(
+                                Integer.toString( buildNumber ), Version.getBuildNumberPadding(
+                                                ( state.getSuffix() == null ? state.getIncrementalSerialSuffixPadding() : 0 ), versionsWithBuildNums ), '0' );
                 modifiedVersion = Version.setBuildNumber( modifiedVersion, paddedBuildNum );
             }
 

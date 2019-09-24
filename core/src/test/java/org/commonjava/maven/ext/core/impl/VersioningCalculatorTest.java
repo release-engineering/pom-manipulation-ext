@@ -710,6 +710,22 @@ public class VersioningCalculatorTest
     }
 
     @Test
+    public void incrementExistingSuffixWithPadding()
+                    throws Exception
+    {
+        final Properties props = new Properties();
+
+        props.setProperty( VersioningState.VERSION_SUFFIX_SYSPROP.getCurrent(), "foo-10" );
+        props.setProperty( VersioningState.INCREMENT_SERIAL_SUFFIX_PADDING_SYSPROP.getCurrent(), "3" );
+        setupSession( props, "1.2.0" );
+
+        final String v = "1.2.0.foo-10";
+
+        final String result = calculate( v );
+        assertThat( result, equalTo( v ) );
+    }
+
+    @Test
     public void incrementExistingSerialSuffix_CompoundQualifier()
         throws Exception
     {
@@ -1157,6 +1173,13 @@ public class VersioningCalculatorTest
     private VersioningState setupSession( final Properties properties, final Map<ProjectRef, String[]> versionMap )
         throws Exception
     {
+        // Originally the default used to be 0, this was changed to be 5 but this affects this test suite so revert
+        // just for these tests.
+        if ( ! properties.containsKey( VersioningState.INCREMENT_SERIAL_SUFFIX_PADDING_SYSPROP.getCurrent() ) )
+        {
+            properties.setProperty( VersioningState.INCREMENT_SERIAL_SUFFIX_PADDING_SYSPROP.getCurrent(), "0" );
+        }
+
         final ArtifactRepository ar =
             new MavenArtifactRepository( "test", "http://repo.maven.apache.org/maven2", new DefaultRepositoryLayout(),
                                          new ArtifactRepositoryPolicy(), new ArtifactRepositoryPolicy() );

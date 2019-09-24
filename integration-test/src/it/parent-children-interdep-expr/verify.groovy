@@ -31,7 +31,7 @@ assert v.endsWith( '.redhat-1' )
 def repodir = new File( localRepo, "${g.replace('.', '/')}/${a}/${v}" )
 def repopom = new File( repodir, "${a}-${v}.pom" )
 System.out.println( "Checking for installed pom: ${repopom.getAbsolutePath()}")
-assert repopom.exists()  
+assert repopom.exists()
 
 def managedDeps = pom.dependencyManagement.dependencies.children
 managedDeps.each {
@@ -59,18 +59,18 @@ children.each() {
 
   def jar = new File(basedir, "${it}/target/${a}-${v}.jar" )
   System.out.println( "Checking for jar: ${jar.getAbsolutePath()}")
-  assert jar.exists()  
+  assert jar.exists()
 
   repodir = new File(localRepo, "${g.replace('.', '/')}/${a}/${v}" )
 
   repopom = new File( repodir, "${a}-${v}.pom" )
   System.out.println( "Checking for installed pom: ${repopom.getAbsolutePath()}")
-  assert repopom.exists()  
+  assert repopom.exists()
 
   def repojar = new File( repodir, "${a}-${v}.jar" )
   System.out.println( "Checking for installed jar: ${repojar.getAbsolutePath()}")
-  assert repojar.exists()  
-  
+  assert repojar.exists()
+
   if ( it == 'child2' ) {
     assert !pom.dependencies.dependency[0].version.text()
   }

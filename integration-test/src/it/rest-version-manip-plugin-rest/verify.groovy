@@ -21,7 +21,7 @@ System.out.println( "Slurping POM: ${pomFile.getAbsolutePath()}" )
 def pom = new XmlSlurper().parse( pomFile )
 
 System.out.println( "POM Version: ${pom.version.text()}" )
-assert pom.version.text().endsWith( '.redhat-2' )
+assert pom.version.text().endsWith( '.redhat-00002' )
 
 assert pomFile.text.contains("maven-jar-plugin>2.1-redhat-1")
 
