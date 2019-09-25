@@ -24,7 +24,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.io.FileFilter;
 import java.util.ArrayList;
 import java.util.Collection;
 
@@ -105,21 +104,14 @@ public class DefaultCliIntegrationTest
     }
 
 
-    public static boolean setupExists (File test)
+    static boolean setupExists( File test )
     {
         boolean result = false;
         File t1 = new File (DEFAULT_MVN_PARAMS.get( "maven.repo.local" ),"org/commonjava/maven/ext/");
         if ( t1.exists())
         {
             File t2 = new File( t1, test.getName() );
-            File[] directories = t2.listFiles(new FileFilter()
-            {
-                @Override
-                public boolean accept( File file )
-                {
-                    return file.isDirectory();
-                }
-            });
+            File[] directories = t2.listFiles( File::isDirectory );
             if ( directories != null)
             {
                 for ( File dir : directories )

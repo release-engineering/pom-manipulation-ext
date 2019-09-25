@@ -170,6 +170,7 @@
                 <goal>test-jar</goal>
               </goals>
               <configuration>
+                <quiet>true</quiet>
                 <sourcepath>${basedir}/src/test/java</sourcepath>
               </configuration>
             </execution>
@@ -316,7 +317,6 @@
                   </goals>
                   <localRepositoryPath>${localRepositoryUrlExt}</localRepositoryPath>
                   <mavenHome>${it.maven.home}</mavenHome>
-                  <!-- Maven 3.0.0 changed defaults for cloneProjectsTo. Fixed in 3.0.2 -->
                   <cloneProjectsTo />
                   <setupIncludes>
                     <setupInclude>setup/*/pom.xml</setupInclude>
