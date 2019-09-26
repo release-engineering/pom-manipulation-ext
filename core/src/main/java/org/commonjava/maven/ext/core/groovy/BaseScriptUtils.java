@@ -47,6 +47,7 @@ public abstract class BaseScriptUtils extends Script implements BaseScriptAPI
      * Allows the specified group:artifact property to be inlined. This is useful to split up properties that cover multiple separate projects.
      * @param currentProject The current project we are operating on.
      * @param groupArtifact A ProjectRef corresponding to the group and artifact of the dependency (or managed dependency) that we wish to inline.
+     *                      An artifactId may be a wildcard (i.e. '*').
      * @throws ManipulationException if an error occurs.
      */
     public void inlineProperty ( Project currentProject, ProjectRef groupArtifact ) throws ManipulationException
@@ -55,7 +56,8 @@ public abstract class BaseScriptUtils extends Script implements BaseScriptAPI
         {
             currentProject.getResolvedManagedDependencies( getSession() )
                           .entrySet().stream()
-                          .filter( a -> a.getKey().asProjectRef().equals( groupArtifact ) && a.getValue().getVersion().contains( "$" ) )
+                          .filter( a -> ( groupArtifact.getArtifactId().equals( "*" ) && a.getKey().getGroupId().equals( groupArtifact.getGroupId()) ) ||
+                                          ( a.getKey().asProjectRef().equals( groupArtifact ) && a.getValue().getVersion().contains( "$" ) ) )
                           .forEach( a -> {
                               logger.info( "Found managed artifact {} (original dependency {})", a.getKey(), a.getValue() );
                               a.getValue().setVersion(
@@ -63,7 +65,8 @@ public abstract class BaseScriptUtils extends Script implements BaseScriptAPI
                           } );
             currentProject.getResolvedDependencies( getSession() )
                           .entrySet().stream()
-                          .filter( a -> a.getKey().asProjectRef().equals( groupArtifact ) && a.getValue().getVersion().contains( "$" ) )
+                          .filter( a -> ( groupArtifact.getArtifactId().equals( "*" ) && a.getKey().getGroupId().equals( groupArtifact.getGroupId()) ) ||
+                                          ( a.getKey().asProjectRef().equals( groupArtifact ) && a.getValue().getVersion().contains( "$" ) ) )
                           .forEach( a -> {
                               logger.info( "Found artifact {} (original dependency {})", a.getKey(), a.getValue() );
                               a.getValue().setVersion(

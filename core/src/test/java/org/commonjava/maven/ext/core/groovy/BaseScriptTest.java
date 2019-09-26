@@ -143,6 +143,7 @@ public class BaseScriptTest
         bs.setValues( null, ms, projects, root, null );
 
         bs.inlineProperty( root, SimpleProjectRef.parse( "org.commonjava.maven.atlas:atlas-identities" ) );
+        bs.inlineProperty( root, SimpleProjectRef.parse( "org.commonjava.maven.galley:*" ) );
 
         assertEquals( "0.17.1", root.getModel()
                                     .getDependencyManagement()
@@ -152,6 +153,14 @@ public class BaseScriptTest
                                     .findFirst()
                                     .orElseThrow(Exception::new)
                                     .getVersion() );
+        assertEquals( 5, root.getModel()
+                                    .getDependencyManagement()
+                                    .getDependencies()
+                                    .stream()
+                                    .filter( d -> d.getGroupId().equals( "org.commonjava.maven.galley" ) )
+                                    .filter( d -> d.getVersion().equals( "0.16.3" ) )
+                                    .count() );
+
 
         bs.inlineProperty( root, "jacksonVersion" );
 
