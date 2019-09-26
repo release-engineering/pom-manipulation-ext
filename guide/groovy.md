@@ -152,6 +152,15 @@ Currently two main utility functions are provided:
 
 This function is typically used to deal with the problem where an upstream may use a single property for several distinct SCM Builds. This can lead to issues, so by 'inlining' the property it can avoid them.
 
+<table bgcolor="#ffff00">
+<tr>
+<td>
+    <b>NOTE</b> : For PME versions <b>after</b> 3.8, the inlineProperty function that takes a <code>ProjectRef</code> will allow a wildcard (<code>*</code>) for artifactId.
+</td>
+</tr>
+</table>
+
+
 #### overrideProjectVersion
 
 Occasionally upstream projects have circular dependencies in their build. This can typically happen if the first build creates a BOM that is used by multiple subsequent builds. If rebuilds (primarily with a suffix) occur then the versions can get out of sync and build errors arise. This function effectively 'locks' the subsequent builds to the suffix value of the first.
