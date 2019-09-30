@@ -47,7 +47,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 
 import static org.apache.commons.lang.StringUtils.isEmpty;
 
@@ -124,18 +123,7 @@ public class RESTCollector
 
         // Call the REST to populate the result.
         logger.debug ("Passing {} GAVs into the REST client api {} ", restParam.size(), restParam);
-        logger.info ("Calling REST client... (with {} GAVs)", restParam.size());
-        long start = System.nanoTime();
-        Map<ProjectVersionRef, String> restResult = null;
-
-        try
-        {
-            restResult = state.getVersionTranslator().translateVersions( restParam );
-        }
-        finally
-        {
-            printFinishTime( start, (restResult != null));
-        }
+        Map<ProjectVersionRef, String> restResult = state.getVersionTranslator().translateVersions( restParam );
         logger.info ("REST Client returned {} ", restResult);
 
         vs.setRESTMetadata (parseVersions(session, projects, state, newProjectKeys, restResult));
@@ -419,15 +407,5 @@ public class RESTCollector
             return Version.removeSnapshot( version );
         }
         return version;
-    }
-
-    private void printFinishTime( long start, boolean finished )
-    {
-        long finish = System.nanoTime();
-        long minutes = TimeUnit.NANOSECONDS.toMinutes( finish - start );
-        long seconds = TimeUnit.NANOSECONDS.toSeconds( finish - start ) - ( minutes * 60 );
-        logger.info ( "REST client finished {}... (took {} min, {} sec, {} millisec)",
-                      ( finished ? "successfully" : "with failures"), minutes, seconds,
-                      (TimeUnit.NANOSECONDS.toMillis( finish - start ) - ( minutes * 60 * 1000 ) - ( seconds * 1000) ));
     }
 }

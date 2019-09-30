@@ -73,6 +73,8 @@ public class DefaultTranslator
 
     private final ListingBlacklistMapper lbm;
 
+    // Allow test to override this.
+    @SuppressWarnings( "FieldCanBeLocal" )
     private int retryDuration = 30;
 
     /**
@@ -103,7 +105,7 @@ public class DefaultTranslator
         Unirest.setObjectMapper( objectMapper );
     }
 
-    public void partition(List<ProjectVersionRef> projects, Queue<Task> queue) {
+    private void partition(List<ProjectVersionRef> projects, Queue<Task> queue) {
         if ( initialRestMaxSize != 0 )
         {
             if (initialRestMaxSize == -1)
@@ -240,59 +242,70 @@ public class DefaultTranslator
     {
         init (rgm );
 
-        final Map<ProjectVersionRef, String> result = new HashMap<>();
+        logger.info ("Calling REST client... (with {} GAVs)", projects.size());
+        final long start = System.nanoTime();
         final Queue<Task> queue = new ArrayDeque<>();
+        final Map<ProjectVersionRef, String> result = new HashMap<>();
+        boolean finishedSuccessfully = false;
 
-        partition(projects, queue);
-
-        while ( !queue.isEmpty() )
+        try
         {
-            Task task = queue.remove();
-            task.executeTranslate();
-            if ( task.isSuccess() )
+            partition( projects, queue );
+
+            while ( !queue.isEmpty() )
             {
-                result.putAll( task.getResult() );
-            }
-            else
-            {
-                if ( task.canSplit() && isRecoverable(task.getStatus()))
+                Task task = queue.remove();
+                task.executeTranslate();
+                if ( task.isSuccess() )
                 {
-                    if (task.getStatus() == HttpStatus.SC_SERVICE_UNAVAILABLE)
-                    {
-                        logger.info("The DA server is unavailable. Waiting {} before splitting the tasks and retrying",
-                                retryDuration);
-
-                        waitBeforeRetry(retryDuration);
-                    }
-
-                    List<Task> tasks = task.split();
-
-                    logger.warn( "Failed to translate versions for task @{} due to {}, splitting and retrying. Chunk size was: {} and new chunk size {} in {} segments.",
-                                 task.hashCode(), task.getStatus(), task.getChunkSize(), tasks.get( 0 ).getChunkSize(), tasks.size());
-                    queue.addAll( tasks );
+                    result.putAll( task.getResult() );
                 }
                 else
                 {
-                    if ( task.getStatus() < 0 )
+                    if ( task.canSplit() && isRecoverable( task.getStatus() ) )
                     {
-                        logger.debug ("Caught exception calling server with message {}", task.getErrorMessage());
-                    }
-                    else
-                    {
-                        logger.debug ("Did not get status {} but received {}", SC_OK, task.getStatus());
-                    }
+                        if ( task.getStatus() == HttpStatus.SC_SERVICE_UNAVAILABLE )
+                        {
+                            logger.info( "The DA server is unavailable. Waiting {} before splitting the tasks and retrying",
+                                         retryDuration );
 
-                    if ( task.getStatus() > 0 )
-                    {
-                        throw new RestException(
-                                        "Received response status " + task.getStatus() + " with message: " + task.getErrorMessage());
+                            waitBeforeRetry( retryDuration );
+                        }
+
+                        List<Task> tasks = task.split();
+
+                        logger.warn( "Failed to translate versions for task @{} due to {}, splitting and retrying. Chunk size was: {} and new chunk size {} in {} segments.",
+                                     task.hashCode(), task.getStatus(), task.getChunkSize(), tasks.get( 0 ).getChunkSize(), tasks.size() );
+                        queue.addAll( tasks );
                     }
                     else
                     {
-                        throw new RestException( "Received response status " + task.getStatus() + " with message " + task.getErrorMessage() );
+                        if ( task.getStatus() < 0 )
+                        {
+                            logger.debug( "Caught exception calling server with message {}", task.getErrorMessage() );
+                        }
+                        else
+                        {
+                            logger.debug( "Did not get status {} but received {}", SC_OK, task.getStatus() );
+                        }
+
+                        if ( task.getStatus() > 0 )
+                        {
+                            throw new RestException( "Received response status " + task.getStatus() + " with message: "
+                                                                     + task.getErrorMessage() );
+                        }
+                        else
+                        {
+                            throw new RestException( "Received response status " + task.getStatus() + " with message " + task.getErrorMessage() );
+                        }
                     }
                 }
             }
+            finishedSuccessfully = true;
+        }
+        finally
+        {
+            printFinishTime( logger, start, finishedSuccessfully);
         }
         return result;
     }
@@ -314,6 +327,7 @@ public class DefaultTranslator
      * Returns the current log header. Protected so it can be overridden.
      * @return a String header
      */
+    @SuppressWarnings("WeakerAccess") // Public API.
     protected String getHeaderContext ()
     {
         String headerContext;
@@ -432,7 +446,7 @@ public class DefaultTranslator
             return result;
         }
 
-        public String getErrorMessage()
+        String getErrorMessage()
         {
             return (exception != null ? exception.getMessage() + ' ' : "" ) + ( errorString != null ? errorString : "" );
         }
@@ -441,13 +455,5 @@ public class DefaultTranslator
         {
             return chunk.size();
         }
-    }
-
-    public int getRetryDuration() {
-        return retryDuration;
-    }
-
-    public void setRetryDuration(int retryDuration) {
-        this.retryDuration = retryDuration;
     }
 }

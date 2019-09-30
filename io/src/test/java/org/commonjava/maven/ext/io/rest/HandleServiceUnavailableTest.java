@@ -16,6 +16,7 @@
 package org.commonjava.maven.ext.io.rest;
 
 import com.mashape.unirest.http.Unirest;
+import org.apache.commons.lang.reflect.FieldUtils;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.ext.io.rest.exception.RestException;
 import org.commonjava.maven.ext.io.rest.handler.SpyFailJettyHandler;
@@ -32,11 +33,18 @@ import org.slf4j.LoggerFactory;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import static org.commonjava.maven.ext.io.rest.Translator.RestProtocol.CURRENT;
 import static org.commonjava.maven.ext.io.rest.VersionTranslatorTest.loadALotOfGAVs;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  * @author Jakub Senko <jsenko@redhat.com>
@@ -106,14 +114,14 @@ public class HandleServiceUnavailableTest
      * and follow the same behavior as that of a 504.
      */
     @Test
-    public void testTranslateVersionsCorrectSplit()
+    public void testTranslateVersionsCorrectSplit() throws IllegalAccessException
     {
         List<ProjectVersionRef> data = aLotOfGavs.subList( 0, 37 );
         handler.getRequestData().clear();
         try
         {
             // Decrease the wait time so that the test does not take too long
-            versionTranslator.setRetryDuration(5);
+            FieldUtils.writeField( versionTranslator, "retryDuration", 5, true);
             versionTranslator.translateVersions( data );
             fail();
         }
