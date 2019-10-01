@@ -17,4 +17,4 @@ before_install: |
   fi
 
 install: /bin/true
-script: travis-wait-enhanced --timeout=60m --interval=4m -- mvn -V clean install -Prun-its
+script: travis-wait-enhanced --timeout=60m --interval=4m -- mvn -V clean org.apache.maven.plugins:maven-source-plugin:jar-no-fork install -Prun-its
