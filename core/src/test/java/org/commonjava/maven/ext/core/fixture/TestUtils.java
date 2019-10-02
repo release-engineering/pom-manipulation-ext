@@ -15,6 +15,10 @@
  */
 package org.commonjava.maven.ext.core.fixture;
 
+import org.apache.maven.artifact.repository.ArtifactRepository;
+import org.apache.maven.artifact.repository.ArtifactRepositoryPolicy;
+import org.apache.maven.artifact.repository.MavenArtifactRepository;
+import org.apache.maven.artifact.repository.layout.DefaultRepositoryLayout;
 import org.apache.maven.execution.DefaultMavenExecutionRequest;
 import org.apache.maven.execution.DefaultMavenExecutionResult;
 import org.apache.maven.execution.MavenExecutionRequest;
@@ -35,6 +39,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.lang.reflect.Method;
 import java.net.URL;
+import java.util.Collections;
 import java.util.Properties;
 
 public class TestUtils
@@ -73,7 +78,12 @@ public class TestUtils
     {
         ManipulationSession session = new ManipulationSession();
 
-        final MavenExecutionRequest req = new DefaultMavenExecutionRequest().setUserProperties( p );
+        final ArtifactRepository ar =
+                        new MavenArtifactRepository( "test", "http://repo.maven.apache.org/maven2", new DefaultRepositoryLayout(),
+                                                     new ArtifactRepositoryPolicy(), new ArtifactRepositoryPolicy() );
+
+        final MavenExecutionRequest req = new DefaultMavenExecutionRequest().setUserProperties( p ).setRemoteRepositories(
+                        Collections.singletonList( ar ) );
         final PlexusContainer container;
         final ManipulationManager manipulationManager;
         final DefaultContainerConfiguration config = new DefaultContainerConfiguration();
