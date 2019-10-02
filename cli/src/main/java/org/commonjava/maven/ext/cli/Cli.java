@@ -83,7 +83,6 @@ import java.util.Properties;
 import java.util.Set;
 
 import static org.apache.commons.lang.StringUtils.isNotEmpty;
-import static org.commonjava.maven.ext.common.util.ProfileUtils.PROFILE_SCANNING;
 
 public class Cli
 {
@@ -324,9 +323,12 @@ public class Cli
             {
                 activeProfiles = new HashSet<>();
                 Collections.addAll( activeProfiles, cmd.getOptionValue( 'P' ).trim().split( "," ) );
-
-                session.getUserProperties().setProperty( PROFILE_SCANNING , "true" );
                 session.getActiveProfiles().addAll( activeProfiles );
+                logger.info ("Setting active profiles of {}", activeProfiles);
+            }
+            else
+            {
+                logger.info ("NOT activating any profiles.");
             }
 
             if ( cmd.hasOption( 'x' ) )
