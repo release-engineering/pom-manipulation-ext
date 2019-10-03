@@ -211,6 +211,12 @@
         <groupId>org.commonjava.maven.galley</groupId>
         <artifactId>galley-core</artifactId>
         <version>${galleyVersion}</version>
+        <exclusions>
+          <exclusion>
+            <groupId>com.sun</groupId>
+            <artifactId>tools</artifactId>
+          </exclusion>
+        </exclusions>
       </dependency>
       <dependency>
         <groupId>org.commonjava.maven.galley</groupId>
