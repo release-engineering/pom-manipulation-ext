@@ -5,7 +5,7 @@
   <servers>
     <server>
       <id>sonatype-nexus-snapshots</id>
-      <username>${env.CI_DEPLOY_USERNAME}</username>
+      <username>${env.SONATYPE_USERNAME}</username>
       <password>${env.SONATYPE_PWD}</password>
     </server>
   </servers>
