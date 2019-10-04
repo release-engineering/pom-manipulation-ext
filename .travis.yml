@@ -16,5 +16,15 @@ before_install: |
   mv travis-wait-enhanced $HOME/bin
   fi
 
+
 install: /bin/true
-script: travis-wait-enhanced --timeout=60m --interval=4m -- mvn -V clean org.apache.maven.plugins:maven-source-plugin:jar-no-fork install -Prun-its
+
+jobs:
+  include:
+  - name: deploy
+    if: branch = master AND type = push
+    script: "cp .travis.settings.xml $HOME/.m2/settings.xml && travis-wait-enhanced --timeout=60m --interval=4m -- mvn -V clean org.apache.maven.plugins:maven-source-plugin:jar-no-fork deploy"
+
+  - name: pr
+    if: type = pull_request
+    script: "travis-wait-enhanced --timeout=60m --interval=4m -- mvn -V clean org.apache.maven.plugins:maven-source-plugin:jar-no-fork install -Prun-its"
