@@ -17,7 +17,9 @@ package org.commonjava.maven.ext.core;
 
 import org.commonjava.maven.ext.core.fixture.PlexusTestRunner;
 import org.commonjava.maven.ext.core.impl.Manipulator;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.contrib.java.lang.system.SystemOutRule;
 import org.junit.runner.RunWith;
 
 import javax.inject.Inject;
@@ -31,6 +33,11 @@ import static org.junit.Assert.assertTrue;
 @Named
 public class ManipulationManagerTest
 {
+    @Rule
+    public final SystemOutRule systemRule = new SystemOutRule().enableLog().muteForSuccessfulTests();
+
+
+    @SuppressWarnings( "unused" )
     @Inject
     private Map<String, Manipulator> manipulators;
 
@@ -43,5 +50,12 @@ public class ManipulationManagerTest
         {
             assertTrue (entry.getValue().getExecutionIndex() > 0 && entry.getValue().getExecutionIndex() < 100);
         }
+    }
+
+    @Test
+    public void testSessionStartupMessage()
+    {
+        new ManipulationSession();
+        assertTrue( systemRule.getLog().contains( "Running Maven Manipulation Extension (PME)" ) );
     }
 }
