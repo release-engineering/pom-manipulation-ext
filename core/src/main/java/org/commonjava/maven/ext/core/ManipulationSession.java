@@ -67,7 +67,7 @@ public class ManipulationSession
     {
         try
         {
-            System.out.println( "[INFO] Maven-Manipulation-Extension " + ManifestUtils.getManifestInformation() );
+            System.out.println( "[INFO] Running Maven Manipulation Extension (PME) " + ManifestUtils.getManifestInformation() );
         }
         catch ( ManipulationException ignored )
         {
