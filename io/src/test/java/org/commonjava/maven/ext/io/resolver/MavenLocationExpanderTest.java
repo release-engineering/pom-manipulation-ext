@@ -146,4 +146,51 @@ public class MavenLocationExpanderTest
         assertThat( loc.getUri(), equalTo( remote.getUrl() ) );
     }
 
+    @Test
+    public void locationURLs()
+                    throws Exception
+    {
+        final ArtifactRepositoryLayout layout = new DefaultRepositoryLayout();
+
+        final ArtifactRepositoryPolicy snapshots =
+                        new ArtifactRepositoryPolicy( true, ArtifactRepositoryPolicy.UPDATE_POLICY_DAILY,
+                                                      ArtifactRepositoryPolicy.CHECKSUM_POLICY_WARN );
+
+        final ArtifactRepositoryPolicy releases =
+                        new ArtifactRepositoryPolicy( true, ArtifactRepositoryPolicy.UPDATE_POLICY_NEVER,
+                                                      ArtifactRepositoryPolicy.CHECKSUM_POLICY_WARN );
+
+        final File localRepo = File.createTempFile( "local.repo.", ".dir" );
+        localRepo.deleteOnExit();
+
+        final ArtifactRepository local =
+                        new MavenArtifactRepository( "local", localRepo.toURI()
+                                                                       .toString(), layout, snapshots, releases );
+
+        final ArtifactRepository remote =
+                        new MavenArtifactRepository( "remote", "http:///repo.maven.apache.org/maven2", layout, snapshots, releases );
+
+        final Settings settings = new Settings();
+
+        final MavenLocationExpander ex =
+                        new MavenLocationExpander( Collections.<Location> emptyList(),
+                                                   Collections.<ArtifactRepository> singletonList( remote ), local,
+                                                   new DefaultMirrorSelector(), settings, Collections.<String> emptyList() );
+
+        final List<Location> result = ex.expand( MavenLocationExpander.EXPANSION_TARGET );
+
+        assertThat( result.size(), equalTo( 2 ) );
+
+        final Iterator<Location> iterator = result.iterator();
+        Location loc = iterator.next();
+
+        assertThat( loc.getName(), equalTo( local.getId() ) );
+        assertThat( loc.getUri(), equalTo( local.getUrl() ) );
+
+        loc = iterator.next();
+
+        assertThat( loc.getName(), equalTo( remote.getId() ) );
+        assertThat( loc.getUri(), equalTo( remote.getUrl() ) );
+
+    }
 }

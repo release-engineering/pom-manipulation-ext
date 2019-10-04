@@ -34,6 +34,7 @@ import org.codehaus.plexus.component.repository.exception.ComponentLookupExcepti
 import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.core.ManipulationManager;
 import org.commonjava.maven.ext.core.ManipulationSession;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.FileReader;
@@ -91,6 +92,9 @@ public class TestUtils
         config.setClassPathScanning( PlexusConstants.SCANNING_ON );
         config.setComponentVisibility( PlexusConstants.GLOBAL_VISIBILITY );
         config.setName( "PME" );
+
+        LoggerFactory.getLogger( TestUtils.class ).info( "Creating session with Maven Cental using configuration PME" );
+
         try
         {
             container = new DefaultPlexusContainer(config);
