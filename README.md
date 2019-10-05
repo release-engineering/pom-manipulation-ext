@@ -30,4 +30,6 @@ An example `codestyle.xml` is supplied which is compatible with Eclipse and may 
 
 `mvn clean install` will compile and run all of the unit tests. In order to run the integration tests `-Prun-its` should be passed in. For the command line tests, it is possible to run a specific one by passing e.g. `-Dtest=DefaultCliIntegrationTest -Dtest-cli=<test name e.g. depmgmt-strict-mode-exact>`.
 
+The system is setup via a `.travis.yml` to build all pull requests in Travis. Further, it will build master branch and utilise the `.travis.settings.xml` to deploy to the Sonatype snapshot repository from Travis.
+
 In order to edit the website at https://release-engineering.github.io/pom-manipulation-ext checkout the `gh-pages` branch. It is possible to use Jekyll (https://help.github.com/articles/using-jekyll-with-pages) to preview the changes. Jekyll can be run with `jekyll serve --watch -V`

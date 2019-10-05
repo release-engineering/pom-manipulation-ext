@@ -273,6 +273,7 @@ public class ManipulationManager
         final Set<Project> changed = new HashSet<>();
         for ( final Manipulator manipulator : orderedManipulators )
         {
+            logger.debug( "Running manipulator {}", manipulator.getClass().getName() );
             final Set<Project> mChanged = manipulator.applyChanges( projects );
 
             if ( mChanged != null )
