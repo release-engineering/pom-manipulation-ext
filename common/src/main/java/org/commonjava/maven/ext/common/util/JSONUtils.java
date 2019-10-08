@@ -47,7 +47,6 @@ public class JSONUtils
     private static final String GROUP_ID = "groupId";
     private static final String ARTIFACT_ID = "artifactId";
     private static final String VERSION = "version";
-    private static final String WHITELIST = "whitelisted";
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
@@ -129,15 +128,11 @@ public class JSONUtils
             final String groupId = node.get(GROUP_ID).asText();
             final String artifactId = node.get(ARTIFACT_ID).asText();
             final String version = node.get(VERSION).asText();
+
             ExtendedLookupReport result = new ExtendedLookupReport();
-            if ( node.hasNonNull( WHITELIST ) )
-            {
-                result.setWhitelisted( Arrays.asList( node.get( WHITELIST ).traverse( p.getCodec() ).readValueAs( RestProductInput[].class )) );
-            }
             result.setAvailableVersions( node.get("availableVersions").traverse( p.getCodec() ).readValueAs( stringList ) );
             result.setBlacklisted( node.get("blacklisted").asBoolean() );
             result.setBestMatchVersion( node.get("bestMatchVersion").asText() );
-
             result.setProjectVersionRef( new SimpleProjectVersionRef( groupId, artifactId, version) );
 
             return result;
