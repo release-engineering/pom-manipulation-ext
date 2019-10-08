@@ -17,7 +17,6 @@ package org.commonjava.maven.ext.io.rest;
 
 import org.commonjava.maven.atlas.ident.ref.ProjectRef;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
-import org.commonjava.maven.ext.common.ManipulationException;
 
 import java.util.List;
 import java.util.Map;
@@ -38,36 +37,4 @@ public interface Translator
     Map<ProjectVersionRef, String> translateVersions( List<ProjectVersionRef> projects );
 
     List<ProjectVersionRef> findBlacklisted( ProjectRef project );
-
-    // TODO: Remove?
-    enum RestProtocol
-    {
-        // These two are equivalent. Keeping current for backwards compatibility.
-        CURRENT( "current" );
-
-        private String name;
-
-        RestProtocol( String name )
-        {
-            this.name = name;
-        }
-
-        @Override
-        public String toString()
-        {
-            return name;
-        }
-
-        public static RestProtocol parse( String protocol ) throws ManipulationException
-        {
-            for ( RestProtocol r : RestProtocol.values() )
-            {
-                if ( r.toString().equals( protocol ) )
-                {
-                    return r;
-                }
-            }
-            throw new ManipulationException( "Unknown protocol " + protocol );
-        }
-    }
 }
