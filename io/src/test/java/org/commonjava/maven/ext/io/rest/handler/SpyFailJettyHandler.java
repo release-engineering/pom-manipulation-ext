@@ -16,7 +16,6 @@
 package org.commonjava.maven.ext.io.rest.handler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.commonjava.maven.ext.io.rest.mapper.GAVSchema;
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.handler.AbstractHandler;

@@ -15,7 +15,7 @@
  */
 package org.commonjava.maven.ext.io.rest;
 
-import com.mashape.unirest.http.Unirest;
+import kong.unirest.Unirest;
 import org.apache.commons.lang.reflect.FieldUtils;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.ext.io.rest.exception.RestException;
@@ -87,7 +87,7 @@ public class HandleServiceUnavailableTest
         LOG.info( "Executing test " + testName.getMethodName() );
 
         handler.setStatusCode( HttpServletResponse.SC_SERVICE_UNAVAILABLE );
-        versionTranslator = new DefaultTranslator( mockServer.getUrl(), protocol, 0, Translator.CHUNK_SPLIT_COUNT,
+        versionTranslator = new DefaultTranslator( mockServer.getUrl(), 0, Translator.CHUNK_SPLIT_COUNT,
                                                    "", "" );
     }
 

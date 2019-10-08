@@ -85,6 +85,8 @@
     <groovyVersion>2.5.7</groovyVersion>
 
     <enforceBestPractices>false</enforceBestPractices>
+
+    <unirestVersion>3.1.00</unirestVersion>
   </properties>
 
 
@@ -240,6 +242,11 @@
         <version>${galleyVersion}</version>
       </dependency>
 
+      <dependency>
+        <groupId>org.jboss.da</groupId>
+        <artifactId>reports-model</artifactId>
+        <version>1.7.0</version>
+      </dependency>
 
       <!-- Plexus Dependencies Reference: -->
       <!-- https://cwiki.apache.org/confluence/display/MAVEN/Plexus+dependencies -->
@@ -303,15 +310,21 @@
       </dependency>
 
       <dependency>
-        <groupId>com.mashape.unirest</groupId>
+        <groupId>com.konghq</groupId>
         <artifactId>unirest-java</artifactId>
-        <version>1.4.6</version>
+        <version>${unirestVersion}</version>
         <exclusions>
           <exclusion>
             <groupId>commons-logging</groupId>
             <artifactId>commons-logging</artifactId>
           </exclusion>
         </exclusions>
+      </dependency>
+      <!-- https://mvnrepository.com/artifact/com.konghq/unirest-objectmapper-jackson -->
+      <dependency>
+        <groupId>com.konghq</groupId>
+        <artifactId>unirest-objectmapper-jackson</artifactId>
+        <version>${unirestVersion}</version>
       </dependency>
 
       <dependency>
@@ -495,6 +508,9 @@
           <artifactId>maven-surefire-plugin</artifactId>
           <configuration>
             <redirectTestOutputToFile>true</redirectTestOutputToFile>
+            <additionalClasspathElements>
+              <additionalClasspathElement>${java.home}/../lib/tools.jar</additionalClasspathElement>
+            </additionalClasspathElements>
           </configuration>
         </plugin>
         <plugin>

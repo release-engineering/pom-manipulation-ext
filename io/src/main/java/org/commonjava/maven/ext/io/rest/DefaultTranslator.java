@@ -15,29 +15,37 @@
  */
 package org.commonjava.maven.ext.io.rest;
 
-import com.mashape.unirest.http.HttpResponse;
-import com.mashape.unirest.http.ObjectMapper;
-import com.mashape.unirest.http.Unirest;
-import com.mashape.unirest.http.exceptions.UnirestException;
+import kong.unirest.GenericType;
+import kong.unirest.HttpResponse;
+import kong.unirest.Unirest;
+import kong.unirest.UnirestException;
 import org.apache.commons.codec.binary.Base32;
 import org.apache.http.HttpStatus;
 import org.commonjava.maven.atlas.ident.ref.ProjectRef;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
+import org.commonjava.maven.ext.common.ManipulationUncheckedException;
+import org.commonjava.maven.ext.common.json.ErrorMessage;
+import org.commonjava.maven.ext.common.json.ExtendedLookupReport;
+import org.commonjava.maven.ext.common.util.GAVUtils;
+import org.commonjava.maven.ext.common.util.JSONUtils.InternalObjectMapper;
 import org.commonjava.maven.ext.common.util.ListUtils;
 import org.commonjava.maven.ext.io.rest.exception.RestException;
-import org.commonjava.maven.ext.io.rest.mapper.ListingBlacklistMapper;
-import org.commonjava.maven.ext.io.rest.mapper.ReportGAVMapper;
+import org.jboss.da.reports.model.request.LookupGAVsRequest;
+import org.jboss.da.reports.model.response.LookupReport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
 
 import static org.apache.commons.lang.StringUtils.isNotBlank;
 import static org.apache.commons.lang.StringUtils.isNotEmpty;
@@ -51,6 +59,13 @@ import static org.apache.http.HttpStatus.SC_OK;
 public class DefaultTranslator
     implements Translator
 {
+    private static final GenericType<List<LookupReport>> lookupType = new GenericType<List<LookupReport>>()
+    {
+    };
+    private static final GenericType<List<ProjectVersionRef>> pvrTyoe = new GenericType<List<ProjectVersionRef>>()
+    {
+    };
+
     private static final String REPORTS_LOOKUP_GAVS = "reports/lookup/gavs";
 
     private static final String LISTING_BLACKLIST_GA = "listings/blacklist/ga";
@@ -65,13 +80,33 @@ public class DefaultTranslator
 
     private final String endpointUrl;
 
-    private final ReportGAVMapper rgm;
-
     private final int initialRestMaxSize;
 
     private final int initialRestMinSize;
 
-    private final ListingBlacklistMapper lbm;
+    private final String repositoryGroup;
+
+    private final String incrementalSerialSuffix;
+
+    static
+    {
+        Logger unirestLogger = LoggerFactory.getLogger( DefaultTranslator.class );
+
+        // According to https://kong.github.io/unirest-java/#configuration the default connection timeout is 10000
+        // and the default socketTimeout is 60000.
+        // We have increased the first to 30 seconds and the second to 10 minutes.
+        Unirest.config()
+               .socketTimeout( 600000 )
+               .connectTimeout( 30000 )
+               .setObjectMapper( new InternalObjectMapper( new com.fasterxml.jackson.databind.ObjectMapper() ) )
+               .instrumentWith( requestSummary -> {
+                                    long startNanos = System.nanoTime();
+                                    return ( responseSummary, exception ) ->
+                                                    printFinishTime( unirestLogger, startNanos,
+                                                                     ( responseSummary != null && responseSummary.getStatus() / 100 == 2 ) );
+                                }
+               );
+    }
 
     // Allow test to override this.
     @SuppressWarnings( "FieldCanBeLocal" )
@@ -79,30 +114,18 @@ public class DefaultTranslator
 
     /**
      * @param endpointUrl is the URL to talk to.
-     * @param protocol determines what REST format PME should use. The two formats
-     *                 currently available are:
      * @param restMaxSize initial (maximum) size of the rest call; if zero will send everything.
      * @param restMinSize minimum size for the call
      * @param repositoryGroup the group to pass to the endpoint.
      * @param incrementalSerialSuffix the suffix to pass to the endpoint.
      */
-    public DefaultTranslator( String endpointUrl, RestProtocol protocol, int restMaxSize, int restMinSize,
-                              String repositoryGroup, String incrementalSerialSuffix )
+    public DefaultTranslator( String endpointUrl, int restMaxSize, int restMinSize, String repositoryGroup, String incrementalSerialSuffix )
     {
-        this.rgm = new ReportGAVMapper( protocol, repositoryGroup, incrementalSerialSuffix );
-        this.lbm = new ListingBlacklistMapper( protocol);
+        this.repositoryGroup = repositoryGroup;
+        this.incrementalSerialSuffix = incrementalSerialSuffix;
         this.endpointUrl = endpointUrl + ( isNotBlank( endpointUrl ) ? endpointUrl.endsWith( "/" ) ? "" : "/" : "");
         this.initialRestMaxSize = restMaxSize;
         this.initialRestMinSize = restMinSize;
-    }
-
-    private void init (ObjectMapper objectMapper)
-    {
-        // According to https://github.com/Mashape/unirest-java the default connection timeout is 10000
-        // and the default socketTimeout is 60000.
-        // We have increased the first to 30 seconds and the second to 10 minutes.
-        Unirest.setTimeouts( 30000, 600000 );
-        Unirest.setObjectMapper( objectMapper );
     }
 
     private void partition(List<ProjectVersionRef> projects, Queue<Task> queue) {
@@ -126,7 +149,7 @@ public class DefaultTranslator
     private void noOpPartition(List<ProjectVersionRef> projects, Queue<Task> queue) {
         logger.info("Using NO-OP partition strategy");
 
-        queue.add(new Task(rgm, projects, endpointUrl + REPORTS_LOOKUP_GAVS));
+        queue.add(new Task( projects, endpointUrl + REPORTS_LOOKUP_GAVS));
     }
 
     private void userDefinedPartition(List<ProjectVersionRef> projects, Queue<Task> queue) {
@@ -137,7 +160,7 @@ public class DefaultTranslator
 
         for ( List<ProjectVersionRef> p : partition )
         {
-            queue.add( new Task( rgm, p, endpointUrl + REPORTS_LOOKUP_GAVS ) );
+            queue.add( new Task( p, endpointUrl + REPORTS_LOOKUP_GAVS ) );
         }
 
         logger.debug( "For initial sizing of {} have split the queue into {} ", initialRestMaxSize , queue.size() );
@@ -166,18 +189,17 @@ public class DefaultTranslator
 
         for ( List<ProjectVersionRef> p : partition )
         {
-            queue.add( new Task( rgm, p, endpointUrl + REPORTS_LOOKUP_GAVS ) );
+            queue.add( new Task( p, endpointUrl + REPORTS_LOOKUP_GAVS ) );
         }
     }
 
     @Override
     public List<ProjectVersionRef> findBlacklisted( ProjectRef ga )
     {
-        init (lbm);
-
         final String blacklistEndpointUrl = endpointUrl + LISTING_BLACKLIST_GA;
-        List<ProjectVersionRef> result;
-        HttpResponse<List> r;
+        final AtomicReference<List<ProjectVersionRef>> result = new AtomicReference<>();
+        final String[] errorString = new String[1];
+        final HttpResponse<List<ProjectVersionRef>> r;
 
         logger.trace( "Called findBlacklisted to {} with {}", blacklistEndpointUrl, ga );
 
@@ -189,124 +211,147 @@ public class DefaultTranslator
                        .header( "Log-Context", getHeaderContext() )
                        .queryString( "groupid", ga.getGroupId() )
                        .queryString( "artifactid", ga.getArtifactId() )
-                       .asObject( List.class );
+                       .asObject( pvrTyoe )
+                       .ifSuccess( successResponse -> result.set( successResponse.getBody() ) )
+                       .ifFailure( failedResponse -> {
+                           if ( !failedResponse.getParsingError().isPresent() )
+                           {
+                               logger.debug( "Parsing error but no message. Status text {}", failedResponse.getStatusText() );
+                               throw new ManipulationUncheckedException( failedResponse.getStatusText() );
+                           }
+                           else
+                           {
+                               String originalBody = failedResponse.getParsingError().get().getOriginalBody();
 
-            int status = r.getStatus();
-            if ( status == SC_OK )
+                               if ( originalBody.length() == 0 )
+                               {
+                                   errorString[0] = "No content to read.";
+                               }
+                               else if ( originalBody.startsWith( "<" ) )
+                               {
+                                   // Read an HTML string.
+                                   String stripped = originalBody.replaceAll( "<.*?>", "" ).replaceAll( "\n", " " ).trim();
+                                   logger.debug( "Read HTML string '{}' rather than a JSON stream; stripping message to '{}'",
+                                                 originalBody, stripped );
+                                   errorString[0] = stripped;
+                               }
+                               else if ( originalBody.startsWith( "{\"" ) )
+                               {
+                                   errorString[0] = failedResponse.mapError( ErrorMessage.class ).toString();
+
+                                   logger.debug( "Read message string {}, processed to {} ", originalBody, errorString );
+                               }
+                               else
+                               {
+                                   throw new ManipulationUncheckedException( "Unknown error",
+                                                                             failedResponse.getParsingError().get() );
+                               }
+                           }
+                       } );
+
+            if ( !r.isSuccess() )
             {
-                result = r.getBody();
-            }
-            else
-            {
-                throw new RestException( String.format( "Failed to establish blacklist calling %s with error %s", this.endpointUrl, lbm.getErrorString() ) );
+                throw new RestException( String.format( "Failed to establish blacklist calling %s with error %s", this.endpointUrl, errorString[0] ) );
             }
         }
-        catch ( UnirestException e )
+        catch ( ManipulationUncheckedException | UnirestException e )
         {
             throw new RestException( "Unable to contact DA", e );
         }
 
-        return result;
+        return result.get();
     }
 
 
 
     /**
      * Translate the versions.
-     * <pre>{@code
-     * [ {
+     * <pre>
+     * [
+     *   {
      *     "groupId": "com.google.guava",
      *     "artifactId": "guava",
      *     "version": "13.0.1"
-     * } }
-     * }</pre>
+     *   }
+     * ]
+     * </pre>
      * This equates to a List of ProjectVersionRef.
      *
-     * <pre>{@code
+     * <pre>
      * {
      *     "productNames": [],
      *     "productVersionIds": [],
      *     "repositoryGroup": "",
      *     "gavs": [
-     *     {
+     *       {
      *         "groupId": "com.google.guava",
      *         "artifactId": "guava",
      *         "version": "13.0.1"
-     *     } ]
+     *       }
+     *     ]
      * }
-     * }</pre>
+     * </pre>
      * There may be a lot of them, possibly causing timeouts or other issues.
      * This is mitigated by splitting them into smaller chunks when an error occurs and retrying.
      */
     public Map<ProjectVersionRef, String> translateVersions( List<ProjectVersionRef> projects )
     {
-        init (rgm );
-
-        logger.info ("Calling REST client... (with {} GAVs)", projects.size());
-        final long start = System.nanoTime();
+        logger.info( "Calling REST client... (with {} GAVs)", projects.size() );
         final Queue<Task> queue = new ArrayDeque<>();
         final Map<ProjectVersionRef, String> result = new HashMap<>();
-        boolean finishedSuccessfully = false;
 
-        try
+        partition( projects, queue );
+
+        while ( !queue.isEmpty() )
         {
-            partition( projects, queue );
-
-            while ( !queue.isEmpty() )
+            Task task = queue.remove();
+            task.executeTranslate();
+            if ( task.isSuccess() )
             {
-                Task task = queue.remove();
-                task.executeTranslate();
-                if ( task.isSuccess() )
+                result.putAll( task.getResult() );
+            }
+            else
+            {
+                if ( task.canSplit() && isRecoverable( task.getStatus() ) )
                 {
-                    result.putAll( task.getResult() );
+                    if ( task.getStatus() == HttpStatus.SC_SERVICE_UNAVAILABLE )
+                    {
+                        logger.info( "The DA server is unavailable. Waiting {} before splitting the tasks and retrying",
+                                     retryDuration );
+
+                        waitBeforeRetry( retryDuration );
+                    }
+
+                    List<Task> tasks = task.split();
+
+                    logger.warn( "Failed to translate versions for task @{} due to {}, splitting and retrying. Chunk size was: {} and new chunk size {} in {} segments.",
+                                 task.hashCode(), task.getStatus(), task.getChunkSize(), tasks.get( 0 ).getChunkSize(),
+                                 tasks.size() );
+                    queue.addAll( tasks );
                 }
                 else
                 {
-                    if ( task.canSplit() && isRecoverable( task.getStatus() ) )
+                    if ( task.getStatus() < 0 )
                     {
-                        if ( task.getStatus() == HttpStatus.SC_SERVICE_UNAVAILABLE )
-                        {
-                            logger.info( "The DA server is unavailable. Waiting {} before splitting the tasks and retrying",
-                                         retryDuration );
-
-                            waitBeforeRetry( retryDuration );
-                        }
-
-                        List<Task> tasks = task.split();
-
-                        logger.warn( "Failed to translate versions for task @{} due to {}, splitting and retrying. Chunk size was: {} and new chunk size {} in {} segments.",
-                                     task.hashCode(), task.getStatus(), task.getChunkSize(), tasks.get( 0 ).getChunkSize(), tasks.size() );
-                        queue.addAll( tasks );
+                        logger.debug( "Caught exception calling server with message {}", task.getErrorMessage() );
                     }
                     else
                     {
-                        if ( task.getStatus() < 0 )
-                        {
-                            logger.debug( "Caught exception calling server with message {}", task.getErrorMessage() );
-                        }
-                        else
-                        {
-                            logger.debug( "Did not get status {} but received {}", SC_OK, task.getStatus() );
-                        }
+                        logger.debug( "Did not get status {} but received {}", SC_OK, task.getStatus() );
+                    }
 
-                        if ( task.getStatus() > 0 )
-                        {
-                            throw new RestException( "Received response status " + task.getStatus() + " with message: "
-                                                                     + task.getErrorMessage() );
-                        }
-                        else
-                        {
-                            throw new RestException( "Received response status " + task.getStatus() + " with message " + task.getErrorMessage() );
-                        }
+                    if ( task.getStatus() > 0 )
+                    {
+                        throw new RestException( "Received response status " + task.getStatus() + " with message: " + task.getErrorMessage() );
+                    }
+                    else
+                    {
+                        throw new RestException( "Received response status " + task.getStatus() + " with message " + task.getErrorMessage() );
                     }
                 }
             }
-            finishedSuccessfully = true;
         }
-        finally
-        {
-            printFinishTime( logger, start, finishedSuccessfully);
-        }
+
         return result;
     }
 
@@ -316,10 +361,13 @@ public class DefaultTranslator
     }
 
     private void waitBeforeRetry(int seconds) {
-        try {
+        try
+        {
             Thread.sleep(TimeUnit.SECONDS.toMillis(seconds));
-        } catch (InterruptedException e) {
-
+        }
+        catch (InterruptedException e)
+        {
+            logger.error( "Caught exception while waiting", e );
         }
     }
 
@@ -352,7 +400,7 @@ public class DefaultTranslator
     {
         private List<ProjectVersionRef> chunk;
 
-        private Map<ProjectVersionRef, String> result = null;
+        private Map<ProjectVersionRef, String> result = Collections.emptyMap();
 
         private int status = -1;
 
@@ -362,39 +410,70 @@ public class DefaultTranslator
 
         private String endpointUrl;
 
-        private ReportGAVMapper pvrm;
-
-        Task( ReportGAVMapper pvrm, List<ProjectVersionRef> chunk, String endpointUrl )
+        Task( List<ProjectVersionRef> chunk, String endpointUrl )
         {
-            this.pvrm = pvrm;
             this.chunk = chunk;
             this.endpointUrl = endpointUrl;
         }
 
         void executeTranslate()
         {
-            HttpResponse<Map> r;
+            HttpResponse<List<LookupReport>> r;
 
             try
             {
+                LookupGAVsRequest request =
+                                new LookupGAVsRequest( Collections.emptySet(), Collections.emptySet(), repositoryGroup,
+                                                       incrementalSerialSuffix, GAVUtils.generateGAVs( chunk ) );
+
                 r = Unirest.post( this.endpointUrl )
                            .header( "accept", "application/json" )
                            .header( "Content-Type", "application/json" )
                            .header( "Log-Context", getHeaderContext() )
-                           .body( chunk )
-                           .asObject( Map.class );
+                           .body( request )
+                           .asObject( lookupType )
+                           .ifSuccess( successResponse -> result = successResponse.getBody()
+                                                  .stream()
+                                                  .collect( Collectors.toMap( e -> ((ExtendedLookupReport)e).getProjectVersionRef(),
+                                                                 LookupReport::getBestMatchVersion ) ) )
+                           .ifFailure( failedResponse -> {
+                               if ( !failedResponse.getParsingError().isPresent() )
+                               {
+                                   logger.debug( "Parsing error but no message. Status text {}", failedResponse.getStatusText() );
+                                   throw new ManipulationUncheckedException( failedResponse.getStatusText() );
+                               }
+                               else
+                               {
+                                   String originalBody = failedResponse.getParsingError().get().getOriginalBody();
+
+                                   if ( originalBody.length() == 0 )
+                                   {
+                                       this.errorString = "No content to read.";
+                                   }
+                                   else if ( originalBody.startsWith( "<" ) )
+                                   {
+                                       // Read an HTML string.
+                                       String stripped = originalBody.replaceAll( "<.*?>", "" ).replaceAll( "\n", " " ).trim();
+                                       logger.debug( "Read HTML string '{}' rather than a JSON stream; stripping message to '{}'",
+                                                     originalBody, stripped );
+                                       this.errorString = stripped;
+                                   }
+                                   else if ( originalBody.startsWith( "{\"" ) )
+                                   {
+                                       this.errorString = failedResponse.mapError( ErrorMessage.class ).toString();
+
+                                       logger.debug( "Read message string {}, processed to {} ", originalBody, errorString );
+                                   }
+                                   else
+                                   {
+                                       throw new ManipulationUncheckedException( "Unknown error", failedResponse.getParsingError().get() );
+                                   }
+                               }
+                           });
 
                 status = r.getStatus();
-                if ( status == SC_OK )
-                {
-                    this.result = r.getBody();
-                }
-                else
-                {
-                    errorString = pvrm.getErrorString();
-                }
             }
-            catch ( UnirestException e )
+            catch ( ManipulationUncheckedException | UnirestException e )
             {
                 exception = e;
                 this.status = -1;
@@ -410,17 +489,17 @@ public class DefaultTranslator
                 int chunkSize = chunk.size() / CHUNK_SPLIT_COUNT;
                 for ( int i = 0; i < ( CHUNK_SPLIT_COUNT - 1 ); i++ )
                 {
-                    res.add( new Task( pvrm, chunk.subList( i * chunkSize, ( i + 1 ) * chunkSize ), endpointUrl ) );
+                    res.add( new Task( chunk.subList( i * chunkSize, ( i + 1 ) * chunkSize ), endpointUrl ) );
                 }
                 // Last chunk may have different size
-                res.add( new Task( pvrm, chunk.subList( ( CHUNK_SPLIT_COUNT - 1 ) * chunkSize, chunk.size() ),
+                res.add( new Task( chunk.subList( ( CHUNK_SPLIT_COUNT - 1 ) * chunkSize, chunk.size() ),
                                    endpointUrl ) );
             }
             else
             {
                 for ( int i = 0 ; i < ( chunk.size() - initialRestMinSize ) + 1; i++ )
                 {
-                    res.add( new Task( pvrm, chunk.subList( i * initialRestMinSize, ( i + 1 ) * initialRestMinSize ), endpointUrl ) );
+                    res.add( new Task( chunk.subList( i * initialRestMinSize, ( i + 1 ) * initialRestMinSize ), endpointUrl ) );
                 }
             }
             return res;
@@ -455,5 +534,15 @@ public class DefaultTranslator
         {
             return chunk.size();
         }
+    }
+
+    private static void printFinishTime ( Logger logger, long start, boolean finished )
+    {
+        long finish = System.nanoTime();
+        long minutes = TimeUnit.NANOSECONDS.toMinutes( finish - start );
+        long seconds = TimeUnit.NANOSECONDS.toSeconds( finish - start ) - ( minutes * 60 );
+        logger.info ( "REST client finished {}... (took {} min, {} sec, {} millisec)",
+                      ( finished ? "successfully" : "with failures"), minutes, seconds,
+                      (TimeUnit.NANOSECONDS.toMillis( finish - start ) - ( minutes * 60 * 1000 ) - ( seconds * 1000) ));
     }
 }

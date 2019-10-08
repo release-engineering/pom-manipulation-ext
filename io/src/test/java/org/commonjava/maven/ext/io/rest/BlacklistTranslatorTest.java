@@ -15,7 +15,7 @@
  */
 package org.commonjava.maven.ext.io.rest;
 
-import com.mashape.unirest.http.Unirest;
+import kong.unirest.Unirest;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleProjectRef;
 import org.commonjava.maven.ext.io.rest.handler.AddSuffixJettyHandler;
@@ -24,33 +24,20 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestName;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
 import org.slf4j.LoggerFactory;
 
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 
-import static org.commonjava.maven.ext.io.rest.Translator.RestProtocol;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 /**
  * @author vdedik@redhat.com
  */
-@RunWith( Parameterized.class)
 public class BlacklistTranslatorTest
 {
     private DefaultTranslator blacklistTranslator;
-
-    private RestProtocol protocol;
-
-    @Parameterized.Parameters()
-    public static Collection<Object[]> data()
-    {
-        return Arrays.asList( new Object[][] { { RestProtocol.CURRENT } } );
-    }
 
     @Rule
     public TestName testName = new TestName();
@@ -65,13 +52,8 @@ public class BlacklistTranslatorTest
     {
         LoggerFactory.getLogger( BlacklistTranslatorTest.class ).info( "Executing test " + testName.getMethodName() );
 
-        this.blacklistTranslator = new DefaultTranslator( mockServer.getUrl(), protocol, 0, Translator.CHUNK_SPLIT_COUNT, "",
+        this.blacklistTranslator = new DefaultTranslator( mockServer.getUrl(), 0, Translator.CHUNK_SPLIT_COUNT, "",
                                                           "" );
-    }
-
-    public BlacklistTranslatorTest( RestProtocol protocol)
-    {
-        this.protocol = protocol;
     }
 
     @Test
@@ -94,8 +76,7 @@ public class BlacklistTranslatorTest
 
         List<ProjectVersionRef> actualResult = blacklistTranslator.findBlacklisted( ga );
 
-        assertTrue( actualResult.size() == 1 );
+        assertEquals( 1, actualResult.size() );
         assertTrue( actualResult.get( 0 ).getVersionString().contains( AddSuffixJettyHandler.DEFAULT_SUFFIX ));
-
     }
 }

@@ -207,7 +207,9 @@
 
                   <include>com.fasterxml.jackson.core:*</include>
                   <include>com.jayway.jsonpath:json-path</include>
-                  <include>com.mashape.unirest:unirest-java</include>
+                  <include>com.konghq:unirest-java</include>
+                  <include>com.konghq:unirest-objectmapper-jackson</include>
+                  <include>com.google.code.gson:gson</include>
                   <include>commons-codec:commons-codec</include>
                   <include>commons-io:commons-io</include>
                   <include>commons-jxpath:commons-jxpath</include>
@@ -219,6 +221,7 @@
                   <include>org.codehaus.groovy:groovy-json</include>
                   <include>org.codehaus.groovy:groovy-xml</include>
                   <include>org.codehaus.groovy:groovy</include>
+                  <include>org.jboss.da:reports-model</include>
                   <include>org.jdom:jdom2</include>
                   <include>org.jsoup:jsoup</include>
                   <include>org.ow2.asm:asm</include>

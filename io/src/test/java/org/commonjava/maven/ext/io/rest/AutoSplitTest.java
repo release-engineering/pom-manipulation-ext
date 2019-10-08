@@ -15,7 +15,7 @@
  */
 package org.commonjava.maven.ext.io.rest;
 
-import com.mashape.unirest.http.Unirest;
+import kong.unirest.Unirest;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.ext.io.rest.exception.RestException;
 import org.commonjava.maven.ext.io.rest.handler.SpyFailJettyHandler;
@@ -25,34 +25,25 @@ import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestName;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
 
-import static org.commonjava.maven.ext.io.rest.Translator.RestProtocol.CURRENT;
 import static org.commonjava.maven.ext.io.rest.VersionTranslatorTest.loadALotOfGAVs;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  * @author Otavio Piske <opiske@redhat.com>
  */
-@RunWith( Parameterized.class)
 public class AutoSplitTest
 {
     private static List<ProjectVersionRef> aLotOfGavs;
-
-    private Translator.RestProtocol protocol;
-
-    @Parameterized.Parameters()
-    public static Collection<Object[]> data()
-    {
-        return Arrays.asList( new Object[][] { { CURRENT } } );
-    }
 
     @Rule
     public TestName testName = new TestName();
@@ -79,11 +70,6 @@ public class AutoSplitTest
         handler.setStatusCode( HttpServletResponse.SC_OK );
     }
 
-    public AutoSplitTest(Translator.RestProtocol protocol )
-    {
-        this.protocol = protocol;
-    }
-
     @Test
     public void testConnection()
     {
@@ -99,8 +85,8 @@ public class AutoSplitTest
 
     private List<List<Map<String, Object>>> translate(int size) {
         final DefaultTranslator versionTranslator = new DefaultTranslator(
-                mockServer.getUrl(), protocol, -1, 0, "",
-                "" );
+                        mockServer.getUrl(), -1, 0, "",
+                        "" );
 
         List<ProjectVersionRef> data = aLotOfGavs.subList( 0, size );
         handler.getRequestData().clear();

@@ -35,7 +35,6 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 
-import static org.commonjava.maven.ext.io.rest.Translator.RestProtocol;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -65,7 +64,7 @@ public class HttpMessageTranslatorTest
     {
         LoggerFactory.getLogger( HttpMessageTranslatorTest.class ).info ( "Executing test " + testName.getMethodName());
 
-        this.versionTranslator = new DefaultTranslator( mockServer.getUrl(), RestProtocol.CURRENT, 0,
+        this.versionTranslator = new DefaultTranslator( mockServer.getUrl(), 0,
                                                         Translator.CHUNK_SPLIT_COUNT, "", "" );
     }
 

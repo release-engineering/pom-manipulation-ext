@@ -15,7 +15,7 @@
  */
 package org.commonjava.maven.ext.io.rest;
 
-import com.mashape.unirest.http.Unirest;
+import kong.unirest.Unirest;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.ext.io.rest.exception.RestException;
 import org.commonjava.maven.ext.io.rest.handler.SpyFailJettyHandler;
@@ -86,7 +86,7 @@ public class VersionTranslatorSplitTest
         LOG.info( "Executing test " + testName.getMethodName() );
 
         handler.setStatusCode( HttpServletResponse.SC_GATEWAY_TIMEOUT );
-        versionTranslator = new DefaultTranslator( mockServer.getUrl(), protocol, 0, Translator.CHUNK_SPLIT_COUNT,
+        versionTranslator = new DefaultTranslator( mockServer.getUrl(), 0, Translator.CHUNK_SPLIT_COUNT,
                                                    "", "" );
     }
 
@@ -188,7 +188,7 @@ public class VersionTranslatorSplitTest
     @Test
     public void testTranslateVersionsCorrectSplitMaxSize()
     {
-        this.versionTranslator = new DefaultTranslator( mockServer.getUrl(), protocol, 10, Translator.CHUNK_SPLIT_COUNT,
+        this.versionTranslator = new DefaultTranslator( mockServer.getUrl(), 10, Translator.CHUNK_SPLIT_COUNT,
                                                         "", "" );
 
         List<ProjectVersionRef> data = aLotOfGavs.subList( 0, 30 );
@@ -251,7 +251,7 @@ public class VersionTranslatorSplitTest
     @Test
     public void testTranslateVersionsCorrectSplitMaxSizeWithMin()
     {
-        this.versionTranslator = new DefaultTranslator( mockServer.getUrl(), protocol, 10, 1, "",
+        this.versionTranslator = new DefaultTranslator( mockServer.getUrl(), 10, 1, "",
                                                         "" );
 
         List<ProjectVersionRef> data = aLotOfGavs.subList( 0, 30 );

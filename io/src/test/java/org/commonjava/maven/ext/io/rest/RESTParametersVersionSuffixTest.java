@@ -19,7 +19,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef;
 import org.commonjava.maven.ext.io.rest.handler.AddSuffixJettyHandler;
-import org.commonjava.maven.ext.io.rest.mapper.GAVSchema;
+import org.commonjava.maven.ext.io.rest.handler.GAVSchema;
 import org.commonjava.maven.ext.io.rest.rule.MockServer;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.handler.AbstractHandler;
@@ -38,7 +38,6 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 
-import static org.commonjava.maven.ext.io.rest.Translator.RestProtocol;
 import static org.junit.Assert.*;
 
 public class RESTParametersVersionSuffixTest
@@ -87,7 +86,7 @@ public class RESTParametersVersionSuffixTest
     @Test
     public void testVerifySuffix()
     {
-        this.versionTranslator = new DefaultTranslator( mockServer.getUrl(), RestProtocol.CURRENT, 0,
+        this.versionTranslator = new DefaultTranslator( mockServer.getUrl(), 0,
                                                         Translator.CHUNK_SPLIT_COUNT, "", suffix );
         List<ProjectVersionRef> gavs = Collections.singletonList(
             new SimpleProjectVersionRef( "com.example", "example", "1.0" ) );
@@ -99,7 +98,7 @@ public class RESTParametersVersionSuffixTest
     @Test
     public void testVerifyNoSuffix()
     {
-        this.versionTranslator = new DefaultTranslator( mockServer.getUrl(), RestProtocol.CURRENT, 0,
+        this.versionTranslator = new DefaultTranslator( mockServer.getUrl(), 0,
                                                         Translator.CHUNK_SPLIT_COUNT, "", "" );
         List<ProjectVersionRef> gavs = Collections.singletonList(
             new SimpleProjectVersionRef( "com.example", "example", "1.0" ) );

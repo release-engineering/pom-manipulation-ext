@@ -19,7 +19,7 @@ import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.mashape.unirest.http.Unirest;
+import kong.unirest.Unirest;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef;
 import org.commonjava.maven.ext.io.rest.exception.RestException;
@@ -32,15 +32,18 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.contrib.java.lang.system.SystemOutRule;
 import org.junit.rules.TestName;
-import org.junit.runner.RunWith;
 import org.junit.runners.MethodSorters;
-import org.junit.runners.Parameterized;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Scanner;
 
-import static org.commonjava.maven.ext.io.rest.Translator.RestProtocol;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
@@ -49,20 +52,11 @@ import static org.junit.Assert.fail;
  * @author vdedik@redhat.com
  */
 @FixMethodOrder( MethodSorters.NAME_ASCENDING)
-@RunWith( Parameterized.class)
 public class VersionTranslatorTest
 {
     private static List<ProjectVersionRef> aLotOfGavs;
 
     private DefaultTranslator versionTranslator;
-
-    private RestProtocol protocol;
-
-    @Parameterized.Parameters()
-    public static Collection<Object[]> data()
-    {
-        return Arrays.asList( new Object[][] { { RestProtocol.CURRENT } } );
-    }
 
     @Rule
     public TestName testName = new TestName();
@@ -85,13 +79,8 @@ public class VersionTranslatorTest
     {
         LoggerFactory.getLogger( VersionTranslatorTest.class ).info( "Executing test " + testName.getMethodName() );
 
-        this.versionTranslator = new DefaultTranslator( mockServer.getUrl(), protocol, 0, Translator.CHUNK_SPLIT_COUNT, "indyGroup",
+        this.versionTranslator = new DefaultTranslator( mockServer.getUrl(), 0, Translator.CHUNK_SPLIT_COUNT, "indyGroup",
                                                         "" );
-    }
-
-    public VersionTranslatorTest( RestProtocol protocol)
-    {
-        this.protocol = protocol;
     }
 
     @Test
@@ -132,7 +121,7 @@ public class VersionTranslatorTest
     public void testTranslateVersionsFailNoResponse()
     {
         // Some url that doesn't exist used here
-        Translator translator = new DefaultTranslator( "http://127.0.0.2", RestProtocol.CURRENT, 0,
+        Translator translator = new DefaultTranslator( "http://127.0.0.2", 0,
                                                        Translator.CHUNK_SPLIT_COUNT, "",
                                                        "" );
 
@@ -159,32 +148,37 @@ public class VersionTranslatorTest
     @Test( timeout = 2000 )
     public void testTranslateVersionsPerformance()
     {
-        // Disable logging for this test as impacts timing.
-        ( (Logger) LoggerFactory.getLogger( Logger.ROOT_LOGGER_NAME ) ).setLevel( Level.WARN );
+        Logger logbackLogger = ( (Logger) LoggerFactory.getLogger( Logger.ROOT_LOGGER_NAME ) );
+        Level originalLevel = logbackLogger.getLevel();
 
-        versionTranslator.translateVersions( aLotOfGavs );
+        try
+        {
+            // Disable logging for this test as impacts timing.
+            logbackLogger.setLevel( Level.OFF );
+            versionTranslator.translateVersions( aLotOfGavs );
+        }
+        finally
+        {
+            logbackLogger.setLevel( originalLevel );
+        }
     }
 
-
-    private static String readFileFromClasspath( String filename )
-    {
+    static List<ProjectVersionRef> loadALotOfGAVs() throws IOException {
+        List<ProjectVersionRef> result = new ArrayList<>();
+        String result1;
         StringBuilder fileContents = new StringBuilder();
         String lineSeparator = System.getProperty( "line.separator" );
 
-        try (Scanner scanner = new Scanner( VersionTranslatorTest.class.getResourceAsStream( filename ) ))
+        try (Scanner scanner = new Scanner( VersionTranslatorTest.class.getResourceAsStream(
+                        "example-response-performance-test.json" ) ))
         {
             while ( scanner.hasNextLine() )
             {
                 fileContents.append( scanner.nextLine() ).append( lineSeparator );
             }
-            return fileContents.toString();
+            result1 = fileContents.toString();
         }
-    }
-
-
-    static List<ProjectVersionRef> loadALotOfGAVs() throws IOException {
-        List<ProjectVersionRef> result = new ArrayList<>();
-        String longJsonFile = readFileFromClasspath( "example-response-performance-test.json" );
+        String longJsonFile = result1;
 
         ObjectMapper objectMapper = new ObjectMapper();
         List<Map<String, String>> gavs = objectMapper

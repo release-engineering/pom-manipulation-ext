@@ -28,7 +28,6 @@ import java.util.List;
 import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 public class ResolveArtifactTest
 {
@@ -48,6 +47,6 @@ public class ResolveArtifactTest
 
         Set<ArtifactRef> artifacts = RESTCollector.establishAllDependencies( session, projects, null );
         System.out.println ("### artifact count is " + artifacts.size());
-        assertEquals( 64, artifacts.size() );
+        assertEquals( 66, artifacts.size() );
     }
 }
