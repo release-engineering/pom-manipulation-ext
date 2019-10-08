@@ -70,10 +70,23 @@
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-annotations</artifactId>
     </dependency>
+    <dependency>
+      <groupId>com.konghq</groupId>
+      <artifactId>unirest-java</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.konghq</groupId>
+      <artifactId>unirest-objectmapper-jackson</artifactId>
+    </dependency>
 
     <dependency>
       <groupId>org.commonjava.maven.galley</groupId>
       <artifactId>galley-maven</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.jboss.da</groupId>
+      <artifactId>reports-model</artifactId>
     </dependency>
 
     <dependency>

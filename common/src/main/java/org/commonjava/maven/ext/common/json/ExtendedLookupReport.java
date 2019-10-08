@@ -13,23 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.commonjava.maven.ext.io.rest.mapper;
 
-public class ErrorMessage
+package org.commonjava.maven.ext.common.json;
+
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
+import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
+import org.jboss.da.reports.model.response.LookupReport;
+
+@ToString
+@Setter
+@Getter
+public class ExtendedLookupReport extends LookupReport
 {
-    public final String errorType;
+    private ProjectVersionRef projectVersionRef;
 
-    public final String errorMessage;
-
-    public final String details;
-
-    public ErrorMessage()
+    public ExtendedLookupReport ()
     {
-        details = errorMessage = errorType = "";
-    }
-
-    public String toString()
-    {
-        return errorType + " " + errorMessage + " " + details;
+        super(null);
     }
 }

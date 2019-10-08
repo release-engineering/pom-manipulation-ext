@@ -16,10 +16,13 @@
 package org.commonjava.maven.ext.io.rest.handler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.commonjava.maven.ext.io.rest.mapper.GAVSchema;
+import org.commonjava.maven.ext.common.util.JSONUtils;
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.handler.AbstractHandler;
+import org.jboss.da.model.rest.GAV;
+import org.jboss.da.reports.model.request.LookupGAVsRequest;
+import org.jboss.da.reports.model.response.LookupReport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,6 +31,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -59,7 +63,7 @@ public class AddSuffixJettyHandler
 
     private String suffix;
 
-    private ObjectMapper objectMapper = new ObjectMapper();
+    private JSONUtils.InternalObjectMapper objectMapper = new JSONUtils.InternalObjectMapper( new ObjectMapper(  ));
 
     private String blacklistVersion = null;
 
@@ -101,48 +105,50 @@ public class AddSuffixJettyHandler
             }
             LOGGER.info( "Read request body '{}' and read parameters '{}'.", jb , request.getParameterMap() );
 
-            List<Map<String, Object>> requestBody;
-            List<Map<String, Object>> responseBody = new ArrayList<>();
+            List<GAV> requestBody;
 
             if ( target.equals( DEFAULT_ENDPOINT ) )
             {
-               // Protocol analysis
-                GAVSchema gavSchema = objectMapper.readValue( jb.toString(), GAVSchema.class );
-                requestBody = gavSchema.gavs;
+                List<LookupReport> responseBody = new ArrayList<>();
 
-                boolean useCustomMixedSuffix = requestBody.stream().anyMatch( r -> r.get( "artifactId" ).equals( "rest-version-manip-mixed-suffix-orig-rh" ) );
-                boolean usePartialCustomMixedSuffix = requestBody.stream().anyMatch( r -> r.get( "artifactId" ).equals( "rest-version-manip-mixed-suffix-orig-rh-norhalign" ) );
+                // Protocol analysis
+                LookupGAVsRequest lookupGAVsRequest = objectMapper.readValue( jb.toString(), LookupGAVsRequest.class );
+                requestBody = lookupGAVsRequest.getGavs();
+
+                boolean useCustomMixedSuffix = requestBody.stream().anyMatch( r -> r.getArtifactId().equals( "rest-version-manip-mixed-suffix-orig-rh" ) );
+                boolean usePartialCustomMixedSuffix = requestBody.stream().anyMatch( r -> r.getArtifactId().equals( "rest-version-manip-mixed-suffix-orig-rh-norhalign" ) );
 
                 // Prepare Response
-                for ( Map<String, Object> gav : requestBody )
+                for ( GAV gav : requestBody )
                 {
+                    LookupReport lr = new LookupReport( gav );
                     List<String> availableVersions = new ArrayList<>();
 
-                    String version = (String) gav.get( "version" );
+                    String version = gav.getVersion();
                     String bestMatchVersion;
 
-                    LOGGER.debug( "Processing artifactId {} with version {}", gav.get( "artifactId" ), version );
+                    LOGGER.debug( "Processing artifactId {} with version {}", gav.getArtifactId(), version );
 
                     // Specific to certain integration tests. For the SNAPSHOT test we want to verify it can handle
                     // a already built version. The PME code should remove SNAPSHOT before sending it.
-                    if ( ( (String) gav.get( "artifactId" ) ).startsWith( "rest-dependency-version-manip-child-module" ) )
+                    if ( gav.getArtifactId().startsWith( "rest-dependency-version-manip-child-module" ) )
                     {
                         bestMatchVersion = version + "-" + EXTENDED_SUFFIX;
                     }
-                    else if ( gav.get( "groupId" ).equals( "org.goots.maven.circulardependencies-test-parent" ) )
+                    else if ( gav.getGroupId().equals( "org.goots.maven.circulardependencies-test-parent" ) )
                     {
                         bestMatchVersion = version + "." + SUFFIX + "-3";
                     }
-                    else if ( gav.get( "artifactId" ).equals( "rest-version-manip-mixed-suffix-orig-rh" ) )
+                    else if ( gav.getArtifactId().equals( "rest-version-manip-mixed-suffix-orig-rh" ) )
                     {
                         bestMatchVersion = version + "-" + this.suffix;
                     }
-                    else if ( ( (String) gav.get( "artifactId" ) ).startsWith( "depMgmt2" ) ||
-                                    ( (String) gav.get( "artifactId" ) ).startsWith( "pluginMgmt3" ) )
+                    else if ( gav.getArtifactId().startsWith( "depMgmt2" ) ||
+                                    gav.getArtifactId().startsWith( "pluginMgmt3" ) )
                     {
                         bestMatchVersion = "1.0.0-" + EXTENDED_SUFFIX;
                     }
-                    else if ( ( (String) gav.get( "artifactId" ) ).startsWith( "rest-version-manip-suffix-strip-increment" ) )
+                    else if ( gav.getArtifactId().startsWith( "rest-version-manip-suffix-strip-increment" ) )
                     {
                         if ( version.contains( "jbossorg" ) )
                         {
@@ -155,7 +161,7 @@ public class AddSuffixJettyHandler
                     }
                     else if ( useCustomMixedSuffix || usePartialCustomMixedSuffix)
                     {
-                        if ( useCustomMixedSuffix && gav.get( "artifactId" ).equals( "commons-lang" ) )
+                        if ( useCustomMixedSuffix && gav.getArtifactId().equals( "commons-lang" ) )
                         {
                             // We know its redhat-1 (hardcoded in the pom).
                             int separatorIndex = version.indexOf( SUFFIX ) - 1;
@@ -164,7 +170,7 @@ public class AddSuffixJettyHandler
                                                                                                         separatorIndex + 1 )
                                                             + MIXED_SUFFIX;
                         }
-                        else if ( useCustomMixedSuffix && gav.get( "artifactId" ).equals( "errai-tools" ) )
+                        else if ( useCustomMixedSuffix && gav.getArtifactId().equals( "errai-tools" ) )
                         {
                             int separatorIndex = version.indexOf( SUFFIX ) - 1;
                             bestMatchVersion =
@@ -172,7 +178,7 @@ public class AddSuffixJettyHandler
                                                                                                            separatorIndex + 1 )
                                             + EXTENDED_SUFFIX;
                         }
-                        else if ( useCustomMixedSuffix && gav.get( "artifactId" ).equals( "commons-httpclient" ) )
+                        else if ( useCustomMixedSuffix && gav.getArtifactId().equals( "commons-httpclient" ) )
                         {
                             int separatorIndex = version.indexOf( "temporary-redhat" ) - 1;
                             bestMatchVersion =
@@ -194,15 +200,16 @@ public class AddSuffixJettyHandler
 
                     availableVersions.add( bestMatchVersion );
 
-                    gav.put( "bestMatchVersion", bestMatchVersion );
-                    gav.put( "whitelisted", false );
-                    gav.put( "blacklisted", false );
-                    gav.put( "availableVersions", availableVersions );
+                    lr.setBestMatchVersion( bestMatchVersion );
+                    lr.setBlacklisted( false );
+                    lr.setAvailableVersions( availableVersions );
 
-                    responseBody.add( gav );
+                    responseBody.add( lr );
                 }
 
-                LOGGER.info( "Returning response body '{}'", responseBody );
+                LOGGER.info( "Returning response body size {}", responseBody.size() );
+
+                response.getWriter().println( objectMapper.writeValue( responseBody ) );
             }
             else
             {
@@ -217,14 +224,14 @@ public class AddSuffixJettyHandler
                 {
                     gav.put ( "version", blacklistVersion );
                 }
-                responseBody.add( gav );
+
+                response.getWriter().println( objectMapper.writeValue( Collections.singletonList( gav ) ) );
             }
 
             // Set Response
             response.setContentType( "application/json;charset=utf-8" );
             response.setStatus( HttpServletResponse.SC_OK );
             baseRequest.setHandled( true );
-            response.getWriter().println( objectMapper.writeValueAsString( responseBody ) );
         }
         else
         {
@@ -242,4 +249,5 @@ public class AddSuffixJettyHandler
     {
         this.suffix = suffix;
     }
+
 }

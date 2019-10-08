@@ -89,7 +89,7 @@ public class HttpErrorTranslatorTest
     {
         LoggerFactory.getLogger( HttpErrorTranslatorTest.class ).info ( "Executing test " + testName.getMethodName());
 
-        this.versionTranslator = new DefaultTranslator( mockServer.getUrl(), Translator.RestProtocol.CURRENT, 0,
+        this.versionTranslator = new DefaultTranslator( mockServer.getUrl(), 0,
                                                         Translator.CHUNK_SPLIT_COUNT, "",
                                                         "" );
     }

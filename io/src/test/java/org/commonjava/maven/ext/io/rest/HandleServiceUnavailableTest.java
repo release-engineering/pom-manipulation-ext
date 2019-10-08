@@ -15,7 +15,7 @@
  */
 package org.commonjava.maven.ext.io.rest;
 
-import com.mashape.unirest.http.Unirest;
+import kong.unirest.Unirest;
 import org.apache.commons.lang.reflect.FieldUtils;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.ext.io.rest.exception.RestException;
@@ -26,21 +26,16 @@ import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestName;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static org.commonjava.maven.ext.io.rest.Translator.RestProtocol.CURRENT;
 import static org.commonjava.maven.ext.io.rest.VersionTranslatorTest.loadALotOfGAVs;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -49,20 +44,11 @@ import static org.junit.Assert.fail;
 /**
  * @author Jakub Senko <jsenko@redhat.com>
  */
-@RunWith( Parameterized.class)
 public class HandleServiceUnavailableTest
 {
     private static List<ProjectVersionRef> aLotOfGavs;
 
     private DefaultTranslator versionTranslator;
-
-    private Translator.RestProtocol protocol;
-
-    @Parameterized.Parameters()
-    public static Collection<Object[]> data()
-    {
-        return Arrays.asList( new Object[][] { { CURRENT } } );
-    }
 
     @Rule
     public TestName testName = new TestName();
@@ -87,13 +73,8 @@ public class HandleServiceUnavailableTest
         LOG.info( "Executing test " + testName.getMethodName() );
 
         handler.setStatusCode( HttpServletResponse.SC_SERVICE_UNAVAILABLE );
-        versionTranslator = new DefaultTranslator( mockServer.getUrl(), protocol, 0, Translator.CHUNK_SPLIT_COUNT,
+        versionTranslator = new DefaultTranslator( mockServer.getUrl(), 0, Translator.CHUNK_SPLIT_COUNT,
                                                    "", "" );
-    }
-
-    public HandleServiceUnavailableTest(Translator.RestProtocol protocol )
-    {
-        this.protocol = protocol;
     }
 
     @Test
@@ -144,8 +125,7 @@ public class HandleServiceUnavailableTest
         assertEquals( 10, requestData.get( 4 ).size() );
         assertEquals( 2, requestData.get( 5 ).size() );
 
-        Set<Map<String, Object>> original = new HashSet<>();
-        original.addAll( requestData.get( 0 ) );
+        Set<Map<String, Object>> original = new HashSet<>( requestData.get( 0 ) );
 
         Set<Map<String, Object>> chunks = new HashSet<>();
         for ( List<Map<String, Object>> e : requestData.subList( 1, 5 ) )

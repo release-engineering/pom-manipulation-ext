@@ -19,7 +19,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef;
 import org.commonjava.maven.ext.io.rest.handler.AddSuffixJettyHandler;
-import org.commonjava.maven.ext.io.rest.mapper.GAVSchema;
+import org.commonjava.maven.ext.io.rest.handler.GAVSchema;
 import org.commonjava.maven.ext.io.rest.rule.MockServer;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.handler.AbstractHandler;
@@ -30,7 +30,6 @@ import org.junit.rules.TestName;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.BufferedReader;
@@ -38,16 +37,12 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 
-import static org.commonjava.maven.ext.io.rest.Translator.RestProtocol;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 public class RESTParametersTest
 {
     private static final Logger LOGGER = LoggerFactory.getLogger( AddSuffixJettyHandler.class );
-
-    private final String group = "indyGroup";
-
-    private final String suffix = "rebuild";
 
     private DefaultTranslator versionTranslator;
 
@@ -61,7 +56,7 @@ public class RESTParametersTest
     {
         @Override
         public void handle( String target, Request baseRequest, HttpServletRequest request,
-                            HttpServletResponse response ) throws IOException, ServletException
+                            HttpServletResponse response ) throws IOException
         {
             ObjectMapper objectMapper = new ObjectMapper();
             StringBuilder jb = new StringBuilder();
@@ -87,7 +82,8 @@ public class RESTParametersTest
     @Test
     public void testVerifyGroup()
     {
-        this.versionTranslator = new DefaultTranslator( mockServer.getUrl(), RestProtocol.CURRENT, 0,
+        String group = "indyGroup";
+        this.versionTranslator = new DefaultTranslator( mockServer.getUrl(), 0,
                                                         Translator.CHUNK_SPLIT_COUNT, group, "" );
         List<ProjectVersionRef> gavs = Collections.singletonList(
             new SimpleProjectVersionRef( "com.example", "example", "1.0" ) );
@@ -99,7 +95,7 @@ public class RESTParametersTest
     @Test
     public void testVerifyNoGroup()
     {
-        this.versionTranslator = new DefaultTranslator( mockServer.getUrl(), RestProtocol.CURRENT, 0,
+        this.versionTranslator = new DefaultTranslator( mockServer.getUrl(), 0,
                                                         Translator.CHUNK_SPLIT_COUNT, "", "" );
         List<ProjectVersionRef> gavs = Collections.singletonList(
             new SimpleProjectVersionRef( "com.example", "example", "1.0" ) );

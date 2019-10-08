@@ -15,12 +15,10 @@
  */
 package org.commonjava.maven.ext.core.state;
 
-import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.core.ManipulationSession;
 import org.commonjava.maven.ext.core.impl.DependencyManipulator;
 import org.commonjava.maven.ext.io.rest.DefaultTranslator;
 import org.commonjava.maven.ext.io.rest.Translator;
-import org.commonjava.maven.ext.io.rest.Translator.RestProtocol;
 
 import java.util.Properties;
 
@@ -37,14 +35,14 @@ public class RESTState implements State
 
     private boolean restSuffixAlign;
 
-    public RESTState( final ManipulationSession session ) throws ManipulationException
+    public RESTState( final ManipulationSession session )
     {
         this.session = session;
 
         initialise( session.getUserProperties() );
     }
 
-    public void initialise( Properties userProps ) throws ManipulationException
+    public void initialise( Properties userProps )
     {
         final VersioningState vState = session.getState( VersioningState.class );
 
@@ -56,9 +54,7 @@ public class RESTState implements State
                                                                    String.valueOf( DefaultTranslator.CHUNK_SPLIT_COUNT ) ) );
         restSuffixAlign = Boolean.parseBoolean( userProps.getProperty( "restSuffixAlign", "true" ) );
 
-        RestProtocol protocol = RestProtocol.parse ( userProps.getProperty( "restProtocol", RestProtocol.CURRENT.toString() ) );
-
-        restEndpoint = new DefaultTranslator( restURL, protocol, restMaxSize, restMinSize, repositoryGroup, vState.getIncrementalSerialSuffix() );
+        restEndpoint = new DefaultTranslator( restURL, restMaxSize, restMinSize, repositoryGroup, vState.getIncrementalSerialSuffix() );
     }
 
     /**

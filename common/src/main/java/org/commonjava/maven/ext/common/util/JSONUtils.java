@@ -19,19 +19,28 @@ package org.commonjava.maven.ext.common.util;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.module.SimpleModule;
+import kong.unirest.JacksonObjectMapper;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef;
+import org.commonjava.maven.ext.common.json.ExtendedLookupReport;
 import org.commonjava.maven.ext.common.json.PME;
+import org.jboss.da.listings.model.rest.RestProductInput;
+import org.jboss.da.reports.model.response.LookupReport;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
 
 public class JSONUtils
 {
@@ -40,6 +49,10 @@ public class JSONUtils
     private static final String VERSION = "version";
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
+
+    private static final TypeReference<List<String>> stringList = new TypeReference<List<String>>()
+    {
+    };
 
     static
     {
@@ -102,6 +115,46 @@ public class JSONUtils
             gen.writeStringField(ARTIFACT_ID, value.getArtifactId());
             gen.writeStringField(VERSION, value.getVersionString());
             gen.writeEndObject();
+        }
+    }
+
+    public static class LookupReportDeserializer extends JsonDeserializer<LookupReport>
+    {
+        @Override
+        public ExtendedLookupReport deserialize( JsonParser p, DeserializationContext ctxt)
+                        throws IOException
+        {
+            JsonNode node = p.getCodec().readTree( p);
+            final String groupId = node.get(GROUP_ID).asText();
+            final String artifactId = node.get(ARTIFACT_ID).asText();
+            final String version = node.get(VERSION).asText();
+
+            ExtendedLookupReport result = new ExtendedLookupReport();
+            result.setAvailableVersions( node.get("availableVersions").traverse( p.getCodec() ).readValueAs( stringList ) );
+            result.setBlacklisted( node.get("blacklisted").asBoolean() );
+            result.setBestMatchVersion( node.get("bestMatchVersion").asText() );
+            result.setProjectVersionRef( new SimpleProjectVersionRef( groupId, artifactId, version) );
+
+            return result;
+        }
+    }
+
+    public static class InternalObjectMapper extends JacksonObjectMapper
+    {
+        public InternalObjectMapper ( ObjectMapper mapper)
+        {
+            super( mapper );
+
+            mapper.configure( JsonGenerator.Feature.IGNORE_UNKNOWN, true );
+            mapper.configure( DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false );
+            mapper.setSerializationInclusion( JsonInclude.Include.NON_EMPTY);
+
+            SimpleModule module = new SimpleModule();
+            module.addDeserializer( ProjectVersionRef.class, new ProjectVersionRefDeserializer());
+            module.addSerializer(ProjectVersionRef.class, new ProjectVersionRefSerializer());
+            module.addDeserializer( LookupReport.class, new LookupReportDeserializer() );
+            mapper.registerModule( module );
+
         }
     }
 }

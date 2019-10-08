@@ -13,28 +13,32 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.commonjava.maven.ext.io.rest;
+package org.commonjava.maven.ext.common.util;
 
-import org.commonjava.maven.atlas.ident.ref.ProjectRef;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
+import org.jboss.da.model.rest.GAV;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 /**
- * @author vdedik@redhat.com
+ * Commonly used manipulations from project profiles.
  */
-public interface Translator
+public final class GAVUtils
 {
-    int CHUNK_SPLIT_COUNT = 4;
+    private GAVUtils()
+    {
+    }
 
-    /**
-     * Executes HTTP request to a REST service that translates versions
-     *
-     * @param projects - List of projects (GAVs)
-     * @return Map of ProjectVersionRef objects as keys and translated versions as values
-     */
-    Map<ProjectVersionRef, String> translateVersions( List<ProjectVersionRef> projects );
+    public static List<GAV> generateGAVs( List<ProjectVersionRef> dep) {
+        ArrayList<GAV> result = new ArrayList<>();
 
-    List<ProjectVersionRef> findBlacklisted( ProjectRef project );
+        dep.forEach( d -> result.add( generateGAVs( d ) ) );
+
+        return result;
+    }
+
+    public static GAV generateGAVs( ProjectVersionRef dep) {
+        return new GAV(dep.getGroupId(), dep.getArtifactId(), dep.getVersionString());
+    }
 }
