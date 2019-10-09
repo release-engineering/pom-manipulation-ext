@@ -115,6 +115,7 @@ public class AddSuffixJettyHandler
                 LookupGAVsRequest lookupGAVsRequest = objectMapper.readValue( jb.toString(), LookupGAVsRequest.class );
                 requestBody = lookupGAVsRequest.getGavs();
 
+                boolean returnNullBestMatch = "NullBestMatchVersion".equals( lookupGAVsRequest.getRepositoryGroup() );
                 boolean useCustomMixedSuffix = requestBody.stream().anyMatch( r -> r.getArtifactId().equals( "rest-version-manip-mixed-suffix-orig-rh" ) );
                 boolean usePartialCustomMixedSuffix = requestBody.stream().anyMatch( r -> r.getArtifactId().equals( "rest-version-manip-mixed-suffix-orig-rh-norhalign" ) );
 
@@ -200,7 +201,10 @@ public class AddSuffixJettyHandler
 
                     availableVersions.add( bestMatchVersion );
 
-                    lr.setBestMatchVersion( bestMatchVersion );
+                    if ( !returnNullBestMatch )
+                    {
+                        lr.setBestMatchVersion( bestMatchVersion );
+                    }
                     lr.setBlacklisted( false );
                     lr.setAvailableVersions( availableVersions );
 

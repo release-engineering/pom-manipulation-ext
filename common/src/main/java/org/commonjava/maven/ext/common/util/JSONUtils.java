@@ -29,17 +29,16 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.fasterxml.jackson.databind.node.JsonNodeType;
 import kong.unirest.JacksonObjectMapper;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef;
 import org.commonjava.maven.ext.common.json.ExtendedLookupReport;
 import org.commonjava.maven.ext.common.json.PME;
-import org.jboss.da.listings.model.rest.RestProductInput;
 import org.jboss.da.reports.model.response.LookupReport;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.List;
 
 public class JSONUtils
@@ -47,6 +46,7 @@ public class JSONUtils
     private static final String GROUP_ID = "groupId";
     private static final String ARTIFACT_ID = "artifactId";
     private static final String VERSION = "version";
+    private static final String BEST_MATCH = "bestMatchVersion";
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
@@ -130,9 +130,16 @@ public class JSONUtils
             final String version = node.get(VERSION).asText();
 
             ExtendedLookupReport result = new ExtendedLookupReport();
+            // TODO: Is there any point in demarshalling this?
             result.setAvailableVersions( node.get("availableVersions").traverse( p.getCodec() ).readValueAs( stringList ) );
+
             result.setBlacklisted( node.get("blacklisted").asBoolean() );
-            result.setBestMatchVersion( node.get("bestMatchVersion").asText() );
+            if ( node.has( BEST_MATCH ) &&
+                            ! node.get(BEST_MATCH).getNodeType().equals( JsonNodeType.NULL ) )
+            {
+                // Calling asText on a NullNode returns a String ' "null" '.
+                result.setBestMatchVersion( node.get(BEST_MATCH).asText() );
+            }
             result.setProjectVersionRef( new SimpleProjectVersionRef( groupId, artifactId, version) );
 
             return result;

@@ -236,6 +236,12 @@ public class VersionCalculator
 
     /**
      * Find matching version strings in the remote repo.
+     *
+     * @param state Current VersionState configuration
+     * @param groupId to look for
+     * @param artifactId to look for
+     * @return the set of potential candidates
+     * @throws ManipulationException if an error occurs.
      */
     protected Set<String> getVersionCandidates(VersioningState state, String groupId, String artifactId)
             throws ManipulationException

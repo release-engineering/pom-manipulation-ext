@@ -90,22 +90,13 @@ public class DefaultTranslator
 
     static
     {
-        Logger unirestLogger = LoggerFactory.getLogger( DefaultTranslator.class );
-
         // According to https://kong.github.io/unirest-java/#configuration the default connection timeout is 10000
         // and the default socketTimeout is 60000.
         // We have increased the first to 30 seconds and the second to 10 minutes.
         Unirest.config()
                .socketTimeout( 600000 )
                .connectTimeout( 30000 )
-               .setObjectMapper( new InternalObjectMapper( new com.fasterxml.jackson.databind.ObjectMapper() ) )
-               .instrumentWith( requestSummary -> {
-                                    long startNanos = System.nanoTime();
-                                    return ( responseSummary, exception ) ->
-                                                    printFinishTime( unirestLogger, startNanos,
-                                                                     ( responseSummary != null && responseSummary.getStatus() / 100 == 2 ) );
-                                }
-               );
+               .setObjectMapper( new InternalObjectMapper( new com.fasterxml.jackson.databind.ObjectMapper() ) );
     }
 
     // Allow test to override this.
@@ -299,57 +290,69 @@ public class DefaultTranslator
         logger.info( "Calling REST client... (with {} GAVs)", projects.size() );
         final Queue<Task> queue = new ArrayDeque<>();
         final Map<ProjectVersionRef, String> result = new HashMap<>();
+        final long start = System.nanoTime();
+        boolean finishedSuccessfully = false;
 
-        partition( projects, queue );
-
-        while ( !queue.isEmpty() )
+        try
         {
-            Task task = queue.remove();
-            task.executeTranslate();
-            if ( task.isSuccess() )
+
+            partition( projects, queue );
+
+            while ( !queue.isEmpty() )
             {
-                result.putAll( task.getResult() );
-            }
-            else
-            {
-                if ( task.canSplit() && isRecoverable( task.getStatus() ) )
+                Task task = queue.remove();
+                task.executeTranslate();
+                if ( task.isSuccess() )
                 {
-                    if ( task.getStatus() == HttpStatus.SC_SERVICE_UNAVAILABLE )
-                    {
-                        logger.info( "The DA server is unavailable. Waiting {} before splitting the tasks and retrying",
-                                     retryDuration );
-
-                        waitBeforeRetry( retryDuration );
-                    }
-
-                    List<Task> tasks = task.split();
-
-                    logger.warn( "Failed to translate versions for task @{} due to {}, splitting and retrying. Chunk size was: {} and new chunk size {} in {} segments.",
-                                 task.hashCode(), task.getStatus(), task.getChunkSize(), tasks.get( 0 ).getChunkSize(),
-                                 tasks.size() );
-                    queue.addAll( tasks );
+                    result.putAll( task.getResult() );
                 }
                 else
                 {
-                    if ( task.getStatus() < 0 )
+                    if ( task.canSplit() && isRecoverable( task.getStatus() ) )
                     {
-                        logger.debug( "Caught exception calling server with message {}", task.getErrorMessage() );
-                    }
-                    else
-                    {
-                        logger.debug( "Did not get status {} but received {}", SC_OK, task.getStatus() );
-                    }
+                        if ( task.getStatus() == HttpStatus.SC_SERVICE_UNAVAILABLE )
+                        {
+                            logger.info( "The DA server is unavailable. Waiting {} before splitting the tasks and retrying",
+                                         retryDuration );
 
-                    if ( task.getStatus() > 0 )
-                    {
-                        throw new RestException( "Received response status " + task.getStatus() + " with message: " + task.getErrorMessage() );
+                            waitBeforeRetry( retryDuration );
+                        }
+
+                        List<Task> tasks = task.split();
+
+                        logger.warn( "Failed to translate versions for task @{} due to {}, splitting and retrying. Chunk size was: {} and new chunk size {} in {} segments.",
+                                     task.hashCode(), task.getStatus(), task.getChunkSize(), tasks.get( 0 ).getChunkSize(),
+                                     tasks.size() );
+                        queue.addAll( tasks );
                     }
                     else
                     {
-                        throw new RestException( "Received response status " + task.getStatus() + " with message " + task.getErrorMessage() );
+                        if ( task.getStatus() < 0 )
+                        {
+                            logger.debug( "Caught exception calling server with message {}", task.getErrorMessage() );
+                        }
+                        else
+                        {
+                            logger.debug( "Did not get status {} but received {}", SC_OK, task.getStatus() );
+                        }
+
+                        if ( task.getStatus() > 0 )
+                        {
+                            throw new RestException( "Received response status " + task.getStatus() + " with message: "
+                                                                     + task.getErrorMessage() );
+                        }
+                        else
+                        {
+                            throw new RestException( "Received response status " + task.getStatus() + " with message " + task.getErrorMessage() );
+                        }
                     }
                 }
             }
+            finishedSuccessfully = true;
+        }
+        finally
+        {
+            printFinishTime( logger, start, finishedSuccessfully);
         }
 
         return result;
@@ -434,6 +437,7 @@ public class DefaultTranslator
                            .asObject( lookupType )
                            .ifSuccess( successResponse -> result = successResponse.getBody()
                                                   .stream()
+                                                  .filter( f -> isNotBlank( f.getBestMatchVersion() ) )
                                                   .collect( Collectors.toMap( e -> ((ExtendedLookupReport)e).getProjectVersionRef(),
                                                                  LookupReport::getBestMatchVersion ) ) )
                            .ifFailure( failedResponse -> {

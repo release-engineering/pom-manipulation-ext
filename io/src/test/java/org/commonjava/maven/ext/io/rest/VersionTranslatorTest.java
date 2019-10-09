@@ -45,6 +45,7 @@ import java.util.Map;
 import java.util.Scanner;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
@@ -115,6 +116,29 @@ public class VersionTranslatorTest
         }};
 
         assertThat( actualResult, is( expectedResult ) );
+    }
+
+
+    @Test
+    public void testTranslateVersionsWithNulls()
+    {
+        this.versionTranslator = new DefaultTranslator( mockServer.getUrl(), 0, Translator.CHUNK_SPLIT_COUNT, "NullBestMatchVersion",
+                                                        "" );
+        List<ProjectVersionRef> gavs = Arrays.asList(
+                        new SimpleProjectVersionRef( "com.example", "example", "1.0" ),
+                        new SimpleProjectVersionRef( "com.example", "example-dep", "2.0" ),
+                        new SimpleProjectVersionRef( "org.commonjava", "example", "1.0" ),
+                        new SimpleProjectVersionRef( "org.commonjava", "example", "1.1" ));
+
+        Map<ProjectVersionRef, String> actualResult = versionTranslator.translateVersions( gavs );
+
+        System.out.println ("### actual " + actualResult);
+
+        // All values with null bestMatchVersion should have been filtered out.
+        Map<ProjectVersionRef, String> expectedResult = new HashMap<ProjectVersionRef, String>()
+        {{
+        }};
+        assertEquals( expectedResult, actualResult );
     }
 
     @Test
