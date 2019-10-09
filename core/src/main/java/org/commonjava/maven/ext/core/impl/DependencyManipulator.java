@@ -271,7 +271,7 @@ public class DependencyManipulator implements Manipulator
                 }
             }
 
-            logger.info ("Iterating for standard overrides...");
+            logger.info ("Iterating for property overrides...{}", versionPropertyUpdateMap);
             for ( Project project : versionPropertyUpdateMap.keySet() )
             {
                 logger.debug( "Checking property override within project {} ", project );

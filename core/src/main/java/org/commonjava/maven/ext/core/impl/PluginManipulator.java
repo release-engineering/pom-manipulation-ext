@@ -167,7 +167,7 @@ public class PluginManipulator
                     }
                 }
             }
-            logger.info( "Iterating for standard overrides..." );
+            logger.info( "Iterating for property overrides...{}", versionPropertyUpdateMap );
             for ( Project project : versionPropertyUpdateMap.keySet() )
             {
                 for ( final Map.Entry<String, PropertyMapper> entry : versionPropertyUpdateMap.get( project ).entrySet() )
