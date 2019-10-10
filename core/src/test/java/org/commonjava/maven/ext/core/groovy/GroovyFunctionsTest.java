@@ -16,20 +16,33 @@
 
 package org.commonjava.maven.ext.core.groovy;
 
+import org.apache.commons.io.FileUtils;
+import org.codehaus.plexus.DefaultContainerConfiguration;
+import org.codehaus.plexus.DefaultPlexusContainer;
+import org.codehaus.plexus.PlexusConstants;
+import org.codehaus.plexus.PlexusContainer;
 import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef;
 import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.common.model.Project;
 import org.commonjava.maven.ext.core.fixture.TestUtils;
+import org.commonjava.maven.ext.core.state.VersioningState;
 import org.commonjava.maven.ext.io.PomIO;
 import org.commonjava.maven.ext.io.rest.handler.AddSuffixJettyHandler;
 import org.commonjava.maven.ext.io.rest.rule.MockServer;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.contrib.java.lang.system.RestoreSystemProperties;
 import org.junit.contrib.java.lang.system.SystemOutRule;
+import org.junit.rules.TemporaryFolder;
+import org.junit.rules.TestRule;
 
 import java.io.File;
 import java.util.List;
 import java.util.Properties;
+
+import static org.hamcrest.core.IsEqual.equalTo;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 
 public class GroovyFunctionsTest
 {
@@ -38,12 +51,18 @@ public class GroovyFunctionsTest
     private AddSuffixJettyHandler handler = new AddSuffixJettyHandler();
 
     @Rule
-    public final SystemOutRule systemOutRule = new SystemOutRule().enableLog().muteForSuccessfulTests();
+    public TemporaryFolder temporaryFolder = new TemporaryFolder();
+
+    @Rule
+    public final SystemOutRule systemOutRule = new SystemOutRule().enableLog();//.muteForSuccessfulTests();
+
+    @Rule
+    public final TestRule restoreSystemProperties = new RestoreSystemProperties();
 
     @Rule
     public MockServer mockServer = new MockServer( handler );
 
-    @Test (expected = ManipulationException.class )
+    @Test(expected = ManipulationException.class )
     public void testOverride() throws Exception
     {
         // Locate the PME project pom file. Use that to verify inheritance tracking.
@@ -62,6 +81,68 @@ public class GroovyFunctionsTest
         impl.setValues( null, TestUtils.createSession( p ), projects, projects.get( 0 ), InvocationStage.FIRST );
 
         impl.overrideProjectVersion( SimpleProjectVersionRef.parse( "org.foo:bar:1.0" ) );
+    }
+
+    @Test
+    public void testOverrideWithTemp() throws Exception
+    {
+        final File base = TestUtils.resolveFileResource( "groovy-project-removal", "" );
+        final File root = temporaryFolder.newFolder();
+        FileUtils.copyDirectory( base, root);
+        final DefaultContainerConfiguration config = new DefaultContainerConfiguration();
+
+        config.setClassPathScanning( PlexusConstants.SCANNING_ON );
+        config.setComponentVisibility( PlexusConstants.GLOBAL_VISIBILITY );
+        config.setName( "PME-CLI" );
+
+        final PlexusContainer container = new DefaultPlexusContainer( config);
+        final PomIO pomIO = container.lookup( PomIO.class );
+        final List<Project> projects = pomIO.parseProject( new File( root, "pom.xml" ) );
+
+        assertThat( projects.size(), equalTo(3) );
+
+        BaseScriptImplTest impl = new BaseScriptImplTest();
+        Properties p = new Properties(  );
+        p.setProperty( "versionIncrementalSuffix", "temporary-redhat" );
+        p.setProperty( "restRepositoryGroup", "GroovyWithTemporary" );
+        p.setProperty( "restURL", mockServer.getUrl() );
+
+        impl.setValues( null, TestUtils.createSession( p ), projects, projects.get( 0 ), InvocationStage.FIRST );
+
+        impl.overrideProjectVersion( SimpleProjectVersionRef.parse( "org.goots:sample:1.0.0" ) );
+    }
+
+    @Test
+    public void testTempOverrideWithNonTemp() throws Exception
+    {
+        final File base = TestUtils.resolveFileResource( "profile.pom", "" );
+        final File root = temporaryFolder.newFolder();
+        final File target = new File ( root, "profile.xml");
+        FileUtils.copyFile( base, target);
+        final DefaultContainerConfiguration config = new DefaultContainerConfiguration();
+
+        config.setClassPathScanning( PlexusConstants.SCANNING_ON );
+        config.setComponentVisibility( PlexusConstants.GLOBAL_VISIBILITY );
+        config.setName( "PME-CLI" );
+
+        final PlexusContainer container = new DefaultPlexusContainer( config);
+        final PomIO pomIO = container.lookup( PomIO.class );
+        final List<Project> projects = pomIO.parseProject( target );
+
+        assertThat( projects.size(), equalTo(1) );
+
+        BaseScriptImplTest impl = new BaseScriptImplTest();
+        Properties p = new Properties(  );
+        p.setProperty( "versionIncrementalSuffix", "temporary-redhat" );
+        p.setProperty( "restRepositoryGroup", "GroovyWithTemporary" );
+        p.setProperty( "restURL", mockServer.getUrl() );
+
+        impl.setValues( null, TestUtils.createSession( p ), projects, projects.get( 0 ), InvocationStage.FIRST );
+
+        impl.overrideProjectVersion( SimpleProjectVersionRef.parse( "org.goots:testTempOverrideWithNonTemp:1.0.0" ) );
+
+        assertEquals( "redhat-5",
+                      impl.getUserProperties().getProperty( VersioningState.VERSION_SUFFIX_SYSPROP.getCurrent() ) );
     }
 
     private static class BaseScriptImplTest extends BaseScript

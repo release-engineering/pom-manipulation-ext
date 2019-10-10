@@ -160,7 +160,7 @@ public class AddSuffixJettyHandler
                             bestMatchVersion = version + "-" + EXTENDED_SUFFIX;
                         }
                     }
-                    else if ( useCustomMixedSuffix || usePartialCustomMixedSuffix)
+                    else if ( useCustomMixedSuffix || usePartialCustomMixedSuffix || "GroovyWithTemporary".equals( lookupGAVsRequest.getRepositoryGroup() ) )
                     {
                         if ( useCustomMixedSuffix && gav.getArtifactId().equals( "commons-lang" ) )
                         {
@@ -186,6 +186,21 @@ public class AddSuffixJettyHandler
                                             version.substring( 0, separatorIndex ) + version.substring( separatorIndex,
                                                                                                            separatorIndex + 1 )
                                             + "temporary-redhat-2";
+                        }
+                        // For GroovyFunctionsTest::testTempOverrideWithNonTemp
+                        else if ( gav.getArtifactId().equals( "groovy-project-removal" ) )
+                        {
+                            bestMatchVersion = version + "-" + this.suffix;
+                        }
+                        // For GroovyFunctionsTest::testOverrideWithTemp
+                        else if ( gav.getGroupId().equals( "io.hawt" ) )
+                        {
+                            bestMatchVersion = version + "-" + MIXED_SUFFIX;
+                        }
+                        // For GroovyFunctionsTest::testOverrideWithTemp
+                        else if ( gav.getArtifactId().equals( "testTempOverrideWithNonTemp" ) )
+                        {
+                            bestMatchVersion = version + "-" + SUFFIX + "-5";
                         }
                         else
                         {
