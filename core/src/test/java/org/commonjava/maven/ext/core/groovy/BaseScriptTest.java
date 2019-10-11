@@ -15,7 +15,14 @@
  */
 package org.commonjava.maven.ext.core.groovy;
 
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang.reflect.FieldUtils;
+import org.codehaus.plexus.DefaultContainerConfiguration;
+import org.codehaus.plexus.DefaultPlexusContainer;
+import org.codehaus.plexus.PlexusConstants;
+import org.codehaus.plexus.PlexusContainer;
 import org.commonjava.maven.atlas.ident.ref.SimpleProjectRef;
+import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.common.model.Project;
 import org.commonjava.maven.ext.core.ManipulationManager;
 import org.commonjava.maven.ext.core.ManipulationSession;
@@ -23,10 +30,13 @@ import org.commonjava.maven.ext.core.fixture.TestUtils;
 import org.commonjava.maven.ext.core.impl.FinalGroovyManipulator;
 import org.commonjava.maven.ext.core.impl.InitialGroovyManipulator;
 import org.commonjava.maven.ext.core.state.VersioningState;
+import org.commonjava.maven.ext.io.FileIO;
 import org.commonjava.maven.ext.io.PomIO;
+import org.commonjava.maven.ext.io.resolver.GalleyInfrastructure;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.contrib.java.lang.system.SystemOutRule;
+import org.junit.rules.TemporaryFolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,6 +50,7 @@ import static junit.framework.TestCase.assertNull;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 public class BaseScriptTest
 {
@@ -48,7 +59,10 @@ public class BaseScriptTest
     private final Logger logger = LoggerFactory.getLogger( getClass() );
 
     @Rule
-    public final SystemOutRule systemRule = new SystemOutRule().enableLog().muteForSuccessfulTests();
+    public TemporaryFolder temporaryFolder = new TemporaryFolder();
+
+    @Rule
+    public final SystemOutRule systemRule = new SystemOutRule().enableLog();//.muteForSuccessfulTests();
 
     @Test
     public void testGroovyAnnotation() throws Exception
@@ -213,5 +227,75 @@ public class BaseScriptTest
         assertTrue( systemRule.getLog().contains( "STAGE FIRST" ) );
         assertTrue( systemRule.getLog().contains( "MODELIO null" ) );
         assertEquals( "rebuild-5", state.getSuffix() );
+    }
+
+
+    @Test
+    public void testGroovyExceptions() throws Exception
+    {
+        // Locate the PME project pom file. Use that to verify inheritance tracking.
+        final File groovy = TestUtils.resolveFileResource( "", "GroovyExceptions.groovy" );
+        final File pom = new File( TestUtils.resolveFileResource( RESOURCE_BASE, "" )
+                                            .getParentFile()
+                                            .getParentFile()
+                                            .getParentFile()
+                                            .getParentFile(), "pom.xml" );
+        final File tmpFolder = temporaryFolder.newFolder();
+        FileUtils.copyFileToDirectory( pom, tmpFolder);
+
+
+        List<Project> projects = new PomIO().parseProject( new File (tmpFolder, "pom.xml" ));
+
+        Properties userProperties = new Properties();
+        userProperties.setProperty( "versionIncrementalSuffix", "rebuild" );
+        userProperties.setProperty( "groovyScripts", "file://" + groovy.getAbsolutePath() );
+        ManipulationSession session = TestUtils.createSession( userProperties );
+
+        VersioningState state = session.getState( VersioningState.class );
+        assertNotNull( state );
+        assertTrue( state.isEnabled() );
+        assertEquals( "rebuild", state.getIncrementalSerialSuffix() );
+        assertNull( state.getSuffix() );
+
+        Project root = projects.stream().filter( p -> p.getProjectParent() == null ).findAny().orElse( null );
+        logger.info( "Found project root " + root );
+
+        final DefaultContainerConfiguration config = new DefaultContainerConfiguration();
+
+        config.setClassPathScanning( PlexusConstants.SCANNING_ON );
+        config.setComponentVisibility( PlexusConstants.GLOBAL_VISIBILITY );
+        config.setName( "PME-TEST" );
+
+        final PlexusContainer container = new DefaultPlexusContainer( config );
+        InitialGroovyManipulator gm = container.lookup( InitialGroovyManipulator.class );
+        FileIO fileIO = new FileIO(
+                        new GalleyInfrastructure( session, null).init( null, null, temporaryFolder.newFolder( "cache-dir" ) )) ;
+        // Update the groovy manipulator with fileIO with a temporary folder for the cache directory.
+        FieldUtils.writeField( gm, "fileIO", fileIO, true );
+
+        gm.init( session );
+
+        session.getUserProperties().setProperty( "manipExcep", "true" );
+        try
+        {
+            gm.applyChanges( projects );
+            fail("No exception thrown");
+        }
+        catch ( ManipulationException ex )
+        {
+            assertTrue( ex.getCause() == null && ex.getMessage().contains( "Manip Except" ) );
+        }
+
+        session.getUserProperties().setProperty( "manipExcep", "false" );
+        try
+        {
+            gm.applyChanges( projects );
+            fail("No exception thrown");
+        }
+        catch ( ManipulationException ex )
+        {
+            assertTrue( ex.getMessage().contains( "Problem running script" ) );
+            assertTrue( ex.getCause().getMessage().contains( "IO problems" ) );
+        }
     }
 }

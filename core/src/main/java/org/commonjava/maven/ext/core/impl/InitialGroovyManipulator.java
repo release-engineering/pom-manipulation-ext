@@ -22,8 +22,6 @@ import org.commonjava.maven.ext.core.groovy.InvocationStage;
 import org.commonjava.maven.ext.core.state.GroovyState;
 import org.commonjava.maven.ext.io.FileIO;
 import org.commonjava.maven.ext.io.ModelIO;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -45,8 +43,6 @@ public class InitialGroovyManipulator
                 extends BaseGroovyManipulator
     implements Manipulator
 {
-    private final Logger logger = LoggerFactory.getLogger( getClass() );
-
     @Inject
     public InitialGroovyManipulator( ModelIO modelIO, FileIO fileIO)
     {

@@ -50,10 +50,12 @@ import static org.apache.commons.lang.StringUtils.isEmpty;
  */
 public abstract class BaseGroovyManipulator
 {
-    private final Logger logger = LoggerFactory.getLogger( getClass() );
+    protected final Logger logger = LoggerFactory.getLogger( getClass() );
 
+    @SuppressWarnings( "WeakerAccess" )
     protected ModelIO modelBuilder;
 
+    @SuppressWarnings( "WeakerAccess" )
     protected FileIO fileIO;
 
     protected ManipulationSession session;
@@ -74,7 +76,7 @@ public abstract class BaseGroovyManipulator
      * @return a collection of parsed ArtifactRef.
      * @throws ManipulationException if an error occurs.
      */
-    public List<File> parseGroovyScripts( final String value ) throws ManipulationException
+    List<File> parseGroovyScripts( final String value ) throws ManipulationException
     {
         if ( isEmpty( value ) )
         {
@@ -184,7 +186,15 @@ public abstract class BaseGroovyManipulator
             }
             catch ( Exception e )
             {
-                throw new ManipulationException( "Unable to parse script", e );
+                //noinspection ConstantConditions
+                if ( e instanceof ManipulationException )
+                {
+                    throw ((ManipulationException)e);
+                }
+                else
+                {
+                    throw new ManipulationException( "Problem running script", e );
+                }
             }
         }
         else
