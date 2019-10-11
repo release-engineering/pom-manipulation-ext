@@ -93,7 +93,7 @@ public class TestUtils
         config.setComponentVisibility( PlexusConstants.GLOBAL_VISIBILITY );
         config.setName( "PME" );
 
-        LoggerFactory.getLogger( TestUtils.class ).info( "Creating session with Maven Cental using configuration PME" );
+        LoggerFactory.getLogger( TestUtils.class ).info( "Creating session with Maven Central using configuration PME" );
 
         try
         {

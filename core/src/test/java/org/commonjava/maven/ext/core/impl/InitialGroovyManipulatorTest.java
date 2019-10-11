@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2012 Red Hat, Inc. (jcasey@redhat.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,6 +16,7 @@
 
 package org.commonjava.maven.ext.core.impl;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.maven.execution.DefaultMavenExecutionRequest;
 import org.apache.maven.execution.DefaultMavenExecutionResult;
 import org.apache.maven.execution.MavenExecutionRequest;
@@ -24,7 +25,16 @@ import org.codehaus.plexus.DefaultContainerConfiguration;
 import org.codehaus.plexus.DefaultPlexusContainer;
 import org.codehaus.plexus.PlexusConstants;
 import org.codehaus.plexus.PlexusContainer;
+import org.commonjava.maven.ext.common.model.Project;
+import org.commonjava.maven.ext.core.ManipulationManager;
+import org.commonjava.maven.ext.core.ManipulationSession;
+import org.commonjava.maven.ext.core.fixture.TestUtils;
+import org.commonjava.maven.ext.io.PomIO;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.contrib.java.lang.system.RestoreSystemProperties;
+import org.junit.rules.TemporaryFolder;
+import org.junit.rules.TestRule;
 
 import java.io.File;
 import java.util.Collections;
@@ -37,36 +47,39 @@ import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
-import org.commonjava.maven.ext.common.model.Project;
-import org.commonjava.maven.ext.core.fixture.TestUtils;
-import org.commonjava.maven.ext.core.ManipulationManager;
-import org.commonjava.maven.ext.core.ManipulationSession;
-import org.commonjava.maven.ext.io.PomIO;
-
 /**
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com
  * <br>
  * Date: 22/08/2019
  */
-public class InitialGroovyManipulatorTest {
+public class InitialGroovyManipulatorTest
+{
+    @Rule
+    public TemporaryFolder tf = new TemporaryFolder();
 
+    // TODO: Refactor TestUtils so its possible to retrieve a ManipulationManager and initialise a MavenSession
     @Test
-    public void shouldRemoveProjectInGroovyScript() throws Exception {
+    public void shouldRemoveProjectInGroovyScript() throws Exception
+    {
         final File groovy = TestUtils.resolveFileResource( "groovy-project-removal", "/manipulation.groovy" );
-        final File projectroot = TestUtils.resolveFileResource( "groovy-project-removal", "/pom.xml" );
+        final File base = TestUtils.resolveFileResource( "groovy-project-removal", "" );
+        final File root = tf.newFolder();
+        FileUtils.copyDirectory( base, root );
+        final File projectroot = new File ( root, "pom.xml");
 
         final DefaultContainerConfiguration config = new DefaultContainerConfiguration();
         config.setClassPathScanning( PlexusConstants.SCANNING_ON );
         config.setComponentVisibility( PlexusConstants.GLOBAL_VISIBILITY );
         config.setName( "PME-CLI" );
-        PlexusContainer container = new DefaultPlexusContainer( config);
+        PlexusContainer container = new DefaultPlexusContainer( config );
 
         PomIO pomIO = container.lookup( PomIO.class );
+
         List<Project> projects = pomIO.parseProject( projectroot );
 
-        assertThat( projects.size(), equalTo(3) );
+        assertThat( projects.size(), equalTo( 3 ) );
 
-        Properties userProperties = new Properties(  );
+        Properties userProperties = new Properties();
         userProperties.setProperty( "versionIncrementalSuffix", "rebuild" );
 
         userProperties.setProperty( "groovyScripts", "file://" + groovy.getAbsolutePath() );
@@ -75,8 +88,8 @@ public class InitialGroovyManipulatorTest {
         ManipulationSession session = container.lookup( ManipulationSession.class );
 
         MavenExecutionRequest req = new DefaultMavenExecutionRequest().setSystemProperties( System.getProperties() )
-              .setUserProperties( userProperties )
-              .setRemoteRepositories( Collections.emptyList() );
+                                                                      .setUserProperties( userProperties )
+                                                                      .setRemoteRepositories( Collections.emptyList() );
         req.setPom( projectroot );
         MavenSession mavenSession = new MavenSession( container, null, req, new DefaultMavenExecutionResult() );
         session.setMavenSession( mavenSession );
@@ -86,20 +99,21 @@ public class InitialGroovyManipulatorTest {
 
         // re-read the projects:
         projects = pomIO.parseProject( projectroot );
-        assertThat( projects.size(), equalTo(3) );
+        assertThat( projects.size(), equalTo( 3 ) );
 
-        assertThat( projectForArtifactId(projects, "groovy-project-removal").getVersion(), containsString("rebuild") );
-        assertThat( projectForArtifactId(projects, "groovy-project-removal-moduleA").getVersion(), containsString("rebuild") );
+        assertThat( projectForArtifactId( projects, "groovy-project-removal" ).getVersion(), containsString( "rebuild" ) );
+        assertThat( projectForArtifactId( projects, "groovy-project-removal-moduleA" ).getVersion(),
+                    containsString( "rebuild" ) );
         // moduleB was removed from projects by the groovy script and therefore should not be reversioned:
-        assertThat( projectForArtifactId(projects, "groovy-project-removal-moduleB").getVersion(), equalTo("1.0.0") );
+        assertThat( projectForArtifactId( projects, "groovy-project-removal-moduleB" ).getVersion(), equalTo( "1.0.0" ) );
     }
 
-    private Project projectForArtifactId(List<Project> projects, String artifactId) {
-        Optional<Project> maybeProject = projects.stream()
-              .filter(p -> p.getArtifactId().equals(artifactId))
-              .findAny();
-        if (!maybeProject.isPresent()) {
-            fail("Unable to find project " + artifactId + " in the groovy-project-removal project");
+    private Project projectForArtifactId( List<Project> projects, String artifactId )
+    {
+        Optional<Project> maybeProject = projects.stream().filter( p -> p.getArtifactId().equals( artifactId ) ).findAny();
+        if ( !maybeProject.isPresent() )
+        {
+            fail( "Unable to find project " + artifactId + " in the groovy-project-removal project" );
         }
         return maybeProject.get();
     }

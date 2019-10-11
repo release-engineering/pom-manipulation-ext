@@ -16,15 +16,15 @@
 
 package org.commonjava.maven.ext.common.json;
 
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
-import lombok.ToString;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.jboss.da.reports.model.response.LookupReport;
 
-@ToString
 @Setter
 @Getter
+@EqualsAndHashCode(callSuper = true)
 public class ExtendedLookupReport extends LookupReport
 {
     private ProjectVersionRef projectVersionRef;
@@ -32,5 +32,11 @@ public class ExtendedLookupReport extends LookupReport
     public ExtendedLookupReport ()
     {
         super(null);
+    }
+
+    @Override
+    public String toString ()
+    {
+        return "PVR : " + projectVersionRef + " ; BestMatch : " + getBestMatchVersion();
     }
 }

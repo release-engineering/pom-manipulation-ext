@@ -285,17 +285,23 @@ public class DefaultTranslator
      * There may be a lot of them, possibly causing timeouts or other issues.
      * This is mitigated by splitting them into smaller chunks when an error occurs and retrying.
      */
-    public Map<ProjectVersionRef, String> translateVersions( List<ProjectVersionRef> projects )
+    public Map<ProjectVersionRef, String> translateVersions( List<ProjectVersionRef> p )
     {
+        final List<ProjectVersionRef> projects = p.stream().distinct().collect( Collectors.toList() );
+        if ( p.size() != projects.size() )
+        {
+            logger.debug( "Eliminating duplicates from {} resulting in {}", p, projects );
+        }
         logger.info( "Calling REST client... (with {} GAVs)", projects.size() );
+
         final Queue<Task> queue = new ArrayDeque<>();
         final Map<ProjectVersionRef, String> result = new HashMap<>();
         final long start = System.nanoTime();
+
         boolean finishedSuccessfully = false;
 
         try
         {
-
             partition( projects, queue );
 
             while ( !queue.isEmpty() )
@@ -436,10 +442,11 @@ public class DefaultTranslator
                            .body( request )
                            .asObject( lookupType )
                            .ifSuccess( successResponse -> result = successResponse.getBody()
-                                                  .stream()
-                                                  .filter( f -> isNotBlank( f.getBestMatchVersion() ) )
-                                                  .collect( Collectors.toMap( e -> ((ExtendedLookupReport)e).getProjectVersionRef(),
-                                                                 LookupReport::getBestMatchVersion ) ) )
+                                                                                  .stream()
+                                                                                  .filter( f -> isNotBlank( f.getBestMatchVersion() ) )
+                                                                                  .collect( Collectors.toMap(
+                                                                                                  e -> ( (ExtendedLookupReport) e ).getProjectVersionRef(),
+                                                                                                  LookupReport::getBestMatchVersion ) ) )
                            .ifFailure( failedResponse -> {
                                if ( !failedResponse.getParsingError().isPresent() )
                                {
@@ -473,7 +480,7 @@ public class DefaultTranslator
                                        throw new ManipulationUncheckedException( "Unknown error", failedResponse.getParsingError().get() );
                                    }
                                }
-                           });
+                           } );
 
                 status = r.getStatus();
             }

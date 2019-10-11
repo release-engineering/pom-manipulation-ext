@@ -179,10 +179,26 @@ public abstract class BaseScriptUtils extends Script implements BaseScriptAPI
                 logger.error( "Alignment failure: Target is {} and this is {}", gav.getVersionString(), getGAV() );
                 throw new ManipulationException( "Unable to set version suffix as versions do not match" );
             }
-            else if ( Version.getIntegerBuildNumber( thisMapping ) >= Version.getIntegerBuildNumber( targetBuild ) )
+            else
             {
-                logger.error( "Alignment failure: Target is {} and this is {}", Version.getIntegerBuildNumber( targetBuild ), Version.getIntegerBuildNumber( thisMapping ) );
-                throw new ManipulationException( "Unable to set version suffix as dependent build has been built more or the same number of times than the original target" );
+                // This is simpler test than using the more comprehensive comparisons available in org.jboss.da.common.version.*
+                VersioningState vs = ((ManipulationSession)getSession()).getState( VersioningState.class );
+                List<String> suffixes = vs.getSuffixAlternatives();
+                if ( suffixes.size() > 0 )
+                {
+                    // We know we have alternate + default (e.g. temporary-redhat + redhat) so examine the incremental
+                    // to see if they match ; if not we can continue as it should not clash.
+                    String suffix = vs.getIncrementalSerialSuffix();
+                    if ( thisMapping.contains( suffix ) && targetBuild.contains( suffix )
+                                    && Version.getIntegerBuildNumber( thisMapping ) >= Version.getIntegerBuildNumber(
+                                    targetBuild ) )
+                    {
+                        logger.error( "Alignment failure: Target is {} and this is {}", Version.getIntegerBuildNumber( targetBuild ),
+                                      Version.getIntegerBuildNumber( thisMapping ) );
+                        throw new ManipulationException(
+                                        "Unable to set version suffix as dependent build has been built more or the same number of times than the original target" );
+                    }
+                }
             }
         }
 
