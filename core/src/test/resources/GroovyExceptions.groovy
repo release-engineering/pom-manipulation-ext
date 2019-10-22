@@ -17,11 +17,11 @@
 
 import org.commonjava.maven.ext.common.ManipulationException
 import org.commonjava.maven.ext.core.groovy.BaseScript
+import org.commonjava.maven.ext.core.groovy.InvocationPoint
 import org.commonjava.maven.ext.core.groovy.InvocationStage
 import org.commonjava.maven.ext.core.groovy.PMEBaseScript
-import org.commonjava.maven.ext.core.groovy.PMEInvocationPoint
 
-@PMEInvocationPoint(invocationPoint = InvocationStage.FIRST)
+@InvocationPoint(invocationPoint = InvocationStage.FIRST)
 @PMEBaseScript BaseScript pme
 
 

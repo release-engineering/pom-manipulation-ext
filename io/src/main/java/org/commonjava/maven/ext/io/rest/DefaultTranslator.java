@@ -446,7 +446,12 @@ public class DefaultTranslator
                                                                                   .filter( f -> isNotBlank( f.getBestMatchVersion() ) )
                                                                                   .collect( Collectors.toMap(
                                                                                                   e -> ( (ExtendedLookupReport) e ).getProjectVersionRef(),
-                                                                                                  LookupReport::getBestMatchVersion ) ) )
+                                                                                                  LookupReport::getBestMatchVersion,
+                                                                                                  // If there is a duplicate key, use the original.
+                                                                                                  (o, n) -> {
+                                                                                                      logger.warn( "Located duplicate key {}", o);
+                                                                                                      return o;
+                                                                                                  } ) ) )
                            .ifFailure( failedResponse -> {
                                if ( !failedResponse.getParsingError().isPresent() )
                                {

@@ -26,11 +26,12 @@ import java.lang.annotation.Target;
 /**
  * Custom annotation that replicates {@link groovy.transform.BaseScript} but also handles extra annotations.
  */
-@Retention(RetentionPolicy.RUNTIME)
+@SuppressWarnings( "unused" )
+@Retention( RetentionPolicy.RUNTIME)
 @Target({ElementType.FIELD, ElementType.ANNOTATION_TYPE, ElementType.LOCAL_VARIABLE, ElementType.PACKAGE, ElementType.TYPE})
 @GroovyASTTransformationClass( "org.commonjava.maven.ext.core.groovy.ASTTransformer")
 
-public @interface PMEBaseScript
+public @interface GMEBaseScript
 {
-    Class value() default MavenBaseScript.class;
+    Class value() default GradleBaseScript.class;
 }

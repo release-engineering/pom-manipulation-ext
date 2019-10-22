@@ -21,6 +21,7 @@ import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 import groovy.util.logging.Slf4j
 import org.commonjava.maven.ext.core.groovy.BaseScript
+import org.commonjava.maven.ext.core.groovy.InvocationPoint
 import org.commonjava.maven.ext.core.groovy.InvocationStage
 
 import org.commonjava.maven.ext.core.groovy.PMEBaseScript
@@ -28,7 +29,7 @@ import org.commonjava.maven.ext.core.groovy.PMEInvocationPoint
 import org.yaml.snakeyaml.Yaml
 import org.zeroturnaround.exec.ProcessExecutor
 
-@PMEInvocationPoint(invocationPoint = InvocationStage.FIRST)
+@InvocationPoint(invocationPoint = InvocationStage.FIRST)
 @PMEBaseScript BaseScript pme
 
 @Slf4j

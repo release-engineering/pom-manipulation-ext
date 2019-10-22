@@ -39,7 +39,7 @@ import java.util.Map;
  * for PME.
  */
 @SuppressWarnings("WeakerAccess") // Public API.
-public abstract class BaseScriptUtils extends Script implements BaseScriptAPI
+public abstract class BaseScriptUtils extends Script implements MavenBaseScript
 {
     protected final Logger logger = LoggerFactory.getLogger( BaseScriptUtils.class );
 
