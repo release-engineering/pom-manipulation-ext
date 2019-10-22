@@ -15,38 +15,14 @@
  */
 package org.commonjava.maven.ext.core.groovy;
 
-import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
-import org.commonjava.maven.ext.common.model.Project;
-import org.commonjava.maven.ext.common.session.MavenSessionHandler;
-import org.commonjava.maven.ext.io.ModelIO;
-
 import java.io.File;
-import java.util.List;
 import java.util.Properties;
 
 /**
- * Common API for developers wishing to implement groovy scripts for PME.
+ * Common API for developers implementing Groovy scripts for PME or GME.
  */
-public interface BaseScriptAPI
+public interface CommonBaseScript
 {
-    /**
-     * Return the current Project
-     * @return a {@link Project} instance.
-     */
-    Project getProject();
-
-    /**
-    * Returns the entire collection of Projects
-    * @return an {@link java.util.ArrayList} of {@link Project} instances.
-    */
-    List<Project> getProjects();
-
-    /**
-     * Obtain the GAV of the current project
-     * @return a {@link ProjectVersionRef}
-     */
-    ProjectVersionRef getGAV();
-
     /**
      * Get the working directory (the execution root).
      * @return a {@link File} reference.
@@ -58,18 +34,6 @@ public interface BaseScriptAPI
      * @return a {@link Properties} reference.
      */
     Properties getUserProperties();
-
-    /**
-     * Get the modelIO instance for remote artifact resolving.
-     * @return a {@link ModelIO} reference.
-     */
-    ModelIO getModelIO();
-
-    /**
-     * Get the MavenSessionHandler instance
-     * @return a {@link MavenSessionHandler} reference.
-     */
-    MavenSessionHandler getSession();
 
     /**
      * Get the current stage

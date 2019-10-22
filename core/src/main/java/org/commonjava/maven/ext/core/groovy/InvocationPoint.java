@@ -16,21 +16,17 @@
 
 package org.commonjava.maven.ext.core.groovy;
 
-import org.codehaus.groovy.transform.GroovyASTTransformationClass;
-
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Custom annotation that replicates {@link groovy.transform.BaseScript} but also handles extra annotations.
+ * Annotation to denote when the groovy script should be invoked.
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.FIELD, ElementType.ANNOTATION_TYPE, ElementType.LOCAL_VARIABLE, ElementType.PACKAGE, ElementType.TYPE})
-@GroovyASTTransformationClass( "org.commonjava.maven.ext.core.groovy.ASTTransformer")
-
-public @interface PMEBaseScript
+@Target({ElementType.LOCAL_VARIABLE, ElementType.TYPE })
+public @interface InvocationPoint
 {
-    Class value() default MavenBaseScript.class;
+    InvocationStage invocationPoint();
 }

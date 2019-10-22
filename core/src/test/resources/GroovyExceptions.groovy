@@ -15,6 +15,7 @@
  */
 
 
+import org.commonjava.maven.ext.common.ManipulationException
 import org.commonjava.maven.ext.core.groovy.BaseScript
 import org.commonjava.maven.ext.core.groovy.InvocationPoint
 import org.commonjava.maven.ext.core.groovy.InvocationStage
@@ -23,29 +24,12 @@ import org.commonjava.maven.ext.core.groovy.PMEBaseScript
 @InvocationPoint(invocationPoint = InvocationStage.FIRST)
 @PMEBaseScript BaseScript pme
 
-// These are both debug AND test statements - do NOT remove. If the injection (in InitialGroovyManipulator)
-// fails these prints will cause the test to fail.
-println "#### BASESCRIPT:"
-println pme.getBaseDir()
-println pme.getBaseDir().getClass().getName()
-println pme.getGAV()
-println pme.getGAV().getClass().getName()
-println pme.getProjects()
-println pme.getProject().getClass().getName()
-println pme.getProjects()
-println pme.getProject().getClass().getName()
-println pme.getSession().getPom()
-println "#### BASESCRIPT END"
 
-println "#### BASESCRIPT END" + pme.getUserProperties()
-
-pme.getUserProperties().setProperty ("versionSuffix", "rebuild-5")
-
-pme.reinitialiseSessionStates()
-
-println "### STAGE " + pme.getInvocationStage()
-println "### MODELIO " + pme.getModelIO()
-
-println ("Accessing directly: " + pme.getGAV())
-
-// End...
+if ( "true".equals(pme.getUserProperties().getProperty("manipExcep")))
+{
+    throw new ManipulationException("Manip Except")
+}
+else if ( "false".equals(pme.getUserProperties().getProperty("manipExcep")))
+{
+    throw new IOException("IO problems")
+}

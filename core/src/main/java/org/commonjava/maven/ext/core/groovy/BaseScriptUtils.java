@@ -38,7 +38,8 @@ import java.util.Map;
  * Abstract class that contains useful utility functions for developers wishing to implement groovy scripts
  * for PME.
  */
-public abstract class BaseScriptUtils extends Script implements BaseScriptAPI
+@SuppressWarnings("WeakerAccess") // Public API.
+public abstract class BaseScriptUtils extends Script implements MavenBaseScript
 {
     protected final Logger logger = LoggerFactory.getLogger( BaseScriptUtils.class );
 

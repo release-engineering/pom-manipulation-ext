@@ -13,24 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.commonjava.maven.ext.core.groovy;
 
-import org.codehaus.groovy.transform.GroovyASTTransformationClass;
-
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import groovy.lang.Script;
 
 /**
- * Custom annotation that replicates {@link groovy.transform.BaseScript} but also handles extra annotations.
+ * Common API for developers wishing to implement groovy scripts for GME.
+ * Abstract class that is used as a marker and extended by the Gradle Manipulation Tooling.
  */
-@Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.FIELD, ElementType.ANNOTATION_TYPE, ElementType.LOCAL_VARIABLE, ElementType.PACKAGE, ElementType.TYPE})
-@GroovyASTTransformationClass( "org.commonjava.maven.ext.core.groovy.ASTTransformer")
-
-public @interface PMEBaseScript
+public abstract class GradleBaseScript extends Script implements CommonBaseScript
 {
-    Class value() default MavenBaseScript.class;
+    /**
+     * Return the current Project
+     *
+     * @return a Project instance.
+     */
+    abstract public Object getProject();
+
+    /**
+     * Get the current ManipulationModel instance for remote artifact resolving.
+     */
+    abstract public Object getModel();
 }
