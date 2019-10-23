@@ -27,7 +27,7 @@
 
   <groupId>org.commonjava.maven.ext</groupId>
   <artifactId>pom-manipulation-parent</artifactId>
-  <version>3.8</version>
+  <version>3.8.1-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <name>POM Manipulation Extension for Maven</name>
@@ -93,38 +93,38 @@
       <dependency>
         <groupId>org.commonjava.maven.ext</groupId>
         <artifactId>pom-manipulation-common</artifactId>
-        <version>3.8</version>
+        <version>3.8.1-SNAPSHOT</version>
       </dependency>
       <dependency>
         <groupId>org.commonjava.maven.ext</groupId>
         <artifactId>pom-manipulation-cli</artifactId>
-        <version>3.8</version>
+        <version>3.8.1-SNAPSHOT</version>
       </dependency>
       <dependency>
         <groupId>org.commonjava.maven.ext</groupId>
         <artifactId>pom-manipulation-cli</artifactId>
         <classifier>minimal</classifier>
-        <version>3.8</version>
+        <version>3.8.1-SNAPSHOT</version>
       </dependency>
       <dependency>
         <groupId>org.commonjava.maven.ext</groupId>
         <artifactId>pom-manipulation-core</artifactId>
-        <version>3.8</version>
+        <version>3.8.1-SNAPSHOT</version>
       </dependency>
       <dependency>
         <groupId>org.commonjava.maven.ext</groupId>
         <artifactId>pom-manipulation-ext</artifactId>
-        <version>3.8</version>
+        <version>3.8.1-SNAPSHOT</version>
       </dependency>
       <dependency>
         <groupId>org.commonjava.maven.ext</groupId>
         <artifactId>pom-manipulation-io</artifactId>
-        <version>3.8</version>
+        <version>3.8.1-SNAPSHOT</version>
       </dependency>
       <dependency>
         <groupId>org.commonjava.maven.ext</groupId>
         <artifactId>pom-manipulation-io</artifactId>
-        <version>3.8</version>
+        <version>3.8.1-SNAPSHOT</version>
         <type>test-jar</type>
       </dependency>
 

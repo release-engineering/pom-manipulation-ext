@@ -23,9 +23,12 @@ import java.lang.annotation.Target;
 
 /**
  * Annotation to denote when the groovy script should be invoked.
+ *
+ * @deprecated Use {@link InvocationPoint}  instead
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.LOCAL_VARIABLE, ElementType.TYPE })
+@Deprecated
 public @interface PMEInvocationPoint
 {
     InvocationStage invocationPoint();

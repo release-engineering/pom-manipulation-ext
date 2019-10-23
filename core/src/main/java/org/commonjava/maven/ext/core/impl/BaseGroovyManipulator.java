@@ -26,6 +26,7 @@ import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.common.model.Project;
 import org.commonjava.maven.ext.core.ManipulationSession;
 import org.commonjava.maven.ext.core.groovy.BaseScript;
+import org.commonjava.maven.ext.core.groovy.InvocationPoint;
 import org.commonjava.maven.ext.core.groovy.InvocationStage;
 import org.commonjava.maven.ext.core.groovy.PMEInvocationPoint;
 import org.commonjava.maven.ext.core.state.GroovyState;
@@ -124,15 +125,27 @@ public abstract class BaseGroovyManipulator
         {
             script = shell.parse( groovyScript );
 
-            PMEInvocationPoint invocationPoint = script.getClass().getAnnotation( PMEInvocationPoint.class );
-            if ( invocationPoint != null )
+            @SuppressWarnings( "deprecation" )
+            PMEInvocationPoint deprecatedInvocationPoint = script.getClass().getAnnotation( PMEInvocationPoint.class );
+            InvocationPoint invocationPoint = script.getClass().getAnnotation( InvocationPoint.class );
+            if ( deprecatedInvocationPoint != null )
+            {
+                logger.warn( "Using deprecated InvocationPoint annotation (for {})", deprecatedInvocationPoint.invocationPoint().toString() );
+                logger.debug( "InvocationPoint is {}", deprecatedInvocationPoint.invocationPoint().toString() );
+                stage = deprecatedInvocationPoint.invocationPoint();
+            }
+            else if ( invocationPoint != null )
             {
                 logger.debug( "InvocationPoint is {}", invocationPoint.invocationPoint().toString() );
                 stage = invocationPoint.invocationPoint();
             }
             else
             {
-                throw new ManipulationException( "Mandatory annotation '@PMEInvocationPoint(invocationPoint = ' not declared" );
+                stage = null;
+            }
+            if ( stage == null )
+            {
+                throw new ManipulationException( "Mandatory annotation '@InvocationPoint(invocationPoint = ' not declared" );
             }
             if ( script instanceof BaseScript )
             {

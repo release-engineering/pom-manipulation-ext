@@ -55,9 +55,11 @@ public class DefaultTranslator
 
     private static final String LISTING_BLACKLIST_GA = "listings/blacklist/ga";
 
-    private static final Random RANDOM = new Random();
+    @SuppressWarnings("WeakerAccess") // Public API.
+    protected static final Random RANDOM = new Random();
 
-    private static final Base32 CODEC = new Base32();
+    @SuppressWarnings("WeakerAccess") // Public API.
+    protected static final Base32 CODEC = new Base32();
 
     private final Logger logger = LoggerFactory.getLogger( getClass() );
 

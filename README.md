@@ -1,3 +1,8 @@
+
+
+[![Build Status (Travis CI)](https://travis-ci.org/release-engineering/pom-manipulation-ext.svg?branch=master)](https://travis-ci.org/release-engineering/pom-manipulation-ext.svg?branch=master)
+
+
 # Overview
 
 POM Manipulation Extension (PME) is a Maven tool to align the versions in your POMs according to some external reference, sort of like a BOM but much more extensive and without the added baggage of a BOM declaration.
