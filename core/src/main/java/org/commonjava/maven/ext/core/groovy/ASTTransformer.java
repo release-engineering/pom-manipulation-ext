@@ -69,34 +69,61 @@ import static org.apache.groovy.ast.tools.ClassNodeUtils.addGeneratedMethod;
 @GroovyASTTransformation(phase = CompilePhase.SEMANTIC_ANALYSIS)
 public class ASTTransformer  extends AbstractASTTransformation {
 
-    private static final Class<PMEBaseScript> MY_CLASS = PMEBaseScript.class;
-    private static final Class<PMEInvocationPoint> COMMAND_CLASS = PMEInvocationPoint.class;
-    private static final Class<BaseScript> BASE_SCRIPT_CLASS = BaseScript.class;
-    private static final ClassNode MY_TYPE = ClassHelper.make( MY_CLASS);
-    private static final ClassNode COMMAND_TYPE = ClassHelper.make(COMMAND_CLASS);
-    private static final ClassNode BASE_SCRIPT_TYPE = ClassHelper.make(BASE_SCRIPT_CLASS);
-    private static final String MY_TYPE_NAME = "@" + MY_TYPE.getNameWithoutPackage();
+    private static final ClassNode MAVEN_TYPE = ClassHelper.make( PMEBaseScript.class );
+    private static final ClassNode GRADLE_TYPE = ClassHelper.make( GMEBaseScript.class );
+    @SuppressWarnings( "deprecation" )
+    private static final ClassNode DEPRECATED_COMMAND_TYPE = ClassHelper.make( PMEInvocationPoint.class );
+    private static final ClassNode COMMAND_TYPE = ClassHelper.make( InvocationPoint.class );
+    private static final ClassNode MAVEN_BASE_SCRIPT_TYPE = ClassHelper.make( BaseScript.class );
+    private static final String MAVEN_TYPE_NAME = "@" + MAVEN_TYPE.getNameWithoutPackage();
+    private static final ClassNode GRADLE_BASE_SCRIPT_TYPE = ClassHelper.make( GradleBaseScript.class );
+    private static final String GRADLE_TYPE_NAME = "@" + GRADLE_TYPE.getNameWithoutPackage();
+
+    enum Type { GRADLE, MAVEN }
+
+    private Type type;
+
     private static final Parameter[] CONTEXT_CTOR_PARAMETERS = {new Parameter(ClassHelper.BINDING_TYPE, "context")};
 
     public void visit(ASTNode[] nodes, SourceUnit source) {
         init(nodes, source);
         AnnotatedNode parent = (AnnotatedNode) nodes[1];
         AnnotationNode node = (AnnotationNode) nodes[0];
-        if (!MY_TYPE.equals(node.getClassNode())) return;
+        if (MAVEN_TYPE.equals( node.getClassNode()) || GRADLE_TYPE.equals( node.getClassNode() ))
+        {
+            type = ( MAVEN_TYPE.equals( node.getClassNode()) ) ? Type.MAVEN : Type.GRADLE;
 
-        if (parent instanceof DeclarationExpression) {
-            changeBaseScriptTypeFromDeclaration((DeclarationExpression) parent, node);
-        } else if (parent instanceof ImportNode || parent instanceof PackageNode) {
-            changeBaseScriptTypeFromPackageOrImport(source, parent, node);
-        } else if (parent instanceof ClassNode) {
-            changeBaseScriptTypeFromClass((ClassNode) parent, node);
+            if ( parent instanceof DeclarationExpression )
+            {
+                changeBaseScriptTypeFromDeclaration( (DeclarationExpression) parent, node );
+            }
+            else if ( parent instanceof ImportNode || parent instanceof PackageNode )
+            {
+                changeBaseScriptTypeFromPackageOrImport( source, parent, node );
+            }
+            else if ( parent instanceof ClassNode )
+            {
+                changeBaseScriptTypeFromClass( (ClassNode) parent, node );
+            }
+        }
+    }
+    
+    private String getType()
+    {
+        if (type == Type.MAVEN)
+        {
+            return MAVEN_TYPE_NAME;
+        }
+        else
+        {
+            return GRADLE_TYPE_NAME;
         }
     }
 
     private void changeBaseScriptTypeFromPackageOrImport(final SourceUnit source, final AnnotatedNode parent, final AnnotationNode node) {
         Expression value = node.getMember("value");
         if (!(value instanceof ClassExpression)) {
-            addError("Annotation " + MY_TYPE_NAME + " member 'value' should be a class literal.", value);
+            addError( "Annotation " + getType() + " member 'value' should be a class literal.", value);
             return;
         }
         List<ClassNode> classes = source.getAST().getClasses();
@@ -118,17 +145,17 @@ public class ASTTransformer  extends AbstractASTTransformation {
 
     private void changeBaseScriptTypeFromDeclaration(final DeclarationExpression de, final AnnotationNode node) {
         if (de.isMultipleAssignmentDeclaration()) {
-            addError("Annotation " + MY_TYPE_NAME + " not supported with multiple assignment notation.", de);
+            addError( "Annotation " + getType() + " not supported with multiple assignment notation.", de);
             return;
         }
 
         if (!(de.getRightExpression() instanceof EmptyExpression)) {
-            addError("Annotation " + MY_TYPE_NAME + " not supported with variable assignment.", de);
+            addError( "Annotation " + getType() + " not supported with variable assignment.", de);
             return;
         }
         Expression value = node.getMember("value");
         if (value != null) {
-            addError("Annotation " + MY_TYPE_NAME + " cannot have member 'value' if used on a declaration.", value);
+            addError( "Annotation " + getType() + " cannot have member 'value' if used on a declaration.", value);
             return;
         }
 
@@ -136,12 +163,19 @@ public class ASTTransformer  extends AbstractASTTransformation {
         ClassNode baseScriptType = de.getVariableExpression().getType().getPlainNodeReference();
         if (baseScriptType.isScript()) {
             if (!(de.getRightExpression() instanceof EmptyExpression)) {
-                addError("Annotation " + MY_TYPE_NAME + " not supported with variable assignment.", de);
+                addError( "Annotation " + getType() + " not supported with variable assignment.", de);
                 return;
             }
             de.setRightExpression(new VariableExpression("this"));
         } else {
-            baseScriptType = BASE_SCRIPT_TYPE;
+            if ( type == Type.MAVEN )
+            {
+                baseScriptType = MAVEN_BASE_SCRIPT_TYPE;
+            }
+            else
+            {
+                baseScriptType = GRADLE_BASE_SCRIPT_TYPE;
+            }
         }
 
         changeBaseScriptType(de, cNode, baseScriptType);
@@ -149,7 +183,7 @@ public class ASTTransformer  extends AbstractASTTransformation {
 
     private void changeBaseScriptType(final AnnotatedNode parent, final ClassNode cNode, final ClassNode baseScriptType) {
         if (!cNode.isScriptBody()) {
-            addError("Annotation " + MY_TYPE_NAME + " can only be used within a Script.", parent);
+            addError( "Annotation " + getType() + " can only be used within a Script.", parent);
             return;
         }
 
@@ -158,8 +192,16 @@ public class ASTTransformer  extends AbstractASTTransformation {
             return;
         }
 
-        List<AnnotationNode> annotations = parent.getAnnotations(COMMAND_TYPE);
-        if (cNode.getAnnotations(COMMAND_TYPE).isEmpty()) { // #388 prevent "Duplicate annotation for class" AnnotationFormatError
+        List<AnnotationNode> annotations = parent.getAnnotations( DEPRECATED_COMMAND_TYPE );
+        if (cNode.getAnnotations( DEPRECATED_COMMAND_TYPE ).isEmpty()) { // #388 prevent "Duplicate annotation for class" AnnotationFormatError
+
+            // TODO : handle scenario where the annotation is not fully qualified which comes through as a variable
+            // expression instead of a PropertyExpression/ClassExpression/ConstantExpression
+
+            cNode.addAnnotations(annotations);
+        }
+        annotations = parent.getAnnotations( COMMAND_TYPE );
+        if (cNode.getAnnotations( COMMAND_TYPE ).isEmpty()) { // #388 prevent "Duplicate annotation for class" AnnotationFormatError
 
             // TODO : handle scenario where the annotation is not fully qualified which comes through as a variable
             // expression instead of a PropertyExpression/ClassExpression/ConstantExpression
