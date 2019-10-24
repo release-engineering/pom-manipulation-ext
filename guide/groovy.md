@@ -83,6 +83,14 @@ Each groovy script will be run on the execution root (i.e. where Maven is invoke
 
 Each script <b>must</b> use the following annotations:
 
+<table bgcolor="#ffff00">
+<tr>
+<td>
+    <b>NOTE</b> : For PME versions <b>from</b> 3.8.1, the <code>PMEInvocationPoint</code> annotation has been deprecated and developers should use <code>InvocationPoint</code> in preference.
+</td>
+</tr>
+</table>
+
 ```
 
 import org.commonjava.maven.ext.core.groovy.BaseScript
@@ -91,7 +99,8 @@ import org.commonjava.maven.ext.core.groovy.PMEBaseScript
 import org.commonjava.maven.ext.core.groovy.PMEInvocationPoint
 ...
 
-@PMEInvocationPoint(invocationPoint = InvocationStage.FIRST)
+// See above note about @PMEInvocationPoint versus @InvocationPoint
+@InvocationPoint(invocationPoint = InvocationStage.FIRST)
 @PMEBaseScript BaseScript pme
 ```
 
