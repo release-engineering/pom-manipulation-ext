@@ -81,6 +81,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.apache.commons.lang.StringUtils.isNotEmpty;
 
@@ -353,8 +354,8 @@ public class Cli
             }
             else if ( cmd.hasOption( 'p' ) || cmd.hasOption( "printGAVTC" ) )
             {
-                Set<ArtifactRef> ts = RESTCollector.establishAllDependencies( session, pomIO.parseProject( session.getPom() ),
-                                                                              activeProfiles );
+                List<ArtifactRef> ts = RESTCollector.establishAllDependencies( session, pomIO.parseProject( session.getPom() ),
+                                                                              activeProfiles ).stream().sorted().collect(Collectors.toList());
                 logger.info( "Found {} dependencies. {}", ts.size(), ts );
                 File output = null;
 
