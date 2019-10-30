@@ -15,7 +15,6 @@
  */
 package org.commonjava.maven.ext.core.impl;
 
-import org.apache.maven.artifact.ArtifactScopeEnum;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.Plugin;
 import org.apache.maven.model.Profile;
@@ -27,8 +26,6 @@ import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleTypeAndClassifier;
 import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.common.model.Project;
-import org.commonjava.maven.ext.common.model.SimpleScopedArtifactRef;
-import org.commonjava.maven.ext.common.util.PropertyResolver;
 import org.commonjava.maven.ext.core.ManipulationSession;
 import org.commonjava.maven.ext.core.state.DependencyState;
 import org.commonjava.maven.ext.core.state.PluginState;
@@ -305,8 +302,8 @@ public class RESTCollector
                     localDeps.add( new SimpleArtifactRef( parent, new SimpleTypeAndClassifier( "pom", null ) ) );
                 }
 
-                recordDependencies( session, project, localDeps, project.getResolvedManagedDependencies( session ) );
-                recordDependencies( session, project, localDeps, project.getResolvedDependencies( session ) );
+                recordDependencies( session, localDeps, project.getResolvedManagedDependencies( session ) );
+                recordDependencies( session, localDeps, project.getResolvedDependencies( session ) );
                 recordPlugins( session, localDeps, project.getResolvedManagedPlugins( session ) );
                 recordPlugins( session, localDeps, project.getResolvedPlugins( session ) );
 
@@ -319,10 +316,10 @@ public class RESTCollector
                         {
                             continue;
                         }
-                        recordDependencies( session, project, localDeps,
+                        recordDependencies( session, localDeps,
                                             project.getResolvedProfileManagedDependencies( session ).getOrDefault (p, Collections.emptyMap()) );
-                        recordDependencies( session, project, localDeps,
-                                             project.getResolvedProfileDependencies( session ).getOrDefault( p, Collections.emptyMap() ) );
+                        recordDependencies( session, localDeps,
+                                            project.getResolvedProfileDependencies( session ).getOrDefault( p, Collections.emptyMap() ) );
                         recordPlugins( session, localDeps, project.getResolvedProfileManagedPlugins( session ).getOrDefault( p, Collections.emptyMap() ) );
                         recordPlugins( session, localDeps, project.getResolvedProfilePlugins( session ).getOrDefault( p, Collections.emptyMap() ) );
 
@@ -345,9 +342,9 @@ public class RESTCollector
 
         for ( ProjectVersionRef pvr : plugins.keySet() )
         {
-            deps.add( new SimpleScopedArtifactRef(
+            deps.add( new SimpleArtifactRef(
                             new SimpleProjectVersionRef( pvr.asProjectRef(), handlePotentialSnapshotVersion( vs, pvr.getVersionString() ) ),
-                            new SimpleTypeAndClassifier( "maven-plugin", null ), ArtifactScopeEnum.compile.name() ) );
+                            new SimpleTypeAndClassifier( "maven-plugin", null ) ) );
         }
     }
 
@@ -355,13 +352,11 @@ public class RESTCollector
     /**
      * Translate a given set of pvr:dependencies into ArtifactRefs.
      * @param session the ManipulationSession
-     * @param project currently scanned project
      * @param deps Set of ArtifactRef to store the results in.
      * @param dependencies dependencies to examine
      */
-    private static void recordDependencies( ManipulationSession session, Project project, Set<ArtifactRef> deps,
+    private static void recordDependencies( ManipulationSession session, Set<ArtifactRef> deps,
                                             Map<ArtifactRef, Dependency> dependencies )
-                    throws ManipulationException
     {
         final VersioningState vs = session.getState( VersioningState.class );
         final RESTState state = session.getState( RESTState.class );
@@ -369,13 +364,9 @@ public class RESTCollector
         for ( ArtifactRef pvr : dependencies.keySet() )
         {
             Dependency d = dependencies.get( pvr );
-            SimpleScopedArtifactRef sa = new SimpleScopedArtifactRef(
+            SimpleArtifactRef sa = new SimpleArtifactRef(
                             new SimpleProjectVersionRef( pvr.asProjectRef(), handlePotentialSnapshotVersion( vs, pvr.getVersionString() ) ),
-                            new SimpleTypeAndClassifier( d.getType(), d.getClassifier() ), isEmpty( d.getScope() ) ?
-                                                                   ArtifactScopeEnum.compile.name() :
-                                                                   PropertyResolver.resolveInheritedProperties( session,
-                                                                                                                project,
-                                                                                                                d.getScope() ) );
+                            new SimpleTypeAndClassifier( d.getType(), d.getClassifier() ) );
 
             boolean validate = true;
 

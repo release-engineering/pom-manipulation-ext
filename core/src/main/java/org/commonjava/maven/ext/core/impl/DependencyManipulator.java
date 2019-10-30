@@ -145,6 +145,7 @@ public class DependencyManipulator implements Manipulator
         Map<ArtifactRef, String> bomOverrides = new LinkedHashMap<>();
         Map<ArtifactRef, String> mergedOverrides = new LinkedHashMap<>();
 
+        logger.info ( "Remote precedence is {}", depState.getPrecedence() );
         if ( gavs != null )
         {
             final ListIterator<ProjectVersionRef> iter = gavs.listIterator( gavs.size() );
@@ -160,7 +161,7 @@ public class DependencyManipulator implements Manipulator
             }
         }
 
-        // Load extra BOMs into seperate maps for accessing later, when applying the dependencyExclusions.
+        // Load extra BOMs into separate maps for accessing later, when applying the dependencyExclusions.
         for ( Map.Entry<String, ProjectVersionRef> entry : extraGAVs.entrySet() )
         {
             extraBOMOverrides.put( entry.getKey(),
@@ -198,7 +199,6 @@ public class DependencyManipulator implements Manipulator
             removeDuplicateArtifacts( mergedOverrides, bomOverrides );
             mergedOverrides.putAll( bomOverrides );
         }
-        logger.info ( "Remote precedence is {}", depState.getPrecedence() );
 
         logger.debug ("Final remote override list is {}", mergedOverrides);
         return mergedOverrides;
@@ -217,7 +217,8 @@ public class DependencyManipulator implements Manipulator
             {
                 if ( pRef.equals( target.asProjectRef() ) )
                 {
-                    logger.debug( "From source overrides artifact {} clashes with target {}", key, target );
+                    logger.debug( "Merging sources ; entry {}={} clashes (and will be removed) with precedence given to {}={}",
+                                  key, mergedOverrides.get( key ), target, targetOverrides.get( target ) );
                     i.remove();
                     break;
                 }

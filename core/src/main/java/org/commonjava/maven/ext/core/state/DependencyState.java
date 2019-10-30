@@ -69,7 +69,21 @@ public class DependencyState
         BOM,
         RESTBOM,
         BOMREST,
-        NONE
+        NONE;
+
+        @Override
+        public String toString()
+        {
+            switch ( this )
+            {
+                case BOMREST:
+                    return "BOM first, then REST";
+                case RESTBOM:
+                    return "REST first, then BOM";
+                default:
+                    return this.name();
+            }
+        }
     }
 
     /**

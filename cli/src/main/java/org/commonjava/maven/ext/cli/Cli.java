@@ -55,7 +55,6 @@ import org.codehaus.plexus.component.repository.exception.ComponentLookupExcepti
 import org.commonjava.maven.atlas.ident.ref.ArtifactRef;
 import org.commonjava.maven.atlas.ident.ref.InvalidRefException;
 import org.commonjava.maven.ext.common.ManipulationException;
-import org.commonjava.maven.ext.common.model.SimpleScopedArtifactRef;
 import org.commonjava.maven.ext.core.ManipulationManager;
 import org.commonjava.maven.ext.core.ManipulationSession;
 import org.commonjava.maven.ext.core.impl.RESTCollector;
@@ -168,7 +167,7 @@ public class Cli
         options.addOption( Option.builder( "p" ).longOpt( "printDeps" ).desc( "Print all project dependencies" ).build() );
         options.addOption( Option.builder()
                                  .longOpt( "printGAVTC" )
-                                 .desc( "Print all project dependencies in group:artifact:version:type:classifier with scope information" )
+                                 .desc( "Print all project dependencies as group:artifact:version:type:classifier" )
                                  .build() );
         options.addOption( Option.builder( "D" )
                                  .hasArgs()
@@ -366,16 +365,11 @@ public class Cli
                 }
                 for ( ArtifactRef a : ts )
                 {
-                    String scope = null;
-                    if ( a instanceof SimpleScopedArtifactRef )
-                    {
-                        scope = ( (SimpleScopedArtifactRef) a ).getScope();
-                    }
                     if ( cmd.hasOption( 'o' ) )
                     {
                         if ( cmd.hasOption( "printGAVTC" ) )
                         {
-                            FileUtils.writeStringToFile( output, String.format( "%-80s%10s\n", a, scope ), Charset.defaultCharset(), true );
+                            FileUtils.writeStringToFile( output, String.format( "%-80s\n", a), Charset.defaultCharset(), true );
                         }
                         else
                         {
@@ -386,7 +380,7 @@ public class Cli
                     {
                         if ( cmd.hasOption( "printGAVTC" ) )
                         {
-                            System.out.format( "%-80s%10s\n", a, scope );
+                            System.out.format( "%-80s\n", a );
                         }
                         else
                         {

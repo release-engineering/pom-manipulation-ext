@@ -38,20 +38,4 @@ public class SetAndSimpleScopeTest
 
         assertEquals( 2, s.size() );
     }
-
-    @Test
-    public void testVerifyScopedArtifactRef()
-    {
-        SimpleArtifactRef commonslang = SimpleArtifactRef.parse( "commons-lang:commons-lang:jar:1.0" );
-        SimpleArtifactRef commonslangsources = SimpleArtifactRef.parse( "commons-lang:commons-lang:jar:1.0:sources" );
-
-        SimpleScopedArtifactRef commonsscoped = new SimpleScopedArtifactRef( commonslang.asProjectVersionRef(), commonslang.getTypeAndClassifier(), "compile" );
-        SimpleScopedArtifactRef commonsscopedtest = new SimpleScopedArtifactRef( commonslangsources.asProjectVersionRef(), commonslangsources.getTypeAndClassifier(), "test" );
-
-        Set<ArtifactRef> s = new HashSet<>(  );
-        s.add( commonsscoped );
-        s.add( commonsscopedtest );
-
-        assertEquals( 2, s.size() );
-    }
 }
