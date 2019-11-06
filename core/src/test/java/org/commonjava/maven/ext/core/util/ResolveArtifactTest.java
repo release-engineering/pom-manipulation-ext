@@ -31,22 +31,19 @@ import static org.junit.Assert.assertEquals;
 
 public class ResolveArtifactTest
 {
+    private static final String RESOURCE_BASE = "properties/";
+
     @Test
     public void testResolveArtifacts() throws Exception
     {
         final ManipulationSession session = new ManipulationSession();
 
-        // Locate the PME project pom file.
-        final File projectroot = new File (TestUtils.resolveFileResource( "properties/", "" )
-                                          .getParentFile()
-                                          .getParentFile()
-                                          .getParentFile()
-                                          .getParentFile(), "pom.xml" );
+        final File projectroot = TestUtils.resolveFileResource( RESOURCE_BASE, "infinispan-bom-8.2.0.Final.pom" );
         PomIO pomIO = new PomIO();
         List<Project> projects = pomIO.parseProject( projectroot );
 
         Set<ArtifactRef> artifacts = RESTCollector.establishAllDependencies( session, projects, null );
         System.out.println ("### artifact count is " + artifacts.size());
-        assertEquals( 66, artifacts.size() );
+        assertEquals( 67, artifacts.size() );
     }
 }
