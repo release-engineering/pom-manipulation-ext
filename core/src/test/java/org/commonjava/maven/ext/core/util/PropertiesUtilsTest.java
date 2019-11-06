@@ -283,9 +283,9 @@ public class PropertiesUtilsTest
         WildcardMap<ProjectVersionRef> map = (session.getState( RelocationState.class) == null ? new WildcardMap<>() : session.getState( RelocationState.class ).getDependencyRelocations());
         String result = ProjectComparator.compareProjects( session, new PME(), map,
                                            projects, newprojects );
-        System.out.println (result);
+        System.out.println( result );
 
-        assertTrue( systemRule.getLog().contains( "------------------- project org.infinispan:infinispan-bom\n"  ) );
+        assertTrue( systemRule.getLog().contains( "------------------- project org.infinispan:infinispan-bom" + System.lineSeparator() ) );
     }
 
 

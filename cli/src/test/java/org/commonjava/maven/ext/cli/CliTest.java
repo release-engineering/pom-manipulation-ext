@@ -121,7 +121,7 @@ public class CliTest
         boolean restore = false;
         Path source = Paths.get ( System.getProperty( "user.home" ) + File.separatorChar + ".m2" + File.separatorChar + "settings.xml");
         Path backup = Paths.get( source.toString() + '.' + UUID.randomUUID().toString() );
-        Path tmpSettings = Paths.get ( getClass().getResource("/settings-test.xml").getFile() );
+        Path tmpSettings = Paths.get ( getClass().getResource("/settings-test.xml").toURI() );
 
         try
         {

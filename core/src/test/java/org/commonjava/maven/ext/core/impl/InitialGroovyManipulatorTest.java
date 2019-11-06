@@ -80,7 +80,7 @@ public class InitialGroovyManipulatorTest
         Properties userProperties = new Properties();
         userProperties.setProperty( "versionIncrementalSuffix", "rebuild" );
 
-        userProperties.setProperty( "groovyScripts", "file://" + groovy.getAbsolutePath() );
+        userProperties.setProperty( "groovyScripts", groovy.toURI().toString() );
 
         ManipulationManager manipulationManager = container.lookup( ManipulationManager.class );
         ManipulationSession session = container.lookup( ManipulationSession.class );
