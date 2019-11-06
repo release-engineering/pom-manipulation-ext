@@ -229,7 +229,6 @@ public class BaseScriptTest
         assertEquals( "rebuild-5", state.getSuffix() );
     }
 
-
     @Test
     public void testGroovyExceptions() throws Exception
     {
@@ -248,7 +247,7 @@ public class BaseScriptTest
 
         Properties userProperties = new Properties();
         userProperties.setProperty( "versionIncrementalSuffix", "rebuild" );
-        userProperties.setProperty( "groovyScripts", "file://" + groovy.getAbsolutePath() );
+        userProperties.setProperty( "groovyScripts", groovy.toURI().toString() );
         ManipulationSession session = TestUtils.createSession( userProperties );
 
         VersioningState state = session.getState( VersioningState.class );
