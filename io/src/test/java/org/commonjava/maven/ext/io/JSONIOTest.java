@@ -29,7 +29,7 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
@@ -67,9 +67,9 @@ public class JSONIOTest
     {
         DocumentContext o = jsonIO.parseJSON( npmFile );
         logger.debug ("Read {} ", o.jsonString());
-        logger.debug ("File {}", FileUtils.readFileToString( npmFile, Charset.defaultCharset() ));
+        logger.debug ("File {}", FileUtils.readFileToString( npmFile, StandardCharsets.UTF_8 ));
         // They won't be equal as jsonString is not pretty printed.
-        assertNotEquals( o.jsonString(), FileUtils.readFileToString( npmFile, Charset.defaultCharset() ) );
+        assertNotEquals( o.jsonString(), FileUtils.readFileToString( npmFile, StandardCharsets.UTF_8 ) );
         assertNotNull( o );
     }
 

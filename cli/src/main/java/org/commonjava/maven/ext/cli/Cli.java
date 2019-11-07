@@ -73,7 +73,7 @@ import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathFactory;
 import java.io.File;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -311,9 +311,9 @@ public class Cli
             logger.debug( "Using local repository \n{} and found global settings file in {} with contents \n{} and user settings file in {} with contents \n{}",
                           session.getLocalRepository(),
                           DEFAULT_GLOBAL_SETTINGS_FILE, DEFAULT_GLOBAL_SETTINGS_FILE.exists() ? FileUtils.readFileToString
-                                          ( DEFAULT_GLOBAL_SETTINGS_FILE, Charset.defaultCharset() ) : "** File does not exist **",
+                                          ( DEFAULT_GLOBAL_SETTINGS_FILE, StandardCharsets.UTF_8 ) : "** File does not exist **",
                           settings,
-                          (settings != null && settings.exists()) ? FileUtils.readFileToString( settings, Charset.defaultCharset() ) : "** File does not exist **"
+                          (settings != null && settings.exists()) ? FileUtils.readFileToString( settings, StandardCharsets.UTF_8 ) : "** File does not exist **"
                           );
 
             manipulationManager.init( session );
@@ -369,11 +369,11 @@ public class Cli
                     {
                         if ( cmd.hasOption( "printGAVTC" ) )
                         {
-                            FileUtils.writeStringToFile( output, String.format( "%-80s\n", a), Charset.defaultCharset(), true );
+                            FileUtils.writeStringToFile( output, String.format( "%-80s\n", a), StandardCharsets.UTF_8, true );
                         }
                         else
                         {
-                            FileUtils.writeStringToFile( output, a.asProjectVersionRef().toString() + '\n', Charset.defaultCharset(), true );
+                            FileUtils.writeStringToFile( output, a.asProjectVersionRef().toString() + '\n', StandardCharsets.UTF_8, true );
                         }
                     }
                     else

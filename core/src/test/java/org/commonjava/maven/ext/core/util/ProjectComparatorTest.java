@@ -44,7 +44,7 @@ import org.slf4j.helpers.FormattingTuple;
 import org.slf4j.helpers.MessageFormatter;
 
 import java.io.File;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
@@ -227,7 +227,7 @@ public class ProjectComparatorTest
         String result = ProjectComparator.compareProjects( session, new PME(), relocationState.getDependencyRelocations(),
                                            projectOriginal, projectNew );
         System.out.println (result);
-        FileUtils.writeStringToFile( resultFile, result, Charset.defaultCharset() );
+        FileUtils.writeStringToFile( resultFile, result, StandardCharsets.UTF_8 );
 
         assertTrue( systemOutRule.getLog().contains( "Managed dependencies :" ) );
         assertTrue( systemOutRule.getLog().contains( "Project version :" ) );
@@ -237,7 +237,7 @@ public class ProjectComparatorTest
         assertTrue( systemOutRule.getLog().contains( "org.foobar" ) );
 
         assertTrue( resultFile.exists() );
-        String contents = FileUtils.readFileToString( resultFile, Charset.defaultCharset() );
+        String contents = FileUtils.readFileToString( resultFile, StandardCharsets.UTF_8 );
 
         assertTrue( contents.contains( "Managed dependencies :" ) );
         assertTrue( contents.contains( "Project version :" ) );

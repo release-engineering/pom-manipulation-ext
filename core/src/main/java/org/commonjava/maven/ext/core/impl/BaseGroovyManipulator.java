@@ -38,7 +38,7 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -162,7 +162,7 @@ public abstract class BaseGroovyManipulator
         {
             try
             {
-                logger.debug ( "Failure when injecting into script {} ", FileUtils.readFileToString( groovyScript, Charset.defaultCharset() ), e );
+                logger.debug ( "Failure when injecting into script {} ", FileUtils.readFileToString( groovyScript, StandardCharsets.UTF_8 ), e );
             }
             catch ( IOException e1 )
             {
@@ -174,7 +174,7 @@ public abstract class BaseGroovyManipulator
         {
             try
             {
-                logger.debug ( "Failure when parsing script {} ", FileUtils.readFileToString( groovyScript, Charset.defaultCharset() ), e );
+                logger.debug ( "Failure when parsing script {} ", FileUtils.readFileToString( groovyScript, StandardCharsets.UTF_8 ), e );
             }
             catch ( IOException e1 )
             {

@@ -27,7 +27,7 @@ import org.junit.rules.TemporaryFolder;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -52,7 +52,7 @@ public class CliTest
                         + "<settings xmlns=\"http://maven.apache.org/SETTINGS/1.0.0\""
                         + "xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\""
                         + "xsi:schemaLocation=\"http://maven.apache.org/SETTINGS/1.0.0 http://maven.apache.org/xsd/settings-1.0.0.xsd\">"
-                        + "</settings>", Charset.defaultCharset() );
+                        + "</settings>", StandardCharsets.UTF_8 );
         return f;
     }
 

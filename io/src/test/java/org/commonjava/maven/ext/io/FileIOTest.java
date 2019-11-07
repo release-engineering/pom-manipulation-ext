@@ -26,7 +26,7 @@ import org.junit.rules.TemporaryFolder;
 
 import java.io.File;
 import java.net.URL;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 import static org.junit.Assert.assertEquals;
 
@@ -55,7 +55,7 @@ public class FileIOTest
     @Test
     public void testReadURL() throws Exception
     {
-        String urlPom = FileUtils.readFileToString( fileIO.resolveURL( new URL ( mockServer.getUrl()) ), Charset.defaultCharset() );
+        String urlPom = FileUtils.readFileToString( fileIO.resolveURL( new URL ( mockServer.getUrl()) ), StandardCharsets.UTF_8 );
         String filePom = FileUtils.readFileToString( new File ( new File (FileIOTest.class.getResource( "/" ).getPath())
                                           .getParentFile().getParentFile(), "pom.xml"), "UTF-8" );
 

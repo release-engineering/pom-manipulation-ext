@@ -42,7 +42,7 @@ import javax.inject.Singleton;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -190,7 +190,7 @@ public class ManipulationManager
                 if ( isNotEmpty( reportTxtOutputFile ) )
                 {
                     File reportFile = new File ( reportTxtOutputFile);
-                    FileUtils.writeStringToFile( reportFile, report, Charset.defaultCharset() );
+                    FileUtils.writeStringToFile( reportFile, report, StandardCharsets.UTF_8 );
                 }
                 final String reportJsonOutputFile = session.getUserProperties().getProperty( REPORT_JSON_OUTPUT_FILE,
                                                                                              session.getTargetDir() + File.separator + REPORT_JSON_DEFAULT);

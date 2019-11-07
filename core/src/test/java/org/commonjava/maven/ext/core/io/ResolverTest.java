@@ -27,7 +27,7 @@ import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
 import java.io.File;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 import static junit.framework.TestCase.assertTrue;
 
@@ -51,7 +51,7 @@ public class ResolverTest
 
         assertTrue (c.exists());
 
-        String academy = FileUtils.readFileToString( c, Charset.defaultCharset());
+        String academy = FileUtils.readFileToString( c, StandardCharsets.UTF_8);
 
         assertTrue (academy.contains( "This is Custom Matcher to validate Credit Card" ));
     }

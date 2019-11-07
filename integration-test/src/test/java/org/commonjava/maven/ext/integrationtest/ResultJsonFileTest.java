@@ -75,7 +75,7 @@ public class ResultJsonFileTest
         copyFile( pomFile, new File( baseDir, "pom.xml" ) );
 
         // when
-        
+
         Map<String, String> params = new HashMap<>();
         params.put( VersioningState.INCREMENT_SERIAL_SUFFIX_SYSPROP.getCurrent(), AddSuffixJettyHandler.SUFFIX );
         params.put( "dependencyOverride.org.apache.qpid-proton-j-parent@*", "0.31.0.redhat-00001" );
@@ -111,8 +111,6 @@ public class ResultJsonFileTest
 
         File outputJsonFile = new File( baseDir, "/target/manipulation.json" );
         assertTrue( outputJsonFile.exists() );
-
-        System.out.println ("#### \n" + FileUtils.readFileToString( outputJsonFile, Charset.defaultCharset() ) );
 
         JsonNode rootNode = MAPPER.readTree( outputJsonFile );
 

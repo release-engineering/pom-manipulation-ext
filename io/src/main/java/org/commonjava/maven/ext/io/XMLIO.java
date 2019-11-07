@@ -37,7 +37,7 @@ import javax.xml.transform.stream.StreamResult;
 import java.io.File;
 import java.io.IOException;
 import java.io.StringWriter;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 @Named
 @Singleton
@@ -105,7 +105,7 @@ public class XMLIO
             String result = convert( contents );
             // Adjust for comment before root node and possibly insert a newline.
             result = result.replaceFirst("(?s)(<!--.*-->)<", "$1\n<");
-            FileUtils.writeStringToFile( target, result, Charset.defaultCharset());
+            FileUtils.writeStringToFile( target, result, StandardCharsets.UTF_8);
         }
         catch ( IOException e )
         {

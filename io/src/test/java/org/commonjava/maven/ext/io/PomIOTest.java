@@ -26,7 +26,7 @@ import org.junit.rules.TemporaryFolder;
 
 import java.io.File;
 import java.net.URL;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.HashSet;
 
 import static org.junit.Assert.assertEquals;
@@ -138,6 +138,6 @@ public class PomIOTest
 
         pomIO.writeModel( model, targetFile );
         assertTrue( targetFile.exists() );
-        assertEquals( sb, FileUtils.readFileToString( targetFile, Charset.defaultCharset() ) );
+        assertEquals( sb, FileUtils.readFileToString( targetFile, StandardCharsets.UTF_8 ) );
     }
 }
