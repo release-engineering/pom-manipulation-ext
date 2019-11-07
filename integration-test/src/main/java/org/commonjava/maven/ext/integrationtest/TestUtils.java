@@ -23,6 +23,7 @@ import ch.qos.logback.core.ConsoleAppender;
 import groovy.lang.Binding;
 import groovy.util.GroovyScriptEngine;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.SystemUtils;
 import org.commonjava.maven.ext.cli.Cli;
 import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.integrationtest.invoker.DefaultExecutionParser;
@@ -47,6 +48,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -64,7 +66,7 @@ public class TestUtils
 
     private static final String LOCAL_REPO = System.getProperty( "localRepositoryPath" );
 
-    static final File IT_LOCATION = new File( BUILD_DIR, "/it-cli");
+    static final File IT_LOCATION = new File( BUILD_DIR, "it-cli" );
 
     static final Map<String, String> DEFAULT_MVN_PARAMS = new HashMap<String, String>()
     {{
@@ -94,7 +96,7 @@ public class TestUtils
 
     static final Map<String, String> LOCATION_REWRITE = new HashMap<String, String>()
     {{
-            put( "simple-numeric-directory-path", "simple-numeric-directory-path/parent" );
+            put( "simple-numeric-directory-path", "simple-numeric-directory-path" + File.separator + "parent" );
     }};
 
     /**
@@ -156,11 +158,11 @@ public class TestUtils
             {
                 if ( cliExitValue != 0 )
                 {
-                    throw new ManipulationException ( "PME-Cli (running in: " + workingDir + ") exited with a non zero value : " + cliExitValue );
+                    throw new ManipulationException ( "PME-Cli (running in: " + workingDir + ") exited with a non zero value: " + cliExitValue );
                 }
                 if ( mavenExitValue != 0 )
                 {
-                    throw new ManipulationException ( "Maven (running in: " + workingDir + ") exited with a non zero value." + mavenExitValue );
+                    throw new ManipulationException ( "Maven (running in: " + workingDir + ") exited with a non zero value: " + mavenExitValue );
                 }
             }
             else
@@ -248,9 +250,20 @@ public class TestUtils
         throws Exception
     {
         String stringParams = toJavaParams( params );
-        String commandMaven = String.format( "mvn %s %s ", commands, stringParams );
+        String commandMaven;
 
-        return runCommandAndWait(commandMaven, workingDir, MVN_LOCATION + "/bin");
+        if ( SystemUtils.IS_OS_WINDOWS )
+        {
+            commandMaven = String.format( "cmd.exe /X /C \"mvn %s %s\"", commands, stringParams );
+        }
+        else
+        {
+            commandMaven = String.format( "mvn %s %s", commands, stringParams );
+        }
+
+        logger.info( "Maven command: {} (cwd: {})", commandMaven, workingDir );
+
+        return runCommandAndWait( commandMaven, workingDir, MVN_LOCATION + File.separator + "bin" );
     }
 
     /**
@@ -263,7 +276,7 @@ public class TestUtils
     private static void runScript( String workingDir, String file )
         throws Exception
     {
-        File verify = new File( workingDir + "/" + file + ".groovy" );
+        File verify = new File( workingDir + File.separator + file + ".groovy" );
         if ( !verify.isFile() )
         {
             return;
@@ -282,7 +295,7 @@ public class TestUtils
      */
     static String getDefaultTestLocation( String test )
     {
-        return String.format( "%s/%s", IT_LOCATION.getAbsolutePath(), test );
+        return IT_LOCATION.getAbsolutePath() + File.separator + test;
     }
 
     /**
@@ -299,9 +312,15 @@ public class TestUtils
         }
 
         StringBuilder stringParams = new StringBuilder();
-        for ( String key : params.keySet() )
+        Iterator<String> it = params.keySet().iterator();
+        while ( it.hasNext() )
         {
-            stringParams.append( String.format( "-D%s=%s ", key, params.get( key ) ) );
+            String key = it.next();
+            stringParams.append( String.format( "-D%s=%s", key, params.get( key ) ) );
+            if ( it.hasNext() )
+            {
+                stringParams.append( " " );
+            }
         }
         return stringParams.toString();
     }
@@ -320,9 +339,15 @@ public class TestUtils
         }
 
         StringBuilder stringParams = new StringBuilder();
-        for ( String key : params.keySet() )
+        Iterator<String> it = params.keySet().iterator();
+        while ( it.hasNext() )
         {
-            stringParams.append( String.format( "--%s=%s ", key, params.get( key ) ) );
+            String key = it.next();
+            stringParams.append( String.format( "--%s=%s", key, params.get( key ) ) );
+            if ( it.hasNext() )
+            {
+                stringParams.append( " " );
+            }
         }
         return stringParams.toString();
     }
@@ -342,36 +367,32 @@ public class TestUtils
         String path = System.getenv( "PATH" );
         if (extraPath != null)
         {
-            path = extraPath + System.getProperty("path.separator") + path;
+            path = extraPath + File.pathSeparator + path;
         }
 
-        Process proc = Runtime.getRuntime().exec(command, new String[] {"M2_HOME=" + MVN_LOCATION, "PATH=" + path}, new File(workingDir));
-        File buildlog = new File(workingDir + "/build.log");
+        Process proc = Runtime.getRuntime().exec(command, new String[] {"PATH=" + path}, new File(workingDir));
+        File buildlog = new File(workingDir, "build.log");
 
-        BufferedReader stdout = new BufferedReader( new InputStreamReader( proc.getInputStream() ) );
-        BufferedReader stderr = new BufferedReader( new InputStreamReader( proc.getErrorStream() ) );
-        PrintWriter out = new PrintWriter( new BufferedWriter( new FileWriter( buildlog, true ) ) );
-
-        String line;
-        String errline = null;
-        while ( ( line = stdout.readLine() ) != null || ( errline = stderr.readLine() ) != null )
+        try ( BufferedReader stdout = new BufferedReader( new InputStreamReader( proc.getInputStream() ) );
+              BufferedReader stderr = new BufferedReader( new InputStreamReader( proc.getErrorStream() ) );
+              PrintWriter out = new PrintWriter( new BufferedWriter( new FileWriter( buildlog, true ) ) ) )
         {
-            if ( line != null )
+            String line;
+            String errline = null;
+            while ( ( line = stdout.readLine() ) != null || ( errline = stderr.readLine() ) != null )
             {
-                out.println( line );
+                if ( line != null )
+                {
+                    out.println( line );
+                }
+                if ( errline != null )
+                {
+                    out.println( errline );
+                }
             }
-            if ( errline != null )
-            {
-                out.println( errline );
-            }
+
+            return proc.waitFor();
         }
-
-        stdout.close();
-        stderr.close();
-        out.flush();
-        out.close();
-
-        return proc.waitFor();
     }
 
     /**

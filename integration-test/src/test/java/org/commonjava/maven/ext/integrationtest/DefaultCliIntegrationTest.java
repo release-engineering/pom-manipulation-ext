@@ -107,7 +107,8 @@ public class DefaultCliIntegrationTest
     static boolean setupExists( File test )
     {
         boolean result = false;
-        File t1 = new File (DEFAULT_MVN_PARAMS.get( "maven.repo.local" ),"org/commonjava/maven/ext/");
+        File t1 = new File( DEFAULT_MVN_PARAMS.get( "maven.repo.local" ),
+                "org" + File.separator + "commonjava" + File.separator + "maven" + File.separator + "ext" );
         if ( t1.exists())
         {
             File t2 = new File( t1, test.getName() );
