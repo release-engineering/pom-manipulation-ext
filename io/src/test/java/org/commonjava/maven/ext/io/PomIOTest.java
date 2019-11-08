@@ -73,7 +73,7 @@ public class PomIOTest
 
         pomIO.rewritePOMs( changed );
 
-        assertTrue( FileUtils.contentEqualsIgnoreEOL( pom, targetFile, "UTF-8" ) );
+        assertTrue( FileUtils.contentEqualsIgnoreEOL( pom, targetFile, StandardCharsets.UTF_8.toString() ) );
         assertTrue( FileUtils.contentEquals( targetFile, pom ) );
     }
 

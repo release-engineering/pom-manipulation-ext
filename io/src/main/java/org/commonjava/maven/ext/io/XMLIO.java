@@ -45,7 +45,6 @@ public class XMLIO
 {
     private final Logger logger = LoggerFactory.getLogger( getClass() );
 
-    private final DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
     private final DocumentBuilder builder;
     private final Transformer transformer;
 
@@ -53,11 +52,11 @@ public class XMLIO
     {
         try
         {
-            builder = builderFactory.newDocumentBuilder();
+            builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
 
             transformer = TransformerFactory.newInstance().newTransformer();
             transformer.setOutputProperty( OutputKeys.INDENT, "yes");
-            transformer.setOutputProperty( OutputKeys.ENCODING, "UTF-8");
+            transformer.setOutputProperty( OutputKeys.ENCODING, StandardCharsets.UTF_8.toString());
             transformer.setOutputProperty( OutputKeys.OMIT_XML_DECLARATION, "yes" );
         }
         catch ( ParserConfigurationException e )
@@ -114,6 +113,7 @@ public class XMLIO
         }
     }
 
+    @SuppressWarnings( "WeakerAccess" )
     public String convert( Document contents ) throws ManipulationException
     {
         StringWriter outWriter = new StringWriter();

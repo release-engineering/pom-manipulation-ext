@@ -57,7 +57,7 @@ public class FileIOTest
     {
         String urlPom = FileUtils.readFileToString( fileIO.resolveURL( new URL ( mockServer.getUrl()) ), StandardCharsets.UTF_8 );
         String filePom = FileUtils.readFileToString( new File ( new File (FileIOTest.class.getResource( "/" ).getPath())
-                                          .getParentFile().getParentFile(), "pom.xml"), "UTF-8" );
+                                          .getParentFile().getParentFile(), "pom.xml"), StandardCharsets.UTF_8 );
 
         assertEquals( urlPom, filePom );
     }

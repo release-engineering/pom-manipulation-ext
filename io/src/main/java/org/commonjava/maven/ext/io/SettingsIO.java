@@ -34,7 +34,7 @@ import javax.inject.Singleton;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.Iterator;
+import java.nio.charset.StandardCharsets;
 
 /**
  * @author vdedik@redhat.com
@@ -58,7 +58,7 @@ public class SettingsIO
     {
         try
         {
-            PrintWriter printWriter = new PrintWriter( settingsFile, "UTF-8" );
+            PrintWriter printWriter = new PrintWriter( settingsFile, StandardCharsets.UTF_8.toString() );
             new SettingsXpp3Writer().write( printWriter, settings );
         }
         catch ( IOException e )
@@ -84,26 +84,12 @@ public class SettingsIO
 
             for ( Profile profile : settings.getProfiles() )
             {
-                Iterator<Profile> i = defaultSettings.getProfiles().iterator();
-                while (i.hasNext())
-                {
-                    if (i.next().getId().equals( profile.getId() ))
-                    {
-                        i.remove();
-                    }
-                }
+                defaultSettings.getProfiles().removeIf( profile1 -> profile1.getId().equals( profile.getId() ) );
                 defaultSettings.addProfile( profile );
             }
             for ( String activeProfile : settings.getActiveProfiles() )
             {
-                Iterator<String> i = defaultSettings.getActiveProfiles().iterator();
-                while (i.hasNext())
-                {
-                    if (i.next().equals( activeProfile ))
-                    {
-                        i.remove();
-                    }
-                }
+                defaultSettings.getActiveProfiles().removeIf( s -> s.equals( activeProfile ) );
                 defaultSettings.addActiveProfile( activeProfile );
             }
             for ( Mirror mirror : settings.getMirrors() )
