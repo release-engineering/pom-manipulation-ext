@@ -16,14 +16,24 @@
 package org.commonjava.maven.ext.io;
 
 import org.apache.commons.io.FileUtils;
+import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.io.resolver.GalleyInfrastructure;
+import org.jdom2.output.LineSeparator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
+
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.URL;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 
 /**
@@ -33,6 +43,8 @@ import java.util.UUID;
 @Singleton
 public class FileIO
 {
+    private static final Logger logger = LoggerFactory.getLogger( FileIO.class );
+
     private GalleyInfrastructure infra;
 
     @Inject
@@ -57,5 +69,46 @@ public class FileIO
         FileUtils.copyURLToFile( ref, result );
 
         return result;
+    }
+
+    static LineSeparator determineEOL( File file )
+        throws ManipulationException
+    {
+        return determineEOL( file, StandardCharsets.UTF_8 );
+    }
+
+    static LineSeparator determineEOL( File file, Charset charset )
+            throws ManipulationException
+    {
+        try ( BufferedReader bufferIn = new BufferedReader( new InputStreamReader( new FileInputStream( file ),
+                charset ) ) )
+        {
+            int prev = -1;
+            int ch;
+            while ( ( ch = bufferIn.read() ) != -1 )
+            {
+                if ( ch == '\n' )
+                {
+                    if ( prev == '\r' )
+                    {
+                        return LineSeparator.CRNL;
+                    }
+                    else
+                    {
+                        return LineSeparator.NL;
+                    }
+                }
+                else if ( prev == '\r' )
+                {
+                    return LineSeparator.CR;
+                }
+                prev = ch;
+            }
+            throw new ManipulationException( "Could not determine end-of-line marker mode" );
+        }
+        catch ( IOException ioe )
+        {
+            throw new ManipulationException( "Could not determine end-of-line marker mode", ioe );
+        }
     }
 }

@@ -87,7 +87,7 @@ import static org.apache.commons.lang.StringUtils.isNotEmpty;
 public class Cli
 {
     private static final File DEFAULT_GLOBAL_SETTINGS_FILE =
-        new File( System.getenv( "M2_HOME" ), "conf/settings.xml" );
+        new File( System.getenv( "M2_HOME" ), "conf" + File.separator + "settings.xml" );
 
     private final Logger logger = LoggerFactory.getLogger( getClass() );
 
@@ -308,14 +308,20 @@ public class Cli
         {
             // Note : don't print out settings information earlier (like when we actually read it) as the logging
             // isn't setup then.
-            logger.debug( "Using local repository \n{} and found global settings file in {} with contents \n{} and user settings file in {} with contents \n{}",
-                          session.getLocalRepository(),
-                          DEFAULT_GLOBAL_SETTINGS_FILE, DEFAULT_GLOBAL_SETTINGS_FILE.exists() ? FileUtils.readFileToString
-                                          ( DEFAULT_GLOBAL_SETTINGS_FILE, StandardCharsets.UTF_8 ) : "** File does not exist **",
-                          settings,
-                          (settings != null && settings.exists()) ? FileUtils.readFileToString( settings, StandardCharsets.UTF_8 ) : "** File does not exist **"
-                          );
-
+            if ( logger.isDebugEnabled() )
+            {
+                logger.debug("Using local repository {}{} and found global settings file in {} with contents {}{} and user settings file in {} with contents {}{}",
+                        System.lineSeparator(), session.getLocalRepository(), DEFAULT_GLOBAL_SETTINGS_FILE,
+                        System.lineSeparator(),
+                        DEFAULT_GLOBAL_SETTINGS_FILE.exists()
+                                ? FileUtils.readFileToString( DEFAULT_GLOBAL_SETTINGS_FILE, StandardCharsets.UTF_8 )
+                                : "** File does not exist **",
+                        settings, System.lineSeparator(),
+                        ( settings != null && settings.exists() )
+                                ? FileUtils.readFileToString( settings, StandardCharsets.UTF_8 )
+                                : "** File does not exist **"
+                 );
+            }
             manipulationManager.init( session );
 
             Set<String> activeProfiles = null;
@@ -369,18 +375,18 @@ public class Cli
                     {
                         if ( cmd.hasOption( "printGAVTC" ) )
                         {
-                            FileUtils.writeStringToFile( output, String.format( "%-80s\n", a), StandardCharsets.UTF_8, true );
+                            FileUtils.writeStringToFile( output, String.format( "%-80s%n", a ), StandardCharsets.UTF_8, true );
                         }
                         else
                         {
-                            FileUtils.writeStringToFile( output, a.asProjectVersionRef().toString() + '\n', StandardCharsets.UTF_8, true );
+                            FileUtils.writeStringToFile( output, a.asProjectVersionRef().toString() + System.lineSeparator(), StandardCharsets.UTF_8, true );
                         }
                     }
                     else
                     {
                         if ( cmd.hasOption( "printGAVTC" ) )
                         {
-                            System.out.format( "%-80s\n", a );
+                            System.out.format( "%-80s%n", a );
                         }
                         else
                         {

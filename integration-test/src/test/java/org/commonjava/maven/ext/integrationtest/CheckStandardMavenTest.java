@@ -21,6 +21,7 @@ import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
 import java.io.File;
+import java.nio.charset.StandardCharsets;
 
 import static org.commonjava.maven.ext.integrationtest.TestUtils.DEFAULT_MVN_PARAMS;
 import static org.commonjava.maven.ext.integrationtest.TestUtils.runMaven;
@@ -45,7 +46,7 @@ public class CheckStandardMavenTest
         assertTrue( files.length == 1 );
         assertTrue( "build.log".equals( files[0].getName() ) );
 
-        String contents = FileUtils.readFileToString( files[0] );
+        String contents = FileUtils.readFileToString( files[0], StandardCharsets.UTF_8 );
 
         assertFalse( "Native Maven should not have PME installed!",
                      contents.contains( "Manipulation engine disabled. No project found." ) );

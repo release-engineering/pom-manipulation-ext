@@ -305,10 +305,10 @@ public class VersionTest
     {
         assertTrue( Version.isEmpty(null) );
         assertTrue( Version.isEmpty("") );
-        assertTrue( Version.isEmpty("  \n") );
+        assertTrue( Version.isEmpty("  " + System.lineSeparator() ) );
 
         assertFalse( Version.isEmpty( "a") );
-        assertFalse( Version.isEmpty( " a \n") );
+        assertFalse( Version.isEmpty( " a " + System.lineSeparator() ) );
     }
 
     @Test

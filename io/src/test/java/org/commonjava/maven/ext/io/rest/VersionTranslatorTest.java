@@ -164,8 +164,7 @@ public class VersionTranslatorTest
         }
         catch ( Exception ex )
         {
-            fail( String.format( "Expected exception is RestException, instead %s thrown.",
-                                 ex.getClass().getSimpleName() ) );
+            fail( "Expected exception is RestException, instead " + ex.getClass().getSimpleName() + "thrown." );
         }
     }
 
@@ -191,7 +190,7 @@ public class VersionTranslatorTest
         List<ProjectVersionRef> result = new ArrayList<>();
         String result1;
         StringBuilder fileContents = new StringBuilder();
-        String lineSeparator = System.getProperty( "line.separator" );
+        String lineSeparator = System.lineSeparator();
 
         try (Scanner scanner = new Scanner( VersionTranslatorTest.class.getResourceAsStream(
                         "example-response-performance-test.json" ) ))

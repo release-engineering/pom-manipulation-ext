@@ -116,7 +116,7 @@ public class HttpErrorTranslatorTest
     private static String readFileFromClasspath( String filename )
     {
         StringBuilder fileContents = new StringBuilder();
-        String lineSeparator = System.getProperty( "line.separator" );
+        String lineSeparator = System.lineSeparator();
 
         try (Scanner scanner = new Scanner( HttpErrorTranslatorTest.class.getResourceAsStream( filename ) ))
         {

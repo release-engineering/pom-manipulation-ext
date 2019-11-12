@@ -184,8 +184,8 @@ public class VersionCalculator
         {
             logger.debug( "Got the following original version: {} for groupId:artifactId {}:{} ", version, groupId,
                     artifactId );
-            logger.debug( "Got the following version suffixes:\n  Static: {}\n  Incremental: {}", staticSuffix,
-                    incrementalSuffix );
+            logger.debug( "Got the following version suffixes:{}  Static: {}{}  Incremental: {}", System.lineSeparator(),
+                    staticSuffix, System.lineSeparator(), incrementalSuffix );
             logger.debug( "Got the following version override: {}", override );
         }
 
@@ -294,7 +294,7 @@ public class VersionCalculator
         }
         catch ( final GalleyMavenException e )
         {
-            throw new ManipulationException( "Failed to resolve metadata for: %s:%s.", e, groupId, artifactId );
+            throw new ManipulationException( "Failed to resolve metadata for: " + groupId + ":" + artifactId + ".", e );
         }
     }
 

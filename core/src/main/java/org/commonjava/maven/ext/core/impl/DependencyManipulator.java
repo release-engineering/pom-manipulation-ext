@@ -351,8 +351,8 @@ public class DependencyManipulator implements Manipulator
             moduleOverrides = applyModuleVersionOverrides( projectGA, dependencyState.getDependencyExclusions(),
                                                            moduleOverrides, explicitOverrides,
                                                            dependencyState.getExtraBOMDepMgmts() );
-            logger.debug( "Module overrides are:\n{}", moduleOverrides );
-            logger.debug( "Explicit overrides are:\n{}", explicitOverrides );
+            logger.debug( "Module overrides are:{}{}", System.lineSeparator(), moduleOverrides );
+            logger.debug( "Explicit overrides are:{}{}", System.lineSeparator(), explicitOverrides );
         }
         catch ( InvalidRefException e )
         {
@@ -770,8 +770,8 @@ public class DependencyManipulator implements Manipulator
 
         if (logger.isDebugEnabled())
         {
-            logger.debug("Calculating module-specific version overrides. Starting with:\n  {}",
-                    join(remainingOverrides.entrySet(), "\n  "));
+            logger.debug( "Calculating module-specific version overrides. Starting with:{}  {}", System.lineSeparator(),
+                    join( remainingOverrides.entrySet(), String.format( System.lineSeparator() + "  " ) ) );
         }
 
         // These modes correspond to two different kinds of passes over the available override properties:
