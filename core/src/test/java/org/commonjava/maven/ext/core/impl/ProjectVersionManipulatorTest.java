@@ -651,8 +651,6 @@ public class ProjectVersionManipulatorTest
                 if ( applyVersioningChanges( new Project ( project.getOriginalModel()), state ) )
                 {
                     final String v = _versionsByGAV.get( SimpleProjectVersionRef.parse( gav( project ) ) );
-                    logger.info( project.getName() + " (" + gav( project ) + "): VERSION MODIFIED\n    New version: "
-                        + v );
 
                     // this is a bigger model, so only do this if the originalModel was modded.
                     applyVersioningChanges( new Project ( project.getModel()), state );

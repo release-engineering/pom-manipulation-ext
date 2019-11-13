@@ -15,10 +15,12 @@
  */
 package org.commonjava.maven.ext.io;
 
+import com.fasterxml.jackson.core.JsonEncoding;
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPathException;
 import org.apache.commons.io.FileUtils;
 import org.commonjava.maven.ext.common.ManipulationException;
+import org.jdom2.output.LineSeparator;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -29,6 +31,7 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
@@ -42,7 +45,7 @@ public class JSONIOTest
 {
     private final Logger logger = LoggerFactory.getLogger( getClass() );
 
-    private JSONIO jsonIO = new JSONIO();
+    private JSONIO jsonIO;
     private File npmFile;
     private File pluginFile;
 
@@ -67,9 +70,9 @@ public class JSONIOTest
     {
         DocumentContext o = jsonIO.parseJSON( npmFile );
         logger.debug ("Read {} ", o.jsonString());
-        logger.debug ("File {}", FileUtils.readFileToString( npmFile, StandardCharsets.UTF_8 ));
+        logger.debug ("File {}", FileUtils.readFileToString( npmFile, jsonIO.getCharset() ) );
         // They won't be equal as jsonString is not pretty printed.
-        assertNotEquals( o.jsonString(), FileUtils.readFileToString( npmFile, StandardCharsets.UTF_8 ) );
+        assertNotEquals( o.jsonString(), FileUtils.readFileToString( npmFile, jsonIO.getCharset() ) );
         assertNotNull( o );
     }
 
@@ -82,7 +85,64 @@ public class JSONIOTest
 
         jsonIO.writeJSON( target, doc );
 
-        assertTrue( FileUtils.contentEquals( npmFile, target ) );
+        assertTrue( FileUtils.contentEqualsIgnoreEOL( npmFile, target, jsonIO.getCharset().name() ) );
+    }
+
+    @Test
+    public void testEOL() throws ManipulationException, IOException
+    {
+        DocumentContext docUnix = jsonIO.parseJSON( npmFile );
+        assertEquals( StandardCharsets.UTF_8, jsonIO.getCharset() );
+        File targetUnix = tf.newFile();
+        jsonIO.writeJSON( targetUnix, docUnix );
+        assertEquals( "\n",  jsonIO.getEOL() );
+        assertEquals( LineSeparator.NL, FileIO.determineEOL( targetUnix ) );
+        assertTrue( FileUtils.contentEqualsIgnoreEOL( npmFile, targetUnix, jsonIO.getCharset().name() ) );
+
+        URL resourceDos = this.getClass().getResource( "npm-shrinkwrap-dos.json" );
+        File npmFileDos = new File( resourceDos.getFile() );
+        DocumentContext docDos = jsonIO.parseJSON( npmFileDos );
+        assertEquals( StandardCharsets.UTF_8, jsonIO.getCharset() );
+        File targetDos = tf.newFile();
+        jsonIO.writeJSON( targetDos, docDos );
+        assertEquals( "\r\n",  jsonIO.getEOL() );
+        assertEquals( LineSeparator.CRNL, FileIO.determineEOL( targetDos ) );
+        assertTrue( FileUtils.contentEqualsIgnoreEOL( npmFileDos, targetDos, jsonIO.getCharset().name() ) );
+
+        URL resourceMac = this.getClass().getResource( "npm-shrinkwrap-mac.json" );
+        File npmFileMac = new File( resourceMac.getFile() );
+        DocumentContext docMac = jsonIO.parseJSON( npmFileMac );
+        assertEquals( StandardCharsets.UTF_8, jsonIO.getCharset() );
+        File targetMac = tf.newFile();
+        jsonIO.writeJSON( targetMac, docMac );
+        assertEquals( "\r",  jsonIO.getEOL() );
+        assertEquals( LineSeparator.CR, FileIO.determineEOL( targetMac ) );
+        assertTrue( FileUtils.contentEqualsIgnoreEOL( npmFileMac, targetMac, jsonIO.getCharset().name() ) );
+    }
+
+    @Test
+    public void testCharsetUTF16BE() throws ManipulationException, IOException
+    {
+        URL resource = this.getClass().getResource( "npm-shrinkwrap-utf16be.json" );
+        File npmFile = new File( resource.getFile() );
+        DocumentContext doc = jsonIO.parseJSON( npmFile );
+        assertEquals( StandardCharsets.UTF_16BE, jsonIO.getCharset() );
+        File target = tf.newFile();
+        jsonIO.writeJSON( target, doc );
+        assertEquals( JsonEncoding.UTF16_BE, JSONIO.detectEncoding( target ) );
+        assertTrue( FileUtils.contentEqualsIgnoreEOL( npmFile, target, jsonIO.getCharset().name() ) );
+    }
+
+    @Test
+    public void testCharsetUTF32BE() throws ManipulationException, IOException {
+        URL resource = this.getClass().getResource( "npm-shrinkwrap-utf32be.json" );
+        File npmFile = new File( resource.getFile() );
+        DocumentContext doc = jsonIO.parseJSON( npmFile );
+        assertEquals( Charset.forName( "UTF-32BE" ), jsonIO.getCharset() );
+        File target = tf.newFile();
+        jsonIO.writeJSON( target, doc );
+        assertEquals( JsonEncoding.UTF32_BE, JSONIO.detectEncoding( target ) );
+        assertTrue( FileUtils.contentEqualsIgnoreEOL( npmFile, target, jsonIO.getCharset().name() ) );
     }
 
     @Test

@@ -58,7 +58,7 @@ public class SettingsIO
     {
         try
         {
-            PrintWriter printWriter = new PrintWriter( settingsFile, StandardCharsets.UTF_8.toString() );
+            PrintWriter printWriter = new PrintWriter( settingsFile, settings.getModelEncoding() );
             new SettingsXpp3Writer().write( printWriter, settings );
         }
         catch ( IOException e )

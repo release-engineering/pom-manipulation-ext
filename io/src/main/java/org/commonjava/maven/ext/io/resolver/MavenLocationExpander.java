@@ -51,7 +51,7 @@ import java.util.Set;
  * Galley {@link LocationExpander} implementation that expands a shorthand URI
  * given in the betterdep goals into the actual list of locations to check for
  * artifacts.
- * 
+ *
  * @author jdcasey
  */
 public class MavenLocationExpander
@@ -91,8 +91,10 @@ public class MavenLocationExpander
         addSettingsProfileRepositoriesTo( locs, settings, activeProfiles, mirrorSelector );
         addRequestRepositoriesTo( locs, artifactRepositories, settings, mirrorSelector );
 
-        if ( locs.size() > 0 && logger.isDebugEnabled()) {
-            logger.debug("Configured to use Maven locations:\n  {}", new JoinString("\n  ", locs));
+        if ( logger.isDebugEnabled() && !locs.isEmpty() )
+        {
+            logger.debug( "Configured to use Maven locations:{}  {}", System.lineSeparator(),
+                    new JoinString( System.lineSeparator() + "  ", locs ) );
         }
         this.locations = new ArrayList<>( locs );
     }
@@ -228,7 +230,11 @@ public class MavenLocationExpander
             expandSingle( loc, result );
         }
 
-        logger.debug( "Expanded to:\n {}", new JoinString( "\n  ", result ) );
+        if ( logger.isDebugEnabled() )
+        {
+            logger.debug( "Expanded to:{} {}", System.lineSeparator(),
+                    new JoinString( System.lineSeparator() + "  ", result ) );
+        }
         return result;
     }
 
@@ -242,8 +248,10 @@ public class MavenLocationExpander
             expandSingle( loc, result );
         }
 
-        if (logger.isDebugEnabled()) {
-            logger.debug("Expanded to:\n {}", new JoinString("\n  ", result));
+        if ( logger.isDebugEnabled() )
+        {
+            logger.debug( "Expanded to:{} {}", System.lineSeparator(),
+                    new JoinString( System.lineSeparator() + "  ", result ) );
         }
 
         return result;
@@ -268,7 +276,8 @@ public class MavenLocationExpander
 
         if (logger.isDebugEnabled())
         {
-            logger.debug("Expanded to:\n {}", new JoinString("\n  ", result));
+            logger.debug( "Expanded to:{} {}", System.lineSeparator(),
+                    new JoinString( System.lineSeparator() + "  ", result ) );
         }
         return new VirtualResource( result );
     }

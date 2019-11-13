@@ -56,7 +56,7 @@ public class XMLIO
 
             transformer = TransformerFactory.newInstance().newTransformer();
             transformer.setOutputProperty( OutputKeys.INDENT, "yes");
-            transformer.setOutputProperty( OutputKeys.ENCODING, StandardCharsets.UTF_8.toString());
+            transformer.setOutputProperty( OutputKeys.ENCODING, StandardCharsets.UTF_8.name() );
             transformer.setOutputProperty( OutputKeys.OMIT_XML_DECLARATION, "yes" );
         }
         catch ( ParserConfigurationException e )

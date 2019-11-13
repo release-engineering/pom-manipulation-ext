@@ -301,9 +301,8 @@ public class DistributionEnforcingManipulator
         }
         catch ( final XmlPullParserException | IOException e )
         {
-            throw new ManipulationException(
-                                             "Failed to re-parse plugin configuration into Xpp3Dom: %s\nConfig was:\n%s",
-                                             e, e.getMessage(), config );
+            throw new ManipulationException( "Failed to re-parse plugin configuration into Xpp3Dom: "
+                    + e.getMessage() + System.lineSeparator() + "Config was:" + System.lineSeparator() + config, e );
         }
     }
 
@@ -384,8 +383,7 @@ public class DistributionEnforcingManipulator
             }
             catch ( final GalleyMavenXMLException e )
             {
-                throw new ManipulationException( "Unable to parse config for plugin: %s in: %s", e, plugin.getId(),
-                                                 project.getKey() );
+                throw new ManipulationException( "Unable to parse config for plugin: " + plugin.getId() + " in: " + project.getKey(), e );
             }
         }
 

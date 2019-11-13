@@ -109,7 +109,8 @@ public class ModelIO
         }
         catch ( final TransferException e )
         {
-            throw new ManipulationException( "Failed to resolve POM: %s.\n--> %s", e, ref, e.getMessage() );
+            throw new ManipulationException( "Failed to resolve POM: " + ref + "." + System.lineSeparator() + "--> "
+                    + e.getMessage(), e );
         }
         if ( transfer == null )
         {
@@ -122,7 +123,8 @@ public class ModelIO
         }
         catch ( final IOException | XmlPullParserException e )
         {
-            throw new ManipulationException( "Failed to build model for POM: %s.\n--> %s", e, ref, e.getMessage() );
+            throw new ManipulationException( "Failed to build model for POM: " + ref + "." + System.lineSeparator()
+                    + "--> " + e.getMessage(),  e );
         }
     }
 
@@ -144,7 +146,8 @@ public class ModelIO
         }
         catch ( final TransferException e )
         {
-            throw new ManipulationException( "Failed to resolve POM: %s.\n--> %s", e, ref, e.getMessage() );
+            throw new ManipulationException( "Failed to resolve POM: " + ref + "." + System.lineSeparator() + "--> " +
+                    e.getMessage(), e );
         }
         if ( transfer == null )
         {
@@ -181,7 +184,7 @@ public class ModelIO
         }
         catch ( final GalleyMavenException e )
         {
-            throw new ManipulationException( "Unable to resolve: %s", e, ref );
+            throw new ManipulationException( "Unable to resolve: " + ref, e );
         }
 
         return versionOverrides;
@@ -269,7 +272,7 @@ public class ModelIO
         }
         catch ( GalleyMavenException e )
         {
-            throw new ManipulationException( "Unable to resolve: %s", e, ref );
+            throw new ManipulationException( "Unable to resolve: " + ref, e );
         }
 
         logger.debug( "Found pluginOverridesResolvedVersions {} ", pluginOverridesPomView );
@@ -361,11 +364,13 @@ public class ModelIO
                     }
                 }
 
-                if (logger.isDebugEnabled()) {
-                    logger.debug( "Added plugin override for {} with configuration \n{} and executions {} and dependencies {}",
-                            p.getId(), p.getExecutions(), p.getDependencies());
+                if ( logger.isDebugEnabled() )
+                {
+                    logger.debug(
+                            "Added plugin override for {} with configuration {}{} and executions {} and dependencies {}",
+                            p.getId(), System.lineSeparator(), p.getConfiguration(), p.getExecutions(),
+                            p.getDependencies() );
                 }
-
             }
         }
         else

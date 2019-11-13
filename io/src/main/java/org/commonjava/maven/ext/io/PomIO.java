@@ -40,7 +40,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.inject.Named;
 import javax.inject.Singleton;
-import java.io.BufferedInputStream;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileWriter;
@@ -107,7 +107,8 @@ public class PomIO
             }
             catch ( final IOException | XmlPullParserException e )
             {
-                throw new ManipulationException( "Failed to build model for POM: %s.\n--> %s", e, pom, e.getMessage() );
+                throw new ManipulationException( "Failed to build model for POM: " + pom + "." + System.lineSeparator()
+                        + "--> " + e.getMessage(), e );
             }
 
             if ( raw == null )
@@ -132,14 +133,14 @@ public class PomIO
 
                 try
                 {
-                    if ( FileUtils.readFileToString( pom, StandardCharsets.UTF_8 ).contains( MODIFIED_BY ) )
+                    if ( FileUtils.readFileToString( pom, raw.getModelEncoding() ).contains( MODIFIED_BY ) )
                     {
                         project.setIncrementalPME (true);
                     }
                 }
                 catch ( final IOException e )
                 {
-                    throw new ManipulationException( "Failed to read POM: %s", e, pom );
+                    throw new ManipulationException( "Failed to read POM: " + pom, e );
                 }
             }
 
@@ -192,14 +193,14 @@ public class PomIO
 
             if (logger.isDebugEnabled())
             {
-                logger.debug(String.format("%s modified! Rewriting.", project));
+                logger.debug( "{} modified! Rewriting.", project );
             }
 
             File pom = project.getPom();
 
             final Model model = project.getModel();
 
-            logger.trace("Rewriting: {} in place of: {}\n       to POM: {}", model.getId(), project.getKey(), pom);
+            logger.trace( "Rewriting: {} in place of: {}{}       to POM: {}", model.getId(), project.getKey(), System.lineSeparator(), pom );
 
             write( project, pom, model );
 
@@ -250,7 +251,7 @@ public class PomIO
             // We possibly could store the EOL type in the Project when we first read
             // the file but we would then have to do a dual read, then write as opposed
             // to a read, then read + write now.
-            LineSeparator ls = determineEOL( pom );
+            LineSeparator ls = FileIO.determineEOL( pom );
             mjw.setLineSeparator( ls );
 
             mjw.write( model, pom, new DocumentModifier()
@@ -273,20 +274,23 @@ public class PomIO
                             }
                         }
 
-                        doc.addContent( Collections.<Content>singletonList(
-                                        new Comment( "\nModified by POM Manipulation Extension for Maven "
-                                                                     + manifestInformation + "\n" ) ) );
+                        Comment comment = new Comment( mjw.getLineSeparator()
+                                + "Modified by POM Manipulation Extension for Maven " + manifestInformation
+                                + mjw.getLineSeparator() );
+                        doc.addContent( Collections.<Content>singletonList( comment ) );
                     }
                 }
             });
         }
         catch ( final IOException e )
         {
-            throw new ManipulationException( "Failed to read POM for rewrite: %s. Reason: %s", e, pom, e.getMessage() );
+            throw new ManipulationException( "Failed to read POM for rewrite: " + pom + ". Reason: "
+                    + e.getMessage(), e );
         }
         catch ( final JDOMException e )
         {
-            throw new ManipulationException( "Failed to parse POM for rewrite: %s. Reason: %s", e, pom, e.getMessage() );
+            throw new ManipulationException( "Failed to parse POM for rewrite: " + pom + ". Reason: "
+                    + e.getMessage(), e );
         }
     }
 
@@ -340,7 +344,7 @@ public class PomIO
                         {
                             topLevelParent = parent;
 
-                            logger.debug("Possible top level parent {}", parent);
+                            logger.debug( "Possible top-level parent {}", parent );
                             pendingPoms.add( parent );
                         }
                         else
@@ -437,40 +441,5 @@ public class PomIO
             }
         }
         return false;
-    }
-
-
-    private static LineSeparator determineEOL( File pom )
-        throws ManipulationException
-    {
-        try (  BufferedInputStream bufferIn = new BufferedInputStream( new FileInputStream( pom ) ) )
-        {
-            int prev = -1;
-            int ch;
-            while ( ( ch = bufferIn.read() ) != -1 )
-            {
-                if ( ch == '\n' )
-                {
-                    if ( prev == '\r' )
-                    {
-                        return LineSeparator.CRNL;
-                    }
-                    else
-                    {
-                        return LineSeparator.NL;
-                    }
-                }
-                else if ( prev == '\r' )
-                {
-                    return LineSeparator.CR;
-                }
-                prev = ch;
-            }
-            throw new ManipulationException( "Could not determine end-of-line marker mode" );
-        }
-        catch ( IOException ioe )
-        {
-            throw new ManipulationException( "Could not determine end-of-line marker mode", ioe );
-        }
     }
 }

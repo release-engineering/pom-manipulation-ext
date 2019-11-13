@@ -138,6 +138,6 @@ public class PomIOTest
 
         pomIO.writeModel( model, targetFile );
         assertTrue( targetFile.exists() );
-        assertEquals( sb, FileUtils.readFileToString( targetFile, StandardCharsets.UTF_8 ) );
+        assertEquals( sb, FileUtils.readFileToString( targetFile, model.getModelEncoding() ) );
     }
 }
