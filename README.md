@@ -24,12 +24,12 @@ For details on usage see the documentation [here](https://release-engineering.gi
 
 ### Copyright
 
-The `.idea` folder 
+The `.idea` folder contains a copyright template suitable for use when the project is imported into IntelliJ.
 
 ### Code Style
 
-Eclipse compatible `codestyle.xml` and `eclipse.importorder` files are supplied inside the `ide-config` directory which 
-may also be imported into IntelliJ via the EclipseCodeFormatter. There is also an IntelliJ compatible copyright template 
+Eclipse compatible `codestyle.xml` and `eclipse.importorder` files are supplied inside the `ide-config` directory which
+may also be imported into IntelliJ via the EclipseCodeFormatter. There is also an IntelliJ compatible copyright template
 suitable for use when the project is imported into IntelliJ.
 
 ### Building
@@ -38,8 +38,8 @@ suitable for use when the project is imported into IntelliJ.
 
 The system is setup via a `.travis.yml` to build all pull requests in Travis. Further, it will build master branch and utilise the `.travis.settings.xml` to deploy to the Sonatype snapshot repository from Travis.
 
-In order to edit the website at https://release-engineering.github.io/pom-manipulation-ext checkout the `gh-pages` branch. 
-It is possible to use Jekyll (https://help.github.com/articles/using-jekyll-with-pages) to preview the changes. 
+In order to edit the website at https://release-engineering.github.io/pom-manipulation-ext checkout the `gh-pages` branch.
+It is possible to use Jekyll (https://help.github.com/articles/using-jekyll-with-pages) to preview the changes.
 Jekyll can be run with `jekyll serve --watch -V` and may be installed in Fedora via the `rubygem-jekyll` package.
 
 ### IntelliJ
@@ -54,4 +54,3 @@ It is also recommended to install:
     * (which allows importing of the code style)
  * https://plugins.jetbrains.com/plugin/7442-gmavenplus-intellij-plugin
     * (especially if using the Groovy [example project](https://github.com/project-ncl/manipulator-groovy-examples) )
-    
