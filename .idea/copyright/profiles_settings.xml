@@ -5,7 +5,6 @@
     </module2copyright>
     <LanguageOptions name="JAVA" />
     <LanguageOptions name="__TEMPLATE__">
-      <option name="separateBefore" value="true" />
       <option name="lenBefore" value="2" />
     </LanguageOptions>
   </settings>
