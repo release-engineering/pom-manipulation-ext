@@ -152,7 +152,7 @@ public class PluginState
     }
 
     /**
-     * Enabled ONLY if propertyManagement is provided in the user properties / CLI -D options.
+     * Enabled ONLY if pluginManagement is provided in the user properties / CLI -D options.
      *
      * @see org.commonjava.maven.ext.core.state.State#isEnabled()
      */
