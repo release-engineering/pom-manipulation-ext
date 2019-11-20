@@ -294,6 +294,11 @@ public final class PropertiesUtils
 
         boolean result = false;
 
+        if ( vState.getAllSuffixes().isEmpty() )
+        {
+            logger.warn( "No version suffixes found ; unable to determine strict mapping" );
+        }
+
         loop:
         for ( String origValue : oldValueOptions )
         {
