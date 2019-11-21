@@ -408,10 +408,9 @@ public class PluginManipulator
 
                             if ( !( plugin.getConfiguration() instanceof Xpp3Dom ) || !( override.getConfiguration() instanceof Xpp3Dom ) )
                             {
-                                throw new ManipulationException(
-                                                "Incorrect DOM type " + plugin.getConfiguration().getClass().getName() + " and" + override.getConfiguration()
-                                                                                                                                          .getClass()
-                                                                                                                                          .getName() );
+                                throw new ManipulationException("Incorrect DOM type {} and {}",
+                                                                plugin.getConfiguration().getClass().getName(),
+                                                                override.getConfiguration().getClass().getName() );
                             }
 
                             if ( pluginState.getConfigPrecedence() == Precedence.REMOTE )

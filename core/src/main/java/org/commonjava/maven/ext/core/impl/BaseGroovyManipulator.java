@@ -155,7 +155,7 @@ public abstract class BaseGroovyManipulator
             }
             else
             {
-                throw new ManipulationException( "Cannot cast " + groovyScript + " to a BaseScript to set values." );
+                throw new ManipulationException( "Cannot cast {} to a BaseScript to set values.", groovyScript );
             }
         }
         catch (MissingMethodException e)

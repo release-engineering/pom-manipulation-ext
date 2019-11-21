@@ -54,7 +54,7 @@ public class PropertyInterpolator
         }
         catch ( final InterpolationException e )
         {
-            throw new ManipulationException( "Failed to interpolate: %s. Reason: %s", e, value, e.getMessage() );
+            throw new ManipulationException( "Failed to interpolate: {}. Reason: {}", value, e.getMessage(), e );
         }
     }
 }

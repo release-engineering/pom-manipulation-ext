@@ -15,14 +15,21 @@
  */
 package org.commonjava.maven.ext.common;
 
+import org.slf4j.helpers.MessageFormatter;
+
 public class ManipulationUncheckedException
     extends RuntimeException
 {
     private static final long serialVersionUID = 1L;
 
-    public ManipulationUncheckedException( final String string )
+    protected Object[] params;
+
+    private String formattedMessage;
+
+    public ManipulationUncheckedException( final String string, final Object... params )
     {
-        super( string );
+        super( string, MessageFormatter.getThrowableCandidate( params ) );
+        this.params = params;
     }
 
     public ManipulationUncheckedException( final Throwable cause )
@@ -30,8 +37,13 @@ public class ManipulationUncheckedException
         super( cause );
     }
 
-    public ManipulationUncheckedException( final String message, final Throwable cause )
+    @Override
+    public synchronized String getMessage()
     {
-        super( message, cause );
+        if ( formattedMessage == null )
+        {
+            formattedMessage = MessageFormatter.arrayFormat( super.getMessage(), params ).getMessage();
+        }
+        return formattedMessage;
     }
 }

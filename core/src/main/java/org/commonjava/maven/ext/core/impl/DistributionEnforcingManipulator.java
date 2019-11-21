@@ -115,7 +115,6 @@ public class DistributionEnforcingManipulator
      */
     @Override
     public void init( final ManipulationSession session )
-        throws ManipulationException
     {
         this.session = session;
         session.setState( new DistributionEnforcingState( session.getUserProperties() ) );
@@ -180,13 +179,9 @@ public class DistributionEnforcingManipulator
 
             baseSkipSetting = enforceSkipFlag( model, baseSkipSetting, project, changed, true );
 
-            final List<Profile> profiles = ProfileUtils.getProfiles( session, model);
-            if ( profiles != null )
+            for ( final Profile profile :  ProfileUtils.getProfiles( session, model ) )
             {
-                for ( final Profile profile :  ProfileUtils.getProfiles( session, model ) )
-                {
-                    enforceSkipFlag( profile, baseSkipSetting, project, changed, false );
-                }
+                enforceSkipFlag( profile, baseSkipSetting, project, changed, false );
             }
 
             if ( baseSkipSetting == Boolean.FALSE && model.getProperties().containsKey( "maven.deploy.skip" ) )
@@ -301,8 +296,7 @@ public class DistributionEnforcingManipulator
         }
         catch ( final XmlPullParserException | IOException e )
         {
-            throw new ManipulationException( "Failed to re-parse plugin configuration into Xpp3Dom: "
-                    + e.getMessage() + System.lineSeparator() + "Config was:" + System.lineSeparator() + config, e );
+            throw new ManipulationException( "Failed to re-parse plugin configuration into Xpp3Dom: {}. Config was: {}", e.getMessage(), config, e );
         }
     }
 
@@ -315,11 +309,9 @@ public class DistributionEnforcingManipulator
     {
         final String key = ga( MAVEN_PLUGIN_GROUPID, pluginArtifactId );
 
-        final List<SkipReference> result = new ArrayList<>();
-
         Map<String, Plugin> pluginMap = getManagedPluginMap( base );
         Plugin plugin = pluginMap.get( key );
-        result.addAll( findSkipRefs( plugin, project ) );
+        final List<SkipReference> result = new ArrayList<>( findSkipRefs( plugin, project ) );
 
         pluginMap = getPluginMap( base );
         plugin = pluginMap.get( key );
@@ -383,7 +375,7 @@ public class DistributionEnforcingManipulator
             }
             catch ( final GalleyMavenXMLException e )
             {
-                throw new ManipulationException( "Unable to parse config for plugin: " + plugin.getId() + " in: " + project.getKey(), e );
+                throw new ManipulationException( "Unable to parse config for plugin {} in {}", plugin.getId(), project.getKey(), e );
             }
         }
 
@@ -400,7 +392,7 @@ public class DistributionEnforcingManipulator
 
         private final Node node;
 
-        public SkipReference( final ConfigurationContainer container, final Node node )
+        SkipReference( final ConfigurationContainer container, final Node node )
         {
             this.container = container;
             this.node = node;
@@ -411,7 +403,7 @@ public class DistributionEnforcingManipulator
             return container;
         }
 
-        public Node getNode()
+        Node getNode()
         {
             return node;
         }

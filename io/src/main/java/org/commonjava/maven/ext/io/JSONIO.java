@@ -15,8 +15,6 @@
  */
 package org.commonjava.maven.ext.io;
 
-import static com.fasterxml.jackson.core.util.DefaultIndenter.SYS_LF;
-
 import com.fasterxml.jackson.core.JsonEncoding;
 import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.core.JsonGenerator;
@@ -31,7 +29,6 @@ import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.Option;
-
 import org.commonjava.maven.ext.common.ManipulationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,7 +40,6 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
-import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
@@ -77,7 +73,7 @@ public class JSONIO
         catch ( IOException e )
         {
             logger.error( "Unable to detect charset for file: {}", jsonFile, e );
-            throw new ManipulationException( "Unable to detect charset for file: " + jsonFile, e );
+            throw new ManipulationException( "Unable to detect charset for file {}", jsonFile, e );
         }
     }
 
@@ -118,7 +114,7 @@ public class JSONIO
         catch ( ManipulationException e )
         {
             logger.error( "Unable to detect eol for file: {}", jsonFile, e );
-            throw new ManipulationException( "Unable to detect eol for file: " + jsonFile, e );
+            throw new ManipulationException( "Unable to detect eol for file {} ", jsonFile, e );
         }
         return lf;
     }

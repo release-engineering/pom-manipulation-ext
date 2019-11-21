@@ -294,7 +294,7 @@ public class VersionCalculator
         }
         catch ( final GalleyMavenException e )
         {
-            throw new ManipulationException( "Failed to resolve metadata for: " + groupId + ":" + artifactId + ".", e );
+            throw new ManipulationException( "Failed to resolve metadata for: {}:{}", groupId, artifactId, e );
         }
     }
 

@@ -109,12 +109,11 @@ public class ModelIO
         }
         catch ( final TransferException e )
         {
-            throw new ManipulationException( "Failed to resolve POM: " + ref + "." + System.lineSeparator() + "--> "
-                    + e.getMessage(), e );
+            throw new ManipulationException( "Failed to resolve POM ({}) : ", ref, e.getMessage(), e );
         }
         if ( transfer == null )
         {
-            throw new ManipulationException( "Failed to resolve POM: " + ref.asPomArtifact() );
+            throw new ManipulationException( "Failed to resolve POM: {}", ref.asPomArtifact() );
         }
 
         try (InputStream in = transfer.openInputStream())
@@ -123,8 +122,7 @@ public class ModelIO
         }
         catch ( final IOException | XmlPullParserException e )
         {
-            throw new ManipulationException( "Failed to build model for POM: " + ref + "." + System.lineSeparator()
-                    + "--> " + e.getMessage(),  e );
+            throw new ManipulationException( "Failed to build model for POM ({}) : ", ref, e.getMessage(), e );
         }
     }
 
@@ -146,12 +144,11 @@ public class ModelIO
         }
         catch ( final TransferException e )
         {
-            throw new ManipulationException( "Failed to resolve POM: " + ref + "." + System.lineSeparator() + "--> " +
-                    e.getMessage(), e );
+            throw new ManipulationException( "Failed to resolve POM ({}) : {}", ref, e.getMessage(), e );
         }
         if ( transfer == null )
         {
-            throw new ManipulationException( "Failed to resolve POM: " + ref.asPomArtifact() );
+            throw new ManipulationException( "Failed to resolve POM: {}", ref.asPomArtifact() );
         }
 
         return transfer.getDetachedFile();
@@ -184,7 +181,7 @@ public class ModelIO
         }
         catch ( final GalleyMavenException e )
         {
-            throw new ManipulationException( "Unable to resolve: " + ref, e );
+            throw new ManipulationException( "Unable to resolve: {} ", ref, e );
         }
 
         return versionOverrides;
@@ -272,7 +269,7 @@ public class ModelIO
         }
         catch ( GalleyMavenException e )
         {
-            throw new ManipulationException( "Unable to resolve: " + ref, e );
+            throw new ManipulationException( "Unable to resolve: {} ", ref, e );
         }
 
         logger.debug( "Found pluginOverridesResolvedVersions {} ", pluginOverridesPomView );
@@ -375,17 +372,13 @@ public class ModelIO
         }
         else
         {
-            throw new ManipulationException(
-                            "Attempting to align to a BOM that does not have a " + type.toString() + " section" );
+            throw new ManipulationException(  "Attempting to align to a BOM that does not have a {} section", type.toString() );
         }
         return pluginOverrides;
     }
 
     /**
      * Recursively process the DOM elements to inline any property values from the model.
-     * @param userProperties
-     * @param model
-     * @param parent
      */
     private void processChildren( Properties userProperties, Model model, Xpp3Dom parent )
     {
@@ -413,11 +406,6 @@ public class ModelIO
 
     /**
      * Recursively resolve a property value.
-     *
-     * @param userProperties
-     * @param p
-     * @param key
-     * @return the value of the key
      */
     private String resolveProperty( Properties userProperties, Properties p, String key )
     {

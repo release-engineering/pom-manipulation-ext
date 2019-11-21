@@ -810,7 +810,7 @@ public class DependencyManipulator implements Manipulator
                     final String[] artifactAndModule = currentKey.split( "@" );
                     if ( artifactAndModule.length != 2 )
                     {
-                        throw new ManipulationException( "Invalid format for exclusion key " + currentKey );
+                        throw new ManipulationException( "Invalid format for exclusion key {}", currentKey );
                     }
                     artifactGA = artifactAndModule[0];
                     final ProjectRef moduleGA = SimpleProjectRef.parse( artifactAndModule[1] );

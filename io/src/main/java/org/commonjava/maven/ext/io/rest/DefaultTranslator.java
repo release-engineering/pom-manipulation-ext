@@ -29,7 +29,6 @@ import org.commonjava.maven.ext.common.json.ExtendedLookupReport;
 import org.commonjava.maven.ext.common.util.GAVUtils;
 import org.commonjava.maven.ext.common.util.JSONUtils.InternalObjectMapper;
 import org.commonjava.maven.ext.common.util.ListUtils;
-import org.commonjava.maven.ext.io.rest.exception.RestException;
 import org.jboss.da.reports.model.request.LookupGAVsRequest;
 import org.jboss.da.reports.model.response.LookupReport;
 import org.slf4j.Logger;
@@ -185,7 +184,7 @@ public class DefaultTranslator
     }
 
     @Override
-    public List<ProjectVersionRef> findBlacklisted( ProjectRef ga )
+    public List<ProjectVersionRef> findBlacklisted( ProjectRef ga ) throws RestException
     {
         final String blacklistEndpointUrl = endpointUrl + LISTING_BLACKLIST_GA;
         final AtomicReference<List<ProjectVersionRef>> result = new AtomicReference<>();
@@ -242,7 +241,7 @@ public class DefaultTranslator
 
             if ( !r.isSuccess() )
             {
-                throw new RestException( String.format( "Failed to establish blacklist calling %s with error %s", this.endpointUrl, errorString[0] ) );
+                throw new RestException( "Failed to establish blacklist calling {} with error {}", endpointUrl, errorString[0] );
             }
         }
         catch ( ManipulationUncheckedException | UnirestException e )
@@ -285,7 +284,7 @@ public class DefaultTranslator
      * There may be a lot of them, possibly causing timeouts or other issues.
      * This is mitigated by splitting them into smaller chunks when an error occurs and retrying.
      */
-    public Map<ProjectVersionRef, String> translateVersions( List<ProjectVersionRef> p )
+    public Map<ProjectVersionRef, String> translateVersions( List<ProjectVersionRef> p ) throws RestException
     {
         final List<ProjectVersionRef> projects = p.stream().distinct().collect( Collectors.toList() );
         if ( p.size() != projects.size() )
@@ -342,15 +341,8 @@ public class DefaultTranslator
                             logger.debug( "Did not get status {} but received {}", SC_OK, task.getStatus() );
                         }
 
-                        if ( task.getStatus() > 0 )
-                        {
-                            throw new RestException( "Received response status " + task.getStatus() + " with message: "
-                                                                     + task.getErrorMessage() );
-                        }
-                        else
-                        {
-                            throw new RestException( "Received response status " + task.getStatus() + " with message " + task.getErrorMessage() );
-                        }
+                        throw new RestException( "Received response status {} with message: {}",
+                                                 task.getStatus(), task.getErrorMessage() );
                     }
                 }
             }

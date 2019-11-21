@@ -22,7 +22,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import kong.unirest.Unirest;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef;
-import org.commonjava.maven.ext.io.rest.exception.RestException;
 import org.commonjava.maven.ext.io.rest.handler.AddSuffixJettyHandler;
 import org.commonjava.maven.ext.io.rest.rule.MockServer;
 import org.junit.Before;
@@ -98,7 +97,7 @@ public class VersionTranslatorTest
     }
 
     @Test
-    public void testTranslateVersions()
+    public void testTranslateVersions() throws RestException
     {
         List<ProjectVersionRef> gavs = Arrays.asList(
             new SimpleProjectVersionRef( "com.example", "example", "1.0" ),
@@ -120,7 +119,7 @@ public class VersionTranslatorTest
 
 
     @Test
-    public void testTranslateVersionsWithNulls()
+    public void testTranslateVersionsWithNulls() throws RestException
     {
         this.versionTranslator = new DefaultTranslator( mockServer.getUrl(), 0, Translator.CHUNK_SPLIT_COUNT, "NullBestMatchVersion",
                                                         "" );
@@ -169,7 +168,7 @@ public class VersionTranslatorTest
     }
 
     @Test( timeout = 2000 )
-    public void testTranslateVersionsPerformance()
+    public void testTranslateVersionsPerformance() throws RestException
     {
         Logger logbackLogger = ( (Logger) LoggerFactory.getLogger( Logger.ROOT_LOGGER_NAME ) );
         Level originalLevel = logbackLogger.getLevel();

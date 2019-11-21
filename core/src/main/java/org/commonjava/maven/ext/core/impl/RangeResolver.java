@@ -26,6 +26,7 @@ import org.apache.maven.model.Profile;
 import org.commonjava.maven.atlas.ident.ref.ProjectRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleProjectRef;
 import org.commonjava.maven.ext.common.ManipulationException;
+import org.commonjava.maven.ext.common.ManipulationUncheckedException;
 import org.commonjava.maven.ext.common.model.Project;
 import org.commonjava.maven.ext.core.ManipulationSession;
 import org.commonjava.maven.ext.core.state.RangeResolverState;
@@ -202,7 +203,7 @@ public class RangeResolver
         }
         catch ( InvalidVersionSpecificationException e )
         {
-            throw new RuntimeException( "UNCHECKED LAMBDA", new ManipulationException( "Invalid range", e ) );
+            throw new ManipulationUncheckedException( new ManipulationException( "Invalid range", e ) );
         }
     }
 
@@ -232,7 +233,7 @@ public class RangeResolver
         }
         catch ( InvalidVersionSpecificationException e )
         {
-            throw new RuntimeException( "UNCHECKED LAMBDA", new ManipulationException( "Invalid range", e ) );
+            throw new ManipulationUncheckedException( new ManipulationException( "Invalid range", e ) );
         }
     }
 
@@ -245,7 +246,7 @@ public class RangeResolver
         }
         catch ( GalleyMavenException e )
         {
-            throw new RuntimeException( "UNCHECKED-LAMBDA", new ManipulationException( "Caught Galley exception processing artifact", e ) );
+            throw new ManipulationUncheckedException( new ManipulationException( "Caught Galley exception processing artifact", e ) );
         }
         return mavenMetadataView.resolveXPathToAggregatedStringList( "/metadata/versioning/versions/version", true, -1 )
                                 .stream()

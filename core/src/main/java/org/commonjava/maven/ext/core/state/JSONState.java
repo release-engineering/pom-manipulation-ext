@@ -78,7 +78,7 @@ public class JSONState
                 }
                 if ( components.length != 3 )
                 {
-                    throw new ManipulationException( "Unable to parse command " + operation + " from property " + property );
+                    throw new ManipulationException( "Unable to parse command {} from property {}", operation, property );
                 }
                 logger.debug ("Adding JSONOperation with file {}, xpath {} and update {}", components[0], components[1], components[2] );
                 jsonOperations.add( new JSONOperation( components[0], components[1], components[2] ) );

@@ -105,8 +105,7 @@ public class PomIO
             }
             catch ( final IOException | XmlPullParserException e )
             {
-                throw new ManipulationException( "Failed to build model for POM: " + pom + "." + System.lineSeparator()
-                        + "--> " + e.getMessage(), e );
+                throw new ManipulationException( "Failed to build model for POM: ({}) : {}", pom, e.getMessage(), e );
             }
 
             if ( raw == null )
@@ -138,7 +137,7 @@ public class PomIO
                 }
                 catch ( final IOException e )
                 {
-                    throw new ManipulationException( "Failed to read POM: " + pom, e );
+                    throw new ManipulationException( "Failed to read POM: {}", pom, e );
                 }
             }
 
@@ -282,13 +281,11 @@ public class PomIO
         }
         catch ( final IOException e )
         {
-            throw new ManipulationException( "Failed to read POM for rewrite: " + pom + ". Reason: "
-                    + e.getMessage(), e );
+            throw new ManipulationException( "Failed to read POM for rewrite: {}. Reason: ", pom, e.getMessage(), e );
         }
         catch ( final JDOMException e )
         {
-            throw new ManipulationException( "Failed to parse POM for rewrite: " + pom + ". Reason: "
-                    + e.getMessage(), e );
+            throw new ManipulationException( "Failed to parse POM for rewrite: {}. Reason: ", pom, e.getMessage(), e );
         }
     }
 

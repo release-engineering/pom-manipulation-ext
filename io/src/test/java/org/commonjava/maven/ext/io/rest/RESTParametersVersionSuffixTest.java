@@ -84,7 +84,7 @@ public class RESTParametersVersionSuffixTest
     }
 
     @Test
-    public void testVerifySuffix()
+    public void testVerifySuffix() throws RestException
     {
         this.versionTranslator = new DefaultTranslator( mockServer.getUrl(), 0,
                                                         Translator.CHUNK_SPLIT_COUNT, "", suffix );
@@ -96,7 +96,7 @@ public class RESTParametersVersionSuffixTest
     }
 
     @Test
-    public void testVerifyNoSuffix()
+    public void testVerifyNoSuffix() throws RestException
     {
         this.versionTranslator = new DefaultTranslator( mockServer.getUrl(), 0,
                                                         Translator.CHUNK_SPLIT_COUNT, "", "" );

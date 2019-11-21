@@ -118,7 +118,7 @@ public class JSONManipulator
             if ( !target.exists() )
             {
                 logger.error( "Unable to locate JSON file {} ", target );
-                throw new ManipulationException( "Unable to locate JSON file " + target );
+                throw new ManipulationException( "Unable to locate JSON file {}", target );
             }
 
             dc = jsonIO.parseJSON( target );

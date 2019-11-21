@@ -118,7 +118,7 @@ public abstract class BaseScriptUtils extends Script implements MavenBaseScript
     {
         if ( ! ( getSession() instanceof ManipulationSession ) )
         {
-            throw new ManipulationException( "Unable to access session instance in " + getSession() );
+            throw new ManipulationException( "Unable to access session instance in {}", getSession() );
         }
     }
 
