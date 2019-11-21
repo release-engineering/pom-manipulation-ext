@@ -87,7 +87,7 @@ import static org.apache.commons.lang.StringUtils.isNotEmpty;
 public class Cli
 {
     private static final File DEFAULT_GLOBAL_SETTINGS_FILE =
-        new File( System.getenv( "M2_HOME" ), "conf" + File.separator + "settings.xml" );
+        new File( System.getProperty( "maven.home" ), "conf" + File.separator + "settings.xml" );
 
     private final Logger logger = LoggerFactory.getLogger( getClass() );
 

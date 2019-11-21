@@ -27,6 +27,8 @@ import static org.commonjava.maven.ext.integrationtest.TestUtils.getDefaultTestL
 import static org.commonjava.maven.ext.integrationtest.TestUtils.runLikeInvoker;
 import static org.commonjava.maven.ext.integrationtest.TestUtils.runMaven;
 
+import java.io.File;
+
 public class CircularIntegrationTest
 {
     private static AddSuffixJettyHandler handler = new AddSuffixJettyHandler( "/", null );
@@ -38,7 +40,7 @@ public class CircularIntegrationTest
     public static void setUp()
         throws Exception
     {
-        runMaven( "install", DEFAULT_MVN_PARAMS, TestUtils.IT_LOCATION + "/circular-dependencies-test-parent" );
+        runMaven( "install", DEFAULT_MVN_PARAMS, TestUtils.IT_LOCATION + File.separator + "circular-dependencies-test-parent" );
     }
 
     @Before
