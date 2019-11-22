@@ -158,19 +158,19 @@ public class TestUtils
             {
                 if ( cliExitValue != 0 )
                 {
-                    throw new ManipulationException ( "PME-Cli (running in: " + workingDir + ") exited with a non zero value: " + cliExitValue );
+                    throw new ManipulationException ( "PME-Cli (running in: {}) exited with a non zero value : {}", workingDir, cliExitValue );
                 }
                 if ( mavenExitValue != 0 )
                 {
-                    throw new ManipulationException ( "Maven (running in: " + workingDir + ") exited with a non zero value: " + mavenExitValue );
+                    throw new ManipulationException ( "Maven (running in: {}) exited with a non zero value : {}", workingDir, mavenExitValue );
                 }
             }
             else
             {
                 if ( cliExitValue == 0 && mavenExitValue == 0 )
                 {
-                    throw new ManipulationException
-                                    ( "Exit value of either PME-Cli (" + cliExitValue + ") or Maven (" + mavenExitValue + ") (running in: " + workingDir + ") must be non-zero.");
+                    throw new ManipulationException( "Exit value of either PME-Cli ({}) or Maven ({}) (running in: {}) must be non-zero.",
+                                      cliExitValue, mavenExitValue, workingDir);
                 }
             }
         }

@@ -180,7 +180,7 @@ public class GalleyInfrastructure
         }
         catch ( final MalformedURLException e )
         {
-            throw new ManipulationException( "Failed to setup Maven-specific LocationExpander: %s", e, e.getMessage() );
+            throw new ManipulationException( "Failed to setup Maven-specific LocationExpander: {}", e.getMessage(), e );
         }
 
         xml = new XMLInfrastructure();
@@ -302,8 +302,8 @@ public class GalleyInfrastructure
 
     private boolean localMetadataScanningEnabled()
     {
-        return sessionHandler == null ? true : Boolean.valueOf( sessionHandler.getUserProperties().getProperty(
-                        LOCAL_REPO_SCANNING_PROP, "true" ) );
+        return sessionHandler == null || Boolean.parseBoolean(
+                        sessionHandler.getUserProperties().getProperty( LOCAL_REPO_SCANNING_PROP, "true" ) );
     }
 
     public MavenPomReader getPomReader()

@@ -430,7 +430,7 @@ public class ProjectComparator
                 }
                 default:
                 {
-                    throw new ManipulationException( "Invalid type " + type.toString() );
+                    throw new ManipulationException( "Invalid type {}", type );
                 }
             }
         }
@@ -466,7 +466,7 @@ public class ProjectComparator
                 }
                 default:
                 {
-                    throw new ManipulationException( "Invalid type " + type.toString() );
+                    throw new ManipulationException( "Invalid type {}", type );
                 }
             }
         }

@@ -54,7 +54,7 @@ public class GroovyFunctionsTest
     public TemporaryFolder temporaryFolder = new TemporaryFolder();
 
     @Rule
-    public final SystemOutRule systemOutRule = new SystemOutRule().enableLog();//.muteForSuccessfulTests();
+    public final SystemOutRule systemOutRule = new SystemOutRule().enableLog().muteForSuccessfulTests();
 
     @Rule
     public final TestRule restoreSystemProperties = new RestoreSystemProperties();

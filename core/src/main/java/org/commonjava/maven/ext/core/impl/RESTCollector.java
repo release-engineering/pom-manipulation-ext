@@ -199,8 +199,8 @@ public class RESTCollector
                         }
                         if ( pVersion.equals( bVersion ) )
                         {
-                            throw new ManipulationException( "community artifact '" + blacklist.get( 0 ) + "' has been blacklisted. Unable to build project version "
-                                                                             + p.getVersion() );
+                            throw new ManipulationException( "Community artifact '{}' has been blacklisted. Unable to build project version {}",
+                                                             blacklist.get( 0 ), p.getVersion() );
                         }
                     }
 

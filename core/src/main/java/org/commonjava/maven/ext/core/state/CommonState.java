@@ -121,7 +121,7 @@ public class CommonState
             }
             catch ( IllegalArgumentException e )
             {
-                throw new ManipulationException( "Illegal scope value " + s );
+                throw new ManipulationException( "Illegal scope value {}", s );
             }
         }
 

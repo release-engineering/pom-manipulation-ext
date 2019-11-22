@@ -61,7 +61,7 @@ import org.commonjava.maven.ext.core.impl.RESTCollector;
 import org.commonjava.maven.ext.io.ConfigIO;
 import org.commonjava.maven.ext.io.PomIO;
 import org.commonjava.maven.ext.io.XMLIO;
-import org.commonjava.maven.ext.io.rest.exception.RestException;
+import org.commonjava.maven.ext.io.rest.RestException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -342,7 +342,7 @@ public class Cli
                 String []params = cmd.getOptionValues( 'x' );
                 if ( params.length != 2)
                 {
-                    throw new ManipulationException( "Invalid number of parameters (" + params.length + "); should be <file> <xpath>" );
+                    throw new ManipulationException( "Invalid number of parameters ({}); should be <file> <xpath>", params.length );
                 }
                 XMLIO xmlIO = new XMLIO();
 
@@ -400,16 +400,16 @@ public class Cli
                 manipulationManager.scanAndApply( session );
             }
         }
-        catch ( ManipulationException e )
-        {
-            logger.error( "POM Manipulation failed; original error is: {}", e.getMessage(), e );
-            return 10;
-        }
         catch ( RestException e )
         {
             logger.error ( "REST communication with {} failed. {}", userProps.getProperty( "restURL" ), e.getMessage () );
             logger.trace ( "Exception trace is", e);
             return 100;
+        }
+        catch ( ManipulationException e )
+        {
+            logger.error( "POM Manipulation failed; original error is: {}", e.getMessage(), e );
+            return 10;
         }
         catch ( InvalidRefException e )
         {

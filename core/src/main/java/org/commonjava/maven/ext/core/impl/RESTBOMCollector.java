@@ -17,7 +17,6 @@ package org.commonjava.maven.ext.core.impl;
 
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef;
-import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.common.model.Project;
 import org.commonjava.maven.ext.core.ManipulationSession;
 import org.commonjava.maven.ext.core.state.DependencyState;
@@ -25,6 +24,7 @@ import org.commonjava.maven.ext.core.state.PluginState;
 import org.commonjava.maven.ext.core.state.ProfileInjectionState;
 import org.commonjava.maven.ext.core.state.RESTState;
 import org.commonjava.maven.ext.core.util.PropertiesUtils;
+import org.commonjava.maven.ext.io.rest.RestException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -54,7 +54,7 @@ public class RESTBOMCollector
     private ManipulationSession session;
 
     @Override
-    public void init( final ManipulationSession session ) throws ManipulationException
+    public void init( final ManipulationSession session )
     {
         this.session = session;
         session.setState( new RESTState( session ) );
@@ -64,7 +64,7 @@ public class RESTBOMCollector
      * No-op in this case - any changes, if configured, would happen in Versioning or other Manipulators.
      */
     @Override
-    public Set<Project> applyChanges( final List<Project> projects )
+    public Set<Project> applyChanges( final List<Project> projects ) throws RestException
     {
         populateBOMVersions( );
 
@@ -78,7 +78,7 @@ public class RESTBOMCollector
         return 4;
     }
 
-    private void populateBOMVersions( )
+    private void populateBOMVersions( ) throws RestException
     {
         final RESTState state = session.getState( RESTState.class );
         final DependencyState ds = session.getState( DependencyState.class );
@@ -149,7 +149,7 @@ public class RESTBOMCollector
             {
                 // Create the dummy PVR to compare with results to...
                 ProjectVersionRef newBom = new SimpleProjectVersionRef( pvr.asProjectRef(), pvr.getVersionString() + "-0" );
-                if ( restResult.keySet().contains( newBom ) )
+                if ( restResult.containsKey( newBom ) )
                 {
                     ProjectVersionRef replacementBOM = new SimpleProjectVersionRef( pvr.asProjectRef(), restResult.get( newBom ) );
                     logger.debug( "Replacing BOM value of {} with {}.", pvr, replacementBOM );

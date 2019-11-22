@@ -118,7 +118,7 @@ public class JSONManipulator
             if ( !target.exists() )
             {
                 logger.error( "Unable to locate JSON file {} ", target );
-                throw new ManipulationException( "Unable to locate JSON file " + target );
+                throw new ManipulationException( "Unable to locate JSON file {}", target );
             }
 
             dc = jsonIO.parseJSON( target );
@@ -141,13 +141,13 @@ public class JSONManipulator
             if ( isEmpty( operation.getUpdate() ) )
             {
                 // Delete
-                logger.info( "Deleting {} on {}", operation.getXPath(), dc.toString() );
+                logger.info( "Deleting {} on {}", operation.getXPath(), dc );
                 dc.delete( operation.getXPath() );
             }
             else
             {
                 // Update
-                logger.info( "Updating {} on {}", operation.getXPath(), dc.toString() );
+                logger.info( "Updating {} on {}", operation.getXPath(), dc );
                 dc.set( operation.getXPath(), operation.getUpdate() );
             }
 

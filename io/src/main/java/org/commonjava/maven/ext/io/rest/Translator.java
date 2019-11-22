@@ -34,7 +34,7 @@ public interface Translator
      * @param projects - List of projects (GAVs)
      * @return Map of ProjectVersionRef objects as keys and translated versions as values
      */
-    Map<ProjectVersionRef, String> translateVersions( List<ProjectVersionRef> projects );
+    Map<ProjectVersionRef, String> translateVersions( List<ProjectVersionRef> projects ) throws RestException;
 
-    List<ProjectVersionRef> findBlacklisted( ProjectRef project );
+    List<ProjectVersionRef> findBlacklisted( ProjectRef project ) throws RestException;
 }

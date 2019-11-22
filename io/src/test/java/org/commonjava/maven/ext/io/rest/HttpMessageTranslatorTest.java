@@ -17,7 +17,6 @@ package org.commonjava.maven.ext.io.rest;
 
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef;
-import org.commonjava.maven.ext.io.rest.exception.RestException;
 import org.commonjava.maven.ext.io.rest.rule.MockServer;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.handler.AbstractHandler;

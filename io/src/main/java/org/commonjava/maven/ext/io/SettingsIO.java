@@ -34,7 +34,6 @@ import javax.inject.Singleton;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.nio.charset.StandardCharsets;
 
 /**
  * @author vdedik@redhat.com
@@ -63,8 +62,8 @@ public class SettingsIO
         }
         catch ( IOException e )
         {
-            throw new ManipulationException( "Failed to create repo removal backup settings.xml file.",
-                                             e, settingsFile, e.getMessage() );
+            throw new ManipulationException( "Failed to create repo removal backup settings.xml file: {}",
+                                             settingsFile, e );
         }
     }
 
@@ -117,8 +116,7 @@ public class SettingsIO
         }
         catch ( SettingsBuildingException e )
         {
-            throw new ManipulationException( "Failed to build existing settings.xml for repo removal backup.",
-                                             e, settingsFile, e.getMessage() );
+            throw new ManipulationException( "Failed to build existing settings.xml for repo removal backup.", settingsFile, e.getMessage(), e );
         }
     }
 }

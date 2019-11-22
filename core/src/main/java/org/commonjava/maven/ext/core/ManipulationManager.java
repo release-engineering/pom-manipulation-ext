@@ -158,7 +158,7 @@ public class ManipulationManager
         final Project originalExecutionRoot = originalProjects.get( 0 );
         if ( ! originalExecutionRoot.isExecutionRoot() )
         {
-            throw new ManipulationException( "First project is not execution root : " + originalProjects.toString() );
+            throw new ManipulationException( "First project is not execution root : {}", originalProjects );
         }
 
         session.getActiveProfiles().addAll( parseActiveProfiles( session, currentProjects ) );

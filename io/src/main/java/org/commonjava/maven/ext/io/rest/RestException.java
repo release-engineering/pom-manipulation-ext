@@ -13,13 +13,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.commonjava.maven.ext.io.rest.exception;
+package org.commonjava.maven.ext.io.rest;
+
+import org.commonjava.maven.ext.common.ManipulationException;
 
 /**
  * @author vdedik@redhat.com
  */
-public class ClientException extends RestException {
-    public ClientException(String msg) {
-        super(msg);
+public class RestException extends ManipulationException
+{
+    public RestException( String msg )
+    {
+        super( msg );
+    }
+
+    public RestException( final String string, final Object... params )
+    {
+        // Note we don't extract any potential Throwable here ; we rely on the superclass to do that.
+        super( string, params );
+    }
+
+    public RestException( String message, Throwable e )
+    {
+        super( message, e );
     }
 }

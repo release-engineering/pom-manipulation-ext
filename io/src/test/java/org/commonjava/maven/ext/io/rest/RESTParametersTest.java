@@ -80,7 +80,7 @@ public class RESTParametersTest
     }
 
     @Test
-    public void testVerifyGroup()
+    public void testVerifyGroup() throws RestException
     {
         String group = "indyGroup";
         this.versionTranslator = new DefaultTranslator( mockServer.getUrl(), 0,
@@ -93,7 +93,7 @@ public class RESTParametersTest
     }
 
     @Test
-    public void testVerifyNoGroup()
+    public void testVerifyNoGroup() throws RestException
     {
         this.versionTranslator = new DefaultTranslator( mockServer.getUrl(), 0,
                                                         Translator.CHUNK_SPLIT_COUNT, "", "" );

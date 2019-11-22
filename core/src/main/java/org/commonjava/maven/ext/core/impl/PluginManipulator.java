@@ -255,7 +255,7 @@ public class PluginManipulator
             mergedOverrides.addAll( restOverrides );
         }
 
-        logger.debug( "Final remote override list for type {} with precedence {} is {}", PluginType.RemotePM.toString(), pState.getPrecedence(), mergedOverrides );
+        logger.debug( "Final remote override list for type {} with precedence {} is {}", PluginType.RemotePM, pState.getPrecedence(), mergedOverrides );
 
         return mergedOverrides;
     }
@@ -408,10 +408,9 @@ public class PluginManipulator
 
                             if ( !( plugin.getConfiguration() instanceof Xpp3Dom ) || !( override.getConfiguration() instanceof Xpp3Dom ) )
                             {
-                                throw new ManipulationException(
-                                                "Incorrect DOM type " + plugin.getConfiguration().getClass().getName() + " and" + override.getConfiguration()
-                                                                                                                                          .getClass()
-                                                                                                                                          .getName() );
+                                throw new ManipulationException("Incorrect DOM type {} and {}",
+                                                                plugin.getConfiguration().getClass().getName(),
+                                                                override.getConfiguration().getClass().getName() );
                             }
 
                             if ( pluginState.getConfigPrecedence() == Precedence.REMOTE )
@@ -429,7 +428,7 @@ public class PluginManipulator
                     }
                     else
                     {
-                        logger.debug( "No remote configuration to inject from {}", override.toString() );
+                        logger.debug( "No remote configuration to inject from {}", override );
                     }
 
                     if ( override.getExecutions() != null )
@@ -453,7 +452,7 @@ public class PluginManipulator
                     }
                     else
                     {
-                        logger.debug( "No remote executions to inject from {}", override.toString() );
+                        logger.debug( "No remote executions to inject from {}", override );
                     }
 
                     if ( !override.getDependencies().isEmpty() )

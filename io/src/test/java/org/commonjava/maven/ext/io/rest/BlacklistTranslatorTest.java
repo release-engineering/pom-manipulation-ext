@@ -70,7 +70,7 @@ public class BlacklistTranslatorTest
     }
 
     @Test
-    public void testFindBlacklisted()
+    public void testFindBlacklisted() throws RestException
     {
         SimpleProjectRef ga = new SimpleProjectRef( "com.example", "example" );
 

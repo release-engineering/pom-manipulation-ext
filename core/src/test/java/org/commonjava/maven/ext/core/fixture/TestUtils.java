@@ -60,7 +60,7 @@ public class TestUtils
 
         if ( resource == null )
         {
-            throw new ManipulationException( "Unable to locate resource for " + resourceBase + resourceName );
+            throw new ManipulationException( "Unable to locate resource for {}{}", resourceBase, resourceName );
         }
         return new File( resource.getPath() );
     }

@@ -203,7 +203,8 @@ public final class PropertiesUtils
                 if ( ignoreStrict )
                 {
                     throw new ManipulationException(
-                                    "NYI : handling for versions with explicit overrides (" + oldValue + ") with multiple embedded properties is NYI. " );
+                                    "NYI : handling for versions with explicit overrides ({}) with multiple embedded properties is NYI. ",
+                                    oldValue);
                 }
                 if ( resolvedValue.equals( newValue ))
                 {
@@ -519,8 +520,9 @@ public final class PropertiesUtils
 
         if ( version.indexOf( "${" ) != 0 || endIndex != version.length() - 1 )
         {
-            throw new ManipulationException( "NYI : handling for versions (" + version
-                                                             + ") with either multiple embedded properties or embedded property and hardcoded string is NYI. " );
+            throw new ManipulationException(
+                            "NYI : handling for versions ({}) with either multiple embedded properties or embedded property and hardcoded string is NYI. ",
+                            version);
         }
         return version.substring( 2, endIndex );
     }
@@ -563,8 +565,8 @@ public final class PropertiesUtils
                 }
                 else
                 {
-                    throw new ManipulationException( "Dependency or Plugin " + pvr + " within project " + project + " did not update property " + version
-                                                                     + " but it has been updated" );
+                    throw new ManipulationException( "Dependency or Plugin {} within project {}} did not update property {} but it has been updated",
+                                                     pvr, project, version );
                 }
             }
         }

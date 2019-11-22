@@ -104,7 +104,7 @@ public class Project
         }
         else if ( model.getVersion() == null && model.getParent() == null )
         {
-            throw new ManipulationException( "Invalid model: " + model + " Cannot find version!" );
+            throw new ManipulationException( "Invalid model ({}) - cannot find version!" );
         }
     }
 
@@ -573,7 +573,7 @@ public class Project
                         logger.error( "Internal project dependency resolution failure ; replaced {} in store by {}:{}:{}.",
                                       old, g, a, v );
                         throw new ManipulationException(
-                                        "Internal project dependency resolution failure ; replaced " + old + " by " + d );
+                                        "Internal project dependency resolution failure ; replaced {} by {}", old, d );
                     }
                 }
             }
@@ -627,8 +627,8 @@ public class Project
                     {
                         logger.error( "Internal project plugin resolution failure ; replaced {} in store by {}.", old,
                                       spv );
-                        throw new ManipulationException(
-                                        "Internal project plugin resolution failure ; replaced " + old + " by " + spv );
+                        throw new ManipulationException( "Internal project plugin resolution failure ; replaced {} in store by {}.", old,
+                                                         spv);
                     }
                 }
             }

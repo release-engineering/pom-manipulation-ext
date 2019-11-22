@@ -77,7 +77,7 @@ public class XMLIO
         if ( xmlFile == null || !xmlFile.exists() )
         {
             logger.error( "Unable to locate XML File {} ", xmlFile );
-            throw new ManipulationException( "XML file (" + xmlFile + ") not found.");
+            throw new ManipulationException( "XML file ({}) not found.", xmlFile);
         }
         Document doc;
         try
@@ -113,7 +113,6 @@ public class XMLIO
         }
     }
 
-    @SuppressWarnings( "WeakerAccess" )
     public String convert( Document contents ) throws ManipulationException
     {
         StringWriter outWriter = new StringWriter();

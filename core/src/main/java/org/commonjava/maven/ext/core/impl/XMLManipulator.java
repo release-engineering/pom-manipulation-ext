@@ -134,7 +134,7 @@ public class XMLManipulator
                 else
                 {
                     logger.error( "XPath {} did not find any expressions within {} ", operation.getXPath(), operation.getFile() );
-                    throw new ManipulationException( "Did not locate XML using XPath " + operation.getXPath() );
+                    throw new ManipulationException( "Did not locate XML using XPath {}", operation.getXPath() );
                 }
             }
 

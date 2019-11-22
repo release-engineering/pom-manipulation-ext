@@ -145,7 +145,7 @@ public class DependencyState
         {
             if ( dependencyExclusions.put( s, oP.get( s ) ) != null )
             {
-                throw new ManipulationException( "Property clash between dependencyOverride and dependencyExclusion for " + s );
+                throw new ManipulationException( "Property clash between dependencyOverride and dependencyExclusion for {}", s );
             }
         }
         String sourceValue = userProps.getProperty( DEPENDENCY_SOURCE,

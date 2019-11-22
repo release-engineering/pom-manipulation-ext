@@ -17,6 +17,10 @@ For details on usage see the documentation [here](https://release-engineering.gi
 
 ## Developing
 
+Contributions are welcome! To contribute sample Groovy scripts (for this project or the sibling
+[Gradle Manipulator](https://github.com/project-ncl/gradle-manipulator) project) please see the
+[Groovy Examples](https://github.com/project-ncl/manipulator-groovy-examples) project.
+
 ### Prerequisites
 
 * Java 1.8 or later
@@ -25,12 +29,6 @@ For details on usage see the documentation [here](https://release-engineering.gi
 ### Copyright
 
 The `.idea` folder contains a copyright template suitable for use when the project is imported into IntelliJ.
-
-### Code Style
-
-Eclipse compatible `codestyle.xml` and `eclipse.importorder` files are supplied inside the `ide-config` directory which
-may also be imported into IntelliJ via the EclipseCodeFormatter. There is also an IntelliJ compatible copyright template
-suitable for use when the project is imported into IntelliJ.
 
 ### Building
 
@@ -54,3 +52,55 @@ It is also recommended to install:
     * (which allows importing of the code style)
  * https://plugins.jetbrains.com/plugin/7442-gmavenplus-intellij-plugin
     * (especially if using the Groovy [example project](https://github.com/project-ncl/manipulator-groovy-examples) )
+
+
+## Coding
+
+
+### Style
+
+Eclipse compatible `codestyle.xml` and `eclipse.importorder` files are supplied inside the `ide-config` directory which
+may also be imported into IntelliJ via the EclipseCodeFormatter. There is also an IntelliJ compatible copyright template
+suitable for use when the project is imported into IntelliJ.
+
+### Exception Handling
+
+The three built in Exceptions all support SLF4J style `{}` substitution parameters
+
+    ManipulationException
+    RestException
+    ManipulationUncheckedException
+
+For example
+
+    throw new ManipulationException( "Unable to detect charset for file {}", jsonFile, exceptionObject );
+    throw new ManipulationException( "Internal project dependency resolution failure ; replaced {} by {}", old, d );
+    throw new ManipulationException( "Unable to parse groovyScripts", exceptionObject );
+
+
+## Testing
+
+The tool has both unit tests and integration tests. The integration tests will only be run if the specified profile has been
+activated e.g.
+
+    mvn clean install -Prun-its
+
+The unit tests make use of the `system-rules` library e.g.
+
+    @Rule
+    public final SystemOutRule systemOutRule = new SystemOutRule().enableLog().muteForSuccessfulTests();
+
+    @Rule
+    public final TestRule restoreSystemProperties = new RestoreSystemProperties();
+
+See https://stefanbirkner.github.io/system-rules for further information on this.
+
+A subset of the integration tests may be run by using the following example commands:
+
+    mvn -Dmaven.javadoc.skip=true -Denforcer.skip=true -DfailIfNoTests=false -Prun-its clean install
+        -Dtest=CircularIntegrationTest -Dtest-cli=circular-dependencies-test-second
+
+    mvn -Dmaven.javadoc.skip=true -DfailIfNoTests=false -Prun-its clean install
+        -Dtest=DefaultCliIntegrationTest -Dtest-cli=property-clash
+
+The main test is the `DefaultCliIntegrationTest`.
