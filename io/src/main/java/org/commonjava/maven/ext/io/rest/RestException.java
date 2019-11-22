@@ -31,7 +31,6 @@ public class RestException extends ManipulationException
     {
         // Note we don't extract any potential Throwable here ; we rely on the superclass to do that.
         super( string, params );
-        this.params = params;
     }
 
     public RestException( String message, Throwable e )

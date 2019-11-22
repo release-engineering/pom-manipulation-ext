@@ -132,13 +132,13 @@ public abstract class BaseGroovyManipulator
             InvocationPoint invocationPoint = script.getClass().getAnnotation( InvocationPoint.class );
             if ( deprecatedInvocationPoint != null )
             {
-                logger.warn( "Using deprecated InvocationPoint annotation (for {})", deprecatedInvocationPoint.invocationPoint().toString() );
-                logger.debug( "InvocationPoint is {}", deprecatedInvocationPoint.invocationPoint().toString() );
+                logger.warn( "Using deprecated InvocationPoint annotation (for {})", deprecatedInvocationPoint.invocationPoint() );
+                logger.debug( "InvocationPoint is {}", deprecatedInvocationPoint.invocationPoint() );
                 stage = deprecatedInvocationPoint.invocationPoint();
             }
             else if ( invocationPoint != null )
             {
-                logger.debug( "InvocationPoint is {}", invocationPoint.invocationPoint().toString() );
+                logger.debug( "InvocationPoint is {}", invocationPoint.invocationPoint() );
                 stage = invocationPoint.invocationPoint();
             }
             else

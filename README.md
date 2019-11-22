@@ -76,3 +76,31 @@ For example
     throw new ManipulationException( "Unable to detect charset for file {}", jsonFile, exceptionObject );
     throw new ManipulationException( "Internal project dependency resolution failure ; replaced {} by {}", old, d );
     throw new ManipulationException( "Unable to parse groovyScripts", exceptionObject );
+
+
+## Testing
+
+The tool has both unit tests and integration tests. The integration tests will only be run if the specified profile has been
+activated e.g.
+
+    mvn clean install -Prun-its
+
+The unit tests make use of the `system-rules` library e.g.
+
+    @Rule
+    public final SystemOutRule systemOutRule = new SystemOutRule().enableLog().muteForSuccessfulTests();
+
+    @Rule
+    public final TestRule restoreSystemProperties = new RestoreSystemProperties();
+
+See https://stefanbirkner.github.io/system-rules for further information on this.
+
+A subset of the integration tests may be run by using the following example commands:
+
+    mvn -Dmaven.javadoc.skip=true -Denforcer.skip=true -DfailIfNoTests=false -Prun-its clean install
+        -Dtest=CircularIntegrationTest -Dtest-cli=circular-dependencies-test-second
+
+    mvn -Dmaven.javadoc.skip=true -DfailIfNoTests=false -Prun-its clean install
+        -Dtest=DefaultCliIntegrationTest -Dtest-cli=property-clash
+
+The main test is the `DefaultCliIntegrationTest`.

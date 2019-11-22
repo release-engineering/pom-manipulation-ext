@@ -175,7 +175,7 @@ public class ModelIO
                 for ( final DependencyView dep : deps )
                 {
                     versionOverrides.put( dep.asArtifactRef(), dep.getVersion() );
-                    logger.debug( "Added version override for: " + dep.asProjectRef().toString() + ":" + dep.getVersion() );
+                    logger.debug( "Added version override for {}:{}", dep.asProjectRef(), dep.getVersion() );
                 }
             }
         }
@@ -372,7 +372,7 @@ public class ModelIO
         }
         else
         {
-            throw new ManipulationException(  "Attempting to align to a BOM that does not have a {} section", type.toString() );
+            throw new ManipulationException(  "Attempting to align to a BOM that does not have a {} section", type );
         }
         return pluginOverrides;
     }

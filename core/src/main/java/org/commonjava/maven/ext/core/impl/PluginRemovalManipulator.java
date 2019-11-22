@@ -131,7 +131,7 @@ public class PluginRemovalManipulator
                 Plugin p = it.next();
                 if ( pluginsToRemove.contains( SimpleProjectRef.parse( p.getKey() ) ) )
                 {
-                    logger.debug( "Removing {} ", p.toString() );
+                    logger.debug( "Removing {} ", p );
                     it.remove();
                     result = true;
                 }

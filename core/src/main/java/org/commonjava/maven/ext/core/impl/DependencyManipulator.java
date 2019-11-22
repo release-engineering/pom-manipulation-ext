@@ -675,7 +675,7 @@ public class DependencyManipulator implements Manipulator
                                 {
                                     throw new ManipulationException(
                                                      "Replacing original version {} in dependency {} with new version {} violates the strict version-alignment rule!",
-                                                     oldVersion, groupIdArtifactId.toString(), overrideVersion );
+                                                     oldVersion, groupIdArtifactId, overrideVersion );
                                 }
                                 else
                                 {

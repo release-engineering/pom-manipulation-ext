@@ -32,6 +32,8 @@ public abstract class GradleBaseScript extends Script implements CommonBaseScrip
 
     /**
      * Get the current ManipulationModel instance for remote artifact resolving.
+     *
+     * @return a Model instance
      */
     abstract public Object getModel();
 }

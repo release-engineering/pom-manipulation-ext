@@ -113,7 +113,7 @@ public class XMLIOTest
 
         Diff diff = DiffBuilder.compare( fromFile( xmlFile ) ).withTest( Input.fromFile( target ) ).build();
 
-        logger.debug( "Difference {} ", diff.toString() );
+        logger.debug( "Difference {} ", diff );
 
         String targetXML = FileUtils.readFileToString(target);
         // XMLUnit only seems to support XPath 1.0 so modify the expression to find the value.

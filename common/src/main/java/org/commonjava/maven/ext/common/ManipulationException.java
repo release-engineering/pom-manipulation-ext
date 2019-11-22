@@ -22,7 +22,7 @@ public class ManipulationException
 {
     private static final long serialVersionUID = 1L;
 
-    protected Object[] params;
+    private Object[] params;
 
     private String formattedMessage;
 
