@@ -68,10 +68,17 @@ public class PomIO
     private static final Logger logger = LoggerFactory.getLogger( PomIO.class );
 
 
-    public List<Project> parseProject (final File pom) throws ManipulationException
+    public List<Project> parseProject( final File pom ) throws ManipulationException
     {
-        final List<PomPeek> peeked = peekAtPomHierarchy(pom);
-        return readModelsForManipulation( pom.getAbsoluteFile(), peeked );
+        final List<PomPeek> peeked = peekAtPomHierarchy( pom );
+        try
+        {
+            return readModelsForManipulation( pom.getCanonicalFile(), peeked );
+        }
+        catch ( IOException e )
+        {
+            throw new ManipulationException( "Error getting canonical file", e );
+        }
     }
 
     /**
