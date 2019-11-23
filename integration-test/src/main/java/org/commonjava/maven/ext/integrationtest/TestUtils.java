@@ -293,9 +293,9 @@ public class TestUtils
      * @param test - Test name.
      * @return Default location of integration test, e.g. ~/pom-manipulation-ext/integration-test/target/it-cli/it-test
      */
-    static String getDefaultTestLocation( String test )
+    static String getDefaultTestLocation( String test ) throws IOException
     {
-        return IT_LOCATION.getAbsolutePath() + File.separator + test;
+        return IT_LOCATION.getCanonicalPath() + File.separator + test;
     }
 
     /**

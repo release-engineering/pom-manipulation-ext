@@ -15,6 +15,7 @@
  */
 package org.commonjava.maven.ext.core.util;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.maven.model.Dependency;
 import org.commonjava.maven.atlas.ident.ref.ArtifactRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleArtifactRef;
@@ -25,8 +26,10 @@ import org.commonjava.maven.ext.io.PomIO;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.contrib.java.lang.system.SystemOutRule;
+import org.junit.rules.TemporaryFolder;
 
 import java.io.File;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
@@ -43,6 +46,9 @@ public class ProjectInheritanceTest
 
     @Rule
     public final SystemOutRule systemOutRule = new SystemOutRule().enableLog().muteForSuccessfulTests();
+
+    @Rule
+    public final TemporaryFolder temporaryFolder = new TemporaryFolder();
 
     @Test
     public void testVerifyInheritance() throws Exception
@@ -145,6 +151,29 @@ public class ProjectInheritanceTest
         PomIO pomIO = new PomIO();
 
         List<Project> projects = pomIO.parseProject( relative.toFile() );
+
+        assertEquals( 1, projects.size() );
+        assertTrue( projects.get( 0 ).isExecutionRoot() );
+    }
+
+    @SuppressWarnings( "ResultOfMethodCallIgnored" )
+    @Test
+    public void testVerifyCanonicalExecutionRoot() throws Exception
+    {
+        final File projectroot = TestUtils.resolveFileResource( RESOURCE_BASE, "infinispan-bom-8.2.0.Final.pom" );
+        final File newFolder = temporaryFolder.newFolder();
+        final File folder1 = new File( newFolder, "One" );
+        final File folder2 = new File( newFolder, "Two" );
+        folder1.mkdir();
+        folder2.mkdir();
+        final File targetPom = new File( folder1, "target.pom" );
+        final File dummyPom = new File( folder2, "target.pom" );
+
+        FileUtils.copyFile( projectroot, targetPom);
+        Files.createSymbolicLink( dummyPom.toPath(), targetPom.toPath() );
+
+        PomIO pomIO = new PomIO();
+        List<Project> projects = pomIO.parseProject( dummyPom );
 
         assertEquals( 1, projects.size() );
         assertTrue( projects.get( 0 ).isExecutionRoot() );

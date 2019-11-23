@@ -174,11 +174,10 @@ public class CliTest
         TestUtils.executeMethod( c, "run", new Object[] {
                         new String[] { "-d", "--settings=" + getClass().getResource( "/settings-test.xml" ).getFile(),
                                         "-Dmaven.repo.local=" + folder.toString(), "-Prun-its", "--file",
-                                        target.getAbsolutePath() } });
+                                        target.getCanonicalPath() } });
 
         assertTrue (systemRule.getLog().contains( "Explicitly activating [run-its]" ));
         assertTrue (systemRule.getLog().contains( "Will not scan all profiles and returning active profiles of [run-its]" ));
-
     }
 
 

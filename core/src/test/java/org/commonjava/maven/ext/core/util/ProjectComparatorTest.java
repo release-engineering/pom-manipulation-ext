@@ -194,7 +194,7 @@ public class ProjectComparatorTest
 
         ManipulationSession session = createUpdateSession();
         session.getUserProperties().put( RelocationState.DEPENDENCY_RELOCATIONS + "ch.qos.logback:@org.foobar.logback:", "" );
-        session.getUserProperties().put( ManipulationManager.REPORT_TXT_OUTPUT_FILE, resultFile.getAbsolutePath());
+        session.getUserProperties().put( ManipulationManager.REPORT_TXT_OUTPUT_FILE, resultFile.getCanonicalPath());
 
         RelocationState relocationState = new RelocationState( session.getUserProperties() );
         session.setState( relocationState );
