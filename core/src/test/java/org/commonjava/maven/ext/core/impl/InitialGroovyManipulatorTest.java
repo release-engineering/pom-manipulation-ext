@@ -32,6 +32,7 @@ import org.commonjava.maven.ext.core.fixture.TestUtils;
 import org.commonjava.maven.ext.io.PomIO;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.contrib.java.lang.system.SystemOutRule;
 import org.junit.rules.TemporaryFolder;
 
 import java.io.File;
@@ -55,11 +56,14 @@ public class InitialGroovyManipulatorTest
     @Rule
     public TemporaryFolder tf = new TemporaryFolder();
 
+    @Rule
+    public final SystemOutRule systemRule = new SystemOutRule().enableLog().muteForSuccessfulTests();
+
     // TODO: Refactor TestUtils so its possible to retrieve a ManipulationManager and initialise a MavenSession
     @Test
     public void shouldRemoveProjectInGroovyScript() throws Exception
     {
-        final File groovy = TestUtils.resolveFileResource( "groovy-project-removal", "/manipulation.groovy" );
+        final File groovy = TestUtils.resolveFileResource( "groovy-project-removal", "manipulation.groovy" );
         final File base = TestUtils.resolveFileResource( "groovy-project-removal", "" );
         final File root = tf.newFolder();
         FileUtils.copyDirectory( base, root );

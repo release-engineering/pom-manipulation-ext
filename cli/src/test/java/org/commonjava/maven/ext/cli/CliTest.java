@@ -34,6 +34,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.UUID;
 
+import static org.commonjava.maven.ext.core.fixture.TestUtils.INTEGRATION_TEST;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -164,11 +165,7 @@ public class CliTest
         File folder = temp.newFolder();
         File target = temp.newFile( );
         // Locate the PME project pom file. Use that to verify inheritance tracking.
-        final File projectroot = new File ( TestUtils.resolveFileResource( "", "" )
-                                                     .getParentFile()
-                                                     .getParentFile()
-                                                     .getParentFile(), "integration-test/pom.xml" );
-        FileUtils.copyFile( projectroot, target );
+        Files.copy( Paths.get( INTEGRATION_TEST.toString(),  "pom.xml" ), target.toPath(), StandardCopyOption.REPLACE_EXISTING );
 
         Cli c = new Cli();
         TestUtils.executeMethod( c, "run", new Object[] {

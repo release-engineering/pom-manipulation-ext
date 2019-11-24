@@ -17,7 +17,6 @@ package org.commonjava.maven.ext.integrationtest;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.commons.io.FileUtils;
 import org.commonjava.maven.ext.core.ManipulationManager;
 import org.commonjava.maven.ext.core.state.VersioningState;
 import org.commonjava.maven.ext.io.rest.handler.AddSuffixJettyHandler;
@@ -92,6 +91,7 @@ public class ResultJsonFileTest
         // given
 
         File baseDir = tmpFolderRule.newFolder();
+        String basePath = baseDir.getCanonicalPath();
         File pomFile = getResourceFile();
         copyFile( pomFile, new File( baseDir, "pom.xml" ) );
 
@@ -102,13 +102,13 @@ public class ResultJsonFileTest
         params.put( VersioningState.INCREMENT_SERIAL_SUFFIX_SYSPROP.getCurrent(), AddSuffixJettyHandler.SUFFIX );
         params.put( VersioningState.INCREMENT_SERIAL_SUFFIX_PADDING_SYSPROP.getCurrent(), "0" );
 
-        Integer exitValue = runCli( Collections.emptyList(), params, baseDir.getCanonicalPath() );
+        Integer exitValue = runCli( Collections.emptyList(), params, basePath );
 
         // then
 
         assertEquals( (Integer) 0, exitValue );
 
-        File outputJsonFile = new File( baseDir, "/target/manipulation.json" );
+        File outputJsonFile = Paths.get( basePath, "target", "manipulation.json" ).toFile();
         assertTrue( outputJsonFile.exists() );
 
         JsonNode rootNode = MAPPER.readTree( outputJsonFile );
@@ -135,6 +135,7 @@ public class ResultJsonFileTest
         // given
 
         File baseDir = tmpFolderWorkingRule.newFolder();
+        String basePath = baseDir.getCanonicalPath();
         File pomFile = getResourceFile();
         copyFile( pomFile, new File( baseDir, "pom.xml" ) );
 
@@ -146,8 +147,7 @@ public class ResultJsonFileTest
         params.put( VersioningState.INCREMENT_SERIAL_SUFFIX_PADDING_SYSPROP.getCurrent(), "0" );
 
         List<String> args = new ArrayList<>();
-        args.add( "--file=" + Paths.get(workingDirectory.getCanonicalPath()).relativize(
-                                                  Paths.get( baseDir.getCanonicalPath()) ) + "/pom.xml" );
+        args.add( "--file=" + Paths.get(workingDirectory.getCanonicalPath()).relativize(Paths.get( basePath) ) + File.separator + "pom.xml" );
 
         Integer exitValue = runCli( args, params, baseDir.getCanonicalPath() );
 
@@ -155,7 +155,8 @@ public class ResultJsonFileTest
 
         assertEquals( (Integer) 0, exitValue );
 
-        File outputJsonFile = new File( baseDir, "/target/manipulation.json" );
+        File outputJsonFile = Paths.get( basePath, "target", "manipulation.json" ).toFile();
+
         assertTrue( outputJsonFile.exists() );
 
         JsonNode rootNode = MAPPER.readTree( outputJsonFile );
@@ -183,6 +184,7 @@ public class ResultJsonFileTest
 
         File baseDir = tmpFolderRule.newFolder();
         File pomFile = getResourceFile();
+        String basePath = baseDir.getCanonicalPath();
         copyFile( pomFile, new File( baseDir, "pom.xml" ) );
 
         // when
@@ -192,13 +194,14 @@ public class ResultJsonFileTest
         params.put( "repo-reporting-removal", "true" );
         params.put( VersioningState.INCREMENT_SERIAL_SUFFIX_PADDING_SYSPROP.getCurrent(), "0" );
 
-        Integer exitValue = runCli( Collections.emptyList(), params, baseDir.getCanonicalPath() );
+        Integer exitValue = runCli( Collections.emptyList(), params, basePath );
 
         // then
 
         assertEquals( (Integer) 0, exitValue );
 
-        File outputJsonFile = new File( baseDir, "/target/manipulation.json" );
+        File outputJsonFile = Paths.get( basePath, "target", "manipulation.json" ).toFile();
+
         assertTrue( outputJsonFile.exists() );
 
         JsonNode rootNode = MAPPER.readTree( outputJsonFile );
@@ -245,7 +248,7 @@ public class ResultJsonFileTest
         params.put( "restURL", mockServer.getUrl() );
         params.put( VersioningState.INCREMENT_SERIAL_SUFFIX_SYSPROP.getCurrent(), AddSuffixJettyHandler.SUFFIX );
         params.put( VersioningState.INCREMENT_SERIAL_SUFFIX_PADDING_SYSPROP.getCurrent(), "0" );
-        params.put( ManipulationManager.REPORT_JSON_OUTPUT_FILE, outputDir.toString() + "/manipulation.json" );
+        params.put( ManipulationManager.REPORT_JSON_OUTPUT_FILE, outputDir.toString() + File.separator + "manipulation.json" );
 
         Integer exitValue = runCli( Collections.emptyList(), params, baseDir.getCanonicalPath() );
 
@@ -253,7 +256,7 @@ public class ResultJsonFileTest
 
         assertEquals( (Integer) 0, exitValue );
 
-        File outputJsonFile = new File( outputDir, "/manipulation.json" );
+        File outputJsonFile = new File( outputDir, "manipulation.json" );
         assertTrue( outputJsonFile.exists() );
 
         JsonNode rootNode = MAPPER.readTree( outputJsonFile );

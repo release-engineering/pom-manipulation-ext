@@ -33,6 +33,7 @@ public interface Translator
      *
      * @param projects - List of projects (GAVs)
      * @return Map of ProjectVersionRef objects as keys and translated versions as values
+     * @throws RestException if an error occurs.
      */
     Map<ProjectVersionRef, String> translateVersions( List<ProjectVersionRef> projects ) throws RestException;
 

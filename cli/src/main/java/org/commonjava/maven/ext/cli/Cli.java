@@ -447,12 +447,14 @@ public class Cli
             ArtifactRepository ar = null;
             if ( settings == null )
             {
+                File mavenHome = new File ( System.getProperty( "user.home" ), ".m2" );
+
                 // No, this is not a typo. If current default is null, supply new local and global.
                 // This function passes in settings to make it easier to test.
-                this.settings = settings = new File( System.getProperty( "user.home" ), ".m2/settings.xml" );
+                this.settings = settings = new File( mavenHome, "settings.xml" );
 
                 ar = new MavenArtifactRepository();
-                ar.setUrl( Paths.get( System.getProperty( "user.home"), ".m2", "repository"  ).toUri().toString() );
+                ar.setUrl( Paths.get( mavenHome.getAbsolutePath(), "repository"  ).toUri().toString() );
                 req.setLocalRepository( ar );
             }
 

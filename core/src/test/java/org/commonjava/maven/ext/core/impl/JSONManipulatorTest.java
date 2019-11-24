@@ -31,6 +31,7 @@ import org.junit.rules.TemporaryFolder;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.Properties;
 
 import static org.junit.Assert.assertFalse;
@@ -84,7 +85,7 @@ public class JSONManipulatorTest
 
         jsonManipulator.internalApplyChanges( project, new JSONState.JSONOperation( target.getName(), modifyPath,
                                                                                             "https://maven.repository.redhat.com/ga/" ) );
-        assertTrue( FileUtils.readFileToString( target ).contains( "https://maven.repository.redhat.com/ga/" ) );
+        assertTrue( FileUtils.readFileToString( target, StandardCharsets.UTF_8 ).contains( "https://maven.repository.redhat.com/ga/" ) );
         assertFalse( FileUtils.contentEquals( pluginFile, target ) );
     }
 
@@ -105,6 +106,6 @@ public class JSONManipulatorTest
         p.put ("jsonUpdate",
                "amg-plugin-registry.json:$xpath-with\\:and\\,:replace with space and \\,\\:controlling\\:access_to_resources_outside_of_an_originating_domain\\,and_to_this_domain.");
 
-        JSONState js = new JSONState( p );
+        new JSONState( p );
     }
 }
