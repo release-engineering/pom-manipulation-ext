@@ -306,7 +306,7 @@ public class PomIO
             final LinkedList<File> pendingPoms = new LinkedList<>();
             pendingPoms.add( topPom.getCanonicalFile() );
 
-            final String topDir = topPom.getAbsoluteFile().getParentFile().getCanonicalPath();
+            final String topDir = topPom.getCanonicalFile().getParentFile().getCanonicalPath();
 
             final Set<File> seen = new HashSet<>();
 

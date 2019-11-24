@@ -74,6 +74,7 @@ import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathFactory;
 import java.io.File;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -446,12 +447,14 @@ public class Cli
             ArtifactRepository ar = null;
             if ( settings == null )
             {
+                File mavenHome = new File ( System.getProperty( "user.home" ), ".m2" );
+
                 // No, this is not a typo. If current default is null, supply new local and global.
                 // This function passes in settings to make it easier to test.
-                this.settings = settings = new File( System.getProperty( "user.home" ), ".m2/settings.xml" );
+                this.settings = settings = new File( mavenHome, "settings.xml" );
 
                 ar = new MavenArtifactRepository();
-                ar.setUrl( "file://" + System.getProperty( "user.home" ) + "/.m2/repository" );
+                ar.setUrl( Paths.get( mavenHome.getAbsolutePath(), "repository"  ).toUri().toString() );
                 req.setLocalRepository( ar );
             }
 
@@ -465,7 +468,7 @@ public class Cli
 
             if ( ar != null)
             {
-                ar.setUrl( "file://" + req.getLocalRepositoryPath() );
+                ar.setUrl( req.getLocalRepositoryPath().toURI().toString() );
             }
 
             if ( userProps != null && userProps.containsKey( "maven.repo.local" ) )
@@ -474,7 +477,7 @@ public class Cli
                 {
                     ar = new MavenArtifactRepository();
                 }
-                ar.setUrl( "file://" + userProps.getProperty( "maven.repo.local" ) );
+                ar.setUrl( Paths.get( userProps.getProperty( "maven.repo.local" ) ).toUri().toString() );
                 req.setLocalRepository( ar );
             }
 

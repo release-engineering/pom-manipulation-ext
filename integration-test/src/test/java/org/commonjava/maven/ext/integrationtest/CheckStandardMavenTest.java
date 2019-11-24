@@ -25,6 +25,7 @@ import java.nio.charset.StandardCharsets;
 
 import static org.commonjava.maven.ext.integrationtest.TestUtils.DEFAULT_MVN_PARAMS;
 import static org.commonjava.maven.ext.integrationtest.TestUtils.runMaven;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
@@ -43,8 +44,8 @@ public class CheckStandardMavenTest
 
         File[] files = tmpFolder.listFiles();
 
-        assertTrue( files.length == 1 );
-        assertTrue( "build.log".equals( files[0].getName() ) );
+        assertEquals( 1, files.length );
+        assertEquals( "build.log", files[0].getName() );
 
         String contents = FileUtils.readFileToString( files[0], StandardCharsets.UTF_8 );
 

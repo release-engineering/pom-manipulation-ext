@@ -15,6 +15,7 @@
  */
 package org.commonjava.maven.ext.core.fixture;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.artifact.repository.ArtifactRepositoryPolicy;
 import org.apache.maven.artifact.repository.MavenArtifactRepository;
@@ -32,6 +33,7 @@ import org.codehaus.plexus.PlexusContainer;
 import org.codehaus.plexus.PlexusContainerException;
 import org.codehaus.plexus.component.repository.exception.ComponentLookupException;
 import org.commonjava.maven.ext.common.ManipulationException;
+import org.commonjava.maven.ext.common.ManipulationUncheckedException;
 import org.commonjava.maven.ext.core.ManipulationManager;
 import org.commonjava.maven.ext.core.ManipulationSession;
 import org.slf4j.LoggerFactory;
@@ -40,27 +42,38 @@ import java.io.File;
 import java.io.FileReader;
 import java.lang.reflect.Method;
 import java.net.URL;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.Properties;
 
 public class TestUtils
 {
+
+    public static final Path ROOT_DIRECTORY = TestUtils.resolveFileResource( "", "" )
+                                                        .getParentFile()
+                                                        .getParentFile()
+                                                        .getParentFile().toPath();
+
+    public static final Path INTEGRATION_TEST = Paths.get( ROOT_DIRECTORY.toString(), "integration-test");
+
     public static Model resolveModelResource( final String resourceBase, final String resourceName )
         throws Exception
     {
         return new MavenXpp3Reader().read( new FileReader( resolveFileResource( resourceBase, resourceName ) ) );
     }
 
+
     public static File resolveFileResource( final String resourceBase, final String resourceName )
-                    throws Exception
     {
+        final String separator = StringUtils.isNotEmpty( resourceBase ) ? "/" : "";
         final URL resource = Thread.currentThread()
                                    .getContextClassLoader()
-                                   .getResource( resourceBase + resourceName );
+                                   .getResource( resourceBase + separator + resourceName );
 
         if ( resource == null )
         {
-            throw new ManipulationException( "Unable to locate resource for {}{}", resourceBase, resourceName );
+            throw new ManipulationUncheckedException( "Unable to locate resource for {}{}", resourceBase, resourceName );
         }
         return new File( resource.getPath() );
     }

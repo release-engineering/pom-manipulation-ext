@@ -41,12 +41,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
 
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertNull;
+import static org.commonjava.maven.ext.core.fixture.TestUtils.INTEGRATION_TEST;
+import static org.commonjava.maven.ext.core.fixture.TestUtils.ROOT_DIRECTORY;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -54,7 +57,7 @@ import static org.junit.Assert.fail;
 
 public class BaseScriptTest
 {
-    private static final String RESOURCE_BASE = "properties/";
+    private static final String RESOURCE_BASE = "properties";
 
     private final Logger logger = LoggerFactory.getLogger( getClass() );
 
@@ -62,22 +65,15 @@ public class BaseScriptTest
     public TemporaryFolder temporaryFolder = new TemporaryFolder();
 
     @Rule
-    public final SystemOutRule systemRule = new SystemOutRule().enableLog();//.muteForSuccessfulTests();
+    public final SystemOutRule systemRule = new SystemOutRule().enableLog().muteForSuccessfulTests();
 
     @Test
     public void testGroovyAnnotation() throws Exception
     {
         // Locate the PME project pom file. Use that to verify inheritance tracking.
-        final File groovy = new File( TestUtils.resolveFileResource( RESOURCE_BASE, "" )
-                                               .getParentFile()
-                                               .getParentFile()
-                                               .getParentFile()
-                                               .getParentFile(), "integration-test/src/it/setup/depMgmt1/Sample.groovy" );
-        final File projectroot = new File( TestUtils.resolveFileResource( RESOURCE_BASE, "" )
-                                                    .getParentFile()
-                                                    .getParentFile()
-                                                    .getParentFile()
-                                                    .getParentFile(), "pom.xml" );
+        final File groovy = Paths.get( INTEGRATION_TEST.toString(),"src", "it", "setup", "depMgmt1", "Sample.groovy" ).toFile();
+        final File projectroot = new File( ROOT_DIRECTORY.toFile(), "pom.xml" );
+
         PomIO pomIO = new PomIO();
         List<Project> projects = pomIO.parseProject( projectroot );
         ManipulationManager m = new ManipulationManager( Collections.emptyMap(), Collections.emptyMap(), null );
@@ -98,16 +94,8 @@ public class BaseScriptTest
     public void testGroovyAnnotationIgnore() throws Exception
     {
         // Locate the PME project pom file. Use that to verify inheritance tracking.
-        final File groovy = new File( TestUtils.resolveFileResource( RESOURCE_BASE, "" )
-                                               .getParentFile()
-                                               .getParentFile()
-                                               .getParentFile()
-                                               .getParentFile(), "integration-test/src/it/setup/depMgmt1/Sample.groovy" );
-        final File projectroot = new File( TestUtils.resolveFileResource( RESOURCE_BASE, "" )
-                                                    .getParentFile()
-                                                    .getParentFile()
-                                                    .getParentFile()
-                                                    .getParentFile(), "pom.xml" );
+        final File groovy = Paths.get( INTEGRATION_TEST.toString(),"src", "it", "setup", "depMgmt1", "Sample.groovy" ).toFile();
+        final File projectroot = new File( ROOT_DIRECTORY.toFile(), "pom.xml" );
 
         PomIO pomIO = new PomIO();
         List<Project> projects = pomIO.parseProject( projectroot );
@@ -131,7 +119,7 @@ public class BaseScriptTest
     public void testInlineProperty() throws Exception
     {
         // Locate the PME project pom file. Use that to verify inheritance tracking.
-        final File projectroot = new File( TestUtils.resolveFileResource( RESOURCE_BASE, "" )
+        final File projectroot = new File( TestUtils.resolveFileResource( RESOURCE_BASE, "/" )
                                                     .getParentFile()
                                                     .getParentFile()
                                                     .getParentFile()
@@ -196,11 +184,7 @@ public class BaseScriptTest
     {
         // Locate the PME project pom file. Use that to verify inheritance tracking.
         final File groovy = TestUtils.resolveFileResource( "", "PropertyOverride.groovy" );
-        final File projectroot = new File( TestUtils.resolveFileResource( RESOURCE_BASE, "" )
-                                                    .getParentFile()
-                                                    .getParentFile()
-                                                    .getParentFile()
-                                                    .getParentFile(), "pom.xml" );
+        final File projectroot = new File( ROOT_DIRECTORY.toFile(), "pom.xml" );
 
         List<Project> projects = new PomIO().parseProject( projectroot );
 
@@ -234,11 +218,8 @@ public class BaseScriptTest
     {
         // Locate the PME project pom file. Use that to verify inheritance tracking.
         final File groovy = TestUtils.resolveFileResource( "", "GroovyExceptions.groovy" );
-        final File pom = new File( TestUtils.resolveFileResource( RESOURCE_BASE, "" )
-                                            .getParentFile()
-                                            .getParentFile()
-                                            .getParentFile()
-                                            .getParentFile(), "pom.xml" );
+        final File pom = new File( ROOT_DIRECTORY.toFile(), "pom.xml" );
+
         final File tmpFolder = temporaryFolder.newFolder();
         FileUtils.copyFileToDirectory( pom, tmpFolder);
 

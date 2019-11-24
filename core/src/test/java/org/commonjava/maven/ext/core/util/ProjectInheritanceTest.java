@@ -15,6 +15,7 @@
  */
 package org.commonjava.maven.ext.core.util;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.maven.model.Dependency;
 import org.commonjava.maven.atlas.ident.ref.ArtifactRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleArtifactRef;
@@ -25,13 +26,17 @@ import org.commonjava.maven.ext.io.PomIO;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.contrib.java.lang.system.SystemOutRule;
+import org.junit.rules.TemporaryFolder;
 
 import java.io.File;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 
+import static org.commonjava.maven.ext.core.fixture.TestUtils.INTEGRATION_TEST;
+import static org.commonjava.maven.ext.core.fixture.TestUtils.ROOT_DIRECTORY;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
@@ -44,15 +49,15 @@ public class ProjectInheritanceTest
     @Rule
     public final SystemOutRule systemOutRule = new SystemOutRule().enableLog().muteForSuccessfulTests();
 
+    @Rule
+    public final TemporaryFolder temporaryFolder = new TemporaryFolder();
+
     @Test
     public void testVerifyInheritance() throws Exception
     {
         // Locate the PME project pom file. Use that to verify inheritance tracking.
-        final File projectroot = new File (TestUtils.resolveFileResource( RESOURCE_BASE, "" )
-                                          .getParentFile()
-                                          .getParentFile()
-                                          .getParentFile()
-                                          .getParentFile(), "pom.xml" );
+        final File projectroot = Paths.get( ROOT_DIRECTORY.toString(),"pom.xml" ).toFile();
+
         PomIO pomIO = new PomIO();
         List<Project> projects = pomIO.parseProject( projectroot );
         for ( Project p : projects )
@@ -69,11 +74,8 @@ public class ProjectInheritanceTest
     public void testVerifyInheritanceMultiple() throws Exception
     {
         // Locate the PME project pom file. Use that to verify inheritance tracking.
-        final File projectroot = new File (TestUtils.resolveFileResource( RESOURCE_BASE, "" )
-                                                    .getParentFile()
-                                                    .getParentFile()
-                                                    .getParentFile()
-                                                    .getParentFile(), "integration-test/src/it/project-inheritance/pom.xml" );
+        final File projectroot = Paths.get( INTEGRATION_TEST.toString(), "src", "it", "project-inheritance", "pom.xml" ).toFile();
+
         PomIO pomIO = new PomIO();
 
         List<Project> projects = pomIO.parseProject( projectroot );
@@ -106,12 +108,7 @@ public class ProjectInheritanceTest
     public void testVerifyExecutionRoot() throws Exception
     {
         // Locate the PME project pom file. Use that to verify inheritance tracking.
-        final File projectroot = new File( TestUtils.resolveFileResource( RESOURCE_BASE, "" )
-                                                    .getParentFile()
-                                                    .getParentFile()
-                                                    .getParentFile()
-                                                    .getParentFile(),
-                                           "integration-test/src/it/project-inheritance/common/pom.xml" );
+        final File projectroot = Paths.get( INTEGRATION_TEST.toString(), "src", "it", "project-inheritance", "common", "pom.xml" ).toFile();
 
         PomIO pomIO = new PomIO();
 
@@ -136,7 +133,7 @@ public class ProjectInheritanceTest
     @Test
     public void testVerifyRelativeExecutionRoot() throws Exception
     {
-        final File projectRoot = new File( System.getProperty( "user.dir" ) + "/pom.xml" );
+        final File projectRoot = new File( System.getProperty( "user.dir" ), "pom.xml" );
 
         Path root = Paths.get( projectRoot.getParent() );
         Path absolute = Paths.get( projectRoot.toString() );
@@ -150,15 +147,35 @@ public class ProjectInheritanceTest
         assertTrue( projects.get( 0 ).isExecutionRoot() );
     }
 
+    @SuppressWarnings( "ResultOfMethodCallIgnored" )
+    @Test
+    public void testVerifyCanonicalExecutionRoot() throws Exception
+    {
+        final File projectroot = TestUtils.resolveFileResource( RESOURCE_BASE, "infinispan-bom-8.2.0.Final.pom" );
+        final File newFolder = temporaryFolder.newFolder();
+        final File folder1 = new File( newFolder, "One" );
+        final File folder2 = new File( newFolder, "Two" );
+        folder1.mkdir();
+        folder2.mkdir();
+        final File targetPom = new File( folder1, "target.pom" );
+        final File dummyPom = new File( folder2, "target.pom" );
+
+        FileUtils.copyFile( projectroot, targetPom);
+        Files.createSymbolicLink( dummyPom.toPath(), targetPom.toPath() );
+
+        PomIO pomIO = new PomIO();
+        List<Project> projects = pomIO.parseProject( dummyPom );
+
+        assertEquals( 1, projects.size() );
+        assertTrue( projects.get( 0 ).isExecutionRoot() );
+    }
+
     @Test
     public void testVerifyInheritanceReversedMultiple() throws Exception
     {
         // Locate the PME project pom file. Use that to verify inheritance tracking.
-        final File projectroot = new File (TestUtils.resolveFileResource( RESOURCE_BASE, "" )
-                                                    .getParentFile()
-                                                    .getParentFile()
-                                                    .getParentFile()
-                                                    .getParentFile(), "integration-test/src/it/project-inheritance/pom.xml" );
+        final File projectroot = Paths.get( INTEGRATION_TEST.toString(), "src", "it", "project-inheritance", "pom.xml" ).toFile();
+
         PomIO pomIO = new PomIO();
 
         List<Project> projects = pomIO.parseProject( projectroot );
@@ -194,11 +211,7 @@ public class ProjectInheritanceTest
     {
         final ManipulationSession session = new ManipulationSession();
 
-        final File projectroot = new File (TestUtils.resolveFileResource( RESOURCE_BASE, "" )
-                                                    .getParentFile()
-                                                    .getParentFile()
-                                                    .getParentFile()
-                                                    .getParentFile(), "integration-test/src/it/project-inheritance/pom.xml" );
+        final File projectroot = Paths.get( INTEGRATION_TEST.toString(), "src", "it", "project-inheritance", "pom.xml" ).toFile();
 
         PomIO pomIO = new PomIO();
         List<Project> projects = pomIO.parseProject( projectroot );
@@ -232,5 +245,4 @@ public class ProjectInheritanceTest
             }
         }
     }
-
 }
