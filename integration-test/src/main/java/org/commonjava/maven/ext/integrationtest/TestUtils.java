@@ -370,7 +370,8 @@ public class TestUtils
             path = extraPath + File.pathSeparator + path;
         }
 
-        Process proc = Runtime.getRuntime().exec(command, new String[] {"PATH=" + path}, new File(workingDir));
+        String javaHome = System.getenv("JAVA_HOME");
+        Process proc = Runtime.getRuntime().exec(command, new String[] {"PATH=" + path, "JAVA_HOME=" + javaHome}, new File(workingDir));
         File buildlog = new File(workingDir, "build.log");
 
         try ( BufferedReader stdout = new BufferedReader( new InputStreamReader( proc.getInputStream() ) );

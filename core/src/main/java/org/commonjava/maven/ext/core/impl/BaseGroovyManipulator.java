@@ -19,6 +19,7 @@ import groovy.lang.GroovyShell;
 import groovy.lang.MissingMethodException;
 import groovy.lang.Script;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang.SystemUtils;
 import org.codehaus.groovy.control.CompilationFailedException;
 import org.commonjava.maven.atlas.ident.ref.ArtifactRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleArtifactRef;
@@ -39,6 +40,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -69,6 +71,17 @@ public abstract class BaseGroovyManipulator
 
     public abstract int getExecutionIndex();
 
+    String fixFileURL( final String script )
+    {
+        if ( !SystemUtils.IS_OS_WINDOWS || script.startsWith( "file:///" ) || !script.startsWith( "file://" ) )
+        {
+            return script;
+        }
+        final String path = script.substring( "file://".length() );
+        final String uri = Paths.get( path ).toUri().toString();
+        logger.debug( "Converted script {} to URI {}", script, uri );
+        return uri;
+    }
 
     /**
      * Splits the value on ',', then wraps each value in {@link SimpleArtifactRef#parse(String)} and prints a warning / skips in the event of a
@@ -94,10 +107,10 @@ public abstract class BaseGroovyManipulator
                 for ( final String script : scripts )
                 {
                     File found;
-                    if ( script.startsWith( "http" ) || script.startsWith( "file" ))
+                    if ( script.startsWith( "http:" ) || script.startsWith( "https:" ) || script.startsWith( "file:" ))
                     {
                         logger.info( "Attempting to read URL {} ", script );
-                        found = fileIO.resolveURL( new URL( script ) );
+                        found = fileIO.resolveURL( new URL( fixFileURL( script ) ) );
                     }
                     else
                     {
@@ -115,7 +128,6 @@ public abstract class BaseGroovyManipulator
             return result;
         }
     }
-
 
     void applyGroovyScript( List<Project> projects, Project project, File groovyScript ) throws ManipulationException
     {
