@@ -28,6 +28,8 @@ public class Execution
 
     private Boolean success = true;
 
+    private Boolean skip = false;
+
     private Map<String, String> javaParams;
 
     private Map<String, String> flags;
@@ -80,5 +82,15 @@ public class Execution
     public void setSuccess( Boolean success )
     {
         this.success = success;
+    }
+
+    public void setSkip( Boolean skip )
+    {
+        this.skip = skip;
+    }
+
+    public boolean isSkip()
+    {
+        return skip;
     }
 }

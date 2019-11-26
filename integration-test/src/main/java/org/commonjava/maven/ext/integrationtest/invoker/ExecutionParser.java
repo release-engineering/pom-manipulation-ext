@@ -15,6 +15,7 @@
  */
 package org.commonjava.maven.ext.integrationtest.invoker;
 
+import org.apache.commons.lang.SystemUtils;
 import org.commonjava.maven.ext.integrationtest.TestUtils;
 
 import java.util.Collection;
@@ -27,6 +28,34 @@ import java.util.Properties;
  */
 public interface ExecutionParser
 {
+    ExecutionParserHandler SKIP_HANDLER = new ExecutionParserHandler()
+    {
+        @Override
+        public void handle( Execution execution, Map<String, String> params )
+        {
+            String key = params.get( "key" );
+            String value = params.get( "value" );
+
+            if ( key.matches( "invoker\\.os\\.family.*" ) && value != null)
+            {
+                value = value.trim();
+                boolean invert = false;
+                if ( value.startsWith( "!" ) )
+                {
+                    invert = true;
+                    value = value.substring( 1 );
+                }
+                // TODO: Very limited handling of selector conditions - just enough to skip for Windows.
+                if ( "windows".equalsIgnoreCase( value ) )
+                {
+                    if ( invert && SystemUtils.IS_OS_WINDOWS )
+                    {
+                        execution.setSkip( true );
+                    }
+                }
+            }
+        }
+    };
 
     /**
      * Sets mvn command of Execution

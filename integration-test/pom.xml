@@ -321,7 +321,7 @@
                   <setupIncludes>
                     <setupInclude>setup/*/pom.xml</setupInclude>
                   </setupIncludes>
-                  <!-- mavenExecutable>mvnDebug</mavenExecutable -->
+                  <!-- <mavenExecutable>mvnDebug</mavenExecutable> -->
                   <pomIncludes>
                     <!-- <pomInclude>remote-plugin-management-invalid/pom.xml</pomInclude> -->
                     <pomInclude>simple-numeric-directory-path/parent/pom.xml</pomInclude>
