@@ -37,7 +37,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -97,7 +96,7 @@ public abstract class BaseGroovyManipulator
                     if ( script.startsWith( "http" ) || script.startsWith( "file" ))
                     {
                         logger.info( "Attempting to read URL {} ", script );
-                        found = fileIO.resolveURL( new URL( script ) );
+                        found = fileIO.resolveURL( script );
                     }
                     else
                     {
