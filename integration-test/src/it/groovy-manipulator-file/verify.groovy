@@ -30,7 +30,7 @@ assert !jsonString.contains ("resolved:")
 def buildLog = new File( basedir, 'build.log' )
 def message = 0
 buildLog.eachLine {
-   if (it.contains( "groovyScripts file:///")) {
+   if (it.contains( "groovyScripts file:")) {
       message++
    }
 }
