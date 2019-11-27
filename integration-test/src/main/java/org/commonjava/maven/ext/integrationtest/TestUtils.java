@@ -115,6 +115,11 @@ public class TestUtils
         // Execute
         for ( Execution e : executions )
         {
+            if ( e.isSkip () )
+            {
+                logger.debug( "Skipping test {}", e.getLocation() );
+                continue;
+            }
             // Setup
             runScript( workingDir, "setup" );
 
@@ -175,8 +180,11 @@ public class TestUtils
             }
         }
 
-        // Verify
-        runScript( workingDir, "verify" );
+        if ( executions.stream().noneMatch( Execution::isSkip ) )
+        {
+            // Verify
+            runScript( workingDir, "verify" );
+        }
     }
 
     /**

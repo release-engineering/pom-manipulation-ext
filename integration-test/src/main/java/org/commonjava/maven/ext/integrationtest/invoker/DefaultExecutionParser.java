@@ -33,6 +33,7 @@ public class DefaultExecutionParser
 {
     public static final List<ExecutionParserHandler> DEFAULT_HANDLERS = new ArrayList<ExecutionParserHandler>()
     {{
+        add( ExecutionParser.SKIP_HANDLER );
         add( ExecutionParser.BUILD_HANDLER );
         add( ExecutionParser.BUILD_RESULT_HANDLER );
         add( ExecutionParser.BUILD_PROFILES_HANDLER );
@@ -89,7 +90,7 @@ public class DefaultExecutionParser
                 {{
                         put( "key", key );
                         put( "value", invokerProperties.getProperty( key ) );
-                    }} );
+                }} );
             }
 
             executions.put( id, execution );

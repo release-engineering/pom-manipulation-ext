@@ -16,16 +16,14 @@
 package org.commonjava.maven.ext.io;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang.SystemUtils;
 import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.io.resolver.GalleyInfrastructure;
 import org.jdom2.output.LineSeparator;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -43,7 +41,6 @@ import java.util.UUID;
 @Singleton
 public class FileIO
 {
-    private static final Logger logger = LoggerFactory.getLogger( FileIO.class );
 
     private GalleyInfrastructure infra;
 
@@ -57,12 +54,21 @@ public class FileIO
      * Read the raw file from a given URL. Useful if we need to read
      * a remote file.
      *
-     * @param ref the ArtifactRef to read.
+     * @param reference the URL to read.
      * @return the file for the URL
      * @throws IOException if an error occurs.
      */
-    public File resolveURL( final URL ref ) throws IOException
+    public File resolveURL( final String reference ) throws IOException
     {
+        URL ref;
+        if ( SystemUtils.IS_OS_WINDOWS )
+        {
+            ref = new URL ( reference.replaceFirst("^file://([a-zA-Z]:\\\\)","file:///$1"));
+        }
+        else
+        {
+            ref = new URL (reference );
+        }
         File cache = infra.getCacheDir();
         File result = new File( cache, UUID.randomUUID().toString() );
 
