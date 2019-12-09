@@ -33,7 +33,7 @@ public class ManipulationException
 
     public ManipulationException( final String string, final Object... params )
     {
-        super( string, MessageFormatter.getThrowableCandidate( params ) );
+        super( string, ExceptionHelper.getThrowableCandidate( params ) );
         this.params = params;
     }
 
