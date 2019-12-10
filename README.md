@@ -104,3 +104,10 @@ A subset of the integration tests may be run by using the following example comm
         -Dtest=DefaultCliIntegrationTest -Dtest-cli=property-clash
 
 The main test is the `DefaultCliIntegrationTest`.
+
+### Code Coverage
+
+JaCoCo is used to produce code coverage reports for the test runs. An aggregate report is produced in HTML and XML. The
+HTML report can be found at `coverage-reporting/target/site/jacoco-aggregate/index.html` and the XML report can be
+found at `coverage-reporting/target/site/jacoco-aggregate/jacoco.xml`. The XML report is uploaded to Codecov via Travis
+CI for use with GitHub pull requests.
