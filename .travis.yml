@@ -31,13 +31,13 @@ jobs:
       os: linux
       jdk: openjdk8
       if: type = pull_request
-      script: "travis-wait-enhanced --timeout=60m --interval=4m -- mvn -B -V clean org.apache.maven.plugins:maven-source-plugin:jar-no-fork install -Prun-its"
+      script: "travis-wait-enhanced --timeout=60m --interval=4m -- mvn -Dmaven.javadoc.skip=true -B -V install -Prun-its"
 
     - name: pr_osx
       os: osx
       osx_image: xcode9.3
       if: type = pull_request
-      script: "travis-wait-enhanced --timeout=60m --interval=4m -- mvn -B -V clean org.apache.maven.plugins:maven-source-plugin:jar-no-fork install -Prun-its"
+      script: "travis-wait-enhanced --timeout=60m --interval=4m -- mvn -Dmaven.javadoc.skip=true -Danimal.sniffer.skip=true -B -V install -Prun-its"
 
     - name: deploy
       os: linux
