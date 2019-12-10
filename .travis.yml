@@ -44,3 +44,6 @@ jobs:
       jdk: openjdk8
       if: branch = master AND type = push
       script: "cp .travis.settings.xml $HOME/.m2/settings.xml && travis-wait-enhanced --timeout=60m --interval=4m -- mvn -B -V clean org.apache.maven.plugins:maven-source-plugin:jar-no-fork deploy"
+
+after_success:
+  - '[ "$TRAVIS_OS_NAME" = "linux" ] && bash <(curl -s https://codecov.io/bash) -f coverage-reporting/target/site/jacoco-aggregate/jacoco.xml'
