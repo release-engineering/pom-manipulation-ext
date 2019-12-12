@@ -27,7 +27,7 @@ jobs:
       os: linux
       jdk: openjdk8
       if: type = pull_request
-      script: "travis-wait-enhanced --timeout=60m --interval=4m -- mvn -Dmaven.javadoc.skip=true -Danimal.sniffer.skip=true -B -V install -Prun-its"
+      script: "travis-wait-enhanced --timeout=60m --interval=4m -- mvn -Denforcer.skip=true -Danimal.sniffer.skip=true -B -V install -Prun-its"
 
     - stage: test
       os: osx
@@ -39,7 +39,7 @@ jobs:
       os: linux
       jdk: openjdk8
       if: branch = master AND type = push
-      script: "cp .travis.settings.xml $HOME/.m2/settings.xml && travis-wait-enhanced --timeout=60m --interval=4m -- mvn -B -V clean org.apache.maven.plugins:maven-source-plugin:jar-no-fork deploy"
+      script: "cp .travis.settings.xml $HOME/.m2/settings.xml && travis-wait-enhanced --timeout=60m --interval=4m -- mvn -Denforcer.skip=true -Danimal.sniffer.skip=true -B -V org.apache.maven.plugins:maven-source-plugin:jar-no-fork deploy -Prun-its"
 
 after_success:
   - '[ "$TRAVIS_OS_NAME" = "linux" ] && bash <(curl -s https://codecov.io/bash) -f coverage-reporting/target/site/jacoco-aggregate/jacoco.xml'
