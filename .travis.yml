@@ -21,7 +21,7 @@ before_install: |
 jobs:
   include:
     - stage: cache warmup
-      script: mvn dependency:go-offline -Prun-its
+      script: mvn de.qaware.maven:go-offline-maven-plugin:1.2.4:resolve-dependencies -Prun-its
 
     - stage: test
       os: linux
