@@ -15,12 +15,18 @@
  */
 package org.commonjava.maven.ext.core.state;
 
+import org.apache.commons.lang.StringUtils;
 import org.commonjava.maven.ext.core.ManipulationSession;
 import org.commonjava.maven.ext.core.impl.DependencyManipulator;
 import org.commonjava.maven.ext.io.rest.DefaultTranslator;
 import org.commonjava.maven.ext.io.rest.Translator;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Properties;
+import java.util.stream.Collectors;
 
 /**
  * Captures configuration relating to dependency alignment from the POMs. Used by {@link DependencyManipulator}.
@@ -34,6 +40,8 @@ public class RESTState implements State
     private Translator restEndpoint;
 
     private boolean restSuffixAlign;
+
+    private Map<String, String> restHeaders;
 
     public RESTState( final ManipulationSession session )
     {
@@ -54,7 +62,17 @@ public class RESTState implements State
                                                                    String.valueOf( DefaultTranslator.CHUNK_SPLIT_COUNT ) ) );
         restSuffixAlign = Boolean.parseBoolean( userProps.getProperty( "restSuffixAlign", "true" ) );
 
-        restEndpoint = new DefaultTranslator( restURL, restMaxSize, restMinSize, repositoryGroup, vState.getIncrementalSerialSuffix() );
+        String restHeadersProperty = userProps.getProperty( "restHeaders", "" );
+        if ( !StringUtils.isEmpty( restHeadersProperty ) )
+        {
+            restHeaders = Arrays.stream( restHeadersProperty.split( "," ) )
+                                .map( h -> h.split( ":", 2 ) )
+                                .filter( h -> h.length > 0 && StringUtils.isNotEmpty( h[0] ) )
+                                .collect( Collectors.toMap( h -> h[0], h -> h.length > 1 ? h[1] : "",
+                                                            ( x, y ) -> y, LinkedHashMap::new ) );
+        }
+
+        restEndpoint = new DefaultTranslator( restURL, restMaxSize, restMinSize, repositoryGroup, vState.getIncrementalSerialSuffix(), restHeaders );
     }
 
     /**
@@ -76,5 +94,10 @@ public class RESTState implements State
     public boolean isRestSuffixAlign()
     {
         return restSuffixAlign;
+    }
+
+    public Map<String, String> getRestHeaders()
+    {
+        return Collections.unmodifiableMap( restHeaders );
     }
 }
