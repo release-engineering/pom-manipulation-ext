@@ -87,6 +87,8 @@ public class DefaultTranslator
 
     private final String incrementalSerialSuffix;
 
+    private final Map<String, String> restHeaders;
+
     static
     {
         // According to https://kong.github.io/unirest-java/#configuration the default connection timeout is 10000
@@ -108,14 +110,29 @@ public class DefaultTranslator
      * @param restMinSize minimum size for the call
      * @param repositoryGroup the group to pass to the endpoint.
      * @param incrementalSerialSuffix the suffix to pass to the endpoint.
+     * @param restHeaders the headers to pass to the endpoint
      */
-    public DefaultTranslator( String endpointUrl, int restMaxSize, int restMinSize, String repositoryGroup, String incrementalSerialSuffix )
+    public DefaultTranslator( String endpointUrl, int restMaxSize, int restMinSize, String repositoryGroup, String incrementalSerialSuffix, Map<String, String> restHeaders )
     {
         this.repositoryGroup = repositoryGroup;
         this.incrementalSerialSuffix = incrementalSerialSuffix;
         this.endpointUrl = endpointUrl + ( isNotBlank( endpointUrl ) ? endpointUrl.endsWith( "/" ) ? "" : "/" : "");
         this.initialRestMaxSize = restMaxSize;
         this.initialRestMinSize = restMinSize;
+        this.restHeaders = restHeaders;
+    }
+
+    /**
+     * @param endpointUrl is the URL to talk to.
+     * @param restMaxSize initial (maximum) size of the rest call; if zero will send everything.
+     * @param restMinSize minimum size for the call
+     * @param repositoryGroup the group to pass to the endpoint.
+     * @param incrementalSerialSuffix the suffix to pass to the endpoint.
+     */
+    public DefaultTranslator( String endpointUrl, int restMaxSize, int restMinSize, String repositoryGroup, String incrementalSerialSuffix )
+    {
+        this ( endpointUrl, restMaxSize, restMinSize, repositoryGroup, incrementalSerialSuffix,
+               Collections.emptyMap() );
     }
 
     private void partition(List<ProjectVersionRef> projects, Queue<Task> queue) {
@@ -191,7 +208,7 @@ public class DefaultTranslator
         final String[] errorString = new String[1];
         final HttpResponse<List<ProjectVersionRef>> r;
 
-        logger.trace( "Called findBlacklisted to {} with {}", blacklistEndpointUrl, ga );
+        logger.debug( "Called findBlacklisted to {} with {} and custom headers {}", blacklistEndpointUrl, ga, restHeaders );
 
         try
         {
@@ -199,6 +216,7 @@ public class DefaultTranslator
                        .header( "accept", "application/json" )
                        .header( "Content-Type", "application/json" )
                        .header( "Log-Context", getHeaderContext() )
+                       .headers( restHeaders )
                        .queryString( "groupid", ga.getGroupId() )
                        .queryString( "artifactid", ga.getArtifactId() )
                        .asObject( pvrTyoe )
@@ -427,10 +445,13 @@ public class DefaultTranslator
                                 new LookupGAVsRequest( Collections.emptySet(), Collections.emptySet(), repositoryGroup,
                                                        incrementalSerialSuffix, GAVUtils.generateGAVs( chunk ) );
 
+                logger.debug( "Called executeTranslate to {} with custom headers {}", this.endpointUrl, restHeaders );
+
                 r = Unirest.post( this.endpointUrl )
                            .header( "accept", "application/json" )
                            .header( "Content-Type", "application/json" )
                            .header( "Log-Context", getHeaderContext() )
+                           .headers( restHeaders )
                            .body( request )
                            .asObject( lookupType )
                            .ifSuccess( successResponse -> result = successResponse.getBody()

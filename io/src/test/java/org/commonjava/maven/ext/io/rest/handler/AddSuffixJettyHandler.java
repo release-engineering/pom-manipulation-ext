@@ -32,6 +32,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -84,6 +85,16 @@ public class AddSuffixJettyHandler
                     throws IOException
     {
         LOGGER.info( "Handling with AddSuffixJettyHandler: {} {}", request.getMethod(), request.getPathInfo() );
+
+        if ( LOGGER.isDebugEnabled() )
+        {
+            Enumeration<String> e = request.getHeaderNames();
+            while( e.hasMoreElements() )
+            {
+                String name = e.nextElement();
+                LOGGER.debug( "Request has header: {}: {}", name, request.getHeader( name ) );
+            }
+        }
 
         if ( target.startsWith( this.endpoint ) )
         {
