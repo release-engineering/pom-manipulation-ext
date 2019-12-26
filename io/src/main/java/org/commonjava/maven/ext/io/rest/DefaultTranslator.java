@@ -19,7 +19,6 @@ import kong.unirest.GenericType;
 import kong.unirest.HttpResponse;
 import kong.unirest.Unirest;
 import kong.unirest.UnirestException;
-import org.apache.commons.codec.binary.Base32;
 import org.apache.http.HttpStatus;
 import org.commonjava.maven.atlas.ident.ref.ProjectRef;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
@@ -41,13 +40,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
-import java.util.Random;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang.StringUtils.isNotBlank;
-import static org.apache.commons.lang.StringUtils.isNotEmpty;
 import static org.apache.http.HttpStatus.SC_OK;
 
 /**
@@ -68,12 +65,6 @@ public class DefaultTranslator
     private static final String REPORTS_LOOKUP_GAVS = "reports/lookup/gavs";
 
     private static final String LISTING_BLACKLIST_GA = "listings/blacklist/ga";
-
-    @SuppressWarnings("WeakerAccess") // Public API.
-    protected static final Random RANDOM = new Random();
-
-    @SuppressWarnings("WeakerAccess") // Public API.
-    protected static final Base32 CODEC = new Base32();
 
     private final Logger logger = LoggerFactory.getLogger( getClass() );
 
@@ -215,7 +206,6 @@ public class DefaultTranslator
             r = Unirest.get( blacklistEndpointUrl )
                        .header( "accept", "application/json" )
                        .header( "Content-Type", "application/json" )
-                       .header( "Log-Context", getHeaderContext() )
                        .headers( restHeaders )
                        .queryString( "groupid", ga.getGroupId() )
                        .queryString( "artifactid", ga.getArtifactId() )
@@ -390,31 +380,6 @@ public class DefaultTranslator
         }
     }
 
-    /**
-     * Returns the current log header. Protected so it can be overridden.
-     * @return a String header
-     */
-    @SuppressWarnings("WeakerAccess") // Public API.
-    protected String getHeaderContext ()
-    {
-        String headerContext;
-
-        if ( isNotEmpty( org.slf4j.MDC.get( "LOG-CONTEXT" ) ) )
-        {
-            headerContext = org.slf4j.MDC.get( "LOG-CONTEXT" );
-        }
-        else
-        {
-            // If we have no MDC PME has been used as the entry point. Dummy one up for DA.
-            byte[] randomBytes = new byte[20];
-            RANDOM.nextBytes( randomBytes );
-            headerContext = "pme-" + CODEC.encodeAsString( randomBytes );
-        }
-
-        return headerContext;
-    }
-
-
     private class Task
     {
         private List<ProjectVersionRef> chunk;
@@ -450,7 +415,6 @@ public class DefaultTranslator
                 r = Unirest.post( this.endpointUrl )
                            .header( "accept", "application/json" )
                            .header( "Content-Type", "application/json" )
-                           .header( "Log-Context", getHeaderContext() )
                            .headers( restHeaders )
                            .body( request )
                            .asObject( lookupType )

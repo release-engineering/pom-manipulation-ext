@@ -21,7 +21,7 @@
     <!-- encoders are assigned the type
          ch.qos.logback.classic.encoder.PatternLayoutEncoder by default -->
     <encoder>
-      <pattern>%mdc{LOG-CONTEXT}%level %logger{36} - %msg%n</pattern>
+      <pattern>%level %logger{36} - %msg%n</pattern>
     </encoder>
   </appender>
 
@@ -32,7 +32,7 @@
   <!-- Used to to output a minimal logger for the comparator -->
   <appender name="COMPARATOR" class="ch.qos.logback.core.ConsoleAppender">
     <encoder>
-      <pattern>%mdc{LOG-CONTEXT}%logger{0} %msg%n</pattern>
+      <pattern>%logger{0} %msg%n</pattern>
     </encoder>
   </appender>
   <logger name="org.commonjava.maven.ext.common.util.ProjectComparator" level="INFO" additivity="false">

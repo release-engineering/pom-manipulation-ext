@@ -27,12 +27,10 @@ import org.junit.contrib.java.lang.system.SystemOutRule;
 import org.junit.rules.TestName;
 import org.slf4j.LoggerFactory;
 
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Collections;
-import java.util.Enumeration;
 import java.util.List;
 
 import static org.junit.Assert.assertTrue;
@@ -52,20 +50,10 @@ public class HttpHeaderHeaderTest
         @Override
         public void handle( String target, Request baseRequest, HttpServletRequest request,
                             HttpServletResponse response )
-                        throws IOException, ServletException
+                        throws IOException
         {
             response.setStatus(HttpServletResponse.SC_GATEWAY_TIMEOUT);
-
-            Enumeration<String> names = request.getHeaderNames();
-            while ( names.hasMoreElements() )
-            {
-                String name = names.nextElement();
-
-                if ( name.equals( "Log-Context" ) )
-                {
-                    response.getWriter().print( HttpHeaderHeaderTest.this.generateResponse( request.getHeader( name ) ) );
-                }
-            }
+            response.getWriter().print( HttpHeaderHeaderTest.this.generateResponse() );
             baseRequest.setHandled( true );
         }
     } );
@@ -84,9 +72,9 @@ public class HttpHeaderHeaderTest
                                                         Translator.CHUNK_SPLIT_COUNT, "", "" );
     }
 
-    private String generateResponse( String header )
+    private String generateResponse()
     {
-        return testResponseStart + (testResponseEnd == null ? "" : header + testResponseEnd);
+        return testResponseStart + (testResponseEnd == null ? "" : "pme" + testResponseEnd);
     }
 
     @Test
@@ -142,7 +130,7 @@ public class HttpHeaderHeaderTest
         }
         catch ( RestException ex )
         {
-            assertTrue( ex.getMessage().contains( "pme-" ) );
+            assertTrue( ex.getMessage().contains( "pme" ) );
         }
     }
 

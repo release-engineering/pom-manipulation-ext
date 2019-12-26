@@ -64,7 +64,6 @@ import org.commonjava.maven.ext.io.XMLIO;
 import org.commonjava.maven.ext.io.rest.RestException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.MDC;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -139,11 +138,6 @@ public class Cli
                                  .numberOfArgs( 1 )
                                  .desc( "POM file" )
                                  .build() );
-        options.addOption( Option.builder()
-                                 .longOpt( "log-context" )
-                                 .desc( "Add log-context ID" )
-                                 .numberOfArgs( 1 )
-                                 .build() );
         options.addOption( Option.builder( "l" )
                                  .longOpt( "log" )
                                  .desc( "Log file to output logging to" )
@@ -216,15 +210,6 @@ public class Cli
         {
             settings = new File( cmd.getOptionValue( 's' ) );
         }
-        if ( cmd.hasOption( "log-context" ) )
-        {
-            String mdc = cmd.getOptionValue( "log-context" );
-            if ( isNotEmpty( mdc ) )
-            {
-                // Append a space to split up level and log-context markers.
-                MDC.put( "LOG-CONTEXT", mdc + ' ' );
-            }
-        }
 
         createSession( target, settings );
 
@@ -238,7 +223,7 @@ public class Cli
             loggerContext.reset();
 
             PatternLayoutEncoder ple = new PatternLayoutEncoder();
-            ple.setPattern( "%mdc{LOG-CONTEXT}%level %logger{36} %msg%n" );
+            ple.setPattern( "%level %logger{36} %msg%n" );
             ple.setContext( loggerContext );
             ple.start();
 
