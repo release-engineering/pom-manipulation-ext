@@ -79,7 +79,7 @@ public class PropertiesUtilsTest
     {
         p.setProperty( "strictAlignment", "true" );
         p.setProperty( "strictViolationFails", "true" );
-        p.setProperty( "version.suffix", "redhat-1" );
+        p.setProperty( "versionSuffix", "redhat-1" );
         p.setProperty( "scanActiveProfiles", "true" );
     }
 
@@ -99,7 +99,7 @@ public class PropertiesUtilsTest
     @Test
     public void testGetSuffix() throws Exception
     {
-        p.remove( "version.suffix" );
+        p.remove( "versionSuffix" );
         ManipulationSession session = createUpdateSession();
         assertNotNull( PropertiesUtils.getSuffix( session ) );
     }
@@ -109,7 +109,7 @@ public class PropertiesUtilsTest
     public void testStrictWithTimeStamp() throws Exception
     {
         String suffix = "t-20170216-223844-555-rebuild";
-        p.setProperty( "version.suffix", suffix + "-1" );
+        p.setProperty( "versionSuffix", suffix + "-1" );
         ManipulationSession session = createUpdateSession();
 
         assertEquals( PropertiesUtils.getSuffix( session ), suffix );
@@ -118,7 +118,7 @@ public class PropertiesUtilsTest
         assertTrue( PropertiesUtils.checkStrictValue( session, "1.0-SNAPSHOT", "1.0.0.t-20170216-223844-555-rebuild-1" ) );
 
         suffix = "t20170216223844555-rebuild";
-        p.setProperty( "version.suffix", suffix + "-2" );
+        p.setProperty( "versionSuffix", suffix + "-2" );
         session = createUpdateSession();
 
         assertEquals( PropertiesUtils.getSuffix( session ), suffix );
@@ -330,7 +330,7 @@ public class PropertiesUtilsTest
     public void testBuildOldValueSetWithTemporary ()
     {
         Properties user = new Properties();
-        user.setProperty( VersioningState.INCREMENT_SERIAL_SUFFIX_SYSPROP.getCurrent(), "temporary-redhat" );
+        user.setProperty( VersioningState.INCREMENT_SERIAL_SUFFIX_SYSPROP, "temporary-redhat" );
         final VersioningState vs = new VersioningState( user );
 
         Set<String> found = PropertiesUtils.buildOldValueSet( vs, "1.0.0.Final-redhat-10" );
@@ -342,7 +342,7 @@ public class PropertiesUtilsTest
     public void testBuildOldValueSetWithTemporaryAndMultipleAlternatives ()
     {
         Properties user = new Properties();
-        user.setProperty( VersioningState.INCREMENT_SERIAL_SUFFIX_SYSPROP.getCurrent(), "temporary-redhat" );
+        user.setProperty( VersioningState.INCREMENT_SERIAL_SUFFIX_SYSPROP, "temporary-redhat" );
         user.setProperty( VersioningState.VERSION_SUFFIX_ALT, "foobar,redhat" );
         final VersioningState vs = new VersioningState( user );
 
@@ -354,7 +354,7 @@ public class PropertiesUtilsTest
     public void testBuildOldValueSetWithNoAlternatives ()
     {
         Properties user = new Properties();
-        user.setProperty( VersioningState.INCREMENT_SERIAL_SUFFIX_SYSPROP.getCurrent(), "redhat" );
+        user.setProperty( VersioningState.INCREMENT_SERIAL_SUFFIX_SYSPROP, "redhat" );
         final VersioningState vs = new VersioningState( user );
 
         Set<String> found = PropertiesUtils.buildOldValueSet( vs, "1.0.0.Final-temporary-redhat-10" );
@@ -376,7 +376,7 @@ public class PropertiesUtilsTest
     public void testBuildOldValueSetWithNoStartSuffix ()
     {
         Properties user = new Properties();
-        user.setProperty( VersioningState.INCREMENT_SERIAL_SUFFIX_SYSPROP.getCurrent(), "redhat" );
+        user.setProperty( VersioningState.INCREMENT_SERIAL_SUFFIX_SYSPROP, "redhat" );
         final VersioningState vs = new VersioningState( user );
 
         Set<String> found = PropertiesUtils.buildOldValueSet( vs, "1.0" );
@@ -404,7 +404,7 @@ public class PropertiesUtilsTest
     @Test
     public void testAllSuffixWithNonRH() throws Exception
     {
-        p.setProperty( "version.suffix", "a-random-value" );
+        p.setProperty( "versionSuffix", "a-random-value" );
         ManipulationSession session = createUpdateSession();
         VersioningState vs = session.getState( VersioningState.class );
         assertEquals( Arrays.asList( "a-random", "redhat" ), vs.getAllSuffixes() );

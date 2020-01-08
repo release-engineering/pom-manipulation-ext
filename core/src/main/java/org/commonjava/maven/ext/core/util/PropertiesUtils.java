@@ -490,28 +490,6 @@ public final class PropertiesUtils
                         ( p -> p.getModel().getProperties().getProperty( prop ) ).findAny().orElse(null);
     }
 
-    public static String handleDeprecatedProperty (Properties userProps, PropertyFlag flag)
-    {
-        return handleDeprecatedProperty( userProps, flag, null );
-    }
-
-    public static String handleDeprecatedProperty (Properties userProps, PropertyFlag flag, String defaultValue )
-    {
-        String result;
-        if ( userProps.containsKey( flag.getDeprecated() ) )
-        {
-            logger.error ("Deprecated property usage {} ", flag.getDeprecated());
-            logger.warn ("Property {} is deprecated. Please use property {} instead.", flag.getDeprecated(), flag.getCurrent() );
-
-            result = userProps.getProperty( flag.getDeprecated(), defaultValue );
-        }
-        else
-        {
-            result = userProps.getProperty( flag.getCurrent(), defaultValue );
-        }
-        return result;
-    }
-
     public static String extractPropertyName( String version ) throws ManipulationException
     {
         // TODO: Handle the scenario where the version might be ${....}${....}

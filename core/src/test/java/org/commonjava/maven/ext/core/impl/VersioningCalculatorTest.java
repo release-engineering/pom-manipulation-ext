@@ -93,7 +93,7 @@ public class VersioningCalculatorTest
         final Properties props = new Properties();
 
         final String s = "foo";
-        props.setProperty( VersioningState.VERSION_SUFFIX_SYSPROP.getCurrent(), s );
+        props.setProperty( VersioningState.VERSION_SUFFIX_SYSPROP, s );
         setupSession( props );
 
         final String v = "${property}";
@@ -110,7 +110,7 @@ public class VersioningCalculatorTest
         final Properties props = new Properties();
 
         final String s = "foo";
-        props.setProperty( VersioningState.VERSION_SUFFIX_SYSPROP.getCurrent(), s );
+        props.setProperty( VersioningState.VERSION_SUFFIX_SYSPROP, s );
         setupSession( props );
 
         String[][] data = new String[][] {
@@ -154,7 +154,7 @@ public class VersioningCalculatorTest
         final Properties props = new Properties();
 
         final String s = "foo";
-        props.setProperty( VersioningState.VERSION_SUFFIX_SYSPROP.getCurrent(), s );
+        props.setProperty( VersioningState.VERSION_SUFFIX_SYSPROP, s );
         setupSession( props );
 
         String[][] data = new String[][] {
@@ -183,8 +183,8 @@ public class VersioningCalculatorTest
         final Properties props = new Properties();
 
         final String s = "foo";
-        props.setProperty( VersioningState.VERSION_SUFFIX_SYSPROP.getCurrent(), s );
-        props.setProperty( VersioningState.VERSION_OSGI_SYSPROP.getCurrent(), "false" );
+        props.setProperty( VersioningState.VERSION_SUFFIX_SYSPROP, s );
+        props.setProperty( VersioningState.VERSION_OSGI_SYSPROP, "false" );
         setupSession( props );
 
         final String v = "1.2.GA";
@@ -201,7 +201,7 @@ public class VersioningCalculatorTest
         final Properties props = new Properties();
 
         final String s = "foo";
-        props.setProperty( VersioningState.VERSION_SUFFIX_SYSPROP.getCurrent(), s );
+        props.setProperty( VersioningState.VERSION_SUFFIX_SYSPROP, s );
         setupSession( props );
 
         final String v = "1.2.0";
@@ -220,7 +220,7 @@ public class VersioningCalculatorTest
         final Properties props = new Properties();
 
         final String s = "foo";
-        props.setProperty( VersioningState.VERSION_SUFFIX_SYSPROP.getCurrent(), s );
+        props.setProperty( VersioningState.VERSION_SUFFIX_SYSPROP, s );
         setupSession( props );
 
         final String v = "1.2.0";
@@ -236,7 +236,7 @@ public class VersioningCalculatorTest
         final Properties props = new Properties();
 
         final String s = "foo-bar";
-        props.setProperty( VersioningState.VERSION_SUFFIX_SYSPROP.getCurrent(), s );
+        props.setProperty( VersioningState.VERSION_SUFFIX_SYSPROP, s );
         setupSession( props );
 
         final String v = "1.2.0";
@@ -252,7 +252,7 @@ public class VersioningCalculatorTest
         final Properties props = new Properties();
 
         final String s = "foo";
-        props.setProperty( VersioningState.VERSION_SUFFIX_SYSPROP.getCurrent(), s );
+        props.setProperty( VersioningState.VERSION_SUFFIX_SYSPROP, s );
         setupSession( props );
 
         final String v = "1.2.0.GA";
@@ -268,7 +268,7 @@ public class VersioningCalculatorTest
         final Properties props = new Properties();
 
         final String s = "foo-1";
-        props.setProperty( VersioningState.VERSION_SUFFIX_SYSPROP.getCurrent(), s );
+        props.setProperty( VersioningState.VERSION_SUFFIX_SYSPROP, s );
         setupSession( props );
 
         final String v = "1.2.0.SP4";
@@ -284,7 +284,7 @@ public class VersioningCalculatorTest
         final Properties props = new Properties();
 
         final String s = "foo-1";
-        props.setProperty( VersioningState.VERSION_SUFFIX_SYSPROP.getCurrent(), s );
+        props.setProperty( VersioningState.VERSION_SUFFIX_SYSPROP, s );
         setupSession( props );
 
         final String v = "1.2.0";
@@ -300,7 +300,7 @@ public class VersioningCalculatorTest
         final Properties props = new Properties();
 
         final String s = "ER2-rht-1";
-        props.setProperty( VersioningState.VERSION_SUFFIX_SYSPROP.getCurrent(), s );
+        props.setProperty( VersioningState.VERSION_SUFFIX_SYSPROP, s );
         setupSession( props );
 
         final String v = "6.2.0-SNAPSHOT";
@@ -317,7 +317,7 @@ public class VersioningCalculatorTest
         final Properties props = new Properties();
 
         final String s = "foo-bar-1";
-        props.setProperty( VersioningState.VERSION_SUFFIX_SYSPROP.getCurrent(), s );
+        props.setProperty( VersioningState.VERSION_SUFFIX_SYSPROP, s );
         setupSession( props );
 
         final String v = "1.2.0";
@@ -333,7 +333,7 @@ public class VersioningCalculatorTest
         final Properties props = new Properties();
 
         final String s = "foo-1";
-        props.setProperty( VersioningState.INCREMENT_SERIAL_SUFFIX_SYSPROP.getCurrent(), s );
+        props.setProperty( VersioningState.INCREMENT_SERIAL_SUFFIX_SYSPROP, s );
         setupSession( props );
 
         final String v = "1.2.0.GA-foo";
@@ -347,9 +347,9 @@ public class VersioningCalculatorTest
                     throws Exception
     {
         final Properties props = new Properties();
-        
+
         final String s = "t-20170216-223844-555-foo";
-        props.setProperty( VersioningState.INCREMENT_SERIAL_SUFFIX_SYSPROP.getCurrent(), s );
+        props.setProperty( VersioningState.INCREMENT_SERIAL_SUFFIX_SYSPROP, s );
         setupSession( props );
 
         final String v = "1.2.0.t-20170216-223844-555-foo";
@@ -365,7 +365,7 @@ public class VersioningCalculatorTest
         final Properties props = new Properties();
 
         final String s = "foo";
-        props.setProperty( VersioningState.INCREMENT_SERIAL_SUFFIX_SYSPROP.getCurrent(), s );
+        props.setProperty( VersioningState.INCREMENT_SERIAL_SUFFIX_SYSPROP, s );
         setupSession( props );
 
         final String originalVersion = "1.0.0.Final";
@@ -382,8 +382,8 @@ public class VersioningCalculatorTest
         final Properties props = new Properties();
 
         final String s = "foo";
-        props.setProperty( VersioningState.INCREMENT_SERIAL_SUFFIX_SYSPROP.getCurrent(), s );
-        props.setProperty( VersioningState.INCREMENT_SERIAL_SUFFIX_PADDING_SYSPROP.getCurrent(), "3" );
+        props.setProperty( VersioningState.INCREMENT_SERIAL_SUFFIX_SYSPROP, s );
+        props.setProperty( VersioningState.INCREMENT_SERIAL_SUFFIX_PADDING_SYSPROP, "3" );
         setupSession( props );
 
         final String originalVersion = "1.0.0.Final";
@@ -400,7 +400,7 @@ public class VersioningCalculatorTest
         final Properties props = new Properties();
 
         final String s = "foo-1";
-        props.setProperty( VersioningState.INCREMENT_SERIAL_SUFFIX_SYSPROP.getCurrent(), s );
+        props.setProperty( VersioningState.INCREMENT_SERIAL_SUFFIX_SYSPROP, s );
         setupSession( props );
 
         final String v = "1.2.0.GA-jdcasey";
@@ -416,7 +416,7 @@ public class VersioningCalculatorTest
         final Properties props = new Properties();
 
         final String s = "foo-1";
-        props.setProperty( VersioningState.VERSION_SUFFIX_SYSPROP.getCurrent(), s );
+        props.setProperty( VersioningState.VERSION_SUFFIX_SYSPROP, s );
         setupSession( props );
 
         final String v = "1.2.0.GA";
@@ -432,7 +432,7 @@ public class VersioningCalculatorTest
         final Properties props = new Properties();
 
         final String s = "foo-2";
-        props.setProperty( VersioningState.VERSION_SUFFIX_SYSPROP.getCurrent(), s );
+        props.setProperty( VersioningState.VERSION_SUFFIX_SYSPROP, s );
         setupSession( props );
 
         final String v = "1.2.0";
@@ -449,7 +449,7 @@ public class VersioningCalculatorTest
         final Properties props = new Properties();
 
         final String s = "foo-2";
-        props.setProperty( VersioningState.VERSION_SUFFIX_SYSPROP.getCurrent(), s );
+        props.setProperty( VersioningState.VERSION_SUFFIX_SYSPROP, s );
         setupSession( props );
 
         final String v = "1.2.0.GA";
@@ -466,8 +466,8 @@ public class VersioningCalculatorTest
         final Properties props = new Properties();
 
         final String s = "foo-2";
-        props.setProperty( VersioningState.VERSION_SUFFIX_SYSPROP.getCurrent(), s );
-        props.setProperty( VersioningState.VERSION_SUFFIX_SNAPSHOT_SYSPROP.getCurrent(), "true" );
+        props.setProperty( VersioningState.VERSION_SUFFIX_SYSPROP, s );
+        props.setProperty( VersioningState.VERSION_SUFFIX_SNAPSHOT_SYSPROP, "true" );
         setupSession( props );
 
         final String v = "1.2.0.GA";
@@ -484,8 +484,8 @@ public class VersioningCalculatorTest
         final Properties props = new Properties();
 
         final String s = "foo-2";
-        props.setProperty( VersioningState.VERSION_SUFFIX_SYSPROP.getCurrent(), s );
-        props.setProperty( VersioningState.VERSION_SUFFIX_SNAPSHOT_SYSPROP.getCurrent(), "true" );
+        props.setProperty( VersioningState.VERSION_SUFFIX_SYSPROP, s );
+        props.setProperty( VersioningState.VERSION_SUFFIX_SNAPSHOT_SYSPROP, "true" );
         setupSession( props );
 
         final String v = "1.2";
@@ -503,8 +503,8 @@ public class VersioningCalculatorTest
         final Properties props = new Properties();
 
         final String s = "foo-2";
-        props.setProperty( VersioningState.VERSION_SUFFIX_SYSPROP.getCurrent(), s );
-        props.setProperty( VersioningState.VERSION_SUFFIX_SNAPSHOT_SYSPROP.getCurrent(), "true" );
+        props.setProperty( VersioningState.VERSION_SUFFIX_SYSPROP, s );
+        props.setProperty( VersioningState.VERSION_SUFFIX_SNAPSHOT_SYSPROP, "true" );
         setupSession( props );
 
         final String v = "1.2.0.GA";
@@ -522,7 +522,7 @@ public class VersioningCalculatorTest
         final Properties props = new Properties();
 
         final String s = "foo";
-        props.setProperty( VersioningState.INCREMENT_SERIAL_SUFFIX_SYSPROP.getCurrent(), s );
+        props.setProperty( VersioningState.INCREMENT_SERIAL_SUFFIX_SYSPROP, s );
         setupSession( props );
 
         final String originalVersion = "1.0.0.Final-foo-SNAPSHOT";
@@ -542,7 +542,7 @@ public class VersioningCalculatorTest
         final String suffix = "foo-1";
         final String newVersion = "1.2.3.4-Final-foo-1";
 
-        props.setProperty( VersioningState.VERSION_SUFFIX_SYSPROP.getCurrent(), suffix );
+        props.setProperty( VersioningState.VERSION_SUFFIX_SYSPROP, suffix );
         setupSession( props );
 
 
@@ -556,7 +556,7 @@ public class VersioningCalculatorTest
     {
         final Properties props = new Properties();
 
-        props.setProperty( VersioningState.INCREMENT_SERIAL_SUFFIX_SYSPROP.getCurrent(), "foo-0" );
+        props.setProperty( VersioningState.INCREMENT_SERIAL_SUFFIX_SYSPROP, "foo-0" );
         setupSession( props );
 
         final String v = "1.2.0.GA";
@@ -573,7 +573,7 @@ public class VersioningCalculatorTest
     {
         final Properties props = new Properties();
 
-        props.setProperty( VersioningState.INCREMENT_SERIAL_SUFFIX_SYSPROP.getCurrent(), "foo-0" );
+        props.setProperty( VersioningState.INCREMENT_SERIAL_SUFFIX_SYSPROP, "foo-0" );
         setupSession( props, "1.2.0.foo-2" );
 
         final String v = "1.2.0";
@@ -590,7 +590,7 @@ public class VersioningCalculatorTest
     {
         final Properties props = new Properties();
 
-        props.setProperty( VersioningState.INCREMENT_SERIAL_SUFFIX_SYSPROP.getCurrent(), "foo" );
+        props.setProperty( VersioningState.INCREMENT_SERIAL_SUFFIX_SYSPROP, "foo" );
         setupSession( props, "1.2.0-foo-1", "1.2.0-foo-2" );
 
         final String v = "1.2.0.foo-3";
@@ -605,7 +605,7 @@ public class VersioningCalculatorTest
     {
         final Properties props = new Properties();
 
-        props.setProperty( VersioningState.INCREMENT_SERIAL_SUFFIX_SYSPROP.getCurrent(), "foo" );
+        props.setProperty( VersioningState.INCREMENT_SERIAL_SUFFIX_SYSPROP, "foo" );
         setupSession( props, "1.2.0-foo-1", "1.2.0-foo-2" );
 
         final String v = "1.2.0.foo-4";
@@ -620,7 +620,7 @@ public class VersioningCalculatorTest
     {
         final Properties props = new Properties();
 
-        props.setProperty( VersioningState.INCREMENT_SERIAL_SUFFIX_SYSPROP.getCurrent(), "foo" );
+        props.setProperty( VersioningState.INCREMENT_SERIAL_SUFFIX_SYSPROP, "foo" );
         setupSession( props, "1.2.0-foo-1", "1.2.0-foo-4" );
 
         final String origVersion = "1.2.0.foo-2";
@@ -636,7 +636,7 @@ public class VersioningCalculatorTest
     {
         final Properties props = new Properties();
 
-        props.setProperty( VersioningState.INCREMENT_SERIAL_SUFFIX_SYSPROP.getCurrent(), "foo" );
+        props.setProperty( VersioningState.INCREMENT_SERIAL_SUFFIX_SYSPROP, "foo" );
         setupSession( props, "1.2.0-foo-8", "1.2.0-foo-9" );
 
         final String v = "1.2.0.foo-10";
@@ -651,7 +651,7 @@ public class VersioningCalculatorTest
     {
         final Properties props = new Properties();
 
-        props.setProperty( VersioningState.INCREMENT_SERIAL_SUFFIX_SYSPROP.getCurrent(), "t-20170216-223844-555-foo" );
+        props.setProperty( VersioningState.INCREMENT_SERIAL_SUFFIX_SYSPROP, "t-20170216-223844-555-foo" );
         setupSession( props, "1.2.0-t-20170216-223844-555-foo-8", "1.2.0-t-20170216-223844-555-foo-9" );
 
         final String newVersion = "1.2.0.t-20170216-223844-555-foo-10";
@@ -667,7 +667,7 @@ public class VersioningCalculatorTest
     {
         final Properties props = new Properties();
 
-        props.setProperty( VersioningState.INCREMENT_SERIAL_SUFFIX_SYSPROP.getCurrent(), "foo-bar" );
+        props.setProperty( VersioningState.INCREMENT_SERIAL_SUFFIX_SYSPROP, "foo-bar" );
         setupSession( props );
 
         final String v = "7.0.0.beta-foo-bar-1";
@@ -683,7 +683,7 @@ public class VersioningCalculatorTest
     {
         final Properties props = new Properties();
 
-        props.setProperty( VersioningState.INCREMENT_SERIAL_SUFFIX_SYSPROP.getCurrent(), "foo" );
+        props.setProperty( VersioningState.INCREMENT_SERIAL_SUFFIX_SYSPROP, "foo" );
         setupSession( props, "1.2.0-foo-1", "1.2.0-foo-4" );
 
         final String origVersion = "1.2.0.foo_2";
@@ -699,8 +699,8 @@ public class VersioningCalculatorTest
     {
         final Properties props = new Properties();
 
-        props.setProperty( VersioningState.INCREMENT_SERIAL_SUFFIX_SYSPROP.getCurrent(), "foo" );
-        props.setProperty( VersioningState.INCREMENT_SERIAL_SUFFIX_PADDING_SYSPROP.getCurrent(), "3" );
+        props.setProperty( VersioningState.INCREMENT_SERIAL_SUFFIX_SYSPROP, "foo" );
+        props.setProperty( VersioningState.INCREMENT_SERIAL_SUFFIX_PADDING_SYSPROP, "3" );
         setupSession( props, "1.2.0-foo-8", "1.2.0-foo-9" );
 
         final String v = "1.2.0.foo-010";
@@ -715,8 +715,8 @@ public class VersioningCalculatorTest
     {
         final Properties props = new Properties();
 
-        props.setProperty( VersioningState.VERSION_SUFFIX_SYSPROP.getCurrent(), "foo-10" );
-        props.setProperty( VersioningState.INCREMENT_SERIAL_SUFFIX_PADDING_SYSPROP.getCurrent(), "3" );
+        props.setProperty( VersioningState.VERSION_SUFFIX_SYSPROP, "foo-10" );
+        props.setProperty( VersioningState.INCREMENT_SERIAL_SUFFIX_PADDING_SYSPROP, "3" );
         setupSession( props, "1.2.0" );
 
         final String v = "1.2.0.foo-10";
@@ -731,7 +731,7 @@ public class VersioningCalculatorTest
     {
         final Properties props = new Properties();
 
-        props.setProperty( VersioningState.INCREMENT_SERIAL_SUFFIX_SYSPROP.getCurrent(), "foo-bar-0" );
+        props.setProperty( VersioningState.INCREMENT_SERIAL_SUFFIX_SYSPROP, "foo-bar-0" );
         setupSession( props, "1.2.0.GA-foo-bar-1", "1.2.0.GA-foo-bar-2" );
 
         final String v = "1.2.0.GA";
@@ -748,7 +748,7 @@ public class VersioningCalculatorTest
     {
         final Properties props = new Properties();
 
-        props.setProperty( VersioningState.INCREMENT_SERIAL_SUFFIX_SYSPROP.getCurrent(), "foo" );
+        props.setProperty( VersioningState.INCREMENT_SERIAL_SUFFIX_SYSPROP, "foo" );
         setupSession( props, "1.2.0-GA-foo-1" );
 
         final String origVer = "1.2.0-GA-foo-1";
@@ -764,7 +764,7 @@ public class VersioningCalculatorTest
     {
         final Properties props = new Properties();
 
-        props.setProperty( VersioningState.INCREMENT_SERIAL_SUFFIX_SYSPROP.getCurrent(), "foo" );
+        props.setProperty( VersioningState.INCREMENT_SERIAL_SUFFIX_SYSPROP, "foo" );
         setupSession( props );
 
         final String origVer = "4.3.3-foo-SNAPSHOT";
@@ -780,7 +780,7 @@ public class VersioningCalculatorTest
     {
         final Properties props = new Properties();
 
-        props.setProperty( VersioningState.INCREMENT_SERIAL_SUFFIX_SYSPROP.getCurrent(), "foo-0" );
+        props.setProperty( VersioningState.INCREMENT_SERIAL_SUFFIX_SYSPROP, "foo-0" );
         setupSession( props, "1.2.0.GA-foo-3", "1.2.0.GA-foo-2", "1.2.0.GA-foo-9" );
 
         final String v = "1.2.0.GA";
@@ -797,7 +797,7 @@ public class VersioningCalculatorTest
     {
         final Properties props = new Properties();
 
-        props.setProperty( VersioningState.INCREMENT_SERIAL_SUFFIX_SYSPROP.getCurrent(), "foo" );
+        props.setProperty( VersioningState.INCREMENT_SERIAL_SUFFIX_SYSPROP, "foo" );
         setupSession( props, "1.2-foo-1", "1.2.foo-2" );
 
         final String v = "1.2";
@@ -830,7 +830,7 @@ public class VersioningCalculatorTest
 
         final Properties props = new Properties();
 
-        props.setProperty( VersioningState.INCREMENT_SERIAL_SUFFIX_SYSPROP.getCurrent(), "foo-0" );
+        props.setProperty( VersioningState.INCREMENT_SERIAL_SUFFIX_SYSPROP, "foo-0" );
         setupSession( props, "1.2.0.GA-foo-3", "1.2.0.GA-foo-2", "1.2.0.GA-foo-9" );
 
         final Map<ProjectVersionRef, String>
@@ -863,7 +863,7 @@ public class VersioningCalculatorTest
 
         final Properties props = new Properties();
 
-        props.setProperty( VersioningState.INCREMENT_SERIAL_SUFFIX_SYSPROP.getCurrent(), "foo-0" );
+        props.setProperty( VersioningState.INCREMENT_SERIAL_SUFFIX_SYSPROP, "foo-0" );
         final Map<ProjectRef, String[]> versionMap = new HashMap<>();
 
         versionMap.put( new SimpleProjectRef( p1.getGroupId(), p1.getArtifactId() ), new String[] { "1.2.0.GA-foo-3",
@@ -886,7 +886,7 @@ public class VersioningCalculatorTest
     {
         final Properties props = new Properties();
 
-        props.setProperty( VersioningState.INCREMENT_SERIAL_SUFFIX_SYSPROP.getCurrent(), "redhat-0" );
+        props.setProperty( VersioningState.INCREMENT_SERIAL_SUFFIX_SYSPROP, "redhat-0" );
         setupSession( props, "0.0.1", "0.0.2", "0.0.3", "0.0.4", "0.0.5", "0.0.6", "0.0.7", "0.0.7.redhat-1" );
 
         final String v = "0.0.7";
@@ -902,7 +902,7 @@ public class VersioningCalculatorTest
     {
         final Properties props = new Properties();
 
-        props.setProperty( VersioningState.INCREMENT_SERIAL_SUFFIX_SYSPROP.getCurrent(), "foo-0" );
+        props.setProperty( VersioningState.INCREMENT_SERIAL_SUFFIX_SYSPROP, "foo-0" );
         setupSession( props );
 
         final String v = "${property}";
@@ -919,7 +919,7 @@ public class VersioningCalculatorTest
     {
         final Properties props = new Properties();
 
-        props.setProperty( VersioningState.INCREMENT_SERIAL_SUFFIX_SYSPROP.getCurrent(), "" );
+        props.setProperty( VersioningState.INCREMENT_SERIAL_SUFFIX_SYSPROP, "" );
         setupSession( props, "1.2.0.1", "1.2.0.2" );
 
         final String v = "1.2.0";
@@ -935,8 +935,8 @@ public class VersioningCalculatorTest
     {
         final Properties props = new Properties();
 
-        props.setProperty( VersioningState.VERSION_SUFFIX_SYSPROP.getCurrent(), "test-jdk7" );
-        props.setProperty( VersioningState.VERSION_OSGI_SYSPROP.getCurrent(), "false" );
+        props.setProperty( VersioningState.VERSION_SUFFIX_SYSPROP, "test-jdk7" );
+        props.setProperty( VersioningState.VERSION_OSGI_SYSPROP, "false" );
         setupSession( props );
 
         final String v = "1.1";
@@ -953,8 +953,8 @@ public class VersioningCalculatorTest
     {
         final Properties props = new Properties();
 
-        props.setProperty( VersioningState.VERSION_SUFFIX_SYSPROP.getCurrent(), "Beta1" );
-        props.setProperty( VersioningState.VERSION_OSGI_SYSPROP.getCurrent(), "true" );
+        props.setProperty( VersioningState.VERSION_SUFFIX_SYSPROP, "Beta1" );
+        props.setProperty( VersioningState.VERSION_OSGI_SYSPROP, "true" );
         setupSession( props );
 
         final String v = "1";
@@ -971,8 +971,8 @@ public class VersioningCalculatorTest
     {
         final Properties props = new Properties();
 
-        props.setProperty( VersioningState.VERSION_SUFFIX_SYSPROP.getCurrent(), "t171222-2230-rebuild-1" );
-        props.setProperty( VersioningState.VERSION_OSGI_SYSPROP.getCurrent(), "true" );
+        props.setProperty( VersioningState.VERSION_SUFFIX_SYSPROP, "t171222-2230-rebuild-1" );
+        props.setProperty( VersioningState.VERSION_OSGI_SYSPROP, "true" );
         setupSession( props );
 
         final String v = "1.1";
@@ -988,9 +988,9 @@ public class VersioningCalculatorTest
     {
         final Properties props = new Properties();
 
-        props.setProperty( VersioningState.VERSION_SUFFIX_SYSPROP.getCurrent(), "test_jdk7" );
-        props.setProperty( VersioningState.VERSION_OSGI_SYSPROP.getCurrent(), "false" );
-        props.setProperty( VersioningState.VERSION_SUFFIX_SNAPSHOT_SYSPROP.getCurrent(), "true" );
+        props.setProperty( VersioningState.VERSION_SUFFIX_SYSPROP, "test_jdk7" );
+        props.setProperty( VersioningState.VERSION_OSGI_SYSPROP, "false" );
+        props.setProperty( VersioningState.VERSION_SUFFIX_SNAPSHOT_SYSPROP, "true" );
         setupSession( props );
 
         final String v = "1.1-SNAPSHOT";
@@ -1087,7 +1087,7 @@ public class VersioningCalculatorTest
 
         final Properties props = new Properties();
 
-        props.setProperty( VersioningState.INCREMENT_SERIAL_SUFFIX_SYSPROP.getCurrent(), "foo" );
+        props.setProperty( VersioningState.INCREMENT_SERIAL_SUFFIX_SYSPROP, "foo" );
         setupSession( props, "1.2.0.GA-foo-003", "1.2.0.GA-foo-002", "1.2.0.GA-foo-009" );
 
         System.out.println ("### Calculating versioning changes for projects " + p1 + " and " + p2);
@@ -1102,8 +1102,8 @@ public class VersioningCalculatorTest
     public void checkVersionStripping ()
     {
         final Properties props = new Properties();
-        props.setProperty( VersioningState.INCREMENT_SERIAL_SUFFIX_SYSPROP.getCurrent(), "temporary-redhat" );
-        props.setProperty( VersioningState.INCREMENT_SERIAL_SUFFIX_PADDING_SYSPROP.getCurrent(), "5" );
+        props.setProperty( VersioningState.INCREMENT_SERIAL_SUFFIX_SYSPROP, "temporary-redhat" );
+        props.setProperty( VersioningState.INCREMENT_SERIAL_SUFFIX_PADDING_SYSPROP, "5" );
         props.setProperty( VersioningState.VERSION_SUFFIX_ALT, "redhat" );
 
         VersioningState vState = new VersioningState( props );
@@ -1112,7 +1112,7 @@ public class VersioningCalculatorTest
         assertEquals( "1.0.0", VersionCalculator.handleAlternate( vState, "1.0.0" ) );
         assertEquals( "1.0.0", VersionCalculator.handleAlternate( vState, "1.0.0.redhat-10" ) );
 
-        props.setProperty( VersioningState.INCREMENT_SERIAL_SUFFIX_SYSPROP.getCurrent(), "redhat" );
+        props.setProperty( VersioningState.INCREMENT_SERIAL_SUFFIX_SYSPROP, "redhat" );
         props.remove( VersioningState.VERSION_SUFFIX_ALT );
         vState = new VersioningState( props );
 
@@ -1129,8 +1129,8 @@ public class VersioningCalculatorTest
     {
         final Properties props = new Properties();
 
-        props.setProperty( VersioningState.INCREMENT_SERIAL_SUFFIX_SYSPROP.getCurrent(), "temporary-redhat" );
-        props.setProperty( VersioningState.INCREMENT_SERIAL_SUFFIX_PADDING_SYSPROP.getCurrent(), "5" );
+        props.setProperty( VersioningState.INCREMENT_SERIAL_SUFFIX_SYSPROP, "temporary-redhat" );
+        props.setProperty( VersioningState.INCREMENT_SERIAL_SUFFIX_PADDING_SYSPROP, "5" );
         props.setProperty( VersioningState.VERSION_SUFFIX_ALT, "redhat" );
 
         setupSession( props, "1.2.0.redhat-00002", "1.2.0.temporary-redhat-00001", "1.2.0.temporary-redhat-00002" );
@@ -1175,9 +1175,9 @@ public class VersioningCalculatorTest
     {
         // Originally the default used to be 0, this was changed to be 5 but this affects this test suite so revert
         // just for these tests.
-        if ( ! properties.containsKey( VersioningState.INCREMENT_SERIAL_SUFFIX_PADDING_SYSPROP.getCurrent() ) )
+        if ( ! properties.containsKey( VersioningState.INCREMENT_SERIAL_SUFFIX_PADDING_SYSPROP ) )
         {
-            properties.setProperty( VersioningState.INCREMENT_SERIAL_SUFFIX_PADDING_SYSPROP.getCurrent(), "0" );
+            properties.setProperty( VersioningState.INCREMENT_SERIAL_SUFFIX_PADDING_SYSPROP, "0" );
         }
 
         final ArtifactRepository ar =
@@ -1223,7 +1223,7 @@ public class VersioningCalculatorTest
         return String.format( "%s/%s/maven-metadata.xml", key.getGroupId()
                                                              .replace( '.', '/' ), key.getArtifactId() );
     }
-    
+
     public static final class TestVersionCalculator
         extends VersionCalculator
     {

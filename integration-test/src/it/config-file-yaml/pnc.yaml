@@ -20,6 +20,6 @@ da:
     configKey1: value1
 
 pme:
-  version.suffix: redhat-1
+  versionSuffix: redhat-1
   dependencyExclusion.com.google.guava:guava@*: 18.0
-  repo-reporting-removal: true
+  repoReportingRemoval: true

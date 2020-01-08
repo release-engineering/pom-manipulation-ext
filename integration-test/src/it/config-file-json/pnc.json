@@ -5,7 +5,7 @@
     },
 
     pme: {
-        "repo-reporting-removal" : "true",
-        "version.suffix" : "redhat-1"
+        "repoReportingRemoval" : "true",
+        "versionSuffix" : "redhat-1"
     }
 }

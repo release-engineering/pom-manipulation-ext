@@ -204,7 +204,7 @@ public abstract class BaseScriptUtils extends Script implements MavenBaseScript
 
         String newSuffix = targetBuild.substring( gav.getVersionString().length() + 1 );
         logger.info( "From version {}, updating versionSuffix to {}", targetBuild, newSuffix );
-        getUserProperties().put( VersioningState.VERSION_SUFFIX_SYSPROP.getCurrent(), newSuffix );
+        getUserProperties().put( VersioningState.VERSION_SUFFIX_SYSPROP, newSuffix );
 
         reinitialiseSessionStates();
     }

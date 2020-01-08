@@ -263,7 +263,7 @@ public class ProjectComparatorTest
         final Properties p = new Properties();
         p.setProperty( "strictAlignment", "true" );
         p.setProperty( "strictViolationFails", "true" );
-        p.setProperty( "version.suffix", "redhat-1" );
+        p.setProperty( "versionSuffix", "redhat-1" );
         p.setProperty( "scanActiveProfiles", "true" );
         session.setState( new DependencyState( p ) );
         session.setState( new VersioningState( p ) );

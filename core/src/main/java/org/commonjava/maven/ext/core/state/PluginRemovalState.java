@@ -17,8 +17,6 @@ package org.commonjava.maven.ext.core.state;
 
 import org.commonjava.maven.atlas.ident.ref.ProjectRef;
 import org.commonjava.maven.ext.core.util.IdUtils;
-import org.commonjava.maven.ext.core.util.PropertiesUtils;
-import org.commonjava.maven.ext.core.util.PropertyFlag;
 
 import java.util.List;
 import java.util.Properties;
@@ -35,7 +33,7 @@ public class PluginRemovalState
      * <code>-DpluginRemoval=org.foo:bar-plugin,....</code>
      * </pre>
      */
-    private static final PropertyFlag PLUGIN_REMOVAL_PROPERTY = new PropertyFlag( "plugin-removal", "pluginRemoval");
+    private static final String PLUGIN_REMOVAL_PROPERTY = "pluginRemoval";
 
     private List<ProjectRef> pluginRemoval;
 
@@ -46,7 +44,7 @@ public class PluginRemovalState
 
     public void initialise( Properties userProps )
     {
-        pluginRemoval = IdUtils.parseGAs( PropertiesUtils.handleDeprecatedProperty ( userProps, PLUGIN_REMOVAL_PROPERTY ) );
+        pluginRemoval = IdUtils.parseGAs( userProps.getProperty( PLUGIN_REMOVAL_PROPERTY ) );
     }
 
     /**

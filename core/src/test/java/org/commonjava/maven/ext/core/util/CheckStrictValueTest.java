@@ -44,7 +44,7 @@ public class CheckStrictValueTest
     public void beforeTest() throws ManipulationException
     {
         Properties user = new Properties();
-        user.setProperty( VersioningState.VERSION_SUFFIX_SYSPROP.getCurrent(), "redhat-5" );
+        user.setProperty( VersioningState.VERSION_SUFFIX_SYSPROP, "redhat-5" );
         final VersioningState vs = new VersioningState( user );
         session.setState( vs );
         if ( ! strictIgnoreSuffix)

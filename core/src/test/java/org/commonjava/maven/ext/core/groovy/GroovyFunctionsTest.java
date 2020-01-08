@@ -142,7 +142,7 @@ public class GroovyFunctionsTest
         impl.overrideProjectVersion( SimpleProjectVersionRef.parse( "org.goots:testTempOverrideWithNonTemp:1.0.0" ) );
 
         assertEquals( "redhat-5",
-                      impl.getUserProperties().getProperty( VersioningState.VERSION_SUFFIX_SYSPROP.getCurrent() ) );
+                      impl.getUserProperties().getProperty( VersioningState.VERSION_SUFFIX_SYSPROP ) );
     }
 
     private static class BaseScriptImplTest extends BaseScript

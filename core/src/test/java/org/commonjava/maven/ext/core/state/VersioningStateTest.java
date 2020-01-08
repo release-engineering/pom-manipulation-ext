@@ -37,7 +37,7 @@ public class VersioningStateTest
     public void enableViaStaticSuffix()
     {
         final Properties p = new Properties();
-        p.setProperty( VersioningState.VERSION_SUFFIX_SYSPROP.getCurrent(), "rebuild-1" );
+        p.setProperty( VersioningState.VERSION_SUFFIX_SYSPROP, "rebuild-1" );
 
         final VersioningState state = new VersioningState( p );
 
@@ -48,7 +48,7 @@ public class VersioningStateTest
     public void enableViaIncrementalSuffix()
     {
         final Properties p = new Properties();
-        p.setProperty( VersioningState.INCREMENT_SERIAL_SUFFIX_SYSPROP.getCurrent(), "rebuild-1" );
+        p.setProperty( VersioningState.INCREMENT_SERIAL_SUFFIX_SYSPROP, "rebuild-1" );
 
         final VersioningState state = new VersioningState( p );
 

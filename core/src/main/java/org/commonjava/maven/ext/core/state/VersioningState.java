@@ -20,8 +20,6 @@ import org.apache.commons.lang.StringUtils;
 import org.commonjava.maven.atlas.ident.ref.ProjectRef;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.ext.core.impl.ProjectVersioningManipulator;
-import org.commonjava.maven.ext.core.util.PropertiesUtils;
-import org.commonjava.maven.ext.core.util.PropertyFlag;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -43,17 +41,17 @@ import static org.apache.commons.lang.StringUtils.isNotEmpty;
 public class VersioningState
     implements State
 {
-    public static final PropertyFlag VERSION_SUFFIX_SYSPROP = new PropertyFlag( "version.suffix", "versionSuffix");
+    public static final String VERSION_SUFFIX_SYSPROP= "versionSuffix";
 
-    public static final PropertyFlag INCREMENT_SERIAL_SUFFIX_SYSPROP = new PropertyFlag( "version.incremental.suffix", "versionIncrementalSuffix");
+    public static final String INCREMENT_SERIAL_SUFFIX_SYSPROP= "versionIncrementalSuffix";
 
-    public static final PropertyFlag INCREMENT_SERIAL_SUFFIX_PADDING_SYSPROP = new PropertyFlag( "version.incremental.suffix.padding", "versionIncrementalSuffixPadding");
+    public static final String INCREMENT_SERIAL_SUFFIX_PADDING_SYSPROP= "versionIncrementalSuffixPadding";
 
-    public static final PropertyFlag VERSION_SUFFIX_SNAPSHOT_SYSPROP = new PropertyFlag( "version.suffix.snapshot", "versionSuffixSnapshot");
+    public static final String VERSION_SUFFIX_SNAPSHOT_SYSPROP= "versionSuffixSnapshot";
 
-    public static final PropertyFlag VERSION_OSGI_SYSPROP = new PropertyFlag( "version.osgi", "versionOsgi");
+    public static final String VERSION_OSGI_SYSPROP= "versionOsgi";
 
-    public static final PropertyFlag VERSION_OVERRIDE_SYSPROP = new PropertyFlag( "version.override", "versionOverride");
+    public static final String VERSION_OVERRIDE_SYSPROP= "versionOverride";
 
     public static final String VERSION_SUFFIX_ALT = "versionSuffixAlternatives";
 
@@ -110,12 +108,12 @@ public class VersioningState
 
     public void initialise( Properties userProps )
     {
-        suffix = PropertiesUtils.handleDeprecatedProperty( userProps, VERSION_SUFFIX_SYSPROP );
-        incrementalSerialSuffix = PropertiesUtils.handleDeprecatedProperty( userProps, INCREMENT_SERIAL_SUFFIX_SYSPROP );
-        incrementalSerialSuffixPadding = Integer.parseInt( PropertiesUtils.handleDeprecatedProperty( userProps, INCREMENT_SERIAL_SUFFIX_PADDING_SYSPROP, "5" ) );
-        preserveSnapshot = Boolean.parseBoolean( PropertiesUtils.handleDeprecatedProperty( userProps, VERSION_SUFFIX_SNAPSHOT_SYSPROP ) );
-        osgi = Boolean.parseBoolean( PropertiesUtils.handleDeprecatedProperty( userProps, VERSION_OSGI_SYSPROP, "true" ) );
-        override = PropertiesUtils.handleDeprecatedProperty( userProps, VERSION_OVERRIDE_SYSPROP );
+        suffix = userProps.getProperty( VERSION_SUFFIX_SYSPROP );
+        incrementalSerialSuffix = userProps.getProperty( INCREMENT_SERIAL_SUFFIX_SYSPROP );
+        incrementalSerialSuffixPadding = Integer.parseInt( userProps.getProperty( INCREMENT_SERIAL_SUFFIX_PADDING_SYSPROP, "5" ) );
+        preserveSnapshot = Boolean.parseBoolean( userProps.getProperty( VERSION_SUFFIX_SNAPSHOT_SYSPROP ) );
+        osgi = Boolean.parseBoolean( userProps.getProperty( VERSION_OSGI_SYSPROP, "true" ) );
+        override = userProps.getProperty( VERSION_OVERRIDE_SYSPROP );
 
         // Provide an alternative list of versionSuffixes split via a comma separator. Defaults to 'redhat' IF the current rebuild suffix is not that.
         suffixAlternatives = Arrays.asList(
@@ -135,7 +133,7 @@ public class VersioningState
 
 
     /**
-     * Enabled ONLY if either version.incremental.suffix or version.suffix is provided in the user properties / CLI -D options.
+     * Enabled ONLY if either versionIncrementalSuffix or versionSuffix is provided in the user properties / CLI -D options.
      *
      * @see #VERSION_SUFFIX_SYSPROP
      * @see #INCREMENT_SERIAL_SUFFIX_SYSPROP

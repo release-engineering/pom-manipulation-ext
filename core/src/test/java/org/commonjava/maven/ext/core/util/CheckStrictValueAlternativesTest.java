@@ -44,7 +44,7 @@ public class CheckStrictValueAlternativesTest
     public void beforeTest() throws ManipulationException
     {
         Properties user = new Properties();
-        user.setProperty( VersioningState.INCREMENT_SERIAL_SUFFIX_SYSPROP.getCurrent(), "temporary-redhat" );
+        user.setProperty( VersioningState.INCREMENT_SERIAL_SUFFIX_SYSPROP, "temporary-redhat" );
         final VersioningState vs = new VersioningState( user );
         session.setState( vs );
         if ( ! strictIgnoreSuffix)

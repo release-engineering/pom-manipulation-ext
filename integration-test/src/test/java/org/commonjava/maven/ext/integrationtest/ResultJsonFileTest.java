@@ -75,9 +75,9 @@ public class ResultJsonFileTest
         // when
 
         Map<String, String> params = new HashMap<>();
-        params.put( VersioningState.INCREMENT_SERIAL_SUFFIX_SYSPROP.getCurrent(), AddSuffixJettyHandler.SUFFIX );
+        params.put( VersioningState.INCREMENT_SERIAL_SUFFIX_SYSPROP, AddSuffixJettyHandler.SUFFIX );
         params.put( "dependencyOverride.org.apache.qpid-proton-j-parent@*", "0.31.0.redhat-00001" );
-        params.put( VersioningState.INCREMENT_SERIAL_SUFFIX_PADDING_SYSPROP.getCurrent(), "0" );
+        params.put( VersioningState.INCREMENT_SERIAL_SUFFIX_PADDING_SYSPROP, "0" );
 
         Integer exitValue = runCli( Collections.emptyList(), params, baseDir.getCanonicalPath() );
 
@@ -99,8 +99,8 @@ public class ResultJsonFileTest
 
         Map<String, String> params = new HashMap<>();
         params.put( "restURL", mockServer.getUrl() );
-        params.put( VersioningState.INCREMENT_SERIAL_SUFFIX_SYSPROP.getCurrent(), AddSuffixJettyHandler.SUFFIX );
-        params.put( VersioningState.INCREMENT_SERIAL_SUFFIX_PADDING_SYSPROP.getCurrent(), "0" );
+        params.put( VersioningState.INCREMENT_SERIAL_SUFFIX_SYSPROP, AddSuffixJettyHandler.SUFFIX );
+        params.put( VersioningState.INCREMENT_SERIAL_SUFFIX_PADDING_SYSPROP, "0" );
 
         Integer exitValue = runCli( Collections.emptyList(), params, basePath );
 
@@ -143,8 +143,8 @@ public class ResultJsonFileTest
 
         Map<String, String> params = new HashMap<>();
         params.put( "restURL", mockServer.getUrl() );
-        params.put( VersioningState.INCREMENT_SERIAL_SUFFIX_SYSPROP.getCurrent(), AddSuffixJettyHandler.SUFFIX );
-        params.put( VersioningState.INCREMENT_SERIAL_SUFFIX_PADDING_SYSPROP.getCurrent(), "0" );
+        params.put( VersioningState.INCREMENT_SERIAL_SUFFIX_SYSPROP, AddSuffixJettyHandler.SUFFIX );
+        params.put( VersioningState.INCREMENT_SERIAL_SUFFIX_PADDING_SYSPROP, "0" );
 
         List<String> args = new ArrayList<>();
         args.add( "--file=" + Paths.get(workingDirectory.getCanonicalPath()).relativize(Paths.get( basePath) ) + File.separator + "pom.xml" );
@@ -192,7 +192,7 @@ public class ResultJsonFileTest
         Map<String, String> params = new HashMap<>();
         params.put( "restURL", mockServer.getUrl() );
         params.put( "repo-reporting-removal", "true" );
-        params.put( VersioningState.INCREMENT_SERIAL_SUFFIX_PADDING_SYSPROP.getCurrent(), "0" );
+        params.put( VersioningState.INCREMENT_SERIAL_SUFFIX_PADDING_SYSPROP, "0" );
 
         Integer exitValue = runCli( Collections.emptyList(), params, basePath );
 
@@ -246,8 +246,8 @@ public class ResultJsonFileTest
 
         Map<String, String> params = new HashMap<>();
         params.put( "restURL", mockServer.getUrl() );
-        params.put( VersioningState.INCREMENT_SERIAL_SUFFIX_SYSPROP.getCurrent(), AddSuffixJettyHandler.SUFFIX );
-        params.put( VersioningState.INCREMENT_SERIAL_SUFFIX_PADDING_SYSPROP.getCurrent(), "0" );
+        params.put( VersioningState.INCREMENT_SERIAL_SUFFIX_SYSPROP, AddSuffixJettyHandler.SUFFIX );
+        params.put( VersioningState.INCREMENT_SERIAL_SUFFIX_PADDING_SYSPROP, "0" );
         params.put( ManipulationManager.REPORT_JSON_OUTPUT_FILE, outputDir.toString() + File.separator + "manipulation.json" );
 
         Integer exitValue = runCli( Collections.emptyList(), params, baseDir.getCanonicalPath() );
