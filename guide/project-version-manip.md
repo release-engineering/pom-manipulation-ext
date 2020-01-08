@@ -15,7 +15,7 @@ PME offers the following version-related configuration:
 
 The extension can be used to append a version suffix/qualifier to the current project, and then apply an incremented index to the version to provide a unique release version.  For example, if the current project version is 1.0.0.GA, the extension can automatically set the version to 1.0.0.GA-rebuild-1, 1.0.0.GA-rebuild-2, etc.
 
-The extension is configured using the property `versionIncrementalSuffix` (*Deprecated property `version.incremental.suffix`*).
+The extension is configured using the property `versionIncrementalSuffix` (*Deprecated property `version.incremental.suffix` for versions **3.8.1 and prior***).
 
     mvn install -DversionIncrementalSuffix=rebuild
 
@@ -29,7 +29,7 @@ The extension is configured using the property `versionIncrementalSuffix` (*Depr
 </tr>
 </table>
 
-When using the automatic increment it is also possible to configure padding for the increment. For instance, by setting `versionIncrementalSuffixPadding` (*Deprecated property `version.incremental.suffix.padding`*)to `3` the version will be `rebuild-003`. Default for PME &le; 3.8 is 0 and for PME after 3.8 is 5.
+When using the automatic increment it is also possible to configure padding for the increment. For instance, by setting `versionIncrementalSuffixPadding` (*Deprecated property `version.incremental.suffix.padding` for versions **3.8.1 and prior***)to `3` the version will be `rebuild-003`. Default for PME &le; 3.8 is 0 and for PME after 3.8 is 5.
 
 #### Version Increment Metadata
 
@@ -41,7 +41,7 @@ The metadata to work out what the correct version of the increment should be can
 
 ### Manual version suffix
 
-The version suffix to be appended to the current project can be manually selected using the property `versionSuffix` (*Deprecated property `version.suffix`*)
+The version suffix to be appended to the current project can be manually selected using the property `versionSuffix` (*Deprecated property `version.suffix` for versions **3.8.1 and prior***)
 
     mvn install -DversionSuffix=release-1
 
@@ -51,7 +51,7 @@ If the current version of the project is "1.2.0.GA", the new version set during 
 
 ### Version override
 
-The version can be forcibly overridden by using the property `versionOverride` (*Deprecated property `version.override`*)
+The version can be forcibly overridden by using the property `versionOverride` (*Deprecated property `version.override` for versions **3.8.1 and prior***)
 
     mvn install -DversionOverride=6.1.0.Final
 
@@ -63,7 +63,7 @@ Using the above example, this would result in the version being "6.1.0.Final-reb
 
 ### Snapshot Detection
 
-The extension can detect snapshot versions and either preserve the snapshot or replace it with a real version. This is controlled by the property `versionSuffixSnapshot` (*Deprecated property `version.suffix.snapshot`*). The default is false (i.e. remove SNAPSHOT and replace by the suffix).
+The extension can detect snapshot versions and either preserve the snapshot or replace it with a real version. This is controlled by the property `versionSuffixSnapshot` (*Deprecated property `version.suffix.snapshot` for versions **3.8.1 and prior***). The default is false (i.e. remove SNAPSHOT and replace by the suffix).
 
     mvn install -DversionSuffixSnapshot=true
 
@@ -108,7 +108,7 @@ it will change to
     1.3.0.GA
     1.3.0.GA
 
-This is controlled by the property `versionOsgi` (*Deprecated property `version.osgi`*). The default is true (i.e. make the versions OSGi compliant).
+This is controlled by the property `versionOsgi` (*Deprecated property `version.osgi` for versions **3.8.1 and prior***). The default is true (i.e. make the versions OSGi compliant).
 
 ### Alternate Suffix Handling
 It is possible to pass in a comma separated list of alternate suffixes via the property `versionSuffixAlternatives`. The default value is `redhat` which will be applied _if_ the current suffix does not match that. This is used during dependency alignment to validate strict alignment between differing suffix types (from the input REST or BOM data).

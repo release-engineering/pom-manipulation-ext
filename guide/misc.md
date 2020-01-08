@@ -37,11 +37,11 @@ PME will automatically resolve ranges in versions in plugins and dependencies. T
 
 #### Repository And Reporting Removal
 
-If the property `repoReportingRemoval` (*Deprecated property `repo-reporting-removal`*) is set, PME will remove all reporting and repository sections (including profiles) from the POM files.
+If the property `repoReportingRemoval` (*Deprecated property `repo-reporting-removal` for versions **3.8.1 and prior***) is set, PME will remove all reporting and repository sections (including profiles) from the POM files.
 
 Repository declarations in the POM are considered a bad build smell, since over time they may become defunct or move.
 
-If the property `repoRemovalIgnorelocalhost` (*Deprecated property `repo-removal-ignorelocalhost`*) is set (default: false) PME will not remove repositories that contain the following definitions
+If the property `repoRemovalIgnorelocalhost` (*Deprecated property `repo-removal-ignorelocalhost` for versions **3.8.1 and prior***) is set (default: false) PME will not remove repositories that contain the following definitions
 
 * file://
 * (http or https)://localhost
@@ -52,7 +52,7 @@ Occasionally a project's more complex example/quickstart may have a local reposi
 
 Additionally, most project rebuilders aren't interested in hosting their own copy of the project's build reports or generated website; therefore, the reporting section only adds more plugin artifacts to the list of what must be present in the environment for the build to succeed. Eliminating this section simplifies the build and reduces the risk of failed builds.
 
-If the property `repoRemovalBackup` (*Deprecated property `repo-removal-backup`*) (default value: off) is set to
+If the property `repoRemovalBackup` (*Deprecated property `repo-removal-backup` for versions **3.8.1 and prior***) (default value: off) is set to
 * `settings.xml` a backup of any removed sections will be created in the top level directory.
 * `<path to file>` a backup of any removed sections will be created in the specified file.
 
@@ -62,7 +62,7 @@ The extension will automatically replace occurences of the property expression `
 
 This avoids a subtle problem that occurs when another project with inherits from this POM. If the child POM (the one that declares the `<parent/>`) specifies its own version **and that version is different from the parent**, that child version will be used to resolve `${project.version}` instead of the intended (parent) version. Resolving these expressions when `packaging` is set to `pom` (the only type of POM that can act as a parent) prevents this from occurring.
 
-This behavior may be configured by setting the property `enforceProjectVersion` (*Deprecated property `enforce-project-version`*):
+This behavior may be configured by setting the property `enforceProjectVersion` (*Deprecated property `enforce-project-version` for versions **3.8.1 and prior***):
 
     -DenforceProjectVersion=on|off
 
