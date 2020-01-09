@@ -116,6 +116,23 @@ The blacklist REST endpoint should follow:
 
 **Note:** For existing dependencies that reference a property, PME will update this property with the new version. If the property can't be found (e.g. it was inherited), a new one will be injected at the top level. This update of the property's value **may** implicitly align other dependencies using the same property that were not explicitly requested to be aligned.
 
+##### REST Headers
+
+<table bgcolor="#ffff00">
+<tr>
+<td>
+    <b>NOTE</b> : Available from version 3.9
+</td>
+</tr>
+</table>
+
+
+You can add custom HTTP headers to your REST calls by setting a property named `restHeaders`. HTTP headers must be comma-separated and each non-empty name-value pair must be colon-separated.
+
+For example:
+
+    -DrestHeaders=log-user-id:102,log-request-context:061294ff-088,log-process-context:,log-expires:,log-tmp:
+
 ### Direct/Transitive Dependencies
 
 <table bgcolor="#ffff00">
