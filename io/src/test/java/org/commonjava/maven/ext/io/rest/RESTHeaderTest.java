@@ -50,7 +50,7 @@ public class RESTHeaderTest
         Map<String, String> headers = new LinkedHashMap<>( 2 );
         headers.put( "Foo", "bar" );
         headers.put( "Bar", "baz" );
-        DefaultTranslator translator = new DefaultTranslator(mockServer.getUrl(), 0,
-                Translator.CHUNK_SPLIT_COUNT, null, "", headers);
+        DefaultTranslator translator = new DefaultTranslator( mockServer.getUrl(), 0,
+                Translator.CHUNK_SPLIT_COUNT, null, "", headers );
     }
 }

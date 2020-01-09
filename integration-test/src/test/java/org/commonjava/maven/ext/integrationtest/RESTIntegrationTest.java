@@ -206,4 +206,11 @@ public class RESTIntegrationTest
             handler.setBlacklist (null);
         }
     }
+
+    @Test
+    public void testRESTHeaders() throws Exception
+    {
+        String test = getDefaultTestLocation( "rest-headers" );
+        runLikeInvoker( test, mockServer.getUrl() );
+    }
 }
