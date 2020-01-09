@@ -139,7 +139,6 @@ public class RepoAndReportingRemovalManipulator
 
             if ( model.getReporting() != null )
             {
-                backupProfile.setReporting( model.getReporting() );
                 model.setReporting( null );
                 changed.add( project );
             }
@@ -194,13 +193,11 @@ public class RepoAndReportingRemovalManipulator
 
                 if ( profile.getReporting() != null )
                 {
-                    repoProfile.setReporting( profile.getReporting() );
                     profile.setReporting( null );
                     changed.add( project );
                 }
 
-                if ( !repoProfile.getRepositories().isEmpty() || !repoProfile.getPluginRepositories().isEmpty()
-                                || repoProfile.getReporting() != null )
+                if ( !repoProfile.getRepositories().isEmpty() || !repoProfile.getPluginRepositories().isEmpty() )
                 {
                     backupSettings.addProfile( SettingsUtils.convertToSettingsProfile( repoProfile ) );
                 }
@@ -208,8 +205,7 @@ public class RepoAndReportingRemovalManipulator
         }
 
         // create new settings file with the removed repositories and reporting
-        if ( !backupProfile.getRepositories().isEmpty() || !backupProfile.getPluginRepositories().isEmpty()
-            || backupProfile.getReporting() != null )
+        if ( !backupProfile.getRepositories().isEmpty() || !backupProfile.getPluginRepositories().isEmpty() )
         {
             backupSettings.addProfile( SettingsUtils.convertToSettingsProfile( backupProfile ) );
 
