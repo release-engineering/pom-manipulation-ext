@@ -29,6 +29,7 @@ import org.commonjava.maven.ext.core.ManipulationSession;
 import org.commonjava.maven.ext.core.impl.Version;
 import org.commonjava.maven.ext.core.state.CommonState;
 import org.commonjava.maven.ext.core.state.VersioningState;
+import org.commonjava.maven.ext.io.ConfigIO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -104,7 +105,7 @@ public final class PropertiesUtils
 
         if ( "project.version".equals( key ) )
         {
-            logger.debug ("Not updating key {} with {} ", key, newValue );
+            logger.debug( "Not updating key {} with {} ", key, newValue );
             return PropertyUpdate.IGNORE;
         }
 
@@ -113,7 +114,8 @@ public final class PropertiesUtils
             if ( p.getModel().getProperties().containsKey( key ) )
             {
                 logger.trace( "Searching properties of {} ", p );
-                return internalUpdateProperty( session, p, ignoreStrict, key, newValue, resolvedValue, p.getModel().getProperties() );
+                return internalUpdateProperty( session, p, ignoreStrict, key, newValue, resolvedValue,
+                                               p.getModel().getProperties() );
             }
             else
             {
@@ -132,11 +134,9 @@ public final class PropertiesUtils
         return PropertyUpdate.NOTFOUND;
     }
 
-
     private static PropertyUpdate internalUpdateProperty( ManipulationSession session, Project p, boolean ignoreStrict,
                                                           String key, String newValue, String resolvedValue,
-                                                          Properties props )
-                    throws ManipulationException
+                                                          Properties props ) throws ManipulationException
     {
         final CommonState state = session.getState( CommonState.class );
         final String oldValue = props.getProperty( key );
@@ -152,13 +152,13 @@ public final class PropertiesUtils
         // >${foo}value<
         // it becomes hairy to verify strict compliance and to correctly split the old value and
         // update it with a portion of the new value.
-        if ( oldValue != null && oldValue.startsWith( "${" ) && oldValue.endsWith( "}" ) &&
-                        !( StringUtils.countMatches( oldValue, "${" ) > 1 ) )
+        if ( oldValue != null && oldValue.startsWith( "${" ) && oldValue.endsWith( "}" ) && !(
+                        StringUtils.countMatches( oldValue, "${" ) > 1 ) )
         {
             logger.debug( "Recursively resolving {} ", oldValue.substring( 2, oldValue.length() - 1 ) );
 
-            if ( updateProperties( session, p, ignoreStrict,
-                                   oldValue.substring( 2, oldValue.length() - 1 ), newValue ) == PropertyUpdate.NOTFOUND )
+            if ( updateProperties( session, p, ignoreStrict, oldValue.substring( 2, oldValue.length() - 1 ), newValue )
+                            == PropertyUpdate.NOTFOUND )
             {
                 logger.error( "Recursive property not found for {} with {} ", oldValue, newValue );
                 return PropertyUpdate.NOTFOUND;
@@ -188,9 +188,8 @@ public final class PropertiesUtils
             }
 
             // TODO: Does not handle explicit overrides.
-            if ( oldValue != null && oldValue.contains( "${" ) &&
-                            !( oldValue.startsWith( "${" ) && oldValue.endsWith( "}" ) ) || (
-                            StringUtils.countMatches( oldValue, "${" ) > 1 ) )
+            if ( oldValue != null && oldValue.contains( "${" ) && !( oldValue.startsWith( "${" ) && oldValue.endsWith(
+                            "}" ) ) || ( StringUtils.countMatches( oldValue, "${" ) > 1 ) )
             {
                 // This block handles
                 // >${foo}value${foo}<
@@ -204,17 +203,15 @@ public final class PropertiesUtils
                 {
                     throw new ManipulationException(
                                     "NYI : handling for versions with explicit overrides ({}) with multiple embedded properties is NYI. ",
-                                    oldValue);
+                                    oldValue );
                 }
-                if ( resolvedValue.equals( newValue ))
+                if ( resolvedValue.equals( newValue ) )
                 {
-                    logger.warn( "Nothing to update as original key {} value matches new value {} ", key,
-                                 newValue );
+                    logger.warn( "Nothing to update as original key {} value matches new value {} ", key, newValue );
                     found = PropertyUpdate.IGNORE;
                 }
                 newValue = oldValue + StringUtils.removeStart( newValue, resolvedValue );
-                logger.info( "Ignoring new value due to embedded property {} and appending {} ", oldValue,
-                             newValue );
+                logger.info( "Ignoring new value due to embedded property {} and appending {} ", oldValue, newValue );
             }
 
             props.setProperty( key, newValue );
@@ -227,7 +224,7 @@ public final class PropertiesUtils
      * @param session Current ManipulationSession
      * @return non-null string suffix.
      */
-    public static String getSuffix ( ManipulationSession session)
+    public static String getSuffix( ManipulationSession session )
     {
         return session.getState( VersioningState.class ).getRebuildSuffix();
     }
@@ -400,8 +397,8 @@ public final class PropertiesUtils
      * @return true if a property was found and cached.
      * @throws ManipulationException if an error occurs.
      */
-    public static boolean cacheProperty( Project project, CommonState state, Map<Project, Map<String, PropertyMapper>> versionPropertyUpdateMap, String oldVersion,
-                                         String newVersion, Object originalType, boolean force )
+    public static boolean cacheProperty( Project project, CommonState state, Map<Project, Map<String, PropertyMapper>> versionPropertyUpdateMap,
+                                         String oldVersion, String newVersion, Object originalType, boolean force )
                     throws ManipulationException
     {
         final Map<String, PropertyMapper> projectProps = versionPropertyUpdateMap.computeIfAbsent( project, k -> new HashMap<>() );
@@ -431,7 +428,7 @@ public final class PropertiesUtils
                               originalType, oldProperty, newVersion, project );
 
                 final String oldVersionProp = oldVersion.substring( 2, oldVersion.length() - 1 );
-                final PropertyMapper container = projectProps.computeIfAbsent( oldVersionProp, k -> new PropertyMapper(  ) );
+                final PropertyMapper container = projectProps.computeIfAbsent( oldVersionProp, k -> new PropertyMapper() );
 
                 // We check if we are replacing a property and there is already a mapping. While we don't allow
                 // a property to be updated to two different versions, if a dependencyExclusion (i.e. a force override)
@@ -457,8 +454,8 @@ public final class PropertiesUtils
                         }
                         else
                         {
-                            logger.warn ("Replacing property '{}' with a new version would clash with existing version which does not match. Old value is {} and new is {}. Purging update of existing property.",
-                                          oldVersionProp, existingPropertyMapping, newVersion );
+                            logger.warn( "Replacing property '{}' with a new version would clash with existing version which does not match. Old value is {} and new is {}. Purging update of existing property.",
+                                         oldVersionProp, existingPropertyMapping, newVersion );
                             projectProps.remove( oldVersionProp );
                             return false;
                         }
@@ -483,11 +480,14 @@ public final class PropertiesUtils
         return result;
     }
 
-    private static String findProperty (Project project , String prop )
+    private static String findProperty( Project project, String prop )
     {
-        return project.getReverseInheritedList().stream().filter
-                        ( p -> p.getModel().getProperties().containsKey( prop ) ).map
-                        ( p -> p.getModel().getProperties().getProperty( prop ) ).findAny().orElse(null);
+        return project.getReverseInheritedList()
+                      .stream()
+                      .filter( p -> p.getModel().getProperties().containsKey( prop ) )
+                      .map( p -> p.getModel().getProperties().getProperty( prop ) )
+                      .findAny()
+                      .orElse( null );
     }
 
     public static String extractPropertyName( String version ) throws ManipulationException
@@ -500,14 +500,13 @@ public final class PropertiesUtils
         {
             throw new ManipulationException(
                             "NYI : handling for versions ({}) with either multiple embedded properties or embedded property and hardcoded string is NYI. ",
-                            version);
+                            version );
         }
         return version.substring( 2, endIndex );
     }
 
     public static void verifyPropertyMapping( CommonState cState, Project project, Map<Project, Map<String, PropertyMapper>> versionPropertyMap,
-                                                          ProjectVersionRef pvr, String version )
-                    throws ManipulationException
+                                              ProjectVersionRef pvr, String version ) throws ManipulationException
     {
         Map<String, PropertyMapper> mapping = versionPropertyMap.get( project );
 
@@ -517,9 +516,10 @@ public final class PropertiesUtils
         {
             PropertyMapper currentProjectVersionMapper = mapping.get( version );
 
-            if ( ! currentProjectVersionMapper.getDependencies().contains( pvr.asProjectRef() ) )
+            if ( !currentProjectVersionMapper.getDependencies().contains( pvr.asProjectRef() ) )
             {
-                logger.debug ("Scanning project {} with version {} and original value {} ", project, version, currentProjectVersionMapper.getOriginalVersion() );
+                logger.debug( "Scanning project {} with version {} and original value {} ", project, version,
+                              currentProjectVersionMapper.getOriginalVersion() );
 
                 if ( cState.getStrictDependencyPluginPropertyValidation() == 2 )
                 {
@@ -532,19 +532,22 @@ public final class PropertiesUtils
                                         !currentProjectVersionMapper.getOriginalVersion()
                                                                     .equals( allProjectMapper.get( version ).getNewVersion() ) &&
                                         // Catch where same version property is used for different values
-                                        currentProjectVersionMapper.getOriginalVersion().equals( allProjectMapper.get( version ).getOriginalVersion() ))
+                                        currentProjectVersionMapper.getOriginalVersion()
+                                                                   .equals( allProjectMapper.get( version )
+                                                                                            .getOriginalVersion() ) )
                         {
                             logger.warn( "Project {} had a property {} that failed to validate to new version {} and is reverted to {} ",
-                                         p, version, allProjectMapper.get( version ).getNewVersion(), allProjectMapper.get( version ).getOriginalVersion() );
-                            allProjectMapper.get( version ).setNewVersion(
-                                            currentProjectVersionMapper.getOriginalVersion() );
+                                         p, version, allProjectMapper.get( version ).getNewVersion(),
+                                         allProjectMapper.get( version ).getOriginalVersion() );
+                            allProjectMapper.get( version ).setNewVersion( currentProjectVersionMapper.getOriginalVersion() );
                         }
                     }
                 }
                 else
                 {
-                    throw new ManipulationException( "Dependency or Plugin {} within project {}} did not update property {} but it has been updated",
-                                                     pvr, project, version );
+                    throw new ManipulationException(
+                                    "Dependency or Plugin {} within project {}} did not update property {} but it has been updated",
+                                    pvr, project, version );
                 }
             }
         }
@@ -570,13 +573,38 @@ public final class PropertiesUtils
                     // We could just add group(1) which would equate to a version without a suffix. But this
                     // can clash when processing from/to that both contain the alt. suffix.
                     //                        result.add( suffixMatcher.group( 1 ) );
-                    result.add( suffixMatcher.group( 1 ) + suffixMatcher.group( 2 ) + versioningState.getRebuildSuffix() + "-0" );
+                    result.add( suffixMatcher.group( 1 ) + suffixMatcher.group( 2 ) + versioningState.getRebuildSuffix()
+                                                + "-0" );
                 }
             } );
         }
 
         logger.debug( "Generated original value set for matching {}", result );
         return result;
+    }
+
+    /**
+     * Common code used between CLI and EXT.
+     * @param userProperties User properties stored internally.
+     * @param config Properties to merge in.
+     */
+    public static void handleConfigPrecedence( Properties userProperties, Properties config )
+    {
+        String value = userProperties.getProperty( ConfigIO.CONFIG_FILE_PRECEDENCE );
+        if ( isNotEmpty( value ) && "true".equalsIgnoreCase( value ) )
+        {
+            userProperties.putAll( config );
+        }
+        else
+        {
+            for ( String key : config.stringPropertyNames() )
+            {
+                if ( ! userProperties.containsKey( key ) )
+                {
+                    userProperties.setProperty( key, config.getProperty(key) );
+                }
+            }
+        }
     }
 
     /**
