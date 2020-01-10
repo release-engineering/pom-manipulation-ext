@@ -15,6 +15,7 @@
  */
 package org.commonjava.maven.ext.core.state;
 
+import org.commonjava.maven.ext.annotation.ConfigValue;
 import org.commonjava.maven.ext.core.impl.RepoAndReportingRemovalManipulator;
 
 import java.util.Properties;
@@ -26,8 +27,10 @@ import java.util.Properties;
 public class RepoReportingState
     implements State
 {
+    @ConfigValue( docIndex = "misc.html#repository-and-reporting-removal")
     private static final String RR_SUFFIX_SYSPROP = "repoReportingRemoval";
 
+    @ConfigValue( docIndex = "misc.html#repository-and-reporting-removal")
     private static final String RR_SUFFIX_SYSPROP_LOCAL = "repoRemovalIgnorelocalhost";
 
     /**
@@ -37,6 +40,7 @@ public class RepoReportingState
      * <br/>'settings.xml' which implicitly means the current build directory
      * <br/>'filename' which should be a valid path to write to
      */
+    @ConfigValue( docIndex = "misc.html#repository-and-reporting-removal")
     private static final String RR_SETTINGS_SFX_SYSPROP = "repoRemovalBackup";
 
     private boolean removal;

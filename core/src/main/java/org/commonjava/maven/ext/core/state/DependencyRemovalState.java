@@ -16,6 +16,7 @@
 package org.commonjava.maven.ext.core.state;
 
 import org.commonjava.maven.atlas.ident.ref.ProjectRef;
+import org.commonjava.maven.ext.annotation.ConfigValue;
 import org.commonjava.maven.ext.core.util.IdUtils;
 
 import java.util.List;
@@ -33,6 +34,7 @@ public class DependencyRemovalState
      * <code>-DdependencyRemoval=org.foo:bar,....</code>
      * </pre>
      */
+    @ConfigValue( docIndex = "dep-manip.html#dependency-removal")
     private static final String DEPENDENCY_REMOVAL_PROPERTY = "dependencyRemoval";
 
     private List<ProjectRef> dependencyRemoval;

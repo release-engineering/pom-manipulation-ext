@@ -19,6 +19,7 @@ import lombok.Getter;
 import org.apache.commons.lang.StringUtils;
 import org.commonjava.maven.atlas.ident.ref.ProjectRef;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
+import org.commonjava.maven.ext.annotation.ConfigValue;
 import org.commonjava.maven.ext.core.impl.ProjectVersioningManipulator;
 
 import java.util.ArrayList;
@@ -41,18 +42,25 @@ import static org.apache.commons.lang.StringUtils.isNotEmpty;
 public class VersioningState
     implements State
 {
+    @ConfigValue( docIndex = "project-version-manip.html#manual-version-suffix" )
     public static final String VERSION_SUFFIX_SYSPROP= "versionSuffix";
 
+    @ConfigValue( docIndex = "project-version-manip.html#automatic-version-increment")
     public static final String INCREMENT_SERIAL_SUFFIX_SYSPROP= "versionIncrementalSuffix";
 
+    @ConfigValue( docIndex = "project-version-manip.html#version-increment-padding")
     public static final String INCREMENT_SERIAL_SUFFIX_PADDING_SYSPROP= "versionIncrementalSuffixPadding";
 
+    @ConfigValue( docIndex = "project-version-manip.html#snapshot-detection")
     public static final String VERSION_SUFFIX_SNAPSHOT_SYSPROP= "versionSuffixSnapshot";
 
+    @ConfigValue( docIndex = "project-version-manip.html#osgi-compliance")
     public static final String VERSION_OSGI_SYSPROP= "versionOsgi";
 
+    @ConfigValue( docIndex = "project-version-manip.html#version-override")
     public static final String VERSION_OVERRIDE_SYSPROP= "versionOverride";
 
+    @ConfigValue( docIndex = "project-version-manip.html#alternate-suffix-handling")
     public static final String VERSION_SUFFIX_ALT = "versionSuffixAlternatives";
 
     /**

@@ -202,6 +202,14 @@ public class Cli
         if ( cmd.hasOption( 'D' ) )
         {
             userProps = cmd.getOptionProperties( "D" );
+
+            for ( String k : userProps.stringPropertyNames() )
+            {
+                if ( ConfigList.allConfigValues.values().stream().noneMatch( k::startsWith ) )
+                {
+                    logger.warn( "Unknown configuration value {}", k );
+                }
+            }
         }
         if ( cmd.hasOption( 'f' ) )
         {
@@ -210,13 +218,6 @@ public class Cli
         if ( cmd.hasOption( 's' ) )
         {
             settings = new File( cmd.getOptionValue( 's' ) );
-        }
-        for ( String k : userProps.stringPropertyNames() )
-        {
-            if ( ConfigList.allConfigValues.values().stream().noneMatch( k::startsWith ) )
-            {
-                logger.warn( "Unknown configuration value {}", k );
-            }
         }
 
         createSession( target, settings );

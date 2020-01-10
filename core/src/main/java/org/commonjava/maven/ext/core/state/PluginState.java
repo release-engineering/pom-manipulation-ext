@@ -18,6 +18,7 @@ package org.commonjava.maven.ext.core.state;
 import org.apache.maven.model.Plugin;
 import org.commonjava.maven.atlas.ident.ref.ArtifactRef;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
+import org.commonjava.maven.ext.annotation.ConfigValue;
 import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.core.impl.PluginManipulator;
 import org.commonjava.maven.ext.core.util.IdUtils;
@@ -37,6 +38,7 @@ public class PluginState
     /**
      * Defines how dependencies are located.
      */
+    @ConfigValue( docIndex = "plugin-manip.html#plugin-source")
     private static final String PLUGIN_SOURCE = "pluginSource";
 
     /**
@@ -64,7 +66,11 @@ public class PluginState
      * <code>-DpluginManagement:org.foo:bar-plugin-mgmt:1.0</code>
      * </pre>
      */
+    @ConfigValue( docIndex = "plugin-manip.html#basic-plugin-alignment")
     private static final String PLUGIN_MANAGEMENT_POM_PROPERTY = "pluginManagement";
+
+    @ConfigValue( docIndex = "plugin-manip.html#basic-plugin-alignment")
+    private static final String PLUGIN_MANAGEMENT_PRECEDENCE = "pluginManagementPrecedence";
 
     /**
      * Two possible methods currently supported configuration merging precedence:
@@ -96,7 +102,7 @@ public class PluginState
     public void initialise( Properties userProps ) throws ManipulationException
     {
         pluginMgmt = IdUtils.parseGAVs( userProps.getProperty( PLUGIN_MANAGEMENT_POM_PROPERTY ) );
-        switch ( Precedence.valueOf( userProps.getProperty( "pluginManagementPrecedence",
+        switch ( Precedence.valueOf( userProps.getProperty( PLUGIN_MANAGEMENT_PRECEDENCE,
                                                             Precedence.REMOTE.toString() ).toUpperCase() ) )
         {
             case LOCAL:

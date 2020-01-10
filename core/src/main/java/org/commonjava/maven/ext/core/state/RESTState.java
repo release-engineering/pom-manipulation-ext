@@ -16,13 +16,13 @@
 package org.commonjava.maven.ext.core.state;
 
 import org.apache.commons.lang.StringUtils;
+import org.commonjava.maven.ext.annotation.ConfigValue;
 import org.commonjava.maven.ext.core.ManipulationSession;
 import org.commonjava.maven.ext.core.impl.DependencyManipulator;
 import org.commonjava.maven.ext.io.rest.DefaultTranslator;
 import org.commonjava.maven.ext.io.rest.Translator;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -33,6 +33,24 @@ import java.util.stream.Collectors;
  */
 public class RESTState implements State
 {
+    @ConfigValue( docIndex = "dep-manip.html#rest-endpoint" )
+    public static final String REST_URL = "restURL";
+
+    @ConfigValue( docIndex = "dep-manip.html#rest-endpoint" )
+    public static final String REST_REPO_GROUP = "restRepositoryGroup";
+
+    @ConfigValue( docIndex = "dep-manip.html#rest-endpoint" )
+    public static final String REST_MAX_SIZE = "restMaxSize";
+
+    @ConfigValue( docIndex = "dep-manip.html#rest-endpoint" )
+    public static final String REST_MIN_SIZE = "restMinSize";
+
+    @ConfigValue( docIndex = "dep-manip.html#rest-endpoint" )
+    public static final String REST_SUFFIX = "restSuffixAlign";
+
+    @ConfigValue( docIndex = "dep-manip.html#rest-endpoint" )
+    public static final String REST_HEADERS = "restHeaders";
+
     private final ManipulationSession session;
 
     private String restURL;
@@ -54,15 +72,15 @@ public class RESTState implements State
     {
         final VersioningState vState = session.getState( VersioningState.class );
 
-        restURL = userProps.getProperty( "restURL" );
+        restURL = userProps.getProperty( REST_URL );
 
-        String repositoryGroup = userProps.getProperty( "restRepositoryGroup", "" );
-        int restMaxSize = Integer.parseInt( userProps.getProperty( "restMaxSize", "-1" ) );
-        int restMinSize = Integer.parseInt( userProps.getProperty( "restMinSize",
+        String repositoryGroup = userProps.getProperty( REST_REPO_GROUP, "" );
+        int restMaxSize = Integer.parseInt( userProps.getProperty( REST_MAX_SIZE, "-1" ) );
+        int restMinSize = Integer.parseInt( userProps.getProperty( REST_MIN_SIZE,
                                                                    String.valueOf( DefaultTranslator.CHUNK_SPLIT_COUNT ) ) );
-        restSuffixAlign = Boolean.parseBoolean( userProps.getProperty( "restSuffixAlign", "true" ) );
+        restSuffixAlign = Boolean.parseBoolean( userProps.getProperty( REST_SUFFIX, "true" ) );
 
-        String restHeadersProperty = userProps.getProperty( "restHeaders", "" );
+        String restHeadersProperty = userProps.getProperty( REST_HEADERS, "" );
         if ( !StringUtils.isEmpty( restHeadersProperty ) )
         {
             restHeaders = Arrays.stream( restHeadersProperty.split( "," ) )
@@ -94,10 +112,5 @@ public class RESTState implements State
     public boolean isRestSuffixAlign()
     {
         return restSuffixAlign;
-    }
-
-    public Map<String, String> getRestHeaders()
-    {
-        return Collections.unmodifiableMap( restHeaders );
     }
 }

@@ -16,6 +16,7 @@
 package org.commonjava.maven.ext.core.state;
 
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
+import org.commonjava.maven.ext.annotation.ConfigValue;
 import org.commonjava.maven.ext.core.impl.PropertyManipulator;
 import org.commonjava.maven.ext.core.util.IdUtils;
 
@@ -37,6 +38,7 @@ public class PropertyState
      * <code>-DpropertyManagement:org.foo:bar-property-mgmt:1.0</code>
      * </pre>
      */
+    @ConfigValue( docIndex = "misc.html#property-override")
     private static final String PROPERTY_MANAGEMENT_POM_PROPERTY = "propertyManagement";
 
     private List<ProjectVersionRef> propertyMgmt;

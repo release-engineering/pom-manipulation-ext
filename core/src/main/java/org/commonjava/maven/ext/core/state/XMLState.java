@@ -15,6 +15,7 @@
  */
 package org.commonjava.maven.ext.core.state;
 
+import org.commonjava.maven.ext.annotation.ConfigValue;
 import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.core.impl.XMLManipulator;
 import org.slf4j.Logger;
@@ -44,6 +45,7 @@ public class XMLState
      *
      * TODO: If <file> is blank this should be a wildcard for all files.
      */
+   @ConfigValue( docIndex = "xml.html" )
     private static final String XML_PROPERTY = "xmlUpdate";
 
     /**

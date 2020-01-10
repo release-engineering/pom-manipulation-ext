@@ -15,6 +15,7 @@
  */
 package org.commonjava.maven.ext.core.state;
 
+import org.commonjava.maven.ext.annotation.ConfigValue;
 import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.core.impl.JSONManipulator;
 import org.slf4j.Logger;
@@ -30,11 +31,11 @@ import static org.apache.commons.lang.StringUtils.isNotEmpty;
  * Captures configuration relating to JSON manipulation. Used by {@link JSONManipulator}.
  */
 public class JSONState
-    implements State
+                implements State
 {
     private final Logger logger = LoggerFactory.getLogger( getClass() );
 
-   /**
+    /**
      * Property on the command line that handles modifying JSON files. The format is
      *
      * -DjsonUpdate=<file>:<json-xpath-expression>:[<replacement-value>] [,....]
@@ -44,6 +45,7 @@ public class JSONState
      *
      * TODO: If <file> is blank this should be a wildcard for all files.
      */
+    @ConfigValue( docIndex = "json.html" )
     private static final String JSON_PROPERTY = "jsonUpdate";
 
     /**
@@ -51,8 +53,7 @@ public class JSONState
      */
     private final List<JSONOperation> jsonOperations = new ArrayList<>();
 
-    public JSONState( final Properties userProps )
-                    throws ManipulationException
+    public JSONState( final Properties userProps ) throws ManipulationException
     {
         initialise( userProps );
     }
@@ -64,23 +65,25 @@ public class JSONState
         if ( isNotEmpty( property ) )
         {
             final String[] ops = property.split( "(?<!\\\\)," );
-            for ( int i=0; i<ops.length; i++)
+            for ( int i = 0; i < ops.length; i++ )
             {
                 ops[i] = ops[i].replaceAll( "\\\\,", "," );
             }
 
-            for ( String operation : ops)
+            for ( String operation : ops )
             {
-                String []components = operation.split( "(?<!\\\\):", 3 );
-                for ( int i=0; i<components.length; i++)
+                String[] components = operation.split( "(?<!\\\\):", 3 );
+                for ( int i = 0; i < components.length; i++ )
                 {
                     components[i] = components[i].replaceAll( "\\\\:", ":" );
                 }
                 if ( components.length != 3 )
                 {
-                    throw new ManipulationException( "Unable to parse command {} from property {}", operation, property );
+                    throw new ManipulationException( "Unable to parse command {} from property {}", operation,
+                                                     property );
                 }
-                logger.debug ("Adding JSONOperation with file {}, xpath {} and update {}", components[0], components[1], components[2] );
+                logger.debug( "Adding JSONOperation with file {}, xpath {} and update {}", components[0], components[1],
+                              components[2] );
                 jsonOperations.add( new JSONOperation( components[0], components[1], components[2] ) );
             }
         }
@@ -94,7 +97,7 @@ public class JSONState
     @Override
     public boolean isEnabled()
     {
-        return jsonOperations != null && !jsonOperations.isEmpty();
+        return !jsonOperations.isEmpty();
     }
 
     public List<JSONOperation> getJSONOperations()
@@ -102,14 +105,15 @@ public class JSONState
         return jsonOperations;
     }
 
-
     public final static class JSONOperation
     {
         private String file;
+
         private String xpath;
+
         private String update;
 
-        public JSONOperation ( String file, String xpath, String update)
+        public JSONOperation( String file, String xpath, String update )
         {
             this.file = file;
             this.xpath = xpath;
@@ -132,7 +136,7 @@ public class JSONState
         }
 
         @Override
-        public String toString ()
+        public String toString()
         {
             return "File " + file + " xpath '" + xpath + "' update " + update;
         }

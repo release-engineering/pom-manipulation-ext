@@ -44,29 +44,34 @@ public class CommonState
      * When true, clashes with cached properties will throw an exception in PropertyResolver. Setting this to false will prevent
      * that. Default value is true.
      */
+    @ConfigValue(docIndex = "dep-manip.html#property-clash-replacement")
     private static final String PROPERTY_CLASH_FAILS = "propertyClashFails";
 
     /**
      * Enables strict checking of non-exclusion dependency versions before aligning to the given BOM dependencies.
      * For example, <code>1.1</code> will match <code>1.1-rebuild-1</code> in strict mode, but <code>1.2</code> will not.
      */
+    @ConfigValue( docIndex = "dep-manip.html#strict-mode-version-alignment" )
     private static final String STRICT_ALIGNMENT = "strictAlignment";
 
     /**
      * When false, strict version-alignment violations will be reported in the warning log-level, but WILL NOT FAIL THE BUILD. When true, the build
      * will fail if such a violation is detected. Default value is false.
      */
+    @ConfigValue( docIndex = "dep-manip.html#strict-mode-version-alignment")
     private static final String STRICT_VIOLATION_FAILS = "strictViolationFails";
 
     /**
      * When true, it will ignore any suffix ( e.g. rebuild-2 ) on the source version during comparisons. Further, it will
      * only allow alignment to a higher incrementing suffix (e.g. rebuild-3 ).
      */
+    @ConfigValue( docIndex = "dep-manip.html#strict-mode-version-alignment")
     public static final String STRICT_ALIGNMENT_IGNORE_SUFFIX = "strictAlignmentIgnoreSuffix";
 
     /**
      * Comma separated list of scopes to exclude and ignore when operating.
      */
+    @ConfigValue( docIndex = "dep-manip.html#scope-exclusion")
     public static final String EXCLUDED_SCOPES = "excludedScopes";
 
     /**
@@ -78,6 +83,7 @@ public class CommonState
      * If set to true, then this will throw an exception.
      * If set to the string 'revert' then it will revert any changes, emitting warnings.
      */
+    @ConfigValue( docIndex = "dep-manip.html#strict-property-validation")
     private static final String DEPENDENCY_PROPERTY_VALIDATION = "strictPropertyValidation";
 
     /**

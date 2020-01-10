@@ -31,7 +31,7 @@ public final class ProfileUtils
     /**
      * Denotes whether we only scan active profiles. Default is true (we scan only active profiles).
      */
-    @ConfigValue( docIndex = "scanActiveProfiles INDEX")
+    @ConfigValue( docIndex = "misc.html#profile-handling")
     public static final String PROFILE_SCANNING = "scanActiveProfiles";
 
     public static String PROFILE_SCANNING_DEFAULT = "true";

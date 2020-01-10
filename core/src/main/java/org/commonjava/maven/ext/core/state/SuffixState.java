@@ -16,6 +16,7 @@
 package org.commonjava.maven.ext.core.state;
 
 import org.apache.commons.lang.StringUtils;
+import org.commonjava.maven.ext.annotation.ConfigValue;
 import org.commonjava.maven.ext.core.impl.SuffixManipulator;
 
 import java.util.Properties;
@@ -42,6 +43,7 @@ public class SuffixState
      * <code>-DversionSuffixStrip=jbossorg-\d+</code>
      * </pre>
      */
+    @ConfigValue( docIndex = "project-version-manip.html#suffix-stripping")
     static final String SUFFIX_STRIP_PROPERTY = "versionSuffixStrip";
 
     private String suffixStrip;

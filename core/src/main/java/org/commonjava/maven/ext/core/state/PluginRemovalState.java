@@ -16,6 +16,7 @@
 package org.commonjava.maven.ext.core.state;
 
 import org.commonjava.maven.atlas.ident.ref.ProjectRef;
+import org.commonjava.maven.ext.annotation.ConfigValue;
 import org.commonjava.maven.ext.core.util.IdUtils;
 
 import java.util.List;
@@ -33,6 +34,7 @@ public class PluginRemovalState
      * <code>-DpluginRemoval=org.foo:bar-plugin,....</code>
      * </pre>
      */
+    @ConfigValue( docIndex = "plugin-manip.html#plugin-removal")
     private static final String PLUGIN_REMOVAL_PROPERTY = "pluginRemoval";
 
     private List<ProjectRef> pluginRemoval;

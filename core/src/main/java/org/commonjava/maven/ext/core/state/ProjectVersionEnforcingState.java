@@ -15,6 +15,8 @@
  */
 package org.commonjava.maven.ext.core.state;
 
+import org.commonjava.maven.ext.annotation.ConfigValue;
+
 import java.util.Properties;
 
 /**
@@ -26,6 +28,7 @@ public class ProjectVersionEnforcingState
     /**
      * Property used to set the enforcement mode.
      */
+    @ConfigValue( docIndex = "misc.html#projectversion-expression-replacement" )
     private static final String ENFORCE_PROJECT_VERSION = "enforceProjectVersion";
 
     static

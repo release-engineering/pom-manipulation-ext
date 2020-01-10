@@ -43,6 +43,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 
 @SupportedAnnotationTypes( "org.commonjava.maven.ext.annotation.ConfigValue" )
 @SupportedOptions( { "generationDirectory", "packageName", "rootDirectory" } )
@@ -54,7 +55,7 @@ public class ConfigValueProcessor extends AbstractProcessor
     private static final String ROOT_DIR = "rootDirectory";
 
     private final Map<String,String> varResults = new HashMap<>( );
-    private final Map<String,String> indexResults = new HashMap<>( );
+    private final Map<String,String> indexResults = new TreeMap<>( );
 
     @Override
     public boolean process( Set<? extends TypeElement> annotations, RoundEnvironment roundEnv )

@@ -16,27 +16,24 @@
 package org.commonjava.maven.ext.core.state;
 
 import org.apache.maven.model.Parent;
-import org.commonjava.maven.atlas.ident.ref.InvalidRefException;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef;
+import org.commonjava.maven.ext.annotation.ConfigValue;
 import org.commonjava.maven.ext.core.impl.RepositoryInjectionManipulator;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.Properties;
 
 /**
- * Captures configuration relating to injection of parent.
+ * Captures configuration relating to injection of parent pom.
  * Used by {@link RepositoryInjectionManipulator}.
  */
 public class ParentInjectionState
     implements State
 {
-    private final Logger logger = LoggerFactory.getLogger( getClass() );
-
     /**
      * Suffix to enable this modder
      */
+    @ConfigValue( docIndex = "misc.html#parent-injection")
     private static final String PARENT_INJECTION_PROPERTY = "parentInjection";
 
     private Parent parent = new Parent();
