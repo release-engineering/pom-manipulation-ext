@@ -410,8 +410,6 @@ public class DefaultTranslator
                                 new LookupGAVsRequest( Collections.emptySet(), Collections.emptySet(), repositoryGroup,
                                                        incrementalSerialSuffix, GAVUtils.generateGAVs( chunk ) );
 
-                logger.debug( "Called executeTranslate to {} with custom headers {}", this.endpointUrl, restHeaders );
-
                 r = Unirest.post( this.endpointUrl )
                            .header( "accept", "application/json" )
                            .header( "Content-Type", "application/json" )
