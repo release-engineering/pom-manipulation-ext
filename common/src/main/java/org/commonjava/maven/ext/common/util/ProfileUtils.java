@@ -17,6 +17,7 @@ package org.commonjava.maven.ext.common.util;
 
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Profile;
+import org.commonjava.maven.ext.annotation.ConfigValue;
 import org.commonjava.maven.ext.common.session.MavenSessionHandler;
 
 import java.util.ArrayList;
@@ -30,6 +31,7 @@ public final class ProfileUtils
     /**
      * Denotes whether we only scan active profiles. Default is true (we scan only active profiles).
      */
+    @ConfigValue( docIndex = "scanActiveProfiles INDEX")
     public static final String PROFILE_SCANNING = "scanActiveProfiles";
 
     public static String PROFILE_SCANNING_DEFAULT = "true";

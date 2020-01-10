@@ -17,6 +17,7 @@ package org.commonjava.maven.ext.core.state;
 
 import lombok.Getter;
 import org.apache.maven.artifact.ArtifactScopeEnum;
+import org.commonjava.maven.ext.annotation.ConfigValue;
 import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.core.impl.DependencyManipulator;
 import org.commonjava.maven.ext.core.impl.PluginManipulator;
@@ -36,6 +37,7 @@ public class CommonState
     /**
      * Whether to override dependencies/plugins that are not directly specified in the project
      */
+    @ConfigValue( docIndex = "index for overrideTransitive")
     private static final String TRANSITIVE_OVERRIDE_PROPERTY = "overrideTransitive";
 
     /**

@@ -15,6 +15,8 @@
  */
 package org.commonjava.maven.ext.core.state;
 
+import org.commonjava.maven.ext.annotation.ConfigValue;
+
 import java.util.Properties;
 
 /**
@@ -23,8 +25,8 @@ import java.util.Properties;
 public class BOMInjectingState
     implements State
 {
-
     /** Set this property to true using <code>-DbomBuilder=true</code> to activate BOM Builder Plugin */
+    @ConfigValue(docIndex = "dep-manip.html#bom-generation")
     public static final String BOM_BUILDER = "bomBuilder";
 
     private boolean builderEnabled;

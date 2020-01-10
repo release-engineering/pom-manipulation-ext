@@ -22,6 +22,7 @@ import org.commonjava.maven.atlas.ident.ref.ArtifactRef;
 import org.commonjava.maven.atlas.ident.ref.ProjectRef;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef;
+import org.commonjava.maven.ext.annotation.ConfigValue;
 import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.common.ManipulationUncheckedException;
 import org.commonjava.maven.ext.common.json.ManagedDependenciesItem;
@@ -55,6 +56,7 @@ import static org.commonjava.maven.ext.common.util.ProjectComparator.Type.PROFIL
 
 public class ProjectComparator
 {
+    @ConfigValue( docIndex = "index.html#summary-logging")
     public static final String REPORT_NON_ALIGNED = "reportNonAligned";
 
     /**

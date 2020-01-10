@@ -55,6 +55,7 @@ import org.codehaus.plexus.component.repository.exception.ComponentLookupExcepti
 import org.commonjava.maven.atlas.ident.ref.ArtifactRef;
 import org.commonjava.maven.atlas.ident.ref.InvalidRefException;
 import org.commonjava.maven.ext.common.ManipulationException;
+import org.commonjava.maven.ext.core.ConfigList;
 import org.commonjava.maven.ext.core.ManipulationManager;
 import org.commonjava.maven.ext.core.ManipulationSession;
 import org.commonjava.maven.ext.core.impl.RESTCollector;
@@ -209,6 +210,13 @@ public class Cli
         if ( cmd.hasOption( 's' ) )
         {
             settings = new File( cmd.getOptionValue( 's' ) );
+        }
+        for ( String k : userProps.stringPropertyNames() )
+        {
+            if ( ConfigList.allConfigValues.values().stream().noneMatch( k::startsWith ) )
+            {
+                logger.warn( "Unknown configuration value {}", k );
+            }
         }
 
         createSession( target, settings );
