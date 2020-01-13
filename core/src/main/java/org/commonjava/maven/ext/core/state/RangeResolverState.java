@@ -15,6 +15,8 @@
  */
 package org.commonjava.maven.ext.core.state;
 
+import org.commonjava.maven.ext.annotation.ConfigValue;
+
 import java.util.Properties;
 
 /**
@@ -27,6 +29,7 @@ public class RangeResolverState
     /**
      * Suffix to enable this modder
      */
+    @ConfigValue( docIndex = "misc.html#version-range-resolving")
     private static final String RESOLVE_RANGES_PROPERTY = "resolveRanges";
 
     static

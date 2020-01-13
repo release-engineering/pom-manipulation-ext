@@ -94,6 +94,11 @@
     <dependencies>
       <dependency>
         <groupId>org.commonjava.maven.ext</groupId>
+        <artifactId>pom-manipulation-annotation</artifactId>
+        <version>3.9-SNAPSHOT</version>
+      </dependency>
+      <dependency>
+        <groupId>org.commonjava.maven.ext</groupId>
         <artifactId>pom-manipulation-common</artifactId>
         <version>3.9-SNAPSHOT</version>
       </dependency>
@@ -414,6 +419,11 @@
         <artifactId>snakeyaml</artifactId>
         <version>1.17</version>
       </dependency>
+      <dependency>
+        <groupId>com.squareup</groupId>
+        <artifactId>javapoet</artifactId>
+        <version>1.12.0</version>
+      </dependency>
 
       <dependency>
         <groupId>org.projectlombok</groupId>
@@ -554,6 +564,11 @@
           <artifactId>jacoco-maven-plugin</artifactId>
           <version>0.8.5</version>
         </plugin>
+        <plugin>
+          <groupId>org.bsc.maven</groupId>
+          <artifactId>maven-processor-plugin</artifactId>
+          <version>3.3.3</version>
+        </plugin>
       </plugins>
     </pluginManagement>
 
@@ -639,6 +654,7 @@
   </reporting>
 
   <modules>
+    <module>annotation</module>
     <module>common</module>
     <module>io</module>
     <module>core</module>

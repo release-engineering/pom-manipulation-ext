@@ -15,6 +15,7 @@
  */
 package org.commonjava.maven.ext.core.state;
 
+import org.commonjava.maven.ext.annotation.ConfigValue;
 import org.commonjava.maven.ext.common.ManipulationException;
 
 import java.util.Properties;
@@ -31,6 +32,7 @@ public class GroovyState
      * <code>-DgroovyScripts=org.foo:bar-script,....</code>
      * </pre>
      */
+    @ConfigValue( docIndex = "groovy.html")
     private static final String GROOVY_SCRIPT = "groovyScripts";
 
     private String groovyScripts;
@@ -44,7 +46,7 @@ public class GroovyState
     {
         groovyScripts = userProps.getProperty( GROOVY_SCRIPT );
 
-        // Catch old style groovy configuration.
+        // Catch old style groovy configuration. Not doc'ed as config value.
         if ( userProps.getProperty( "groovyManipulatorPrecedence" ) != null )
         {
             throw new ManipulationException( "groovyManipulatorPrecedence is no longer valid" );

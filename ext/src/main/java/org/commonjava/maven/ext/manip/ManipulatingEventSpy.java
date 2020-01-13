@@ -19,8 +19,10 @@ import org.apache.maven.eventspy.AbstractEventSpy;
 import org.apache.maven.execution.ExecutionEvent;
 import org.apache.maven.execution.ExecutionEvent.Type;
 import org.commonjava.maven.ext.common.ManipulationException;
+import org.commonjava.maven.ext.core.ConfigList;
 import org.commonjava.maven.ext.core.ManipulationManager;
 import org.commonjava.maven.ext.core.ManipulationSession;
+import org.commonjava.maven.ext.core.util.PropertiesUtils;
 import org.commonjava.maven.ext.io.ConfigIO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,8 +32,6 @@ import javax.inject.Named;
 import javax.inject.Singleton;
 import java.io.File;
 import java.util.Properties;
-
-import static org.apache.commons.lang.StringUtils.isNotEmpty;
 
 /**
  * Implements hooks necessary to apply modifications in the Maven bootstrap, before the build starts.
@@ -83,24 +83,18 @@ public class ManipulatingEventSpy
                     {
                         session.setMavenSession( ee.getSession() );
 
+                        for ( String k : session.getUserProperties().stringPropertyNames() )
+                        {
+                            if ( ConfigList.allConfigValues.values().stream().noneMatch( k::startsWith ) )
+                            {
+                                logger.warn( "Unknown configuration value {}", k );
+                            }
+                        }
+
                         if ( ee.getSession().getRequest().getPom() != null )
                         {
                             Properties config = configIO.parse( ee.getSession().getRequest().getPom().getParentFile() );
-                            String value = session.getUserProperties().getProperty( "allowConfigFilePrecedence" );
-                            if ( isNotEmpty( value ) && "true".equalsIgnoreCase( value ) )
-                            {
-                                session.getUserProperties().putAll( config );
-                            }
-                            else
-                            {
-                                for ( String key : config.stringPropertyNames() )
-                                {
-                                    if ( ! session.getUserProperties().containsKey( key ) )
-                                    {
-                                        session.getUserProperties().setProperty( key, config.getProperty( key ) );
-                                    }
-                                }
-                            }
+                            PropertiesUtils.handleConfigPrecedence( session.getUserProperties(), config );
                         }
 
                         manipulationManager.init( session );

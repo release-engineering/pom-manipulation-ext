@@ -19,6 +19,7 @@ import org.commonjava.maven.atlas.ident.ref.ProjectRef;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleProjectRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef;
+import org.commonjava.maven.ext.annotation.ConfigValue;
 import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.core.util.PropertiesUtils;
 import org.commonjava.maven.ext.common.util.WildcardMap;
@@ -52,6 +53,7 @@ public class RelocationState
      * <li>If version is specified we force set the version.</li>
      * </ul>
      */
+    @ConfigValue( docIndex = "dep-manip.html#dependency-relocations" )
     public static final String DEPENDENCY_RELOCATIONS = "dependencyRelocations.";
 
     private static final Logger logger = LoggerFactory.getLogger( RelocationState.class );

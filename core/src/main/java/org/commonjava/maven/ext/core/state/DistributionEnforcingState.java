@@ -15,6 +15,7 @@
  */
 package org.commonjava.maven.ext.core.state;
 
+import org.commonjava.maven.ext.annotation.ConfigValue;
 import org.commonjava.maven.ext.core.impl.DistributionEnforcingManipulator;
 
 import java.util.Map;
@@ -31,6 +32,7 @@ public class DistributionEnforcingState
     /**
      * Property used to set the enforcement mode.
      */
+    @ConfigValue( docIndex = "plugin.html#install-and-deploy-skip-flag-alignment")
     public static final String ENFORCE_SYSPROP = "enforceSkip";
 
     /**

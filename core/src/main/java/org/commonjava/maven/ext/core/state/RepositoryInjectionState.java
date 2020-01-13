@@ -15,14 +15,12 @@
  */
 package org.commonjava.maven.ext.core.state;
 
-import org.commonjava.maven.atlas.ident.ref.InvalidRefException;
 import org.commonjava.maven.atlas.ident.ref.ProjectRef;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef;
+import org.commonjava.maven.ext.annotation.ConfigValue;
 import org.commonjava.maven.ext.core.impl.RepositoryInjectionManipulator;
 import org.commonjava.maven.ext.core.util.IdUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Properties;
@@ -34,13 +32,13 @@ import java.util.Properties;
 public class RepositoryInjectionState
     implements State
 {
-    private final Logger logger = LoggerFactory.getLogger( getClass() );
-
     /**
      * Suffix to enable this modder
      */
+    @ConfigValue( docIndex = "misc.html#repository-injection")
     private static final String REPOSITORY_INJECTION_PROPERTY = "repositoryInjection";
 
+    @ConfigValue( docIndex = "misc.html#repository-injection")
     private static final String REPOSITORY_INJECTION_POMS = "repositoryInjectionPoms";
 
     private ProjectVersionRef repoMgmt;

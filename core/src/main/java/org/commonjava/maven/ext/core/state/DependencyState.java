@@ -20,6 +20,7 @@ import org.commonjava.maven.atlas.ident.ref.ArtifactRef;
 import org.commonjava.maven.atlas.ident.ref.ProjectRef;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef;
+import org.commonjava.maven.ext.annotation.ConfigValue;
 import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.core.impl.DependencyManipulator;
 import org.commonjava.maven.ext.core.util.IdUtils;
@@ -45,11 +46,13 @@ public class DependencyState
      * <code>-DdependencyExclusion.junit:junit@org.groupId:artifactId</code>
      * </pre>
      */
+    @ConfigValue( docIndex = "dep-manip.html#exclusions-and-overrides")
     private static final String DEPENDENCY_EXCLUSION_PREFIX = "dependencyExclusion.";
 
     /**
      * Defines how dependencies are located.
      */
+    @ConfigValue( docIndex = "dep-manip.html#dependency-source")
     static final String DEPENDENCY_SOURCE = "dependencySource";
 
     /**
@@ -89,6 +92,7 @@ public class DependencyState
     /**
      * Merely an alias for {@link DependencyState#DEPENDENCY_EXCLUSION_PREFIX}
      */
+    @ConfigValue( docIndex = "dep-manip.html#exclusions-and-overrides")
     private static final String DEPENDENCY_OVERRIDE_PREFIX = "dependencyOverride.";
 
     /**
@@ -98,6 +102,7 @@ public class DependencyState
      * <code>-DdependencyManagement:org.foo:bar-dep-mgmt:1.0</code>
      * </pre>
      */
+    @ConfigValue( docIndex = "dep-manip.html#remote-pom")
     private static final String DEPENDENCY_MANAGEMENT_POM_PROPERTY = "dependencyManagement";
 
     /**

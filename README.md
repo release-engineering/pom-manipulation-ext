@@ -77,6 +77,16 @@ For example
     throw new ManipulationException( "Internal project dependency resolution failure ; replaced {} by {}", old, d );
     throw new ManipulationException( "Unable to parse groovyScripts", exceptionObject );
 
+### Configuration
+
+Any configuration property value **must** have a static String together with the internal configuration annotation e.g.
+```
+    @ConfigValue( docIndex = "project-version-manip.html#manual-version-suffix" )
+    public static final String VERSION_SUFFIX_SYSPROP= "versionSuffix";
+```
+The `docIndex` value represents the property index for the gh-pages. This is automatically generated upon build inside 
+`root/target/property-index-subset.md`. A new class `org.commonjava.maven.ext.core.ConfigList` is also generated that contains
+a HashMap of all properties ; this is used for validation input checking within the CLI /  EXT.
 
 ## Testing
 

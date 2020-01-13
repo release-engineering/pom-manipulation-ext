@@ -55,9 +55,12 @@ import org.codehaus.plexus.component.repository.exception.ComponentLookupExcepti
 import org.commonjava.maven.atlas.ident.ref.ArtifactRef;
 import org.commonjava.maven.atlas.ident.ref.InvalidRefException;
 import org.commonjava.maven.ext.common.ManipulationException;
+import org.commonjava.maven.ext.core.ConfigList;
 import org.commonjava.maven.ext.core.ManipulationManager;
 import org.commonjava.maven.ext.core.ManipulationSession;
 import org.commonjava.maven.ext.core.impl.RESTCollector;
+import org.commonjava.maven.ext.core.state.RESTState;
+import org.commonjava.maven.ext.core.util.PropertiesUtils;
 import org.commonjava.maven.ext.io.ConfigIO;
 import org.commonjava.maven.ext.io.PomIO;
 import org.commonjava.maven.ext.io.XMLIO;
@@ -81,8 +84,6 @@ import java.util.List;
 import java.util.Properties;
 import java.util.Set;
 import java.util.stream.Collectors;
-
-import static org.apache.commons.lang.StringUtils.isNotEmpty;
 
 public class Cli
 {
@@ -201,6 +202,14 @@ public class Cli
         if ( cmd.hasOption( 'D' ) )
         {
             userProps = cmd.getOptionProperties( "D" );
+
+            for ( String k : userProps.stringPropertyNames() )
+            {
+                if ( !k.equals ("maven.repo.local" ) && ConfigList.allConfigValues.values().stream().noneMatch( k::startsWith ) )
+                {
+                    logger.warn( "Unknown configuration value {}", k );
+                }
+            }
         }
         if ( cmd.hasOption( 'f' ) )
         {
@@ -267,22 +276,7 @@ public class Cli
         }
         try
         {
-            Properties config = new ConfigIO().parse( target.getParentFile() );
-            String value = session.getUserProperties().getProperty( "allowConfigFilePrecedence" );
-            if ( isNotEmpty( value ) && "true".equalsIgnoreCase( value ) )
-            {
-                session.getUserProperties().putAll( config );
-            }
-            else
-            {
-                for ( String key : config.stringPropertyNames() )
-                {
-                    if ( ! session.getUserProperties().containsKey( key ) )
-                    {
-                        session.getUserProperties().setProperty( key, config.getProperty(key) );
-                    }
-                }
-            }
+            PropertiesUtils.handleConfigPrecedence( session.getUserProperties(), new ConfigIO().parse( target.getParentFile() ) );
         }
         catch ( ManipulationException e )
         {
@@ -388,7 +382,7 @@ public class Cli
         }
         catch ( RestException e )
         {
-            logger.error ( "REST communication with {} failed. {}", userProps.getProperty( "restURL" ), e.getMessage () );
+            logger.error ( "REST communication with {} failed. {}", userProps.getProperty( RESTState.REST_URL ), e.getMessage () );
             logger.trace ( "Exception trace is", e);
             return 100;
         }

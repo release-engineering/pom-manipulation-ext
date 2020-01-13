@@ -17,6 +17,7 @@ package org.commonjava.maven.ext.io;
 
 import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.JsonPathException;
+import org.commonjava.maven.ext.annotation.ConfigValue;
 import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.common.model.YamlFile;
 import org.slf4j.Logger;
@@ -44,6 +45,9 @@ public class ConfigIO
     private final static String yamlPMEFileString = "pme.yaml";
     private final static String yamlPNCFileString = "pnc.yaml";
     private final static String jsonPNCFileString = "pnc.json";
+
+    @ConfigValue( docIndex = "configuration.html#overview")
+    public static final String CONFIG_FILE_PRECEDENCE = "allowConfigFilePrecedence";
 
     public Properties parse ( final String workingDir) throws ManipulationException
     {

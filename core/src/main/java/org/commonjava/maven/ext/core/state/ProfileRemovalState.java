@@ -15,6 +15,7 @@
  */
 package org.commonjava.maven.ext.core.state;
 
+import org.commonjava.maven.ext.annotation.ConfigValue;
 import org.commonjava.maven.ext.core.impl.ProfileInjectionManipulator;
 
 import java.util.Arrays;
@@ -33,6 +34,7 @@ public class ProfileRemovalState
     /**
      * Suffix to enable this modder
      */
+    @ConfigValue( docIndex = "misc.html#profile-removal")
     private static final String PROFILE_REMOVAL_PROPERTY = "profileRemoval";
 
     private List<String> profiles;
