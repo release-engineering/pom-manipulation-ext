@@ -112,13 +112,13 @@ public class ConfigValueProcessor extends AbstractProcessor
 
         Set<CodeBlock> contents = new HashSet<>(  );
         varResults.forEach( ( key, value ) -> contents.add(
-                        CodeBlock.builder().addStatement( "allConfigValues.put($S, $S);", key, value ).build() ) );
+                        CodeBlock.builder().addStatement( "allConfigValues.put($S, $S)", key, value ).build() ) );
 
         TypeSpec ConfigList = TypeSpec.classBuilder( "ConfigList" )
                                       .addModifiers( Modifier.PUBLIC, Modifier.FINAL )
                                       .addField( FieldSpec.builder
                                                       ( mainType, "allConfigValues", Modifier.STATIC, Modifier.FINAL, Modifier.PUBLIC )
-                                                          .initializer( "new HashMap<>()" )
+                                                          .initializer( "new HashMap<>(" + indexResults.size() + ')')
                                                           .build() )
                                       .addStaticBlock( CodeBlock.join( contents, " " ) )
                                       .build();
