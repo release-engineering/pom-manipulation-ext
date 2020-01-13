@@ -239,6 +239,7 @@
           </optionMap>
           <additionalSourceDirectories>
             <additionalSourceDirectory>${project.basedir}/../common/src/main/java</additionalSourceDirectory>
+            <additionalSourceDirectory>${project.basedir}/../io/src/main/java</additionalSourceDirectory>
           </additionalSourceDirectories>
         </configuration>
         <dependencies>
