@@ -535,6 +535,16 @@
           <version>0.3</version>
         </plugin>
         <plugin>
+          <groupId>com.mycila</groupId>
+          <artifactId>license-maven-plugin</artifactId>
+          <configuration>
+            <excludes combine.children="append">
+              <exclude>ide-config/eclipse.importorder</exclude>
+              <exclude>**/commonjava/maven/ext/common/ExceptionHelper.java</exclude>
+            </excludes>
+          </configuration>
+        </plugin>
+        <plugin>
           <groupId>org.codehaus.mojo</groupId>
           <artifactId>animal-sniffer-maven-plugin</artifactId>
           <version>1.18</version>
