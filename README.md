@@ -2,6 +2,22 @@
 
 [![Build Status (Travis CI)](https://travis-ci.org/release-engineering/pom-manipulation-ext.svg?branch=master)](https://travis-ci.org/release-engineering/pom-manipulation-ext.svg?branch=master)
 
+[TOC levels=1-3]: #
+
+# Table of Contents
+- [Introduction](#introduction)
+- [Documentation](#documentation)
+- [Developing](#developing)
+    - [Prerequisites](#prerequisites)
+    - [Coding](#coding)
+        - [Exception Handling](#exception-handling)
+        - [Configuration](#configuration)
+    - [Style & Copyright](#style--copyright)
+    - [IntelliJ](#intellij)
+    - [Compiling](#compiling)
+    - [Testing](#testing)
+    - [Code Coverage](#code-coverage)
+
 
 # Introduction
 
