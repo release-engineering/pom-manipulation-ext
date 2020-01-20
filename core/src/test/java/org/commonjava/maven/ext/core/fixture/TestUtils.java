@@ -57,6 +57,8 @@ public class TestUtils
 
     public static final Path INTEGRATION_TEST = Paths.get( ROOT_DIRECTORY.toString(), "integration-test");
 
+    public static final String MVN_CENTRAL = "https://repo1.maven.org/maven2";
+
     public static Model resolveModelResource( final String resourceBase, final String resourceName )
         throws Exception
     {
@@ -93,7 +95,7 @@ public class TestUtils
         ManipulationSession session = new ManipulationSession();
 
         final ArtifactRepository ar =
-                        new MavenArtifactRepository( "test", "http://repo.maven.apache.org/maven2", new DefaultRepositoryLayout(),
+                        new MavenArtifactRepository( "test", MVN_CENTRAL, new DefaultRepositoryLayout(),
                                                      new ArtifactRepositoryPolicy(), new ArtifactRepositoryPolicy() );
 
         final MavenExecutionRequest req = new DefaultMavenExecutionRequest().setUserProperties( p ).setRemoteRepositories(
