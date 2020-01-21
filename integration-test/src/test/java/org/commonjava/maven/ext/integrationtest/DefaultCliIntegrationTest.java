@@ -44,9 +44,9 @@ public class DefaultCliIntegrationTest
     {
         Collection<Object[]> params = new ArrayList<>();
         // Hack to allow a single parameterized test to be run.
-        if ( System.getProperties().containsKey( "test-cli" ) )
+        if ( ! "*".equals( System.getProperties().getProperty( "selectedTest", "*" ) ) )
         {
-            for (String t : System.getProperty("test-cli").split( "," ))
+            for (String t : System.getProperty("selectedTest").split( "," ))
             {
                 params.add( new Object[] { t } );
             }

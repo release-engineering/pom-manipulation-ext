@@ -39,6 +39,7 @@ import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.common.model.Project;
 import org.commonjava.maven.ext.core.ManipulationSession;
 import org.commonjava.maven.ext.core.fixture.StubTransport;
+import org.commonjava.maven.ext.core.fixture.TestUtils;
 import org.commonjava.maven.ext.core.state.VersioningState;
 import org.commonjava.maven.ext.io.resolver.GalleyAPIWrapper;
 import org.commonjava.maven.ext.io.resolver.GalleyInfrastructure;
@@ -1181,7 +1182,7 @@ public class VersioningCalculatorTest
         }
 
         final ArtifactRepository ar =
-            new MavenArtifactRepository( "test", "http://repo.maven.apache.org/maven2", new DefaultRepositoryLayout(),
+            new MavenArtifactRepository( "test", TestUtils.MVN_CENTRAL, new DefaultRepositoryLayout(),
                                          new ArtifactRepositoryPolicy(), new ArtifactRepositoryPolicy() );
 
         final MavenExecutionRequest req =

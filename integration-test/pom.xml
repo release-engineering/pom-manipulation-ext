@@ -134,6 +134,7 @@
     <localRepositoryUrl>${project.build.directory}/local-repo-${testMode}</localRepositoryUrl>
     <localRepositoryUrlExt>${project.build.directory}/local-repo-${extIter}</localRepositoryUrlExt>
     <localRepositoryUrlCli>${project.build.directory}/local-repo-${cliIter}</localRepositoryUrlCli>
+    <selectedTest>*</selectedTest>
   </properties>
 
   <build>
@@ -325,7 +326,7 @@
                   <pomIncludes>
                     <!-- <pomInclude>remote-plugin-management-invalid/pom.xml</pomInclude> -->
                     <pomInclude>simple-numeric-directory-path/parent/pom.xml</pomInclude>
-                    <pomInclude>*/pom.xml</pomInclude>
+                    <pomInclude>${selectedTest}/pom.xml</pomInclude>
                   </pomIncludes>
                   <pomExcludes>
                     <!-- Only run by JUnit as we need a Mock REST server started -->
