@@ -148,21 +148,24 @@ public class RelocationManipulator
                 if ( relocations.containsKey( pvr.asProjectRef() ) )
                 {
                     ProjectVersionRef relocation = relocations.get( pvr.asProjectRef() );
+
                     updateDependencyExclusion( pvr, relocation );
 
+                    Dependency dependency = dependencies.get( pvr );
+
                     logger.info( "Replacing groupId {} by {} and artifactId {} with {}",
-                                 dependencies.get( pvr ).getGroupId(), relocation.getGroupId(), dependencies.get( pvr ).getArtifactId(), relocation.getArtifactId() );
+                                 dependency.getGroupId(), relocation.getGroupId(), dependency.getArtifactId(), relocation.getArtifactId() );
 
                     if ( !relocation.getArtifactId().equals( WildcardMap.WILDCARD ) )
                     {
-                        dependencies.get( pvr ).setArtifactId( relocation.getArtifactId() );
+                        dependency.setArtifactId( relocation.getArtifactId() );
                     }
-                    dependencies.get( pvr ).setGroupId( relocation.getGroupId() );
+                    dependency.setGroupId( relocation.getGroupId() );
 
                     // Unfortunately because we iterate using the resolved project keys if the relocation updates those
                     // keys multiple iterations will not work. Therefore we need to remove the original key:dependency
                     // to map to the relocated form.
-                    postFixUp.put( SimpleArtifactRef.parse( dependencies.get( pvr ).getManagementKey() ), dependencies.get( pvr ) );
+                    postFixUp.put( SimpleArtifactRef.parse( dependency.getManagementKey() ), dependency );
                     it.remove();
 
                     result = true;
