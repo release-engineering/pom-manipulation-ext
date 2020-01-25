@@ -20,6 +20,7 @@ import org.apache.maven.execution.DefaultMavenExecutionResult;
 import org.apache.maven.execution.MavenExecutionRequest;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.model.Model;
+import org.apache.maven.model.Plugin;
 import org.codehaus.plexus.DefaultPlexusContainer;
 import org.codehaus.plexus.PlexusContainer;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
@@ -133,13 +134,16 @@ public class PropertiesUtilsTest
         Map<Project,Map<String,PropertyMapper>> propertyMap = new HashMap<>();
         CommonState state = new CommonState( new Properties(  ) );
         Project project = getProject();
+        Plugin dummy = new Plugin();
+        dummy.setGroupId( "org.dummy" );
+        dummy.setArtifactId( "dummyArtifactId" );
 
-        assertFalse( PropertiesUtils.cacheProperty( project, state, propertyMap, "${foobar}${foobar2}", null, null, false ) );
-        assertFalse( PropertiesUtils.cacheProperty( project, state, propertyMap, "suffix.${foobar}", null, null, false ) );
-        assertFalse( PropertiesUtils.cacheProperty( project, state, propertyMap, null, "2.0", null, false ) );
-        assertFalse( PropertiesUtils.cacheProperty( project, state, propertyMap, "1.0", "2.0", null, false ) );
-        assertTrue( PropertiesUtils.cacheProperty( project, state, propertyMap, "${version.org.jboss}", "2.0", null, false ) );
-        assertFalse ( PropertiesUtils.cacheProperty( project, state, propertyMap, "${project.version}", "2.0", null, false ) );
+        assertFalse( PropertiesUtils.cacheProperty( project, state, propertyMap, "${foobar}${foobar2}", null, dummy, false ) );
+        assertFalse( PropertiesUtils.cacheProperty( project, state, propertyMap, "suffix.${foobar}", null, dummy, false ) );
+        assertFalse( PropertiesUtils.cacheProperty( project, state, propertyMap, null, "2.0", dummy, false ) );
+        assertFalse( PropertiesUtils.cacheProperty( project, state, propertyMap, "1.0", "2.0", dummy, false ) );
+        assertTrue( PropertiesUtils.cacheProperty( project, state, propertyMap, "${version.org.jboss}", "2.0", dummy, false ) );
+        assertFalse ( PropertiesUtils.cacheProperty( project, state, propertyMap, "${project.version}", "2.0", dummy, false ) );
 
         // DependencyManipulator does dependency.getVersion(). This could return e.g. ${version.scala} which can
         // refer to <version.scala>${version.scala.major}.7</version.scala>. If we are attempting to change version.scala
