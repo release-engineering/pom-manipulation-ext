@@ -26,3 +26,7 @@ pom.properties.each {
     }
 }
 assert (passed == true)
+
+def buildLog = new File( basedir, 'build.log' )
+assert buildLog.getText().contains( "Replacing property 'myprop' with a new version would clash with existing version which does not match. Old value is 4.1 and new is 2.5. Purging update of existing property." )
+assert buildLog.getText().contains( 'Context was replacing commons-lang:commons-lang:jar:2.5 and clashed with [junit:junit]' )

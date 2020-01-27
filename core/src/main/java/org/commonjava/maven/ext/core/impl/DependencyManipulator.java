@@ -651,7 +651,7 @@ public class DependencyManipulator implements Manipulator
                     else if ( strict && oldVersion.contains( "$" ) &&
                                     ! PropertiesUtils.checkStrictValue( session, resolvedValue, overrideVersion) )
                     {
-                        logger.debug ("Original fully resolved version {} of {} does not match override version {} -> {} so ignoring",
+                        logger.debug ("Original fully resolved version {} for {} does not match override version {} -> {} so ignoring",
                                       resolvedValue, dependency, entry.getKey(), overrideVersion);
                         if ( commonState.isFailOnStrictViolation() )
                         {
