@@ -459,18 +459,20 @@ public final class PropertiesUtils
                     {
                         if ( state.isPropertyClashFails() )
                         {
-                            logger.error( "Replacing property '{}' with a new version but the existing version does not match. Old value is {} and new is {}",
-                                          oldVersionProp, existingPropertyMapping, newVersion );
-                            logger.error( "Context was replacing {} and clashed with {}", originalType, container.getDependencies());
+                            logger.error( "Replacing property '{}' with a new version but the existing version does not match. " +
+                                          "Old value is {} and new is {}. Context was replacing {} and clashed with {}",
+                                          oldVersionProp, existingPropertyMapping, newVersion, originalType,
+                                          container.getDependencies() );
                             throw new ManipulationException(
                                             "Property replacement clash - updating property '{}' to both {} and {} ",
                                             oldVersionProp, existingPropertyMapping, newVersion );
                         }
                         else
                         {
-                            logger.warn( "Replacing property '{}' with a new version would clash with existing version which does not match. Old value is {} and new is {}. Purging update of existing property.",
-                                         oldVersionProp, existingPropertyMapping, newVersion );
-                            logger.warn( "Context was replacing {} and clashed with {}", originalType, container.getDependencies());
+                            logger.warn( "Replacing property '{}' with a new version would clash with existing version which does not match. " +
+                                         "Old value is {} and new is {}. Purging update of existing property. Context was replacing {} and clashed with {}",
+                                         oldVersionProp, existingPropertyMapping, newVersion, originalType,
+                                         container.getDependencies() );
                             projectProps.remove( oldVersionProp );
                             return false;
                         }
