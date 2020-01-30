@@ -90,6 +90,8 @@ It is also recommended to install:
     * (which allows importing of the code style)
  * https://plugins.jetbrains.com/plugin/7442-gmavenplus-intellij-plugin
     * (especially if using the Groovy [example project](https://github.com/project-ncl/manipulator-groovy-examples) )
+ * https://plugins.jetbrains.com/plugin/7896-markdown-navigator
+    * (provides table of contents autogeneration)
 
 ## Compiling
 
@@ -118,7 +120,7 @@ The unit tests make use of the `system-rules` library e.g.
 
 See https://stefanbirkner.github.io/system-rules for further information on this.
 
-For the CLI/Integration tests, it is possible to run a specific one by passing e.g. 
+For the CLI/Integration tests, it is possible to run a specific one by passing e.g.
 
 
 A subset of the integration tests may be run by using the following example commands:

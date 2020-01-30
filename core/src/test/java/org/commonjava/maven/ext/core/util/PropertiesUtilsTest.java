@@ -20,6 +20,7 @@ import org.apache.maven.execution.DefaultMavenExecutionResult;
 import org.apache.maven.execution.MavenExecutionRequest;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.model.Model;
+import org.apache.maven.model.Plugin;
 import org.codehaus.plexus.DefaultPlexusContainer;
 import org.codehaus.plexus.PlexusContainer;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
@@ -61,6 +62,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 public class PropertiesUtilsTest
 {
@@ -104,7 +106,6 @@ public class PropertiesUtilsTest
         assertNotNull( PropertiesUtils.getSuffix( session ) );
     }
 
-
     @Test
     public void testStrictWithTimeStamp() throws Exception
     {
@@ -113,7 +114,8 @@ public class PropertiesUtilsTest
         ManipulationSession session = createUpdateSession();
 
         assertEquals( PropertiesUtils.getSuffix( session ), suffix );
-        assertTrue( PropertiesUtils.checkStrictValue( session, "1.0.0.Final", "1.0.0.Final-t-20170216-223844-555-rebuild-1" ) );
+        assertTrue( PropertiesUtils.checkStrictValue( session, "1.0.0.Final",
+                                                      "1.0.0.Final-t-20170216-223844-555-rebuild-1" ) );
         assertTrue( PropertiesUtils.checkStrictValue( session, "1.0", "1.0.0.t-20170216-223844-555-rebuild-1" ) );
         assertTrue( PropertiesUtils.checkStrictValue( session, "1.0-SNAPSHOT", "1.0.0.t-20170216-223844-555-rebuild-1" ) );
 
@@ -130,16 +132,22 @@ public class PropertiesUtilsTest
     @Test
     public void testCacheProperty() throws Exception
     {
-        Map<Project,Map<String,PropertyMapper>> propertyMap = new HashMap<>();
-        CommonState state = new CommonState( new Properties(  ) );
+        Map<Project, Map<String, PropertyMapper>> propertyMap = new HashMap<>();
+        CommonState state = new CommonState( new Properties() );
         Project project = getProject();
+        Plugin dummy = new Plugin();
+        dummy.setGroupId( "org.dummy" );
+        dummy.setArtifactId( "dummyArtifactId" );
 
-        assertFalse( PropertiesUtils.cacheProperty( project, state, propertyMap, "${foobar}${foobar2}", null, null, false ) );
-        assertFalse( PropertiesUtils.cacheProperty( project, state, propertyMap, "suffix.${foobar}", null, null, false ) );
-        assertFalse( PropertiesUtils.cacheProperty( project, state, propertyMap, null, "2.0", null, false ) );
-        assertFalse( PropertiesUtils.cacheProperty( project, state, propertyMap, "1.0", "2.0", null, false ) );
-        assertTrue( PropertiesUtils.cacheProperty( project, state, propertyMap, "${version.org.jboss}", "2.0", null, false ) );
-        assertFalse ( PropertiesUtils.cacheProperty( project, state, propertyMap, "${project.version}", "2.0", null, false ) );
+        assertFalse( PropertiesUtils.cacheProperty( project, state, propertyMap, "${foobar}${foobar2}", null, dummy,
+                                                    false ) );
+        assertFalse( PropertiesUtils.cacheProperty( project, state, propertyMap, "suffix.${foobar}", null, dummy, false ) );
+        assertFalse( PropertiesUtils.cacheProperty( project, state, propertyMap, null, "2.0", dummy, false ) );
+        assertFalse( PropertiesUtils.cacheProperty( project, state, propertyMap, "1.0", "2.0", dummy, false ) );
+        assertTrue( PropertiesUtils.cacheProperty( project, state, propertyMap, "${version.org.jboss}", "2.0", dummy,
+                                                   false ) );
+        assertFalse( PropertiesUtils.cacheProperty( project, state, propertyMap, "${project.version}", "2.0", dummy,
+                                                    false ) );
 
         // DependencyManipulator does dependency.getVersion(). This could return e.g. ${version.scala} which can
         // refer to <version.scala>${version.scala.major}.7</version.scala>. If we are attempting to change version.scala
@@ -149,14 +157,17 @@ public class PropertiesUtilsTest
         // However we don't need to change the value of the property. If the property is foobar.${....} then
         // we want to append suffix to the property ... but we need to handle that part of the property is hardcoded.
 
-        assertFalse( PropertiesUtils.cacheProperty( project, state, propertyMap, "${version.scala}.7", "2.0", null, false ) );
-        assertFalse( PropertiesUtils.cacheProperty( project, state, propertyMap, "${version.foo}.${version.scala}.7", "2.0", null, false ) );
+        assertFalse( PropertiesUtils.cacheProperty( project, state, propertyMap, "${version.scala}.7", "2.0", null,
+                                                    false ) );
+        assertFalse( PropertiesUtils.cacheProperty( project, state, propertyMap, "${version.foo}.${version.scala}.7",
+                                                    "2.0", null, false ) );
 
         try
         {
-            PropertiesUtils.cacheProperty( project, state, propertyMap, "${version.scala}.7.${version.scala2}", "2.0", null, false );
+            PropertiesUtils.cacheProperty( project, state, propertyMap, "${version.scala}.7.${version.scala2}", "2.0",
+                                           null, false );
         }
-        catch (ManipulationException e)
+        catch ( ManipulationException e )
         {
             // Pass.
         }
@@ -280,14 +291,14 @@ public class PropertiesUtilsTest
 
         List<Project> newprojects = pomIO.parseProject( projectroot );
 
-        WildcardMap<ProjectVersionRef> map = (session.getState( RelocationState.class) == null ? new WildcardMap<>() : session.getState( RelocationState.class ).getDependencyRelocations());
-        String result = ProjectComparator.compareProjects( session, new PME(), map,
-                                           projects, newprojects );
+        WildcardMap<ProjectVersionRef> map = ( session.getState( RelocationState.class ) == null ?
+                        new WildcardMap<>() :
+                        session.getState( RelocationState.class ).getDependencyRelocations() );
+        String result = ProjectComparator.compareProjects( session, new PME(), map, projects, newprojects );
         System.out.println( result );
 
         assertTrue( systemRule.getLog().contains( "------------------- project org.infinispan:infinispan-bom" + System.lineSeparator() ) );
     }
-
 
     private Project getProject() throws Exception
     {
@@ -327,7 +338,7 @@ public class PropertiesUtilsTest
     }
 
     @Test
-    public void testBuildOldValueSetWithTemporary ()
+    public void testBuildOldValueSetWithTemporary()
     {
         Properties user = new Properties();
         user.setProperty( VersioningState.INCREMENT_SERIAL_SUFFIX_SYSPROP, "temporary-redhat" );
@@ -335,11 +346,11 @@ public class PropertiesUtilsTest
 
         Set<String> found = PropertiesUtils.buildOldValueSet( vs, "1.0.0.Final-redhat-10" );
 
-        assertEquals( Stream.of( "1.0.0.Final-temporary-redhat-0", "1.0.0.Final-redhat-10" ).collect(toSet()), found );
+        assertEquals( Stream.of( "1.0.0.Final-temporary-redhat-0", "1.0.0.Final-redhat-10" ).collect( toSet() ), found );
     }
 
     @Test
-    public void testBuildOldValueSetWithTemporaryAndMultipleAlternatives ()
+    public void testBuildOldValueSetWithTemporaryAndMultipleAlternatives()
     {
         Properties user = new Properties();
         user.setProperty( VersioningState.INCREMENT_SERIAL_SUFFIX_SYSPROP, "temporary-redhat" );
@@ -347,40 +358,40 @@ public class PropertiesUtilsTest
         final VersioningState vs = new VersioningState( user );
 
         Set<String> found = PropertiesUtils.buildOldValueSet( vs, "1.0.0.Final-foobar-10" );
-        assertEquals( Stream.of( "1.0.0.Final-foobar-10", "1.0.0.Final-temporary-redhat-0" ).collect(toSet()), found );
+        assertEquals( Stream.of( "1.0.0.Final-foobar-10", "1.0.0.Final-temporary-redhat-0" ).collect( toSet() ), found );
     }
 
     @Test
-    public void testBuildOldValueSetWithNoAlternatives ()
+    public void testBuildOldValueSetWithNoAlternatives()
     {
         Properties user = new Properties();
         user.setProperty( VersioningState.INCREMENT_SERIAL_SUFFIX_SYSPROP, "redhat" );
         final VersioningState vs = new VersioningState( user );
 
         Set<String> found = PropertiesUtils.buildOldValueSet( vs, "1.0.0.Final-temporary-redhat-10" );
-        System.out.println ("### Found " + found);
-        assertEquals( Stream.of( "1.0.0.Final-temporary-redhat-10" ).collect(toSet()), found );
+        System.out.println( "### Found " + found );
+        assertEquals( Stream.of( "1.0.0.Final-temporary-redhat-10" ).collect( toSet() ), found );
     }
 
     @Test
-    public void testBuildOldValueSetWithNoSuffix ()
+    public void testBuildOldValueSetWithNoSuffix()
     {
         Properties user = new Properties();
         final VersioningState vs = new VersioningState( user );
 
         Set<String> found = PropertiesUtils.buildOldValueSet( vs, "1.0.0.Final-redhat-10" );
-        assertEquals( Stream.of( "1.0.0.Final-redhat-10" ).collect(toSet()), found );
+        assertEquals( Stream.of( "1.0.0.Final-redhat-10" ).collect( toSet() ), found );
     }
 
     @Test
-    public void testBuildOldValueSetWithNoStartSuffix ()
+    public void testBuildOldValueSetWithNoStartSuffix()
     {
         Properties user = new Properties();
         user.setProperty( VersioningState.INCREMENT_SERIAL_SUFFIX_SYSPROP, "redhat" );
         final VersioningState vs = new VersioningState( user );
 
         Set<String> found = PropertiesUtils.buildOldValueSet( vs, "1.0" );
-        assertEquals( Stream.of( "1.0" ).collect(toSet()), found );
+        assertEquals( Stream.of( "1.0" ).collect( toSet() ), found );
     }
 
     @Test
@@ -408,5 +419,24 @@ public class PropertiesUtilsTest
         ManipulationSession session = createUpdateSession();
         VersioningState vs = session.getState( VersioningState.class );
         assertEquals( Arrays.asList( "a-random", "redhat" ), vs.getAllSuffixes() );
+    }
+
+    @Test
+    public void testOriginalTypeChecking() throws Exception
+    {
+        Map<Project, Map<String, PropertyMapper>> propertyMap = new HashMap<>();
+        CommonState state = new CommonState( new Properties() );
+        Project project = getProject();
+
+        try
+        {
+            assertFalse( PropertiesUtils.cacheProperty( project, state, propertyMap, "${foobar}", null, null,
+                                                        false ) );
+            fail("Should have thrown an exception");
+        }
+        catch (ManipulationException e)
+        {
+            assertTrue( e.getMessage().contains( "Unknown type for null" ) );
+        }
     }
 }

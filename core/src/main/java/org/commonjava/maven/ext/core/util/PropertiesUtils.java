@@ -19,6 +19,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.maven.model.Plugin;
 import org.apache.maven.model.Profile;
 import org.commonjava.maven.atlas.ident.ref.ArtifactRef;
+import org.commonjava.maven.atlas.ident.ref.ProjectRef;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleProjectRef;
 import org.commonjava.maven.ext.common.ManipulationException;
@@ -429,11 +430,23 @@ public final class PropertiesUtils
 
                 final String oldVersionProp = oldVersion.substring( 2, oldVersion.length() - 1 );
                 final PropertyMapper container = projectProps.computeIfAbsent( oldVersionProp, k -> new PropertyMapper() );
-
                 // We check if we are replacing a property and there is already a mapping. While we don't allow
                 // a property to be updated to two different versions, if a dependencyExclusion (i.e. a force override)
                 // has been specified this will bypass the check.
-                String existingPropertyMapping = container.getNewVersion();
+                final String existingPropertyMapping = container.getNewVersion();
+                final ProjectRef originalReference;
+                if ( originalType instanceof ArtifactRef )
+                {
+                    originalReference = ( (ArtifactRef) originalType ).asProjectRef();
+                }
+                else if ( originalType instanceof Plugin )
+                {
+                    originalReference = new SimpleProjectRef( ( (Plugin) originalType ).getGroupId(), ( (Plugin) originalType ).getArtifactId() );
+                }
+                else
+                {
+                    throw new ManipulationException( "Unknown type for {}", originalType );
+                }
 
                 if ( existingPropertyMapping != null && !existingPropertyMapping.equals( newVersion ) )
                 {
@@ -446,30 +459,27 @@ public final class PropertiesUtils
                     {
                         if ( state.isPropertyClashFails() )
                         {
-                            logger.error( "Replacing property '{}' with a new version but the existing version does not match. Old value is {} and new is {}",
-                                          oldVersionProp, existingPropertyMapping, newVersion );
+                            logger.error( "Replacing property '{}' with a new version but the existing version does not match. " +
+                                          "Old value is {} and new is {}. Context was replacing {} and clashed with {}",
+                                          oldVersionProp, existingPropertyMapping, newVersion, originalType,
+                                          container.getDependencies() );
                             throw new ManipulationException(
                                             "Property replacement clash - updating property '{}' to both {} and {} ",
                                             oldVersionProp, existingPropertyMapping, newVersion );
                         }
                         else
                         {
-                            logger.warn( "Replacing property '{}' with a new version would clash with existing version which does not match. Old value is {} and new is {}. Purging update of existing property.",
-                                         oldVersionProp, existingPropertyMapping, newVersion );
+                            logger.warn( "Replacing property '{}' with a new version would clash with existing version which does not match. " +
+                                         "Old value is {} and new is {}. Purging update of existing property. Context was replacing {} and clashed with {}",
+                                         oldVersionProp, existingPropertyMapping, newVersion, originalType,
+                                         container.getDependencies() );
                             projectProps.remove( oldVersionProp );
                             return false;
                         }
                     }
                 }
 
-                if ( originalType instanceof ArtifactRef )
-                {
-                    container.getDependencies().add( ( (ArtifactRef) originalType ).asProjectRef() );
-                }
-                else if ( originalType instanceof Plugin )
-                {
-                    container.getDependencies().add( new SimpleProjectRef( ( (Plugin) originalType ).getGroupId(), ( (Plugin) originalType ).getArtifactId() ) );
-                }
+                container.getDependencies().add( originalReference );
                 container.setOriginalVersion( findProperty( project, oldVersionProp ) );
                 container.setNewVersion( newVersion );
 

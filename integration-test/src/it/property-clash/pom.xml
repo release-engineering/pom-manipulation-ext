@@ -37,6 +37,11 @@
         <version>${myprop}</version>
       </dependency>
       <dependency>
+        <groupId>org.apache.xbean</groupId>
+        <artifactId>xbean</artifactId>
+        <version>${myprop}</version>
+      </dependency>
+      <dependency>
         <groupId>commons-lang</groupId>
         <artifactId>commons-lang</artifactId>
         <version>${myprop}</version>
