@@ -32,10 +32,8 @@ import javax.inject.Singleton;
 import java.io.File;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Properties;
 
 /**
@@ -67,7 +65,8 @@ public class ManipulationSession
     {
         try
         {
-            System.out.println( "[INFO] Running Maven Manipulation Extension (PME) " + ManifestUtils.getManifestInformation() );
+            System.out.println( "[INFO] Running Maven Manipulation Extension (PME) " +
+                                                ManifestUtils.getManifestInformation(ManipulationSession.class) );
         }
         catch ( ManipulationException ignored )
         {
@@ -105,12 +104,6 @@ public class ManipulationSession
         {
             s.initialise( getUserProperties() );
         }
-    }
-
-
-    HashSet<Entry<Class<?>, State>> getStatesCopy()
-    {
-        return new HashSet<>( states.entrySet() );
     }
 
     public <T extends State> T getState( final Class<T> stateType )

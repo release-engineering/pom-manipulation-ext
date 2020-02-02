@@ -248,7 +248,7 @@ public class PomIO
     {
         try
         {
-            final String manifestInformation = project.isInheritanceRoot() ? ManifestUtils.getManifestInformation() : null;
+            final String manifestInformation = project.isInheritanceRoot() ? ManifestUtils.getManifestInformation(PomIO.class) : null;
 
             MavenJDOMWriter mjw = new MavenJDOMWriter( model );
 
