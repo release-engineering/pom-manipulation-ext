@@ -16,44 +16,56 @@
 
 package org.commonjava.maven.ext.common.util;
 
+import lombok.experimental.UtilityClass;
 import org.commonjava.maven.ext.common.ManipulationException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.util.Enumeration;
+import java.util.jar.JarInputStream;
 import java.util.jar.Manifest;
 
+@UtilityClass
 public class ManifestUtils
 {
+    private static final Logger logger = LoggerFactory.getLogger( ManifestUtils.class );
+
     /**
      * Retrieves the SHA this was built with.
      *
+     * @param target the Class within the jar to find and locate.
      * @return the GIT sha of this codebase.
      * @throws ManipulationException if an error occurs.
      */
-    public static String getManifestInformation()
+    public static String getManifestInformation(Class<?> target)
         throws ManipulationException
     {
         String result = "";
+
+        if (target == null)
+        {
+            throw new ManipulationException( "No target specified." );
+        }
+
         try
         {
-            final Enumeration<URL> resources = ManifestUtils.class.getClassLoader()
-                                                          .getResources( "META-INF/MANIFEST.MF" );
+            final URL jarUrl = target.getProtectionDomain().getCodeSource().getLocation();
 
-            while ( resources.hasMoreElements() )
+            if ( new File( jarUrl.getPath() ).isDirectory() )
             {
-                final URL jarUrl = resources.nextElement();
-
-                if ( jarUrl.getFile()
-                           .contains( "pom-manipulation-" ) )
+                logger.debug( "Unable to retrieve manifest for {} as location is a directory not a jar ({})",
+                              target,
+                              jarUrl.getPath() );
+            }
+            else
+            {
+                try (JarInputStream jarStream = new JarInputStream( jarUrl.openStream() ))
                 {
-                    final Manifest manifest = new Manifest( jarUrl.openStream() );
-
-                    result = manifest.getMainAttributes()
-                                     .getValue( "Implementation-Version" );
-                    result += " ( SHA: " + manifest.getMainAttributes()
-                                                   .getValue( "Scm-Revision" ) + " ) ";
-                    break;
+                    final Manifest manifest = jarStream.getManifest();
+                    result = manifest.getMainAttributes().getValue( "Implementation-Version" );
+                    result += " ( SHA: " + manifest.getMainAttributes().getValue( "Scm-Revision" ) + " ) ";
                 }
             }
         }

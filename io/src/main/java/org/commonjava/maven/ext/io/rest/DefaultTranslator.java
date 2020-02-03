@@ -241,8 +241,8 @@ public class DefaultTranslator
                                }
                                else
                                {
-                                   throw new ManipulationUncheckedException( "Unknown error",
-                                                                             failedResponse.getParsingError().get() );
+                                   throw new ManipulationUncheckedException( "Problem in HTTP communication with status code {} and message {}",
+                                                                             failedResponse.getStatus(), failedResponse.getStatusText() );
                                }
                            }
                        } );
@@ -382,7 +382,9 @@ public class DefaultTranslator
 
     private class Task
     {
-        private List<ProjectVersionRef> chunk;
+        private final List<ProjectVersionRef> chunk;
+
+        private final String endpointUrl;
 
         private Map<ProjectVersionRef, String> result = Collections.emptyMap();
 
@@ -392,7 +394,6 @@ public class DefaultTranslator
 
         private String errorString;
 
-        private String endpointUrl;
 
         Task( List<ProjectVersionRef> chunk, String endpointUrl )
         {
@@ -457,7 +458,8 @@ public class DefaultTranslator
                                    }
                                    else
                                    {
-                                       throw new ManipulationUncheckedException( "Unknown error", failedResponse.getParsingError().get() );
+                                       throw new ManipulationUncheckedException( "Problem in HTTP communication with status code {} and message {}",
+                                                                                 failedResponse.getStatus(), failedResponse.getStatusText() );
                                    }
                                }
                            } );
