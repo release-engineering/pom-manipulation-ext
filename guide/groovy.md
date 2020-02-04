@@ -132,8 +132,8 @@ The following API is available:
 </tr>
 </table>
 
-| void inlineProperty([Project](https://github.com/release-engineering/pom-manipulation-ext/blob/master/common/src/main/java/org/commonjava/maven/ext/common/model/Project.java), [ProjectRef](https://github.com/Commonjava/atlas/blob/master/identities/src/main/java/org/commonjava/atlas/maven/ident/ref/ProjectRef.java)) | Allows the specified group:artifact property to be inlined in any depedencies/dependencyManagement. This is useful to split up properties that cover multiple separate projects. |
-| void inlineProperty([Project](https://github.com/release-engineering/pom-manipulation-ext/blob/master/common/src/main/java/org/commonjava/maven/ext/common/model/Project.java), String "propertyKey") | Allows the specified property to be inlined in any depedencies/dependencyManagement. This is useful to split up properties that cover multiple separate projects. |
+| void inlineProperty([Project](https://github.com/release-engineering/pom-manipulation-ext/blob/master/common/src/main/java/org/commonjava/maven/ext/common/model/Project.java), [ProjectRef](https://github.com/Commonjava/atlas/blob/master/identities/src/main/java/org/commonjava/atlas/maven/ident/ref/ProjectRef.java)) | Allows the specified group:artifact property to be inlined in any depedencies/dependencyManagement. This is useful to split up properties that cover multiple separate projects. Supports `*` as a wildcard for artifactId. |
+| void inlineProperty([Project](https://github.com/release-engineering/pom-manipulation-ext/blob/master/common/src/main/java/org/commonjava/maven/ext/common/model/Project.java), String "propertyKey") | Allows the specified property to be inlined in any depedencies/dependencyManagement. This is useful to split up properties that cover multiple separate projects. Supports `*` as a wildcard for artifactId. |
 
 <table bgcolor="#ffff00">
 <tr>
