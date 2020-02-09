@@ -84,7 +84,7 @@ public class WildcardMap<T>
     {
         boolean result;
 
-        LinkedHashMap vMap = map.get(groupId);
+        LinkedHashMap<String, T> vMap = map.get( groupId);
 
         if ( vMap == null || vMap.isEmpty())
         {
@@ -138,6 +138,7 @@ public class WildcardMap<T>
                 if ( o.equals( WILDCARD ) )
                 {
                     wildcard = true;
+                    break;
                 }
             }
         }

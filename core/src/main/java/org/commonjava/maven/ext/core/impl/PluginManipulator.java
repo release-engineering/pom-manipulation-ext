@@ -24,9 +24,12 @@ import org.apache.maven.model.PluginManagement;
 import org.apache.maven.model.Profile;
 import org.codehaus.plexus.util.xml.Xpp3Dom;
 import org.codehaus.plexus.util.xml.Xpp3DomUtils;
+import org.commonjava.maven.atlas.ident.ref.ArtifactRef;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.ext.common.ManipulationException;
+import org.commonjava.maven.ext.common.model.ArtifactPluginWrapper;
 import org.commonjava.maven.ext.common.model.Project;
+import org.commonjava.maven.ext.common.util.WildcardMap;
 import org.commonjava.maven.ext.core.ManipulationSession;
 import org.commonjava.maven.ext.core.state.CommonState;
 import org.commonjava.maven.ext.core.state.PluginState;
@@ -36,8 +39,6 @@ import org.commonjava.maven.ext.core.state.RESTState;
 import org.commonjava.maven.ext.core.util.PropertiesUtils;
 import org.commonjava.maven.ext.core.util.PropertyMapper;
 import org.commonjava.maven.ext.io.ModelIO;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -61,8 +62,7 @@ import static org.commonjava.maven.ext.core.util.IdUtils.ga;
  */
 @Named("plugin-manipulator")
 @Singleton
-public class PluginManipulator
-    implements Manipulator
+public class PluginManipulator extends CommonManipulator implements Manipulator
 {
     private ManipulationSession session;
 
@@ -90,9 +90,7 @@ public class PluginManipulator
         }
     }
 
-    private final Logger logger = LoggerFactory.getLogger( getClass() );
-
-    private ModelIO effectiveModelBuilder;
+    private final ModelIO effectiveModelBuilder;
 
     /**
      * Used to store mappings of old property to new version.
@@ -140,7 +138,7 @@ public class PluginManipulator
         {
             final Model model = project.getModel();
 
-            if (!mgmtOverrides.isEmpty())
+            if (!mgmtOverrides.isEmpty() || !state.getPluginOverride().isEmpty())
             {
                 apply( project, model, mgmtOverrides );
 
@@ -260,12 +258,39 @@ public class PluginManipulator
         return mergedOverrides;
     }
 
-    private void apply( final Project project, final Model model, final Set<Plugin> override )
+    private void apply( final Project project, final Model model, final Set<Plugin> overrides )
         throws ManipulationException
     {
         if (logger.isDebugEnabled())
         {
             logger.debug( "Applying plugin changes for {} to: {} ", PluginType.RemotePM, ga( project));
+        }
+
+        final CommonState commonState = session.getState( CommonState.class );
+        final PluginState pluginState = session.getState( PluginState.class );
+
+        // TODO: Do we need removeReactorGAs ?
+
+        // Map of Group : Map of artifactId [ may be wildcard ] : value
+        final WildcardMap<String> explicitOverrides = new WildcardMap<>();
+        final String projectGA = ga( project );
+        final Map<ArtifactRef, String> originalOverrides = new HashMap<>();
+        overrides.forEach( p -> originalOverrides.put( new ArtifactPluginWrapper( p ), p.getVersion()) );
+
+        final Map<ArtifactRef, String> originalOverridesReduced = applyModuleVersionOverrides( projectGA, pluginState.getPluginOverride(), originalOverrides, explicitOverrides, Collections.emptyMap() );
+
+        // Now we have a reduced list of wrapper plugins (due to removing those are being explicitly overridden).
+        // Therefore reflect that in the original plugin list.
+        Iterator<Plugin> it = overrides.iterator();
+        while (it.hasNext())
+        {
+            Plugin existing = it.next();
+            if ( originalOverridesReduced.keySet().stream().anyMatch( a -> ((ArtifactPluginWrapper)a).getOriginal().equals( existing ) ) )
+            {
+                continue;
+            }
+            // Couldn't find it so remove it.
+            it.remove();
         }
 
         if ( project.isInheritanceRoot() )
@@ -290,10 +315,12 @@ public class PluginManipulator
             }
 
             // Override plugin management versions
-            applyOverrides( project, PluginType.LocalPM, project.getResolvedManagedPlugins( session ), override );
+            applyOverrides( project, PluginType.LocalPM, project.getResolvedManagedPlugins( session ), overrides );
         }
 
-        applyOverrides( project, PluginType.LocalP, project.getResolvedPlugins( session ), override );
+        applyOverrides( project, PluginType.LocalP, project.getResolvedPlugins( session ), overrides );
+        applyExplicitOverrides( project, project.getResolvedManagedPlugins( session ), explicitOverrides,
+                                commonState, explicitVersionPropertyUpdateMap );
 
         final Map<Profile, Map<ProjectVersionRef, Plugin>> pd = project.getResolvedProfilePlugins( session );
         final Map<Profile, Map<ProjectVersionRef, Plugin>> pmd = project.getResolvedProfileManagedPlugins( session );
@@ -301,13 +328,19 @@ public class PluginManipulator
         logger.debug ("Processing profiles with plugin management");
         for ( Profile p : pmd.keySet() )
         {
-            applyOverrides( project, PluginType.LocalPM, pmd.get( p ), override );
+            applyOverrides( project, PluginType.LocalPM, pmd.get( p ), overrides );
+            applyExplicitOverrides( project, pmd.get( p ), explicitOverrides,
+                                    commonState, explicitVersionPropertyUpdateMap );
         }
         logger.debug ("Processing profiles with plugins");
         for ( Profile p : pd.keySet() )
         {
-            applyOverrides( project, PluginType.LocalP, pd.get( p ), override );
+            applyOverrides( project, PluginType.LocalP, pd.get( p ), overrides );
+            applyExplicitOverrides( project, pd.get( p ), explicitOverrides,
+                                    commonState, explicitVersionPropertyUpdateMap );
         }
+
+        explicitOverridePropertyUpdates(session);
     }
 
     /**
@@ -327,6 +360,7 @@ public class PluginManipulator
      * @param pluginVersionOverrides The list of version overrides to apply to the plugins
      * @throws ManipulationException if an error occurs.
      */
+    // TODO:  Pass in explicitOverrides to avoid potential property clashes.
     private void applyOverrides( Project project, final PluginType localPluginType, final Map<ProjectVersionRef, Plugin> plugins,
                                  final Set<Plugin> pluginVersionOverrides ) throws ManipulationException
     {

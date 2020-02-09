@@ -18,7 +18,6 @@ package org.commonjava.maven.ext.core.impl;
 import org.apache.commons.lang.StringUtils;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.DependencyManagement;
-import org.apache.maven.model.Exclusion;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Profile;
 import org.commonjava.maven.atlas.ident.ref.ArtifactRef;
@@ -38,8 +37,6 @@ import org.commonjava.maven.ext.core.state.RESTState;
 import org.commonjava.maven.ext.core.util.PropertiesUtils;
 import org.commonjava.maven.ext.core.util.PropertyMapper;
 import org.commonjava.maven.ext.io.ModelIO;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -56,7 +53,6 @@ import java.util.Map;
 import java.util.Set;
 
 import static org.apache.commons.lang.StringUtils.isEmpty;
-import static org.apache.commons.lang.StringUtils.join;
 import static org.commonjava.maven.ext.core.util.IdUtils.ga;
 
 /**
@@ -65,15 +61,8 @@ import static org.commonjava.maven.ext.core.util.IdUtils.ga;
  */
 @Named("project-dependency-manipulator")
 @Singleton
-public class DependencyManipulator implements Manipulator
+public class DependencyManipulator extends CommonManipulator implements Manipulator
 {
-    private final Logger logger = LoggerFactory.getLogger( getClass() );
-
-    /**
-     * Used to store mappings of old property to new version for explicit overrides.
-     */
-    private final Map<Project,Map<String, PropertyMapper>> explicitVersionPropertyUpdateMap = new LinkedHashMap<>();
-
     /**
      * Used to store mappings of old property to new version - the new version is encapsulated within the {@link PropertyMapper}
      * which also contains reference to the old version and the dependency that changed this. This allows complete tracking of
@@ -82,7 +71,7 @@ public class DependencyManipulator implements Manipulator
      */
     private final Map<Project,Map<String, PropertyMapper>> versionPropertyUpdateMap = new LinkedHashMap<>();
 
-    private ModelIO effectiveModelBuilder;
+    private final ModelIO effectiveModelBuilder;
 
     private ManipulationSession session;
 
@@ -299,32 +288,7 @@ public class DependencyManipulator implements Manipulator
                 }
             }
 
-            logger.info ("Iterating for explicit overrides...");
-            for ( Project project : explicitVersionPropertyUpdateMap.keySet() )
-            {
-                logger.debug( "Checking property override within project {} ", project );
-                for ( final Map.Entry<String, PropertyMapper> entry : explicitVersionPropertyUpdateMap.get( project ).entrySet() )
-                {
-                    PropertiesUtils.PropertyUpdate found =
-                                    PropertiesUtils.updateProperties( session, project, true,
-                                                                      entry.getKey(), entry.getValue().getNewVersion() );
-
-                    if ( found == PropertiesUtils.PropertyUpdate.NOTFOUND )
-                    {
-                        // Problem in this scenario is that we know we have a property update map but we have not found a
-                        // property to update. Its possible this property has been inherited from a parent. Override in the
-                        // top pom for safety.
-                        logger.info( "Unable to find a property for {} to update for explicit overrides", entry.getKey() );
-                        logger.info( "Adding property {} with {} ", entry.getKey(), entry.getValue().getNewVersion() );
-                        // We know the inheritance root is at position 0 in the inherited list...
-                        project.getInheritedList()
-                               .get( 0 )
-                               .getModel()
-                               .getProperties()
-                               .setProperty( entry.getKey(), entry.getValue().getNewVersion() );
-                    }
-                }
-            }
+            explicitOverridePropertyUpdates(session);
         }
         return result;
     }
@@ -343,20 +307,20 @@ public class DependencyManipulator implements Manipulator
 
         logger.debug( "Processing project {} ", projectGA );
 
-        Map<ArtifactRef, String> moduleOverrides = new LinkedHashMap<>( overrides );
-        moduleOverrides = removeReactorGAs( moduleOverrides );
+        Map<ArtifactRef, String> originalOverrides = new LinkedHashMap<>( overrides );
+        originalOverrides = removeReactorGAs( originalOverrides );
 
         try
         {
-            moduleOverrides = applyModuleVersionOverrides( projectGA, dependencyState.getDependencyExclusions(),
-                                                           moduleOverrides, explicitOverrides,
+            originalOverrides = applyModuleVersionOverrides( projectGA, dependencyState.getDependencyExclusions(),
+                                                           originalOverrides, explicitOverrides,
                                                            dependencyState.getExtraBOMDepMgmts() );
-            logger.debug( "Module overrides are:{}{}", System.lineSeparator(), moduleOverrides );
+            logger.debug( "Module overrides are:{}{}", System.lineSeparator(), originalOverrides );
             logger.debug( "Explicit overrides are:{}{}", System.lineSeparator(), explicitOverrides );
         }
         catch ( InvalidRefException e )
         {
-            logger.error( "Invalid module exclusion override {} : {} ", moduleOverrides, explicitOverrides );
+            logger.error( "Invalid module exclusion override {} : {} ", originalOverrides, explicitOverrides );
             throw e;
         }
 
@@ -365,7 +329,7 @@ public class DependencyManipulator implements Manipulator
             // Handle the situation where the top level parent refers to a prior build that is in the BOM.
             if ( project.getModelParent() != null )
             {
-                for ( Map.Entry<ArtifactRef, String> entry : moduleOverrides.entrySet() )
+                for ( Map.Entry<ArtifactRef, String> entry : originalOverrides.entrySet() )
                 {
                     String oldValue = project.getModelParent().getVersion();
                     String newValue = entry.getValue();
@@ -420,7 +384,7 @@ public class DependencyManipulator implements Manipulator
 
             final Map<ArtifactRef, String> nonMatchingVersionOverrides =
                             applyOverrides( project, project.getResolvedManagedDependencies( session ),
-                                            explicitOverrides, moduleOverrides );
+                                            explicitOverrides, originalOverrides );
 
             applyExplicitOverrides( project, project.getResolvedManagedDependencies( session ), explicitOverrides,
                                     commonState, explicitVersionPropertyUpdateMap );
@@ -444,7 +408,7 @@ public class DependencyManipulator implements Manipulator
                     newDependency.setType( var.getType() );
                     newDependency.setClassifier( var.getClassifier() );
 
-                    final String artifactVersion = moduleOverrides.get( var );
+                    final String artifactVersion = originalOverrides.get( var );
                     newDependency.setVersion( artifactVersion );
 
                     extraDeps.add( newDependency );
@@ -473,14 +437,14 @@ public class DependencyManipulator implements Manipulator
         {
             logger.debug( "Applying overrides to managed dependencies for: {}", projectGA );
             applyOverrides( project, project.getResolvedManagedDependencies( session ), explicitOverrides,
-                            moduleOverrides );
+                            originalOverrides );
             applyExplicitOverrides( project, project.getResolvedManagedDependencies( session ), explicitOverrides,
                                     commonState, explicitVersionPropertyUpdateMap );
         }
 
         logger.debug( "Applying overrides to concrete dependencies for: {}", projectGA );
         // Apply overrides to project direct dependencies
-        applyOverrides( project, project.getResolvedDependencies( session ), explicitOverrides, moduleOverrides );
+        applyOverrides( project, project.getResolvedDependencies( session ), explicitOverrides, originalOverrides );
         applyExplicitOverrides( project, project.getResolvedDependencies( session ), explicitOverrides, commonState,
                                 explicitVersionPropertyUpdateMap );
 
@@ -489,90 +453,15 @@ public class DependencyManipulator implements Manipulator
 
         for ( Profile p : pd.keySet() )
         {
-            applyOverrides( project, pd.get( p ), explicitOverrides, moduleOverrides );
+            applyOverrides( project, pd.get( p ), explicitOverrides, originalOverrides );
             applyExplicitOverrides( project, pd.get( p ), explicitOverrides, commonState,
                                     explicitVersionPropertyUpdateMap );
         }
         for ( Profile p : pmd.keySet() )
         {
-            applyOverrides( project, pmd.get( p ), explicitOverrides, moduleOverrides );
+            applyOverrides( project, pmd.get( p ), explicitOverrides, originalOverrides );
             applyExplicitOverrides( project, pmd.get( p ), explicitOverrides, commonState,
                                     explicitVersionPropertyUpdateMap );
-        }
-    }
-
-    /**
-     * Apply explicit overrides to a set of dependencies from a project. The explicit overrides come from
-     * dependencyExclusion. However they have to be separated out from standard overrides so we can easily
-     * ignore any property references (and overwrite them).
-     *
-     * @param project the current Project
-     * @param dependencies dependencies to check
-     * @param explicitOverrides a custom map to handle wildcard overrides
-     * @param state the CommonState, to retrieve Common Properties
-     * @param versionPropertyUpdateMap properties to update
-     * @throws ManipulationException if an error occurs
-     */
-    private void applyExplicitOverrides( final Project project, final Map<ArtifactRef, Dependency> dependencies,
-                                         final WildcardMap<String> explicitOverrides, final CommonState state,
-                                         final Map<Project, Map<String, PropertyMapper>> versionPropertyUpdateMap )
-                    throws ManipulationException
-    {
-        // Apply matching overrides to dependencies
-        for ( final ArtifactRef dependency : dependencies.keySet() )
-        {
-            final ProjectRef groupIdArtifactId = new SimpleProjectRef( dependency.getGroupId(), dependency.getArtifactId() );
-
-            if ( explicitOverrides.containsKey( groupIdArtifactId ) )
-            {
-                final String overrideVersion = explicitOverrides.get( groupIdArtifactId );
-                final String oldVersion = dependencies.get( dependency ).getVersion();
-
-                if ( isEmpty( overrideVersion ) || isEmpty( oldVersion ) )
-                {
-                    if ( isEmpty( oldVersion ) )
-                    {
-                        logger.debug( "Unable to force align as no existing version field to update for " + groupIdArtifactId + "; ignoring" );
-                    }
-                    else
-                    {
-                        logger.warn( "Unable to force align as override version is empty for " + groupIdArtifactId
-                                                     + "; ignoring" );
-                    }
-                }
-                else
-                {
-                    for ( String target : overrideVersion.split( "," ) )
-                    {
-                        if ( target.startsWith( "+" ) )
-                        {
-                            logger.info( "Adding dependency exclusion {} to dependency {} ", target.substring( 1 ),
-                                         dependency );
-                            Exclusion e = new Exclusion();
-                            e.setGroupId( target.substring( 1 ).split( ":" )[0] );
-                            e.setArtifactId( target.split( ":" )[1] );
-                            dependencies.get( dependency ).addExclusion( e );
-                        }
-                        else
-                        {
-                            logger.info( "Explicit overrides : force aligning {} to {}.", groupIdArtifactId, target );
-
-                            if ( !PropertiesUtils.cacheProperty( project, state, versionPropertyUpdateMap, oldVersion,
-                                                                 target, dependency, true ) )
-                            {
-                                if ( oldVersion.contains( "${" ) )
-                                {
-                                    logger.warn( "Overriding version with {} when old version contained a property {} ",
-                                                 target, oldVersion );
-                                    // TODO: Should this throw an exception?
-                                }
-                                // Not checking strict version alignment here as explicit overrides take priority.
-                                dependencies.get( dependency ).setVersion( target );
-                            }
-                        }
-                    }
-                }
-            }
         }
     }
 
@@ -744,188 +633,6 @@ public class DependencyManipulator implements Manipulator
             reducedVersionOverrides.remove( new SimpleArtifactRef( project.getGroupId(), project.getArtifactId(), project.getVersion(), "pom", null ) );
         }
         return reducedVersionOverrides;
-    }
-
-    /**
-     * Remove module overrides which do not apply to the current module. Searches the full list of version overrides
-     * for any keys which contain the '@' symbol.  Removes these from the version overrides list, and add them back
-     * without the '@' symbol only if they apply to the current module.
-     *
-     * @param projectGA the current project group : artifact
-     * @param originalOverrides The full list of version overrides, both global and module specific
-     * @param moduleOverrides are individual overrides e.g. group:artifact@groupId:artifactId :: value
-     * @param explicitOverrides a custom map to handle wildcard overrides
-     * @param extraBOMOverrides a nested map of additional overrides, keyed on a String
-     * @return The map of global and module specific overrides which apply to the given module
-     * @throws ManipulationException if an error occurs
-     */
-    private Map<ArtifactRef, String> applyModuleVersionOverrides( final String projectGA,
-                                                                  final Map<String, String> moduleOverrides,
-                                                                  Map<ArtifactRef, String> originalOverrides,
-                                                                  final WildcardMap<String> explicitOverrides,
-                                                                  final Map<String, Map<ProjectRef, String>> extraBOMOverrides )
-                    throws ManipulationException
-    {
-        final Map<ArtifactRef, String> remainingOverrides = new LinkedHashMap<>( originalOverrides );
-
-        if (logger.isDebugEnabled())
-        {
-            logger.debug( "Calculating module-specific version overrides. Starting with:{}  {}", System.lineSeparator(),
-                    join( remainingOverrides.entrySet(), String.format( System.lineSeparator() + "  " ) ) );
-        }
-
-        // These modes correspond to two different kinds of passes over the available override properties:
-        // 1. Module-specific: Don't process wildcard overrides here, allow module-specific settings to take precedence.
-        // 2. Wildcards: Add these IF there is no corresponding module-specific override.
-        final boolean[] wildcardMode = { false, true };
-        for ( boolean aWildcardMode : wildcardMode )
-        {
-            for ( final String currentKey : new HashSet<>( moduleOverrides.keySet() ) )
-            {
-                final String currentValue = moduleOverrides.get( currentKey );
-
-                logger.debug( "Processing key {} for override with value {}", currentKey, currentValue );
-
-                if ( !currentKey.contains( "@" ) )
-                {
-                    logger.debug( "Not an override. Skip." );
-                    continue;
-                }
-
-                final boolean isModuleWildcard = currentKey.endsWith( "@*" );
-                logger.debug( "Is wildcard? {} and in module wildcard mode? {} ", isModuleWildcard, aWildcardMode );
-
-                String artifactGA;
-                boolean replace = false;
-                // process module-specific overrides (first)
-                if ( !aWildcardMode )
-                {
-                    // skip wildcard overrides in this mode
-                    if ( isModuleWildcard )
-                    {
-                        logger.debug( "Not currently in wildcard mode. Skip." );
-                        continue;
-                    }
-
-                    final String[] artifactAndModule = currentKey.split( "@" );
-                    if ( artifactAndModule.length != 2 )
-                    {
-                        throw new ManipulationException( "Invalid format for exclusion key {}", currentKey );
-                    }
-                    artifactGA = artifactAndModule[0];
-                    final ProjectRef moduleGA = SimpleProjectRef.parse( artifactAndModule[1] );
-
-                    logger.debug( "For artifact override: {}, comparing parsed module: {} to current project: {}",
-                                  artifactGA, moduleGA, projectGA );
-
-                    if ( moduleGA.toString().equals( projectGA ) ||
-                                    (
-                                        moduleGA.getArtifactId().equals( "*" ) &&
-                                        SimpleProjectRef.parse( projectGA ).getGroupId().equals( moduleGA.getGroupId()
-                                    )
-                        ) )
-                    {
-                        if ( currentValue != null && !currentValue.isEmpty() )
-                        {
-                            replace = true;
-                            logger.debug( "Overriding module dependency for {} with {} : {}", moduleGA, artifactGA,
-                                          currentValue );
-                        }
-                        else
-                        {
-                            // Override prevention...
-                            removeGA( remainingOverrides, SimpleProjectRef.parse( artifactGA ) );
-                            logger.debug( "For module {}, ignoring dependency override for {} ", moduleGA, artifactGA);
-                        }
-                    }
-                }
-                // process wildcard overrides (second)
-                else
-                {
-                    // skip module-specific overrides in this mode i.e. format of groupdId:artifactId@*=
-                    if ( !isModuleWildcard )
-                    {
-                        logger.debug( "Currently in wildcard mode. Skip." );
-                        continue;
-                    }
-
-                    artifactGA = currentKey.substring( 0, currentKey.length() - 2 );
-                    logger.debug( "For artifact override: {}, checking if current overrides already contain a module-specific version.",
-                                  artifactGA );
-
-                    if ( explicitOverrides.containsKey( SimpleProjectRef.parse( artifactGA ) ) )
-                    {
-                        logger.debug( "For artifact override: {}, current overrides already contain a module-specific version. Skip.",
-                                      artifactGA );
-                        continue;
-                    }
-
-                    // I think this is only used for e.g. dependencyExclusion.groupId:artifactId@*=<explicitVersion>
-                    if ( currentValue != null && !currentValue.isEmpty() )
-                    {
-                        logger.debug( "Overriding module dependency for {} with {} : {}", projectGA, artifactGA,
-                                      currentValue );
-                        replace = true;
-                    }
-                    else
-                    {
-                        // If we have a wildcard artifact we want to replace any prior explicit overrides
-                        // with this one i.e. this takes precedence.
-                        removeGA( remainingOverrides, SimpleProjectRef.parse( artifactGA ) );
-                        logger.debug( "Removing artifactGA {} from overrides", artifactGA );
-                    }
-                }
-
-                if ( replace )
-                {
-                    ProjectRef projectRef = SimpleProjectRef.parse( artifactGA );
-                    String newArtifactValue;
-                    // Expand values that reference an extra BOM
-                    Map<ProjectRef, String> extraBOM = extraBOMOverrides.get( currentValue );
-                    if ( extraBOM == null )
-                    {
-                        newArtifactValue = currentValue;
-                    }
-                    else
-                    {
-                        newArtifactValue = extraBOM.get( projectRef );
-                        if ( newArtifactValue == null )
-                        {
-                            throw new ManipulationException( "Extra BOM {} does not define a version for artifact {} targeted by {}",
-                                                             currentValue, artifactGA, currentKey );
-                        }
-                        logger.debug( "Dereferenced value {} for {} from extra BOM {}", newArtifactValue, artifactGA,
-                                      currentValue );
-                    }
-                    explicitOverrides.put( projectRef, newArtifactValue );
-                }
-            }
-        }
-
-        return remainingOverrides;
-    }
-
-    private void removeGA( Map<ArtifactRef, String> overrides, ProjectRef ref )
-    {
-        Iterator<ArtifactRef> it = overrides.keySet().iterator();
-
-        while ( it.hasNext() )
-        {
-            ArtifactRef a = it.next();
-
-            if ( a.asProjectRef().equals( ref ) ||
-                ( ref.getArtifactId().equals( "*" ) && a.getGroupId().equals( ref.getGroupId() ) ) ||
-                ( ref.getGroupId().equals( "*" ) && a.getArtifactId().equals( ref.getArtifactId() ) ) )
-            {
-                it.remove();
-            }
-            else if ( ref.getArtifactId().equals( "*" ) && ref.getGroupId().equals( "*" ) )
-            {
-                // For complete wildcard also cache the ignored module as we need the list later during
-                // property processing.
-                it.remove();
-            }
-        }
     }
 
     private void validateDependenciesUpdatedProperty( CommonState cState, Project p, Map<ArtifactRef, Dependency> dependencies )

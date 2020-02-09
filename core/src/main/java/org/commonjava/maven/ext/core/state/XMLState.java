@@ -35,7 +35,7 @@ public class XMLState
 {
     private final Logger logger = LoggerFactory.getLogger( getClass() );
 
-   /**
+    /**
      * Property on the command line that handles modifying XML files. The format is
      *
      * -DxmlUpdate=<file>:<xml-xpath-expression>:[<replacement-value>] [,....]
@@ -43,9 +43,8 @@ public class XMLState
      * 1. If replacement-value is blank it becomes a delete instead of replace.
      * 2. Multiple operations may be fed in via comma separator.
      *
-     * TODO: If <file> is blank this should be a wildcard for all files.
      */
-   @ConfigValue( docIndex = "xml.html" )
+    @ConfigValue( docIndex = "xml.html" )
     private static final String XML_PROPERTY = "xmlUpdate";
 
     /**
@@ -107,9 +106,9 @@ public class XMLState
 
     public final static class XMLOperation
     {
-        private String file;
-        private String xpath;
-        private String update;
+        private final String file;
+        private final String xpath;
+        private final String update;
 
         public XMLOperation ( String file, String xpath, String update)
         {

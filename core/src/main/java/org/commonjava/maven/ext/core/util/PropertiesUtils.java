@@ -18,7 +18,6 @@ package org.commonjava.maven.ext.core.util;
 import org.apache.commons.lang.StringUtils;
 import org.apache.maven.model.Plugin;
 import org.apache.maven.model.Profile;
-import org.commonjava.maven.atlas.ident.ref.ArtifactRef;
 import org.commonjava.maven.atlas.ident.ref.ProjectRef;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleProjectRef;
@@ -435,9 +434,9 @@ public final class PropertiesUtils
                 // has been specified this will bypass the check.
                 final String existingPropertyMapping = container.getNewVersion();
                 final ProjectRef originalReference;
-                if ( originalType instanceof ArtifactRef )
+                if ( originalType instanceof ProjectVersionRef )
                 {
-                    originalReference = ( (ArtifactRef) originalType ).asProjectRef();
+                    originalReference = ( ( ProjectVersionRef ) originalType ).asProjectRef();
                 }
                 else if ( originalType instanceof Plugin )
                 {
@@ -445,7 +444,7 @@ public final class PropertiesUtils
                 }
                 else
                 {
-                    throw new ManipulationException( "Unknown type for {}", originalType );
+                    throw new ManipulationException( "Unknown type for {}", ( originalType == null ? null : originalType.getClass() ) );
                 }
 
                 if ( existingPropertyMapping != null && !existingPropertyMapping.equals( newVersion ) )
