@@ -71,10 +71,6 @@ public class DependencyManipulator extends CommonManipulator implements Manipula
      */
     private final Map<Project,Map<String, PropertyMapper>> versionPropertyUpdateMap = new LinkedHashMap<>();
 
-    private final ModelIO effectiveModelBuilder;
-
-    private ManipulationSession session;
-
     @Inject
     public DependencyManipulator(ModelIO effectiveModelBuilder)
     {

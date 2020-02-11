@@ -30,6 +30,7 @@ import org.commonjava.maven.ext.core.ManipulationSession;
 import org.commonjava.maven.ext.core.state.CommonState;
 import org.commonjava.maven.ext.core.util.PropertiesUtils;
 import org.commonjava.maven.ext.core.util.PropertyMapper;
+import org.commonjava.maven.ext.io.ModelIO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,6 +53,10 @@ public class CommonManipulator
      * Used to store mappings of old property to new version for explicit overrides.
      */
     protected final Map<Project,Map<String, PropertyMapper>> explicitVersionPropertyUpdateMap = new LinkedHashMap<>();
+
+    protected ModelIO effectiveModelBuilder;
+
+    protected ManipulationSession session;
 
     /**
      * Remove module overrides which do not apply to the current module. Searches the full list of version overrides
@@ -188,7 +193,6 @@ public class CommonManipulator
                     ProjectRef projectRef = SimpleProjectRef.parse( artifactGA );
                     String newArtifactValue;
                     // Expand values that reference an extra BOM
-                    // TODO: Do we need checks here?
                     Map<ProjectRef, String> extraBOM = extraBOMOverrides.get( currentValue );
                     if ( extraBOM == null )
                     {
@@ -299,9 +303,10 @@ public class CommonManipulator
                             {
                                 if ( oldVersion.contains( "${" ) )
                                 {
-                                    logger.warn( "Overriding version with {} when old version contained a property {} ",
+                                    // This might happen if the property was inherited from an external parent.
+                                    logger.warn( "Overriding version with {} when old version contained a property {} "
+                                                                 + "that was not found in the current project",
                                                  target, oldVersion );
-                                    // TODO: Should this throw an exception?
                                 }
                                 // Not checking strict version alignment here as explicit overrides take priority.
                                 wrapper.setVersion( target );

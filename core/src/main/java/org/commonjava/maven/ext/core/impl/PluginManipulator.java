@@ -64,8 +64,6 @@ import static org.commonjava.maven.ext.core.util.IdUtils.ga;
 @Singleton
 public class PluginManipulator extends CommonManipulator implements Manipulator
 {
-    private ManipulationSession session;
-
     private enum PluginType
     {
         // Attempting to configure using remote plugins is not supported - just remote plugin management (like dependencyManagement).
@@ -89,8 +87,6 @@ public class PluginManipulator extends CommonManipulator implements Manipulator
             }
         }
     }
-
-    private final ModelIO effectiveModelBuilder;
 
     /**
      * Used to store mappings of old property to new version.

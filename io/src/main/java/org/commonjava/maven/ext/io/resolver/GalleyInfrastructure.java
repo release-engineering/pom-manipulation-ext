@@ -287,9 +287,7 @@ public class GalleyInfrastructure
 
         artifactManager = new ArtifactManagerImpl( transfers, locationExpander, types, versionResolver );
 
-        // TODO: auto-adjust this to the current Maven runtime!
         final MavenPluginDefaults pluginDefaults = new StandardMaven350PluginDefaults();
-
         final MavenPluginImplications pluginImplications = new StandardMavenPluginImplications( xml );
 
         pomReader =

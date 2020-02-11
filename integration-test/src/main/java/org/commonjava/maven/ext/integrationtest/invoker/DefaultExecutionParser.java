@@ -40,12 +40,7 @@ public class DefaultExecutionParser
         add( ExecutionParser.SYSTEM_PROPERTIES_HANDLER );
     }};
 
-    private List<ExecutionParserHandler> handlers;
-
-    public DefaultExecutionParser()
-    {
-        this( new ArrayList<ExecutionParserHandler>() );
-    }
+    private final List<ExecutionParserHandler> handlers;
 
     public DefaultExecutionParser( List<ExecutionParserHandler> handlers )
     {
@@ -62,7 +57,7 @@ public class DefaultExecutionParser
         {
             final String key = (String) rawKey;
             String[] parts = key.split( "\\." );
-            Integer id;
+            int id;
             try
             {
                 id = Integer.parseInt( parts[parts.length - 1] );
@@ -110,11 +105,5 @@ public class DefaultExecutionParser
         }
 
         return executions.values();
-    }
-
-    @Override
-    public void addHandler( ExecutionParserHandler handler )
-    {
-        handlers.add( handler );
     }
 }
