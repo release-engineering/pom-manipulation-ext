@@ -76,7 +76,7 @@
                 <repository>
                     <id>bpms-m2-repo</id>
                     <name>BRMS M2 Repo</name>
-                    <url>http://localhost:8080/business-central/maven2/</url>
+                    <url>https://localhost:8080/business-central/maven2/</url>
                 </repository>
                 <repository>
                     <id>IPv4</id>
@@ -86,12 +86,12 @@
                 <repository>
                     <id>IPv6</id>
                     <name>IPv6</name>
-                    <url>http://::1/business-central/maven2/</url>
+                    <url>https://::1/business-central/maven2/</url>
                 </repository>
                 <repository>
                     <id>REMOTE</id>
                     <name>REMOTE</name>
-                    <url>http://10.10.0.1/business-central/maven2/</url>
+                    <url>https://10.10.0.1/business-central/maven2/</url>
                 </repository>
             </repositories>
         </profile>
