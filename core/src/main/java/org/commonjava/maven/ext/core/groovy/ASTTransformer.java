@@ -64,7 +64,10 @@ import static org.apache.groovy.ast.tools.ClassNodeUtils.addGeneratedMethod;
  * This class performs the same transformations as {@link org.codehaus.groovy.transform.BaseScriptASTTransformation},
  * and in addition moves {@link } annotations to the generated script class.
  *
- * This uses code from {@link groovyjarjarpicocli.groovy.PicocliScriptASTTransformation}.
+ * This uses code from
+ * <a href="https://github.com/groovy/groovy-core/blob/master/src/main/org/codehaus/groovy/transform/BaseScriptASTTransformation.java">BaseScriptASTTransformation</a>
+ * and
+ * <a href="https://github.com/remkop/picocli/blob/master/picocli-groovy/src/main/java/picocli/groovy/PicocliScriptASTTransformation.java">PicocliScriptASTTransformation</a>.
  */
 @GroovyASTTransformation(phase = CompilePhase.SEMANTIC_ANALYSIS)
 public class ASTTransformer  extends AbstractASTTransformation {
@@ -103,7 +106,7 @@ public class ASTTransformer  extends AbstractASTTransformation {
             }
             else if ( parent instanceof ClassNode )
             {
-                changeBaseScriptTypeFromClass( (ClassNode) parent, node );
+                changeBaseScriptTypeFromClass( (ClassNode) parent );
             }
         }
     }
@@ -122,24 +125,33 @@ public class ASTTransformer  extends AbstractASTTransformation {
 
     private void changeBaseScriptTypeFromPackageOrImport(final SourceUnit source, final AnnotatedNode parent, final AnnotationNode node) {
         Expression value = node.getMember("value");
-        if (!(value instanceof ClassExpression)) {
-            addError( "Annotation " + getType() + " member 'value' should be a class literal.", value);
-            return;
+        ClassNode scriptType;
+
+        if (value == null) {
+            if ( type == Type.MAVEN )
+            {
+                scriptType = MAVEN_BASE_SCRIPT_TYPE;
+            }
+            else
+            {
+                scriptType = GRADLE_BASE_SCRIPT_TYPE;
+            }
+        } else {
+            if (!(value instanceof ClassExpression)) {
+                addError( "Annotation " + getType() + " member 'value' should be a class literal.", value);
+                return;
+            }
+            scriptType = value.getType();
         }
         List<ClassNode> classes = source.getAST().getClasses();
         for (ClassNode classNode : classes) {
             if (classNode.isScriptBody()) {
-                changeBaseScriptType(parent, classNode, value.getType());
+                changeBaseScriptType(parent, classNode, scriptType);
             }
         }
     }
 
-    private void changeBaseScriptTypeFromClass(final ClassNode parent, final AnnotationNode node) {
-        //        Expression value = node.getMember("value");
-        //        if (!(value instanceof ClassExpression)) {
-        //            addError("Annotation " + MY_TYPE_NAME + " member 'value' should be a class literal.", value);
-        //            return;
-        //        }
+    private void changeBaseScriptTypeFromClass( final ClassNode parent ) {
         changeBaseScriptType(parent, parent, parent.getSuperClass());
     }
 
@@ -194,17 +206,10 @@ public class ASTTransformer  extends AbstractASTTransformation {
 
         List<AnnotationNode> annotations = parent.getAnnotations( DEPRECATED_COMMAND_TYPE );
         if (cNode.getAnnotations( DEPRECATED_COMMAND_TYPE ).isEmpty()) { // #388 prevent "Duplicate annotation for class" AnnotationFormatError
-
-            // TODO : handle scenario where the annotation is not fully qualified which comes through as a variable
-            // expression instead of a PropertyExpression/ClassExpression/ConstantExpression
-
             cNode.addAnnotations(annotations);
         }
         annotations = parent.getAnnotations( COMMAND_TYPE );
         if (cNode.getAnnotations( COMMAND_TYPE ).isEmpty()) { // #388 prevent "Duplicate annotation for class" AnnotationFormatError
-
-            // TODO : handle scenario where the annotation is not fully qualified which comes through as a variable
-            // expression instead of a PropertyExpression/ClassExpression/ConstantExpression
 
             cNode.addAnnotations(annotations);
         }
