@@ -121,7 +121,7 @@ The blacklist REST endpoint should follow:
 <table bgcolor="#ffff00">
 <tr>
 <td>
-    <b>NOTE</b> : Available from version 3.9
+    <b>NOTE</b> : Available from version 4.0
 </td>
 </tr>
 </table>

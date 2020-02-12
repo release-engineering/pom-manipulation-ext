@@ -82,7 +82,7 @@ This will utilise the default suffix strip configuration (in regular expression 
 <table bgcolor="#ffff00">
 <tr>
 <td>
-    <b>NOTE</b> : From version 3.9 disabling is possible as follows:
+    <b>NOTE</b> : From version 4.0 disabling is possible as follows:
 </td>
 </tr>
 </table>

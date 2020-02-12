@@ -7,9 +7,7 @@ title: "Plugin Manipulation"
 
 ### Overview
 
-PME can align plugin versions and configuration using a similar pattern to [dependencies](dep-manip.html). It also has the ability to standardize the use of `skip` flags that determine whether the `maven-install-plugin` and `maven-deploy-plugin` execute. Finally, by default PME will inject plugin executions for the `project-sources-maven-plugin` and `buildmetadata-maven-plugin`, in order to promote reproducibility of the project build.
-
-### Plugin Alignment
+PME can align plugin versions and configuration using a similar pattern to [dependencies](dep-manip.html). It also has the ability to standardize the use of `skip` flags that determine whether the `maven-install-plugin` and `maven-deploy-plugin` execute. Finally, PME can inject plugin executions for the `project-sources-maven-plugin` and `buildmetadata-maven-plugin`.
 
 <table bgcolor="#00ff99">
 <tr>
@@ -19,16 +17,16 @@ PME can align plugin versions and configuration using a similar pattern to [depe
 </tr>
 </table>
 
-#### Plugin Source
+### Plugin Source
 
-##### BOM and REST
+#### BOM and REST
 
 There are two sources of plugins used to align to in PME. The property `pluginSource` is used to alter the behaviour of how PME handles the multiple sources of plugin information. The `BOM` value is that PME will use the BOM (i.e. Remote POM) source. Alternatively the `REST` source may be specified to use only the REST Endpoint information. However by setting the property to either `RESTBOM` or `BOMREST` it will instead merge the two sets of values. With `RESTBOM` precendence is given to the REST information and for `BOMREST` precendence is given to the BOM information. If the setting is `NONE` no remote alignment will be performned.
 
 **Note**: If this is not specified the default value for `pluginSource` will match the value for `dependencySource`. Therefore it is only necessary to set `pluginSource` if a *different* value to `dependencySource` is needed.
 
 
-##### Remote POM
+#### Remote POM
 
 A remote plugin management POM is used to specify the plugin versions (and configuration) to inject:
 
@@ -40,12 +38,11 @@ This will inject all `<pluginManagement/>` versions, executions and configuratio
 
 **Note:** If the BOM is specified in the format `-DpluginManagement=org.foo:my-dep-pom:1.0-rebuild` i.e. a rebuild suffix is specified *but without a numeric portion* then PME will automatically replace the BOM GAV with the latest suffix via a REST call. For instance, assuming the latest suffix is rebuild-3, the above will be replaced implicitly by `-DpluginManagement=org.foo:my-dep-pom:1.0-rebuild-3`.
 
-##### REST Endpoint
+#### REST Endpoint
 
 For information on the REST Endpoint see [here](dep-manip.html#rest-endpoint)
 
-
-#### Direct/Transitive Dependencies
+### Direct/Transitive Dependencies
 
 By default the extension will inject _all_ plugins declared in the remote BOM. If the option `overrideTransitive` is set to `false` to then only plugins used will be overridden.
 
@@ -53,11 +50,90 @@ By default the extension will inject _all_ plugins declared in the remote BOM. I
 
 **Note**: overrideTransitive is also used by the Dependency Manipulator.
 
-#### Strict Mode Version Alignment
+
+
+<table bgcolor="#ffff00">
+<tr>
+<td>
+    <b>NOTE</b> : From version 4.0 plugin overrides are supported as follows:
+</td>
+</tr>
+</table>
+
+### Overrides
+
+In a multi-module build it is considered good practice to coordinate plugin version among the modules using plugin management.  In other words, if module A and B both use plugin X, both modules should use the same version of plugin X.  Therefore, the default behaviour of this extension is to use a single set of plugin versions applied to all modules.
+
+It is possible to flexibly override or exclude a plugin globally or on a per module basis. The property starts with `pluginOverride.` and has the following format:
+
+    mvn install -DpluginOverride.[groupId]:[artifactId]@[moduleGroupId]:[moduleArtifactId]=[version]...
+
+**Note:** Multiple overrides may be added using multiple instances of `-DpluginOverride...`.
+
+#### Global Version Override
+
+Sometimes it is more convenient to use the command line rather than a BOM. Therefore extending the above it is possible to set the version of a plugin via:
+
+    mvn install -DpluginOverride.junit:junit@*=4.10-rebuild-10
+
+This will, throughout the entire project (due to the wildcard), apply the explicit 4.10-rebuild-10 version to the junit:junit plugin.
+
+**Note:** Explicit overrides like this will take precedence over strict alignment and the BOM.
+
+
+#### Per-Module Version Override
+
+However, there are certain cases where it is useful to use different versions of the same plugin in different modules.  For example, if the project includes integration code for multiple versions of a particular API. In that case it is possible to apply a version override to a specific module of a multi-module build. For example to apply an explicit plugin override only to module B of project foo.
+
+    mvn install -DpluginOverride.junit:junit@org.foo:moduleB=4.10
+
+**Note:** Explicit overrides like this will take precedence over strict alignment and the BOM.
+
+
+#### Per-Module Prevention of Override
+
+It is also possible to **prevent overriding plugin versions** on a per module basis:
+
+    mvn install -DpluginOverride.[groupId]:[artifactId]@[moduleGroupId]:[moduleArtifactId]=
+
+For example:
+
+    mvn install -DpluginOverride.junit:junit@org.foo:moduleB=
+
+#### Override Prevention with Wildcards
+
+Likewise, you can prevent overriding a plugin version across the entire project using a wildcard:
+
+    mvn install -DpluginOverride.[groupId]:[artifactId]@*=
+
+For example:
+
+    mvn install -DpluginOverride.junit:junit@*=
+
+Or, you can prevent overriding a plugin version across the entire project where the groupId matches, using multiple wildcards:
+
+    mvn install -DpluginOverride.[groupId]:*@*=
+
+For example:
+
+    mvn install -DpluginOverride.junit:*@*=
+
+#### Per Module Override Prevention with Wildcards
+
+Linking the two prior concepts it is also possible to prevent overriding using wildcards on a per-module basis e.g.
+
+    mvn install -DpluginOverride.*:*@org.foo:moduleB=
+
+This will prevent any alignment within the org.foo:moduleB.
+
+    mvn install -DpluginOverride.*:*@org.foo:*=
+
+This will prevent any alignment within org.foo and all sub-modules within that.
+### Strict Mode Version Alignment
 
 For information on strict mode configuration see [here](dep-manip.html#strict-mode-version-alignment)
 
-#### Configuration
+### Plugin Configurations
 
 If there is an existing local configuration then it will be merged with the remote. The following configuration controls the precedence:
 
@@ -67,7 +143,15 @@ Default is `REMOTE` which means the remote configuration takes precedence over l
 
 If when attempting to merge the remote execution blocks into local, the `<id>`'s clash an exception will be thrown.
 
-### Install and Deploy Skip Flag Alignment
+### Plugin Removal
+
+If the property `pluginRemoval` (*Deprecated property `plugin-removal` for versions **3.8.1 and prior***) is set, PME will remove the specified plugins from the POM files. The argument should be a comma separated list of group:artifact. For example:
+
+    -DpluginRemoval=group:artifact,....
+
+### Miscellaneous
+
+#### Install and Deploy Skip Flag Alignment
 
 By default, this extension will disable the skip flag on the install and deploy plugins. This is useful for build environments that compare the results of install with those from deploy as a validation step. More generally, suppressing installation or deployment tends to be an aesthetic decision that can have subtle functional consequences. It's usually not really worth the hassle.
 
@@ -82,13 +166,7 @@ Additionally, the feature supports per-module overrides, which can be specified 
 
     -DenforceSkip.org.group.id:artifact-id=(none|on|true|off|false|detect)
 
-### Plugin Removal
-
-If the property `pluginRemoval` (*Deprecated property `plugin-removal` for versions **3.8.1 and prior***) is set, PME will remove the specified plugins from the POM files. The argument should be a comma separated list of group:artifact. For example:
-
-    -DpluginRemoval=group:artifact,....
-
-### Project Sources / Build Metadata Plugin Injection
+#### Project Sources / Build Metadata Plugin Injection
 
 <table bgcolor="#ffff00">
 <tr>
