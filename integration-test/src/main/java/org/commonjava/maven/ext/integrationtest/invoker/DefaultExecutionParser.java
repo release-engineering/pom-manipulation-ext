@@ -17,7 +17,7 @@ package org.commonjava.maven.ext.integrationtest.invoker;
 
 import org.commonjava.maven.ext.integrationtest.TestUtils;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -31,21 +31,10 @@ import java.util.TreeMap;
 public class DefaultExecutionParser
     implements ExecutionParser
 {
-    public static final List<ExecutionParserHandler> DEFAULT_HANDLERS = new ArrayList<ExecutionParserHandler>()
-    {{
-        add( ExecutionParser.SKIP_HANDLER );
-        add( ExecutionParser.BUILD_HANDLER );
-        add( ExecutionParser.BUILD_RESULT_HANDLER );
-        add( ExecutionParser.BUILD_PROFILES_HANDLER );
-        add( ExecutionParser.SYSTEM_PROPERTIES_HANDLER );
-    }};
-
-    private final List<ExecutionParserHandler> handlers;
-
-    public DefaultExecutionParser( List<ExecutionParserHandler> handlers )
-    {
-        this.handlers = handlers;
-    }
+    private static final List<ExecutionParserHandler> handlers =
+                    Arrays.asList( ExecutionParser.SKIP_HANDLER, ExecutionParser.BUILD_HANDLER,
+                                   ExecutionParser.BUILD_RESULT_HANDLER, ExecutionParser.BUILD_PROFILES_HANDLER,
+                                   ExecutionParser.SYSTEM_PROPERTIES_HANDLER );
 
     @Override
     public Collection<Execution> parse( String workingDir )
