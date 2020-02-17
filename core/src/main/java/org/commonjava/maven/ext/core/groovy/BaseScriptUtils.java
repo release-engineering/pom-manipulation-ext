@@ -16,6 +16,7 @@
 package org.commonjava.maven.ext.core.groovy;
 
 import groovy.lang.Script;
+import lombok.Getter;
 import org.commonjava.maven.atlas.ident.ref.ProjectRef;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.ext.common.ManipulationException;
@@ -41,7 +42,8 @@ import java.util.Map;
 @SuppressWarnings("WeakerAccess") // Public API.
 public abstract class BaseScriptUtils extends Script implements MavenBaseScript
 {
-    protected final Logger logger = LoggerFactory.getLogger( BaseScriptUtils.class );
+    @Getter
+    final Logger logger = LoggerFactory.getLogger( getClass() );
 
     /**
      * Allows the specified group:artifact property to be inlined. This is useful to split up properties that cover multiple separate projects.
