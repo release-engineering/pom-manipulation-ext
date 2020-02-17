@@ -63,28 +63,9 @@ import static org.apache.commons.lang.StringUtils.isNotEmpty;
 @Singleton
 public class ModelIO
 {
-    private enum PluginType
-    {
-        PluginMgmt, Plugins;
-
-        @Override
-        public String toString()
-        {
-            switch ( this )
-            {
-                case PluginMgmt:
-                    return "pluginManagement";
-                case Plugins:
-                    return "plugins";
-                default:
-                    throw new IllegalArgumentException();
-            }
-        }
-    }
-
     private final Logger logger = LoggerFactory.getLogger( getClass() );
 
-    private GalleyAPIWrapper galleyWrapper;
+    private final GalleyAPIWrapper galleyWrapper;
 
     @Inject
     public ModelIO(GalleyAPIWrapper galleyWrapper)
@@ -223,28 +204,7 @@ public class ModelIO
     public Set<Plugin> getRemotePluginManagementVersionOverrides( final ProjectVersionRef ref, final Properties userProperties )
                     throws ManipulationException
     {
-        return getRemotePluginVersionOverrides( PluginType.PluginMgmt, ref, userProperties );
-    }
-
-    /**
-     * Return remote plugins to override
-     * @param ref the remote reference to resolve.
-     * @param userProperties a collection of properties to ignore when resolving the remote plugin property expressions.
-     * @return a map containing ProjectRef to Plugins
-     * @throws ManipulationException if an error occurs
-     */
-    public Set<Plugin> getRemotePluginVersionOverrides( final ProjectVersionRef ref, final Properties userProperties )
-                    throws ManipulationException
-    {
-        return getRemotePluginVersionOverrides( PluginType.Plugins, ref, userProperties );
-    }
-
-
-    private Set<Plugin> getRemotePluginVersionOverrides( final PluginType type, final ProjectVersionRef ref,
-                                                                    final Properties userProperties )
-                    throws ManipulationException
-    {
-        logger.debug( "Resolving remote {} POM: {}", type, ref );
+        logger.debug( "Resolving remote pluginManagement POM: {}", ref );
 
         final Set<Plugin> pluginOverrides = new HashSet<>();
         final Map<ProjectRef, ProjectVersionRef> pluginOverridesPomView = new HashMap<>();
@@ -253,15 +213,7 @@ public class ModelIO
         try
         {
             final MavenPomView pomView = galleyWrapper.readPomView( ref );
-            final List<PluginView> deps;
-            if (type == PluginType.PluginMgmt )
-            {
-                deps = pomView.getAllManagedBuildPlugins();
-            }
-            else
-            {
-                deps = pomView.getAllBuildPlugins();
-            }
+            final List<PluginView> deps = pomView.getAllManagedBuildPlugins();
             for ( final PluginView p : deps )
             {
                 pluginOverridesPomView.put( p.asProjectRef(), p.asProjectVersionRef() );
@@ -291,15 +243,10 @@ public class ModelIO
         {
             Iterator<Plugin> plit = null;
 
-            if ( type == PluginType.PluginMgmt && m.getBuild().getPluginManagement() != null )
+            if ( m.getBuild().getPluginManagement() != null )
             {
                 logger.debug( "Returning override of {}", m.getBuild().getPluginManagement().getPlugins() );
                 plit = m.getBuild().getPluginManagement().getPlugins().iterator();
-            }
-            else if ( type == PluginType.Plugins && m.getBuild().getPlugins() != null)
-            {
-                logger.debug( "Returning override of {}", m.getBuild().getPlugins() );
-                plit = m.getBuild().getPlugins().iterator();
             }
 
             while ( plit != null && plit.hasNext() )
@@ -312,7 +259,6 @@ public class ModelIO
                     // Property reference to something in the remote pom. Resolve and inline it now.
                     String newVersion = resolveProperty( userProperties, m.getProperties(), p.getVersion() );
 
-                    // TODO: Complete replacement with PomView
                     if ( newVersion.startsWith("${") || newVersion.length() == 0)
                     {
                         // Use PomView as that contains a pre-resolved list of plugins.
@@ -372,7 +318,7 @@ public class ModelIO
         }
         else
         {
-            throw new ManipulationException(  "Attempting to align to a BOM that does not have a {} section", type );
+            throw new ManipulationException( "Attempting to align to a BOM that does not have a pluginManagement section" );
         }
         return pluginOverrides;
     }

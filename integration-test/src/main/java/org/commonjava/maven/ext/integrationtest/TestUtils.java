@@ -109,7 +109,7 @@ public class TestUtils
     static void runLikeInvoker( String workingDir, String url )
         throws Exception
     {
-        ExecutionParser executionParser = new DefaultExecutionParser( DefaultExecutionParser.DEFAULT_HANDLERS );
+        ExecutionParser executionParser = new DefaultExecutionParser();
         Collection<Execution> executions = executionParser.parse( workingDir );
 
         // Execute

@@ -137,7 +137,9 @@ public class DependencyState
     {
         remoteBOMdepMgmt = IdUtils.parseGAVs( userProps.getProperty( DEPENDENCY_MANAGEMENT_POM_PROPERTY ) );
 
+        extraBOMDepMgmts = new HashMap<>();
         extraBOMs = new HashMap<>();
+
         for ( Map.Entry<String, String> extra : getPropertiesByPrefix( userProps, EXTRA_BOM_PREFIX ).entrySet() )
         {
             extraBOMs.put( extra.getKey(), SimpleProjectVersionRef.parse( extra.getValue() ) );
@@ -219,10 +221,6 @@ public class DependencyState
 
     public Map<String, Map<ProjectRef, String>> getExtraBOMDepMgmts( )
     {
-        if ( extraBOMDepMgmts == null )
-        {
-            extraBOMDepMgmts = new HashMap<>(  );
-        }
         return extraBOMDepMgmts;
     }
 

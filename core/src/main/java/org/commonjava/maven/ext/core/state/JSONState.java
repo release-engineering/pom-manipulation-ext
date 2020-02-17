@@ -43,7 +43,6 @@ public class JSONState
      * 1. If replacement-value is blank it becomes a delete instead of replace.
      * 2. Multiple operations may be fed in via comma separator.
      *
-     * TODO: If <file> is blank this should be a wildcard for all files.
      */
     @ConfigValue( docIndex = "json.html" )
     private static final String JSON_PROPERTY = "jsonUpdate";

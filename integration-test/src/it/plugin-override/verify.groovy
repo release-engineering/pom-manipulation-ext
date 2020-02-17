@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (C) 2012 Red Hat, Inc. (jcasey@redhat.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,23 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+def pomFile = new File( basedir, 'pom.xml' )
+System.out.println( "Slurping POM: ${pomFile.getAbsolutePath()}" )
 
-package org.commonjava.maven.ext.annotation;
+def pom = new XmlSlurper().parse( pomFile )
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+def plugin = pom.build.pluginManagement.plugins.plugin.find { it.artifactId.text() == "maven-surefire-plugin" }
+assert plugin != null
+assert plugin.version.text() == "3.0.0-M3"
 
-/**
- * Annotation to denote configuration options.
- */
-@Retention(RetentionPolicy.SOURCE)
-@Target({ElementType.FIELD, ElementType.TYPE })
-public @interface ConfigValue
-{
-    /**
-     * @return String denoting the location in the online documentation used for index generation.
-     */
-    String docIndex();
-}
+plugin = pom.build.plugins.plugin.find { it.artifactId.text() == "maven-processor-plugin" }
+assert plugin != null
+assert plugin.version.text() == "3.3.3"
+
+assert pomFile.text.contains ("<buildNumberPlugin>1.4")

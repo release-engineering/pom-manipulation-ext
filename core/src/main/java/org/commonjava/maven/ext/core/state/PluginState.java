@@ -15,6 +15,7 @@
  */
 package org.commonjava.maven.ext.core.state;
 
+import lombok.Getter;
 import org.apache.maven.model.Plugin;
 import org.commonjava.maven.atlas.ident.ref.ArtifactRef;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
@@ -28,6 +29,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+
+import static org.commonjava.maven.ext.core.util.PropertiesUtils.getPropertiesByPrefix;
 
 /**
  * Captures configuration relating to plugin alignment from the POMs. Used by {@link PluginManipulator}.
@@ -72,6 +75,10 @@ public class PluginState
     @ConfigValue( docIndex = "plugin-manip.html#basic-plugin-alignment")
     private static final String PLUGIN_MANAGEMENT_PRECEDENCE = "pluginManagementPrecedence";
 
+    // TODO: ConfigValue
+    @ConfigValue( docIndex = "")
+    private static final String PLUGIN_OVERRIDE_PREFIX = "pluginOverride.";
+
     /**
      * Two possible methods currently supported configuration merging precedence:
      * <pre>
@@ -86,13 +93,20 @@ public class PluginState
         LOCAL
     }
 
-    private List<ProjectVersionRef> pluginMgmt;
+    @Getter
+    private List<ProjectVersionRef> remotePluginMgmt;
 
+    @Getter
     private Precedence configPrecedence;
 
-    private Set<Plugin> remoteRESTplugins = new HashSet<>(  );
+    @Getter
+    private final Set<Plugin> remoteRESTplugins = new HashSet<>();
 
+    @Getter
     private PluginPrecedence precedence;
+
+    @Getter
+    private Map<String, String> pluginOverride;
 
     public PluginState( final Properties userProps ) throws ManipulationException
     {
@@ -101,7 +115,8 @@ public class PluginState
 
     public void initialise( Properties userProps ) throws ManipulationException
     {
-        pluginMgmt = IdUtils.parseGAVs( userProps.getProperty( PLUGIN_MANAGEMENT_POM_PROPERTY ) );
+        remotePluginMgmt = IdUtils.parseGAVs( userProps.getProperty( PLUGIN_MANAGEMENT_POM_PROPERTY ) );
+        pluginOverride = getPropertiesByPrefix( userProps, PLUGIN_OVERRIDE_PREFIX );
         switch ( Precedence.valueOf( userProps.getProperty( PLUGIN_MANAGEMENT_PRECEDENCE,
                                                             Precedence.REMOTE.toString() ).toUpperCase() ) )
         {
@@ -166,18 +181,9 @@ public class PluginState
     public boolean isEnabled()
     {
         return ( ! ( precedence == PluginPrecedence.NONE ) ) &&
-                        ( pluginMgmt != null && !pluginMgmt.isEmpty() ) ||
-                        ( remoteRESTplugins != null && !remoteRESTplugins.isEmpty() );
-    }
-
-    public List<ProjectVersionRef> getRemotePluginMgmt()
-    {
-        return pluginMgmt;
-    }
-
-    public Precedence getConfigPrecedence()
-    {
-        return configPrecedence;
+                        ( remotePluginMgmt != null && !remotePluginMgmt.isEmpty() ) ||
+                        ( !remoteRESTplugins.isEmpty() ) ||
+                        !pluginOverride.isEmpty();
     }
 
     public void setRemoteRESTOverrides( Map<ArtifactRef, String> overrides )
@@ -195,10 +201,5 @@ public class PluginState
     public Set<Plugin> getRemoteRESTOverrides( )
     {
         return remoteRESTplugins;
-    }
-
-    public PluginPrecedence getPrecedence()
-    {
-        return precedence;
     }
 }

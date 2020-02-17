@@ -61,7 +61,7 @@ public class ProjectVersioningManipulator
 {
     private final Logger logger = LoggerFactory.getLogger( getClass() );
 
-    private VersionCalculator calculator;
+    private final VersionCalculator calculator;
 
     private ManipulationSession session;
 
@@ -134,7 +134,6 @@ public class ProjectVersioningManipulator
      * @return whether any changes have been applied.
      * @throws ManipulationException if an error occurs.
      */
-    // TODO: Loooong method
     protected boolean applyVersioningChanges( final Project project, final VersioningState state )
         throws ManipulationException
     {

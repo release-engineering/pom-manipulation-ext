@@ -92,8 +92,7 @@ public class RangeResolver
         {
             try
             {
-                // TODO:
-                // Ranges in properties are not currently handled.
+                // TODO: Ranges in properties are not currently handled.
 
                 if ( p.getModel().getBuild() != null )
                 {

@@ -46,7 +46,7 @@ public class PlexusTestRunner
 
         final DefaultContainerConfiguration config = new DefaultContainerConfiguration();
 
-        // TODO: Set implicitly by below??? : config.setAutoWiring( true );
+        // setAutoWiring is set implicitly by below.
         config.setClassPathScanning( PlexusConstants.SCANNING_ON );
         config.setComponentVisibility( PlexusConstants.GLOBAL_VISIBILITY );
         config.setName( testClass.getName() );

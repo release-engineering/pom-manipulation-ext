@@ -28,30 +28,25 @@ import java.util.Properties;
  */
 public interface ExecutionParser
 {
-    ExecutionParserHandler SKIP_HANDLER = new ExecutionParserHandler()
-    {
-        @Override
-        public void handle( Execution execution, Map<String, String> params )
-        {
-            String key = params.get( "key" );
-            String value = params.get( "value" );
+    ExecutionParserHandler SKIP_HANDLER = ( execution, params ) -> {
+        String key = params.get( "key" );
+        String value = params.get( "value" );
 
-            if ( key.matches( "invoker\\.os\\.family.*" ) && value != null)
+        if ( key.matches( "invoker\\.os\\.family.*" ) && value != null)
+        {
+            value = value.trim();
+            boolean invert = false;
+            if ( value.startsWith( "!" ) )
             {
-                value = value.trim();
-                boolean invert = false;
-                if ( value.startsWith( "!" ) )
+                invert = true;
+                value = value.substring( 1 );
+            }
+            // Very limited handling of selector conditions - just enough to skip for Windows.
+            if ( "windows".equalsIgnoreCase( value ) )
+            {
+                if ( invert && SystemUtils.IS_OS_WINDOWS )
                 {
-                    invert = true;
-                    value = value.substring( 1 );
-                }
-                // TODO: Very limited handling of selector conditions - just enough to skip for Windows.
-                if ( "windows".equalsIgnoreCase( value ) )
-                {
-                    if ( invert && SystemUtils.IS_OS_WINDOWS )
-                    {
-                        execution.setSkip( true );
-                    }
+                    execution.setSkip( true );
                 }
             }
         }
@@ -60,106 +55,81 @@ public interface ExecutionParser
     /**
      * Sets mvn command of Execution
      */
-    ExecutionParserHandler BUILD_HANDLER = new ExecutionParserHandler()
-    {
-        @Override
-        public void handle( Execution execution, Map<String, String> params )
-        {
-            String key = params.get( "key" );
-            String value = params.get( "value" );
+    ExecutionParserHandler BUILD_HANDLER = ( execution, params ) -> {
+        String key = params.get( "key" );
+        String value = params.get( "value" );
 
-            if ( key.matches( "invoker\\.goals.*" ) )
-            {
-                execution.setMvnCommand( value );
-            }
-            else if ( !key.matches( "invoker\\..*" ) && value.isEmpty() )
-            {
-                execution.setMvnCommand( key );
-            }
+        if ( key.matches( "invoker\\.goals.*" ) )
+        {
+            execution.setMvnCommand( value );
+        }
+        else if ( !key.matches( "invoker\\..*" ) && value.isEmpty() )
+        {
+            execution.setMvnCommand( key );
         }
     };
 
-    ExecutionParserHandler BUILD_PROFILES_HANDLER = new ExecutionParserHandler()
-    {
-        @Override
-        public void handle( Execution execution, Map<String, String> params )
-        {
-            String key = params.get( "key" );
-            String value = params.get( "value" );
+    ExecutionParserHandler BUILD_PROFILES_HANDLER = ( execution, params ) -> {
+        String key = params.get( "key" );
+        String value = params.get( "value" );
 
-            if ( key.matches( "invoker\\.profiles.*" ) )
+        if ( key.matches( "invoker\\.profiles.*" ) )
+        {
+            Map<String,String> flags = execution.getFlags();
+            if ( flags == null)
             {
-                Map<String,String> flags = execution.getFlags();
-                if ( flags == null)
-                {
-                    flags = new HashMap<>(  );
-                }
-                flags.put( "activeProfiles", value );
-                execution.setFlags( flags );
+                flags = new HashMap<>(  );
             }
+            flags.put( "activeProfiles", value );
+            execution.setFlags( flags );
         }
     };
 
     /**
      * Sets expected result of Execution (i.e. success true/false)
      */
-    ExecutionParserHandler BUILD_RESULT_HANDLER = new ExecutionParserHandler()
-    {
-        @Override
-        public void handle( Execution execution, Map<String, String> params )
-        {
-            String key = params.get( "key" );
-            String value = params.get( "value" );
+    ExecutionParserHandler BUILD_RESULT_HANDLER = ( execution, params ) -> {
+        String key = params.get( "key" );
+        String value = params.get( "value" );
 
-            if ( key.matches( "invoker\\.buildResult.*" ) && value.equals( "failure" ) )
-            {
-                execution.setSuccess( false );
-            }
+        if ( key.matches( "invoker\\.buildResult.*" ) && value.equals( "failure" ) )
+        {
+            execution.setSuccess( false );
         }
     };
 
     /**
      * Sets java parameters to Execution
      */
-    ExecutionParserHandler SYSTEM_PROPERTIES_HANDLER = new ExecutionParserHandler()
-    {
-        @Override
-        public void handle( Execution execution, Map<String, String> params )
+    ExecutionParserHandler SYSTEM_PROPERTIES_HANDLER = ( execution, params ) -> {
+        String key = params.get( "key" );
+        String value = params.get( "value" );
+
+        if ( key.matches( "invoker\\.systemPropertiesFile.*" ) )
         {
-            String key = params.get( "key" );
-            String value = params.get( "value" );
+            Properties props = TestUtils.loadProps( execution.getLocation() + "/" + value );
 
-            if ( key.matches( "invoker\\.systemPropertiesFile.*" ) )
+            // Properties to Map
+            Map<String, String> javaParams = TestUtils.propsToMap( props );
+            if ( execution.getJavaParams() != null )
             {
-                Properties props = TestUtils.loadProps( execution.getLocation() + "/" + value );
-
-                // Properties to Map
-                Map<String, String> javaParams = TestUtils.propsToMap( props );
-                if ( execution.getJavaParams() != null )
-                {
-                    javaParams.putAll( execution.getJavaParams() );
-                }
-
-                // And put it all into execution
-                execution.setJavaParams( javaParams );
+                javaParams.putAll( execution.getJavaParams() );
             }
+
+            // And put it all into execution
+            execution.setJavaParams( javaParams );
         }
     };
 
     /**
      * Used after all other handlers were run
      */
-    ExecutionParserHandler POST_HANDLER = new ExecutionParserHandler()
-    {
-        @Override
-        public void handle( Execution execution, Map<String, String> params )
+    ExecutionParserHandler POST_HANDLER = ( execution, params ) -> {
+        if ( execution.getJavaParams() == null )
         {
-            if ( execution.getJavaParams() == null )
-            {
-                Properties props = TestUtils.loadProps( execution.getLocation() + "/test.properties" );
-                Map<String, String> javaParams = TestUtils.propsToMap( props );
-                execution.setJavaParams( javaParams );
-            }
+            Properties props = TestUtils.loadProps( execution.getLocation() + "/test.properties" );
+            Map<String, String> javaParams = TestUtils.propsToMap( props );
+            execution.setJavaParams( javaParams );
         }
     };
 
@@ -170,11 +140,4 @@ public interface ExecutionParser
      * @return Collection of executions
      */
     Collection<Execution> parse( String workingDir );
-
-    /**
-     * Adds another execution parser handler (to be used when parsing)
-     *
-     * @param handler - Execution parser handler
-     */
-    void addHandler( ExecutionParserHandler handler );
 }
