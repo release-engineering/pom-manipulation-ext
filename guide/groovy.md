@@ -146,6 +146,16 @@ The following API is available:
 | void reinitialiseSessionStates() | This will re-initialise any State linked to this session. This is useful if the groovy scripts have altered the user properties. |
 | void overrideProjectVersion ([ProjectVersionRef](https://github.com/Commonjava/atlas/blob/master/identities/src/main/java/org/commonjava/atlas/maven/ident/ref/ProjectVersionRef.java)) | The specified GAV will be queried from DA for its current suffix and that suffix be used in [versionSuffix](project-version-manip.html#manual-version-suffix) instead of any [versionIncrementalSuffix](project-version-manip.html#automatic-version-increment). |
 
+<table bgcolor="#ffff00">
+<tr>
+<td>
+    <b>NOTE</b> : From version 4.0 the following extra API is available:
+</td>
+</tr>
+</table>
+
+| [Logger](https://www.javadoc.io/doc/org.slf4j/slf4j-api/1.7.30/org/slf4j/Logger.html) getLogger() | This will return the current SLF4J Logger instance. |
+
 
 This can then be invoked by e.g.
 
