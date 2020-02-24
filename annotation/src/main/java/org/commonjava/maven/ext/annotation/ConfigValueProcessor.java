@@ -134,8 +134,16 @@ public class ConfigValueProcessor extends AbstractProcessor
 
         StringBuilder propertyIndex = new StringBuilder();
 
-        indexResults.forEach( (key, value) -> propertyIndex.append( "  * [" ).
-                        append( key ).append( "](" ).append( value ).append( ")" ).append( System.lineSeparator() ) );
+        indexResults.forEach( (key, value) -> propertyIndex
+                .append( "  * [" )
+                .append( key )
+                .append( "](" )
+                .append( value )
+                .append( ")" )
+                .append( "\t" )
+                .append( varResults.get(key) ? "(deprecated)" : "")
+                .append( System.lineSeparator() )
+        );
         FileUtils.writeStringToFile(
                         new File(processingEnv.getOptions().get( ROOT_DIR ) +
                                                  File.separator + "target" + File.separator + "property-index-subset.md"),

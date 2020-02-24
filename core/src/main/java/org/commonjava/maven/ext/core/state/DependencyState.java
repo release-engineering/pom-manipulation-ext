@@ -45,7 +45,10 @@ public class DependencyState
      * <pre>
      * <code>-DdependencyExclusion.junit:junit@org.groupId:artifactId</code>
      * </pre>
+     * This has now been deprecated and is now an alias for {@link DependencyState#DEPENDENCY_OVERRIDE_PREFIX}
      */
+    @SuppressWarnings("DeprecatedIsStillUsed")
+    @Deprecated
     @ConfigValue( docIndex = "dep-manip.html#exclusions-and-overrides", deprecated = true )
     private static final String DEPENDENCY_EXCLUSION_PREFIX = "dependencyExclusion.";
 
@@ -90,7 +93,11 @@ public class DependencyState
     }
 
     /**
-     * Merely an alias for {@link DependencyState#DEPENDENCY_EXCLUSION_PREFIX}
+     * The String that needs to be prepended a system property to make it a dependencyExclusion.
+     * For example to exclude junit alignment for the GAV (org.groupId:artifactId)
+     * <pre>
+     * <code>-DdependencyOverride.junit:junit@org.groupId:artifactId</code>
+     * </pre>
      */
     @ConfigValue( docIndex = "dep-manip.html#exclusions-and-overrides")
     private static final String DEPENDENCY_OVERRIDE_PREFIX = "dependencyOverride.";
@@ -122,7 +129,7 @@ public class DependencyState
 
     private Map<String, Map<ProjectRef, String>> extraBOMDepMgmts;
 
-    private Map<String, String> dependencyExclusions;
+    private Map<String, String> dependencyOverrides;
 
     private Map<ArtifactRef, String> remoteRESTdepMgmt;
 
@@ -145,12 +152,12 @@ public class DependencyState
             extraBOMs.put( extra.getKey(), SimpleProjectVersionRef.parse( extra.getValue() ) );
         }
 
-        dependencyExclusions = getPropertiesByPrefix( userProps, DEPENDENCY_EXCLUSION_PREFIX );
+        dependencyOverrides = getPropertiesByPrefix( userProps, DEPENDENCY_EXCLUSION_PREFIX );
 
         Map<String, String> oP = PropertiesUtils.getPropertiesByPrefix( userProps, DEPENDENCY_OVERRIDE_PREFIX );
         for ( String s : oP.keySet() )
         {
-            if ( dependencyExclusions.put( s, oP.get( s ) ) != null )
+            if ( dependencyOverrides.put( s, oP.get( s ) ) != null )
             {
                 throw new ManipulationException( "Property clash between dependencyOverride and dependencyExclusion for {}", s );
             }
@@ -203,10 +210,10 @@ public class DependencyState
     @Override
     public boolean isEnabled()
     {
-        return ( ( ! ( precedence == DependencyPrecedence.NONE ) ) &&
+        return ( ( !( precedence == DependencyPrecedence.NONE ) ) &&
                  ( remoteBOMdepMgmt != null && !remoteBOMdepMgmt.isEmpty()   ) ||
                  ( remoteRESTdepMgmt != null && !remoteRESTdepMgmt.isEmpty() ) ||
-                 (!dependencyExclusions.isEmpty()) );
+                 ( !dependencyOverrides.isEmpty()) );
     }
 
     public List<ProjectVersionRef> getRemoteBOMDepMgmt()
@@ -243,13 +250,13 @@ public class DependencyState
         return remoteRESTdepMgmt;
     }
 
-    public Map<String, String> getDependencyExclusions( )
+    public Map<String, String> getDependencyOverrides( )
     {
-        return dependencyExclusions;
+        return dependencyOverrides;
     }
 
     public void updateExclusions (String key, String value)
     {
-        dependencyExclusions.put( key, value );
+        dependencyOverrides.put( key, value );
     }
 }

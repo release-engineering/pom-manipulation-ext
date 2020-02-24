@@ -21,6 +21,7 @@ import org.apache.maven.profiles.DefaultProfileManager;
 import org.apache.maven.profiles.activation.ProfileActivationException;
 import org.apache.maven.project.ProjectBuilder;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
+import org.commonjava.maven.ext.annotation.ConfigValue;
 import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.common.json.PME;
 import org.commonjava.maven.ext.common.model.Project;
@@ -45,6 +46,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -82,6 +84,8 @@ public class ManipulationManager
 
     public static final String REPORT_JSON_OUTPUT_FILE = "reportJSONOutputFile";
 
+    // TODO: Config index value
+    @ConfigValue( docIndex = "")
     public static final String DEPRECATED_PROPERTIES = "enabledDeprecatedProperties";
 
     private final Logger logger = LoggerFactory.getLogger( getClass() );
@@ -116,13 +120,13 @@ public class ManipulationManager
      * @throws ManipulationException if an error occurs.
      */
     public void init( final ManipulationSession session )
-        throws ManipulationException
-    {
-        logger.debug( "Initialising ManipulationManager with user properties {}", session.getUserProperties() );
+        throws ManipulationException {
+        logger.debug("Initialising ManipulationManager with user properties {}", session.getUserProperties());
 
         // We invert it as the property is to _enable_ deprecated properties - which is off by default.
-        final boolean deprecatedDisabled = !Boolean.parseBoolean(session.getUserProperties().getProperty( DEPRECATED_PROPERTIES,
+        final boolean deprecatedDisabled = !Boolean.parseBoolean(session.getUserProperties().getProperty(DEPRECATED_PROPERTIES,
                 "false"));
+        final HashMap<String, String> deprecatedUsage = new HashMap<>();
 
         session.getUserProperties().stringPropertyNames().forEach(
                 p -> {
@@ -132,21 +136,18 @@ public class ManipulationManager
                     // If the configuration value 'x' is deprecated remove it from the property list _if_ deprecated properties
                     // are NOT enabled. We have to do a rather ugly starts with instead of direct keying as some properties
                     // operate upon a prefix basis.
-                    if (deprecatedDisabled) {
-                        logger.debug ("Examining for deprecated properties in {}", p);
-                        ConfigList.allConfigValues.entrySet().stream().
-                                filter( e -> p.startsWith(e.getKey())).
-                                filter( Map.Entry::getValue ).
-                                forEach(up ->
-                                {
-                                    logger.warn
-                                            ("Removing key {} (as deprecated) from user properties (with matcher of {})",
-                                                    p,
-                                                    up.getKey());
-                                    session.getUserProperties().remove(p);
-                                });
-                    }
+                    logger.debug("Examining for deprecated properties for {}", p);
+                    ConfigList.allConfigValues.entrySet().stream().
+                            filter(e -> p.startsWith(e.getKey())).
+                            filter(Map.Entry::getValue).
+                            forEach(up -> deprecatedUsage.put(p, up.getKey()));
                 });
+
+        if (deprecatedDisabled && deprecatedUsage.size() > 0)
+        {
+            deprecatedUsage.forEach( (k,v) -> logger.warn ("Located deprecated property {} in user properties (with matcher of {})", k, v) );
+            throw new ManipulationException("Deprecated properties are being used. Either remove them or set enabledDeprecatedProperties=true");
+        }
 
         for ( final ExtensionInfrastructure infra : infrastructure.values() )
         {
