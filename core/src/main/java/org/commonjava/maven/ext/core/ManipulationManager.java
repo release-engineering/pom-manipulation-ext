@@ -143,10 +143,13 @@ public class ManipulationManager
                             forEach(up -> deprecatedUsage.put(p, up.getKey()));
                 });
 
-        if (deprecatedDisabled && deprecatedUsage.size() > 0)
+        if (deprecatedUsage.size() > 0)
         {
             deprecatedUsage.forEach( (k,v) -> logger.warn ("Located deprecated property {} in user properties (with matcher of {})", k, v) );
-            throw new ManipulationException("Deprecated properties are being used. Either remove them or set enabledDeprecatedProperties=true");
+            if ( deprecatedDisabled )
+            {
+                throw new ManipulationException("Deprecated properties are being used. Either remove them or set enabledDeprecatedProperties=true");
+            }
         }
 
         for ( final ExtensionInfrastructure infra : infrastructure.values() )

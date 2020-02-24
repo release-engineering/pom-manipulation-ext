@@ -30,3 +30,6 @@ assert ossDependency.version.text() == "9"
 def ossParentVersion = pom.parent.version.text()
 assert ossParentVersion != null
 assert ossParentVersion == "9"
+
+def buildLog = new File( basedir, 'build.log' )
+assert buildLog.text.contains("Located deprecated property")
