@@ -46,7 +46,7 @@ public class DependencyState
      * <code>-DdependencyExclusion.junit:junit@org.groupId:artifactId</code>
      * </pre>
      */
-    @ConfigValue( docIndex = "dep-manip.html#exclusions-and-overrides")
+    @ConfigValue( docIndex = "dep-manip.html#exclusions-and-overrides", deprecated = true )
     private static final String DEPENDENCY_EXCLUSION_PREFIX = "dependencyExclusion.";
 
     /**

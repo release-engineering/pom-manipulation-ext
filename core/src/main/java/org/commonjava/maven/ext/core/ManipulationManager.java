@@ -82,11 +82,13 @@ public class ManipulationManager
 
     public static final String REPORT_JSON_OUTPUT_FILE = "reportJSONOutputFile";
 
+    public static final String DEPRECATED_PROPERTIES = "enabledDeprecatedProperties";
+
     private final Logger logger = LoggerFactory.getLogger( getClass() );
 
-    private Map<String, Manipulator> manipulators;
+    private final Map<String, Manipulator> manipulators;
 
-    private Map<String, ExtensionInfrastructure> infrastructure;
+    private final Map<String, ExtensionInfrastructure> infrastructure;
 
     private final PomIO pomIO;
 
@@ -108,7 +110,7 @@ public class ManipulationManager
 
     /**
      * Initialize {@link ManipulationSession} using the given {@link MavenSession} instance, along with any state managed by the individual
-     * {@link Manipulator} components.
+     * {@link Manipulator} components. Entry point for both CLI and EXT modes.
      *
      * @param session the container session for manipulation.
      * @throws ManipulationException if an error occurs.
@@ -117,6 +119,34 @@ public class ManipulationManager
         throws ManipulationException
     {
         logger.debug( "Initialising ManipulationManager with user properties {}", session.getUserProperties() );
+
+        // We invert it as the property is to _enable_ deprecated properties - which is off by default.
+        final boolean deprecatedDisabled = !Boolean.parseBoolean(session.getUserProperties().getProperty( DEPRECATED_PROPERTIES,
+                "false"));
+
+        session.getUserProperties().stringPropertyNames().forEach(
+                p -> {
+                    if (!p.equals("maven.repo.local") && ConfigList.allConfigValues.keySet().stream().noneMatch(p::startsWith)) {
+                        logger.warn("Unknown configuration value {}", p);
+                    }
+                    // If the configuration value 'x' is deprecated remove it from the property list _if_ deprecated properties
+                    // are NOT enabled. We have to do a rather ugly starts with instead of direct keying as some properties
+                    // operate upon a prefix basis.
+                    if (deprecatedDisabled) {
+                        logger.debug ("Examining for deprecated properties in {}", p);
+                        ConfigList.allConfigValues.entrySet().stream().
+                                filter( e -> p.startsWith(e.getKey())).
+                                filter( Map.Entry::getValue ).
+                                forEach(up ->
+                                {
+                                    logger.warn
+                                            ("Removing key {} (as deprecated) from user properties (with matcher of {})",
+                                                    p,
+                                                    up.getKey());
+                                    session.getUserProperties().remove(p);
+                                });
+                    }
+                });
 
         for ( final ExtensionInfrastructure infra : infrastructure.values() )
         {

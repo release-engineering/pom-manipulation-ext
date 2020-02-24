@@ -19,7 +19,6 @@ import org.apache.maven.eventspy.AbstractEventSpy;
 import org.apache.maven.execution.ExecutionEvent;
 import org.apache.maven.execution.ExecutionEvent.Type;
 import org.commonjava.maven.ext.common.ManipulationException;
-import org.commonjava.maven.ext.core.ConfigList;
 import org.commonjava.maven.ext.core.ManipulationManager;
 import org.commonjava.maven.ext.core.ManipulationSession;
 import org.commonjava.maven.ext.core.util.PropertiesUtils;
@@ -37,6 +36,7 @@ import java.util.Properties;
  * Implements hooks necessary to apply modifications in the Maven bootstrap, before the build starts.
  * @author jdcasey
  */
+@SuppressWarnings("unused")
 @Named
 @Singleton
 public class ManipulatingEventSpy
@@ -82,14 +82,6 @@ public class ManipulatingEventSpy
                     if ( ee.getSession() != null )
                     {
                         session.setMavenSession( ee.getSession() );
-
-                        for ( String k : session.getUserProperties().stringPropertyNames() )
-                        {
-                            if ( ConfigList.allConfigValues.values().stream().noneMatch( k::startsWith ) )
-                            {
-                                logger.warn( "Unknown configuration value {}", k );
-                            }
-                        }
 
                         if ( ee.getSession().getRequest().getPom() != null )
                         {

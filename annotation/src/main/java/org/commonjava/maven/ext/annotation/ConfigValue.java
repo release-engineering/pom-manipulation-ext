@@ -32,4 +32,6 @@ public @interface ConfigValue
      * @return String denoting the location in the online documentation used for index generation.
      */
     String docIndex();
+
+    boolean deprecated() default false;
 }

@@ -221,4 +221,26 @@ public class CliTest
         assertEquals( ms.getRequest().getLocalRepository().getBasedir(),
                       ms.getRequest().getLocalRepositoryPath().toString() );
     }
+
+
+    @Test
+    public void checkUnknownProperty() throws Exception
+    {
+        File folder = temp.newFolder();
+        File target = temp.newFile( );
+        // Locate the PME project pom file. Use that to verify inheritance tracking.
+        Files.copy( Paths.get( INTEGRATION_TEST.toString(),  "pom.xml" ), target.toPath(), StandardCopyOption.REPLACE_EXISTING );
+
+        Cli c = new Cli();
+        TestUtils.executeMethod(c, "run", new Object[]{
+                new String[]{"-d",
+                        "--settings=" + getClass().getResource("/settings-test.xml").getFile(),
+                        "-Dmaven.repo.local=" + folder.toString(),
+                        "-DUNKNOWN_PROPERTY=DUMMY",
+                        "-Prun-its",
+                        "--file",
+                        target.getCanonicalPath()}});
+
+        assertTrue (systemRule.getLog().contains( "Unknown configuration value UNKNOWN_PROPERTY" ));
+    }
 }
