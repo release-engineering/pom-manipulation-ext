@@ -133,9 +133,8 @@ public class ManipulationManager
                     if (!p.equals("maven.repo.local") && ConfigList.allConfigValues.keySet().stream().noneMatch(p::startsWith)) {
                         logger.warn("Unknown configuration value {}", p);
                     }
-                    // If the configuration value 'x' is deprecated remove it from the property list _if_ deprecated properties
-                    // are NOT enabled. We have to do a rather ugly starts with instead of direct keying as some properties
-                    // operate upon a prefix basis.
+                    // Track deprecated properties. We have to do a rather ugly starts with instead of direct keying as
+                    // some properties operate upon a prefix basis.
                     logger.debug("Examining for deprecated properties for {}", p);
                     ConfigList.allConfigValues.entrySet().stream().
                             filter(e -> p.startsWith(e.getKey())).
