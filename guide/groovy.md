@@ -149,7 +149,7 @@ The following API is available:
 <table bgcolor="#ffff00">
 <tr>
 <td>
-    <b>NOTE</b> : From version 4.0 the following extra API is available:
+    <b>NOTE</b> : From version 3.8.2 the following extra API is available:
 </td>
 </tr>
 </table>
