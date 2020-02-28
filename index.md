@@ -20,7 +20,7 @@ For a list of changes please see [here](https://github.com/release-engineering/p
 
 #### Installation as CLI tool.
 
-Obtain the jar from [here](http://central.maven.org/maven2/org/commonjava/maven/ext/pom-manipulation-cli) and then it may be invoked as
+Obtain the jar from [here](https://repo1.maven.org/maven2/org/commonjava/maven/ext/pom-manipulation-cli) and then it may be invoked as
 
     java -jar pom-manipulation-cli-<version>.jar
 
