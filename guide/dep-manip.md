@@ -171,13 +171,20 @@ will change to:
 
 In a multi-module build it is considered good practice to coordinate dependency version among the modules using dependency management.  In other words, if module A and B both use dependency X, both modules should use the same version of dependency X.  Therefore, the default behaviour of this extension is to use a single set of dependency versions applied to all modules.
 
-It is possible to flexibly override or exclude a dependency globally or on a per module basis. The property starts with `dependencyExclusion.` and has the following format:
+It is possible to flexibly override or exclude a dependency globally or on a per module basis. The property starts with `dependencyOverride.` and has the following format:
 
-    mvn install -DdependencyExclusion.[groupId]:[artifactId]@[moduleGroupId]:[moduleArtifactId]=[version] | ,+[group:artifact]...
+    mvn install -DdependencyOverride.[groupId]:[artifactId]@[moduleGroupId]:[moduleArtifactId]=[version] | ,+[group:artifact]...
 
-**Note:** `dependencyOverride` is an alias for `dependencyExclusion` and functions _exactly the same_. If both are set then they will be merged and an error thrown if they clash.
 
-**Note:** Multiple exclusions may be added using multiple instances of `-DdependencyExclusion...`.
+<table bgcolor="#ffff00">
+<tr>
+<td>
+    <b>NOTE</b> : Previously <i>dependencyExclusion</i> operated as an alias of <i>dependencyOverride</i> (and functioned _exactly the same_). As of PME 4.0 this has now been deprecated and must be explicitly enabled. If enabled and both are set then they will be merged and an error thrown if they clash.
+</td>
+</tr>
+</table>
+
+**Note:** Multiple overrides/exclusions may be added using multiple instances of `-DdependencyOverride...`.
 
 #### Global Version Override
 
