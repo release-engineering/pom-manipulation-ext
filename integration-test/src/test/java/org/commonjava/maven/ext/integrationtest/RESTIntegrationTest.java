@@ -28,10 +28,10 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 
 import static org.commonjava.maven.ext.integrationtest.DefaultCliIntegrationTest.setupExists;
-import static org.commonjava.maven.ext.integrationtest.TestUtils.DEFAULT_MVN_PARAMS;
-import static org.commonjava.maven.ext.integrationtest.TestUtils.getDefaultTestLocation;
-import static org.commonjava.maven.ext.integrationtest.TestUtils.runLikeInvoker;
-import static org.commonjava.maven.ext.integrationtest.TestUtils.runMaven;
+import static org.commonjava.maven.ext.integrationtest.ITestUtils.DEFAULT_MVN_PARAMS;
+import static org.commonjava.maven.ext.integrationtest.ITestUtils.getDefaultTestLocation;
+import static org.commonjava.maven.ext.integrationtest.ITestUtils.runLikeInvoker;
+import static org.commonjava.maven.ext.integrationtest.ITestUtils.runMaven;
 
 public class RESTIntegrationTest
 {

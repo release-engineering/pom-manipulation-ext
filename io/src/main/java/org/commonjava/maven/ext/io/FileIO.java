@@ -30,7 +30,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 
@@ -41,8 +40,7 @@ import java.util.UUID;
 @Singleton
 public class FileIO
 {
-
-    private GalleyInfrastructure infra;
+    private final GalleyInfrastructure infra;
 
     @Inject
     public FileIO(@Named("galley") GalleyInfrastructure infra)
@@ -78,16 +76,10 @@ public class FileIO
     }
 
     static LineSeparator determineEOL( File file )
-        throws ManipulationException
-    {
-        return determineEOL( file, StandardCharsets.UTF_8 );
-    }
-
-    static LineSeparator determineEOL( File file, Charset charset )
             throws ManipulationException
     {
         try ( BufferedReader bufferIn = new BufferedReader( new InputStreamReader( new FileInputStream( file ),
-                charset ) ) )
+                StandardCharsets.UTF_8 ) ) )
         {
             int prev = -1;
             int ch;

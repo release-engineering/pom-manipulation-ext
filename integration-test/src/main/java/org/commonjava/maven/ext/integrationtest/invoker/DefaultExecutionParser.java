@@ -15,8 +15,6 @@
  */
 package org.commonjava.maven.ext.integrationtest.invoker;
 
-import org.commonjava.maven.ext.integrationtest.TestUtils;
-
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
@@ -39,7 +37,7 @@ public class DefaultExecutionParser
     @Override
     public Collection<Execution> parse( String workingDir )
     {
-        final Properties invokerProperties = TestUtils.loadProps( workingDir + "/invoker.properties" );
+        final Properties invokerProperties = ExecutionParser.loadProps( workingDir + "/invoker.properties" );
         Map<Integer, Execution> executions = new TreeMap<>();
 
         for ( Object rawKey : invokerProperties.keySet() )

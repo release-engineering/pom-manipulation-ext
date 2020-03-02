@@ -19,6 +19,8 @@ import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.ext.common.model.Project;
 import org.commonjava.maven.ext.common.session.MavenSessionHandler;
 import org.commonjava.maven.ext.io.ModelIO;
+import org.commonjava.maven.ext.io.PomIO;
+import org.omg.PortableServer.POAManager;
 
 import java.util.List;
 
@@ -50,6 +52,12 @@ public interface MavenBaseScript extends CommonBaseScript
      * @return a {@link ModelIO} reference.
      */
     ModelIO getModelIO();
+
+    /**
+     * Get the pom io instance for Project resolving.
+     * @return a {@link PomIO} reference.
+     */
+    PomIO getPomIO();
 
     /**
      * Get the MavenSessionHandler instance

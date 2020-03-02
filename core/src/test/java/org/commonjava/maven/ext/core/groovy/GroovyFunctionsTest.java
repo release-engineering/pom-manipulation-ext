@@ -48,7 +48,7 @@ public class GroovyFunctionsTest
 {
     private static final String RESOURCE_BASE = "properties/";
 
-    private AddSuffixJettyHandler handler = new AddSuffixJettyHandler();
+    private final AddSuffixJettyHandler handler = new AddSuffixJettyHandler();
 
     @Rule
     public TemporaryFolder temporaryFolder = new TemporaryFolder();
@@ -78,7 +78,7 @@ public class GroovyFunctionsTest
         Properties p = new Properties(  );
         p.setProperty( "restURL", mockServer.getUrl() );
 
-        impl.setValues( null, TestUtils.createSession( p ), projects, projects.get( 0 ), InvocationStage.FIRST );
+        impl.setValues(pomIO, null, null, TestUtils.createSession( p ), projects, projects.get( 0 ), InvocationStage.FIRST );
 
         impl.overrideProjectVersion( SimpleProjectVersionRef.parse( "org.foo:bar:1.0" ) );
     }
@@ -107,7 +107,7 @@ public class GroovyFunctionsTest
         p.setProperty( "restRepositoryGroup", "GroovyWithTemporary" );
         p.setProperty( "restURL", mockServer.getUrl() );
 
-        impl.setValues( null, TestUtils.createSession( p ), projects, projects.get( 0 ), InvocationStage.FIRST );
+        impl.setValues(pomIO, null, null, TestUtils.createSession( p ), projects, projects.get( 0 ), InvocationStage.FIRST );
 
         impl.overrideProjectVersion( SimpleProjectVersionRef.parse( "org.goots:sample:1.0.0" ) );
     }
@@ -137,7 +137,7 @@ public class GroovyFunctionsTest
         p.setProperty( "restRepositoryGroup", "GroovyWithTemporary" );
         p.setProperty( "restURL", mockServer.getUrl() );
 
-        impl.setValues( null, TestUtils.createSession( p ), projects, projects.get( 0 ), InvocationStage.FIRST );
+        impl.setValues(pomIO, null, null, TestUtils.createSession( p ), projects, projects.get( 0 ), InvocationStage.FIRST );
 
         impl.overrideProjectVersion( SimpleProjectVersionRef.parse( "org.goots:testTempOverrideWithNonTemp:1.0.0" ) );
 

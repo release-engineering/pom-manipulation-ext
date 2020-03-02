@@ -41,6 +41,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.io.IOException;
+import java.net.UnknownHostException;
 import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.List;
@@ -83,7 +85,7 @@ public class BaseScriptTest
         Project root = projects.stream().filter( p -> p.getProjectParent() == null ).findAny().orElse( null );
         logger.info( "Found project root " + root );
 
-        InitialGroovyManipulator gm = new InitialGroovyManipulator( null, null );
+        InitialGroovyManipulator gm = new InitialGroovyManipulator( null, null, null );
         gm.init( ms );
         TestUtils.executeMethod( gm, "applyGroovyScript", new Class[] { List.class, Project.class, File.class },
                                  new Object[] { projects, root, groovy } );
@@ -106,7 +108,7 @@ public class BaseScriptTest
         Project root = projects.stream().filter( p -> p.getProjectParent() == null ).findAny().orElse( null );
         logger.info( "Found project root " + root );
 
-        FinalGroovyManipulator gm = new FinalGroovyManipulator( null, null );
+        FinalGroovyManipulator gm = new FinalGroovyManipulator( null, null, null );
         gm.init( ms );
         TestUtils.executeMethod( gm, "applyGroovyScript", new Class[] { List.class, Project.class, File.class },
                                  new Object[] { projects, root, groovy } );
@@ -125,12 +127,17 @@ public class BaseScriptTest
                                                     .getParentFile()
                                                     .getParentFile(), "pom.xml" );
         PomIO pomIO = new PomIO();
+        FileIO fileIO = new FileIO( new GalleyInfrastructure( null, null ).init( temporaryFolder.newFolder() ) );
+
         List<Project> projects = pomIO.parseProject( projectroot );
         ManipulationManager m = new ManipulationManager( Collections.emptyMap(), Collections.emptyMap(), null );
         ManipulationSession ms = TestUtils.createSession( null );
         m.init( ms );
 
-        Project root = projects.stream().filter( p -> p.getProjectParent() == null ).findAny().orElseThrow(Exception::new);
+        Project root = projects.stream()
+                               .filter( p -> p.getProjectParent() == null )
+                               .findAny()
+                               .orElseThrow( Exception::new );
 
         logger.info( "Found project root {}", root );
 
@@ -142,10 +149,24 @@ public class BaseScriptTest
                 return null;
             }
         };
-        bs.setValues( null, ms, projects, root, null );
+        bs.setValues( pomIO, fileIO, null, ms, projects, root, null );
 
         bs.inlineProperty( root, SimpleProjectRef.parse( "org.commonjava.maven.atlas:atlas-identities" ) );
         bs.inlineProperty( root, SimpleProjectRef.parse( "org.commonjava.maven.galley:*" ) );
+
+        try
+        {
+            bs.getFileIO().resolveURL( "http://www.i-do-not-exist.com/foo" );
+            fail ("No exception");
+        }
+        catch ( IOException e )
+        {
+            if ( !( e instanceof UnknownHostException ))
+            {
+                fail ("Unknown exception " + e);
+            }
+            // else pass
+        }
 
         assertEquals( "0.17.1", root.getModel()
                                     .getDependencyManagement()
@@ -202,7 +223,7 @@ public class BaseScriptTest
         Project root = projects.stream().filter( p -> p.getProjectParent() == null ).findAny().orElse( null );
         logger.info( "Found project root " + root );
 
-        InitialGroovyManipulator gm = new InitialGroovyManipulator( null, null );
+        InitialGroovyManipulator gm = new InitialGroovyManipulator( null, null, null );
         gm.init( session );
         TestUtils.executeMethod( gm, "applyGroovyScript", new Class[] { List.class, Project.class, File.class },
                                  new Object[] { projects, root, groovy } );

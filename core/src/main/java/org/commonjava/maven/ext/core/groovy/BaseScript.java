@@ -15,12 +15,15 @@
  */
 package org.commonjava.maven.ext.core.groovy;
 
+import lombok.Getter;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.ext.common.model.Project;
 import org.commonjava.maven.ext.common.session.MavenSessionHandler;
 import org.commonjava.maven.ext.core.ManipulationSession;
 import org.commonjava.maven.ext.core.impl.InitialGroovyManipulator;
+import org.commonjava.maven.ext.io.FileIO;
 import org.commonjava.maven.ext.io.ModelIO;
+import org.commonjava.maven.ext.io.PomIO;
 
 import java.io.File;
 import java.util.List;
@@ -42,11 +45,21 @@ public abstract class BaseScript extends BaseScriptUtils
 
     private Properties userProperties;
 
-    private ModelIO modelIO;
-
     private MavenSessionHandler sessionHandler;
 
     private InvocationStage stage;
+
+    /**
+     * Get the modelIO instance for remote artifact resolving.
+     */
+    @Getter
+    private ModelIO modelIO;
+
+    @Getter
+    private FileIO fileIO;
+
+    @Getter
+    private PomIO pomIO;
 
     /**
      * Return the current Project
@@ -94,15 +107,6 @@ public abstract class BaseScript extends BaseScriptUtils
     }
 
     /**
-     * Get the modelIO instance for remote artifact resolving.
-     * @return a {@link ModelIO} reference.
-     */
-    public ModelIO getModelIO()
-    {
-        return modelIO;
-    }
-
-    /**
      * Get the MavenSessionHandler instance
      * @return a {@link MavenSessionHandler} reference.
      */
@@ -123,15 +127,19 @@ public abstract class BaseScript extends BaseScriptUtils
     /**
      * Internal use only - the {@link InitialGroovyManipulator} uses this to
      * initialise the values
+     * @param pomIO the pomIO instance.
+     * @param fileIO the fileIO instance.
      * @param modelIO the modelIO instance.
      * @param session the Session instance.
      * @param projects ArrayList of Project instances
      * @param project Current project
      * @param stage the current InvocationStage of the groovy script
      */
-    public void setValues( ModelIO modelIO, ManipulationSession session, List<Project> projects, Project project,
-                           InvocationStage stage )
+    public void setValues(PomIO pomIO, FileIO fileIO, ModelIO modelIO, ManipulationSession session, List<Project> projects, Project project,
+                          InvocationStage stage)
     {
+        this.fileIO = fileIO;
+        this.pomIO = pomIO;
         this.modelIO = modelIO;
         this.sessionHandler = session;
         this.projects = projects;

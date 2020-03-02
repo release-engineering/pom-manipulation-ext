@@ -22,6 +22,7 @@ import org.commonjava.maven.ext.core.groovy.InvocationStage;
 import org.commonjava.maven.ext.core.state.GroovyState;
 import org.commonjava.maven.ext.io.FileIO;
 import org.commonjava.maven.ext.io.ModelIO;
+import org.commonjava.maven.ext.io.PomIO;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -43,9 +44,9 @@ public class FinalGroovyManipulator
     implements Manipulator
 {
     @Inject
-    public FinalGroovyManipulator( ModelIO modelIO, FileIO fileIO)
+    public FinalGroovyManipulator(ModelIO modelIO, FileIO fileIO, PomIO pomIO)
     {
-        super( modelIO, fileIO );
+        super( modelIO, fileIO, pomIO );
     }
     /**
      * Initialize the {@link GroovyState} state holder in the {@link ManipulationSession}. This state holder detects

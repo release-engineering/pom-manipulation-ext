@@ -35,7 +35,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.codehaus.plexus.util.FileUtils.copyFile;
-import static org.commonjava.maven.ext.integrationtest.TestUtils.runCli;
+import static org.commonjava.maven.ext.integrationtest.ITestUtils.runCli;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;

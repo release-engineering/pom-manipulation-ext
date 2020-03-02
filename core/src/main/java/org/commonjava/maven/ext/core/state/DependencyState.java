@@ -93,7 +93,7 @@ public class DependencyState
     }
 
     /**
-     * The String that needs to be prepended a system property to make it a dependencyExclusion.
+     * The String that needs to be prepended a system property to make it a dependencyOverride.
      * For example to exclude junit alignment for the GAV (org.groupId:artifactId)
      * <pre>
      * <code>-DdependencyOverride.junit:junit@org.groupId:artifactId</code>

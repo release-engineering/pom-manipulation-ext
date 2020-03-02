@@ -32,6 +32,7 @@ import org.commonjava.maven.ext.core.groovy.PMEInvocationPoint;
 import org.commonjava.maven.ext.core.state.GroovyState;
 import org.commonjava.maven.ext.io.FileIO;
 import org.commonjava.maven.ext.io.ModelIO;
+import org.commonjava.maven.ext.io.PomIO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,17 +54,21 @@ public abstract class BaseGroovyManipulator
     protected final Logger logger = LoggerFactory.getLogger( getClass() );
 
     @SuppressWarnings( "WeakerAccess" )
-    protected ModelIO modelBuilder;
+    protected ModelIO modelIO;
 
     @SuppressWarnings( "WeakerAccess" )
     protected FileIO fileIO;
 
+    @SuppressWarnings( "WeakerAccess" )
+    protected PomIO pomIO;
+
     protected ManipulationSession session;
 
-    BaseGroovyManipulator( ModelIO modelIO, FileIO fileIO )
+    BaseGroovyManipulator( ModelIO modelIO, FileIO fileIO, PomIO pomIO )
     {
-        this.modelBuilder = modelIO;
+        this.modelIO = modelIO;
         this.fileIO = fileIO;
+        this.pomIO = pomIO;
     }
 
     public abstract int getExecutionIndex();
@@ -102,7 +107,7 @@ public abstract class BaseGroovyManipulator
                     {
                         final ArtifactRef ar = SimpleArtifactRef.parse( script );
                         logger.info( "Attempting to read GAV {} with classifier {} and type {} ", ar.asProjectVersionRef(), ar.getClassifier(), ar.getType() );
-                        found = modelBuilder.resolveRawFile( ar );
+                        found = modelIO.resolveRawFile( ar );
                     }
                     result.add( found );
                 }
@@ -150,7 +155,7 @@ public abstract class BaseGroovyManipulator
             }
             if ( script instanceof BaseScript )
             {
-                ((BaseScript) script).setValues( modelBuilder, session, projects, project, stage);
+                ((BaseScript) script).setValues(pomIO, fileIO, modelIO, session, projects, project, stage);
             }
             else
             {

@@ -31,7 +31,11 @@ public interface ExtensionInfrastructure
 {
     ExtensionInfrastructure init( ) throws ManipulationException;
 
+    // Only used for tests
     ExtensionInfrastructure init( final Location customLocation, final Transport customTransport, File cacheDir ) throws ManipulationException;
+
+    // Only used for tests
+    ExtensionInfrastructure init( File cacheDir ) throws ManipulationException;
 
     void finish();
 }

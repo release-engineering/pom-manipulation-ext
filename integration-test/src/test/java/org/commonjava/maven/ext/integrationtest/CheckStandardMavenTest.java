@@ -23,8 +23,8 @@ import org.junit.rules.TemporaryFolder;
 import java.io.File;
 import java.nio.charset.StandardCharsets;
 
-import static org.commonjava.maven.ext.integrationtest.TestUtils.DEFAULT_MVN_PARAMS;
-import static org.commonjava.maven.ext.integrationtest.TestUtils.runMaven;
+import static org.commonjava.maven.ext.integrationtest.ITestUtils.DEFAULT_MVN_PARAMS;
+import static org.commonjava.maven.ext.integrationtest.ITestUtils.runMaven;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;

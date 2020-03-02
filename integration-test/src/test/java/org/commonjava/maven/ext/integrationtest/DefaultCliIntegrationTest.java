@@ -27,11 +27,11 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import static org.commonjava.maven.ext.integrationtest.TestUtils.DEFAULT_MVN_PARAMS;
-import static org.commonjava.maven.ext.integrationtest.TestUtils.IT_LOCATION;
-import static org.commonjava.maven.ext.integrationtest.TestUtils.getDefaultTestLocation;
-import static org.commonjava.maven.ext.integrationtest.TestUtils.runLikeInvoker;
-import static org.commonjava.maven.ext.integrationtest.TestUtils.runMaven;
+import static org.commonjava.maven.ext.integrationtest.ITestUtils.DEFAULT_MVN_PARAMS;
+import static org.commonjava.maven.ext.integrationtest.ITestUtils.IT_LOCATION;
+import static org.commonjava.maven.ext.integrationtest.ITestUtils.getDefaultTestLocation;
+import static org.commonjava.maven.ext.integrationtest.ITestUtils.runLikeInvoker;
+import static org.commonjava.maven.ext.integrationtest.ITestUtils.runMaven;
 
 @SuppressWarnings( "ConstantConditions" )
 @RunWith( Parameterized.class )
@@ -55,7 +55,7 @@ public class DefaultCliIntegrationTest
         {
             for ( File rl : IT_LOCATION.listFiles() )
             {
-                if ( rl.isDirectory() && !TestUtils.EXCLUDED_FILES.contains( rl.getName() ) )
+                if ( rl.isDirectory() && !ITestUtils.EXCLUDED_FILES.contains( rl.getName() ) )
                 {
                     Object[] arr = new Object[] { rl.getName() };
                     params.add( arr );
@@ -94,9 +94,9 @@ public class DefaultCliIntegrationTest
         throws Exception
     {
         String testRelativeLocation = this.testRelativeLocation;
-        if ( TestUtils.LOCATION_REWRITE.containsKey( this.testRelativeLocation ) )
+        if ( ITestUtils.LOCATION_REWRITE.containsKey( this.testRelativeLocation ) )
         {
-            testRelativeLocation = TestUtils.LOCATION_REWRITE.get( this.testRelativeLocation );
+            testRelativeLocation = ITestUtils.LOCATION_REWRITE.get( this.testRelativeLocation );
         }
         LOGGER.info ("Testing {}", testRelativeLocation);
         String test = getDefaultTestLocation( testRelativeLocation );

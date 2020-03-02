@@ -16,8 +16,9 @@
 package org.commonjava.maven.ext.integrationtest.invoker;
 
 import org.apache.commons.lang.SystemUtils;
-import org.commonjava.maven.ext.integrationtest.TestUtils;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -107,10 +108,10 @@ public interface ExecutionParser
 
         if ( key.matches( "invoker\\.systemPropertiesFile.*" ) )
         {
-            Properties props = TestUtils.loadProps( execution.getLocation() + "/" + value );
+            Properties props = loadProps( execution.getLocation() + "/" + value );
 
             // Properties to Map
-            Map<String, String> javaParams = TestUtils.propsToMap( props );
+            Map<String, String> javaParams = propsToMap( props );
             if ( execution.getJavaParams() != null )
             {
                 javaParams.putAll( execution.getJavaParams() );
@@ -127,11 +128,48 @@ public interface ExecutionParser
     ExecutionParserHandler POST_HANDLER = ( execution, params ) -> {
         if ( execution.getJavaParams() == null )
         {
-            Properties props = TestUtils.loadProps( execution.getLocation() + "/test.properties" );
-            Map<String, String> javaParams = TestUtils.propsToMap( props );
+            Properties props = loadProps( execution.getLocation() + "/test.properties" );
+            Map<String, String> javaParams = propsToMap( props );
             execution.setJavaParams( javaParams );
         }
     };
+
+    /**
+     * Loads *.properties file.
+     *
+     * @param filePath - File path of the *.properties file
+     * @return Loaded properties
+     */
+    static Properties loadProps(String filePath)
+    {
+        File propsFile = new File( filePath );
+        Properties props = new Properties();
+        if ( propsFile.isFile() )
+        {
+            try
+            {
+                FileInputStream fis = new FileInputStream( propsFile );
+                props.load( fis );
+            }
+            catch ( Exception e )
+            {
+                // ignore
+            }
+        }
+
+        return props;
+    }
+
+    static Map<String, String> propsToMap(Properties props)
+    {
+        Map<String, String> map = new HashMap<>();
+        for ( Object p : props.keySet() )
+        {
+            map.put( (String) p, props.getProperty( (String) p ) );
+        }
+
+        return map;
+    }
 
     /**
      * Parse invoker properties from workingDir into a collection of executions.

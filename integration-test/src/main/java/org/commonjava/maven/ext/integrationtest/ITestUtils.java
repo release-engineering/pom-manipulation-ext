@@ -35,7 +35,6 @@ import org.slf4j.LoggerFactory;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -51,14 +50,13 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 
 /**
  * @author vdedik@redhat.com
  */
-public class TestUtils
+public class ITestUtils
 {
-    private static final Logger logger = LoggerFactory.getLogger( TestUtils.class );
+    private static final Logger logger = LoggerFactory.getLogger( ITestUtils.class );
 
     private static final String BUILD_DIR = System.getProperty( "buildDirectory" );
 
@@ -404,54 +402,16 @@ public class TestUtils
     }
 
     /**
-     * Loads *.properties file.
-     *
-     * @param filePath - File path of the *.properties file
-     * @return Loaded properties
-     */
-    public static Properties loadProps( String filePath )
-    {
-        File propsFile = new File( filePath );
-        Properties props = new Properties();
-        if ( propsFile.isFile() )
-        {
-            try
-            {
-                FileInputStream fis = new FileInputStream( propsFile );
-                props.load( fis );
-            }
-            catch ( Exception e )
-            {
-                // ignore
-            }
-        }
-
-        return props;
-    }
-
-    public static Map<String, String> propsToMap( Properties props )
-    {
-        Map<String, String> map = new HashMap<>();
-        for ( Object p : props.keySet() )
-        {
-            map.put( (String) p, props.getProperty( (String) p ) );
-        }
-
-        return map;
-    }
-
-    /**
      * Executes a method on an object instance.  The name and parameters of
      * the method are specified.  The method will be executed and the value
      * of it returned, even if the method would have private or protected access.
      */
-    @SuppressWarnings( "unchecked" )
-    private static Object executeMethod( Object instance, Object[] params ) throws Exception
+    private static Object executeMethod( Cli instance, Object[] params ) throws Exception
     {
-        Class c = instance.getClass();
+        Class<? extends Cli> c = instance.getClass();
 
         // Fetch the Class types of all method parameters
-        Class[] types = new Class[params.length];
+        Class<?>[] types = new Class[params.length];
 
         for ( int i = 0; i < params.length; i++ )
             types[i] = params[i].getClass();

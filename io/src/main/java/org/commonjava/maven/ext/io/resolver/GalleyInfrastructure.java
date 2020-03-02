@@ -98,7 +98,9 @@ public class GalleyInfrastructure
      */
     private static final String LOCAL_REPO_SCANNING_PROP = "manipulator.local.repo.scanning";
 
-    private MirrorSelector mirrorSelector;
+    private final MirrorSelector mirrorSelector;
+
+    private final MavenSessionHandler sessionHandler;
 
     private MavenPomReader pomReader;
 
@@ -111,8 +113,6 @@ public class GalleyInfrastructure
     private XPathManager xpaths;
 
     private ExecutorService executor;
-
-    private MavenSessionHandler sessionHandler;
 
     public File getCacheDir()
     {
@@ -158,6 +158,29 @@ public class GalleyInfrastructure
         {
             return init( sessionHandler.getTargetDir(), sessionHandler.getRemoteRepositories(), sessionHandler.getLocalRepository(),
                          sessionHandler.getSettings(), sessionHandler.getActiveProfiles(), customLocation, customTransport, cacheDir );
+        }
+    }
+
+    /**
+     * Allow for a 'shell' infrastructure with majority not implemented but just the cache directory for FileIO.
+     * @param targetDirectory the directory to create the cache in
+     * @return this instance
+     * @throws ManipulationException if an error occurs.
+     */
+    @Override
+    public GalleyInfrastructure init(File targetDirectory) throws ManipulationException
+    {
+        if ( sessionHandler == null )
+        {
+            if ( cacheDir == null )
+            {
+                cacheDir = new File( targetDirectory, "manipulator-cache" );
+            }
+            return this;
+        }
+        else
+        {
+            throw new ManipulationException("Partial infrastructure creation - only for tests");
         }
     }
 

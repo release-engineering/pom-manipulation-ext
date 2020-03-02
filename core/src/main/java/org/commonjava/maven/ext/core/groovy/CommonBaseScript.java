@@ -15,7 +15,10 @@
  */
 package org.commonjava.maven.ext.core.groovy;
 
+import org.commonjava.maven.ext.io.FileIO;
+
 import java.io.File;
+import java.io.FileInputStream;
 import java.util.Properties;
 
 /**
@@ -40,4 +43,11 @@ public interface CommonBaseScript
      * @return a {@link InvocationStage} reference.
      */
     InvocationStage getInvocationStage();
+
+    /**
+     * Return a FileIO instance to read a raw file from a given URL
+     * @return a {@link FileIO} reference.
+     */
+    FileIO getFileIO ();
+
 }
