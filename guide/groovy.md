@@ -114,20 +114,19 @@ The following API is available:
 
 | Method | Description |
 | -------|:------------|
-| [Properties](https://docs.oracle.com/javase/7/docs/api/java/util/Properties.html) getUserProperties() | Get the user properties. |
 | [File](https://docs.oracle.com/javase/7/docs/api/java/io/File.html) getBaseDir() | Get the working directory (the execution root). |
-| [ProjectVersionRef](https://github.com/Commonjava/atlas/blob/master/identities/src/main/java/org/commonjava/atlas/maven/ident/ref/ProjectVersionRef.java) getGAV() | Obtain the GAV of the current project |
+| [InvocationStage](https://github.com/release-engineering/pom-manipulation-ext/blob/master/core/src/main/java/org/commonjava/maven/ext/core/groovy/InvocationStage.java) getInvocationStage() | Return the current stage of the groovy manipulation. |
+| [ProjectVersionRef](https://github.com/Commonjava/atlas/blob/master/identities/src/main/java/org/commonjava/atlas/maven/ident/ref/ProjectVersionRef.java) getGAV() | Get the GAV of the current project |
+| [ModelIO](https://github.com/release-engineering/pom-manipulation-ext/blob/master/io/src/main/java/org/commonjava/maven/ext/io/ModelIO.java) getModelIO() | Return a ModelIO instance for artifact resolving |
 | [Project](https://github.com/release-engineering/pom-manipulation-ext/blob/master/common/src/main/java/org/commonjava/maven/ext/common/model/Project.java) getProject() | Return the current Project |
 | [ArrayList](https://docs.oracle.com/javase/7/docs/api/java/util/ArrayList.html)<[ProjectVersionRef](https://github.com/Commonjava/atlas/blob/master/identities/src/main/java/org/commonjava/atlas/maven/ident/ref/ProjectVersionRef.java)> getProjects() | Returns the entire collection of Projects |
 | [MavenSessionHandler](https://github.com/release-engineering/pom-manipulation-ext/blob/master/common/src/main/java/org/commonjava/maven/ext/common/session/MavenSessionHandler.java) getSession() | Return the current session handler |
-| [ModelIO](https://github.com/release-engineering/pom-manipulation-ext/blob/master/io/src/main/java/org/commonjava/maven/ext/io/ModelIO.java) getModelIO() | Return a ModelIO instance for artifact resolving |
-| [InvocationStage](https://github.com/release-engineering/pom-manipulation-ext/blob/master/core/src/main/java/org/commonjava/maven/ext/core/groovy/InvocationStage.java) getInvocationStage() | Return the current stage of the groovy manipulation. |
-| void inlineProperty([Project](https://github.com/release-engineering/pom-manipulation-ext/blob/master/common/src/main/java/org/commonjava/maven/ext/common/model/Project.java), String "group:artifact") | Allows the specified group:artifact property to be inlined in any depedencies/dependencyManagement. This is useful to split up properties that cover multiple separate projects. |
+| [Properties](https://docs.oracle.com/javase/7/docs/api/java/util/Properties.html) getUserProperties() | Get the user properties. |
 
 <table bgcolor="#ffff00">
 <tr>
 <td>
-    <b>NOTE</b> : From version 3.8 <small>inlineProperty(Project, String “group:artifact”)</small> will be removed and replaced with the below:
+    <b>NOTE</b> : From version 3.8 <small>inlineProperty(Project, String “group:artifact”)</small> has been removed and replaced with:
 </td>
 </tr>
 </table>
@@ -155,6 +154,18 @@ The following API is available:
 </table>
 
 | [Logger](https://www.javadoc.io/doc/org.slf4j/slf4j-api/1.7.30/org/slf4j/Logger.html) getLogger() | This will return the current SLF4J Logger instance. |
+
+
+<table bgcolor="#ffff00">
+<tr>
+<td>
+    <b>NOTE</b> : From version 4.0 the following extra API is available:
+</td>
+</tr>
+</table>
+
+| [FileIO](https://github.com/release-engineering/pom-manipulation-ext/blob/master/io/src/main/java/org/commonjava/maven/ext/io/FileIO.java) getFileIO() | This will return a FileIO instance for remote File resolving. |
+| [PomIO](https://github.com/release-engineering/pom-manipulation-ext/blob/master/io/src/main/java/org/commonjava/maven/ext/io/PomIO.java) getPomIO() | This will return a PomIO instance for parsing POM models. |
 
 
 This can then be invoked by e.g.
@@ -239,22 +250,8 @@ A typical groovy script that alters a JSON file on disk might be:
     sp.execute()
 
 
+### Developing Groovy Scripts
 
-If a developer wishes to setup an IDE to write the groovy script we would recommend adding to the POM file and activating this profile within the IDE:
-
-    <!-- This profile is only used within IntelliJ for Groovy development -->
-    <profiles>
-      <profile>
-        <id>groovy</id>
-        <dependencies>
-          <dependency>
-            <groupId>org.commonjava.maven.ext</groupId>
-            <artifactId>pom-manipulation-core</artifactId>
-            <version>1.13</version>
-            <scope>provided</scope>
-          </dependency>
-        </dependencies>
-      </profile>
-    </profiles>
+To make it easier to develop scripts for both PME (this project) and [GME](https://github.com/project-ncl/gradle-manipulator) an example project has been setup. The [manipulator-groovy-examples](https://github.com/project-ncl/manipulator-groovy-examples) provides a framework to develop and test such scripts.
 
 [circular]: ../images/circular.png "Circular Example"
