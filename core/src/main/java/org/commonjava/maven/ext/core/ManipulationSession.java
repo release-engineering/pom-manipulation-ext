@@ -18,6 +18,7 @@ package org.commonjava.maven.ext.core;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.settings.Settings;
+import org.commonjava.maven.ext.annotation.ConfigValue;
 import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.common.model.Project;
 import org.commonjava.maven.ext.common.session.MavenSessionHandler;
@@ -48,6 +49,7 @@ import java.util.Properties;
 public class ManipulationSession
                 implements MavenSessionHandler
 {
+    @ConfigValue( docIndex = "index.html#disabling-the-extension")
     private static final String MANIPULATIONS_DISABLED_PROP = "manipulation.disable";
 
     private final Map<Class<?>, State> states = new HashMap<>();

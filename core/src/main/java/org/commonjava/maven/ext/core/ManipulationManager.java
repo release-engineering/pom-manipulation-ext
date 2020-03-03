@@ -80,12 +80,13 @@ public class ManipulationManager
 
     private static final String REPORT_JSON_DEFAULT = File.separatorChar + "manipulation.json";
 
+    @ConfigValue( docIndex = "index.html#summary-logging")
     public static final String REPORT_TXT_OUTPUT_FILE = "reportTxtOutputFile";
 
+    @ConfigValue( docIndex = "index.html#summary-logging")
     public static final String REPORT_JSON_OUTPUT_FILE = "reportJSONOutputFile";
 
-    // TODO: Config index value
-    @ConfigValue( docIndex = "")
+    @ConfigValue( docIndex = "index.html#deprecated-and-unknown-properties")
     public static final String DEPRECATED_PROPERTIES = "enabledDeprecatedProperties";
 
     private final Logger logger = LoggerFactory.getLogger( getClass() );
