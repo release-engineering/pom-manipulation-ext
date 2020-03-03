@@ -48,7 +48,7 @@ Note that all property arguments are the equivalent to those used when it is use
 
 #### Installation as an Extension
 
-Installing PME is as simple as [grabbing the binary](http://central.maven.org/maven2/org/commonjava/maven/ext/pom-manipulation-ext) and copying it to your `${MAVEN_HOME}/lib/ext` directory. Once PME is installed, Maven should output something like the following when run:
+Installing PME is as simple as [grabbing the binary](https://repo1.maven.org/maven2/org/commonjava/maven/ext/pom-manipulation-ext) and copying it to your `${MAVEN_HOME}/lib/ext` directory. Once PME is installed, Maven should output something like the following when run:
 
 	[INFO] Maven-Manipulation-Extension
 
@@ -75,6 +75,20 @@ If you want to make it more permanent, you could add it to your `settings.xml`:
             <activeProfile>disable-pme</activeProfile>
         </activeProfiles>
     </settings>
+
+### Deprecated and Unknown Properties
+
+<table bgcolor="#ffff00">
+<tr>
+<td>
+    <b>NOTE</b> : Available from version 4.0
+</td>
+</tr>
+</table>
+
+If an unknown property is passed in the tool (whether in CLI or extension mode) will output a warning with the unknown property.
+
+By default if a deprecated property is used the tool will detect it and throw an exception. If the user wishes to allow usage of deprecated properties set `enabledDeprecatedProperties` to true.
 
 ### Extension Marker File
 
@@ -108,7 +122,6 @@ Finally it will also output the comparator summary as a JSON file. By default th
         ...
 
 This JSON file may be read as POJO by using the [JSONUtils](https://github.com/release-engineering/pom-manipulation-ext/blob/master/common/src/main/java/org/commonjava/maven/ext/common/util/JSONUtils.java) class which utilises the [json](https://github.com/release-engineering/pom-manipulation-ext/blob/master/common/src/main/java/org/commonjava/maven/ext/common/json) package.
-
 
 ### Feature Guide
 
