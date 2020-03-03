@@ -21,6 +21,7 @@ import org.apache.maven.profiles.DefaultProfileManager;
 import org.apache.maven.profiles.activation.ProfileActivationException;
 import org.apache.maven.project.ProjectBuilder;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
+import org.commonjava.maven.ext.annotation.ConfigValue;
 import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.common.json.PME;
 import org.commonjava.maven.ext.common.model.Project;
@@ -45,6 +46,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -78,15 +80,20 @@ public class ManipulationManager
 
     private static final String REPORT_JSON_DEFAULT = File.separatorChar + "manipulation.json";
 
+    @ConfigValue( docIndex = "index.html#summary-logging")
     public static final String REPORT_TXT_OUTPUT_FILE = "reportTxtOutputFile";
 
+    @ConfigValue( docIndex = "index.html#summary-logging")
     public static final String REPORT_JSON_OUTPUT_FILE = "reportJSONOutputFile";
+
+    @ConfigValue( docIndex = "index.html#deprecated-and-unknown-properties")
+    public static final String DEPRECATED_PROPERTIES = "enabledDeprecatedProperties";
 
     private final Logger logger = LoggerFactory.getLogger( getClass() );
 
-    private Map<String, Manipulator> manipulators;
+    private final Map<String, Manipulator> manipulators;
 
-    private Map<String, ExtensionInfrastructure> infrastructure;
+    private final Map<String, ExtensionInfrastructure> infrastructure;
 
     private final PomIO pomIO;
 
@@ -108,15 +115,42 @@ public class ManipulationManager
 
     /**
      * Initialize {@link ManipulationSession} using the given {@link MavenSession} instance, along with any state managed by the individual
-     * {@link Manipulator} components.
+     * {@link Manipulator} components. Entry point for both CLI and EXT modes.
      *
      * @param session the container session for manipulation.
      * @throws ManipulationException if an error occurs.
      */
     public void init( final ManipulationSession session )
-        throws ManipulationException
-    {
-        logger.debug( "Initialising ManipulationManager with user properties {}", session.getUserProperties() );
+        throws ManipulationException {
+        logger.debug("Initialising ManipulationManager with user properties {}", session.getUserProperties());
+
+        // We invert it as the property is to _enable_ deprecated properties - which is off by default.
+        final boolean deprecatedDisabled = !Boolean.parseBoolean(session.getUserProperties().getProperty(DEPRECATED_PROPERTIES,
+                "false"));
+        final HashMap<String, String> deprecatedUsage = new HashMap<>();
+
+        session.getUserProperties().stringPropertyNames().forEach(
+                p -> {
+                    if (!p.equals("maven.repo.local") && ConfigList.allConfigValues.keySet().stream().noneMatch(p::startsWith)) {
+                        logger.warn("Unknown configuration value {}", p);
+                    }
+                    // Track deprecated properties. We have to do a rather ugly starts with instead of direct keying as
+                    // some properties operate upon a prefix basis.
+                    logger.debug("Examining for deprecated properties for {}", p);
+                    ConfigList.allConfigValues.entrySet().stream().
+                            filter(e -> p.startsWith(e.getKey())).
+                            filter(Map.Entry::getValue).
+                            forEach(up -> deprecatedUsage.put(p, up.getKey()));
+                });
+
+        if (deprecatedUsage.size() > 0)
+        {
+            deprecatedUsage.forEach( (k,v) -> logger.warn ("Located deprecated property {} in user properties (with matcher of {})", k, v) );
+            if ( deprecatedDisabled )
+            {
+                throw new ManipulationException("Deprecated properties are being used. Either remove them or set enabledDeprecatedProperties=true");
+            }
+        }
 
         for ( final ExtensionInfrastructure infra : infrastructure.values() )
         {

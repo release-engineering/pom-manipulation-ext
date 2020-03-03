@@ -21,5 +21,5 @@ da:
 
 pme:
   versionSuffix: redhat-1
-  dependencyExclusion.com.google.guava:guava@*: 18.0
+  dependencyOverride.com.google.guava:guava@*: 18.0
   repoReportingRemoval: true

@@ -75,8 +75,7 @@ public class PluginState
     @ConfigValue( docIndex = "plugin-manip.html#basic-plugin-alignment")
     private static final String PLUGIN_MANAGEMENT_PRECEDENCE = "pluginManagementPrecedence";
 
-    // TODO: ConfigValue
-    @ConfigValue( docIndex = "")
+    @ConfigValue( docIndex = "plugin-manip.html#plugin-override")
     private static final String PLUGIN_OVERRIDE_PREFIX = "pluginOverride.";
 
     /**

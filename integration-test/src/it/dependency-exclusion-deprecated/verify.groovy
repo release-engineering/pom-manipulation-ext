@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (C) 2012 Red Hat, Inc. (jcasey@redhat.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,24 +14,5 @@
  * limitations under the License.
  */
 
-package org.commonjava.maven.ext.annotation;
-
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-
-/**
- * Annotation to denote configuration options.
- */
-@Retention(RetentionPolicy.SOURCE)
-@Target({ElementType.FIELD, ElementType.TYPE })
-public @interface ConfigValue
-{
-    /**
-     * @return String denoting the location in the online documentation used for index generation.
-     */
-    String docIndex();
-
-    boolean deprecated() default false;
-}
+def buildLog = new File( basedir, 'build.log' )
+assert buildLog.text.contains("Deprecated properties are being used. Either remove them or set enabledDeprecatedProperties=true")

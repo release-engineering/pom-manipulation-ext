@@ -228,7 +228,7 @@ public class DependencyManipulator extends CommonManipulator implements Manipula
         {
             final Model model = project.getModel();
 
-            if (!overrides.isEmpty() || !state.getDependencyExclusions().isEmpty())
+            if (!overrides.isEmpty() || !state.getDependencyOverrides().isEmpty())
             {
                 apply( project, model, overrides );
 
@@ -308,7 +308,7 @@ public class DependencyManipulator extends CommonManipulator implements Manipula
 
         try
         {
-            originalOverrides = applyModuleVersionOverrides( projectGA, dependencyState.getDependencyExclusions(),
+            originalOverrides = applyModuleVersionOverrides( projectGA, dependencyState.getDependencyOverrides(),
                                                            originalOverrides, explicitOverrides,
                                                            dependencyState.getExtraBOMDepMgmts() );
             logger.debug( "Module overrides are:{}{}", System.lineSeparator(), originalOverrides );

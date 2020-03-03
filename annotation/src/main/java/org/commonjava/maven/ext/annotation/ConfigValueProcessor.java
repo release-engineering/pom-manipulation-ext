@@ -23,6 +23,8 @@ import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeSpec;
 import org.apache.commons.io.FileUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.Messager;
@@ -39,8 +41,8 @@ import javax.tools.Diagnostic;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
-import java.util.HashMap;
-import java.util.HashSet;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
@@ -54,8 +56,10 @@ public class ConfigValueProcessor extends AbstractProcessor
     private static final String PACKAGE_NAME = "packageName";
     private static final String ROOT_DIR = "rootDirectory";
 
-    private final Map<String,String> varResults = new HashMap<>( );
-    private final Map<String,String> indexResults = new TreeMap<>( );
+    private final Logger logger = LoggerFactory.getLogger( getClass() );
+
+    private final Map<String, Boolean> varResults = new TreeMap<>( );
+    private final Map<String, String> indexResults = new TreeMap<>( );
 
     @Override
     public boolean process( Set<? extends TypeElement> annotations, RoundEnvironment roundEnv )
@@ -83,7 +87,7 @@ public class ConfigValueProcessor extends AbstractProcessor
                 messager.printMessage ( Diagnostic.Kind.NOTE,
                                         "Found " + vElement.toString() + " & " + annotation.docIndex() + " & " + vElement.getConstantValue());
 
-                varResults.put( vElement.toString(), vElement.getConstantValue().toString() );
+                varResults.put( vElement.getConstantValue().toString(), annotation.deprecated() );
                 indexResults.put( vElement.getConstantValue().toString(), annotation.docIndex() );
             }
         }
@@ -106,13 +110,15 @@ public class ConfigValueProcessor extends AbstractProcessor
 
     void generateCode() throws IOException
     {
-        ClassName hashMap = ClassName.get( "java.util", "HashMap");
-        ClassName str = ClassName.get( String.class );
-        ParameterizedTypeName mainType = ParameterizedTypeName.get( hashMap, str, str );
+        logger.info ("Generating code and index");
 
-        Set<CodeBlock> contents = new HashSet<>(  );
-        varResults.forEach( ( key, value ) -> contents.add(
-                        CodeBlock.builder().addStatement( "allConfigValues.put($S, $S)", key, value ).build() ) );
+        ClassName hashMap = ClassName.get( "java.util", "HashMap");
+        ParameterizedTypeName mainType = ParameterizedTypeName.get(
+                hashMap, ClassName.get(String.class), ClassName.get(Boolean.class));
+
+        List<CodeBlock> contents = new ArrayList<>( );
+        varResults.forEach((key, value) ->
+                contents.add(CodeBlock.builder().addStatement("allConfigValues.put($S, $L)", key, value).build()) );
 
         TypeSpec ConfigList = TypeSpec.classBuilder( "ConfigList" )
                                       .addModifiers( Modifier.PUBLIC, Modifier.FINAL )
@@ -128,8 +134,16 @@ public class ConfigValueProcessor extends AbstractProcessor
 
         StringBuilder propertyIndex = new StringBuilder();
 
-        indexResults.forEach( (key, value) -> propertyIndex.append( "  * [" ).
-                        append( key ).append( "](" ).append( value ).append( ")" ).append( System.lineSeparator() ) );
+        indexResults.forEach( (key, value) -> propertyIndex
+                .append( "  * [" )
+                .append( key )
+                .append( "](" )
+                .append( value )
+                .append( ")" )
+                .append( "\t" )
+                .append( varResults.get(key) ? "(deprecated)" : "")
+                .append( System.lineSeparator() )
+        );
         FileUtils.writeStringToFile(
                         new File(processingEnv.getOptions().get( ROOT_DIR ) +
                                                  File.separator + "target" + File.separator + "property-index-subset.md"),
