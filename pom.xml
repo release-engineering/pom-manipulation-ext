@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <!--
 
-    Copyright (C) 2012 Red Hat, Inc. (jcasey@redhat.com)
+    Copyright (C) 2012 Red Hat, Inc.
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@
   <parent>
     <groupId>com.redhat.rcm</groupId>
     <artifactId>redhat-releng-tools</artifactId>
-    <version>7</version>
+    <version>9</version>
   </parent>
 
   <groupId>org.commonjava.maven.ext</groupId>
@@ -551,6 +551,7 @@
             <excludes combine.children="append">
               <exclude>ide-config/eclipse.importorder</exclude>
               <exclude>**/commonjava/maven/ext/common/ExceptionHelper.java</exclude>
+              <exclude>**/src/test/resources/org/commonjava/maven/ext/io/pom.xml</exclude>
             </excludes>
           </configuration>
         </plugin>

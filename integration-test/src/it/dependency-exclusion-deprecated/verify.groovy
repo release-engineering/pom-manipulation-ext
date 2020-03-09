@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2012 Red Hat, Inc. (jcasey@redhat.com)
+ * Copyright (C) 2012 Red Hat, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,5 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 def buildLog = new File( basedir, 'build.log' )
 assert buildLog.text.contains("Deprecated properties are being used. Either remove them or set enabledDeprecatedProperties=true")

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 Red Hat, Inc. (jcasey@redhat.com)
+ * Copyright (C) 2012 Red Hat, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -217,7 +217,7 @@ public class DistributionEnforcingManipulator
             {
                 // we need to set the local value AND the global value.
                 final SkipReference ref = skipRefs.get( 0 );
-                final ConfigurationContainer container = ref.getContainer();
+                final ConfigurationContainer container = ref.container;
                 if ( !( container instanceof PluginExecution )
                     || ( (PluginExecution) container ).getId()
                                                       .equals( DEFAULT_INSTALL_EXEC ) )
