@@ -30,6 +30,10 @@ import java.util.Map;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertEquals;
 
+import static org.commonjava.maven.ext.io.rest.Translator.DEFAULT_CONNECTION_TIMEOUT_SEC;
+import static org.commonjava.maven.ext.io.rest.Translator.DEFAULT_SOCKET_TIMEOUT_SEC;
+import static org.commonjava.maven.ext.io.rest.Translator.RETRY_DURATION_SEC;
+
 public class RESTHeaderTest
 {
     @Rule
@@ -51,6 +55,7 @@ public class RESTHeaderTest
         headers.put( "Foo", "bar" );
         headers.put( "Bar", "baz" );
         DefaultTranslator translator = new DefaultTranslator( mockServer.getUrl(), 0,
-                Translator.CHUNK_SPLIT_COUNT, null, "", headers );
+                Translator.CHUNK_SPLIT_COUNT, null, "", headers, DEFAULT_CONNECTION_TIMEOUT_SEC, 
+                DEFAULT_SOCKET_TIMEOUT_SEC, RETRY_DURATION_SEC );
     }
 }

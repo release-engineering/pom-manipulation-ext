@@ -39,6 +39,10 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import static org.commonjava.maven.ext.io.rest.Translator.DEFAULT_CONNECTION_TIMEOUT_SEC;
+import static org.commonjava.maven.ext.io.rest.Translator.DEFAULT_SOCKET_TIMEOUT_SEC;
+import static org.commonjava.maven.ext.io.rest.Translator.RETRY_DURATION_SEC;
+
 /**
  * @author Jakub Senko <jsenko@redhat.com>
  */
@@ -72,7 +76,8 @@ public class VersionTranslatorSplitTest
 
         handler.setStatusCode( HttpServletResponse.SC_GATEWAY_TIMEOUT );
         versionTranslator = new DefaultTranslator( mockServer.getUrl(), 0, Translator.CHUNK_SPLIT_COUNT,
-                                                   "", "" );
+                                                   "", "", DEFAULT_CONNECTION_TIMEOUT_SEC, 
+                                                   DEFAULT_SOCKET_TIMEOUT_SEC, RETRY_DURATION_SEC );
     }
 
     @Test
@@ -167,7 +172,8 @@ public class VersionTranslatorSplitTest
     public void testTranslateVersionsCorrectSplitMaxSize()
     {
         this.versionTranslator = new DefaultTranslator( mockServer.getUrl(), 10, Translator.CHUNK_SPLIT_COUNT,
-                                                        "", "" );
+                                                        "", "", DEFAULT_CONNECTION_TIMEOUT_SEC, 
+                                                        DEFAULT_SOCKET_TIMEOUT_SEC, RETRY_DURATION_SEC );
 
         List<ProjectVersionRef> data = aLotOfGavs.subList( 0, 30 );
         handler.getRequestData().clear();
@@ -230,7 +236,8 @@ public class VersionTranslatorSplitTest
     public void testTranslateVersionsCorrectSplitMaxSizeWithMin()
     {
         this.versionTranslator = new DefaultTranslator( mockServer.getUrl(), 10, 1, "",
-                                                        "" );
+                                                        "", DEFAULT_CONNECTION_TIMEOUT_SEC, 
+                                                        DEFAULT_SOCKET_TIMEOUT_SEC, RETRY_DURATION_SEC );
 
         List<ProjectVersionRef> data = aLotOfGavs.subList( 0, 30 );
         handler.getRequestData().clear();

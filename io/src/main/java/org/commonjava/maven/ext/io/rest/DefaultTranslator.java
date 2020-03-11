@@ -80,6 +80,12 @@ public class DefaultTranslator
 
     private final Map<String, String> restHeaders;
 
+    private final int retryDuration;
+
+    private final int restConnectionTimeout;
+
+    private final int restSocketTimeout;
+
     static
     {
         // According to https://kong.github.io/unirest-java/#configuration the default connection timeout is 10000
@@ -91,9 +97,9 @@ public class DefaultTranslator
                .setObjectMapper( new InternalObjectMapper( new com.fasterxml.jackson.databind.ObjectMapper() ) );
     }
 
-    // Allow test to override this.
-    @SuppressWarnings( "FieldCanBeLocal" )
-    private int retryDuration = 30;
+//    // Allow test to override this.
+//    @SuppressWarnings( "FieldCanBeLocal" )
+//    private int retryDuration = 30;
 
     /**
      * @param endpointUrl is the URL to talk to.
@@ -103,7 +109,8 @@ public class DefaultTranslator
      * @param incrementalSerialSuffix the suffix to pass to the endpoint.
      * @param restHeaders the headers to pass to the endpoint
      */
-    public DefaultTranslator( String endpointUrl, int restMaxSize, int restMinSize, String repositoryGroup, String incrementalSerialSuffix, Map<String, String> restHeaders )
+    public DefaultTranslator( String endpointUrl, int restMaxSize, int restMinSize, String repositoryGroup, String incrementalSerialSuffix, Map<String, String> restHeaders,
+                              int restConnectionTimeout, int restSocketTimeout, int restRetryDuration )
     {
         this.repositoryGroup = repositoryGroup;
         this.incrementalSerialSuffix = incrementalSerialSuffix;
@@ -111,6 +118,9 @@ public class DefaultTranslator
         this.initialRestMaxSize = restMaxSize;
         this.initialRestMinSize = restMinSize;
         this.restHeaders = restHeaders;
+        this.restConnectionTimeout = restConnectionTimeout;
+        this.restSocketTimeout = restSocketTimeout;
+        this.retryDuration = restRetryDuration;
     }
 
     /**
@@ -120,10 +130,11 @@ public class DefaultTranslator
      * @param repositoryGroup the group to pass to the endpoint.
      * @param incrementalSerialSuffix the suffix to pass to the endpoint.
      */
-    public DefaultTranslator( String endpointUrl, int restMaxSize, int restMinSize, String repositoryGroup, String incrementalSerialSuffix )
+    public DefaultTranslator( String endpointUrl, int restMaxSize, int restMinSize, String repositoryGroup, String incrementalSerialSuffix,
+                              int restConnectionTimeout, int restSocketTimeout, int restRetryDuration)
     {
         this ( endpointUrl, restMaxSize, restMinSize, repositoryGroup, incrementalSerialSuffix,
-               Collections.emptyMap() );
+               Collections.emptyMap(), restConnectionTimeout, restSocketTimeout, restRetryDuration );
     }
 
     private void partition(List<ProjectVersionRef> projects, Queue<Task> queue) {
@@ -207,6 +218,8 @@ public class DefaultTranslator
                        .header( "accept", "application/json" )
                        .header( "Content-Type", "application/json" )
                        .headers( restHeaders )
+                       .connectTimeout(restConnectionTimeout * 1000)
+                       .socketTimeout(restSocketTimeout * 1000)
                        .queryString( "groupid", ga.getGroupId() )
                        .queryString( "artifactid", ga.getArtifactId() )
                        .asObject( pvrTyoe )
@@ -415,6 +428,8 @@ public class DefaultTranslator
                            .header( "accept", "application/json" )
                            .header( "Content-Type", "application/json" )
                            .headers( restHeaders )
+                           .connectTimeout(restConnectionTimeout * 1000)
+                           .socketTimeout(restSocketTimeout * 1000)
                            .body( request )
                            .asObject( lookupType )
                            .ifSuccess( successResponse -> result = successResponse.getBody()
