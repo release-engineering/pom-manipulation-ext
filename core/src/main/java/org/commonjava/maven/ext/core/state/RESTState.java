@@ -51,6 +51,15 @@ public class RESTState implements State
     @ConfigValue( docIndex = "dep-manip.html#rest-endpoint" )
     public static final String REST_HEADERS = "restHeaders";
 
+    @ConfigValue( docIndex = "dep-manip.html#rest-timeouts-and-retries" )
+    public static final String REST_CONNECTION_TIMEOUT_SEC = "connectionTimeout";
+
+    @ConfigValue( docIndex = "dep-manip.html#rest-timeouts-and-retries" )
+    public static final String REST_SOCKET_TIMEOUT_SEC = "socketTimeout";
+
+    @ConfigValue( docIndex = "dep-manip.html#rest-timeouts-and-retries" )
+    public static final String REST_RETRY_DURATION_SEC = "retryTimeout";
+
     private final ManipulationSession session;
 
     private String restURL;
@@ -60,6 +69,12 @@ public class RESTState implements State
     private boolean restSuffixAlign;
 
     private Map<String, String> restHeaders;
+
+    private int connectionTimeout;
+
+    private int socketTimeout;
+
+    private int retryTimeout;
 
     public RESTState( final ManipulationSession session )
     {
@@ -90,7 +105,12 @@ public class RESTState implements State
                                                             ( x, y ) -> y, LinkedHashMap::new ) );
         }
 
-        restEndpoint = new DefaultTranslator( restURL, restMaxSize, restMinSize, repositoryGroup, vState.getIncrementalSerialSuffix(), restHeaders );
+        connectionTimeout = Integer.parseInt( userProps.getProperty( REST_CONNECTION_TIMEOUT_SEC, String.valueOf( DefaultTranslator.DEFAULT_CONNECTION_TIMEOUT_SEC ) ) );
+        socketTimeout = Integer.parseInt( userProps.getProperty( REST_SOCKET_TIMEOUT_SEC, String.valueOf( DefaultTranslator.DEFAULT_SOCKET_TIMEOUT_SEC ) ) );
+        retryTimeout = Integer.parseInt( userProps.getProperty( REST_RETRY_DURATION_SEC, String.valueOf( DefaultTranslator.RETRY_DURATION_SEC ) ) );
+
+        restEndpoint = new DefaultTranslator( restURL, restMaxSize, restMinSize, repositoryGroup, vState.getIncrementalSerialSuffix(), restHeaders,
+                                              connectionTimeout, socketTimeout, retryTimeout);
     }
 
     /**

@@ -41,6 +41,10 @@ import java.util.*;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import static org.commonjava.maven.ext.io.rest.Translator.DEFAULT_CONNECTION_TIMEOUT_SEC;
+import static org.commonjava.maven.ext.io.rest.Translator.DEFAULT_SOCKET_TIMEOUT_SEC;
+import static org.commonjava.maven.ext.io.rest.Translator.RETRY_DURATION_SEC;
+
 @FixMethodOrder( MethodSorters.NAME_ASCENDING)
 public class HttpErrorTranslatorTest
 {
@@ -90,7 +94,8 @@ public class HttpErrorTranslatorTest
 
         this.versionTranslator = new DefaultTranslator( mockServer.getUrl(), 0,
                                                         Translator.CHUNK_SPLIT_COUNT, "",
-                                                        "" );
+                                                        "", DEFAULT_CONNECTION_TIMEOUT_SEC, 
+                                                        DEFAULT_SOCKET_TIMEOUT_SEC, RETRY_DURATION_SEC );
     }
 
     @Test

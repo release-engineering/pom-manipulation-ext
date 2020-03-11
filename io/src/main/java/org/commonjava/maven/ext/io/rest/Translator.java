@@ -28,6 +28,12 @@ public interface Translator
 {
     int CHUNK_SPLIT_COUNT = 4;
 
+    int DEFAULT_CONNECTION_TIMEOUT_SEC = 30;
+
+    int DEFAULT_SOCKET_TIMEOUT_SEC = 600;
+
+    int RETRY_DURATION_SEC = 30;
+
     /**
      * Executes HTTP request to a REST service that translates versions
      *
