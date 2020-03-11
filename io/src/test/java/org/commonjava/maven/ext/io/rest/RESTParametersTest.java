@@ -39,6 +39,9 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.commonjava.maven.ext.io.rest.Translator.RestProtocol;
+import static org.commonjava.maven.ext.io.rest.Translator.DEFAULT_CONNECTION_TIMEOUT_SEC;
+import static org.commonjava.maven.ext.io.rest.Translator.DEFAULT_SOCKET_TIMEOUT_SEC;
+import static org.commonjava.maven.ext.io.rest.Translator.RETRY_DURATION_SEC;
 import static org.junit.Assert.*;
 
 public class RESTParametersTest
@@ -88,7 +91,8 @@ public class RESTParametersTest
     public void testVerifyGroup()
     {
         this.versionTranslator = new DefaultTranslator( mockServer.getUrl(), RestProtocol.CURRENT, 0,
-                                                        Translator.CHUNK_SPLIT_COUNT, group, "" );
+                                                        Translator.CHUNK_SPLIT_COUNT, group, "", DEFAULT_CONNECTION_TIMEOUT_SEC, 
+                                                        DEFAULT_SOCKET_TIMEOUT_SEC, RETRY_DURATION_SEC );
         List<ProjectVersionRef> gavs = Collections.singletonList(
             new SimpleProjectVersionRef( "com.example", "example", "1.0" ) );
 
@@ -100,7 +104,8 @@ public class RESTParametersTest
     public void testVerifyNoGroup()
     {
         this.versionTranslator = new DefaultTranslator( mockServer.getUrl(), RestProtocol.CURRENT, 0,
-                                                        Translator.CHUNK_SPLIT_COUNT, "", "" );
+                                                        Translator.CHUNK_SPLIT_COUNT, "", "", DEFAULT_CONNECTION_TIMEOUT_SEC, 
+                                                        DEFAULT_SOCKET_TIMEOUT_SEC, RETRY_DURATION_SEC );
         List<ProjectVersionRef> gavs = Collections.singletonList(
             new SimpleProjectVersionRef( "com.example", "example", "1.0" ) );
 

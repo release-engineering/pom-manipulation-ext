@@ -36,6 +36,9 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.commonjava.maven.ext.io.rest.Translator.RestProtocol;
+import static org.commonjava.maven.ext.io.rest.Translator.DEFAULT_CONNECTION_TIMEOUT_SEC;
+import static org.commonjava.maven.ext.io.rest.Translator.DEFAULT_SOCKET_TIMEOUT_SEC;
+import static org.commonjava.maven.ext.io.rest.Translator.RETRY_DURATION_SEC;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -66,7 +69,8 @@ public class HttpMessageTranslatorTest
         LoggerFactory.getLogger( HttpMessageTranslatorTest.class ).info ( "Executing test " + testName.getMethodName());
 
         this.versionTranslator = new DefaultTranslator( mockServer.getUrl(), RestProtocol.CURRENT, 0,
-                                                        Translator.CHUNK_SPLIT_COUNT, "", "" );
+                                                        Translator.CHUNK_SPLIT_COUNT, "", "", DEFAULT_CONNECTION_TIMEOUT_SEC, 
+                                                        DEFAULT_SOCKET_TIMEOUT_SEC, RETRY_DURATION_SEC );
     }
 
     @Test

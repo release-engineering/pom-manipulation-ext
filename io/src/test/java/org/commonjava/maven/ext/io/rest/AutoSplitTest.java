@@ -35,6 +35,9 @@ import java.io.IOException;
 import java.util.*;
 
 import static org.commonjava.maven.ext.io.rest.Translator.RestProtocol.CURRENT;
+import static org.commonjava.maven.ext.io.rest.Translator.DEFAULT_CONNECTION_TIMEOUT_SEC;
+import static org.commonjava.maven.ext.io.rest.Translator.DEFAULT_SOCKET_TIMEOUT_SEC;
+import static org.commonjava.maven.ext.io.rest.Translator.RETRY_DURATION_SEC;
 import static org.commonjava.maven.ext.io.rest.VersionTranslatorTest.loadALotOfGAVs;
 import static org.junit.Assert.*;
 
@@ -100,7 +103,8 @@ public class AutoSplitTest
     private List<List<Map<String, Object>>> translate(int size) {
         final DefaultTranslator versionTranslator = new DefaultTranslator(
                 mockServer.getUrl(), protocol, -1, 0, "",
-                "" );
+                "" , DEFAULT_CONNECTION_TIMEOUT_SEC, 
+                DEFAULT_SOCKET_TIMEOUT_SEC, RETRY_DURATION_SEC);
 
         List<ProjectVersionRef> data = aLotOfGavs.subList( 0, size );
         handler.getRequestData().clear();

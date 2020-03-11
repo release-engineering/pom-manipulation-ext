@@ -73,7 +73,11 @@ public class DefaultTranslator
 
     private final ListingBlacklistMapper lbm;
 
-    private int retryDuration = 30;
+    private int retryDuration;
+
+    private long restConnectionTimeout;
+
+    private long restSocketTimeout;
 
     /**
      * @param endpointUrl is the URL to talk to.
@@ -83,23 +87,30 @@ public class DefaultTranslator
      * @param restMinSize minimum size for the call
      * @param repositoryGroup the group to pass to the endpoint.
      * @param incrementalSerialSuffix the suffix to pass to the endpoint.
+     * @param restConnectionTimeout the connection timeout (in seconds) set for the rest call.
+     * @param restSocketTimeout the socket timeout (in seconds) set for the rest call.
+     * @param restRetryDuration the seconds to wait before splitting the tasks and retrying when DA service is not available.
      */
     public DefaultTranslator( String endpointUrl, RestProtocol protocol, int restMaxSize, int restMinSize,
-                              String repositoryGroup, String incrementalSerialSuffix )
+                              String repositoryGroup, String incrementalSerialSuffix, long restConnectionTimeout,
+                              long restSocketTimeout, int restRetryDuration )
     {
         this.rgm = new ReportGAVMapper( protocol, repositoryGroup, incrementalSerialSuffix );
         this.lbm = new ListingBlacklistMapper( protocol);
         this.endpointUrl = endpointUrl + ( isNotBlank( endpointUrl ) ? endpointUrl.endsWith( "/" ) ? "" : "/" : "");
         this.initialRestMaxSize = restMaxSize;
         this.initialRestMinSize = restMinSize;
+        this.restConnectionTimeout = restConnectionTimeout;
+        this.restSocketTimeout = restSocketTimeout;
+        this.retryDuration = restRetryDuration;
     }
 
     private void init (ObjectMapper objectMapper)
     {
         // According to https://github.com/Mashape/unirest-java the default connection timeout is 10000
         // and the default socketTimeout is 60000.
-        // We have increased the first to 30 seconds and the second to 10 minutes.
-        Unirest.setTimeouts( 30000, 600000 );
+        // If not specified via properties, the values will be increased by default to 30 seconds for the first and 10 minutes for the second.
+        Unirest.setTimeouts( restConnectionTimeout * 1000, restSocketTimeout * 1000 );
         Unirest.setObjectMapper( objectMapper );
     }
 
