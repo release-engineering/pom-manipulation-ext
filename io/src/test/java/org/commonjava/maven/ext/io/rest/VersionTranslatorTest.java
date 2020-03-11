@@ -41,6 +41,9 @@ import java.io.IOException;
 import java.util.*;
 
 import static org.commonjava.maven.ext.io.rest.Translator.RestProtocol;
+import static org.commonjava.maven.ext.io.rest.Translator.DEFAULT_CONNECTION_TIMEOUT_SEC;
+import static org.commonjava.maven.ext.io.rest.Translator.DEFAULT_SOCKET_TIMEOUT_SEC;
+import static org.commonjava.maven.ext.io.rest.Translator.RETRY_DURATION_SEC;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
@@ -86,7 +89,8 @@ public class VersionTranslatorTest
         LoggerFactory.getLogger( VersionTranslatorTest.class ).info( "Executing test " + testName.getMethodName() );
 
         this.versionTranslator = new DefaultTranslator( mockServer.getUrl(), protocol, 0, Translator.CHUNK_SPLIT_COUNT, "indyGroup",
-                                                        "" );
+                                                        "", DEFAULT_CONNECTION_TIMEOUT_SEC, 
+                                                        DEFAULT_SOCKET_TIMEOUT_SEC, RETRY_DURATION_SEC );
     }
 
     public VersionTranslatorTest( RestProtocol protocol)
@@ -134,7 +138,8 @@ public class VersionTranslatorTest
         // Some url that doesn't exist used here
         Translator translator = new DefaultTranslator( "http://127.0.0.2", RestProtocol.CURRENT, 0,
                                                        Translator.CHUNK_SPLIT_COUNT, "",
-                                                       "" );
+                                                       "", DEFAULT_CONNECTION_TIMEOUT_SEC, 
+                                                       DEFAULT_SOCKET_TIMEOUT_SEC, RETRY_DURATION_SEC );
 
         List<ProjectVersionRef> gavs = Collections.singletonList(
             new SimpleProjectVersionRef( "com.example", "example", "1.0" ) );
