@@ -52,13 +52,13 @@ public class RESTState implements State
     public static final String REST_HEADERS = "restHeaders";
 
     @ConfigValue( docIndex = "dep-manip.html#rest-timeouts-and-retries" )
-    public static final String REST_CONNECTION_TIMEOUT_SEC = "connectionTimeout";
+    public static final String REST_CONNECTION_TIMEOUT_SEC = "restConnectionTimeout";
 
     @ConfigValue( docIndex = "dep-manip.html#rest-timeouts-and-retries" )
-    public static final String REST_SOCKET_TIMEOUT_SEC = "socketTimeout";
+    public static final String REST_SOCKET_TIMEOUT_SEC = "restSocketTimeout";
 
     @ConfigValue( docIndex = "dep-manip.html#rest-timeouts-and-retries" )
-    public static final String REST_RETRY_DURATION_SEC = "retryTimeout";
+    public static final String REST_RETRY_DURATION_SEC = "restRetryDuration";
 
     private final ManipulationSession session;
 
@@ -70,11 +70,11 @@ public class RESTState implements State
 
     private Map<String, String> restHeaders;
 
-    private int connectionTimeout;
+    private int restConnectionTimeout;
 
-    private int socketTimeout;
+    private int restSocketTimeout;
 
-    private int retryTimeout;
+    private int restRetryDuration;
 
     public RESTState( final ManipulationSession session )
     {
@@ -105,12 +105,12 @@ public class RESTState implements State
                                                             ( x, y ) -> y, LinkedHashMap::new ) );
         }
 
-        connectionTimeout = Integer.parseInt( userProps.getProperty( REST_CONNECTION_TIMEOUT_SEC, String.valueOf( DefaultTranslator.DEFAULT_CONNECTION_TIMEOUT_SEC ) ) );
-        socketTimeout = Integer.parseInt( userProps.getProperty( REST_SOCKET_TIMEOUT_SEC, String.valueOf( DefaultTranslator.DEFAULT_SOCKET_TIMEOUT_SEC ) ) );
-        retryTimeout = Integer.parseInt( userProps.getProperty( REST_RETRY_DURATION_SEC, String.valueOf( DefaultTranslator.RETRY_DURATION_SEC ) ) );
+        restConnectionTimeout = Integer.parseInt( userProps.getProperty( REST_CONNECTION_TIMEOUT_SEC, String.valueOf( DefaultTranslator.DEFAULT_CONNECTION_TIMEOUT_SEC ) ) );
+        restSocketTimeout = Integer.parseInt( userProps.getProperty( REST_SOCKET_TIMEOUT_SEC, String.valueOf( DefaultTranslator.DEFAULT_SOCKET_TIMEOUT_SEC ) ) );
+        restRetryDuration = Integer.parseInt( userProps.getProperty( REST_RETRY_DURATION_SEC, String.valueOf( DefaultTranslator.RETRY_DURATION_SEC ) ) );
 
         restEndpoint = new DefaultTranslator( restURL, restMaxSize, restMinSize, repositoryGroup, vState.getIncrementalSerialSuffix(), restHeaders,
-                                              connectionTimeout, socketTimeout, retryTimeout);
+                                              restConnectionTimeout, restSocketTimeout, restRetryDuration);
     }
 
     /**
