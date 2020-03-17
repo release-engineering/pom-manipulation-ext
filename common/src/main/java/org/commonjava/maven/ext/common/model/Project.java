@@ -61,6 +61,8 @@ public class Project
 {
     private static final MavenPluginDefaults PLUGIN_DEFAULTS = new StandardMaven350PluginDefaults();
 
+    private enum PLUGIN_RESOLVER { NONE, PLUGIN_DEFAULTS, ALL };
+
     private final Logger logger = LoggerFactory.getLogger( getClass() );
 
     /**
@@ -361,11 +363,25 @@ public class Project
 
         if ( getModel().getBuild() != null )
         {
-            resolvePlugins( session, getModel().getBuild().getPlugins(), resolvedPlugins );
+            resolvePlugins( session, getModel().getBuild().getPlugins(), PLUGIN_RESOLVER.NONE, resolvedPlugins );
         }
 
         return resolvedPlugins;
     }
+
+    // TODO: javadoc and getAllResolvedProfilePlugins
+    public Map<ProjectVersionRef, Plugin> getAllResolvedPlugins ( MavenSessionHandler session) throws ManipulationException
+    {
+        Map<ProjectVersionRef, Plugin> resolvedPlugins = new HashMap<>();
+
+        if ( getModel().getBuild() != null )
+        {
+            resolvePlugins( session, getModel().getBuild().getPlugins(), PLUGIN_RESOLVER.ALL, resolvedPlugins );
+        }
+
+        return resolvedPlugins;
+    }
+
 
 
     /**
@@ -387,7 +403,7 @@ public class Project
             final PluginManagement pm = getModel().getBuild().getPluginManagement();
             if ( !( pm == null || pm.getPlugins() == null ) )
             {
-                resolvePlugins( session, pm.getPlugins(), resolvedManagedPlugins );
+                resolvePlugins( session, pm.getPlugins(), PLUGIN_RESOLVER.PLUGIN_DEFAULTS, resolvedManagedPlugins );
             }
         }
 
@@ -415,7 +431,7 @@ public class Project
 
             if ( profile.getBuild() != null )
             {
-                resolvePlugins( session, profile.getBuild().getPlugins(), profileDeps );
+                resolvePlugins( session, profile.getBuild().getPlugins(), PLUGIN_RESOLVER.NONE, profileDeps );
 
             }
             resolvedProfilePlugins.put( profile, profileDeps );
@@ -449,7 +465,7 @@ public class Project
 
                 if ( pm != null )
                 {
-                    resolvePlugins( session, pm.getPlugins(), profileDeps );
+                    resolvePlugins( session, pm.getPlugins(), PLUGIN_RESOLVER.PLUGIN_DEFAULTS, profileDeps );
                 }
             }
             resolvedProfileManagedPlugins.put( profile, profileDeps );
@@ -581,7 +597,8 @@ public class Project
     }
 
 
-    private void resolvePlugins ( MavenSessionHandler session, List<Plugin> plugins, Map<ProjectVersionRef, Plugin> resolvedPlugins)
+    private void resolvePlugins( MavenSessionHandler session, List<Plugin> plugins, PLUGIN_RESOLVER includeManagedPlugins,
+                                 Map<ProjectVersionRef, Plugin> resolvedPlugins )
                     throws ManipulationException
     {
         ListIterator<Plugin> iterator = plugins.listIterator( plugins.size() );
@@ -604,6 +621,23 @@ public class Project
             if ( isEmpty( g ) )
             {
                 g = PLUGIN_DEFAULTS.getDefaultGroupId( a );
+            }
+            if ( isEmpty( v ) )
+            {
+                // For managed plugins, if the version is blank we always check the default list.
+                // If getAll* has been called then if we can't find a version in the default list, dummy one up.
+                if ( includeManagedPlugins == PLUGIN_RESOLVER.ALL || includeManagedPlugins == PLUGIN_RESOLVER.PLUGIN_DEFAULTS)
+                {
+                    v = PLUGIN_DEFAULTS.getDefaultVersion( g, a );
+                    if ( "[0.0.0.1,]".equals( v ) )
+                    {
+                        v = "";
+                    }
+                }
+                if ( isEmpty( v ) && includeManagedPlugins == PLUGIN_RESOLVER.ALL )
+                {
+                    v = "*";
+                }
             }
             // Theoretically we could default an empty v via PLUGIN_DEFAULTS.getDefaultVersion( g, a ) but
             // this means managed plugins would be included which confuses things.
