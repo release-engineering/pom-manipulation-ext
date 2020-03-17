@@ -31,12 +31,12 @@ import org.commonjava.maven.atlas.ident.ref.SimpleArtifactRef;
 import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.common.model.Project;
 import org.commonjava.maven.ext.common.util.ProfileUtils;
+import org.commonjava.maven.ext.common.util.WildcardMap;
 import org.commonjava.maven.ext.core.ManipulationSession;
 import org.commonjava.maven.ext.core.state.DependencyState;
 import org.commonjava.maven.ext.core.state.PluginState;
 import org.commonjava.maven.ext.core.state.RelocationState;
 import org.commonjava.maven.ext.core.state.State;
-import org.commonjava.maven.ext.common.util.WildcardMap;
 import org.commonjava.maven.ext.io.resolver.GalleyAPIWrapper;
 import org.commonjava.maven.galley.maven.parse.GalleyMavenXMLException;
 import org.slf4j.Logger;
@@ -160,7 +160,7 @@ public class RelocationManipulator
 
         result |= updatePlugins( relocations, project, project.getResolvedManagedPlugins( session ) );
 
-        result |= updatePlugins( relocations, project, project.getResolvedPlugins( session ) );
+        result |= updatePlugins( relocations, project, project.getAllResolvedPlugins( session ) );
 
         for ( Profile profile : project.getResolvedProfilePlugins( session ).keySet() )
         {
@@ -432,7 +432,7 @@ public class RelocationManipulator
         return 15;
     }
 
-    private final class PluginReference
+    private static final class PluginReference
     {
         private final ConfigurationContainer container;
 
@@ -449,6 +449,17 @@ public class RelocationManipulator
             this.groupIdNode = groupIdNode;
             this.artifactIdNode = artifactIdNode;
             this.versionNode = versionNode;
+        }
+
+        @Override
+        public String toString()
+        {
+            return "PluginReference{" + "container=" + container + nodeToString(groupIdNode) + nodeToString(artifactIdNode) + nodeToString(versionNode) + '}';
+        }
+
+        private String nodeToString(Node node)
+        {
+            return node == null ? "" : ", [" + node.getNodeName() + "=" + node.getTextContent() + "]";
         }
     }
 }

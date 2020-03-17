@@ -42,4 +42,4 @@ assert (passed == true)
 
 def plugin = pom.build.pluginManagement.plugins.plugin.find { it.artifactId.text() == "maven-dependency-plugin" }
 assert plugin != null
-assert plugin.version.text() == "3.1.1"
+assert plugin.version.text() == "3.1.2"

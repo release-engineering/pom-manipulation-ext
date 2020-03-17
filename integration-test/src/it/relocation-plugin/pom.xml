@@ -30,6 +30,7 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <junitProp>3.8.2</junitProp>
   </properties>
 
   <dependencies>
@@ -46,7 +47,21 @@
   </dependencies>
 
   <build>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>com.soebes.maven.plugins</groupId>
+          <artifactId>iterator-maven-plugin</artifactId>
+          <version>0.3</version>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+
     <plugins>
+      <plugin>
+        <groupId>com.soebes.maven.plugins</groupId>
+        <artifactId>iterator-maven-plugin</artifactId>
+      </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-dependency-plugin</artifactId>
@@ -62,7 +77,7 @@
                 <artifactItem>
                   <groupId>com.junit</groupId>
                   <artifactId>junit</artifactId>
-                  <version>3.8.2</version>
+                  <version>${junitProp}</version>
                   <type>jar</type>
                   <overWrite>false</overWrite>
                   <outputDirectory>${project.build.directory}</outputDirectory>
@@ -93,7 +108,7 @@
             <phase>none</phase>
             <configuration>
               <groupId>wildfly</groupId>
-              <artifactId>wildfly-dist</artifactId>
+              <artifactId>wildfly-olddist</artifactId>
               <version>18.0.0.Final</version>
               <server-config>standalone-full-ha.xml</server-config>
             </configuration>
