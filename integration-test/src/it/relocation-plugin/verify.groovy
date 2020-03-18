@@ -18,25 +18,19 @@ System.out.println( "Slurping POM: ${pomFile.getAbsolutePath()}" )
 
 def pom = new XmlSlurper().parse( pomFile )
 
-def dependency = pom.dependencies.dependency.find { it.groupId.text() == "junit" }
-assert dependency != null
-assert dependency.artifactId.text() == "junit"
-assert dependency.version.text() == "4.1"
+def plugin1 = pom.build.plugins.plugin.find { it.groupId.text() == "org.wildfly.plugins" && it.artifactId.text() == "wildfly-maven-plugin" }
+assert plugin1.size() != 0
+assert plugin1.executions.execution.configuration.groupId.text() == "org.wildfly"
+assert plugin1.executions.execution.configuration.artifactId.text() == "wildfly-dist"
+assert plugin1.executions.execution.configuration.version.text() == "18.0.1.Final"
 
-dependency = pom.dependencies.dependency.find { it.groupId.text() == "org.slf4j" }
-assert dependency != null
-assert dependency.artifactId.text() == "slf4j-api"
-assert dependency.version.text() == "1.7.30"
+def plugin2 = pom.build.plugins.plugin.find { it.groupId.text() == "org.apache.maven.plugins" && it.artifactId.text() == "maven-dependency-plugin" }
+assert plugin2.size() != 0
 
-def plugin = pom.build.plugins.plugin.find { it.groupId.text() == "org.wildfly.plugins" && it.artifactId.text() == "wildfly-maven-plugin" }
-assert plugin != null
-assert plugin.executions.execution.configuration.groupId.text() == "org.wildfly"
-assert plugin.executions.execution.configuration.artifactId.text() == "wildfly-dist"
-assert plugin.executions.execution.configuration.version.text() == "18.0.1.Final"
+def artifactItem1 = plugin2.executions.execution.configuration.artifactItems.artifactItem.find { it.groupId.text() == "junit" && it.artifactId.text() == "junit" }
+assert artifactItem1.size() != 0
+assert artifactItem1.version.text() == "4.1"
 
-plugin = pom.build.plugins.plugin.find { it.groupId.text() == "org.apache.maven.plugins" && it.artifactId.text() == "maven-dependency-plugin" }
-assert plugin != null
-def artifactItem = plugin.executions.execution.configuration.artifactItems.find { it.groupId.text() == "junit" && t.artifactId.text() == "junit" }
-assert artifactItem != null
-artifactItem = plugin.executions.execution.configuration.artifactItems.find { it.groupId.text() == "org.sfl4j" && t.artifactId.text() == "sfl4j-api" }
-assert artifactItem != null
+def artifactItem2 = plugin2.executions.execution.configuration.artifactItems.artifactItem.find { it.groupId.text() == "org.slf4j" && it.artifactId.text() == "slf4j-api" }
+assert artifactItem2.size() != 0
+assert artifactItem2.version.text() == "1.7.30"
