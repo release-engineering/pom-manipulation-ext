@@ -34,3 +34,16 @@ assert artifactItem1.version.text() == "4.1"
 def artifactItem2 = plugin2.executions.execution.configuration.artifactItems.artifactItem.find { it.groupId.text() == "org.slf4j" && it.artifactId.text() == "slf4j-api" }
 assert artifactItem2.size() != 0
 assert artifactItem2.version.text() == "1.7.30"
+
+def profile1 = pom.profiles.profile.find { it.id.text() == "one" }
+assert profile1.size() != 0
+def plugin3 = profile1.build.plugins.plugin.find { it.groupId.text() == "org.apache.maven.plugins" && it.artifactId.text() == "maven-dependency-plugin" }
+assert plugin3.size() != 0
+
+def artifactItem3 = plugin3.executions.execution.configuration.artifactItems.artifactItem.find { it.groupId.text() == "junit" && it.artifactId.text() == "junit" }
+assert artifactItem3.size() != 0
+assert artifactItem3.version.text() == "4.1"
+
+def artifactItem4 = plugin3.executions.execution.configuration.artifactItems.artifactItem.find { it.groupId.text() == "org.slf4j" && it.artifactId.text() == "slf4j-api" }
+assert artifactItem4.size() != 0
+assert artifactItem4.version.text() == "1.7.30"

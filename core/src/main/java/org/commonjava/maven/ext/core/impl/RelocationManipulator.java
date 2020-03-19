@@ -75,7 +75,7 @@ import static org.commonjava.maven.ext.core.util.IdUtils.ga;
 @Named("relocations-manipulator")
 @Singleton
 public class RelocationManipulator
-        implements Manipulator
+                implements Manipulator
 {
     private final Logger logger = LoggerFactory.getLogger( getClass() );
 
@@ -107,13 +107,13 @@ public class RelocationManipulator
      */
     @Override
     public Set<Project> applyChanges( final List<Project> projects )
-            throws ManipulationException
+                    throws ManipulationException
     {
         final State state = session.getState( RelocationState.class );
 
         if ( !session.isEnabled() || !state.isEnabled() )
         {
-            logger.debug("{}: Nothing to do!", getClass().getSimpleName());
+            logger.debug( "{}: Nothing to do!", getClass().getSimpleName() );
             return Collections.emptySet();
         }
 
@@ -162,9 +162,9 @@ public class RelocationManipulator
 
         result |= updatePlugins( relocations, project, project.getAllResolvedPlugins( session ) );
 
-        for ( Profile profile : project.getResolvedProfilePlugins( session ).keySet() )
+        for ( Profile profile : project.getAllResolvedProfilePlugins( session ).keySet() )
         {
-            result |= updatePlugins( relocations, project, project.getResolvedProfilePlugins( session ).get( profile ) );
+            result |= updatePlugins( relocations, project, project.getAllResolvedProfilePlugins( session ).get( profile ) );
         }
 
         for ( Profile profile : project.getResolvedProfileManagedPlugins( session ).keySet() )
