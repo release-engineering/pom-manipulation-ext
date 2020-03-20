@@ -149,7 +149,6 @@ public class WildcardMap<T>
         }
         else
         {
-            logger.debug ("Entering artifact of " + artifactId + " and value " + value);
             vMap.put(artifactId, value);
             map.put(groupId, vMap);
         }
@@ -191,7 +190,6 @@ public class WildcardMap<T>
         LinkedHashMap<String, T> value = map.get(groupId);
         if (value != null)
         {
-            logger.debug("Retrieved value map of " + value);
             if ( value.get(WILDCARD) != null)
             {
                 result = value.get(WILDCARD);
@@ -201,8 +199,6 @@ public class WildcardMap<T>
                 result = value.get(artifactId);
             }
         }
-        logger.debug("Returning result of " + result);
-
         return result;
     }
 

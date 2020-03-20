@@ -61,6 +61,8 @@ public class Project
 {
     private static final MavenPluginDefaults PLUGIN_DEFAULTS = new StandardMaven350PluginDefaults();
 
+    private enum PluginResolver { NONE, PLUGIN_DEFAULTS, ALL };
+
     private final Logger logger = LoggerFactory.getLogger( getClass() );
 
     /**
@@ -114,7 +116,7 @@ public class Project
      * @throws ManipulationException if an error occurs.
      */
     public Project( final Model model )
-        throws ManipulationException
+                    throws ManipulationException
     {
         this( model.getPomFile(), model );
     }
@@ -181,9 +183,9 @@ public class Project
         // Simply inlined ProjectVersionRef comparison here as ProjectVersionRef are created now
         // on demand to ensure they have the current values. However we are using VersionSpec.equals
         // in order to maintain the same semantics as ProjectVersionRef.equals.
-        return getGroupId().equals( other.getGroupId() )
-                && getArtifactId().equals( other.getArtifactId() )
-                && VersionUtils.createFromSpec( getVersion() ).equals( VersionUtils.createFromSpec( other.getVersion() ) );
+        return getGroupId().equals( other.getGroupId() ) && getArtifactId().equals( other.getArtifactId() )
+                        && VersionUtils.createFromSpec( getVersion() )
+                                       .equals( VersionUtils.createFromSpec( other.getVersion() ) );
     }
 
     @Override
@@ -305,7 +307,7 @@ public class Project
 
         for ( final Profile profile : ProfileUtils.getProfiles( session, model ) )
         {
-            HashMap<ArtifactRef, Dependency> profileDeps = new HashMap<>();
+            Map<ArtifactRef, Dependency> profileDeps = new HashMap<>();
 
             resolveDeps( session, profile.getDependencies(), true, profileDeps );
 
@@ -361,12 +363,32 @@ public class Project
 
         if ( getModel().getBuild() != null )
         {
-            resolvePlugins( session, getModel().getBuild().getPlugins(), resolvedPlugins );
+            resolvePlugins( session, getModel().getBuild().getPlugins(), PluginResolver.NONE, resolvedPlugins );
         }
 
         return resolvedPlugins;
     }
 
+    /**
+     * This method will scan the plugins in this project including those without a version and return a fully resolved
+     * list. Note that while updating the {@link Plugin} reference returned will be reflected in the Model as it is the
+     * same object, if you wish to remove or add items to the Model then you must use {@link #getModel()}
+     *
+     * @param session MavenSessionHandler, used by {@link PropertyResolver}
+     * @return a list of fully resolved {@link ProjectVersionRef} to the original {@link Plugin}
+     * @throws ManipulationException if an error occurs
+     */
+    public Map<ProjectVersionRef, Plugin> getAllResolvedPlugins ( MavenSessionHandler session) throws ManipulationException
+    {
+        Map<ProjectVersionRef, Plugin> resolvedPlugins = new HashMap<>();
+
+        if ( getModel().getBuild() != null )
+        {
+            resolvePlugins( session, getModel().getBuild().getPlugins(), PluginResolver.ALL, resolvedPlugins );
+        }
+
+        return resolvedPlugins;
+    }
 
     /**
      * This method will scan the plugins in the pluginManagement section of this project and return a fully
@@ -387,7 +409,7 @@ public class Project
             final PluginManagement pm = getModel().getBuild().getPluginManagement();
             if ( !( pm == null || pm.getPlugins() == null ) )
             {
-                resolvePlugins( session, pm.getPlugins(), resolvedManagedPlugins );
+                resolvePlugins( session, pm.getPlugins(), PluginResolver.PLUGIN_DEFAULTS, resolvedManagedPlugins );
             }
         }
 
@@ -411,17 +433,47 @@ public class Project
 
         for ( final Profile profile : ProfileUtils.getProfiles( session, model ) )
         {
-            HashMap<ProjectVersionRef, Plugin> profileDeps = new HashMap<>();
+            Map<ProjectVersionRef, Plugin> profileDeps = new HashMap<>();
 
             if ( profile.getBuild() != null )
             {
-                resolvePlugins( session, profile.getBuild().getPlugins(), profileDeps );
+                resolvePlugins( session, profile.getBuild().getPlugins(), PluginResolver.NONE, profileDeps );
 
             }
             resolvedProfilePlugins.put( profile, profileDeps );
         }
 
         return resolvedProfilePlugins;
+    }
+
+    /**
+     * This method will scan the plugins in the potentially active Profiles in this project including those without a
+     * version and return a fully resolved list. Note that while updating the {@link Plugin} reference returned will be
+     * reflected in the Model as it is the same object, if you wish to remove or add items to the Model then you must
+     * use {@link #getModel()}
+     *
+     * @param session MavenSessionHandler, used by {@link PropertyResolver}
+     * @return a list of fully resolved {@link ProjectVersionRef} to the original {@link Plugin}
+     * @throws ManipulationException if an error occurs
+     */
+    public Map<Profile,Map<ProjectVersionRef,Plugin>> getAllResolvedProfilePlugins( MavenSessionHandler session )
+                    throws ManipulationException
+    {
+        Map<Profile, Map<ProjectVersionRef, Plugin>> allResolvedProfilePlugins = new HashMap<>();
+
+        for ( final Profile profile : ProfileUtils.getProfiles( session, model ) )
+        {
+            Map<ProjectVersionRef, Plugin> profileDeps = new HashMap<>();
+
+            if ( profile.getBuild() != null )
+            {
+                resolvePlugins( session, profile.getBuild().getPlugins(), PluginResolver.ALL, profileDeps );
+
+            }
+            allResolvedProfilePlugins.put( profile, profileDeps );
+        }
+
+        return allResolvedProfilePlugins;
     }
 
     /**
@@ -449,7 +501,7 @@ public class Project
 
                 if ( pm != null )
                 {
-                    resolvePlugins( session, pm.getPlugins(), profileDeps );
+                    resolvePlugins( session, pm.getPlugins(), PluginResolver.PLUGIN_DEFAULTS, profileDeps );
                 }
             }
             resolvedProfileManagedPlugins.put( profile, profileDeps );
@@ -581,7 +633,8 @@ public class Project
     }
 
 
-    private void resolvePlugins ( MavenSessionHandler session, List<Plugin> plugins, Map<ProjectVersionRef, Plugin> resolvedPlugins)
+    private void resolvePlugins( MavenSessionHandler session, List<Plugin> plugins, PluginResolver includeManagedPlugins,
+                                 Map<ProjectVersionRef, Plugin> resolvedPlugins )
                     throws ManipulationException
     {
         ListIterator<Plugin> iterator = plugins.listIterator( plugins.size() );
@@ -604,6 +657,23 @@ public class Project
             if ( isEmpty( g ) )
             {
                 g = PLUGIN_DEFAULTS.getDefaultGroupId( a );
+            }
+            if ( isEmpty( v ) )
+            {
+                // For managed plugins, if the version is blank we always check the default list.
+                // If getAll* has been called then if we can't find a version in the default list, dummy one up.
+                if ( includeManagedPlugins == PluginResolver.ALL || includeManagedPlugins == PluginResolver.PLUGIN_DEFAULTS)
+                {
+                    v = PLUGIN_DEFAULTS.getDefaultVersion( g, a );
+                    if ( "[0.0.0.1,]".equals( v ) )
+                    {
+                        v = "";
+                    }
+                }
+                if ( isEmpty( v ) && includeManagedPlugins == PluginResolver.ALL )
+                {
+                    v = "*";
+                }
             }
             // Theoretically we could default an empty v via PLUGIN_DEFAULTS.getDefaultVersion( g, a ) but
             // this means managed plugins would be included which confuses things.
