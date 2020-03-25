@@ -29,6 +29,7 @@ import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleArtifactRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef;
 import org.commonjava.maven.atlas.ident.util.VersionUtils;
+import org.commonjava.maven.ext.annotation.JavadocExclude;
 import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.common.session.MavenSessionHandler;
 import org.commonjava.maven.ext.common.util.ProfileUtils;

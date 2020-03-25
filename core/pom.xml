@@ -247,7 +247,7 @@
             <groupId>org.commonjava.maven.ext</groupId>
             <artifactId>pom-manipulation-annotation</artifactId>
             <classifier>processor</classifier>
-            <version>3.9-SNAPSHOT</version>
+            <version>${project.version}</version>
           </dependency>
         </dependencies>
       </plugin>

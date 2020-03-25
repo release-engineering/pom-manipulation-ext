@@ -41,20 +41,50 @@ public class ProfileItem
     @JsonProperty( "profileId" )
     private String id;
 
+    /**
+     * A collection of managed plugins
+     */
     @JsonProperty( "managedPlugins" )
     private List<ManagedPluginsItem> managedPlugins = new ArrayList<>();
 
+    /**
+     * A collection of managed dependencies
+     */
     @JsonProperty( "managedDependencies" )
     private List<ManagedDependenciesItem> managedDependencies = new ArrayList<>();
 
+    /**
+     * A collection of plugins. Each plugin is rendered as
+     * <pre>
+     *     original-GAV : {
+     *         groupId
+     *         artifactId
+     *         version
+     *     }
+     * </pre>
+     */
     @JsonProperty( "plugins" )
     @JsonDeserialize( contentUsing = JSONUtils.ProjectVersionRefDeserializer.class )
     @JsonSerialize( contentUsing = JSONUtils.ProjectVersionRefSerializer.class )
     private Map<String, ProjectVersionRef> plugins = new HashMap<>();
 
+    /**
+     * Represent a collection of properties, mapping to key to a {@link PropertiesItem} object
+     * containing the new and old value
+     */
     @JsonProperty( "properties" )
     private Map<String, PropertiesItem> properties = new HashMap<>();
 
+    /**
+     * A collection of dependencies. Each dependency is rendered as
+     * <pre>
+     *     original-GAV : {
+     *         groupId
+     *         artifactId
+     *         version
+     *     }
+     * </pre>
+     */
     @JsonProperty( "dependencies" )
     @JsonDeserialize( contentUsing = JSONUtils.ProjectVersionRefDeserializer.class )
     @JsonSerialize( contentUsing = JSONUtils.ProjectVersionRefSerializer.class )

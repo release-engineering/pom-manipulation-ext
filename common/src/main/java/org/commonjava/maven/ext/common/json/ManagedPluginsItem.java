@@ -30,10 +30,20 @@ import org.commonjava.maven.ext.common.util.JSONUtils;
 import java.util.HashMap;
 import java.util.Map;
 
-@Setter
 @Getter
+@Setter
 public class ManagedPluginsItem
 {
+    /**
+     * A collection of plugins. Each plugin is rendered as
+     * <pre>
+     *     original-GAV : {
+     *         groupId
+     *         artifactId
+     *         version
+     *     }
+     * </pre>
+     */
     @JsonProperty( "plugins" )
     @JsonDeserialize( contentUsing = JSONUtils.ProjectVersionRefDeserializer.class )
     @JsonSerialize( contentUsing = JSONUtils.ProjectVersionRefSerializer.class )

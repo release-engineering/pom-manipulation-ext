@@ -44,25 +44,58 @@ public class ModulesItem
     @JsonProperty( "gav" )
     private GAV gav = new GAV();
 
+    /**
+     * Represent a collection of properties, mapping to key to a {@link PropertiesItem} object
+     * containing the new and old value
+     */
     @JsonProperty( "properties" )
     private Map<String, PropertiesItem> properties = new HashMap<>();
 
+    /**
+     * A collection of managed plugins
+     */
     @JsonProperty( "managedPlugins" )
     private ManagedPluginsItem managedPlugins;
 
+    /**
+     * A collection of managed dependencies
+     */
     @JsonProperty( "managedDependencies" )
     private ManagedDependenciesItem managedDependencies;
 
+    /**
+     * A collection of plugins. Each plugin is rendered as
+     * <pre>
+     *     original-GAV : {
+     *         groupId
+     *         artifactId
+     *         version
+     *     }
+     * </pre>
+     */
     @JsonProperty( "plugins" )
     @JsonDeserialize( contentUsing = JSONUtils.ProjectVersionRefDeserializer.class )
     @JsonSerialize( contentUsing = JSONUtils.ProjectVersionRefSerializer.class )
     private Map<String, ProjectVersionRef> plugins = new HashMap<>();
 
+    /**
+     * A collection of dependencies. Each dependency is rendered as
+     * <pre>
+     *     original-GAV : {
+     *         groupId
+     *         artifactId
+     *         version
+     *     }
+     * </pre>
+     */
     @JsonProperty( "dependencies" )
     @JsonDeserialize( contentUsing = JSONUtils.ProjectVersionRefDeserializer.class )
     @JsonSerialize( contentUsing = JSONUtils.ProjectVersionRefSerializer.class )
     private Map<String, ProjectVersionRef> dependencies = new HashMap<>();
 
+    /**
+     * A collection of profiles
+     */
     @JsonProperty( "profiles" )
     private List<ProfileItem> profiles = new ArrayList<>();
 }

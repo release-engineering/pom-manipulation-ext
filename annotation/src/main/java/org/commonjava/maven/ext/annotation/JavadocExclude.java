@@ -13,25 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.commonjava.maven.ext.common.json;
 
-import lombok.Getter;
-import lombok.Setter;
-import org.commonjava.maven.ext.annotation.JavadocExclude;
+package org.commonjava.maven.ext.annotation;
 
-@Setter
-@Getter
-@JavadocExclude
-public class ErrorMessage
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+
+
+@Retention( RetentionPolicy.SOURCE)
+public @interface JavadocExclude
 {
-    private String errorType;
-
-    private String errorMessage;
-
-    private String details;
-
-    public String toString()
-    {
-        return errorType + " " + errorMessage + " " + details;
-    }
 }

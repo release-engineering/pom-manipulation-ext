@@ -34,6 +34,16 @@ import java.util.Map;
 @Setter
 public class ManagedDependenciesItem
 {
+    /**
+     * A collection of dependencies. Each dependency is rendered as
+     * <pre>
+     *     original-GAV : {
+     *         groupId
+     *         artifactId
+     *         version
+     *     }
+     * </pre>
+     */
     @JsonProperty( "dependencies" )
     @JsonDeserialize( contentUsing = JSONUtils.ProjectVersionRefDeserializer.class )
     @JsonSerialize( contentUsing = JSONUtils.ProjectVersionRefSerializer.class )

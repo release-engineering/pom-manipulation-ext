@@ -32,9 +32,18 @@ import lombok.Setter;
 @NoArgsConstructor
 public class PropertiesItem
 {
+    /**
+     * The original value of the property.
+     * @return the old value
+     */
+    @Getter
+    @Setter
     @JsonProperty( "oldValue" )
     private String oldValue;
 
+    /**
+     * The new value of the property.
+     */
     @JsonProperty( "value" )
     private String newValue;
 }

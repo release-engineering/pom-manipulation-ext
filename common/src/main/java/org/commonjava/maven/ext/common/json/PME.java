@@ -32,9 +32,15 @@ import java.util.List;
 @JsonPropertyOrder( {"executionRoot", "modules" } )
 public class PME
 {
+    /**
+     * Represents the root of the project and is used by Repour to calculate the project GAV change.
+     */
     @JsonProperty( "executionRoot" )
     private GAV gav = new GAV();
 
+    /**
+     * A collection of one or more modules containing the changes made.
+     */
     @JsonProperty
     private List<ModulesItem> modules = new ArrayList<>();
 }

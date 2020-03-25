@@ -81,12 +81,15 @@
     <atlasVersion>0.17.1</atlasVersion>
     <galleyVersion>0.16.3</galleyVersion>
 
-    <jacksonVersion>2.10.3</jacksonVersion>
     <groovyVersion>2.5.7</groovyVersion>
-
-    <enforceBestPractices>false</enforceBestPractices>
-
     <unirestVersion>3.1.00</unirestVersion>
+    <jsonPathVersion>2.3.0</jsonPathVersion>
+    <slf4jVersion>1.7.30</slf4jVersion>
+
+    <!-- Both Jackson versions should be identical except if Jackson has not -->
+    <!-- published javadoc for the micro version -->
+    <jacksonVersion>2.10.3</jacksonVersion>
+    <jacksonJavadocVersion>2.10</jacksonJavadocVersion>
   </properties>
 
 
@@ -362,7 +365,7 @@
       <dependency>
         <groupId>com.jayway.jsonpath</groupId>
         <artifactId>json-path</artifactId>
-        <version>2.3.0</version>
+        <version>${jsonPathVersion}</version>
       </dependency>
 
       <dependency>
@@ -380,7 +383,7 @@
       <dependency>
         <groupId>org.slf4j</groupId>
         <artifactId>slf4j-api</artifactId>
-        <version>1.7.29</version>
+        <version>${slf4jVersion}</version>
       </dependency>
       <dependency>
         <groupId>ch.qos.logback</groupId>
@@ -426,9 +429,14 @@
       </dependency>
 
       <dependency>
+        <groupId>com.github.olivergondza</groupId>
+        <artifactId>maven-jdk-tools-wrapper</artifactId>
+        <version>0.1</version>
+      </dependency>
+      <dependency>
         <groupId>org.projectlombok</groupId>
         <artifactId>lombok</artifactId>
-        <version>1.18.2</version>
+        <version>1.18.12</version>
         <scope>provided</scope>
       </dependency>
 
@@ -570,10 +578,36 @@
           <artifactId>maven-processor-plugin</artifactId>
           <version>3.3.3</version>
         </plugin>
+        <plugin>
+          <groupId>org.projectlombok</groupId>
+          <artifactId>lombok-maven-plugin</artifactId>
+          <version>1.18.12.0</version>
+        </plugin>
       </plugins>
     </pluginManagement>
 
     <plugins>
+      <plugin>
+        <groupId>org.projectlombok</groupId>
+        <artifactId>lombok-maven-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>delombok</id>
+            <phase>generate-sources</phase>
+            <goals>
+              <goal>delombok</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>${project.build.directory}/javadoc-generated-sources</outputDirectory>
+              <addOutputDirectory>false</addOutputDirectory>
+              <sourceDirectory>src/main/java</sourceDirectory>
+              <formatPreferences>
+                <javaLangAsFQN>skip</javaLangAsFQN>
+              </formatPreferences>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>buildnumber-maven-plugin</artifactId>
@@ -585,7 +619,36 @@
           <execution>
             <id>attach-javadocs</id>
             <configuration>
+              <sourcepath>${project.build.directory}/javadoc-generated-sources</sourcepath>
+              <doclet>org.commonjava.maven.ext.annotation.JavadocFilter</doclet>
+              <docletArtifact>
+                <groupId>org.commonjava.maven.ext</groupId>
+                <artifactId>pom-manipulation-annotation</artifactId>
+                <version>${project.version}</version>
+              </docletArtifact>
+              <detectJavaApiLink>true</detectJavaApiLink>
               <quiet>true</quiet>
+              <author>false</author>
+              <links>
+                <link>https://www.javadoc.io/doc/org.commonjava.maven.ext/pom-manipulation-common/${project.version}</link>
+                <link>https://www.javadoc.io/doc/org.commonjava.maven.ext/pom-manipulation-io/${project.version}</link>
+                <link>https://www.javadoc.io/doc/org.commonjava.maven.ext/pom-manipulation-core/${project.version}</link>
+                <link>https://www.javadoc.io/doc/org.commonjava.maven.ext/pom-manipulation-cli/${project.version}</link>
+                <link>https://www.javadoc.io/doc/org.commonjava.maven.ext/pom-manipulation-ext/${project.version}</link>
+                <link>https://www.javadoc.io/doc/org.commonjava.maven.ext/pom-manipulation-integration-test/${project.version}</link>
+
+                <link>https://javadoc.io/doc/org.commonjava.maven.atlas/atlas-identities/${atlasVersion}</link>
+                <link>https://javadoc.io/doc/org.commonjava.maven.galley/galley-api/${galleyVersion}</link>
+                <link>https://javadoc.io/doc/org.commonjava.maven.galley/galley-maven/${galleyVersion}</link>
+
+                <link>https://maven.apache.org/ref/${mavenVersion}/maven-model/apidocs</link>
+                <link>https://maven.apache.org/ref/${mavenVersion}/maven-core/apidocs</link>
+                <link>https://maven.apache.org/ref/${mavenVersion}/maven-compat/apidocs</link>
+
+                <link>https://www.javadoc.io/doc/org.slf4j/slf4j-api/${slf4jVersion}</link>
+                <link>https://www.javadoc.io/doc/com.jayway.jsonpath/json-path/${jsonPathVersion}/</link>
+                <link>https://fasterxml.github.io/jackson-core/javadoc/${jacksonJavadocVersion}/</link>
+              </links>
             </configuration>
           </execution>
         </executions>
