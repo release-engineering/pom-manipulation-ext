@@ -123,6 +123,10 @@ Finally it will also output the comparator summary as a JSON file. By default th
 
 This JSON file may be read as POJO by using the [JSONUtils](https://github.com/release-engineering/pom-manipulation-ext/blob/master/common/src/main/java/org/commonjava/maven/ext/common/util/JSONUtils.java) class which utilises the [json](https://github.com/release-engineering/pom-manipulation-ext/blob/master/common/src/main/java/org/commonjava/maven/ext/common/json) package.
 
+### Javadoc
+
+This is available [here](https://www.javadoc.io/doc/org.commonjava.maven.ext)
+
 ### Feature Guide
 
 Below are links to more specific information about configuring sets of features in PME:

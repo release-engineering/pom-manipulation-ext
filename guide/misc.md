@@ -37,7 +37,7 @@ PME will automatically resolve ranges in versions in plugins and dependencies. T
 
 #### Repository And Reporting Removal
 
-If the property `repoReportingRemoval` (*Deprecated property `repo-reporting-removal` for versions **3.8.1 and prior***) is set, PME will remove all reporting and repository sections (including profiles) from the POM files.
+If the property `repoReportingRemoval` (*Deprecated property `repo-reporting-removal` for versions **3.8.1 and prior***) is set, PME will remove all reporting and repository sections (including profiles) from the POM files (default: off).
 
 Repository declarations in the POM are considered a bad build smell, since over time they may become defunct or move.
 
