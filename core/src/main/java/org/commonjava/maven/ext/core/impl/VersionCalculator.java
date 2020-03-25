@@ -60,7 +60,7 @@ public class VersionCalculator
 {
     private final Logger logger = LoggerFactory.getLogger( getClass() );
 
-    private GalleyAPIWrapper readerWrapper;
+    private final GalleyAPIWrapper readerWrapper;
 
     @Inject
     public VersionCalculator( final GalleyAPIWrapper readerWrapper )
