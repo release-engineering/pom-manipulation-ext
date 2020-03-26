@@ -1,8 +1,14 @@
+
+dependency-reduced-pom.xml
+
+# Maven
 target/
+
+# Eclipse
 .project
 .settings
 .classpath
-.idea
 
+# IntelliJ
+.idea
 *.iml
-dependency-reduced-pom.xml

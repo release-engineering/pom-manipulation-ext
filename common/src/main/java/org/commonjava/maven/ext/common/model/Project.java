@@ -29,7 +29,6 @@ import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleArtifactRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef;
 import org.commonjava.maven.atlas.ident.util.VersionUtils;
-import org.commonjava.maven.ext.annotation.JavadocExclude;
 import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.common.session.MavenSessionHandler;
 import org.commonjava.maven.ext.common.util.ProfileUtils;
@@ -62,7 +61,7 @@ public class Project
 {
     private static final MavenPluginDefaults PLUGIN_DEFAULTS = new StandardMaven350PluginDefaults();
 
-    private enum PluginResolver { NONE, PLUGIN_DEFAULTS, ALL };
+    private enum PluginResolver { NONE, PLUGIN_DEFAULTS, ALL }
 
     private final Logger logger = LoggerFactory.getLogger( getClass() );
 

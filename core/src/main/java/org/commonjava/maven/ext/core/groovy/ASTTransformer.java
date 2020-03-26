@@ -60,7 +60,7 @@ import static org.apache.groovy.ast.tools.ClassNodeUtils.addGeneratedMethod;
 
 /**
  * Ensures that Groovy scripts annotated with {@link GMEBaseScript} and {@link PMEBaseScript} are transformed into a class that
- * extends groovy.transform.BaseScript.
+ * extends {@link groovy.transform.BaseScript}.
  * This class performs the same transformations as {@link org.codehaus.groovy.transform.BaseScriptASTTransformation},
  * and in addition moves the custom annotations to the generated script class.
  *
