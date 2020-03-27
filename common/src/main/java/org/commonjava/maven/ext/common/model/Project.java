@@ -61,7 +61,7 @@ public class Project
 {
     private static final MavenPluginDefaults PLUGIN_DEFAULTS = new StandardMaven350PluginDefaults();
 
-    private enum PluginResolver { NONE, PLUGIN_DEFAULTS, ALL };
+    private enum PluginResolver { NONE, PLUGIN_DEFAULTS, ALL }
 
     private final Logger logger = LoggerFactory.getLogger( getClass() );
 

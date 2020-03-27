@@ -15,6 +15,7 @@
  */
 package org.commonjava.maven.ext.common.util;
 
+import lombok.experimental.UtilityClass;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.jboss.da.model.rest.GAV;
 
@@ -24,12 +25,9 @@ import java.util.List;
 /**
  * Commonly used manipulations from project profiles.
  */
+@UtilityClass
 public final class GAVUtils
 {
-    private GAVUtils()
-    {
-    }
-
     public static List<GAV> generateGAVs( List<ProjectVersionRef> dep) {
         ArrayList<GAV> result = new ArrayList<>();
 

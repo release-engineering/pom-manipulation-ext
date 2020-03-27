@@ -29,11 +29,27 @@ import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef;
 @Setter
 public class GAV
 {
+    /**
+     * A string representing the Maven groupId
+     */
     private String groupId;
+    /**
+     * A string representing the Maven artifactId
+     */
     private String artifactId;
+    /**
+     * A string representing the Maven version
+     */
     private String version;
+    /**
+     * A string representing the original groupId:artifactId:version
+     */
     private String originalGAV;
 
+    /**
+     * Convenience function to update the contents of this object using a {@link ProjectVersionRef}.
+     * @param p a ProjectVersionRef
+     */
     @JsonIgnore
     public void setPVR( ProjectVersionRef p )
     {
@@ -42,6 +58,10 @@ public class GAV
         setVersion( p.getVersionString() );
     }
 
+    /**
+     * Convenience function to convert this object to a {@link ProjectVersionRef}.
+     * @return a ProjectVersionRef
+     */
     @JsonIgnore
     public ProjectVersionRef getPVR()
     {

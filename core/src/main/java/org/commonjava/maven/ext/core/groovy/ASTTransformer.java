@@ -59,17 +59,18 @@ import java.util.List;
 import static org.apache.groovy.ast.tools.ClassNodeUtils.addGeneratedMethod;
 
 /**
- * Ensures that Groovy scripts annotated with {@link } are transformed into a class that
- * extends {@link }.
+ * Ensures that Groovy scripts annotated with {@link GMEBaseScript} and {@link PMEBaseScript} are transformed into a class that
+ * extends {@link groovy.transform.BaseScript}.
  * This class performs the same transformations as {@link org.codehaus.groovy.transform.BaseScriptASTTransformation},
- * and in addition moves {@link } annotations to the generated script class.
+ * and in addition moves the custom annotations to the generated script class.
  *
  * This uses code from
  * <a href="https://github.com/groovy/groovy-core/blob/master/src/main/org/codehaus/groovy/transform/BaseScriptASTTransformation.java">BaseScriptASTTransformation</a>
  * and
  * <a href="https://github.com/remkop/picocli/blob/master/picocli-groovy/src/main/java/picocli/groovy/PicocliScriptASTTransformation.java">PicocliScriptASTTransformation</a>.
  */
-@GroovyASTTransformation(phase = CompilePhase.SEMANTIC_ANALYSIS)
+@SuppressWarnings( "unused" )
+@GroovyASTTransformation( phase = CompilePhase.SEMANTIC_ANALYSIS)
 public class ASTTransformer  extends AbstractASTTransformation {
 
     private static final ClassNode MAVEN_TYPE = ClassHelper.make( PMEBaseScript.class );

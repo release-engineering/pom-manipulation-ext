@@ -32,6 +32,7 @@ import com.fasterxml.jackson.databind.node.JsonNodeType;
 import kong.unirest.JacksonObjectMapper;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef;
+import org.commonjava.maven.ext.annotation.JavadocExclude;
 import org.commonjava.maven.ext.common.json.ExtendedLookupReport;
 import org.commonjava.maven.ext.common.json.PME;
 import org.jboss.da.reports.model.response.LookupReport;
@@ -117,6 +118,7 @@ public class JSONUtils
         }
     }
 
+    @JavadocExclude
     public static class LookupReportDeserializer extends JsonDeserializer<LookupReport>
     {
         @Override
@@ -145,6 +147,7 @@ public class JSONUtils
         }
     }
 
+    @JavadocExclude
     public static class InternalObjectMapper extends JacksonObjectMapper
     {
         public InternalObjectMapper ( ObjectMapper mapper)

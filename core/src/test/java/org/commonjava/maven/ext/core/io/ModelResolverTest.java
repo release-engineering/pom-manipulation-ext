@@ -15,9 +15,11 @@
  */
 package org.commonjava.maven.ext.core.io;
 
+import org.apache.maven.repository.DefaultMirrorSelector;
 import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef;
 import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.core.ManipulationSession;
+import org.commonjava.maven.ext.core.fixture.TestUtils;
 import org.commonjava.maven.ext.io.ModelIO;
 import org.commonjava.maven.ext.io.resolver.GalleyAPIWrapper;
 import org.commonjava.maven.ext.io.resolver.GalleyInfrastructure;
@@ -25,12 +27,18 @@ import org.jboss.byteman.contrib.bmunit.BMRule;
 import org.jboss.byteman.contrib.bmunit.BMUnitRunner;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.contrib.java.lang.system.SystemOutRule;
 import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
+
+import static org.junit.Assert.assertEquals;
 
 @RunWith(BMUnitRunner.class)
 public class ModelResolverTest
 {
+    @Rule
+    public final SystemOutRule systemRule = new SystemOutRule().enableLog().muteForSuccessfulTests();
+
     @Rule
     public TemporaryFolder temp = new TemporaryFolder();
 
@@ -46,11 +54,29 @@ public class ModelResolverTest
     {
         final ManipulationSession session = new ManipulationSession();
         final GalleyInfrastructure galleyInfra =
-            new GalleyInfrastructure( session, null).init( null, null, temp.newFolder(
+            new GalleyInfrastructure( session, new DefaultMirrorSelector()).init( null, null, temp.newFolder(
                             "cache-dir" ) );
         final GalleyAPIWrapper wrapper = new GalleyAPIWrapper( galleyInfra );
         final ModelIO model = new ModelIO(wrapper);
 
         model.resolveRawModel( SimpleProjectVersionRef.parse( "org.commonjava:commonjava:5"  ) );
+    }
+
+
+    @Test
+    public void resolveRemoteArtifactTest()
+                    throws Exception
+    {
+        final ManipulationSession session = TestUtils.createSession( null );
+        final GalleyInfrastructure galleyInfra =
+                        new GalleyInfrastructure( session, new DefaultMirrorSelector()).init( null, null, temp.newFolder(
+                                        "cache-dir" ) );
+        final GalleyAPIWrapper wrapper = new GalleyAPIWrapper( galleyInfra );
+        final ModelIO model = new ModelIO(wrapper);
+
+        assertEquals( "groovy-cps",
+                      model.resolveRawModel( SimpleProjectVersionRef.parse( "com.cloudbees:groovy-cps:1.20" ) ).
+                                      getArtifactId() );
+
     }
 }

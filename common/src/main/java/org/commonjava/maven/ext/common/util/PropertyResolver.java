@@ -15,6 +15,7 @@
  */
 package org.commonjava.maven.ext.common.util;
 
+import lombok.experimental.UtilityClass;
 import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.common.ManipulationUncheckedException;
 import org.commonjava.maven.ext.common.model.Project;
@@ -26,12 +27,9 @@ import java.util.Properties;
 /**
  * Commonly used manipulations / extractions from project / user (CLI) properties.
  */
+@UtilityClass
 public final class PropertyResolver
 {
-    private PropertyResolver()
-    {
-    }
-
     /**
      * This recursively checks the supplied value and recursively resolves it if its a property.
      *

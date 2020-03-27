@@ -15,6 +15,7 @@
  */
 package org.commonjava.maven.ext.common.util;
 
+import lombok.experimental.UtilityClass;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Profile;
 import org.commonjava.maven.ext.annotation.ConfigValue;
@@ -26,6 +27,7 @@ import java.util.List;
 /**
  * Commonly used manipulations from project profiles.
  */
+@UtilityClass
 public final class ProfileUtils
 {
     /**
@@ -35,10 +37,6 @@ public final class ProfileUtils
     public static final String PROFILE_SCANNING = "scanActiveProfiles";
 
     public static String PROFILE_SCANNING_DEFAULT = "true";
-
-    private ProfileUtils()
-    {
-    }
 
     public static List<Profile> getProfiles ( MavenSessionHandler session, Model model)
     {
