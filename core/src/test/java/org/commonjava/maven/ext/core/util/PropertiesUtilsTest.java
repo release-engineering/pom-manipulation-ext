@@ -32,6 +32,7 @@ import org.commonjava.maven.ext.common.util.PropertyResolver;
 import org.commonjava.maven.ext.common.util.WildcardMap;
 import org.commonjava.maven.ext.core.ManipulationSession;
 import org.commonjava.maven.ext.core.fixture.TestUtils;
+import org.commonjava.maven.ext.core.impl.Version;
 import org.commonjava.maven.ext.core.state.CommonState;
 import org.commonjava.maven.ext.core.state.DependencyState;
 import org.commonjava.maven.ext.core.state.RelocationState;
@@ -146,7 +147,7 @@ public class PropertiesUtilsTest
         assertFalse( PropertiesUtils.cacheProperty( project, state, propertyMap, "1.0", "2.0", dummy, false ) );
         assertTrue( PropertiesUtils.cacheProperty( project, state, propertyMap, "${version.org.jboss}", "2.0", dummy,
                                                    false ) );
-        assertFalse( PropertiesUtils.cacheProperty( project, state, propertyMap, "${project.version}", "2.0", dummy,
+        assertFalse( PropertiesUtils.cacheProperty( project, state, propertyMap, Version.PROJECT_VERSION, "2.0", dummy,
                                                     false ) );
 
         // DependencyManipulator does dependency.getVersion(). This could return e.g. ${version.scala} which can
@@ -262,7 +263,7 @@ public class PropertiesUtilsTest
                                                      "TestSTART.and.${version.scala.major}.now.${version.scala.minor}" );
         assertEquals( "TestSTART.and.2.11.now.7", result );
 
-        result = PropertyResolver.resolveProperties( session, al, "${project.version}" );
+        result = PropertyResolver.resolveProperties( session, al, Version.PROJECT_VERSION );
         assertEquals( "1", result );
 
         result = PropertyResolver.resolveProperties( session, al, "${version.hibernate.osgi}" );

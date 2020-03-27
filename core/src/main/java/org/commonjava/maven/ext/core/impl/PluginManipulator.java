@@ -391,7 +391,7 @@ public class PluginManipulator extends CommonManipulator implements Manipulator
                 String oldValue = pluginsByGA.get( override.getKey() ).getVersionString();
                 plugin = plugins.get( pluginsByGA.get( override.getKey() ) );
 
-                if ( plugin.getVersion().equals( "${project.version}" ) || ( plugin.getVersion().contains( "$" ) && project.getVersion().equals( oldValue ) ))
+                if ( plugin.getVersion().equals( Version.PROJECT_VERSION ) || ( plugin.getVersion().contains( "$" ) && project.getVersion().equals( oldValue ) ))
                 {
                     logger.warn( "Plugin {} for {} references ${project.version} so skipping.", plugin, project.getPom() );
                 }
@@ -521,7 +521,7 @@ public class PluginManipulator extends CommonManipulator implements Manipulator
                 if ( !PropertiesUtils.cacheProperty( project, commonState, versionPropertyUpdateMap, oldVersion,
                                                      newValue, plugin, false ) )
                 {
-                    if ( oldVersion != null && oldVersion.equals( "${project.version}" ) )
+                    if ( oldVersion != null && oldVersion.equals( Version.PROJECT_VERSION ) )
                     {
                         logger.debug( "For plugin {} ; version is built in {} so skipping inlining {}", plugin,
                                       oldVersion, newValue );

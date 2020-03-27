@@ -513,7 +513,7 @@ public class DependencyManipulator extends CommonManipulator implements Manipula
                     {
                         logger.debug( "Dependency is a managed version for {}; ignoring", groupIdArtifactId );
                     }
-                    else if (oldVersion.equals( "${project.version}" ) || ( oldVersion.contains( "$" ) && project.getVersion().equals( resolvedValue ) ) )
+                    else if (oldVersion.equals( Version.PROJECT_VERSION ) || ( oldVersion.contains( "$" ) && project.getVersion().equals( resolvedValue ) ) )
                     {
                         logger.debug( "Dependency {} with original version {} and project version {} for {} references ${project.version} so skipping.",
                                      dependency, oldVersion, project.getVersion(), project.getPom() );

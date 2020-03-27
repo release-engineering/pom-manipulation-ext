@@ -17,6 +17,7 @@ package org.commonjava.maven.ext.core.impl;
 
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.Model;
+import org.apache.maven.model.Plugin;
 import org.apache.maven.model.Profile;
 import org.commonjava.maven.ext.common.model.Project;
 import org.commonjava.maven.ext.common.util.ProfileUtils;
@@ -47,8 +48,6 @@ import java.util.Set;
 public class ProjectVersionEnforcingManipulator
     implements Manipulator
 {
-    private static final String PROJVER = "${project.version}";
-
     private final Logger logger = LoggerFactory.getLogger( getClass() );
 
     private ManipulationSession session;
@@ -85,31 +84,51 @@ public class ProjectVersionEnforcingManipulator
         {
             final Model model = project.getModel();
 
-            model.getProperties().stringPropertyNames().stream().filter( k -> model.getProperties().getProperty( k ).equals( PROJVER ) ).
+            model.getProperties().stringPropertyNames().stream().filter( k -> model.getProperties().getProperty( k ).equals(
+                            Version.PROJECT_VERSION ) ).
                             forEach( k -> {
                                 logger.debug( "Replacing project.version within properties for project {} with key {}", project, k );
                                 model.getProperties().setProperty( k, project.getVersion() );
                                 changed.add( project );
                             } );
 
+            // TODO: We _could_ change it everywhere but it only really breaks in POM files.
             if ( model.getPackaging().equals( "pom" ) )
             {
-                enforceProjectVersion( project, model.getDependencies(), changed );
+                enforceDependencyProjectVersion( project, model.getDependencies(), changed );
 
                 if ( model.getDependencyManagement() != null )
                 {
-                    enforceProjectVersion( project, model.getDependencyManagement().getDependencies(), changed );
+                    enforceDependencyProjectVersion( project, model.getDependencyManagement().getDependencies(), changed );
+                }
+
+                if ( model.getBuild() != null )
+                {
+                    enforcePluginProjectVersion( project, model.getBuild().getPlugins(), changed );
+
+                    if ( model.getBuild().getPluginManagement() != null )
+                    {
+                        enforcePluginProjectVersion( project, model.getBuild().getPluginManagement().getPlugins(), changed );
+                    }
                 }
 
                 final List<Profile> profiles = ProfileUtils.getProfiles( session, model);
                 for ( final Profile profile : profiles )
                 {
-                    enforceProjectVersion( project, profile.getDependencies(), changed );
+                    enforceDependencyProjectVersion( project, profile.getDependencies(), changed );
                     if ( profile.getDependencyManagement() != null )
                     {
-                        enforceProjectVersion( project, profile.getDependencyManagement().getDependencies(), changed );
+                        enforceDependencyProjectVersion( project, profile.getDependencyManagement().getDependencies(), changed );
                     }
+                    if ( profile.getBuild() != null )
+                    {
+                        enforcePluginProjectVersion( project, profile.getBuild().getPlugins(), changed );
 
+                        if ( profile.getBuild().getPluginManagement() != null )
+                        {
+                            enforcePluginProjectVersion( project, profile.getBuild().getPluginManagement().getPlugins(), changed );
+                        }
+                    }
                 }
             }
         }
@@ -120,11 +139,22 @@ public class ProjectVersionEnforcingManipulator
         return changed;
     }
 
-    private void enforceProjectVersion( final Project project, final List<Dependency> dependencies, final Set<Project> changed )
+    private void enforceDependencyProjectVersion( final Project project, final List<Dependency> dependencies, final Set<Project> changed )
     {
         String newVersion = project.getVersion();
 
-        dependencies.stream().filter( d-> PROJVER.equals( d.getVersion() ) ).forEach( d -> {
+        dependencies.stream().filter( d-> Version.PROJECT_VERSION.equals( d.getVersion() ) ).forEach( d -> {
+            logger.debug( "Replacing project.version within {} for project {} with {}", d, project, newVersion );
+            d.setVersion( newVersion );
+            changed.add( project );
+        } );
+    }
+
+    private void enforcePluginProjectVersion( final Project project, final List<Plugin> plugins, final Set<Project> changed )
+    {
+        String newVersion = project.getVersion();
+
+        plugins.stream().filter( d-> Version.PROJECT_VERSION.equals( d.getVersion() ) ).forEach( d -> {
             logger.debug( "Replacing project.version within {} for project {} with {}", d, project, newVersion );
             d.setVersion( newVersion );
             changed.add( project );

@@ -646,8 +646,9 @@
                 <link>https://maven.apache.org/ref/${mavenVersion}/maven-compat/apidocs</link>
 
                 <link>https://www.javadoc.io/doc/org.slf4j/slf4j-api/${slf4jVersion}</link>
-                <link>https://www.javadoc.io/doc/com.jayway.jsonpath/json-path/${jsonPathVersion}/</link>
-                <link>https://fasterxml.github.io/jackson-core/javadoc/${jacksonJavadocVersion}/</link>
+                <link>https://www.javadoc.io/doc/com.jayway.jsonpath/json-path/${jsonPathVersion}</link>
+                <link>https://www.javadoc.io/doc/org.codehause.groovy/groovy-all/${groovyVersion}</link>
+                <link>https://fasterxml.github.io/jackson-core/javadoc/${jacksonJavadocVersion}</link>
               </links>
             </configuration>
           </execution>

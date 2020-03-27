@@ -43,3 +43,5 @@ pomFile.eachLine {
     }
 }
 assert (passed == true)
+
+assert !pomFile.text.contains("{project.version}")

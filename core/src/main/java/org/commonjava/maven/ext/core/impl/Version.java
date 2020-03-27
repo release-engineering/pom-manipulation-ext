@@ -101,6 +101,8 @@ public class Version
 
     private final static Pattern osgiPattern = Pattern.compile(OSGI_VERSION_REGEX);
 
+    public static final String PROJECT_VERSION = "${project.version}";
+
     // Prevent construction.
     private Version () {}
 

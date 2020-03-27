@@ -55,9 +55,9 @@ public class VersionTest
     @Test
     public void testAppendQualifierSuffix_WithProperty()
     {
-        assertThat( Version.appendQualifierSuffix( "${project.version}", "foo" ), equalTo( "${project.version}-foo") );
+        assertThat( Version.appendQualifierSuffix( Version.PROJECT_VERSION, "foo" ), equalTo( "${project.version}-foo") );
         assertThat( Version.appendQualifierSuffix( "1.0.${micro}", ".foo" ), equalTo( "1.0.${micro}.foo") );
-        assertThat( Version.setBuildNumber( "${project.version}", "10" ), equalTo( "${project.version}-10") );
+        assertThat( Version.setBuildNumber( Version.PROJECT_VERSION, "10" ), equalTo( "${project.version}-10") );
         assertThat( Version.setBuildNumber( "${project.version}-foo", "10" ), equalTo( "${project.version}-foo-10") );
     }
 
