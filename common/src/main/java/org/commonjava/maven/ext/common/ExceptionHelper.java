@@ -1,4 +1,19 @@
 /*
+ * Copyright (C) 2012 Red Hat, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *         http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
  * Copyright (c) 2004-2011 QOS.ch
  * All rights reserved.
  *
@@ -22,21 +37,6 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  */
-/*
- * Copyright (C) 2012 Red Hat, Inc. (jcasey@redhat.com)
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *         http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package org.commonjava.maven.ext.common;
 
 /**
@@ -46,8 +46,9 @@ package org.commonjava.maven.ext.common;
  *
  * The {@link #getThrowableCandidate}
  * was only made public in {@link org.slf4j.helpers.MessageFormatter} version 1.7.29 and later.
- *
- * See https://github.com/qos-ch/slf4j/commit/a7562cb4b928c225192405b4d849246db60107d4#diff-f99407dbe36d6d3e23534b6e5701b231
+ * <br>
+ * <br>
+ * See the <a href="https://github.com/qos-ch/slf4j/commit/a7562cb4b928c225192405b4d849246db60107d4#diff-f99407dbe36d6d3e23534b6e5701b231">SLF4J source</a>
  */
 public final class ExceptionHelper
 {
