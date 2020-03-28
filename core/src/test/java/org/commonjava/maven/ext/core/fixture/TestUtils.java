@@ -15,6 +15,7 @@
  */
 package org.commonjava.maven.ext.core.fixture;
 
+import lombok.Getter;
 import org.apache.commons.lang.StringUtils;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.artifact.repository.ArtifactRepositoryPolicy;
@@ -89,8 +90,13 @@ public class TestUtils
         return result;
     }
 
-    @SuppressWarnings( "deprecation" )
     public static ManipulationSession createSession( Properties p ) throws ManipulationException
+    {
+        return createSessionAndManager( p ).getSession();
+    }
+
+    @SuppressWarnings( "deprecation" )
+    public static SMContainer createSessionAndManager( Properties p ) throws ManipulationException
     {
         ManipulationSession session = new ManipulationSession();
 
@@ -98,8 +104,8 @@ public class TestUtils
                         new MavenArtifactRepository( "test", MVN_CENTRAL, new DefaultRepositoryLayout(),
                                                      new ArtifactRepositoryPolicy(), new ArtifactRepositoryPolicy() );
 
-        final MavenExecutionRequest req = new DefaultMavenExecutionRequest().setUserProperties( p ).setRemoteRepositories(
-                        Collections.singletonList( ar ) );
+        final MavenExecutionRequest req = new DefaultMavenExecutionRequest().setSystemProperties
+                        ( System.getProperties() ).setUserProperties( p ).setRemoteRepositories( Collections.singletonList( ar ) );
         final PlexusContainer container;
         final ManipulationManager manipulationManager;
         final DefaultContainerConfiguration config = new DefaultContainerConfiguration();
@@ -124,7 +130,7 @@ public class TestUtils
         session.setMavenSession( mavenSession );
         manipulationManager.init( session );
 
-        return session;
+        return new SMContainer( req, session,  manipulationManager);
     }
 
     /**
@@ -132,10 +138,9 @@ public class TestUtils
      * the method are specified.  The method will be executed and the value
      * of it returned, even if the method would have private or protected access.
      */
-    @SuppressWarnings( "unchecked" )
-    public static Object executeMethod( Object instance, String name, Class[] types, Object[] params ) throws Exception
+    public static Object executeMethod( Object instance, String name, Class<?>[] types, Object[] params ) throws Exception
     {
-        Class c = instance.getClass();
+        Class<?> c = instance.getClass();
 
         Method m;
         try
@@ -158,16 +163,39 @@ public class TestUtils
      * the method are specified.  The method will be executed and the value
      * of it returned, even if the method would have private or protected access.
      */
-    public static Object executeMethod( Object instance, String name, Object[] params ) throws Exception
+    public static void executeMethod( Object instance, String name, Object[] params ) throws Exception
     {
         // Fetch the Class types of all method parameters
-        Class[] types = new Class[params.length];
+        Class<?>[] types = new Class[params.length];
 
         for ( int i = 0; i < params.length; i++ )
         {
             types[i] = params[i].getClass();
         }
 
-        return executeMethod( instance, name, types, params );
+        executeMethod( instance, name, types, params );
+    }
+
+    /**
+     * Container object to allow a {@link ManipulationSession} to be created but also return the {@link ManipulationManager}
+     * and {@link MavenExecutionRequest}.
+     */
+    public static class SMContainer
+    {
+        @Getter
+        private final ManipulationSession session;
+
+        @Getter
+        private final ManipulationManager manager;
+
+        @Getter
+        private final MavenExecutionRequest request;
+
+        private SMContainer( MavenExecutionRequest req, ManipulationSession session, ManipulationManager manager )
+        {
+            this.request = req;
+            this.session = session;
+            this.manager = manager;
+        }
     }
 }

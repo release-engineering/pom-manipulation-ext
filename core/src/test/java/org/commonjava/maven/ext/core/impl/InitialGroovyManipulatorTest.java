@@ -16,17 +16,11 @@
 package org.commonjava.maven.ext.core.impl;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.maven.execution.DefaultMavenExecutionRequest;
-import org.apache.maven.execution.DefaultMavenExecutionResult;
-import org.apache.maven.execution.MavenExecutionRequest;
-import org.apache.maven.execution.MavenSession;
 import org.codehaus.plexus.DefaultContainerConfiguration;
 import org.codehaus.plexus.DefaultPlexusContainer;
 import org.codehaus.plexus.PlexusConstants;
 import org.codehaus.plexus.PlexusContainer;
 import org.commonjava.maven.ext.common.model.Project;
-import org.commonjava.maven.ext.core.ManipulationManager;
-import org.commonjava.maven.ext.core.ManipulationSession;
 import org.commonjava.maven.ext.core.fixture.TestUtils;
 import org.commonjava.maven.ext.io.PomIO;
 import org.junit.Rule;
@@ -35,7 +29,6 @@ import org.junit.contrib.java.lang.system.SystemOutRule;
 import org.junit.rules.TemporaryFolder;
 
 import java.io.File;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Properties;
@@ -58,7 +51,6 @@ public class InitialGroovyManipulatorTest
     @Rule
     public final SystemOutRule systemRule = new SystemOutRule().enableLog().muteForSuccessfulTests();
 
-    // TODO: Refactor TestUtils so its possible to retrieve a ManipulationManager and initialise a MavenSession
     @Test
     public void shouldRemoveProjectInGroovyScript() throws Exception
     {
@@ -82,21 +74,11 @@ public class InitialGroovyManipulatorTest
 
         Properties userProperties = new Properties();
         userProperties.setProperty( "versionIncrementalSuffix", "rebuild" );
-
         userProperties.setProperty( "groovyScripts", groovy.toURI().toString() );
 
-        ManipulationManager manipulationManager = container.lookup( ManipulationManager.class );
-        ManipulationSession session = container.lookup( ManipulationSession.class );
-
-        MavenExecutionRequest req = new DefaultMavenExecutionRequest().setSystemProperties( System.getProperties() )
-                                                                      .setUserProperties( userProperties )
-                                                                      .setRemoteRepositories( Collections.emptyList() );
-        req.setPom( projectroot );
-        MavenSession mavenSession = new MavenSession( container, null, req, new DefaultMavenExecutionResult() );
-        session.setMavenSession( mavenSession );
-        manipulationManager.init( session );
-
-        manipulationManager.scanAndApply( session );
+        TestUtils.SMContainer smc = TestUtils.createSessionAndManager( userProperties );
+        smc.getRequest().setPom( projectroot );
+        smc.getManager().scanAndApply( smc.getSession() );
 
         // re-read the projects:
         projects = pomIO.parseProject( projectroot );

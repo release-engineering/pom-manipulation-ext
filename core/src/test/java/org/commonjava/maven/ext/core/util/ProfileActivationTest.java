@@ -16,18 +16,17 @@
 package org.commonjava.maven.ext.core.util;
 
 import org.commonjava.maven.ext.common.model.Project;
-import org.commonjava.maven.ext.core.ManipulationManager;
 import org.commonjava.maven.ext.core.ManipulationSession;
 import org.commonjava.maven.ext.core.fixture.TestUtils;
 import org.commonjava.maven.ext.io.PomIO;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.contrib.java.lang.system.RestoreSystemProperties;
+import org.junit.contrib.java.lang.system.SystemOutRule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
@@ -40,6 +39,9 @@ public class ProfileActivationTest
     private final Logger logger = LoggerFactory.getLogger( getClass() );
 
     private static final String RESOURCE_BASE = "";
+
+    @Rule
+    public final SystemOutRule systemRule = new SystemOutRule().enableLog().muteForSuccessfulTests();
 
     @Rule
 	public final RestoreSystemProperties restoreSystemProperties = new RestoreSystemProperties();
@@ -57,16 +59,14 @@ public class ProfileActivationTest
     }
 
     @Test
+    @SuppressWarnings( "unchecked" )
     public void testVerifyProfile1() throws Exception
     {
         List<Project> p = getProject();
-        ManipulationManager m = new ManipulationManager( Collections.emptyMap(), Collections.emptyMap(), null );
-        ManipulationSession ms = TestUtils.createSession( null );
-        m.init( ms );
+        TestUtils.SMContainer smc = TestUtils.createSessionAndManager( null );
 
-        Set<String> activeProfiles = (Set<String>) TestUtils.executeMethod( m, "parseActiveProfiles",
-                                                                            new Class[] { ManipulationSession.class, List.class },
-                                                                            new Object[] { ms, p } );
+        Set<String> activeProfiles = (Set<String>) TestUtils.executeMethod( smc.getManager(), "parseActiveProfiles", new Class[] { ManipulationSession.class,
+                        List.class }, new Object[] { smc.getSession(), p } );
 
         logger.info( "Returning active profiles of {} ", activeProfiles );
 
@@ -74,20 +74,19 @@ public class ProfileActivationTest
     }
 
     @Test
+    @SuppressWarnings( "unchecked" )
     public void testVerifyProfile2() throws Exception
     {
         List<Project> p = getProject();
-        ManipulationManager m = new ManipulationManager( Collections.emptyMap(), Collections.emptyMap(), null );
         Properties properties = new Properties(  );
         properties.setProperty( "testProperty", "testvalue" );
-        ManipulationSession ms = TestUtils.createSession( properties );
-        m.init( ms );
+        TestUtils.SMContainer smc = TestUtils.createSessionAndManager( properties );
 
-        Set<String> activeProfiles = (Set<String>) TestUtils.executeMethod( m, "parseActiveProfiles",
+        Set<String> activeProfiles = (Set<String>) TestUtils.executeMethod( smc.getManager(), "parseActiveProfiles",
                                                                             new Class[] { ManipulationSession.class, List.class },
-                                                                            new Object[] { ms, p } );
+                                                                            new Object[] { smc.getSession(), p } );
 
-        activeProfiles.stream().forEach( i -> System.out.println( "Active list is " + i ) );
+        activeProfiles.forEach( i -> System.out.println( "Active list is " + i ) );
 
         assertEquals( 3, activeProfiles.size() );
         assertTrue( activeProfiles.stream().anyMatch( i -> i.equals( "testProperty" ) ) );

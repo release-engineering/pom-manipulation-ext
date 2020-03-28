@@ -24,7 +24,6 @@ import org.codehaus.plexus.PlexusContainer;
 import org.commonjava.maven.atlas.ident.ref.SimpleProjectRef;
 import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.common.model.Project;
-import org.commonjava.maven.ext.core.ManipulationManager;
 import org.commonjava.maven.ext.core.ManipulationSession;
 import org.commonjava.maven.ext.core.fixture.TestUtils;
 import org.commonjava.maven.ext.core.impl.FinalGroovyManipulator;
@@ -44,7 +43,6 @@ import java.io.File;
 import java.io.IOException;
 import java.net.UnknownHostException;
 import java.nio.file.Paths;
-import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
 
@@ -78,9 +76,7 @@ public class BaseScriptTest
 
         PomIO pomIO = new PomIO();
         List<Project> projects = pomIO.parseProject( projectroot );
-        ManipulationManager m = new ManipulationManager( Collections.emptyMap(), Collections.emptyMap(), null );
         ManipulationSession ms = TestUtils.createSession( null );
-        m.init( ms );
 
         Project root = projects.stream().filter( p -> p.getProjectParent() == null ).findAny().orElse( null );
         logger.info( "Found project root " + root );
@@ -101,9 +97,7 @@ public class BaseScriptTest
 
         PomIO pomIO = new PomIO();
         List<Project> projects = pomIO.parseProject( projectroot );
-        ManipulationManager m = new ManipulationManager( Collections.emptyMap(), Collections.emptyMap(), null );
         ManipulationSession ms = TestUtils.createSession( null );
-        m.init( ms );
 
         Project root = projects.stream().filter( p -> p.getProjectParent() == null ).findAny().orElse( null );
         logger.info( "Found project root " + root );
@@ -130,9 +124,7 @@ public class BaseScriptTest
         FileIO fileIO = new FileIO( new GalleyInfrastructure( null, null ).init( temporaryFolder.newFolder() ) );
 
         List<Project> projects = pomIO.parseProject( projectroot );
-        ManipulationManager m = new ManipulationManager( Collections.emptyMap(), Collections.emptyMap(), null );
         ManipulationSession ms = TestUtils.createSession( null );
-        m.init( ms );
 
         Project root = projects.stream()
                                .filter( p -> p.getProjectParent() == null )
