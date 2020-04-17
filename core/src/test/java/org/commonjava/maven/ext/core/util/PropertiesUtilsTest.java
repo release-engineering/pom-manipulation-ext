@@ -228,7 +228,6 @@ public class PropertiesUtilsTest
         }
         catch ( ManipulationException e )
         {
-            e.printStackTrace();
             // Pass.
         }
         try
@@ -238,7 +237,6 @@ public class PropertiesUtilsTest
         }
         catch ( ManipulationException e )
         {
-            e.printStackTrace();
             // Pass.
         }
     }
@@ -268,6 +266,9 @@ public class PropertiesUtilsTest
 
         result = PropertyResolver.resolveProperties( session, al, "${version.hibernate.osgi}" );
         assertEquals( "5.0.4.Final", result );
+
+        result = PropertyResolver.resolveProperties( session, al, "version.gnu.getopt" );
+        assertEquals( "version.gnu.getopt", result );
     }
 
     @Test
