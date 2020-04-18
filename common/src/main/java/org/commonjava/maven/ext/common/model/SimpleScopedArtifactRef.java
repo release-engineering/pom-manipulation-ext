@@ -52,7 +52,8 @@ public class SimpleScopedArtifactRef extends SimpleArtifactRef
 
     public SimpleScopedArtifactRef( final Dependency dependency )
     {
-        super( dependency.getGroupId(), dependency.getArtifactId(), dependency.getVersion(),
+        super( dependency.getGroupId(), dependency.getArtifactId(),
+               isEmpty( dependency.getVersion() ) ? "*" : dependency.getVersion(),
                dependency.getType(), dependency.getClassifier());
         this.scope = dependency.getScope();
     }

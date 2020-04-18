@@ -51,6 +51,11 @@
       <groupId>com.junit</groupId>
       <artifactId>junit-dep</artifactId>
     </dependency>
+    <dependency>
+      <groupId>com.junit</groupId>
+      <artifactId>junit-dep</artifactId>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 
 </project>
