@@ -24,6 +24,7 @@ import org.commonjava.maven.atlas.ident.ref.ArtifactRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleArtifactRef;
 import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.common.model.Project;
+import org.commonjava.maven.ext.common.model.SimpleScopedArtifactRef;
 import org.commonjava.maven.ext.core.ManipulationSession;
 import org.commonjava.maven.ext.core.groovy.BaseScript;
 import org.commonjava.maven.ext.core.groovy.InvocationPoint;
@@ -105,7 +106,7 @@ public abstract class BaseGroovyManipulator
                     }
                     else
                     {
-                        final ArtifactRef ar = SimpleArtifactRef.parse( script );
+                        final ArtifactRef ar = SimpleScopedArtifactRef.parse( script );
                         logger.info( "Attempting to read GAV {} with classifier {} and type {} ", ar.asProjectVersionRef(), ar.getClassifier(), ar.getType() );
                         found = modelIO.resolveRawFile( ar );
                     }

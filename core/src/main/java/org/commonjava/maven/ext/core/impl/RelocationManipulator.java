@@ -27,9 +27,9 @@ import org.codehaus.plexus.util.xml.Xpp3DomBuilder;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 import org.commonjava.maven.atlas.ident.ref.ArtifactRef;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
-import org.commonjava.maven.atlas.ident.ref.SimpleArtifactRef;
 import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.common.model.Project;
+import org.commonjava.maven.ext.common.model.SimpleScopedArtifactRef;
 import org.commonjava.maven.ext.common.util.ProfileUtils;
 import org.commonjava.maven.ext.common.util.WildcardMap;
 import org.commonjava.maven.ext.core.ManipulationSession;
@@ -209,7 +209,7 @@ public class RelocationManipulator
                     // Unfortunately because we iterate using the resolved project keys if the relocation updates those
                     // keys multiple iterations will not work. Therefore we need to remove the original key:dependency
                     // to map to the relocated form.
-                    postFixUp.put( SimpleArtifactRef.parse( dependency.getManagementKey() ), dependency );
+                    postFixUp.put( new SimpleScopedArtifactRef( dependency ), dependency );
                     it.remove();
 
                     result = true;

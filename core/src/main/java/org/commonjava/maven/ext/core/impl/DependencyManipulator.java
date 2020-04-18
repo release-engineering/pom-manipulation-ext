@@ -24,10 +24,11 @@ import org.commonjava.maven.atlas.ident.ref.ArtifactRef;
 import org.commonjava.maven.atlas.ident.ref.InvalidRefException;
 import org.commonjava.maven.atlas.ident.ref.ProjectRef;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
-import org.commonjava.maven.atlas.ident.ref.SimpleArtifactRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleProjectRef;
+import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef;
 import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.common.model.Project;
+import org.commonjava.maven.ext.common.model.SimpleScopedArtifactRef;
 import org.commonjava.maven.ext.common.util.WildcardMap;
 import org.commonjava.maven.ext.core.ManipulationSession;
 import org.commonjava.maven.ext.core.state.CommonState;
@@ -50,6 +51,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import static org.apache.commons.lang.StringUtils.isEmpty;
@@ -147,7 +149,7 @@ public class DependencyManipulator extends CommonManipulator implements Manipula
         }
 
         // Load extra BOMs into separate maps for accessing later, when applying the dependencyExclusions.
-        for ( Map.Entry<String, ProjectVersionRef> entry : extraGAVs.entrySet() )
+        for ( Entry<String, ProjectVersionRef> entry : extraGAVs.entrySet() )
         {
             extraBOMOverrides.put( entry.getKey(),
                                    effectiveModelBuilder.getRemoteDependencyVersionOverridesByProject( entry.getValue() ) );
@@ -261,7 +263,7 @@ public class DependencyManipulator extends CommonManipulator implements Manipula
             for ( Project project : versionPropertyUpdateMap.keySet() )
             {
                 logger.debug( "Checking property override within project {} ", project );
-                for ( final Map.Entry<String, PropertyMapper> entry : versionPropertyUpdateMap.get( project ).entrySet() )
+                for ( final Entry<String, PropertyMapper> entry : versionPropertyUpdateMap.get( project ).entrySet() )
                 {
                     PropertiesUtils.PropertyUpdate found =
                                     PropertiesUtils.updateProperties( session, project, false,
@@ -306,6 +308,7 @@ public class DependencyManipulator extends CommonManipulator implements Manipula
         Map<ArtifactRef, String> originalOverrides = new LinkedHashMap<>( overrides );
         originalOverrides = removeReactorGAs( originalOverrides );
 
+        logger.debug( "Using dependencyOverride of {}", dependencyState.getDependencyOverrides() );
         try
         {
             originalOverrides = applyModuleVersionOverrides( projectGA, dependencyState.getDependencyOverrides(),
@@ -325,7 +328,7 @@ public class DependencyManipulator extends CommonManipulator implements Manipula
             // Handle the situation where the top level parent refers to a prior build that is in the BOM.
             if ( project.getModelParent() != null )
             {
-                for ( Map.Entry<ArtifactRef, String> entry : originalOverrides.entrySet() )
+                for ( Entry<ArtifactRef, String> entry : originalOverrides.entrySet() )
                 {
                     String oldValue = project.getModelParent().getVersion();
                     String newValue = entry.getValue();
@@ -369,7 +372,7 @@ public class DependencyManipulator extends CommonManipulator implements Manipula
                 d.setGroupId( project.getModelParent().getGroupId() );
                 d.setArtifactId( project.getModelParent().getArtifactId() );
                 d.setVersion( project.getModelParent().getVersion() );
-                pDepMap.put( SimpleArtifactRef.parse( d.getManagementKey() ), d );
+                pDepMap.put( SimpleScopedArtifactRef.parse( d.getManagementKey() ), d );
                 applyExplicitOverrides( project, pDepMap, explicitOverrides, commonState,
                                         explicitVersionPropertyUpdateMap );
                 project.getModelParent().setVersion( d.getVersion() );
@@ -496,7 +499,7 @@ public class DependencyManipulator extends CommonManipulator implements Manipula
             // different modules. It is currently undefined what will happen if non-strict mode is enabled and
             // multiple versions are in the remote override list (be it from a bom or rest call). Actually, what
             // will most likely happen is last-wins.
-            for ( final Map.Entry<ArtifactRef, String> entry : overrides.entrySet() )
+            for ( final Entry<ArtifactRef, String> entry : overrides.entrySet() )
             {
                 ProjectRef groupIdArtifactId = entry.getKey().asProjectRef();
                 if ( depPr.equals( groupIdArtifactId ) )
@@ -624,9 +627,16 @@ public class DependencyManipulator extends CommonManipulator implements Manipula
     private Map<ArtifactRef, String> removeReactorGAs( final Map<ArtifactRef, String> versionOverrides )
     {
         final Map<ArtifactRef, String> reducedVersionOverrides = new LinkedHashMap<>( versionOverrides );
-        for ( final Project project : session.getProjects() )
+        Iterator<Entry<ArtifactRef, String>> it = reducedVersionOverrides.entrySet().iterator();
+        while ( it.hasNext() )
         {
-            reducedVersionOverrides.remove( new SimpleArtifactRef( project.getGroupId(), project.getArtifactId(), project.getVersion(), "pom", null ) );
+            Entry<ArtifactRef, String> e = it.next();
+            session.getProjects().forEach( p -> {
+                if ( e.getKey().asProjectVersionRef().equals( new SimpleProjectVersionRef( p.getGroupId(), p.getArtifactId(), p.getVersion() ) ) )
+                {
+                    it.remove();
+                }
+            } );
         }
         return reducedVersionOverrides;
     }

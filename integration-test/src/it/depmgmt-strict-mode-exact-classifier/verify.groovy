@@ -40,4 +40,4 @@ pomFile.eachLine {
         message++
     }
 }
-assert (message == 4)
+assert (message == 5)
