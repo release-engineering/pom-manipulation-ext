@@ -18,7 +18,6 @@ package org.commonjava.maven.ext.core.util;
 import org.apache.commons.io.FileUtils;
 import org.apache.maven.model.Dependency;
 import org.commonjava.maven.atlas.ident.ref.ArtifactRef;
-import org.commonjava.maven.atlas.ident.ref.SimpleArtifactRef;
 import org.commonjava.maven.ext.common.model.Project;
 import org.commonjava.maven.ext.common.model.SimpleScopedArtifactRef;
 import org.commonjava.maven.ext.core.ManipulationSession;
@@ -231,7 +230,7 @@ public class ProjectInheritanceTest
                 {
                     assertFalse ( a.getVersionString().contains( "project.version" ));
                 }
-                assertFalse( deps.containsKey(  SimpleArtifactRef.parse( "org.mockito:mockito-all:jar:*" )));
+                assertFalse( deps.containsKey(  SimpleScopedArtifactRef.parse( "org.mockito:mockito-all:jar:*" )));
                 deps = p.getAllResolvedDependencies( session );
                 assertEquals( 3, deps.size() );
                 for ( ArtifactRef a : deps.keySet())

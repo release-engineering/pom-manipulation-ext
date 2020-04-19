@@ -16,7 +16,7 @@
 package org.commonjava.maven.ext.core.io;
 
 import org.apache.commons.io.FileUtils;
-import org.commonjava.maven.atlas.ident.ref.SimpleArtifactRef;
+import org.commonjava.maven.ext.common.model.SimpleScopedArtifactRef;
 import org.commonjava.maven.ext.core.ManipulationSession;
 import org.commonjava.maven.ext.core.fixture.TestUtils;
 import org.commonjava.maven.ext.io.ModelIO;
@@ -51,7 +51,7 @@ public class ResolverTest
         final GalleyAPIWrapper wrapper = new GalleyAPIWrapper( galleyInfra );
         final ModelIO model = new ModelIO(wrapper);
 
-        File c = model.resolveRawFile( SimpleArtifactRef.parse( "academy.alex:custommatcher:1.0"  ) );
+        File c = model.resolveRawFile( SimpleScopedArtifactRef.parse( "academy.alex:custommatcher:1.0"  ) );
 
         assertTrue (c.exists());
 

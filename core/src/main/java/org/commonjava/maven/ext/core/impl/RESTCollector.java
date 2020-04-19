@@ -15,7 +15,6 @@
  */
 package org.commonjava.maven.ext.core.impl;
 
-import org.apache.maven.artifact.ArtifactScopeEnum;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.Plugin;
 import org.apache.maven.model.Profile;
@@ -345,7 +344,8 @@ public class RESTCollector
         {
             deps.add( new SimpleScopedArtifactRef(
                             new SimpleProjectVersionRef( pvr.asProjectRef(), handlePotentialSnapshotVersion( vs, pvr.getVersionString() ) ),
-                            new SimpleTypeAndClassifier( "maven-plugin", null ), ArtifactScopeEnum.compile.name() ) );
+                            new SimpleTypeAndClassifier( "maven-plugin", null ),
+                            null ) );
         }
     }
 
@@ -369,7 +369,7 @@ public class RESTCollector
             SimpleScopedArtifactRef sa = new SimpleScopedArtifactRef(
                             new SimpleProjectVersionRef( pvr.asProjectRef(), handlePotentialSnapshotVersion( vs, pvr.getVersionString() ) ),
                             new SimpleTypeAndClassifier( d.getType(), d.getClassifier() ),
-                            ( isEmpty( d.getScope() ) ? ArtifactScopeEnum.compile.name() : d.getScope() ) );
+                            d.getScope() );
 
             boolean validate = true;
 

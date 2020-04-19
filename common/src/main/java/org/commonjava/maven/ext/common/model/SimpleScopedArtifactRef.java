@@ -29,6 +29,10 @@ import static org.apache.commons.lang.StringUtils.isNotEmpty;
 
 /**
  * Wrapper around SimpleArtifactRef to also store the scope of the dependency.
+ * <p>
+ * This should <b>always</b> be used in preference to {@link SimpleArtifactRef} for consistency even if
+ * there is no scope information.
+ * </p>
  */
 @Getter
 @Setter

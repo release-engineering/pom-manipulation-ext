@@ -16,7 +16,6 @@
 package org.commonjava.maven.ext.common.model;
 
 import org.commonjava.maven.atlas.ident.ref.ArtifactRef;
-import org.commonjava.maven.atlas.ident.ref.SimpleArtifactRef;
 import org.junit.Test;
 
 import java.util.HashSet;
@@ -29,8 +28,8 @@ public class SetAndSimpleScopeTest
     @Test
     public void testVerifyArtifactRef()
     {
-        SimpleArtifactRef commonslang = SimpleArtifactRef.parse( "commons-lang:commons-lang:jar:1.0" );
-        SimpleArtifactRef commonslangsources = SimpleArtifactRef.parse( "commons-lang:commons-lang:jar:1.0:sources" );
+        SimpleScopedArtifactRef commonslang = SimpleScopedArtifactRef.parse( "commons-lang:commons-lang:jar:1.0" );
+        SimpleScopedArtifactRef commonslangsources = SimpleScopedArtifactRef.parse( "commons-lang:commons-lang:jar:1.0:sources" );
 
         Set<ArtifactRef> s = new HashSet<>(  );
         s.add( commonslang );
@@ -42,8 +41,8 @@ public class SetAndSimpleScopeTest
     @Test
     public void testVerifyScopedArtifactRef()
     {
-        SimpleArtifactRef commonslang = SimpleArtifactRef.parse( "commons-lang:commons-lang:jar:1.0" );
-        SimpleArtifactRef commonslangsources = SimpleArtifactRef.parse( "commons-lang:commons-lang:jar:1.0:sources" );
+        SimpleScopedArtifactRef commonslang = SimpleScopedArtifactRef.parse( "commons-lang:commons-lang:jar:1.0" );
+        SimpleScopedArtifactRef commonslangsources = SimpleScopedArtifactRef.parse( "commons-lang:commons-lang:jar:1.0:sources" );
 
         SimpleScopedArtifactRef commonsscoped = new SimpleScopedArtifactRef( commonslang.asProjectVersionRef(), commonslang.getTypeAndClassifier(), "compile" );
         SimpleScopedArtifactRef commonsscopedtest = new SimpleScopedArtifactRef( commonslangsources.asProjectVersionRef(), commonslangsources.getTypeAndClassifier(), "test" );
