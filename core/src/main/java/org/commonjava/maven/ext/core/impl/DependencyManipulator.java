@@ -372,7 +372,7 @@ public class DependencyManipulator extends CommonManipulator implements Manipula
                 d.setGroupId( project.getModelParent().getGroupId() );
                 d.setArtifactId( project.getModelParent().getArtifactId() );
                 d.setVersion( project.getModelParent().getVersion() );
-                pDepMap.put( SimpleScopedArtifactRef.parse( d.getManagementKey() ), d );
+                pDepMap.put( new SimpleScopedArtifactRef( d ), d );
                 applyExplicitOverrides( project, pDepMap, explicitOverrides, commonState,
                                         explicitVersionPropertyUpdateMap );
                 project.getModelParent().setVersion( d.getVersion() );
