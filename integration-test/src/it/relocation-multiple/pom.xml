@@ -42,6 +42,12 @@
       <artifactId>another-library</artifactId>
       <version>3.8.2</version>
     </dependency>
+    <dependency>
+      <groupId>org.junit</groupId>
+      <artifactId>another-library</artifactId>
+      <version>3.8.2</version>
+      <scope>provided</scope>
+    </dependency>
   </dependencies>
 
 </project>

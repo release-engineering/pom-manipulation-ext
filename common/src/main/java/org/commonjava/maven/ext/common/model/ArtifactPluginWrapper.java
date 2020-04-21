@@ -16,26 +16,21 @@
 package org.commonjava.maven.ext.common.model;
 
 import lombok.Getter;
+import lombok.ToString;
 import org.apache.maven.model.Plugin;
-import org.commonjava.maven.atlas.ident.ref.SimpleArtifactRef;
 
 /**
  * Simple wrapper to allow a Plugin to be treated as an ArtifactRef which allows for more generic code.
  */
-public class ArtifactPluginWrapper extends SimpleArtifactRef
+@ToString(callSuper = true)
+public class ArtifactPluginWrapper extends SimpleScopedArtifactRef
 {
     @Getter
     private final Plugin original;
 
     public ArtifactPluginWrapper( Plugin p )
     {
-        super (p.getGroupId(), p.getArtifactId(), p.getVersion(), null, null);
+        super (p.getGroupId(), p.getArtifactId(), p.getVersion(), null, null, null);
         this.original = p;
-    }
-
-    @Override
-    public String toString()
-    {
-        return getClass() + " : " + super.toString();
     }
 }

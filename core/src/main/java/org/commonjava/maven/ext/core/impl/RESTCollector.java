@@ -21,11 +21,11 @@ import org.apache.maven.model.Profile;
 import org.commonjava.maven.atlas.ident.ref.ArtifactRef;
 import org.commonjava.maven.atlas.ident.ref.ProjectRef;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
-import org.commonjava.maven.atlas.ident.ref.SimpleArtifactRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleTypeAndClassifier;
 import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.common.model.Project;
+import org.commonjava.maven.ext.common.model.SimpleScopedArtifactRef;
 import org.commonjava.maven.ext.core.ManipulationSession;
 import org.commonjava.maven.ext.core.state.DependencyState;
 import org.commonjava.maven.ext.core.state.PluginState;
@@ -299,7 +299,7 @@ public class RESTCollector
                     SimpleProjectVersionRef parent = new SimpleProjectVersionRef( project.getModelParent().getGroupId(),
                                                                                   project.getModelParent().getArtifactId(),
                                                                                   handlePotentialSnapshotVersion( vs, project.getModelParent().getVersion() ) );
-                    localDeps.add( new SimpleArtifactRef( parent, new SimpleTypeAndClassifier( "pom", null ) ) );
+                    localDeps.add( new SimpleScopedArtifactRef( parent, new SimpleTypeAndClassifier( "pom", null ), null ) );
                 }
 
                 recordDependencies( session, localDeps, project.getResolvedManagedDependencies( session ) );
@@ -342,9 +342,10 @@ public class RESTCollector
 
         for ( ProjectVersionRef pvr : plugins.keySet() )
         {
-            deps.add( new SimpleArtifactRef(
+            deps.add( new SimpleScopedArtifactRef(
                             new SimpleProjectVersionRef( pvr.asProjectRef(), handlePotentialSnapshotVersion( vs, pvr.getVersionString() ) ),
-                            new SimpleTypeAndClassifier( "maven-plugin", null ) ) );
+                            new SimpleTypeAndClassifier( "maven-plugin", null ),
+                            null ) );
         }
     }
 
@@ -364,9 +365,11 @@ public class RESTCollector
         for ( ArtifactRef pvr : dependencies.keySet() )
         {
             Dependency d = dependencies.get( pvr );
-            SimpleArtifactRef sa = new SimpleArtifactRef(
+
+            SimpleScopedArtifactRef sa = new SimpleScopedArtifactRef(
                             new SimpleProjectVersionRef( pvr.asProjectRef(), handlePotentialSnapshotVersion( vs, pvr.getVersionString() ) ),
-                            new SimpleTypeAndClassifier( d.getType(), d.getClassifier() ) );
+                            new SimpleTypeAndClassifier( d.getType(), d.getClassifier() ),
+                            d.getScope() );
 
             boolean validate = true;
 

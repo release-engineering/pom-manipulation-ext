@@ -26,7 +26,6 @@ import org.apache.maven.model.PluginManagement;
 import org.apache.maven.model.Profile;
 import org.commonjava.maven.atlas.ident.ref.ArtifactRef;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
-import org.commonjava.maven.atlas.ident.ref.SimpleArtifactRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef;
 import org.commonjava.maven.atlas.ident.util.VersionUtils;
 import org.commonjava.maven.ext.common.ManipulationException;
@@ -606,7 +605,7 @@ public class Project
             }
             if ( isNotEmpty( g ) && isNotEmpty( a ) && isNotEmpty( v ) )
             {
-                SimpleArtifactRef sar = new SimpleArtifactRef( g, a, v, d.getType(), d.getClassifier() );
+                SimpleScopedArtifactRef sar = new SimpleScopedArtifactRef( g, a, v, d.getType(), d.getClassifier(), d.getScope() );
 
                 // If the GAVTC already exists within the map it means we have a duplicate entry. While Maven
                 // technically allows this it does warn that this leads to unstable models. In PME case this breaks

@@ -21,3 +21,12 @@ def pom = new XmlSlurper().parse( pomFile )
 def dependency = pom.dependencies.dependency.find { it.artifactId.text() == "junit" }
 assert dependency != null
 assert dependency.version.text() == "4.1"
+
+
+dependency = pom.dependencies.dependency.find { it.scope.text() == "test" }
+assert dependency != null
+assert dependency.groupId.text() == "junit"
+
+dependency = pom.dependencies.dependency.find { it.artifactId.text() == "junit-dep" && it.scope.text() != "test" }
+assert dependency != null
+assert dependency.groupId.text() == "junit"

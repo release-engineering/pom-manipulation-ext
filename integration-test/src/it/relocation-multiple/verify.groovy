@@ -23,6 +23,8 @@ assert dependency != null
 assert dependency.version.text() == "4.1"
 assert dependency.groupId.text() == "com.junit"
 
+assert 2 == pom.dependencies.dependency.count { it.artifactId.text() == "special-junit" }
+
 dependency = pom.dependencies.dependency.find { it.artifactId.text() == "junit" }
 assert dependency != null
 assert dependency.version.text() == "4.1"

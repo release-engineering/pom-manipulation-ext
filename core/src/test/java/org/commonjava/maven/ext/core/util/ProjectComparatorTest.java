@@ -63,7 +63,7 @@ public class ProjectComparatorTest
     @Rule
     public final SystemOutRule systemOutRule = new SystemOutRule().enableLog();//.muteForSuccessfulTests();
 
-    private WildcardMap<ProjectVersionRef> map = new WildcardMap<>();
+    private final WildcardMap<ProjectVersionRef> map = new WildcardMap<>();
 
     @Test
     public void testCompareNoChanges() throws Exception
