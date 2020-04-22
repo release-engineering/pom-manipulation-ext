@@ -97,10 +97,6 @@ public class DefaultTranslator
                .setObjectMapper( new InternalObjectMapper( new com.fasterxml.jackson.databind.ObjectMapper() ) );
     }
 
-//    // Allow test to override this.
-//    @SuppressWarnings( "FieldCanBeLocal" )
-//    private int retryDuration = 30;
-
     /**
      * @param endpointUrl is the URL to talk to.
      * @param restMaxSize initial (maximum) size of the rest call; if zero will send everything.
@@ -109,7 +105,8 @@ public class DefaultTranslator
      * @param incrementalSerialSuffix the suffix to pass to the endpoint.
      * @param restHeaders the headers to pass to the endpoint
      */
-    public DefaultTranslator( String endpointUrl, int restMaxSize, int restMinSize, String repositoryGroup, String incrementalSerialSuffix, Map<String, String> restHeaders,
+    public DefaultTranslator( String endpointUrl, int restMaxSize, int restMinSize, String repositoryGroup,
+                              String incrementalSerialSuffix, Map<String, String> restHeaders,
                               int restConnectionTimeout, int restSocketTimeout, int restRetryDuration )
     {
         this.repositoryGroup = repositoryGroup;

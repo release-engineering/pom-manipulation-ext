@@ -16,6 +16,7 @@
 package org.commonjava.maven.ext.io;
 
 import org.apache.commons.io.FileUtils;
+import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.io.resolver.GalleyInfrastructure;
 import org.commonjava.maven.ext.io.rest.handler.StaticResourceHandler;
 import org.commonjava.maven.ext.io.rest.rule.MockServer;
@@ -25,16 +26,18 @@ import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class FileIOTest
 {
     @Rule
     public TemporaryFolder folder = new TemporaryFolder();
 
-    private StaticResourceHandler staticFile = new StaticResourceHandler( "pom.xml" );
+    private final StaticResourceHandler staticFile = new StaticResourceHandler( "pom.xml" );
 
     @Rule
     public MockServer mockServer = new MockServer( staticFile );
@@ -59,5 +62,17 @@ public class FileIOTest
                                           .getParentFile().getParentFile(), "pom.xml"), StandardCharsets.UTF_8 );
 
         assertEquals( urlPom, filePom );
+    }
+
+    @Test
+    public void cacheDir() throws IOException, ManipulationException
+    {
+        GalleyInfrastructure gi = new GalleyInfrastructure
+                        ( null, null ).init(null, null, folder.newFolder());
+
+        File f = gi.getCacheDir();
+
+        assertTrue( f.exists() );
+        assertEquals( f.getParentFile(), folder.getRoot() );
     }
 }

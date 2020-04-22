@@ -23,6 +23,7 @@ import org.commonjava.maven.ext.io.rest.DefaultTranslator;
 import org.commonjava.maven.ext.io.rest.Translator;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -68,14 +69,6 @@ public class RESTState implements State
 
     private boolean restSuffixAlign;
 
-    private Map<String, String> restHeaders;
-
-    private int restConnectionTimeout;
-
-    private int restSocketTimeout;
-
-    private int restRetryDuration;
-
     public RESTState( final ManipulationSession session )
     {
         this.session = session;
@@ -88,29 +81,22 @@ public class RESTState implements State
         final VersioningState vState = session.getState( VersioningState.class );
 
         restURL = userProps.getProperty( REST_URL );
+        restSuffixAlign = Boolean.parseBoolean( userProps.getProperty( REST_SUFFIX, "true" ) );
 
         String repositoryGroup = userProps.getProperty( REST_REPO_GROUP, "" );
         int restMaxSize = Integer.parseInt( userProps.getProperty( REST_MAX_SIZE, "-1" ) );
         int restMinSize = Integer.parseInt( userProps.getProperty( REST_MIN_SIZE,
                                                                    String.valueOf( DefaultTranslator.CHUNK_SPLIT_COUNT ) ) );
-        restSuffixAlign = Boolean.parseBoolean( userProps.getProperty( REST_SUFFIX, "true" ) );
+        Map<String, String> restHeaders = restHeaderParser( userProps.getProperty( REST_HEADERS, "" ) );
+        int restConnectionTimeout = Integer.parseInt( userProps.getProperty( REST_CONNECTION_TIMEOUT_SEC,
+                                                                             String.valueOf( DefaultTranslator.DEFAULT_CONNECTION_TIMEOUT_SEC ) ) );
+        int restSocketTimeout = Integer.parseInt( userProps.getProperty( REST_SOCKET_TIMEOUT_SEC,
+                                                                         String.valueOf( DefaultTranslator.DEFAULT_SOCKET_TIMEOUT_SEC ) ) );
+        int restRetryDuration = Integer.parseInt( userProps.getProperty( REST_RETRY_DURATION_SEC,
+                                                                         String.valueOf( DefaultTranslator.RETRY_DURATION_SEC ) ) );
 
-        String restHeadersProperty = userProps.getProperty( REST_HEADERS, "" );
-        if ( !StringUtils.isEmpty( restHeadersProperty ) )
-        {
-            restHeaders = Arrays.stream( restHeadersProperty.split( "," ) )
-                                .map( h -> h.split( ":", 2 ) )
-                                .filter( h -> h.length > 0 && StringUtils.isNotEmpty( h[0] ) )
-                                .collect( Collectors.toMap( h -> h[0], h -> h.length > 1 ? h[1] : "",
-                                                            ( x, y ) -> y, LinkedHashMap::new ) );
-        }
-
-        restConnectionTimeout = Integer.parseInt( userProps.getProperty( REST_CONNECTION_TIMEOUT_SEC, String.valueOf( DefaultTranslator.DEFAULT_CONNECTION_TIMEOUT_SEC ) ) );
-        restSocketTimeout = Integer.parseInt( userProps.getProperty( REST_SOCKET_TIMEOUT_SEC, String.valueOf( DefaultTranslator.DEFAULT_SOCKET_TIMEOUT_SEC ) ) );
-        restRetryDuration = Integer.parseInt( userProps.getProperty( REST_RETRY_DURATION_SEC, String.valueOf( DefaultTranslator.RETRY_DURATION_SEC ) ) );
-
-        restEndpoint = new DefaultTranslator( restURL, restMaxSize, restMinSize, repositoryGroup, vState.getIncrementalSerialSuffix(), restHeaders,
-                                              restConnectionTimeout, restSocketTimeout, restRetryDuration);
+        restEndpoint = new DefaultTranslator( restURL, restMaxSize, restMinSize, repositoryGroup, vState.getIncrementalSerialSuffix(),
+                                              restHeaders, restConnectionTimeout, restSocketTimeout, restRetryDuration );
     }
 
     /**
@@ -132,5 +118,19 @@ public class RESTState implements State
     public boolean isRestSuffixAlign()
     {
         return restSuffixAlign;
+    }
+
+    // Public API : Used by GME to convert as well.
+    public static Map<String,String> restHeaderParser(String value)
+    {
+        if ( !StringUtils.isEmpty( value ) )
+        {
+            return Arrays.stream( value.split( "," ) )
+                         .map( h -> h.split( ":", 2 ) )
+                         .filter( h -> h.length > 0 && StringUtils.isNotEmpty( h[0] ) )
+                         .collect( Collectors.toMap( h -> h[0], h -> h.length > 1 ? h[1] : "", ( x, y ) -> y,
+                                                     LinkedHashMap::new ) );
+        }
+        return Collections.emptyMap();
     }
 }

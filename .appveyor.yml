@@ -34,7 +34,7 @@ cache:
   - C:\Users\appveyor\.m2 -> pom.xml
 
 build_script:
-  - ps: mvn -B -Prun-its clean install
+  - ps: mvn '-Denforcer.skip=true' '-Danimal.sniffer.skip=true' '-Dmaven.javadoc.skip=true' -B -Prun-its clean install
 
 #on_finish:
 #  - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))

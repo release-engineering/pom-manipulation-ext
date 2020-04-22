@@ -162,7 +162,9 @@ public class GalleyInfrastructure
     }
 
     /**
-     * Allow for a 'shell' infrastructure with majority not implemented but just the cache directory for FileIO.
+     * Allow for a 'shell' infrastructure with majority not implemented but just the cache directory for FileIO. This
+     * is useful for both tests and usage of FileIO within GME.
+     *
      * @param targetDirectory the directory to create the cache in
      * @return this instance
      * @throws ManipulationException if an error occurs.
@@ -180,7 +182,7 @@ public class GalleyInfrastructure
         }
         else
         {
-            throw new ManipulationException("Partial infrastructure creation - only for tests");
+            throw new ManipulationException("Partial infrastructure creation");
         }
     }
 
