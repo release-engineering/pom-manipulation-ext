@@ -20,7 +20,6 @@ import org.commonjava.maven.ext.common.model.Project;
 import org.commonjava.maven.ext.common.session.MavenSessionHandler;
 import org.commonjava.maven.ext.io.ModelIO;
 import org.commonjava.maven.ext.io.PomIO;
-import org.omg.PortableServer.POAManager;
 
 import java.util.List;
 
