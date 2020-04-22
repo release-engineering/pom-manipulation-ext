@@ -534,6 +534,40 @@ public class VersioningCalculatorTest
     }
 
     @Test
+    public void applyManualSuffixReplaceSNAPSHOT()
+                    throws Exception
+    {
+        final Properties props = new Properties();
+
+        final String s = "201212-1";
+        props.setProperty( VersioningState.VERSION_SUFFIX_SYSPROP, s );
+        setupSession( props );
+
+        final String originalVersion = "1.0.0.Final-SNAPSHOT";
+        final String calcdVersion = "1.0.0.Final-201212-1";
+
+        final String result = calculate( originalVersion );
+        assertThat( result, equalTo( calcdVersion ) );
+    }
+
+    @Test
+    public void applyManualSuffixReplaceSNAPSHOT2()
+                    throws Exception
+    {
+        final Properties props = new Properties();
+
+        final String s = "jbossorg-201212";
+        props.setProperty( VersioningState.VERSION_SUFFIX_SYSPROP, s );
+        setupSession( props );
+
+        final String originalVersion = "1.0.0.Final-SNAPSHOT";
+        final String calcdVersion = "1.0.0.Final-jbossorg-201212";
+
+        final String result = calculate( originalVersion );
+        assertThat( result, equalTo( calcdVersion ) );
+    }
+
+    @Test
     public void applySerialSuffix_InvalidOSGi()
         throws Exception
     {
