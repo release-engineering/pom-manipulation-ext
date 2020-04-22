@@ -22,12 +22,12 @@ import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.junit.Test;
 
+import java.io.File;
+
 import static org.commonjava.maven.ext.integrationtest.ITestUtils.DEFAULT_MVN_PARAMS;
 import static org.commonjava.maven.ext.integrationtest.ITestUtils.getDefaultTestLocation;
 import static org.commonjava.maven.ext.integrationtest.ITestUtils.runLikeInvoker;
 import static org.commonjava.maven.ext.integrationtest.ITestUtils.runMaven;
-
-import java.io.File;
 
 public class CircularIntegrationTest
 {

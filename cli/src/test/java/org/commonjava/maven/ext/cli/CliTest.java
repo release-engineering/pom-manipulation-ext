@@ -76,7 +76,7 @@ public class CliTest
         Cli c = new Cli();
         File pom1 = temp.newFile( );
 
-        TestUtils.executeMethod( c, "run", new Object[] { new String[] { "-f", pom1.toString() } } );
+        c.run( new String[] { "-f", pom1.toString() } );
 
         assertEquals( "Session file should match", pom1,
                       ( (ManipulationSession) FieldUtils.readField( c, "session", true ) ).getPom() );
@@ -86,8 +86,7 @@ public class CliTest
     public void checkTargetDefaultMatches() throws Exception
     {
         Cli c = new Cli();
-
-        TestUtils.executeMethod( c, "run", new Object[] { new String[] {} } );
+        c.run( new String[] {} );
 
         ManipulationSession session = (ManipulationSession) FieldUtils.readField( c, "session", true );
         File defaultTarget = (File) FieldUtils.readField( c, "target", true );
@@ -232,14 +231,13 @@ public class CliTest
         Files.copy( Paths.get( INTEGRATION_TEST.toString(),  "pom.xml" ), target.toPath(), StandardCopyOption.REPLACE_EXISTING );
 
         Cli c = new Cli();
-        TestUtils.executeMethod(c, "run", new Object[]{
-                new String[]{"-d",
+        c.run( new String[]{"-d",
                         "--settings=" + getClass().getResource("/settings-test.xml").getFile(),
                         "-Dmaven.repo.local=" + folder.toString(),
                         "-DUNKNOWN_PROPERTY=DUMMY",
                         "-Prun-its",
                         "--file",
-                        target.getCanonicalPath()}});
+                        target.getCanonicalPath() } );
 
         assertTrue (systemRule.getLog().contains( "Unknown configuration value UNKNOWN_PROPERTY" ));
     }

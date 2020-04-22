@@ -18,7 +18,6 @@ package org.commonjava.maven.ext.core.groovy;
 import org.commonjava.maven.ext.io.FileIO;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.util.Properties;
 
 /**

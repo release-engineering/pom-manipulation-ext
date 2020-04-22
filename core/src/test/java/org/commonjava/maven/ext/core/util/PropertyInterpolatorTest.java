@@ -26,7 +26,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
