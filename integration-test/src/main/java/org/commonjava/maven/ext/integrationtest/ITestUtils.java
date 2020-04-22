@@ -39,7 +39,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
-import java.lang.reflect.Method;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -141,7 +140,7 @@ public class ITestUtils
             args.add( toFlagsParams( e.getFlags() ) );
 
             // Run PME-Cli
-            Integer cliExitValue = 0;
+            int cliExitValue = 0;
             if ( !StringUtils.contains( e.getMvnCommand(), "manipulation.disable=true" ) )
             {
                 cliExitValue = runCli( args, e.getJavaParams(), e.getLocation() );
@@ -191,10 +190,9 @@ public class ITestUtils
      * @param args - List of additional command line arguments
      * @param params - Map of String keys and String values representing -D arguments
      * @param workingDir - Working directory in which you want the cli to be run.
-     * @throws Exception if an error occurs.
      * @return Exit value
      */
-    static Integer runCli( List<String> args, Map<String, String> params, String workingDir ) throws Exception
+    static Integer runCli( List<String> args, Map<String, String> params, String workingDir )
     {
         ArrayList<String> arguments = new ArrayList<>( args );
         Collections.addAll( arguments, toJavaParams( params ).split( "\\s+" ) );
@@ -214,7 +212,7 @@ public class ITestUtils
         }
         logger.info( "Invoking CLI with {} ", arguments );
         Cli cli = new Cli();
-        Integer result = (Integer) executeMethod( cli, new Object[]{arguments.toArray( new String[0] )} );
+        int result = cli.run( arguments.toArray( new String[0] ) );
 
         // Close unirest client down to prevent any hanging.
         // Unirest.shutdown();
@@ -399,26 +397,5 @@ public class ITestUtils
 
             return proc.waitFor();
         }
-    }
-
-    /**
-     * Executes a method on an object instance.  The name and parameters of
-     * the method are specified.  The method will be executed and the value
-     * of it returned, even if the method would have private or protected access.
-     */
-    private static Object executeMethod( Cli instance, Object[] params ) throws Exception
-    {
-        Class<? extends Cli> c = instance.getClass();
-
-        // Fetch the Class types of all method parameters
-        Class<?>[] types = new Class[params.length];
-
-        for ( int i = 0; i < params.length; i++ )
-            types[i] = params[i].getClass();
-
-        Method m = c.getDeclaredMethod( "run", types );
-        m.setAccessible( true );
-
-        return m.invoke( instance, params );
     }
 }

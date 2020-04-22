@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
+
+import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef
 import org.commonjava.maven.ext.core.groovy.BaseScript
 import org.commonjava.maven.ext.core.groovy.InvocationPoint
 import org.commonjava.maven.ext.core.groovy.InvocationStage
 import org.commonjava.maven.ext.core.groovy.PMEBaseScript
-import org.commonjava.maven.ext.core.groovy.PMEInvocationPoint
-import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef;
-
 
 @InvocationPoint(invocationPoint = InvocationStage.FIRST)
 @PMEBaseScript BaseScript pme
