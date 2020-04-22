@@ -393,7 +393,7 @@ public class PluginManipulator extends CommonManipulator implements Manipulator
 
                 if ( plugin.getVersion().equals( Version.PROJECT_VERSION ) || ( plugin.getVersion().contains( "$" ) && project.getVersion().equals( oldValue ) ))
                 {
-                    logger.warn( "Plugin {} for {} references ${project.version} so skipping.", plugin, project.getPom() );
+                    logger.warn( "Plugin {} for {} references ${project.version} so skipping.", plugin.getId(), project.getPom() );
                 }
                 else if ( commonState.isStrict() )
                 {

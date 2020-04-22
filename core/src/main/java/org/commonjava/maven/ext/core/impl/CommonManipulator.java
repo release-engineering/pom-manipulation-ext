@@ -320,7 +320,8 @@ public class CommonManipulator
 
     protected void explicitOverridePropertyUpdates( ManipulationSession session ) throws ManipulationException
     {
-        logger.info ("Iterating for explicit overrides...");
+        // Moved this to debug as otherwise it deluges the logging.
+        logger.debug ("Iterating for explicit overrides...");
         for ( Project project : explicitVersionPropertyUpdateMap.keySet() )
         {
             logger.debug( "Checking property override within project {} ", project );
