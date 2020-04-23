@@ -59,6 +59,8 @@ public class FileIO
     public File resolveURL( final String reference ) throws IOException
     {
         URL ref;
+        File result;
+
         if ( SystemUtils.IS_OS_WINDOWS )
         {
             ref = new URL ( reference.replaceFirst("^file://([a-zA-Z]:\\\\)","file:///$1"));
@@ -67,10 +69,19 @@ public class FileIO
         {
             ref = new URL (reference );
         }
-        File cache = infra.getCacheDir();
-        File result = new File( cache, UUID.randomUUID().toString() );
+        // If its a local file reference. just use the file itself rather than copying it.
+        if ( ! "file".equals( ref.getProtocol() ) )
+        {
+            File cache = infra.getCacheDir();
 
-        FileUtils.copyURLToFile( ref, result );
+            result = new File( cache, UUID.randomUUID().toString() );
+
+            FileUtils.copyURLToFile( ref, result );
+        }
+        else
+        {
+            result = new File(ref.getPath());
+        }
 
         return result;
     }

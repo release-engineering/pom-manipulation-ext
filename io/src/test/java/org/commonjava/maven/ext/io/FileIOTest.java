@@ -75,4 +75,13 @@ public class FileIOTest
         assertTrue( f.exists() );
         assertEquals( f.getParentFile(), folder.getRoot() );
     }
+
+
+    @Test
+    public void testReadFile() throws Exception
+    {
+        File root = folder.getRoot();
+        File result = fileIO.resolveURL( "file://" + root.getAbsolutePath() );
+        assertEquals( root, result );
+    }
 }
