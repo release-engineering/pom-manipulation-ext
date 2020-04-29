@@ -125,12 +125,16 @@
     </dependency>
 
     <dependency>
-      <groupId>org.commonjava.maven</groupId>
-      <artifactId>maven3-model-jdom-support</artifactId>
+      <groupId>org.apache.maven.release</groupId>
+      <artifactId>maven-release-manager</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.maven.release</groupId>
+      <artifactId>maven-release-api</artifactId>
     </dependency>
     <dependency>
       <groupId>org.jdom</groupId>
-      <artifactId>jdom2</artifactId>
+      <artifactId>jdom</artifactId>
     </dependency>
 
     <dependency>
@@ -213,11 +217,12 @@
                   <include>net.minidev:*</include>
                   <include>org.apache.httpcomponents:*</include>
                   <include>org.apache.ivy:*</include>
+                  <include>org.apache.maven.release:*</include>
                   <include>org.codehaus.groovy:groovy-json</include>
                   <include>org.codehaus.groovy:groovy-xml</include>
                   <include>org.codehaus.groovy:groovy</include>
                   <include>org.jboss.da:reports-model</include>
-                  <include>org.jdom:jdom2</include>
+                  <include>org.jdom:jdom</include>
                   <include>org.jsoup:jsoup</include>
                   <include>org.ow2.asm:asm</include>
                   <include>org.yaml:snakeyaml</include>

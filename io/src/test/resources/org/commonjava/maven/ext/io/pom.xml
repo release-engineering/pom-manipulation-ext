@@ -1,4 +1,5 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0"?>
+
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
@@ -7,5 +8,34 @@
     <version>1.0</version>
     <packaging>pom</packaging>
     <!-- Test Comment -->
+
+    <description>
+        Manipulation Tool (available as library, extension and CLI) for Apache Maven
+        that allows pre-processing of Maven pom.xml's.
+    </description>
+
+    <developers />
+
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+                <extensions>true</extensions>
+                <configuration>
+                    <instructions>
+                        <Bundle-SymbolicName>${project.groupId}.${project.artifactId};blueprint.aries.xml-validation:=false</Bundle-SymbolicName>
+                        <Import-Package>
+                            javax.ws.rs.*;version="[1.1,3)",
+                            org.apache.cxf.*;version="[2,4)",
+                        </Import-Package>
+                        <Export-Package>org.apache.cxf.samples.failover.jaxws</Export-Package>
+                    </instructions>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
 
 </project>
