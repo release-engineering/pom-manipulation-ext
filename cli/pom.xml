@@ -214,7 +214,7 @@
         <executions>
           <execution>
             <id>generate-index</id>
-            <phase>not-used</phase>
+            <phase>none</phase>
           </execution>
           <execution>
             <id>index-dependencies</id>

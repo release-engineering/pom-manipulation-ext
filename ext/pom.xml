@@ -169,7 +169,7 @@
         <executions>
           <execution>
             <id>generate-index</id>
-            <phase>not-used</phase>
+            <phase>none</phase>
           </execution>
           <execution>
             <id>index-dependencies</id>
@@ -178,11 +178,7 @@
               <goal>index</goal>
             </goals>
             <configuration>
-              <artifactSet>
-                <includes>
-                  <include>org.commonjava.*:*</include>
-                </includes>
-              </artifactSet>
+              <includeGroupIds>org.commonjava</includeGroupIds>
             </configuration>
           </execution>
         </executions>
