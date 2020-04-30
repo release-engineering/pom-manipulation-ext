@@ -18,6 +18,8 @@
 
 
     <build>
+        <pluginManagement />
+
         <plugins>
             <plugin>
                 <groupId>org.apache.felix</groupId>

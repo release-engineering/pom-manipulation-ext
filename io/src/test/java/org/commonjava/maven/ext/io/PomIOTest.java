@@ -28,6 +28,7 @@ import java.io.File;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.HashSet;
+import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -46,6 +47,27 @@ public class PomIOTest
     public void setup()
     {
         pomIO = new PomIO();
+    }
+
+
+    @Test
+    public void testRoundtripPOMs()
+                    throws Exception
+    {
+        URL resource = PomIOTest.class.getResource( filename );
+        assertNotNull( resource );
+        File pom = new File( resource.getFile() );
+        assertTrue( pom.exists() );
+
+        File targetFile = folder.newFile( "target.xml" );
+        FileUtils.copyFile( pom, targetFile );
+
+        List<Project> projects = pomIO.parseProject( targetFile );
+        HashSet<Project> changed = new HashSet<>(projects);
+        pomIO.rewritePOMs( changed );
+
+        assertTrue( FileUtils.contentEqualsIgnoreEOL( pom, targetFile, StandardCharsets.UTF_8.toString() ) );
+        assertTrue( FileUtils.contentEquals( targetFile, pom ) );
     }
 
     @Test
@@ -70,7 +92,6 @@ public class PomIOTest
         Project p = new Project( targetFile, model );
         HashSet<Project> changed = new HashSet<>();
         changed.add( p );
-
         pomIO.rewritePOMs( changed );
 
         assertTrue( FileUtils.contentEqualsIgnoreEOL( pom, targetFile, StandardCharsets.UTF_8.toString() ) );

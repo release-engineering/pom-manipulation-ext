@@ -35,6 +35,7 @@ import java.util.Properties;
 
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.core.IsEqual.equalTo;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
@@ -84,6 +85,7 @@ public class InitialGroovyManipulatorTest
         projects = pomIO.parseProject( projectroot );
         assertThat( projects.size(), equalTo( 3 ) );
 
+        assertEquals( projectForArtifactId( projects, "groovy-project-removal").getModel().getProfiles().size(), 1 );
         assertThat( projectForArtifactId( projects, "groovy-project-removal" ).getVersion(), containsString( "rebuild" ) );
         assertThat( projectForArtifactId( projects, "groovy-project-removal-moduleA" ).getVersion(),
                     containsString( "rebuild" ) );

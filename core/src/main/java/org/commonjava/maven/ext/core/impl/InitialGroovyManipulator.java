@@ -81,11 +81,13 @@ public class InitialGroovyManipulator
         for ( File groovyScript : parseGroovyScripts( state.getGroovyScripts() ))
         {
             List<Project> roots = projects.stream().filter(Project::isExecutionRoot).collect(Collectors.toList());
-            for ( final Project project : roots )
+            if ( roots.size() > 1 )
             {
-                applyGroovyScript( projects, project, groovyScript);
-                changed.add( project );
+                logger.error( "Found multiple execution roots: {}", roots );
             }
+            Project project = roots.get( 0 );
+            applyGroovyScript( projects, project, groovyScript);
+            changed.add( project );
         }
         return changed;
     }

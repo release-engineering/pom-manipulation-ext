@@ -31,9 +31,10 @@ import org.apache.maven.shared.release.transform.jdom.JDomModelETLFactory;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.ext.common.ManipulationException;
+import org.commonjava.maven.ext.common.jdom.JDOMModelConverter;
 import org.commonjava.maven.ext.common.model.Project;
+import org.commonjava.maven.ext.common.util.LineSeparator;
 import org.commonjava.maven.ext.common.util.ManifestUtils;
-import org.commonjava.maven.ext.io.FileIO.LineSeparator;
 import org.commonjava.maven.galley.maven.parse.PomPeek;
 import org.jdom.Comment;
 import org.jdom.Content;
@@ -73,7 +74,6 @@ public class PomIO
 
     private final JDomModelETLFactory modelETLFactories = new JDomModelETLFactory();
     private final ReleaseDescriptorBuilder releaseDescriptorBuilder = new ReleaseDescriptorBuilder();
-
 
     public List<Project> parseProject( final File pom ) throws ManipulationException
     {
@@ -266,16 +266,22 @@ public class PomIO
             MavenProject mp = new MavenProject(model);
             request.setLineSeparator( ls.value() );
             request.setProject( mp );
-            ReleaseUtils.buildReleaseDescriptor( releaseDescriptorBuilder );
             request.setReleaseDescriptor( ReleaseUtils.buildReleaseDescriptor( releaseDescriptorBuilder ) );
 
             ModelETL etl = modelETLFactories.newInstance( request );
+            // Reread in order to fill in JdomModelETL
             etl.extract( pom );
+
+            // Annoyingly the document is private but we need to access it in order to:
+            // 1. Potentially add the PME modified note to the root project
+            // 2. Ensure the model is written to the Document.
+            Document doc = (Document) FieldUtils.getDeclaredField( JDomModelETL.class, "document", true ).get( etl );
+
+            final JDOMModelConverter jdomModelConverter = new JDOMModelConverter( );
+            jdomModelConverter.convertModelToJDOM( model, doc );
 
             if ( project.isExecutionRoot() )
             {
-                // Annoyingly the document is private but we need to access it in order to add the PME modified note to the root project
-                Document doc = (Document) FieldUtils.getDeclaredField( JDomModelETL.class, "document", true ).get( etl );
                 @SuppressWarnings( "unchecked" )
                 final Iterator<Content> it = doc.getContent( new ContentFilter( ContentFilter.COMMENT ) ).iterator();
                 while ( it.hasNext() )
@@ -295,7 +301,7 @@ public class PomIO
 
             etl.load( pom );
         }
-        catch ( ReleaseExecutionException | IllegalAccessException e )
+        catch ( ReleaseExecutionException | IllegalAccessException | IOException e )
         {
             throw new ManipulationException( "Failed to parse POM for rewrite: {}. Reason: ", pom, e.getMessage(), e );
         }

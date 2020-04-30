@@ -32,6 +32,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * {@link Manipulator} implementation that can resolve a remote groovy file and execute it on executionRoot. Configuration
@@ -79,17 +80,14 @@ public class FinalGroovyManipulator
 
         for ( File groovyScript : parseGroovyScripts( state.getGroovyScripts() ))
         {
-            for ( final Project project : projects )
+            List<Project> roots = projects.stream().filter(Project::isExecutionRoot).collect(Collectors.toList());
+            if ( roots.size() > 1 )
             {
-                if ( project.isExecutionRoot() )
-                {
-                    logger.info ("Executing {} on {}", groovyScript, project);
-
-                    applyGroovyScript( projects, project, groovyScript);
-
-                    changed.add( project );
-                }
+                logger.error( "Found multiple execution roots: {}", roots );
             }
+            Project project = roots.get( 0 );
+            applyGroovyScript( projects, project, groovyScript);
+            changed.add( project );
         }
         return changed;
     }
