@@ -26,6 +26,7 @@ import org.junit.rules.TemporaryFolder;
 
 import java.io.File;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.HashSet;
 import java.util.List;
@@ -51,7 +52,7 @@ public class PomIOTest
 
 
     @Test
-    public void testRoundtripPOMs()
+    public void testRoundTripPOMs()
                     throws Exception
     {
         URL resource = PomIOTest.class.getResource( filename );
@@ -80,9 +81,13 @@ public class PomIOTest
         assertTrue( pom.exists() );
 
         File targetFile = folder.newFile( "target.xml" );
+        FileUtils.writeStringToFile( targetFile,
+                                     FileUtils.readFileToString( pom, Charset.defaultCharset() ).replaceAll( "dospom", "newdospom" ),
+                                Charset.defaultCharset() );
         FileUtils.copyFile( pom, targetFile );
 
-        Model model = new Model();
+        List<Project> projects = pomIO.parseProject( targetFile );
+        Model model = projects.get( 0 ).getModel();
         model.setGroupId( "org.commonjava.maven.ext.versioning.test" );
         model.setArtifactId( "dospom" );
         model.setVersion( "1.0" );

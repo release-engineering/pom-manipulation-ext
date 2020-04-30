@@ -43,9 +43,7 @@ public class FileIO
     private final GalleyInfrastructure infra;
 
     @Inject
-    public FileIO(
-                    @Named( "galley" )
-                                    GalleyInfrastructure infra )
+    public FileIO(@Named( "galley" ) GalleyInfrastructure infra )
     {
         this.infra = infra;
     }

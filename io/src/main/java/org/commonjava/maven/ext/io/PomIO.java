@@ -75,6 +75,8 @@ public class PomIO
     private final JDomModelETLFactory modelETLFactories = new JDomModelETLFactory();
     private final ReleaseDescriptorBuilder releaseDescriptorBuilder = new ReleaseDescriptorBuilder();
 
+    private final JDOMModelConverter jdomModelConverter = new JDOMModelConverter( );
+
     public List<Project> parseProject( final File pom ) throws ManipulationException
     {
         final List<PomPeek> peeked = peekAtPomHierarchy( pom );
@@ -277,7 +279,6 @@ public class PomIO
             // 2. Ensure the model is written to the Document.
             Document doc = (Document) FieldUtils.getDeclaredField( JDomModelETL.class, "document", true ).get( etl );
 
-            final JDOMModelConverter jdomModelConverter = new JDOMModelConverter( );
             jdomModelConverter.convertModelToJDOM( model, doc );
 
             if ( project.isExecutionRoot() )

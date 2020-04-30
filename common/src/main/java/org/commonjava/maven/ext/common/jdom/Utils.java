@@ -50,7 +50,7 @@ import java.util.ListIterator;
 import java.util.Map;
 import java.util.TreeMap;
 
-@SuppressWarnings( "all" )
+// @SuppressWarnings( "all" )
 public final class Utils
 {
 
@@ -454,7 +454,7 @@ public final class Utils
     } // -- void updatePatternSet( PatternSet, String, Counter, Element )
 
     // Copied from JDOM2
-    public static List<Namespace> getNamespacesInherited(Element element) {
+    static List<Namespace> getNamespacesInherited(Element element) {
         if (element.getParentElement() == null) {
             ArrayList<Namespace> ret = new ArrayList<Namespace>(getNamespacesInScope(element));
             for (Iterator<Namespace> it = ret.iterator(); it.hasNext();) {
@@ -496,8 +496,6 @@ public final class Utils
      * <li>The element's namespace is added (commonly
      * {@link Namespace#NO_NAMESPACE})
      * <li>All the attributes are inspected and their Namespaces are included
-     * <li>All Namespaces declared on this Element using
-     * {@link #addNamespaceDeclaration(Namespace)} are included.
      * <li>If the element has a parent then the parent's Namespace scope is
      * inspected, and any prefixes in the parent scope that are not yet bound
      * in this Element's scope are included.
@@ -511,16 +509,11 @@ public final class Utils
      * If an element has no parent then
      * <p>
      * Note that the Element's Namespace will always be reported first.
-     * <p>
-     * <strong>Description copied from</strong>
-     * {@link NamespaceAware#getNamespacesInScope()}:
-     * <p>
      * {@inheritDoc}
      *
-     * @see NamespaceAware
      */
     // Copied from JDOM2
-    public static List<Namespace> getNamespacesInScope(Element element) {
+    static List<Namespace> getNamespacesInScope(Element element) {
         // The assumption here is that all namespaces are valid,
         // that there are no namespace collisions on this element
 

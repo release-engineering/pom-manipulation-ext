@@ -35,7 +35,7 @@ package org.commonjava.maven.ext.common.jdom;
  *
  * @version $Revision$ $Date$
  */
-public class IndentationCounter
+class IndentationCounter
 {
 
     // --------------------------/
