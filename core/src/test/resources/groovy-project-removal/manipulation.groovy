@@ -41,13 +41,6 @@ while (it.hasNext())
         break;
     }
 }
-System.out.println (" profiles " + pme.project.model.profiles)
-//toRemove = pme.project.model.profiles.findAll {
-//    it.id == 'extra-repositories'
-//}
-//toRemove.each {
-//   pme.project.model.profiles.remove(it)
-//}
 
 
 

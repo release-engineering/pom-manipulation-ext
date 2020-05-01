@@ -30,7 +30,7 @@
  */
 package org.commonjava.maven.ext.common.jdom;
 
-import org.apache.maven.model.PatternSet;
+import lombok.experimental.UtilityClass;
 import org.codehaus.plexus.util.xml.Xpp3Dom;
 import org.jdom.Attribute;
 import org.jdom.CDATA;
@@ -39,18 +39,23 @@ import org.jdom.DefaultJDOMFactory;
 import org.jdom.Element;
 import org.jdom.Namespace;
 import org.jdom.Text;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
-import java.util.Map;
+import java.util.Properties;
 import java.util.TreeMap;
 
 // @SuppressWarnings( "all" )
+@SuppressWarnings( { "JavaDoc", "RedundantModifiersUtilityClassLombok", "UnusedReturnValue", "unchecked" } )
+@UtilityClass
 public final class Utils
 {
 
@@ -60,9 +65,8 @@ public final class Utils
 
     private static final DefaultJDOMFactory factory = new DefaultJDOMFactory();
 
-    private Utils()
-    {
-    }
+    protected final Logger logger = LoggerFactory.getLogger( Utils.class );
+
 
     /**
      * Method updateElement.
@@ -139,20 +143,16 @@ public final class Utils
         if ( parentDom.getChildCount() > 0 )
         {
             final Xpp3Dom[] childs = parentDom.getChildren();
-            final Collection domChilds = new ArrayList();
-            for ( final Xpp3Dom child : childs )
-            {
-                domChilds.add( child );
-            }
-            final ListIterator it = parent.getChildren().listIterator();
+            final ArrayList<Xpp3Dom> domChilds = new ArrayList<>( Arrays.asList( childs ) );
+            final ListIterator<?> it = parent.getChildren().listIterator();
             while ( it.hasNext() )
             {
                 final Element elem = (Element) it.next();
-                final Iterator it2 = domChilds.iterator();
+                final Iterator<Xpp3Dom> it2 = domChilds.iterator();
                 Xpp3Dom corrDom = null;
                 while ( it2.hasNext() )
                 {
-                    final Xpp3Dom dm = (Xpp3Dom) it2.next();
+                    final Xpp3Dom dm = it2.next();
                     if ( dm.getName().equals( elem.getName() ) )
                     {
                         corrDom = dm;
@@ -170,10 +170,8 @@ public final class Utils
                     it.remove();
                 }
             }
-            final Iterator it2 = domChilds.iterator();
-            while ( it2.hasNext() )
+            for ( Xpp3Dom dm : domChilds )
             {
-                final Xpp3Dom dm = (Xpp3Dom) it2.next();
                 final String rawName = dm.getName();
                 final String[] parts = rawName.split( ":" );
 
@@ -192,7 +190,7 @@ public final class Utils
                 else
                 {
                     Namespace root = parent.getNamespace();
-                    for ( Namespace n : getNamespacesInherited(parent))
+                    for ( Namespace n : getNamespacesInherited( parent ) )
                     {
                         if ( n.getPrefix() == null || n.getPrefix().length() == 0 )
                         {
@@ -227,6 +225,7 @@ public final class Utils
                 if (c instanceof CDATA )
                 {
                     foundCdata = true;
+                    break;
                 }
             }
 
@@ -234,7 +233,7 @@ public final class Utils
             {
                 if ( parent.getText().trim().equals( parentDom.getValue() ) )
                 {
-                    System.out.println ("### Original of '" + parent.getText() + "' equals (ignoring trimmed whitespace) '" + parentDom.getValue() + "'");
+                    logger.trace ("Ignoring during element update as original of '{}' equals (ignoring trimmed whitespace) '{}'", parent.getText(), parentDom.getValue());
                 }
                 else
                 {
@@ -256,7 +255,7 @@ public final class Utils
     {
         int contentIndex = 0;
         int elementCounter = 0;
-        final Iterator it = parent.getContent().iterator();
+        final Iterator<?> it = parent.getContent().iterator();
         Text lastText = null;
         int offset = 0;
         while ( it.hasNext() && elementCounter <= counter.getCurrentIndex() )
@@ -280,18 +279,20 @@ public final class Utils
         }
         else
         {
-            String starter = lineSeparator;
+            StringBuilder starter = new StringBuilder( lineSeparator);
             for ( int i = 0; i < counter.getDepth(); i++ )
             {
-                starter = starter + INDENT; // TODO make settable?
+                starter.append( INDENT );
             }
-            lastText = factory.text( starter );
+            lastText = factory.text( starter.toString() );
         }
         if ( parent.getContentSize() == 0 )
         {
-            System.out.println ("### WTF ; doing something with indent to " + lastText);
             final Text finalText = (Text) lastText.clone();
-            finalText.setText( finalText.getText().substring( 0, finalText.getText().length() - INDENT.length() ) );
+            final String newVersion = finalText.getText().substring( 0, finalText.getText().length() - INDENT.length() );
+            // TODO: Not sure if we need to handle this text replacement specially (like elsewhere).
+            logger.trace( "Replacing original text of {} with modified text of ", finalText.getText() , newVersion);
+            finalText.setText( newVersion );
             parent.addContent( contentIndex, finalText );
         }
         parent.addContent( contentIndex, child );
@@ -308,20 +309,20 @@ public final class Utils
      * @return Element
      */
     public static Element findAndReplaceProperties( final IndentationCounter counter, final Element parent,
-                                                    final String name, final Map props )
+                                                    final String name, final Properties props )
     {
         final boolean shouldExist = ( props != null ) && !props.isEmpty();
         final Element element = updateElement( counter, parent, name, shouldExist );
         if ( shouldExist )
         {
-            Iterator it = props.keySet().iterator();
+            Iterator<?> it = props.stringPropertyNames().iterator();
             final IndentationCounter innerCounter = new IndentationCounter( counter.getDepth() + 1 );
             while ( it.hasNext() )
             {
                 final String key = (String) it.next();
                 findAndReplaceSimpleElement( innerCounter, element, key, (String) props.get( key ), null );
             }
-            final ArrayList lst = new ArrayList( props.keySet() );
+            final ArrayList<String> lst = new ArrayList<>( props.stringPropertyNames() );
             it = element.getChildren().iterator();
             while ( it.hasNext() )
             {
@@ -349,11 +350,11 @@ public final class Utils
     public static Element findAndReplaceSimpleElement( final IndentationCounter counter, final Element parent,
                                                        final String name, final String text, final String defaultValue )
     {
-        if ( ( defaultValue != null ) && ( text != null ) && defaultValue.equals( text ) )
+        if ( ( defaultValue != null ) && defaultValue.equals( text ) )
         {
             final Element element = parent.getChild( name, parent.getNamespace() );
             // if exist and is default value or if doesn't exist.. just keep the way it is..
-            if ( ( element != null && defaultValue.equals( element.getText() ) ) || element == null )
+            if ( element == null || defaultValue.equals( element.getText() ) )
             {
                 return element;
             }
@@ -364,7 +365,7 @@ public final class Utils
         {
             if ( element.getText().trim().equals( text ) )
             {
-                System.out.println ("### Original of '" + element.getText() + "' equals (ignoring trimmed whitespace) '" + text + "'");
+                logger.trace ("Ignoring during element update as original of '{}' equals (ignoring trimmed whitespace) '{}'", element.getText(), text);
             }
             else
             {
@@ -385,15 +386,15 @@ public final class Utils
      * @return Element
      */
     public static Element findAndReplaceSimpleLists( final IndentationCounter counter, final Element parent,
-                                                     final Collection list, final String parentName,
+                                                     final Collection<?> list, final String parentName,
                                                      final String childName )
     {
         final boolean shouldExist = ( list != null ) && ( list.size() > 0 );
         final Element element = updateElement( counter, parent, parentName, shouldExist );
         if ( shouldExist )
         {
-            final Iterator it = list.iterator();
-            Iterator elIt = element.getChildren( childName, element.getNamespace() ).iterator();
+            final Iterator<?> it = list.iterator();
+            Iterator<?> elIt = element.getChildren( childName, element.getNamespace() ).iterator();
             if ( !elIt.hasNext() )
             {
                 elIt = null;
@@ -416,7 +417,8 @@ public final class Utils
                     el = factory.element( childName, element.getNamespace() );
                     insertAtPreferredLocation( element, el, innerCount );
                 }
-                System.out.println ("### Another setText Original of '" + element.getText() + "' and equals (ignoring trimmed whitespace) '" + value + "'");
+                // TODO: Not sure if we need to handle this text replacement specially (like elsewhere).
+                logger.trace( "TODO: Replacing original text of {} with modified text of ", el.getText() , value);
                 el.setText( value );
                 innerCount.increaseCount();
             }
@@ -432,31 +434,10 @@ public final class Utils
         return element;
     } // -- Element findAndReplaceSimpleLists( Counter, Element, java.util.Collection, String, String )
 
-    /**
-     * Method updatePatternSet.
-     * 
-     * @param patternSet
-     * @param element
-     * @param counter
-     * @param xmlTag
-     */
-    public static void updatePatternSet( final PatternSet patternSet, final String xmlTag,
-                                         final IndentationCounter counter, final Element element )
-    {
-        final boolean shouldExist = ( patternSet != null );
-        final Element root = updateElement( counter, element, xmlTag, shouldExist );
-        if ( shouldExist )
-        {
-            final IndentationCounter innerCount = new IndentationCounter( counter.getDepth() + 1 );
-            findAndReplaceSimpleLists( innerCount, root, patternSet.getIncludes(), "includes", "include" );
-            findAndReplaceSimpleLists( innerCount, root, patternSet.getExcludes(), "excludes", "exclude" );
-        }
-    } // -- void updatePatternSet( PatternSet, String, Counter, Element )
-
     // Copied from JDOM2
     static List<Namespace> getNamespacesInherited(Element element) {
         if (element.getParentElement() == null) {
-            ArrayList<Namespace> ret = new ArrayList<Namespace>(getNamespacesInScope(element));
+            ArrayList<Namespace> ret = new ArrayList<>( getNamespacesInScope( element ) );
             for (Iterator<Namespace> it = ret.iterator(); it.hasNext();) {
                 Namespace ns = it.next();
                 if (ns == Namespace.NO_NAMESPACE || ns == Namespace.XML_NAMESPACE) {
@@ -469,12 +450,12 @@ public final class Utils
 
         // OK, the things we inherit are the prefixes we have in scope that
         // are also in our parent's scope.
-        HashMap<String,Namespace> parents = new HashMap<String, Namespace>();
+        HashMap<String,Namespace> parents = new HashMap<>();
         for (Namespace ns : getNamespacesInScope(element.getParentElement())) {
             parents.put(ns.getPrefix(), ns);
         }
 
-        ArrayList<Namespace> al = new ArrayList<Namespace>();
+        ArrayList<Namespace> al = new ArrayList<>();
         for (Namespace ns : getNamespacesInScope(element)) {
             if (ns == parents.get(ns.getPrefix())) {
                 // inherited
@@ -521,7 +502,7 @@ public final class Utils
         // It does not make reference to this Element instance's other
         // getNamespace*() methods
 
-        TreeMap<String,Namespace> namespaces = new TreeMap<String, Namespace>();
+        TreeMap<String,Namespace> namespaces = new TreeMap<>();
         namespaces.put(Namespace.XML_NAMESPACE.getPrefix(), Namespace.XML_NAMESPACE);
         namespaces.put(element.getNamespacePrefix(), element.getNamespace());
         if (element.getAdditionalNamespaces() != null) {
@@ -555,7 +536,7 @@ public final class Utils
             namespaces.put(Namespace.NO_NAMESPACE.getPrefix(), Namespace.NO_NAMESPACE);
         }
 
-        ArrayList<Namespace> al = new ArrayList<Namespace>(namespaces.size());
+        ArrayList<Namespace> al = new ArrayList<>( namespaces.size() );
         al.add(element.getNamespace());
         namespaces.remove(element.getNamespacePrefix());
         al.addAll(namespaces.values());

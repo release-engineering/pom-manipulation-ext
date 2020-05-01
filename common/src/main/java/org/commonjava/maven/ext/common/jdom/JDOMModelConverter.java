@@ -40,6 +40,12 @@ public class JDOMModelConverter
     {
     }
 
+    /**
+     * Writes the model to the document
+     * @param model containing changes to propagate to the model.
+     * @param document the document to write changes to.
+     * @throws IOException if an error occurs.
+     */
     public void convertModelToJDOM ( final Model model, Document document ) throws IOException
     {
         update( model, new IndentationCounter( 0 ), document.getRootElement() );
@@ -47,23 +53,18 @@ public class JDOMModelConverter
 
     /**
      * Method iterateContributor.
-     *
      * @param counter
-     * @param childTag
-     * @param parentTag
-     * @param list
      * @param parent
+     * @param list
      */
-    protected void iterateContributor( final IndentationCounter counter, final Element parent,
-                                       final Collection list, final String parentTag,
-                                       final String childTag )
+    protected void iterateContributor( final IndentationCounter counter, final Element parent, final Collection list )
     {
         final boolean shouldExist = ( list != null ) && ( list.size() > 0 );
-        final Element element = Utils.updateElement( counter, parent, parentTag, shouldExist );
+        final Element element = Utils.updateElement( counter, parent, "contributors", shouldExist );
         if ( shouldExist )
         {
             final Iterator it = list.iterator();
-            Iterator elIt = element.getChildren( childTag, element.getNamespace() ).iterator();
+            Iterator elIt = element.getChildren( "contributor", element.getNamespace() ).iterator();
             if ( !elIt.hasNext() )
             {
                 elIt = null;
@@ -83,10 +84,10 @@ public class JDOMModelConverter
                 }
                 else
                 {
-                    el = factory.element( childTag, element.getNamespace() );
+                    el = factory.element( "contributor", element.getNamespace() );
                     Utils.insertAtPreferredLocation( element, el, innerCount );
                 }
-                updateContributor( value, childTag, innerCount, el );
+                updateContributor( value, "contributor", innerCount, el );
                 innerCount.increaseCount();
             }
             if ( elIt != null )
@@ -542,19 +543,16 @@ public class JDOMModelConverter
 
     /**
      * Method iteratePluginExecution.
-     *
-     * @param counter
-     * @param childTag
-     * @param parentTag
-     * @param list
+     *  @param counter
      * @param parent
+     * @param list
+     * @param childTag
      */
     protected void iteratePluginExecution( final IndentationCounter counter, final Element parent,
-                                           final Collection list, final String parentTag,
-                                           final String childTag )
+                                           final Collection list, final String childTag )
     {
         final boolean shouldExist = ( list != null ) && ( list.size() > 0 );
-        final Element element = Utils.updateElement( counter, parent, parentTag, shouldExist );
+        final Element element = Utils.updateElement( counter, parent, "executions", shouldExist );
         if ( shouldExist )
         {
             final Iterator it = list.iterator();
@@ -597,23 +595,18 @@ public class JDOMModelConverter
 
     /**
      * Method iterateProfile.
-     *
      * @param counter
-     * @param childTag
-     * @param parentTag
-     * @param list
      * @param parent
+     * @param list
      */
-    protected void iterateProfile( final IndentationCounter counter, final Element parent,
-                                   final Collection list, final String parentTag,
-                                   final String childTag )
+    protected void iterateProfile( final IndentationCounter counter, final Element parent, final Collection list )
     {
         final boolean shouldExist = ( list != null ) && ( list.size() > 0 );
-        final Element element = Utils.updateElement( counter, parent, parentTag, shouldExist );
+        final Element element = Utils.updateElement( counter, parent, "profiles", shouldExist );
         if ( shouldExist )
         {
             final Iterator it = list.iterator();
-            Iterator elIt = element.getChildren( childTag, element.getNamespace() ).iterator();
+            Iterator elIt = element.getChildren( "profile", element.getNamespace() ).iterator();
             if ( !elIt.hasNext() )
             {
                 elIt = null;
@@ -633,10 +626,10 @@ public class JDOMModelConverter
                 }
                 else
                 {
-                    el = factory.element( childTag, element.getNamespace() );
+                    el = factory.element( "profile", element.getNamespace() );
                     Utils.insertAtPreferredLocation( element, el, innerCount );
                 }
-                updateProfile( value, childTag, innerCount, el );
+                updateProfile( value, "profile", innerCount, el );
                 innerCount.increaseCount();
             }
             if ( elIt != null )
@@ -1489,7 +1482,7 @@ public class JDOMModelConverter
         updateOrganization( model.getOrganization(), "organization", innerCount, root );
         iterateLicense( innerCount, root, model.getLicenses(), "licenses", "license" );
         iterateDeveloper( innerCount, root, model.getDevelopers(), "developers", "developer" );
-        iterateContributor( innerCount, root, model.getContributors(), "contributors", "contributor" );
+        iterateContributor( innerCount, root, model.getContributors() );
         iterateMailingList( innerCount, root, model.getMailingLists(), "mailingLists", "mailingList" );
         updatePrerequisites( model.getPrerequisites(), "prerequisites", innerCount, root );
         Utils.findAndReplaceSimpleLists( innerCount, root, model.getModules(), "modules", "module" );
@@ -1505,7 +1498,7 @@ public class JDOMModelConverter
         updateBuild( model.getBuild(), "build", innerCount, root );
         Utils.findAndReplaceXpp3DOM( innerCount, root, "reports", (Xpp3Dom) model.getReports() );
         updateReporting( model.getReporting(), "reporting", innerCount, root );
-        iterateProfile( innerCount, root, model.getProfiles(), "profiles", "profile" );
+        iterateProfile( innerCount, root, model.getProfiles() );
     } // -- void updateModel( Model, String, Counter, Element )
 
     /**
@@ -1667,7 +1660,7 @@ public class JDOMModelConverter
                                            root,
                                            "extensions", plugin.getExtensions(),
                                            null );
-        iteratePluginExecution( innerCount, root, plugin.getExecutions(), "executions", "execution" );
+        iteratePluginExecution( innerCount, root, plugin.getExecutions(), "execution" );
         iterateDependency( innerCount, root, plugin.getDependencies(), "dependencies", "dependency" );
         Utils.findAndReplaceXpp3DOM( innerCount, root, "goals", (Xpp3Dom) plugin.getGoals() );
         Utils.findAndReplaceSimpleElement( innerCount,

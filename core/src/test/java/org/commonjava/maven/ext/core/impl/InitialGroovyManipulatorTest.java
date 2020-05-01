@@ -50,7 +50,7 @@ public class InitialGroovyManipulatorTest
     public TemporaryFolder tf = new TemporaryFolder();
 
     @Rule
-    public final SystemOutRule systemRule = new SystemOutRule().enableLog();//.muteForSuccessfulTests();
+    public final SystemOutRule systemRule = new SystemOutRule().enableLog().muteForSuccessfulTests();
 
     @Test
     public void shouldRemoveProjectInGroovyScript() throws Exception

@@ -272,9 +272,7 @@ public class PomIO
             // Reread in order to fill in JdomModelETL
             etl.extract( pom );
 
-            // Annoyingly the document is private but we need to access it in order to:
-            // 1. Potentially add the PME modified note to the root project
-            // 2. Ensure the model is written to the Document.
+            // Annoyingly the document is private but we need to access it in order to ensure the model is written to the Document.
             //
             // Currently the fields we want to access are private - https://issues.apache.org/jira/browse/MRELEASE-1044 requests
             // them to be protected to avoid this reflection.
