@@ -291,7 +291,7 @@ public final class Utils
             final Text finalText = (Text) lastText.clone();
             final String newVersion = finalText.getText().substring( 0, finalText.getText().length() - INDENT.length() );
             // TODO: Not sure if we need to handle this text replacement specially (like elsewhere).
-            logger.trace( "Replacing original text of {} with modified text of ", finalText.getText() , newVersion);
+            logger.trace( "Replacing original text of {} with modified text of {}", finalText.getText() , newVersion);
             finalText.setText( newVersion );
             parent.addContent( contentIndex, finalText );
         }
@@ -359,7 +359,7 @@ public final class Utils
                 return element;
             }
         }
-        final boolean shouldExist = ( text != null ) && ( text.trim().length() >= 0 );
+        final boolean shouldExist = ( text != null ) && ( text.trim().length() > 0 );
         final Element element = updateElement( counter, parent, name, shouldExist );
         if ( shouldExist )
         {
@@ -418,7 +418,7 @@ public final class Utils
                     insertAtPreferredLocation( element, el, innerCount );
                 }
                 // TODO: Not sure if we need to handle this text replacement specially (like elsewhere).
-                logger.trace( "TODO: Replacing original text of {} with modified text of ", el.getText() , value);
+                logger.trace( "TODO: Replacing original text of {} with modified text of {}", el.getText() , value);
                 el.setText( value );
                 innerCount.increaseCount();
             }

@@ -29,7 +29,7 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.Iterator;
 
-@SuppressWarnings( "rawtypes" )
+@SuppressWarnings( { "rawtypes", "JavaDoc" } )
 public class JDOMModelConverter
 {
     protected final JDOMFactory factory = new UncheckedJDOMFactory();
@@ -60,7 +60,11 @@ public class JDOMModelConverter
     protected void iterateContributor( final IndentationCounter counter, final Element parent, final Collection list )
     {
         final boolean shouldExist = ( list != null ) && ( list.size() > 0 );
-        final Element element = Utils.updateElement( counter, parent, "contributors", shouldExist );
+        Element element = parent.getChild( "contributors", parent.getNamespace() );
+        if ( element == null ) // If the list element already exists ignore it.
+        {
+            element = Utils.updateElement( counter, parent, "contributors", shouldExist );
+        }
         if ( shouldExist )
         {
             final Iterator it = list.iterator();
@@ -115,7 +119,11 @@ public class JDOMModelConverter
                                       final String childTag )
     {
         final boolean shouldExist = ( list != null ) && ( list.size() > 0 );
-        final Element element = Utils.updateElement( counter, parent, parentTag, shouldExist );
+        Element element = parent.getChild( parentTag, parent.getNamespace() );
+        if ( element == null ) // If the list element already exists ignore it.
+        {
+            element = Utils.updateElement( counter, parent, parentTag, shouldExist );
+        }
         if ( shouldExist )
         {
             final Iterator it = list.iterator();
@@ -158,23 +166,23 @@ public class JDOMModelConverter
 
     /**
      * Method iterateDeveloper.
-     *
      * @param counter
-     * @param childTag
-     * @param parentTag
-     * @param list
      * @param parent
+     * @param list
      */
-    protected void iterateDeveloper( final IndentationCounter counter, final Element parent,
-                                     final Collection list, final String parentTag,
-                                     final String childTag )
+    protected void iterateDeveloper( final IndentationCounter counter, final Element parent, final Collection list )
     {
-        final boolean shouldExist = ( list != null ) && ( list.size() >= 0 );
-        final Element element = Utils.updateElement( counter, parent, parentTag, shouldExist );
+        final boolean shouldExist = list != null && list.size() > 0;
+
+        Element element = parent.getChild( "developers", parent.getNamespace() );
+        if ( element == null ) // If the list element already exists ignore it.
+        {
+            element = Utils.updateElement( counter, parent, "developers", shouldExist );
+        }
         if ( shouldExist )
         {
             final Iterator it = list.iterator();
-            Iterator elIt = element.getChildren( childTag, element.getNamespace() ).iterator();
+            Iterator elIt = element.getChildren( "developer", element.getNamespace() ).iterator();
             if ( !elIt.hasNext() )
             {
                 elIt = null;
@@ -194,10 +202,10 @@ public class JDOMModelConverter
                 }
                 else
                 {
-                    el = factory.element( childTag, element.getNamespace() );
+                    el = factory.element( "developer", element.getNamespace() );
                     Utils.insertAtPreferredLocation( element, el, innerCount );
                 }
-                updateDeveloper( value, childTag, innerCount, el );
+                updateDeveloper( value, "developer", innerCount, el );
                 innerCount.increaseCount();
             }
             if ( elIt != null )
@@ -335,7 +343,11 @@ public class JDOMModelConverter
                                    final String childTag )
     {
         final boolean shouldExist = ( list != null ) && ( list.size() > 0 );
-        final Element element = Utils.updateElement( counter, parent, parentTag, shouldExist );
+        Element element = parent.getChild( parentTag, parent.getNamespace() );
+        if ( element == null ) // If the list element already exists ignore it.
+        {
+            element = Utils.updateElement( counter, parent, parentTag, shouldExist );
+        }
         if ( shouldExist )
         {
             final Iterator it = list.iterator();
@@ -390,7 +402,11 @@ public class JDOMModelConverter
                                        final String childTag )
     {
         final boolean shouldExist = ( list != null ) && ( list.size() > 0 );
-        final Element element = Utils.updateElement( counter, parent, parentTag, shouldExist );
+        Element element = parent.getChild( parentTag, parent.getNamespace() );
+        if ( element == null ) // If the list element already exists ignore it.
+        {
+            element = Utils.updateElement( counter, parent, parentTag, shouldExist );
+        }
         if ( shouldExist )
         {
             final Iterator it = list.iterator();
@@ -602,7 +618,11 @@ public class JDOMModelConverter
     protected void iterateProfile( final IndentationCounter counter, final Element parent, final Collection list )
     {
         final boolean shouldExist = ( list != null ) && ( list.size() > 0 );
-        final Element element = Utils.updateElement( counter, parent, "profiles", shouldExist );
+        Element element = parent.getChild( "profiles", parent.getNamespace() );
+        if ( element == null ) // If the list element already exists ignore it.
+        {
+            element = Utils.updateElement( counter, parent, "profiles", shouldExist );
+        }
         if ( shouldExist )
         {
             final Iterator it = list.iterator();
@@ -767,7 +787,11 @@ public class JDOMModelConverter
                                       final String childTag )
     {
         final boolean shouldExist = ( list != null ) && ( list.size() > 0 );
-        final Element element = Utils.updateElement( counter, parent, parentTag, shouldExist );
+        Element element = parent.getChild( parentTag, parent.getNamespace() );
+        if ( element == null ) // If the list element already exists ignore it.
+        {
+            element = Utils.updateElement( counter, parent, parentTag, shouldExist );
+        }
         if ( shouldExist )
         {
             final Iterator it = list.iterator();
@@ -1481,7 +1505,7 @@ public class JDOMModelConverter
                                            null );
         updateOrganization( model.getOrganization(), "organization", innerCount, root );
         iterateLicense( innerCount, root, model.getLicenses(), "licenses", "license" );
-        iterateDeveloper( innerCount, root, model.getDevelopers(), "developers", "developer" );
+        iterateDeveloper( innerCount, root, model.getDevelopers() );
         iterateContributor( innerCount, root, model.getContributors() );
         iterateMailingList( innerCount, root, model.getMailingLists(), "mailingLists", "mailingList" );
         updatePrerequisites( model.getPrerequisites(), "prerequisites", innerCount, root );

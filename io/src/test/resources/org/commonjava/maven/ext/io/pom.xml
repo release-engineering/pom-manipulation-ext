@@ -14,8 +14,9 @@
         that allows pre-processing of Maven pom.xml's.
     </description>
 
-    <developers />
+<!--    <developers />-->
 
+    <contributors />
 
     <build>
         <pluginManagement />
@@ -39,5 +40,5 @@
         </plugins>
     </build>
 
-
+    <repositories />
 </project>

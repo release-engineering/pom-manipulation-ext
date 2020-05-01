@@ -64,7 +64,7 @@ public class ManifestUtils
                 {
                     final Manifest manifest = jarStream.getManifest();
                     result = manifest.getMainAttributes().getValue( "Implementation-Version" );
-                    result += " ( SHA: " + manifest.getMainAttributes().getValue( "Scm-Revision" ) + " ) ";
+                    result += " ( SHA: " + manifest.getMainAttributes().getValue( "Scm-Revision" ) + " )";
                 }
             }
         }
