@@ -112,6 +112,7 @@ public class ITestUtils
         // Execute
         for ( Execution e : executions )
         {
+            logger.debug( "Running execution on location {} with command {}", e.getLocation(), e.getMvnCommand() );
             if ( e.isSkip () )
             {
                 logger.debug( "Skipping test {}", e.getLocation() );

@@ -47,7 +47,7 @@ public class JSONManipulator
 {
     private final Logger logger = LoggerFactory.getLogger( getClass() );
 
-    private JSONIO jsonIO;
+    private final JSONIO jsonIO;
 
     private ManipulationSession session;
 

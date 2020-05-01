@@ -16,6 +16,8 @@
 package org.commonjava.maven.ext.io;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.reflect.FieldUtils;
 import org.apache.maven.model.Model;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.ext.common.model.Project;
@@ -64,6 +66,8 @@ public class PomIOTest
         FileUtils.copyFile( pom, targetFile );
 
         List<Project> projects = pomIO.parseProject( targetFile );
+        // We don't want this to be the execution root so that it doesn't add "Modified by" which breaks the comparison
+        FieldUtils.writeDeclaredField( projects.get( 0 ), "executionRoot", false, true);
         HashSet<Project> changed = new HashSet<>(projects);
         pomIO.rewritePOMs( changed );
 
@@ -165,5 +169,32 @@ public class PomIOTest
         pomIO.writeModel( model, targetFile );
         assertTrue( targetFile.exists() );
         assertEquals( sb, FileUtils.readFileToString( targetFile, model.getModelEncoding() ) );
+    }
+
+    @Test
+    public void testAddModifiedBy()
+                    throws Exception
+    {
+        URL resource = PomIOTest.class.getResource( filename );
+        assertNotNull( resource );
+        File pom = new File( resource.getFile() );
+        assertTrue( pom.exists() );
+
+        File targetFile = folder.newFile( "target.xml" );
+        FileUtils.copyFile( pom, targetFile );
+
+        List<Project> projects = pomIO.parseProject( targetFile );
+        projects.get( 0 ).setExecutionRoot();
+
+        HashSet<Project> changed = new HashSet<>();
+        changed.add( projects.get( 0 ) );
+        pomIO.rewritePOMs( changed );
+
+        String s = FileUtils.readFileToString( targetFile, Charset.defaultCharset() );
+        assertEquals( StringUtils.countMatches(s, "Modified by POM Manipulation Extension" ), 1);
+
+        pomIO.rewritePOMs( changed );
+        s = FileUtils.readFileToString( targetFile, Charset.defaultCharset() );
+        assertEquals( StringUtils.countMatches(s, "Modified by POM Manipulation Extension" ), 1);
     }
 }

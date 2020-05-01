@@ -36,10 +36,7 @@ import org.commonjava.maven.ext.common.model.Project;
 import org.commonjava.maven.ext.common.util.LineSeparator;
 import org.commonjava.maven.ext.common.util.ManifestUtils;
 import org.commonjava.maven.galley.maven.parse.PomPeek;
-import org.jdom.Comment;
-import org.jdom.Content;
 import org.jdom.Document;
-import org.jdom.filter.ContentFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,10 +48,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -76,6 +71,8 @@ public class PomIO
     private final ReleaseDescriptorBuilder releaseDescriptorBuilder = new ReleaseDescriptorBuilder();
 
     private final JDOMModelConverter jdomModelConverter = new JDOMModelConverter( );
+
+    private String manifestComment;
 
     public List<Project> parseProject( final File pom ) throws ManipulationException
     {
@@ -197,6 +194,8 @@ public class PomIO
     {
         ProjectVersionRef result = null;
 
+        manifestComment = "Modified by POM Manipulation Extension for Maven " +  ManifestUtils.getManifestInformation(PomIO.class);
+
         for ( final Project project : changed )
         {
             if ( project.isExecutionRoot() )
@@ -257,8 +256,6 @@ public class PomIO
     {
         try
         {
-            final String manifestInformation = project.isInheritanceRoot() ? ManifestUtils.getManifestInformation(PomIO.class) : null;
-
             // We possibly could store the EOL type in the Project when we first read
             // the file but we would then have to do a dual read, then write as opposed
             // to a read, then read + write now.
@@ -271,33 +268,48 @@ public class PomIO
             request.setReleaseDescriptor( ReleaseUtils.buildReleaseDescriptor( releaseDescriptorBuilder ) );
 
             ModelETL etl = modelETLFactories.newInstance( request );
+
             // Reread in order to fill in JdomModelETL
             etl.extract( pom );
 
             // Annoyingly the document is private but we need to access it in order to:
             // 1. Potentially add the PME modified note to the root project
             // 2. Ensure the model is written to the Document.
+            //
+            // Currently the fields we want to access are private - https://issues.apache.org/jira/browse/MRELEASE-1044 requests
+            // them to be protected to avoid this reflection.
             Document doc = (Document) FieldUtils.getDeclaredField( JDomModelETL.class, "document", true ).get( etl );
 
             jdomModelConverter.convertModelToJDOM( model, doc );
 
             if ( project.isExecutionRoot() )
             {
-                @SuppressWarnings( "unchecked" )
-                final Iterator<Content> it = doc.getContent( new ContentFilter( ContentFilter.COMMENT ) ).iterator();
-                while ( it.hasNext() )
+                // Previously it was possible to add a comment outside of the root element (which maven3-model-jdom-support handled)
+                // but the release plugin code only takes account of code within the root element and everything else is handled separately.
+                //
+                String outtro = (String) FieldUtils.getDeclaredField( JDomModelETL.class, "outtro", true ).get( etl );
+
+                String commentStart = ls.value() +
+                                "<!--" +
+                                ls.value();
+                String commentEnd = ls.value() +
+                                "-->" +
+                                ls.value();
+
+                if ( outtro.equals( ls.value() ) )
                 {
-                    final Comment c = (Comment) it.next();
+                    logger.debug( "Outtro contains newlines only" );
 
-                    if ( c.toString().contains( MODIFIED_BY ) )
-                    {
-                        it.remove();
-                    }
+                    outtro = commentStart + manifestComment + commentEnd;
                 }
-
-                Comment comment = new Comment( ls.value() + "Modified by POM Manipulation Extension for Maven " + manifestInformation
-                                                               + ls.value() );
-                doc.addContent( Collections.<Content>singletonList( comment ) );
+                else
+                {
+                    outtro = outtro.replaceAll( "Modified by.*", manifestComment );
+                }
+                FieldUtils.writeDeclaredField( etl,
+                                               "outtro",
+                                               outtro,
+                                               true);
             }
 
             etl.load( pom );

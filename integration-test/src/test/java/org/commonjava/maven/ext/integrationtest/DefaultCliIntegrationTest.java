@@ -66,7 +66,7 @@ public class DefaultCliIntegrationTest
         return params;
     }
 
-    private String testRelativeLocation;
+    private final String testRelativeLocation;
 
     public DefaultCliIntegrationTest( String testRelativeLocation )
     {
