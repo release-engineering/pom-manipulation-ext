@@ -359,7 +359,8 @@ public final class Utils
                 return element;
             }
         }
-        final boolean shouldExist = ( text != null ) && ( text.trim().length() > 0 );
+        // TODO: IntelliJ warns this is always true but having .length() > 0 removes elements by mistake.
+        final boolean shouldExist = ( text != null ) && ( text.trim().length() >= 0 );
         final Element element = updateElement( counter, parent, name, shouldExist );
         if ( shouldExist )
         {
