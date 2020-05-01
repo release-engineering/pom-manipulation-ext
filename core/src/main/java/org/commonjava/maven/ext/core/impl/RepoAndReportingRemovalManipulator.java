@@ -55,7 +55,7 @@ public class RepoAndReportingRemovalManipulator
 {
     private final Logger logger = LoggerFactory.getLogger( getClass() );
 
-    private SettingsIO settingsWriter;
+    private final SettingsIO settingsWriter;
 
     private ManipulationSession session;
 

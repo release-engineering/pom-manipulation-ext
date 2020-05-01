@@ -140,6 +140,33 @@ public class PomIOTest
 
 
     @Test
+    public void testListRemovalPOMs()
+                    throws Exception
+    {
+        URL resource = PomIOTest.class.getResource( filename );
+        assertNotNull( resource );
+        File pom = new File( resource.getFile() );
+        assertTrue( pom.exists() );
+
+        File targetFile = folder.newFile( "target.xml" );
+        FileUtils.copyFile( pom, targetFile );
+
+        List<Project> projects = pomIO.parseProject( targetFile );
+        Project p = projects.get( 0 );
+        p.getModel().getRepositories().clear();
+
+        HashSet<Project> changed = new HashSet<>();
+        changed.add( p );
+
+        ProjectVersionRef gav = pomIO.rewritePOMs( changed );
+
+        p = pomIO.parseProject( targetFile ).get( 0 );
+
+        assertEquals( 0, p.getModel().getRepositories().size() );
+    }
+
+
+    @Test
     public void testWriteModel()
                     throws Exception
     {
