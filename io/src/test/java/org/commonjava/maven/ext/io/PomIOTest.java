@@ -24,6 +24,7 @@ import org.commonjava.maven.ext.common.model.Project;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.contrib.java.lang.system.SystemOutRule;
 import org.junit.rules.TemporaryFolder;
 
 import java.io.File;
@@ -43,6 +44,9 @@ public class PomIOTest
 
     @Rule
     public TemporaryFolder folder = new TemporaryFolder();
+
+    @Rule
+    public final SystemOutRule systemOutRule = new SystemOutRule().enableLog().muteForSuccessfulTests();
 
     private PomIO pomIO;
 
@@ -158,7 +162,7 @@ public class PomIOTest
         HashSet<Project> changed = new HashSet<>();
         changed.add( p );
 
-        ProjectVersionRef gav = pomIO.rewritePOMs( changed );
+        pomIO.rewritePOMs( changed );
 
         p = pomIO.parseProject( targetFile ).get( 0 );
 

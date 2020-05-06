@@ -123,7 +123,7 @@ public class JSONManipulator
 
             dc = jsonIO.parseJSON( target );
 
-            List o = dc.read( operation.getXPath() );
+            List<?> o = dc.read( operation.getXPath() );
             if ( o.size() == 0 )
             {
                 if ( project.isIncrementalPME() )

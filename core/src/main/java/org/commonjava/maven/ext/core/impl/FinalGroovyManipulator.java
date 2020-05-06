@@ -80,12 +80,10 @@ public class FinalGroovyManipulator
 
         for ( File groovyScript : parseGroovyScripts( state.getGroovyScripts() ))
         {
-            List<Project> roots = projects.stream().filter(Project::isExecutionRoot).collect(Collectors.toList());
-            if ( roots.size() > 1 )
-            {
-                logger.error( "Found multiple execution roots: {}", roots );
-            }
-            Project project = roots.get( 0 );
+            Project project = projects.stream()
+                                      .filter( Project::isExecutionRoot )
+                                      .findFirst()
+                                      .orElseThrow( () -> new ManipulationException( "Unable to find execution root" ) );
             applyGroovyScript( projects, project, groovyScript);
             changed.add( project );
         }

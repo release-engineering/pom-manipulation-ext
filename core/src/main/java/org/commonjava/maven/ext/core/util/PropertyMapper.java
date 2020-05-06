@@ -24,9 +24,6 @@ import java.util.HashSet;
 import java.util.Set;
 
 
-@Setter
-@Getter
-@ToString
 /**
  * Used to hold multiple mapping information when mapping properties to update within the Manipulators.
  * For instance, normally we map:
@@ -34,6 +31,9 @@ import java.util.Set;
  * And this then allows us to record the new version, the old version and any groupId:artifactId of the
  * various Dependencies and Plugins that attempt to update this property.
  */
+@Setter
+@Getter
+@ToString
 public class PropertyMapper
 {
     private String originalVersion;

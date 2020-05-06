@@ -1151,34 +1151,6 @@ public class JDOMModelConverter
     } // -- void updateCiManagement( CiManagement, String, Counter, Element )
 
     /**
-     * Method updateConfigurationContainer.
-     *
-     * @param configurationContainer
-     * @param element
-     * @param counter
-     * @param xmlTag
-     */
-    protected void updateConfigurationContainer( final ConfigurationContainer configurationContainer,
-                                                 final String xmlTag, final IndentationCounter counter,
-                                                 final Element element )
-    {
-        final boolean shouldExist = ( configurationContainer != null );
-        final Element root = Utils.updateElement( counter, element, xmlTag, shouldExist );
-        if ( shouldExist )
-        {
-            final IndentationCounter innerCount = new IndentationCounter( counter.getDepth() + 1 );
-            Utils.findAndReplaceSimpleElement( innerCount,
-                                               root,
-                                               "inherited", configurationContainer.getInherited(),
-                                               null );
-            Utils.findAndReplaceXpp3DOM( innerCount,
-                                   root,
-                                   "configuration",
-                                   (Xpp3Dom) configurationContainer.getConfiguration() );
-        }
-    } // -- void updateConfigurationContainer( ConfigurationContainer, String, Counter, Element )
-
-    /**
      * Method updateContributor.
      *
      * @param contributor
@@ -1280,8 +1252,7 @@ public class JDOMModelConverter
             Utils.findAndReplaceSimpleElement( innerCount,
                                                root,
                                                "uniqueVersion",
-                                               deploymentRepository.isUniqueVersion() ? null
-                                                         : String.valueOf( deploymentRepository.isUniqueVersion() ),
+                                               String.valueOf( deploymentRepository.isUniqueVersion() ),
                                                "true" );
             updateRepositoryPolicy( deploymentRepository.getReleases(), "releases", innerCount, root );
             updateRepositoryPolicy( deploymentRepository.getSnapshots(), "snapshots", innerCount, root );
@@ -1393,31 +1364,6 @@ public class JDOMModelConverter
                                            "version", extension.getVersion(),
                                            null );
     } // -- void updateExtension( Extension, String, Counter, Element )
-
-    /**
-     * Method updateFileSet.
-     *
-     * @param fileSet
-     * @param element
-     * @param counter
-     * @param xmlTag
-     */
-    protected void updateFileSet( final FileSet fileSet, final String xmlTag, final IndentationCounter counter,
-                                  final Element element )
-    {
-        final boolean shouldExist = ( fileSet != null );
-        final Element root = Utils.updateElement( counter, element, xmlTag, shouldExist );
-        if ( shouldExist )
-        {
-            final IndentationCounter innerCount = new IndentationCounter( counter.getDepth() + 1 );
-            Utils.findAndReplaceSimpleElement( innerCount,
-                                               root,
-                                               "directory", fileSet.getDirectory(),
-                                               null );
-            Utils.findAndReplaceSimpleLists( innerCount, root, fileSet.getIncludes(), "includes", "include" );
-            Utils.findAndReplaceSimpleLists( innerCount, root, fileSet.getExcludes(), "excludes", "exclude" );
-        }
-    } // -- void updateFileSet( FileSet, String, Counter, Element )
 
     /**
      * Method updateIssueManagement.
@@ -1547,41 +1493,6 @@ public class JDOMModelConverter
     } // -- void updateModel( Model, String, Counter, Element )
 
     /**
-     * Method updateModelBase.
-     *
-     * @param modelBase
-     * @param element
-     * @param counter
-     * @param xmlTag
-     */
-    protected void updateModelBase( final ModelBase modelBase, final String xmlTag, final IndentationCounter counter,
-                                    final Element element )
-    {
-        final boolean shouldExist = ( modelBase != null );
-        final Element root = Utils.updateElement( counter, element, xmlTag, shouldExist );
-        if ( shouldExist )
-        {
-            final IndentationCounter innerCount = new IndentationCounter( counter.getDepth() + 1 );
-            Utils.findAndReplaceSimpleLists( innerCount, root, modelBase.getModules(), "modules", "module" );
-            updateDistributionManagement( modelBase.getDistributionManagement(),
-                                          "distributionManagement",
-                                          innerCount,
-                                          root );
-            Utils.findAndReplaceProperties( innerCount, root, "properties", modelBase.getProperties() );
-            updateDependencyManagement( modelBase.getDependencyManagement(), "dependencyManagement", innerCount, root );
-            iterateDependency( innerCount, root, modelBase.getDependencies(), "dependencies", "dependency" );
-            iterateRepository( innerCount, root, modelBase.getRepositories(), "repositories", "repository" );
-            iterateRepository( innerCount,
-                               root,
-                               modelBase.getPluginRepositories(),
-                               "pluginRepositories",
-                               "pluginRepository" );
-            Utils.findAndReplaceXpp3DOM( innerCount, root, "reports", (Xpp3Dom) modelBase.getReports() );
-            updateReporting( modelBase.getReporting(), "reporting", innerCount, root );
-        }
-    } // -- void updateModelBase( ModelBase, String, Counter, Element )
-
-    /**
      * Method updateNotifier.
      *
      * @param notifier
@@ -1598,15 +1509,11 @@ public class JDOMModelConverter
                                            "mail" );
         Utils.findAndReplaceSimpleElement( innerCount, element,
                                            "sendOnError",
-                                           notifier.isSendOnError() ? null
-                                                     : String.valueOf( notifier.isSendOnError() ),
+                                           String.valueOf( notifier.isSendOnError() ),
                                            "true" );
-        Utils.findAndReplaceSimpleElement( innerCount, element, "sendOnFailure", notifier.isSendOnFailure() ? null
-                        : String.valueOf( notifier.isSendOnFailure() ), "true" );
-        Utils.findAndReplaceSimpleElement( innerCount, element, "sendOnSuccess", notifier.isSendOnSuccess() ? null
-                        : String.valueOf( notifier.isSendOnSuccess() ), "true" );
-        Utils.findAndReplaceSimpleElement( innerCount, element, "sendOnWarning", notifier.isSendOnWarning() ? null
-                        : String.valueOf( notifier.isSendOnWarning() ), "true" );
+        Utils.findAndReplaceSimpleElement( innerCount, element, "sendOnFailure", String.valueOf( notifier.isSendOnFailure() ), "true" );
+        Utils.findAndReplaceSimpleElement( innerCount, element, "sendOnSuccess", String.valueOf( notifier.isSendOnSuccess() ), "true" );
+        Utils.findAndReplaceSimpleElement( innerCount, element, "sendOnWarning", String.valueOf( notifier.isSendOnWarning() ), "true" );
         Utils.findAndReplaceSimpleElement( innerCount, element,
                                            "address", notifier.getAddress(),
                                            null );
@@ -1704,27 +1611,6 @@ public class JDOMModelConverter
                                            null );
         Utils.findAndReplaceXpp3DOM( innerCount, element, "configuration", (Xpp3Dom) plugin.getConfiguration() );
     } // -- void updatePlugin( Plugin, String, Counter, Element )
-
-    /**
-     * Method updatePluginConfiguration.
-     *
-     * @param pluginConfiguration
-     * @param element
-     * @param counter
-     * @param xmlTag
-     */
-    protected void updatePluginConfiguration( final PluginConfiguration pluginConfiguration, final String xmlTag,
-                                              final IndentationCounter counter, final Element element )
-    {
-        final boolean shouldExist = ( pluginConfiguration != null );
-        final Element root = Utils.updateElement( counter, element, xmlTag, shouldExist );
-        if ( shouldExist )
-        {
-            final IndentationCounter innerCount = new IndentationCounter( counter.getDepth() + 1 );
-            updatePluginManagement( pluginConfiguration.getPluginManagement(), "pluginManagement", innerCount, root );
-            iteratePlugin( innerCount, root, pluginConfiguration.getPlugins(), "plugins", "plugin" );
-        }
-    } // -- void updatePluginConfiguration( PluginConfiguration, String, Counter, Element )
 
     /**
      * Method updatePluginExecution.
@@ -1938,32 +1824,6 @@ public class JDOMModelConverter
     } // -- void updateRepository( Repository, String, Counter, Element )
 
     /**
-     * Method updateRepositoryBase.
-     *
-     * @param repositoryBase
-     * @param element
-     * @param counter
-     * @param xmlTag
-     */
-    protected void updateRepositoryBase( final RepositoryBase repositoryBase, final String xmlTag,
-                                         final IndentationCounter counter, final Element element )
-    {
-        final boolean shouldExist = ( repositoryBase != null );
-        final Element root = Utils.updateElement( counter, element, xmlTag, shouldExist );
-        if ( shouldExist )
-        {
-            final IndentationCounter innerCount = new IndentationCounter( counter.getDepth() + 1 );
-            Utils.findAndReplaceSimpleElement( innerCount,
-                                               root,
-                                               "id", repositoryBase.getId(),
-                                               null );
-            Utils.findAndReplaceSimpleElement( innerCount, root, "name", repositoryBase.getName(), null );
-            Utils.findAndReplaceSimpleElement( innerCount, root, "url", repositoryBase.getUrl(), null );
-            Utils.findAndReplaceSimpleElement( innerCount, root, "layout", repositoryBase.getLayout(), "default" );
-        }
-    } // -- void updateRepositoryBase( RepositoryBase, String, Counter, Element )
-
-    /**
      * Method updateRepositoryPolicy.
      *
      * @param repositoryPolicy
@@ -2068,7 +1928,6 @@ public class JDOMModelConverter
     } // -- void updateSite( Site, String, Counter, Element )
 
     protected void update( final Model source, final IndentationCounter indentationCounter, final Element rootElement )
-        throws IOException
     {
         updateModel( source, "project", indentationCounter, rootElement );
     }

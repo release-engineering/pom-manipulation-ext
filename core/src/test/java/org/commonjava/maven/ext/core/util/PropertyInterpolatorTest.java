@@ -29,6 +29,7 @@ import org.junit.rules.TemporaryFolder;
 import java.util.Map;
 import java.util.Properties;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
@@ -53,11 +54,12 @@ public class PropertyInterpolatorTest
             if ( ( (String) o ).contains( "${" ) )
             {
                 containsProperty = true;
+                break;
             }
         }
         assertTrue( containsProperty );
         PropertyInterpolator pi = new PropertyInterpolator( props, p );
-        assertTrue( pi.interp( "${version.hibernate.osgi}" ).equals( "5.0.4.Final" ) );
+        assertEquals( "5.0.4.Final", pi.interp( "${version.hibernate.osgi}" ) );
     }
 
     @Test
