@@ -312,7 +312,7 @@ public class PomIO
 
             etl.load( pom );
         }
-        catch ( ReleaseExecutionException | IllegalAccessException | IOException e )
+        catch ( ReleaseExecutionException | IllegalAccessException e )
         {
             throw new ManipulationException( "Failed to parse POM for rewrite: {}. Reason: ", pom, e.getMessage(), e );
         }

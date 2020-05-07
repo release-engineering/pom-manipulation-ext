@@ -25,7 +25,6 @@ import org.jdom.UncheckedJDOMFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.util.Collection;
 import java.util.Iterator;
 
@@ -44,9 +43,8 @@ public class JDOMModelConverter
      * Writes the model to the document
      * @param model containing changes to propagate to the model.
      * @param document the document to write changes to.
-     * @throws IOException if an error occurs.
      */
-    public void convertModelToJDOM ( final Model model, Document document ) throws IOException
+    public void convertModelToJDOM ( final Model model, Document document )
     {
         update( model, new IndentationCounter( 0 ), document.getRootElement() );
     }
@@ -91,7 +89,7 @@ public class JDOMModelConverter
                     el = factory.element( "contributor", element.getNamespace() );
                     Utils.insertAtPreferredLocation( element, el, innerCount );
                 }
-                updateContributor( value, "contributor", innerCount, el );
+                updateContributor( value, innerCount, el );
                 innerCount.increaseCount();
             }
             if ( elIt != null )
@@ -111,27 +109,22 @@ public class JDOMModelConverter
 
     /**
      * Method iterateDependency.
-     *
      * @param counter
-     * @param childTag
-     * @param parentTag
-     * @param list
      * @param parent
+     * @param list
      */
-    protected void iterateDependency( final IndentationCounter counter, final Element parent,
-                                      final Collection list, final String parentTag,
-                                      final String childTag )
+    protected void iterateDependency( final IndentationCounter counter, final Element parent, final Collection list )
     {
         final boolean shouldExist = ( list != null ) && ( list.size() > 0 );
-        Element element = parent.getChild( parentTag, parent.getNamespace() );
+        Element element = parent.getChild( "dependencies", parent.getNamespace() );
         if ( element == null ) // If the list element already exists ignore it.
         {
-            element = Utils.updateElement( counter, parent, parentTag, shouldExist );
+            element = Utils.updateElement( counter, parent, "dependencies", shouldExist );
         }
         if ( shouldExist )
         {
             final Iterator it = list.iterator();
-            Iterator elIt = element.getChildren( childTag, element.getNamespace() ).iterator();
+            Iterator elIt = element.getChildren( "dependency", element.getNamespace() ).iterator();
             if ( !elIt.hasNext() )
             {
                 elIt = null;
@@ -151,10 +144,10 @@ public class JDOMModelConverter
                 }
                 else
                 {
-                    el = factory.element( childTag, element.getNamespace() );
+                    el = factory.element( "dependency", element.getNamespace() );
                     Utils.insertAtPreferredLocation( element, el, innerCount );
                 }
-                updateDependency( value, childTag, innerCount, el );
+                updateDependency( value, innerCount, el );
                 innerCount.increaseCount();
             }
             if ( elIt != null )
@@ -168,7 +161,7 @@ public class JDOMModelConverter
         }
         else
         {
-            removeExisting( element, childTag );
+            removeExisting( element, "dependency" );
         }
     } // -- void iterateDependency( Counter, Element, java.util.Collection, java.lang.String, java.lang.String )
 
@@ -213,7 +206,7 @@ public class JDOMModelConverter
                     el = factory.element( "developer", element.getNamespace() );
                     Utils.insertAtPreferredLocation( element, el, innerCount );
                 }
-                updateDeveloper( value, "developer", innerCount, el );
+                updateDeveloper( value, innerCount, el );
                 innerCount.increaseCount();
             }
             if ( elIt != null )
@@ -233,23 +226,18 @@ public class JDOMModelConverter
 
     /**
      * Method iterateExclusion.
-     *
      * @param counter
-     * @param childTag
-     * @param parentTag
-     * @param list
      * @param parent
+     * @param list
      */
-    protected void iterateExclusion( final IndentationCounter counter, final Element parent,
-                                     final Collection list, final String parentTag,
-                                     final String childTag )
+    protected void iterateExclusion( final IndentationCounter counter, final Element parent, final Collection list )
     {
         final boolean shouldExist = ( list != null ) && ( list.size() > 0 );
-        final Element element = Utils.updateElement( counter, parent, parentTag, shouldExist );
+        final Element element = Utils.updateElement( counter, parent, "exclusions", shouldExist );
         if ( shouldExist )
         {
             final Iterator it = list.iterator();
-            Iterator elIt = element.getChildren( childTag, element.getNamespace() ).iterator();
+            Iterator elIt = element.getChildren( "exclusion", element.getNamespace() ).iterator();
             if ( !elIt.hasNext() )
             {
                 elIt = null;
@@ -269,10 +257,10 @@ public class JDOMModelConverter
                 }
                 else
                 {
-                    el = factory.element( childTag, element.getNamespace() );
+                    el = factory.element( "exclusion", element.getNamespace() );
                     Utils.insertAtPreferredLocation( element, el, innerCount );
                 }
-                updateExclusion( value, childTag, innerCount, el );
+                updateExclusion( value, innerCount, el );
                 innerCount.increaseCount();
             }
             if ( elIt != null )
@@ -286,29 +274,24 @@ public class JDOMModelConverter
         }
         else
         {
-            removeExisting( element, childTag );
+            removeExisting( element, "exclusion" );
         }
     } // -- void iterateExclusion( Counter, Element, java.util.Collection, java.lang.String, java.lang.String )
 
     /**
      * Method iterateExtension.
-     *
      * @param counter
-     * @param childTag
-     * @param parentTag
-     * @param list
      * @param parent
+     * @param list
      */
-    protected void iterateExtension( final IndentationCounter counter, final Element parent,
-                                     final Collection list, final String parentTag,
-                                     final String childTag )
+    protected void iterateExtension( final IndentationCounter counter, final Element parent, final Collection list )
     {
         final boolean shouldExist = ( list != null ) && ( list.size() > 0 );
-        final Element element = Utils.updateElement( counter, parent, parentTag, shouldExist );
+        final Element element = Utils.updateElement( counter, parent, "extensions", shouldExist );
         if ( shouldExist )
         {
             final Iterator it = list.iterator();
-            Iterator elIt = element.getChildren( childTag, element.getNamespace() ).iterator();
+            Iterator elIt = element.getChildren( "extension", element.getNamespace() ).iterator();
             if ( !elIt.hasNext() )
             {
                 elIt = null;
@@ -328,10 +311,10 @@ public class JDOMModelConverter
                 }
                 else
                 {
-                    el = factory.element( childTag, element.getNamespace() );
+                    el = factory.element( "extension", element.getNamespace() );
                     Utils.insertAtPreferredLocation( element, el, innerCount );
                 }
-                updateExtension( value, childTag, innerCount, el );
+                updateExtension( value, innerCount, el );
                 innerCount.increaseCount();
             }
             if ( elIt != null )
@@ -347,27 +330,22 @@ public class JDOMModelConverter
 
     /**
      * Method iterateLicense.
-     *
      * @param counter
-     * @param childTag
-     * @param parentTag
-     * @param list
      * @param parent
+     * @param list
      */
-    protected void iterateLicense( final IndentationCounter counter, final Element parent,
-                                   final Collection list, final String parentTag,
-                                   final String childTag )
+    protected void iterateLicense( final IndentationCounter counter, final Element parent, final Collection list )
     {
         final boolean shouldExist = ( list != null ) && ( list.size() > 0 );
-        Element element = parent.getChild( parentTag, parent.getNamespace() );
+        Element element = parent.getChild( "licenses", parent.getNamespace() );
         if ( element == null ) // If the list element already exists ignore it.
         {
-            element = Utils.updateElement( counter, parent, parentTag, shouldExist );
+            element = Utils.updateElement( counter, parent, "licenses", shouldExist );
         }
         if ( shouldExist )
         {
             final Iterator it = list.iterator();
-            Iterator elIt = element.getChildren( childTag, element.getNamespace() ).iterator();
+            Iterator elIt = element.getChildren( "license", element.getNamespace() ).iterator();
             if ( !elIt.hasNext() )
             {
                 elIt = null;
@@ -387,10 +365,10 @@ public class JDOMModelConverter
                 }
                 else
                 {
-                    el = factory.element( childTag, element.getNamespace() );
+                    el = factory.element( "license", element.getNamespace() );
                     Utils.insertAtPreferredLocation( element, el, innerCount );
                 }
-                updateLicense( value, childTag, innerCount, el );
+                updateLicense( value, innerCount, el );
                 innerCount.increaseCount();
             }
             if ( elIt != null )
@@ -404,33 +382,28 @@ public class JDOMModelConverter
         }
         else
         {
-            removeExisting( element, childTag );
+            removeExisting( element, "license" );
         }
     } // -- void iterateLicense( Counter, Element, java.util.Collection, java.lang.String, java.lang.String )
 
     /**
      * Method iterateMailingList.
-     *
      * @param counter
-     * @param childTag
-     * @param parentTag
-     * @param list
      * @param parent
+     * @param list
      */
-    protected void iterateMailingList( final IndentationCounter counter, final Element parent,
-                                       final Collection list, final String parentTag,
-                                       final String childTag )
+    protected void iterateMailingList( final IndentationCounter counter, final Element parent, final Collection list )
     {
         final boolean shouldExist = ( list != null ) && ( list.size() > 0 );
-        Element element = parent.getChild( parentTag, parent.getNamespace() );
+        Element element = parent.getChild( "mailingLists", parent.getNamespace() );
         if ( element == null ) // If the list element already exists ignore it.
         {
-            element = Utils.updateElement( counter, parent, parentTag, shouldExist );
+            element = Utils.updateElement( counter, parent, "mailingLists", shouldExist );
         }
         if ( shouldExist )
         {
             final Iterator it = list.iterator();
-            Iterator elIt = element.getChildren( childTag, element.getNamespace() ).iterator();
+            Iterator elIt = element.getChildren( "mailingList", element.getNamespace() ).iterator();
             if ( !elIt.hasNext() )
             {
                 elIt = null;
@@ -450,10 +423,10 @@ public class JDOMModelConverter
                 }
                 else
                 {
-                    el = factory.element( childTag, element.getNamespace() );
+                    el = factory.element( "mailingList", element.getNamespace() );
                     Utils.insertAtPreferredLocation( element, el, innerCount );
                 }
-                updateMailingList( value, childTag, innerCount, el );
+                updateMailingList( value, innerCount, el );
                 innerCount.increaseCount();
             }
             if ( elIt != null )
@@ -467,29 +440,24 @@ public class JDOMModelConverter
         }
         else
         {
-            removeExisting( element, childTag );
+            removeExisting( element, "mailingList" );
         }
     } // -- void iterateMailingList( Counter, Element, java.util.Collection, java.lang.String, java.lang.String )
 
     /**
      * Method iterateNotifier.
-     *
      * @param counter
-     * @param childTag
-     * @param parentTag
-     * @param list
      * @param parent
+     * @param list
      */
-    protected void iterateNotifier( final IndentationCounter counter, final Element parent,
-                                    final Collection list, final String parentTag,
-                                    final String childTag )
+    protected void iterateNotifier( final IndentationCounter counter, final Element parent, final Collection list )
     {
         final boolean shouldExist = ( list != null ) && ( list.size() > 0 );
-        final Element element = Utils.updateElement( counter, parent, parentTag, shouldExist );
+        final Element element = Utils.updateElement( counter, parent, "notifiers", shouldExist );
         if ( shouldExist )
         {
             final Iterator it = list.iterator();
-            Iterator elIt = element.getChildren( childTag, element.getNamespace() ).iterator();
+            Iterator elIt = element.getChildren( "notifier", element.getNamespace() ).iterator();
             if ( !elIt.hasNext() )
             {
                 elIt = null;
@@ -509,10 +477,10 @@ public class JDOMModelConverter
                 }
                 else
                 {
-                    el = factory.element( childTag, element.getNamespace() );
+                    el = factory.element( "notifier", element.getNamespace() );
                     Utils.insertAtPreferredLocation( element, el, innerCount );
                 }
-                updateNotifier( value, childTag, innerCount, el );
+                updateNotifier( value, innerCount, el );
                 innerCount.increaseCount();
             }
             if ( elIt != null )
@@ -526,29 +494,24 @@ public class JDOMModelConverter
         }
         else
         {
-            removeExisting( element, childTag );
+            removeExisting( element, "notifier" );
         }
     } // -- void iterateNotifier( Counter, Element, java.util.Collection, java.lang.String, java.lang.String )
 
     /**
      * Method iteratePlugin.
-     *
      * @param counter
-     * @param childTag
-     * @param parentTag
-     * @param list
      * @param parent
+     * @param list
      */
-    protected void iteratePlugin( final IndentationCounter counter, final Element parent,
-                                  final Collection list, final String parentTag,
-                                  final String childTag )
+    protected void iteratePlugin( final IndentationCounter counter, final Element parent, final Collection list )
     {
         final boolean shouldExist = ( list != null ) && ( list.size() > 0 );
-        final Element element = Utils.updateElement( counter, parent, parentTag, shouldExist );
+        final Element element = Utils.updateElement( counter, parent, "plugins", shouldExist );
         if ( shouldExist )
         {
             final Iterator it = list.iterator();
-            Iterator elIt = element.getChildren( childTag, element.getNamespace() ).iterator();
+            Iterator elIt = element.getChildren( "plugin", element.getNamespace() ).iterator();
             if ( !elIt.hasNext() )
             {
                 elIt = null;
@@ -568,10 +531,10 @@ public class JDOMModelConverter
                 }
                 else
                 {
-                    el = factory.element( childTag, element.getNamespace() );
+                    el = factory.element( "plugin", element.getNamespace() );
                     Utils.insertAtPreferredLocation( element, el, innerCount );
                 }
-                updatePlugin( value, childTag, innerCount, el );
+                updatePlugin( value, innerCount, el );
                 innerCount.increaseCount();
             }
             if ( elIt != null )
@@ -585,26 +548,24 @@ public class JDOMModelConverter
         }
         else
         {
-            removeExisting( element, childTag );
+            removeExisting( element, "plugin" );
         }
     } // -- void iteratePlugin( Counter, Element, java.util.Collection, java.lang.String, java.lang.String )
 
     /**
      * Method iteratePluginExecution.
-     *  @param counter
+     * @param counter
      * @param parent
      * @param list
-     * @param childTag
      */
-    protected void iteratePluginExecution( final IndentationCounter counter, final Element parent,
-                                           final Collection list, final String childTag )
+    protected void iteratePluginExecution( final IndentationCounter counter, final Element parent, final Collection list )
     {
         final boolean shouldExist = ( list != null ) && ( list.size() > 0 );
         final Element element = Utils.updateElement( counter, parent, "executions", shouldExist );
         if ( shouldExist )
         {
             final Iterator it = list.iterator();
-            Iterator elIt = element.getChildren( childTag, element.getNamespace() ).iterator();
+            Iterator elIt = element.getChildren( "execution", element.getNamespace() ).iterator();
             if ( !elIt.hasNext() )
             {
                 elIt = null;
@@ -624,10 +585,10 @@ public class JDOMModelConverter
                 }
                 else
                 {
-                    el = factory.element( childTag, element.getNamespace() );
+                    el = factory.element( "execution", element.getNamespace() );
                     Utils.insertAtPreferredLocation( element, el, innerCount );
                 }
-                updatePluginExecution( value, childTag, innerCount, el );
+                updatePluginExecution( value, innerCount, el );
                 innerCount.increaseCount();
             }
             if ( elIt != null )
@@ -641,7 +602,7 @@ public class JDOMModelConverter
         }
         else
         {
-            removeExisting( element, childTag );
+            removeExisting( element, "execution" );
         }
     } // -- void iteratePluginExecution( Counter, Element, java.util.Collection, java.lang.String, java.lang.String )
 
@@ -685,7 +646,7 @@ public class JDOMModelConverter
                     el = factory.element( "profile", element.getNamespace() );
                     Utils.insertAtPreferredLocation( element, el, innerCount );
                 }
-                updateProfile( value, "profile", innerCount, el );
+                updateProfile( value, innerCount, el );
                 innerCount.increaseCount();
             }
             if ( elIt != null )
@@ -705,23 +666,18 @@ public class JDOMModelConverter
 
     /**
      * Method iterateReportPlugin.
-     *
      * @param counter
-     * @param childTag
-     * @param parentTag
-     * @param list
      * @param parent
+     * @param list
      */
-    protected void iterateReportPlugin( final IndentationCounter counter, final Element parent,
-                                        final Collection list, final String parentTag,
-                                        final String childTag )
+    protected void iterateReportPlugin( final IndentationCounter counter, final Element parent, final Collection list )
     {
         final boolean shouldExist = ( list != null ) && ( list.size() > 0 );
-        final Element element = Utils.updateElement( counter, parent, parentTag, shouldExist );
+        final Element element = Utils.updateElement( counter, parent, "plugins", shouldExist );
         if ( shouldExist )
         {
             final Iterator it = list.iterator();
-            Iterator elIt = element.getChildren( childTag, element.getNamespace() ).iterator();
+            Iterator elIt = element.getChildren( "plugin", element.getNamespace() ).iterator();
             if ( !elIt.hasNext() )
             {
                 elIt = null;
@@ -741,10 +697,10 @@ public class JDOMModelConverter
                 }
                 else
                 {
-                    el = factory.element( childTag, element.getNamespace() );
+                    el = factory.element( "plugin", element.getNamespace() );
                     Utils.insertAtPreferredLocation( element, el, innerCount );
                 }
-                updateReportPlugin( value, childTag, innerCount, el );
+                updateReportPlugin( value, innerCount, el );
                 innerCount.increaseCount();
             }
             if ( elIt != null )
@@ -758,29 +714,24 @@ public class JDOMModelConverter
         }
         else
         {
-            removeExisting( element, childTag );
+            removeExisting( element, "plugin" );
         }
     } // -- void iterateReportPlugin( Counter, Element, java.util.Collection, java.lang.String, java.lang.String )
 
     /**
      * Method iterateReportSet.
-     *
      * @param counter
-     * @param childTag
-     * @param parentTag
-     * @param list
      * @param parent
+     * @param list
      */
-    protected void iterateReportSet( final IndentationCounter counter, final Element parent,
-                                     final Collection list, final String parentTag,
-                                     final String childTag )
+    protected void iterateReportSet( final IndentationCounter counter, final Element parent, final Collection list )
     {
         final boolean shouldExist = ( list != null ) && ( list.size() > 0 );
-        final Element element = Utils.updateElement( counter, parent, parentTag, shouldExist );
+        final Element element = Utils.updateElement( counter, parent, "reportSets", shouldExist );
         if ( shouldExist )
         {
             final Iterator it = list.iterator();
-            Iterator elIt = element.getChildren( childTag, element.getNamespace() ).iterator();
+            Iterator elIt = element.getChildren( "reportSet", element.getNamespace() ).iterator();
             if ( !elIt.hasNext() )
             {
                 elIt = null;
@@ -800,10 +751,10 @@ public class JDOMModelConverter
                 }
                 else
                 {
-                    el = factory.element( childTag, element.getNamespace() );
+                    el = factory.element( "reportSet", element.getNamespace() );
                     Utils.insertAtPreferredLocation( element, el, innerCount );
                 }
-                updateReportSet( value, childTag, innerCount, el );
+                updateReportSet( value, innerCount, el );
                 innerCount.increaseCount();
             }
             if ( elIt != null )
@@ -817,7 +768,7 @@ public class JDOMModelConverter
         }
         else
         {
-            removeExisting( element, childTag );
+            removeExisting( element, "reportSet" );
         }
     } // -- void iterateReportSet( Counter, Element, java.util.Collection, java.lang.String, java.lang.String )
 
@@ -867,7 +818,7 @@ public class JDOMModelConverter
                     el = factory.element( childTag, element.getNamespace() );
                     Utils.insertAtPreferredLocation( element, el, innerCount );
                 }
-                updateRepository( value, childTag, innerCount, el );
+                updateRepository( value, innerCount, el );
                 innerCount.increaseCount();
             }
             if ( elIt != null )
@@ -926,7 +877,7 @@ public class JDOMModelConverter
                     el = factory.element( childTag, element.getNamespace() );
                     Utils.insertAtPreferredLocation( element, el, innerCount );
                 }
-                updateResource( value, childTag, innerCount, el );
+                updateResource( value, innerCount, el );
                 innerCount.increaseCount();
             }
             if ( elIt != null )
@@ -946,17 +897,14 @@ public class JDOMModelConverter
 
     /**
      * Method updateActivation.
-     *
-     * @param activation
-     * @param element
+     *  @param activation
      * @param counter
-     * @param xmlTag
+     * @param element
      */
-    protected void updateActivation( final Activation activation, final String xmlTag,
-                                     final IndentationCounter counter, final Element element )
+    protected void updateActivation( final Activation activation, final IndentationCounter counter, final Element element )
     {
         final boolean shouldExist = ( activation != null );
-        final Element root = Utils.updateElement( counter, element, xmlTag, shouldExist );
+        final Element root = Utils.updateElement( counter, element, "activation", shouldExist );
         if ( shouldExist )
         {
             final IndentationCounter innerCount = new IndentationCounter( counter.getDepth() + 1 );
@@ -970,25 +918,22 @@ public class JDOMModelConverter
                                                root,
                                                "jdk", activation.getJdk(),
                                                null );
-            updateActivationOS( activation.getOs(), "os", innerCount, root );
-            updateActivationProperty( activation.getProperty(), "property", innerCount, root );
-            updateActivationFile( activation.getFile(), "file", innerCount, root );
+            updateActivationOS( activation.getOs(), innerCount, root );
+            updateActivationProperty( activation.getProperty(), innerCount, root );
+            updateActivationFile( activation.getFile(), innerCount, root );
         }
     } // -- void updateActivation( Activation, String, Counter, Element )
 
     /**
      * Method updateActivationFile.
-     *
-     * @param activationFile
-     * @param element
+     *  @param activationFile
      * @param counter
-     * @param xmlTag
+     * @param element
      */
-    protected void updateActivationFile( final ActivationFile activationFile, final String xmlTag,
-                                         final IndentationCounter counter, final Element element )
+    protected void updateActivationFile( final ActivationFile activationFile, final IndentationCounter counter, final Element element )
     {
         final boolean shouldExist = ( activationFile != null );
-        final Element root = Utils.updateElement( counter, element, xmlTag, shouldExist );
+        final Element root = Utils.updateElement( counter, element, "file", shouldExist );
         if ( shouldExist )
         {
             final IndentationCounter innerCount = new IndentationCounter( counter.getDepth() + 1 );
@@ -999,17 +944,14 @@ public class JDOMModelConverter
 
     /**
      * Method updateActivationOS.
-     *
-     * @param activationOS
-     * @param element
+     *  @param activationOS
      * @param counter
-     * @param xmlTag
+     * @param element
      */
-    protected void updateActivationOS( final ActivationOS activationOS, final String xmlTag,
-                                       final IndentationCounter counter, final Element element )
+    protected void updateActivationOS( final ActivationOS activationOS, final IndentationCounter counter, final Element element )
     {
         final boolean shouldExist = ( activationOS != null );
-        final Element root = Utils.updateElement( counter, element, xmlTag, shouldExist );
+        final Element root = Utils.updateElement( counter, element, "os", shouldExist );
         if ( shouldExist )
         {
             final IndentationCounter innerCount = new IndentationCounter( counter.getDepth() + 1 );
@@ -1028,17 +970,14 @@ public class JDOMModelConverter
 
     /**
      * Method updateActivationProperty.
-     *
-     * @param activationProperty
-     * @param element
+     *  @param activationProperty
      * @param counter
-     * @param xmlTag
+     * @param element
      */
-    protected void updateActivationProperty( final ActivationProperty activationProperty, final String xmlTag,
-                                             final IndentationCounter counter, final Element element )
+    protected void updateActivationProperty( final ActivationProperty activationProperty, final IndentationCounter counter, final Element element )
     {
         final boolean shouldExist = ( activationProperty != null );
-        final Element root = Utils.updateElement( counter, element, xmlTag, shouldExist );
+        final Element root = Utils.updateElement( counter, element, "property", shouldExist );
         if ( shouldExist )
         {
             final IndentationCounter innerCount = new IndentationCounter( counter.getDepth() + 1 );
@@ -1049,17 +988,14 @@ public class JDOMModelConverter
 
     /**
      * Method updateBuild.
-     *
-     * @param build
-     * @param element
+     *  @param build
      * @param counter
-     * @param xmlTag
+     * @param element
      */
-    protected void updateBuild( final Build build, final String xmlTag, final IndentationCounter counter,
-                                final Element element )
+    protected void updateBuild( final Build build, final IndentationCounter counter, final Element element )
     {
         final boolean shouldExist = ( build != null );
-        final Element root = Utils.updateElement( counter, element, xmlTag, shouldExist );
+        final Element root = Utils.updateElement( counter, element, "build", shouldExist );
         if ( shouldExist )
         {
             final IndentationCounter innerCount = new IndentationCounter( counter.getDepth() + 1 );
@@ -1077,7 +1013,7 @@ public class JDOMModelConverter
                                                root,
                                                "testOutputDirectory", build.getTestOutputDirectory(),
                                                null );
-            iterateExtension( innerCount, root, build.getExtensions(), "extensions", "extension" );
+            iterateExtension( innerCount, root, build.getExtensions() );
             Utils.findAndReplaceSimpleElement( innerCount,
                                                root,
                                                "defaultGoal", build.getDefaultGoal(),
@@ -1093,24 +1029,21 @@ public class JDOMModelConverter
                                                "finalName", build.getFinalName(),
                                                null );
             Utils.findAndReplaceSimpleLists( innerCount, root, build.getFilters(), "filters", "filter" );
-            updatePluginManagement( build.getPluginManagement(), "pluginManagement", innerCount, root );
-            iteratePlugin( innerCount, root, build.getPlugins(), "plugins", "plugin" );
+            updatePluginManagement( build.getPluginManagement(), innerCount, root );
+            iteratePlugin( innerCount, root, build.getPlugins() );
         }
     } // -- void updateBuild( Build, String, Counter, Element )
 
     /**
      * Method updateBuildBase.
-     *
-     * @param buildBase
-     * @param element
+     *  @param buildBase
      * @param counter
-     * @param xmlTag
+     * @param element
      */
-    protected void updateBuildBase( final BuildBase buildBase, final String xmlTag, final IndentationCounter counter,
-                                    final Element element )
+    protected void updateBuildBase( final BuildBase buildBase, final IndentationCounter counter, final Element element )
     {
         final boolean shouldExist = ( buildBase != null );
-        final Element root = Utils.updateElement( counter, element, xmlTag, shouldExist );
+        final Element root = Utils.updateElement( counter, element, "build", shouldExist );
         if ( shouldExist )
         {
             final IndentationCounter innerCount = new IndentationCounter( counter.getDepth() + 1 );
@@ -1120,24 +1053,21 @@ public class JDOMModelConverter
             Utils.findAndReplaceSimpleElement( innerCount, root, "directory", buildBase.getDirectory(), null );
             Utils.findAndReplaceSimpleElement( innerCount, root, "finalName", buildBase.getFinalName(), null );
             Utils.findAndReplaceSimpleLists( innerCount, root, buildBase.getFilters(), "filters", "filter" );
-            updatePluginManagement( buildBase.getPluginManagement(), "pluginManagement", innerCount, root );
-            iteratePlugin( innerCount, root, buildBase.getPlugins(), "plugins", "plugin" );
+            updatePluginManagement( buildBase.getPluginManagement(), innerCount, root );
+            iteratePlugin( innerCount, root, buildBase.getPlugins() );
         }
     } // -- void updateBuildBase( BuildBase, String, Counter, Element )
 
     /**
      * Method updateCiManagement.
-     *
-     * @param ciManagement
-     * @param element
+     *  @param ciManagement
      * @param counter
-     * @param xmlTag
+     * @param element
      */
-    protected void updateCiManagement( final CiManagement ciManagement, final String xmlTag,
-                                       final IndentationCounter counter, final Element element )
+    protected void updateCiManagement( final CiManagement ciManagement, final IndentationCounter counter, final Element element )
     {
         final boolean shouldExist = ( ciManagement != null );
-        final Element root = Utils.updateElement( counter, element, xmlTag, shouldExist );
+        final Element root = Utils.updateElement( counter, element, "ciManagement", shouldExist );
         if ( shouldExist )
         {
             final IndentationCounter innerCount = new IndentationCounter( counter.getDepth() + 1 );
@@ -1146,20 +1076,17 @@ public class JDOMModelConverter
                                                root,
                                                "url", ciManagement.getUrl(),
                                                null );
-            iterateNotifier( innerCount, root, ciManagement.getNotifiers(), "notifiers", "notifier" );
+            iterateNotifier( innerCount, root, ciManagement.getNotifiers() );
         }
     } // -- void updateCiManagement( CiManagement, String, Counter, Element )
 
     /**
      * Method updateContributor.
-     *
-     * @param contributor
-     * @param element
+     *  @param contributor
      * @param counter
-     * @param xmlTag
+     * @param element
      */
-    protected void updateContributor( final Contributor contributor, final String xmlTag,
-                                      final IndentationCounter counter, final Element element )
+    protected void updateContributor( final Contributor contributor, final IndentationCounter counter, final Element element )
     {
         final IndentationCounter innerCount = new IndentationCounter( counter.getDepth() + 1 );
         Utils.findAndReplaceSimpleElement( innerCount, element,
@@ -1186,10 +1113,8 @@ public class JDOMModelConverter
      * @param dependency
      * @param element
      * @param counter
-     * @param xmlTag
      */
-    protected void updateDependency( final Dependency dependency, final String xmlTag,
-                                     final IndentationCounter counter, final Element element )
+    protected void updateDependency( final Dependency dependency, final IndentationCounter counter, final Element element )
     {
         final IndentationCounter innerCount = new IndentationCounter( counter.getDepth() + 1 );
         Utils.findAndReplaceSimpleElement( innerCount, element,
@@ -1207,7 +1132,7 @@ public class JDOMModelConverter
                                            "scope", dependency.getScope(),
                                            null );
         Utils.findAndReplaceSimpleElement( innerCount, element, "systemPath", dependency.getSystemPath(), null );
-        iterateExclusion( innerCount, element, dependency.getExclusions(), "exclusions", "exclusion" );
+        iterateExclusion( innerCount, element, dependency.getExclusions() );
         Utils.findAndReplaceSimpleElement( innerCount, element,
                                            "optional", dependency.getOptional(),
                                            null );
@@ -1215,21 +1140,18 @@ public class JDOMModelConverter
 
     /**
      * Method updateDependencyManagement.
-     *
-     * @param dependencyManagement
-     * @param element
+     *  @param dependencyManagement
      * @param counter
-     * @param xmlTag
+     * @param element
      */
-    protected void updateDependencyManagement( final DependencyManagement dependencyManagement, final String xmlTag,
-                                               final IndentationCounter counter, final Element element )
+    protected void updateDependencyManagement( final DependencyManagement dependencyManagement, final IndentationCounter counter, final Element element )
     {
         final boolean shouldExist = ( dependencyManagement != null );
-        final Element root = Utils.updateElement( counter, element, xmlTag, shouldExist );
+        final Element root = Utils.updateElement( counter, element, "dependencyManagement", shouldExist );
         if ( shouldExist )
         {
             final IndentationCounter innerCount = new IndentationCounter( counter.getDepth() + 1 );
-            iterateDependency( innerCount, root, dependencyManagement.getDependencies(), "dependencies", "dependency" );
+            iterateDependency( innerCount, root, dependencyManagement.getDependencies() );
         }
     } // -- void updateDependencyManagement( DependencyManagement, String, Counter, Element )
 
@@ -1265,14 +1187,11 @@ public class JDOMModelConverter
 
     /**
      * Method updateDeveloper.
-     *
-     * @param developer
-     * @param element
+     *  @param developer
      * @param counter
-     * @param xmlTag
+     * @param element
      */
-    protected void updateDeveloper( final Developer developer, final String xmlTag, final IndentationCounter counter,
-                                    final Element element )
+    protected void updateDeveloper( final Developer developer, final IndentationCounter counter, final Element element )
     {
         final IndentationCounter innerCount = new IndentationCounter( counter.getDepth() + 1 );
         Utils.findAndReplaceSimpleElement( innerCount, element, "id", developer.getId(), null );
@@ -1296,18 +1215,15 @@ public class JDOMModelConverter
 
     /**
      * Method updateDistributionManagement.
-     *
-     * @param distributionManagement
-     * @param element
+     *  @param distributionManagement
      * @param counter
-     * @param xmlTag
+     * @param element
      */
-    protected void updateDistributionManagement( final DistributionManagement distributionManagement,
-                                                 final String xmlTag, final IndentationCounter counter,
+    protected void updateDistributionManagement( final DistributionManagement distributionManagement, final IndentationCounter counter,
                                                  final Element element )
     {
         final boolean shouldExist = ( distributionManagement != null );
-        final Element root = Utils.updateElement( counter, element, xmlTag, shouldExist );
+        final Element root = Utils.updateElement( counter, element, "distributionManagement", shouldExist );
         if ( shouldExist )
         {
             final IndentationCounter innerCount = new IndentationCounter( counter.getDepth() + 1 );
@@ -1316,12 +1232,12 @@ public class JDOMModelConverter
                                         "snapshotRepository",
                                         innerCount,
                                         root );
-            updateSite( distributionManagement.getSite(), "site", innerCount, root );
+            updateSite( distributionManagement.getSite(), innerCount, root );
             Utils.findAndReplaceSimpleElement( innerCount,
                                                root,
                                                "downloadUrl", distributionManagement.getDownloadUrl(),
                                                null );
-            updateRelocation( distributionManagement.getRelocation(), "relocation", innerCount, root );
+            updateRelocation( distributionManagement.getRelocation(), innerCount, root );
             Utils.findAndReplaceSimpleElement( innerCount, root, "status", distributionManagement.getStatus(), null );
         }
     } // -- void updateDistributionManagement( DistributionManagement, String, Counter, Element )
@@ -1332,10 +1248,8 @@ public class JDOMModelConverter
      * @param exclusion
      * @param element
      * @param counter
-     * @param xmlTag
      */
-    protected void updateExclusion( final Exclusion exclusion, final String xmlTag, final IndentationCounter counter,
-                                    final Element element )
+    protected void updateExclusion( final Exclusion exclusion, final IndentationCounter counter, final Element element )
     {
         final IndentationCounter innerCount = new IndentationCounter( counter.getDepth() + 1 );
         Utils.findAndReplaceSimpleElement( innerCount, element, "artifactId", exclusion.getArtifactId(), null );
@@ -1350,10 +1264,8 @@ public class JDOMModelConverter
      * @param extension
      * @param element
      * @param counter
-     * @param xmlTag
      */
-    protected void updateExtension( final Extension extension, final String xmlTag, final IndentationCounter counter,
-                                    final Element element )
+    protected void updateExtension( final Extension extension, final IndentationCounter counter, final Element element )
     {
         final IndentationCounter innerCount = new IndentationCounter( counter.getDepth() + 1 );
         Utils.findAndReplaceSimpleElement( innerCount, element,
@@ -1367,17 +1279,14 @@ public class JDOMModelConverter
 
     /**
      * Method updateIssueManagement.
-     *
-     * @param issueManagement
-     * @param element
+     *  @param issueManagement
      * @param counter
-     * @param xmlTag
+     * @param element
      */
-    protected void updateIssueManagement( final IssueManagement issueManagement, final String xmlTag,
-                                          final IndentationCounter counter, final Element element )
+    protected void updateIssueManagement( final IssueManagement issueManagement, final IndentationCounter counter, final Element element )
     {
         final boolean shouldExist = ( issueManagement != null );
-        final Element root = Utils.updateElement( counter, element, xmlTag, shouldExist );
+        final Element root = Utils.updateElement( counter, element, "issueManagement", shouldExist );
         if ( shouldExist )
         {
             final IndentationCounter innerCount = new IndentationCounter( counter.getDepth() + 1 );
@@ -1392,10 +1301,8 @@ public class JDOMModelConverter
      * @param license
      * @param element
      * @param counter
-     * @param xmlTag
      */
-    protected void updateLicense( final License license, final String xmlTag, final IndentationCounter counter,
-                                  final Element element )
+    protected void updateLicense( final License license, final IndentationCounter counter, final Element element )
     {
         final IndentationCounter innerCount = new IndentationCounter( counter.getDepth() + 1 );
         Utils.findAndReplaceSimpleElement( innerCount, element,
@@ -1414,10 +1321,8 @@ public class JDOMModelConverter
      * @param mailingList
      * @param element
      * @param counter
-     * @param xmlTag
      */
-    protected void updateMailingList( final MailingList mailingList, final String xmlTag,
-                                      final IndentationCounter counter, final Element element )
+    protected void updateMailingList( final MailingList mailingList, final IndentationCounter counter, final Element element )
     {
         final IndentationCounter innerCount = new IndentationCounter( counter.getDepth() + 1 );
         Utils.findAndReplaceSimpleElement( innerCount, element,
@@ -1436,20 +1341,17 @@ public class JDOMModelConverter
 
     /**
      * Method updateModel.
-     *
-     * @param model
-     * @param element
+     *  @param model
      * @param counter
-     * @param xmlTag
+     * @param element
      */
-    protected void updateModel( final Model model, final String xmlTag, final IndentationCounter counter,
-                                final Element element )
+    protected void updateModel( final Model model, final IndentationCounter counter, final Element element )
     {
         final IndentationCounter innerCount = new IndentationCounter( counter.getDepth() + 1 );
         Utils.findAndReplaceSimpleElement( innerCount, element,
                                            "modelVersion", model.getModelVersion(),
                                            null );
-        updateParent( model.getParent(), "parent", innerCount, element );
+        updateParent( model.getParent(), innerCount, element );
         Utils.findAndReplaceSimpleElement( innerCount, element,
                                            "groupId", model.getGroupId(),
                                            null );
@@ -1470,25 +1372,25 @@ public class JDOMModelConverter
         Utils.findAndReplaceSimpleElement( innerCount, element,
                                            "inceptionYear", model.getInceptionYear(),
                                            null );
-        updateOrganization( model.getOrganization(), "organization", innerCount, element );
-        iterateLicense( innerCount, element, model.getLicenses(), "licenses", "license" );
+        updateOrganization( model.getOrganization(), innerCount, element );
+        iterateLicense( innerCount, element, model.getLicenses() );
         iterateDeveloper( innerCount, element, model.getDevelopers() );
         iterateContributor( innerCount, element, model.getContributors() );
-        iterateMailingList( innerCount, element, model.getMailingLists(), "mailingLists", "mailingList" );
-        updatePrerequisites( model.getPrerequisites(), "prerequisites", innerCount, element );
+        iterateMailingList( innerCount, element, model.getMailingLists() );
+        updatePrerequisites( model.getPrerequisites(), innerCount, element );
         Utils.findAndReplaceSimpleLists( innerCount, element, model.getModules(), "modules", "module" );
-        updateScm( model.getScm(), "scm", innerCount, element );
-        updateIssueManagement( model.getIssueManagement(), "issueManagement", innerCount, element );
-        updateCiManagement( model.getCiManagement(), "ciManagement", innerCount, element );
-        updateDistributionManagement( model.getDistributionManagement(), "distributionManagement", innerCount, element );
+        updateScm( model.getScm(), innerCount, element );
+        updateIssueManagement( model.getIssueManagement(), innerCount, element );
+        updateCiManagement( model.getCiManagement(), innerCount, element );
+        updateDistributionManagement( model.getDistributionManagement(), innerCount, element );
         Utils.findAndReplaceProperties( innerCount, element, "properties", model.getProperties() );
-        updateDependencyManagement( model.getDependencyManagement(), "dependencyManagement", innerCount, element );
-        iterateDependency( innerCount, element, model.getDependencies(), "dependencies", "dependency" );
+        updateDependencyManagement( model.getDependencyManagement(), innerCount, element );
+        iterateDependency( innerCount, element, model.getDependencies() );
         iterateRepository( innerCount, element, model.getRepositories(), "repositories", "repository" );
         iterateRepository( innerCount, element, model.getPluginRepositories(), "pluginRepositories", "pluginRepository" );
-        updateBuild( model.getBuild(), "build", innerCount, element );
+        updateBuild( model.getBuild(), innerCount, element );
         Utils.findAndReplaceXpp3DOM( innerCount, element, "reports", (Xpp3Dom) model.getReports() );
-        updateReporting( model.getReporting(), "reporting", innerCount, element );
+        updateReporting( model.getReporting(), innerCount, element );
         iterateProfile( innerCount, element, model.getProfiles() );
     } // -- void updateModel( Model, String, Counter, Element )
 
@@ -1498,10 +1400,8 @@ public class JDOMModelConverter
      * @param notifier
      * @param element
      * @param counter
-     * @param xmlTag
      */
-    protected void updateNotifier( final Notifier notifier, final String xmlTag, final IndentationCounter counter,
-                                   final Element element )
+    protected void updateNotifier( final Notifier notifier, final IndentationCounter counter, final Element element )
     {
         final IndentationCounter innerCount = new IndentationCounter( counter.getDepth() + 1 );
         Utils.findAndReplaceSimpleElement( innerCount, element,
@@ -1522,17 +1422,14 @@ public class JDOMModelConverter
 
     /**
      * Method updateOrganization.
-     *
-     * @param organization
-     * @param element
+     *  @param organization
      * @param counter
-     * @param xmlTag
+     * @param element
      */
-    protected void updateOrganization( final Organization organization, final String xmlTag,
-                                       final IndentationCounter counter, final Element element )
+    protected void updateOrganization( final Organization organization, final IndentationCounter counter, final Element element )
     {
         final boolean shouldExist = ( organization != null );
-        final Element root = Utils.updateElement( counter, element, xmlTag, shouldExist );
+        final Element root = Utils.updateElement( counter, element, "organization", shouldExist );
         if ( shouldExist )
         {
             final IndentationCounter innerCount = new IndentationCounter( counter.getDepth() + 1 );
@@ -1549,17 +1446,14 @@ public class JDOMModelConverter
 
     /**
      * Method updateParent.
-     *
-     * @param parent
-     * @param element
+     *  @param parent
      * @param counter
-     * @param xmlTag
+     * @param element
      */
-    protected void updateParent( final Parent parent, final String xmlTag, final IndentationCounter counter,
-                                 final Element element )
+    protected void updateParent( final Parent parent, final IndentationCounter counter, final Element element )
     {
         final boolean shouldExist = ( parent != null );
-        final Element root = Utils.updateElement( counter, element, xmlTag, shouldExist );
+        final Element root = Utils.updateElement( counter, element, "parent", shouldExist );
         if ( shouldExist )
         {
             final IndentationCounter innerCount = new IndentationCounter( counter.getDepth() + 1 );
@@ -1581,14 +1475,11 @@ public class JDOMModelConverter
 
     /**
      * Method updatePlugin.
-     *
-     * @param plugin
-     * @param element
+     *  @param plugin
      * @param counter
-     * @param xmlTag
+     * @param element
      */
-    protected void updatePlugin( final Plugin plugin, final String xmlTag, final IndentationCounter counter,
-                                 final Element element )
+    protected void updatePlugin( final Plugin plugin, final IndentationCounter counter, final Element element )
     {
         final IndentationCounter innerCount = new IndentationCounter( counter.getDepth() + 1 );
         Utils.findAndReplaceSimpleElement( innerCount, element,
@@ -1603,8 +1494,8 @@ public class JDOMModelConverter
         Utils.findAndReplaceSimpleElement( innerCount, element,
                                            "extensions", plugin.getExtensions(),
                                            null );
-        iteratePluginExecution( innerCount, element, plugin.getExecutions(), "execution" );
-        iterateDependency( innerCount, element, plugin.getDependencies(), "dependencies", "dependency" );
+        iteratePluginExecution( innerCount, element, plugin.getExecutions() );
+        iterateDependency( innerCount, element, plugin.getDependencies() );
         Utils.findAndReplaceXpp3DOM( innerCount, element, "goals", (Xpp3Dom) plugin.getGoals() );
         Utils.findAndReplaceSimpleElement( innerCount, element,
                                            "inherited", plugin.getInherited(),
@@ -1614,14 +1505,11 @@ public class JDOMModelConverter
 
     /**
      * Method updatePluginExecution.
-     *
-     * @param pluginExecution
-     * @param element
+     *  @param pluginExecution
      * @param counter
-     * @param xmlTag
+     * @param element
      */
-    protected void updatePluginExecution( final PluginExecution pluginExecution, final String xmlTag,
-                                          final IndentationCounter counter, final Element element )
+    protected void updatePluginExecution( final PluginExecution pluginExecution, final IndentationCounter counter, final Element element )
     {
         final IndentationCounter innerCount = new IndentationCounter( counter.getDepth() + 1 );
         Utils.findAndReplaceSimpleElement( innerCount, element,
@@ -1635,37 +1523,32 @@ public class JDOMModelConverter
 
     /**
      * Method updatePluginManagement.
-     *
-     * @param pluginManagement
-     * @param element
+     *  @param pluginManagement
      * @param counter
-     * @param xmlTag
+     * @param element
      */
-    protected void updatePluginManagement( final PluginManagement pluginManagement, final String xmlTag,
-                                           final IndentationCounter counter, final Element element )
+    protected void updatePluginManagement( final PluginManagement pluginManagement, final IndentationCounter counter,
+                                           final Element element )
     {
         final boolean shouldExist = ( pluginManagement != null );
-        final Element root = Utils.updateElement( counter, element, xmlTag, shouldExist );
+        final Element root = Utils.updateElement( counter, element, "pluginManagement", shouldExist );
         if ( shouldExist )
         {
             final IndentationCounter innerCount = new IndentationCounter( counter.getDepth() + 1 );
-            iteratePlugin( innerCount, root, pluginManagement.getPlugins(), "plugins", "plugin" );
+            iteratePlugin( innerCount, root, pluginManagement.getPlugins() );
         }
     } // -- void updatePluginManagement( PluginManagement, String, Counter, Element )
 
     /**
      * Method updatePrerequisites.
-     *
-     * @param prerequisites
-     * @param element
+     *  @param prerequisites
      * @param counter
-     * @param xmlTag
+     * @param element
      */
-    protected void updatePrerequisites( final Prerequisites prerequisites, final String xmlTag,
-                                        final IndentationCounter counter, final Element element )
+    protected void updatePrerequisites( final Prerequisites prerequisites, final IndentationCounter counter, final Element element )
     {
         final boolean shouldExist = ( prerequisites != null );
-        final Element root = Utils.updateElement( counter, element, xmlTag, shouldExist );
+        final Element root = Utils.updateElement( counter, element, "prerequisites", shouldExist );
         if ( shouldExist )
         {
             final IndentationCounter innerCount = new IndentationCounter( counter.getDepth() + 1 );
@@ -1675,46 +1558,40 @@ public class JDOMModelConverter
 
     /**
      * Method updateProfile.
-     *
-     * @param profile
-     * @param element
+     *  @param profile
      * @param counter
-     * @param xmlTag
+     * @param element
      */
-    protected void updateProfile( final Profile profile, final String xmlTag, final IndentationCounter counter,
-                                  final Element element )
+    protected void updateProfile( final Profile profile, final IndentationCounter counter, final Element element )
     {
         final IndentationCounter innerCount = new IndentationCounter( counter.getDepth() + 1 );
         Utils.findAndReplaceSimpleElement( innerCount, element,
                                            "id", profile.getId(),
                                            "default" );
-        updateActivation( profile.getActivation(), "activation", innerCount, element );
-        updateBuildBase( profile.getBuild(), "build", innerCount, element );
+        updateActivation( profile.getActivation(), innerCount, element );
+        updateBuildBase( profile.getBuild(), innerCount, element );
         Utils.findAndReplaceSimpleLists( innerCount, element, profile.getModules(), "modules", "module" );
-        updateDistributionManagement( profile.getDistributionManagement(), "distributionManagement", innerCount,
+        updateDistributionManagement( profile.getDistributionManagement(), innerCount,
                                       element );
         Utils.findAndReplaceProperties( innerCount, element, "properties", profile.getProperties() );
-        updateDependencyManagement( profile.getDependencyManagement(), "dependencyManagement", innerCount, element );
-        iterateDependency( innerCount, element, profile.getDependencies(), "dependencies", "dependency" );
+        updateDependencyManagement( profile.getDependencyManagement(), innerCount, element );
+        iterateDependency( innerCount, element, profile.getDependencies() );
         iterateRepository( innerCount, element, profile.getRepositories(), "repositories", "repository" );
         iterateRepository( innerCount, element, profile.getPluginRepositories(), "pluginRepositories", "pluginRepository" );
         Utils.findAndReplaceXpp3DOM( innerCount, element, "reports", (Xpp3Dom) profile.getReports() );
-        updateReporting( profile.getReporting(), "reporting", innerCount, element );
+        updateReporting( profile.getReporting(), innerCount, element );
     } // -- void updateProfile( Profile, String, Counter, Element )
 
     /**
      * Method updateRelocation.
-     *
-     * @param relocation
-     * @param element
+     *  @param relocation
      * @param counter
-     * @param xmlTag
+     * @param element
      */
-    protected void updateRelocation( final Relocation relocation, final String xmlTag,
-                                     final IndentationCounter counter, final Element element )
+    protected void updateRelocation( final Relocation relocation, final IndentationCounter counter, final Element element )
     {
         final boolean shouldExist = ( relocation != null );
-        final Element root = Utils.updateElement( counter, element, xmlTag, shouldExist );
+        final Element root = Utils.updateElement( counter, element, "relocation", shouldExist );
         if ( shouldExist )
         {
             final IndentationCounter innerCount = new IndentationCounter( counter.getDepth() + 1 );
@@ -1727,34 +1604,28 @@ public class JDOMModelConverter
 
     /**
      * Method updateReportPlugin.
-     *
-     * @param reportPlugin
-     * @param element
+     *  @param reportPlugin
      * @param counter
-     * @param xmlTag
+     * @param element
      */
-    protected void updateReportPlugin( final ReportPlugin reportPlugin, final String xmlTag,
-                                       final IndentationCounter counter, final Element element )
+    protected void updateReportPlugin( final ReportPlugin reportPlugin, final IndentationCounter counter, final Element element )
     {
         final IndentationCounter innerCount = new IndentationCounter( counter.getDepth() + 1 );
         Utils.findAndReplaceSimpleElement( innerCount, element, "groupId", reportPlugin.getGroupId(), "org.apache.maven.plugins" );
         Utils.findAndReplaceSimpleElement( innerCount, element, "artifactId", reportPlugin.getArtifactId(), null );
         Utils.findAndReplaceSimpleElement( innerCount, element, "version", reportPlugin.getVersion(), null );
-        iterateReportSet( innerCount, element, reportPlugin.getReportSets(), "reportSets", "reportSet" );
+        iterateReportSet( innerCount, element, reportPlugin.getReportSets() );
         Utils.findAndReplaceSimpleElement( innerCount, element, "inherited", reportPlugin.getInherited(), null );
         Utils.findAndReplaceXpp3DOM( innerCount, element, "configuration", (Xpp3Dom) reportPlugin.getConfiguration() );
     } // -- void updateReportPlugin( ReportPlugin, String, Counter, Element )
 
     /**
      * Method updateReportSet.
-     *
-     * @param reportSet
-     * @param element
+     *  @param reportSet
      * @param counter
-     * @param xmlTag
+     * @param element
      */
-    protected void updateReportSet( final ReportSet reportSet, final String xmlTag, final IndentationCounter counter,
-                                    final Element element )
+    protected void updateReportSet( final ReportSet reportSet, final IndentationCounter counter, final Element element )
     {
         final IndentationCounter innerCount = new IndentationCounter( counter.getDepth() + 1 );
         Utils.findAndReplaceSimpleElement( innerCount, element,
@@ -1769,17 +1640,14 @@ public class JDOMModelConverter
 
     /**
      * Method updateReporting.
-     *
-     * @param reporting
-     * @param element
+     *  @param reporting
      * @param counter
-     * @param xmlTag
+     * @param element
      */
-    protected void updateReporting( final Reporting reporting, final String xmlTag, final IndentationCounter counter,
-                                    final Element element )
+    protected void updateReporting( final Reporting reporting, final IndentationCounter counter, final Element element )
     {
         final boolean shouldExist = ( reporting != null );
-        final Element root = Utils.updateElement( counter, element, xmlTag, shouldExist );
+        final Element root = Utils.updateElement( counter, element, "reporting", shouldExist );
         if ( shouldExist )
         {
             final IndentationCounter innerCount = new IndentationCounter( counter.getDepth() + 1 );
@@ -1791,7 +1659,7 @@ public class JDOMModelConverter
                                                root,
                                                "outputDirectory", reporting.getOutputDirectory(),
                                                null );
-            iterateReportPlugin( innerCount, root, reporting.getPlugins(), "plugins", "plugin" );
+            iterateReportPlugin( innerCount, root, reporting.getPlugins() );
         }
     } // -- void updateReporting( Reporting, String, Counter, Element )
 
@@ -1801,10 +1669,8 @@ public class JDOMModelConverter
      * @param repository
      * @param element
      * @param counter
-     * @param xmlTag
      */
-    protected void updateRepository( final Repository repository, final String xmlTag,
-                                     final IndentationCounter counter, final Element element )
+    protected void updateRepository( final Repository repository, final IndentationCounter counter, final Element element )
     {
         final IndentationCounter innerCount = new IndentationCounter( counter.getDepth() + 1 );
         updateRepositoryPolicy( repository.getReleases(), "releases", innerCount, element );
@@ -1857,10 +1723,8 @@ public class JDOMModelConverter
      * @param resource
      * @param element
      * @param counter
-     * @param xmlTag
      */
-    protected void updateResource( final Resource resource, final String xmlTag, final IndentationCounter counter,
-                                   final Element element )
+    protected void updateResource( final Resource resource, final IndentationCounter counter, final Element element )
     {
         final IndentationCounter innerCount = new IndentationCounter( counter.getDepth() + 1 );
         Utils.findAndReplaceSimpleElement( innerCount, element,
@@ -1878,17 +1742,14 @@ public class JDOMModelConverter
 
     /**
      * Method updateScm.
-     *
-     * @param scm
-     * @param element
+     *  @param scm
      * @param counter
-     * @param xmlTag
+     * @param element
      */
-    protected void updateScm( final Scm scm, final String xmlTag, final IndentationCounter counter,
-                              final Element element )
+    protected void updateScm( final Scm scm, final IndentationCounter counter, final Element element )
     {
         final boolean shouldExist = ( scm != null );
-        final Element root = Utils.updateElement( counter, element, xmlTag, shouldExist );
+        final Element root = Utils.updateElement( counter, element, "scm", shouldExist );
         if ( shouldExist )
         {
             final IndentationCounter innerCount = new IndentationCounter( counter.getDepth() + 1 );
@@ -1907,17 +1768,14 @@ public class JDOMModelConverter
 
     /**
      * Method updateSite.
-     *
-     * @param site
-     * @param element
+     *  @param site
      * @param counter
-     * @param xmlTag
+     * @param element
      */
-    protected void updateSite( final Site site, final String xmlTag, final IndentationCounter counter,
-                               final Element element )
+    protected void updateSite( final Site site, final IndentationCounter counter, final Element element )
     {
         final boolean shouldExist = ( site != null );
-        final Element root = Utils.updateElement( counter, element, xmlTag, shouldExist );
+        final Element root = Utils.updateElement( counter, element, "site", shouldExist );
         if ( shouldExist )
         {
             final IndentationCounter innerCount = new IndentationCounter( counter.getDepth() + 1 );
@@ -1929,7 +1787,7 @@ public class JDOMModelConverter
 
     protected void update( final Model source, final IndentationCounter indentationCounter, final Element rootElement )
     {
-        updateModel( source, "project", indentationCounter, rootElement );
+        updateModel( source, indentationCounter, rootElement );
     }
 
     /**
