@@ -35,6 +35,7 @@ import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 public class PomIOTest
@@ -69,6 +70,9 @@ public class PomIOTest
         FileUtils.copyFile( pom, targetFile );
 
         List<Project> projects = pomIO.parseProject( targetFile );
+
+        assertNull( projects.get( 0 ).getModel().getModelEncoding() );
+
         // We don't want this to be the execution root so that it doesn't add "Modified by" which breaks the comparison
         FieldUtils.writeDeclaredField( projects.get( 0 ), "executionRoot", false, true);
         HashSet<Project> changed = new HashSet<>(projects);

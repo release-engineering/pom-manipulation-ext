@@ -47,6 +47,7 @@ import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -143,7 +144,7 @@ public class PomIO
 
                 try
                 {
-                    if ( FileUtils.readFileToString( pom, raw.getModelEncoding() ).contains( MODIFIED_BY ) )
+                    if ( FileUtils.readFileToString( pom, StandardCharsets.UTF_8 ).contains( MODIFIED_BY ) )
                     {
                         project.setIncrementalPME (true);
                     }

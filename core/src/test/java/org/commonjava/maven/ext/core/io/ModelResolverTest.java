@@ -15,6 +15,7 @@
  */
 package org.commonjava.maven.ext.core.io;
 
+import org.apache.maven.model.Model;
 import org.apache.maven.repository.DefaultMirrorSelector;
 import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef;
 import org.commonjava.maven.ext.common.ManipulationException;
@@ -32,6 +33,7 @@ import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 @RunWith(BMUnitRunner.class)
 public class ModelResolverTest
@@ -62,6 +64,23 @@ public class ModelResolverTest
         model.resolveRawModel( SimpleProjectVersionRef.parse( "org.commonjava:commonjava:5"  ) );
     }
 
+
+    @Test
+    public void verifyModelEncoding()
+                    throws Exception
+    {
+        final ManipulationSession session = TestUtils.createSession( null );
+        final GalleyInfrastructure galleyInfra =
+                        new GalleyInfrastructure( session, new DefaultMirrorSelector()).init( null, null, temp.newFolder(
+                                        "cache-dir" ) );
+        final GalleyAPIWrapper wrapper = new GalleyAPIWrapper( galleyInfra );
+        final ModelIO model = new ModelIO(wrapper);
+
+        Model m = model.resolveRawModel( SimpleProjectVersionRef.parse( "org.commonjava:commonjava:12"  ) );
+        assertNull( m.getModelEncoding() );
+        m = model.resolveRawModel( SimpleProjectVersionRef.parse( "org.goots.maven.extensions:alt-deploy-maven-extension:1.4" ) );
+        assertEquals( "UTF-8", m.getModelEncoding() );
+    }
 
     @Test
     public void resolveRemoteArtifactTest()
