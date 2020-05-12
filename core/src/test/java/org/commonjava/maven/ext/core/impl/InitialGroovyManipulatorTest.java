@@ -85,7 +85,7 @@ public class InitialGroovyManipulatorTest
         projects = pomIO.parseProject( projectroot );
         assertThat( projects.size(), equalTo( 3 ) );
 
-        assertEquals( projectForArtifactId( projects, "groovy-project-removal").getModel().getProfiles().size(), 1 );
+        assertEquals( 1, projectForArtifactId( projects, "groovy-project-removal").getModel().getProfiles().size() );
         assertThat( projectForArtifactId( projects, "groovy-project-removal" ).getVersion(), containsString( "rebuild" ) );
         assertThat( projectForArtifactId( projects, "groovy-project-removal-moduleA" ).getVersion(),
                     containsString( "rebuild" ) );

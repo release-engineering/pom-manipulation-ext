@@ -29,7 +29,6 @@ import org.junit.rules.TemporaryFolder;
 
 import java.io.File;
 import java.net.URL;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.HashSet;
 import java.util.List;
@@ -89,9 +88,8 @@ public class PomIOTest
         assertTrue( pom.exists() );
 
         File targetFile = folder.newFile( "target.xml" );
-        FileUtils.writeStringToFile( targetFile,
-                                     FileUtils.readFileToString( pom, Charset.defaultCharset() ).replaceAll( "dospom", "newdospom" ),
-                                Charset.defaultCharset() );
+        FileUtils.writeStringToFile( targetFile, FileUtils.readFileToString( pom, StandardCharsets.UTF_8 )
+                                                          .replaceAll( "dospom", "newdospom" ), StandardCharsets.UTF_8 );
         FileUtils.copyFile( pom, targetFile );
 
         List<Project> projects = pomIO.parseProject( targetFile );
@@ -199,7 +197,7 @@ public class PomIOTest
 
         pomIO.writeModel( model, targetFile );
         assertTrue( targetFile.exists() );
-        assertEquals( sb, FileUtils.readFileToString( targetFile, model.getModelEncoding() ) );
+        assertEquals( sb, FileUtils.readFileToString( targetFile, StandardCharsets.UTF_8 ) );
     }
 
     @Test
@@ -214,18 +212,18 @@ public class PomIOTest
         File targetFile = folder.newFile( "target.xml" );
         FileUtils.copyFile( pom, targetFile );
 
-        List<Project> projects = pomIO.parseProject( targetFile );
-        projects.get( 0 ).setExecutionRoot();
+        Project project = pomIO.parseProject( targetFile ).get( 0 );
+        project.setExecutionRoot();
 
         HashSet<Project> changed = new HashSet<>();
-        changed.add( projects.get( 0 ) );
+        changed.add( project );
         pomIO.rewritePOMs( changed );
 
-        String s = FileUtils.readFileToString( targetFile, Charset.defaultCharset() );
-        assertEquals( StringUtils.countMatches(s, "Modified by POM Manipulation Extension" ), 1);
+        String s = FileUtils.readFileToString( targetFile, StandardCharsets.UTF_8 );
+        assertEquals( 1, StringUtils.countMatches(s, "Modified by POM Manipulation Extension" ) );
 
         pomIO.rewritePOMs( changed );
-        s = FileUtils.readFileToString( targetFile, Charset.defaultCharset() );
-        assertEquals( StringUtils.countMatches(s, "Modified by POM Manipulation Extension" ), 1);
+        s = FileUtils.readFileToString( targetFile, StandardCharsets.UTF_8 );
+        assertEquals( 1, StringUtils.countMatches(s, "Modified by POM Manipulation Extension" ) );
     }
 }

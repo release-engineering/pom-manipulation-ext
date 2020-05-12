@@ -213,7 +213,7 @@ public class XMLIOTest
     }
 
     @Test
-    public void findArtemis() throws ManipulationException, XPathExpressionException
+    public void testFindSingleInstance() throws ManipulationException, XPathExpressionException
     {
         Document doc = xmlIO.parseXML( xmlFile );
         XPath xPath = XPathFactory.newInstance().newXPath();
