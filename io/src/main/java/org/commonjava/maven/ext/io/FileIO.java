@@ -17,9 +17,9 @@ package org.commonjava.maven.ext.io;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.SystemUtils;
+import org.commonjava.maven.ext.common.util.LineSeparator;
 import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.io.resolver.GalleyInfrastructure;
-import org.jdom2.output.LineSeparator;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -43,7 +43,7 @@ public class FileIO
     private final GalleyInfrastructure infra;
 
     @Inject
-    public FileIO(@Named("galley") GalleyInfrastructure infra)
+    public FileIO(@Named( "galley" ) GalleyInfrastructure infra )
     {
         this.infra = infra;
     }
@@ -63,14 +63,14 @@ public class FileIO
 
         if ( SystemUtils.IS_OS_WINDOWS )
         {
-            ref = new URL ( reference.replaceFirst("^file://([a-zA-Z]:\\\\)","file:///$1"));
+            ref = new URL( reference.replaceFirst( "^file://([a-zA-Z]:\\\\)", "file:///$1" ) );
         }
         else
         {
-            ref = new URL (reference );
+            ref = new URL( reference );
         }
         // If its a local file reference. just use the file itself rather than copying it.
-        if ( ! "file".equals( ref.getProtocol() ) )
+        if ( !"file".equals( ref.getProtocol() ) )
         {
             File cache = infra.getCacheDir();
 
@@ -80,17 +80,16 @@ public class FileIO
         }
         else
         {
-            result = new File(ref.getPath());
+            result = new File( ref.getPath() );
         }
 
         return result;
     }
 
-    static LineSeparator determineEOL( File file )
-            throws ManipulationException
+    static LineSeparator determineEOL( File file ) throws ManipulationException
     {
-        try ( BufferedReader bufferIn = new BufferedReader( new InputStreamReader( new FileInputStream( file ),
-                StandardCharsets.UTF_8 ) ) )
+        try (BufferedReader bufferIn = new BufferedReader(
+                        new InputStreamReader( new FileInputStream( file ), StandardCharsets.UTF_8 ) ))
         {
             int prev = -1;
             int ch;

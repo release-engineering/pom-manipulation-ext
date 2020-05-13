@@ -19,8 +19,8 @@ import org.apache.maven.model.Model;
 import org.commonjava.maven.ext.common.ManipulationException;
 import org.junit.Test;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 
 public class ProjectTest
 {
@@ -54,7 +54,7 @@ public class ProjectTest
         m2.setVersion( "1.0" );
         Project two = new Project( m2 );
 
-        assertTrue (one.equals( two ));
+        assertEquals( one, two );
 
         m2 = new Model();
         m2.setGroupId( "org.foo" );
@@ -62,7 +62,7 @@ public class ProjectTest
         m2.setVersion( "1.0.0" );
         two = new Project( m2 );
 
-        assertTrue (one.equals( two ));
+        assertEquals( one, two );
 
         Model m3 = new Model();
         m3.setGroupId( "org.foo" );
@@ -70,6 +70,6 @@ public class ProjectTest
         m3.setVersion( "1.0.rebuild-1" );
         Project three = new Project( m3 );
 
-        assertFalse (one.equals( three ));
+        assertNotEquals( one, three );
     }
 }

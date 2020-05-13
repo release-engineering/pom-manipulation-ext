@@ -20,7 +20,7 @@ import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPathException;
 import org.apache.commons.io.FileUtils;
 import org.commonjava.maven.ext.common.ManipulationException;
-import org.jdom2.output.LineSeparator;
+import org.commonjava.maven.ext.common.util.LineSeparator;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;

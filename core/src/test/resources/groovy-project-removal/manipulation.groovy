@@ -13,6 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+import org.apache.maven.model.Profile
 import org.commonjava.maven.ext.core.groovy.BaseScript
 import org.commonjava.maven.ext.core.groovy.InvocationStage
 import org.commonjava.maven.ext.core.groovy.PMEBaseScript
@@ -28,6 +30,16 @@ def toRemove = pme.projects.findAll {
 }
 toRemove.each {
     pme.projects.remove(it)
+}
+Iterator<Profile> it =  pme.project.model.profiles.iterator();
+while (it.hasNext())
+{
+    Profile p = it.next();
+    if (p.id  == 'extra-repositories' )
+    {
+        it.remove();
+        break;
+    }
 }
 
 

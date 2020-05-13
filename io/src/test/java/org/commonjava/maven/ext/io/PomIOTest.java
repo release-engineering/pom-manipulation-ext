@@ -16,21 +16,26 @@
 package org.commonjava.maven.ext.io;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.reflect.FieldUtils;
 import org.apache.maven.model.Model;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.ext.common.model.Project;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.contrib.java.lang.system.SystemOutRule;
 import org.junit.rules.TemporaryFolder;
 
 import java.io.File;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.HashSet;
+import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 public class PomIOTest
@@ -40,12 +45,41 @@ public class PomIOTest
     @Rule
     public TemporaryFolder folder = new TemporaryFolder();
 
+    @Rule
+    public final SystemOutRule systemOutRule = new SystemOutRule().enableLog().muteForSuccessfulTests();
+
     private PomIO pomIO;
 
     @Before
     public void setup()
     {
         pomIO = new PomIO();
+    }
+
+
+    @Test
+    public void testRoundTripPOMs()
+                    throws Exception
+    {
+        URL resource = PomIOTest.class.getResource( filename );
+        assertNotNull( resource );
+        File pom = new File( resource.getFile() );
+        assertTrue( pom.exists() );
+
+        File targetFile = folder.newFile( "target.xml" );
+        FileUtils.copyFile( pom, targetFile );
+
+        List<Project> projects = pomIO.parseProject( targetFile );
+
+        assertNull( projects.get( 0 ).getModel().getModelEncoding() );
+
+        // We don't want this to be the execution root so that it doesn't add "Modified by" which breaks the comparison
+        FieldUtils.writeDeclaredField( projects.get( 0 ), "executionRoot", false, true);
+        HashSet<Project> changed = new HashSet<>(projects);
+        pomIO.rewritePOMs( changed );
+
+        assertTrue( FileUtils.contentEqualsIgnoreEOL( pom, targetFile, StandardCharsets.UTF_8.toString() ) );
+        assertTrue( FileUtils.contentEquals( targetFile, pom ) );
     }
 
     @Test
@@ -58,9 +92,12 @@ public class PomIOTest
         assertTrue( pom.exists() );
 
         File targetFile = folder.newFile( "target.xml" );
+        FileUtils.writeStringToFile( targetFile, FileUtils.readFileToString( pom, StandardCharsets.UTF_8 )
+                                                          .replaceAll( "dospom", "newdospom" ), StandardCharsets.UTF_8 );
         FileUtils.copyFile( pom, targetFile );
 
-        Model model = new Model();
+        List<Project> projects = pomIO.parseProject( targetFile );
+        Model model = projects.get( 0 ).getModel();
         model.setGroupId( "org.commonjava.maven.ext.versioning.test" );
         model.setArtifactId( "dospom" );
         model.setVersion( "1.0" );
@@ -70,7 +107,6 @@ public class PomIOTest
         Project p = new Project( targetFile, model );
         HashSet<Project> changed = new HashSet<>();
         changed.add( p );
-
         pomIO.rewritePOMs( changed );
 
         assertTrue( FileUtils.contentEqualsIgnoreEOL( pom, targetFile, StandardCharsets.UTF_8.toString() ) );
@@ -110,6 +146,33 @@ public class PomIOTest
 
 
     @Test
+    public void testListRemovalPOMs()
+                    throws Exception
+    {
+        URL resource = PomIOTest.class.getResource( filename );
+        assertNotNull( resource );
+        File pom = new File( resource.getFile() );
+        assertTrue( pom.exists() );
+
+        File targetFile = folder.newFile( "target.xml" );
+        FileUtils.copyFile( pom, targetFile );
+
+        List<Project> projects = pomIO.parseProject( targetFile );
+        Project p = projects.get( 0 );
+        p.getModel().getRepositories().clear();
+
+        HashSet<Project> changed = new HashSet<>();
+        changed.add( p );
+
+        pomIO.rewritePOMs( changed );
+
+        p = pomIO.parseProject( targetFile ).get( 0 );
+
+        assertEquals( 0, p.getModel().getRepositories().size() );
+    }
+
+
+    @Test
     public void testWriteModel()
                     throws Exception
     {
@@ -138,6 +201,33 @@ public class PomIOTest
 
         pomIO.writeModel( model, targetFile );
         assertTrue( targetFile.exists() );
-        assertEquals( sb, FileUtils.readFileToString( targetFile, model.getModelEncoding() ) );
+        assertEquals( sb, FileUtils.readFileToString( targetFile, StandardCharsets.UTF_8 ) );
+    }
+
+    @Test
+    public void testAddModifiedBy()
+                    throws Exception
+    {
+        URL resource = PomIOTest.class.getResource( filename );
+        assertNotNull( resource );
+        File pom = new File( resource.getFile() );
+        assertTrue( pom.exists() );
+
+        File targetFile = folder.newFile( "target.xml" );
+        FileUtils.copyFile( pom, targetFile );
+
+        Project project = pomIO.parseProject( targetFile ).get( 0 );
+        project.setExecutionRoot();
+
+        HashSet<Project> changed = new HashSet<>();
+        changed.add( project );
+        pomIO.rewritePOMs( changed );
+
+        String s = FileUtils.readFileToString( targetFile, StandardCharsets.UTF_8 );
+        assertEquals( 1, StringUtils.countMatches(s, "Modified by POM Manipulation Extension" ) );
+
+        pomIO.rewritePOMs( changed );
+        s = FileUtils.readFileToString( targetFile, StandardCharsets.UTF_8 );
+        assertEquals( 1, StringUtils.countMatches(s, "Modified by POM Manipulation Extension" ) );
     }
 }

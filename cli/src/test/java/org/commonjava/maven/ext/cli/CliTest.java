@@ -22,6 +22,8 @@ import org.commonjava.maven.ext.core.ManipulationSession;
 import org.commonjava.maven.ext.core.fixture.TestUtils;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.contrib.java.lang.system.ExpectedSystemExit;
+import org.junit.contrib.java.lang.system.SystemErrRule;
 import org.junit.contrib.java.lang.system.SystemOutRule;
 import org.junit.rules.TemporaryFolder;
 
@@ -44,8 +46,13 @@ public class CliTest
     public TemporaryFolder temp = new TemporaryFolder( );
 
     @Rule
-    public final SystemOutRule systemRule = new SystemOutRule().enableLog().muteForSuccessfulTests();
+    public final SystemOutRule systemOutRule = new SystemOutRule().enableLog().muteForSuccessfulTests();
 
+    @Rule
+    public final SystemErrRule systemErrRule = new SystemErrRule().enableLog().muteForSuccessfulTests();
+
+    @Rule
+    public final ExpectedSystemExit expectedSystemExit = ExpectedSystemExit.none();
 
     private File writeSettings (File f) throws IOException
     {
@@ -55,6 +62,22 @@ public class CliTest
                         + "xsi:schemaLocation=\"http://maven.apache.org/SETTINGS/1.0.0 http://maven.apache.org/xsd/settings-1.0.0.xsd\">"
                         + "</settings>", StandardCharsets.UTF_8 );
         return f;
+    }
+
+    @Test
+    public void checkHelpAndExit()
+    {
+        expectedSystemExit.expectSystemExitWithStatus( 0 );
+        Cli.main( new String[] { "-h" } );
+        assertTrue( systemOutRule.getLog().contains( "usage: ..." ) );
+    }
+
+    @Test
+    public void checkInvalidParam()
+    {
+        expectedSystemExit.expectSystemExitWithStatus( 10 );
+        Cli.main( new String[] { "-FOOBAR"} );
+        assertTrue( systemOutRule.getLog().contains( "usage: ..." ) );
     }
 
     @Test
@@ -172,8 +195,8 @@ public class CliTest
                                         "-Dmaven.repo.local=" + folder.toString(), "-Prun-its", "--file",
                                         target.getCanonicalPath() } });
 
-        assertTrue (systemRule.getLog().contains( "Explicitly activating [run-its]" ));
-        assertTrue (systemRule.getLog().contains( "Will not scan all profiles and returning active profiles of [run-its]" ));
+        assertTrue ( systemOutRule.getLog().contains( "Explicitly activating [run-its]" ));
+        assertTrue ( systemOutRule.getLog().contains( "Will not scan all profiles and returning active profiles of [run-its]" ));
     }
 
 
@@ -239,6 +262,6 @@ public class CliTest
                         "--file",
                         target.getCanonicalPath() } );
 
-        assertTrue (systemRule.getLog().contains( "Unknown configuration value UNKNOWN_PROPERTY" ));
+        assertTrue ( systemOutRule.getLog().contains( "Unknown configuration value UNKNOWN_PROPERTY" ));
     }
 }

@@ -15,6 +15,7 @@
  */
 package org.commonjava.maven.ext.io;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.maven.settings.Mirror;
 import org.apache.maven.settings.Profile;
 import org.apache.maven.settings.Proxy;
@@ -34,6 +35,7 @@ import javax.inject.Singleton;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.charset.StandardCharsets;
 
 /**
  * @author vdedik@redhat.com
@@ -44,7 +46,7 @@ public class SettingsIO
 {
     protected final Logger logger = LoggerFactory.getLogger( getClass() );
 
-    private SettingsBuilder settingsBuilder;
+    private final SettingsBuilder settingsBuilder;
 
     @Inject
     public SettingsIO (SettingsBuilder settingsBuilder)
@@ -57,7 +59,8 @@ public class SettingsIO
     {
         try
         {
-            PrintWriter printWriter = new PrintWriter( settingsFile, settings.getModelEncoding() );
+            PrintWriter printWriter = new PrintWriter( settingsFile,
+                                                       StringUtils.isEmpty( settings.getModelEncoding() ) ? StandardCharsets.UTF_8.toString() : settings.getModelEncoding() );
             new SettingsXpp3Writer().write( printWriter, settings );
         }
         catch ( IOException e )

@@ -52,9 +52,9 @@ public class XMLManipulator
 {
     private final Logger logger = LoggerFactory.getLogger( getClass() );
 
-    private XPath xPath = XPathFactory.newInstance().newXPath();
+    private final XPath xPath = XPathFactory.newInstance().newXPath();
 
-    private XMLIO xmlIO;
+    private final XMLIO xmlIO;
 
     private ManipulationSession session;
 

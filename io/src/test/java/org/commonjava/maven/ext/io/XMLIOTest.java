@@ -212,6 +212,15 @@ public class XMLIOTest
         assertEquals( 0, nodeList.getLength() );
     }
 
+    @Test
+    public void testFindSingleInstance() throws ManipulationException, XPathExpressionException
+    {
+        Document doc = xmlIO.parseXML( xmlFile );
+        XPath xPath = XPathFactory.newInstance().newXPath();
+        NodeList nodeList = (NodeList) xPath.evaluate( "//include[starts-with(.,\"org.apache.tomcat\")]", doc, XPathConstants.NODESET );
+
+        assertTrue( nodeList.getLength() != 0 );
+    }
 
     @Test
     public void removePartFile ()
