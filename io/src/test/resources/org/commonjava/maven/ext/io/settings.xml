@@ -15,11 +15,17 @@
   ~ limitations under the License.
   -->
 
-<settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
-          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-          xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0 http://maven.apache.org/xsd/settings-1.0.0.xsd">
+<settings xmlns="http://maven.apache.org/SETTINGS/1.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0 http://maven.apache.org/xsd/settings-1.0.0.xsd">
 
-  <!-- <localRepository>${user.home}/.m2-testing</localRepository> -->
+  <localRepository>${user.home}/.m2-testing</localRepository>
+
+  <mirrors>
+      <mirror>
+          <id>mead-ip6-repository</id>
+          <mirrorOf>*</mirrorOf>
+          <url>http://www.dummy.com/brewroot/repos/jb-ip-6-build/latest/maven</url>
+      </mirror>
+  </mirrors>
 
   <servers>
     <server>
@@ -28,4 +34,55 @@
       <password>password</password>
     </server>
   </servers>
+
+  <profiles>
+    <profile>
+      <id>gpg</id>
+      <activation>
+        <os><family>unix</family></os>
+      </activation>
+      <properties>
+        <gpg.executable>gpg2</gpg.executable>
+      </properties>
+    </profile>
+
+    <profile>
+      <id>indy</id>
+      <activation>
+        <activeByDefault>false</activeByDefault>
+        <file>
+          <exists>${user.home}/INDY</exists>
+        </file>
+      </activation>
+      <repositories>
+        <repository>
+          <id>brew</id>
+          <name>Brew Native Archives</name>
+          <url>http://www.dummy.com/brewroot/1.redhat_1.el6/maven/</url>
+          <layout>default</layout>
+          <releases>
+            <enabled>true</enabled>
+          </releases>
+          <snapshots>
+            <enabled>true</enabled>
+          </snapshots>
+        </repository>
+      </repositories>
+    </profile>
+  </profiles>
+
+  <proxies>
+    <proxy>
+      <id>indy-http</id>
+      <active>true</active>
+      <protocol>http</protocol>
+      <host>localhost</host>
+      <port>7888</port>
+      <!-- <nonProxyHosts>></nonProxyHosts> -->
+    </proxy>
+  </proxies>
+
+  <activeProfiles>
+    <activeProfile>gpg</activeProfile>
+  </activeProfiles>
 </settings>
