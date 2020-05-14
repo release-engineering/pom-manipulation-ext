@@ -19,13 +19,13 @@ import org.apache.maven.model.Parent;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef;
 import org.commonjava.maven.ext.annotation.ConfigValue;
-import org.commonjava.maven.ext.core.impl.RepositoryInjectionManipulator;
+import org.commonjava.maven.ext.core.impl.ParentInjectionManipulator;
 
 import java.util.Properties;
 
 /**
  * Captures configuration relating to injection of parent pom.
- * Used by {@link RepositoryInjectionManipulator}.
+ * Used by {@link ParentInjectionManipulator}.
  */
 public class ParentInjectionState
     implements State

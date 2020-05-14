@@ -262,8 +262,8 @@ public class PomIO
             // to a read, then read + write now.
             LineSeparator ls = FileIO.determineEOL( pom );
 
-            ModelETLRequest request = new ModelETLRequest();
             MavenProject mp = new MavenProject(model);
+            ModelETLRequest request = new ModelETLRequest();
             request.setLineSeparator( ls.value() );
             request.setProject( mp );
             request.setReleaseDescriptor( ReleaseUtils.buildReleaseDescriptor( releaseDescriptorBuilder ) );

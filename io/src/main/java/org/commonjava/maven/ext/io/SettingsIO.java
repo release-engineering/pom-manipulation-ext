@@ -15,7 +15,7 @@
  */
 package org.commonjava.maven.ext.io;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.reflect.FieldUtils;
 import org.apache.maven.settings.Mirror;
 import org.apache.maven.settings.Profile;
 import org.apache.maven.settings.Proxy;
@@ -24,8 +24,15 @@ import org.apache.maven.settings.Settings;
 import org.apache.maven.settings.building.DefaultSettingsBuildingRequest;
 import org.apache.maven.settings.building.SettingsBuilder;
 import org.apache.maven.settings.building.SettingsBuildingException;
-import org.apache.maven.settings.io.xpp3.SettingsXpp3Writer;
+import org.apache.maven.shared.release.ReleaseExecutionException;
+import org.apache.maven.shared.release.transform.ModelETL;
+import org.apache.maven.shared.release.transform.ModelETLRequest;
+import org.apache.maven.shared.release.transform.jdom.JDomModelETL;
+import org.apache.maven.shared.release.transform.jdom.JDomModelETLFactory;
 import org.commonjava.maven.ext.common.ManipulationException;
+import org.commonjava.maven.ext.common.jdom.JDOMSettingsConverter;
+import org.commonjava.maven.ext.common.util.LineSeparator;
+import org.jdom.JDOMException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,8 +41,6 @@ import javax.inject.Named;
 import javax.inject.Singleton;
 import java.io.File;
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.nio.charset.StandardCharsets;
 
 /**
  * @author vdedik@redhat.com
@@ -46,6 +51,10 @@ public class SettingsIO
 {
     protected final Logger logger = LoggerFactory.getLogger( getClass() );
 
+    private final JDOMSettingsConverter jdomSettingsConverter = new JDOMSettingsConverter( );
+
+    private final JDomModelETLFactory modelETLFactories = new JDomModelETLFactory();
+
     private final SettingsBuilder settingsBuilder;
 
     @Inject
@@ -54,16 +63,49 @@ public class SettingsIO
         this.settingsBuilder = settingsBuilder;
     }
 
+    /**
+     * Writes a settings file out to the denoted file. If the settings file exists it attempts to preserve existing
+     * formatting.
+     * @param settings the Maven settings to write out.
+     * @param settingsFile the File to write to
+     * @throws ManipulationException if an error occurs.
+     */
     public void write( Settings settings, File settingsFile )
         throws ManipulationException
     {
         try
         {
-            PrintWriter printWriter = new PrintWriter( settingsFile,
-                                                       StringUtils.isEmpty( settings.getModelEncoding() ) ? StandardCharsets.UTF_8.toString() : settings.getModelEncoding() );
-            new SettingsXpp3Writer().write( printWriter, settings );
+            LineSeparator ls;
+            String intro = "";
+            String outtro = "";
+
+            // If we are building from an existing file then use that as a base otherwise we need to construct the Document
+            // and root Element.
+            if ( settingsFile.length() > 0 )
+            {
+                ls = FileIO.determineEOL( settingsFile );
+                ModelETLRequest request = new ModelETLRequest();
+                request.setLineSeparator( ls.value() );
+                ModelETL etl = modelETLFactories.newInstance( request );
+
+                // Reread in order to fill in JdomModelETL
+                etl.extract( settingsFile );
+
+                // Annoyingly the document is private but we need to access it in order to ensure the model is written to the Document.
+                //
+                // Currently the fields we want to access are private - https://issues.apache.org/jira/browse/MRELEASE-1044 requests
+                // them to be protected to avoid this reflection.
+                intro = (String) FieldUtils.getDeclaredField( JDomModelETL.class, "intro", true ).get( etl );
+                outtro = (String) FieldUtils.getDeclaredField( JDomModelETL.class, "outtro", true ).get( etl );
+            }
+            else
+            {
+                ls = LineSeparator.NL;
+            }
+            jdomSettingsConverter.setLineSeparator( ls.value() );
+            jdomSettingsConverter.write( settings, settingsFile, intro, outtro);
         }
-        catch ( IOException e )
+        catch ( IOException | JDOMException | ReleaseExecutionException | IllegalAccessException e )
         {
             throw new ManipulationException( "Failed to create repo removal backup settings.xml file: {}",
                                              settingsFile, e );
