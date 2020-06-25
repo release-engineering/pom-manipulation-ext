@@ -33,7 +33,7 @@ public class ProfileInjectionState
     /**
      * Suffix to enable this modder
      */
-    @ConfigValue( docIndex = "misc.html#profile-injection)")
+    @ConfigValue( docIndex = "misc.html#profile-injection")
     private static final String PROFILE_INJECTION_PROPERTY = "profileInjection";
 
     private List<ProjectVersionRef> profileMgmt;
