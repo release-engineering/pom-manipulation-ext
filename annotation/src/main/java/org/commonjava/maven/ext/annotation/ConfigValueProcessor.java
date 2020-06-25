@@ -133,19 +133,19 @@ public class ConfigValueProcessor extends AbstractProcessor
 
         StringBuilder propertyIndex = new StringBuilder();
 
+        propertyIndex.append( "---\ntitle: \"Index of Properties\"\n---\n\n" );
         indexResults.forEach( (key, value) -> propertyIndex
                 .append( "  * [" )
                 .append( key )
                 .append( "](" )
                 .append( value )
                 .append( ")" )
-                .append( "\t" )
-                .append( varResults.get(key) ? "(deprecated)" : "")
+                .append( varResults.get(key) ? "\t(deprecated)" : "")
                 .append( System.lineSeparator() )
         );
         FileUtils.writeStringToFile(
                         new File(processingEnv.getOptions().get( ROOT_DIR ) +
-                                                 File.separator + "target" + File.separator + "property-index-subset.md"),
+                                                 File.separator + "target" + File.separator + "property-index.md"),
                         propertyIndex.toString(),
                         Charset.defaultCharset());
     }
