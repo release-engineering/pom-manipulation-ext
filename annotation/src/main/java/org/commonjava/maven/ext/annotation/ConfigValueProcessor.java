@@ -39,7 +39,7 @@ import javax.lang.model.util.ElementFilter;
 import javax.tools.Diagnostic;
 import java.io.File;
 import java.io.IOException;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -141,12 +141,12 @@ public class ConfigValueProcessor extends AbstractProcessor
                 .append( value )
                 .append( ")" )
                 .append( varResults.get(key) ? "\t(deprecated)" : "")
-                .append( System.lineSeparator() )
+                .append( "\n" )
         );
         FileUtils.writeStringToFile(
                         new File(processingEnv.getOptions().get( ROOT_DIR ) +
                                                  File.separator + "target" + File.separator + "property-index.md"),
                         propertyIndex.toString(),
-                        Charset.defaultCharset());
+                        StandardCharsets.UTF_8 );
     }
 }
