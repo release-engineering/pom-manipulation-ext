@@ -37,7 +37,7 @@ public class CommonState
     /**
      * Whether to override dependencies/plugins that are not directly specified in the project
      */
-    @ConfigValue( docIndex = "index for overrideTransitive")
+    @ConfigValue( docIndex = "dep-manip.html#directtransitive-dependencies" )
     private static final String TRANSITIVE_OVERRIDE_PROPERTY = "overrideTransitive";
 
     /**
