@@ -1,0 +1,251 @@
+# POM Manipulation Extension (PME) Release Process
+
+This document describes how to setup and perform a new POM Manipulation
+Extension (PME) release.
+
+## Conventions
+
+We use some conventions and policies in the projects we develop under the organization. For the most part, these help
+projects build uniformly with the fewest surprises in store for developers switching codebases. Some of them are aimed
+at improving reproducibility and reducing the confusion of a variable build environment.
+
+Integration/functional tests are not run in the default build. To run them, you can use one of the following profiles:
+
+* `run-its`
+* `release` (this is used when we release projects)
+
+Dependency versions are kept in the root POM for the project inside the `dependencyManagement` section (*not* in the
+normal `dependencies` section). Declare the most commonly used scope for the dependency inside the project if it's not
+a compile-time dependency, e.g., when declaring a dependency on JUnit as `<scope>test</scope>`. Override this scope as
+needed inside modules that have specific needs, e.g., re-declaring the JUnit dependency as `<scope>compile</scope>` for
+a module containing common test fixtures. We use the license-maven-plugin to format license headers. We declare it in
+the shared parent POM, inside the formatting profile. The release profile will use the check goal from this plugin to
+verify that all files have appropriate license headers. The POM's `<inceptionYear>` element is used as the copyright date
+in license headers. The POM's `projectOwner` and `projectEmail` properties are used to format the copyright ownership
+declaration. These properties can be overridden on a per-project basis as needed.
+
+We enforce some things about POMs by default:
+
+* All dependencies must have versions declared in `dependencyManagement`, and not overridden in the direct dependency.
+* Any artifact that contains a class directly imported by one or more classes in our project should have a direct
+  dependency in that project.
+* All plugins used in the POM must have a version declared.
+* All modules in a project must share the same version.
+  * It's easiest to just declare this version in each module's `<parent>` declaration.
+* Don't declare repositories in project POMs.
+
+Some other things aren't enforced, but are preferred:
+
+* Declare your project modules in the root POM's `dependencyManagement` section, to make module interrelationship
+  simpler.
+* Avoid using `${project.groupId}` and `${project.artifactId}` in dependency declarations.
+* Only use version properties for dependencies when:
+  * It's referencing another codebase that we actively develop.
+  * There is more than one dependency belonging to the same project and you always want them to use the same version
+    (which is normally the case).
+
+## Create a GPG Keypair
+
+If you don't already have a GPG keypair for the email address you use
+for contributing, you can generate one using
+
+```
+$ gpg --gen-key
+$ gpg --send-keys <keyname>
+```
+
+If you need to find the `<keyname>` later, you can use
+
+```
+$ gpg --list-keys
+```
+
+to find it. If you're using more than one key to perform releases, you
+can set it during the release process by passing
+`-Dgpg.keyname=<keyname>` to the `mvn` command or placing this property
+in your Maven settings file.
+
+For more information, see
+[Working with PGP Signatures](https://central.sonatype.org/pages/working-with-pgp-signatures.html).
+
+## Create a Sonatype JIRA Account
+
+Sonatype is used for publishing both releases and snapshots. To be able
+to perform a release, you will need a Sonatype OSSRH (OSS Repository
+Hosting) account.
+
+Sonatype uses JIRA to manage requests.
+
+- [Create your JIRA account](https://issues.sonatype.org/secure/Signup!default.jspa)
+- [Create a New Project ticket](https://issues.sonatype.org/secure/CreateIssue.jspa?issuetype=21&pid=10134)
+
+For more information, see
+[OSSRH Guide](https://central.sonatype.org/pages/ossrh-guide.html).
+
+## Store GPG and Sonatype passwords
+
+If you don't already have a `mvn` master password, create one by using
+
+`mvn --encrypt-master-password`
+
+This command will produce an encrypted version of the password which
+looks similar to
+
+```
+{jSMOWnoPFgsHVpMvz5VrIt5kRbzGpI8u+9EF1iFQyJQ=}
+```
+
+Store this password in the file `${user.home}/.m2/settings-security.xml`
+like so
+
+```
+<settingsSecurity>
+  <master>{jSMOWnoPFgsHVpMvz5VrIt5kRbzGpI8u+9EF1iFQyJQ=}</master>
+</settingsSecurity>
+```
+
+Alternatively, you can point to a different `settings-security.xml` file
+like so
+
+```
+<settingsSecurity>
+  <relocation>/volumeUSB1/settings-security.xml</relocation>
+</settingsSecurity>
+```
+
+After you have a master password, you then need to produce encryped
+versions of your GPG and Sonatype passwords using the following, one
+time for each password
+
+`mvn --encrypt-password`
+
+This command produces an encrypted version of of the password which
+looks similar to
+
+```
+{COQLCE6DU6GtcS5P=}
+```
+
+Place the encpted passwords into the appropriate `servers` section of
+your
+[`${user.home}/.m2/settings.xml`](https://maven.apache.org/ref/3.6.3/maven-settings/settings.html)
+file. This will look similar to
+
+```
+<settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0
+                      https://maven.apache.org/xsd/settings-1.0.0.xsd">
+  <profiles>
+    <profile>
+      <id>ossrh</id>
+      <activation>
+        <activeByDefault>true</activeByDefault>
+      </activation>
+      <repositories>
+        <repository>
+          <id>ossrh</id>
+          <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+          <releases>
+            <enabled>false</enabled>
+          </releases>
+          <snapshots>
+            <enabled>true</enabled>
+            <updatePolicy>always</updatePolicy>
+          </snapshots>
+        </repository>
+      </repositories>
+    </profile>
+  </profiles>
+
+  <servers>
+    <server>
+      <id>ossrh</id>
+      <username>user</username>
+      <password>{COQLCE6DU6GtcS5P=}</password>
+    </server>
+    <server>
+      <id>gpg.passphrase</id>
+      <passphrase>{COQLCE6DU6GtcS5P=}</passphrase>
+    </server>
+  </servers>
+</settings>
+```
+
+The Sonatype username and password should go into the appropriate server
+section. In the example, this server has the identifier `ossrh`. The GPG
+password should go in the server section with the identifier
+`gpg.passphrase` which is the default value for the `passphraseServerId`
+property. Alternatively, you can set the GPG paramters using properties
+
+```
+<properties>
+  <gpg.executable>gpg</gpg.executable>
+  <gpg.keyname>AB12C3D4</gpg.keyname>
+</properties>
+```
+
+For more information, see
+[Deploying to OSSRH with Apache Maven](https://central.sonatype.org/pages/apache-maven.html).
+
+## Pre-release Checks
+
+### Stabilize All BOM References
+
+Maven plugins are essentially blind to the existence of BOMs, owing to how Maven processes BOM information. BOMs are
+basically `dependencyManagement` sections that get inlined into your project's POM (with some de-duplication). The
+implication of this is that plugins like the maven-release-plugin cannot see the original BOM reference when they
+execute. They only see the contents of that BOM. So, if your POM contains a reference to a `SNAPSHOT` version of a BOM
+when you do a release, that `SNASPHOT` reference will be in your released POM file, and nobody will be able to use your
+libraries without somehow gaining access to that `SNAPSHOT` BOM.
+
+### Check for Improperly Formatted License Headers
+
+Each source file, along with `pom.xml` and test resource files, should have a header comment that reflects the license
+of the project. We're using the [license-maven-plugin](https://mycila.mathieu.photography/license-maven-plugin/) for
+this purpose. It reformats license headers when you use the formatting profile (`-Pformatting`) and verifies their
+presence and correctness during the project release as part of the release build profile. If any of the license
+headers are missing or incorrect, the verification step will fail the build leaving you with a release to rollback
+before you can correct the problem and try again.
+
+So, before you try to run the actual release, perform the following steps:
+
+```
+#!/bin/bash
+
+# We don't need tests, but may need module dependency assemblies, etc.
+mvn -Pformatting clean install -DskipTests=true
+
+# Check whether any files were updated
+git status | grep 'modified:'
+changed=$?
+
+# Only necessary if files changed
+if [ $changed != 0 ]; then
+    git add .
+    git commit -am "Fix license headers"
+fi
+```
+
+## Deploy the Release
+
+```
+$ mvn clean release:prepare release:perform -Prelease
+```
+
+## Roll Back a Release
+
+The rollback process below is ONLY safe if you haven't distributed the binaries. If you have, then you must not
+rollback. Instead, you have to release a new version.
+
+To revert the changes from the release plugin, you can use the release plugin.
+Run `mvn release:rollback release:clean` to revert the POM version changes and clean up the release-plugin accounting
+(temporary) files. Check the git tags. If the release tag exists, you'll have to remove it (locally and remotely). The
+tag format is: `<parent-pom-artifactId>-<version>`. Run `git tag -d <tag-name>` to delete the tag locally and run
+`git push --delete upstream <tag-name>` to delete the tag on the canonical GitHub repository. You may also need to
+remove a staging repository from the [Sonatype OSS Reposirory](https://oss.sonatype.org).
+
+Log in and select Staging Repositories from the menu on the left.
+Select your staging repository. The details should mention your username and the content tab should contain whatever
+binaries you managed to upload before the build failed. Be very careful not to modify someone else's repository.
+Finally, click on the Drop button. Confirm the operation if it asks you to.
