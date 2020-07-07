@@ -71,9 +71,7 @@ The following plugin is required:
 It is also recommended to install:
 
  * https://plugins.jetbrains.com/plugin/6546-eclipse-code-formatter
-    * (which allows importing of the code style)
- * https://plugins.jetbrains.com/plugin/7442-gmavenplus-intellij-plugin
-    * (especially if using the Groovy [example project](https://github.com/project-ncl/manipulator-groovy-examples) )
+    * (which allows importing of the code style. See https://github.com/krasa/EclipseCodeFormatter#instructions )
 
 ## Documentation
 
@@ -360,7 +358,12 @@ fi
 ### Run the Release
 
 ```
-$ mvn clean release:prepare release:perform -Prelease
+mvn clean release:prepare release:perform@second-cli -Prelease
+```
+
+Or, if you have a GPG profile in your `$HOME/.m2/settings.xml`:
+```
+mvn clean release:prepare release:perform@second-cli -Prelease -Pgpg
 ```
 
 ### Roll Back a Release

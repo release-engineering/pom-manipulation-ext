@@ -535,8 +535,27 @@
           <configuration>
             <mavenExecutorId>forked-path</mavenExecutorId>
             <useReleaseProfile>false</useReleaseProfile>
-            <arguments>-Prelease,run-its</arguments>
           </configuration>
+          <executions>
+            <execution>
+              <id>default-cli</id>
+              <goals>
+                <goal>prepare</goal>
+              </goals>
+              <configuration>
+                <arguments>-Prelease,run-its</arguments>
+              </configuration>
+            </execution>
+            <execution>
+              <id>second-cli</id>
+              <goals>
+                <goal>perform</goal>
+              </goals>
+              <configuration>
+                <arguments>-Prelease -DskipTests=true</arguments>
+              </configuration>
+            </execution>
+          </executions>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
