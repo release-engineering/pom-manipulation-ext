@@ -135,6 +135,7 @@
     <localRepositoryUrlExt>${project.build.directory}/local-repo-${extIter}</localRepositoryUrlExt>
     <localRepositoryUrlCli>${project.build.directory}/local-repo-${cliIter}</localRepositoryUrlCli>
     <selectedTest>*</selectedTest>
+    <invokerParallel>5</invokerParallel>
   </properties>
 
   <build>
@@ -304,7 +305,7 @@
                 </goals>
                 <configuration>
                   <debug>true</debug>
-                  <parallelThreads>10</parallelThreads>
+                  <parallelThreads>${invokerParallel}</parallelThreads>
                   <goals>
                     <goal>clean</goal>
                     <goal>package</goal>
@@ -345,7 +346,7 @@
               <additionalClasspathElements>
                 <additionalClasspathElement>${java.home}/../lib/tools.jar</additionalClasspathElement>
               </additionalClasspathElements>
-              <forkCount>2.5C</forkCount>
+              <forkCount>${forkCount}</forkCount>
               <!-- Attempting to run DefaultCliIntegrationTest with parallel methods causes problems in Maven downloads -->
               <!-- and processing - potential race conditions -->
               <!--<parallel>classesAndMethods</parallel>-->

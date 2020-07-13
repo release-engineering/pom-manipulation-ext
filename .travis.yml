@@ -27,14 +27,14 @@ jobs:
       os: linux
       jdk: openjdk11
       if: type = pull_request
-      script: "travis-wait-enhanced --timeout=60m --interval=4m -- mvn -Denforcer.skip=true -Danimal.sniffer.skip=true -B -V install -Prun-its"
+      script: "travis-wait-enhanced --timeout=60m --interval=4m -- mvn -Denforcer.skip=true -Danimal.sniffer.skip=true -DforkCount=1.25C -B -V install -Prun-its"
 
     - stage: test
       os: osx
       osx_image: xcode9.4
       jdk: openjdk11
       if: type = pull_request
-      script: "travis-wait-enhanced --timeout=60m --interval=4m -- mvn -Djacoco.skip=true -Denforcer.skip=true -Danimal.sniffer.skip=true -Dmaven.javadoc.skip=true -B -V install -Prun-its"
+      script: "travis-wait-enhanced --timeout=60m --interval=4m -- mvn -Djacoco.skip=true -Denforcer.skip=true -Dmaven.buildNumber.skip=true -Dmaven.javadoc.skip=true -Danimal.sniffer.skip=true -DforkCount=1.25C -B -V install -Prun-its"
 
     - stage: deploy
       os: linux

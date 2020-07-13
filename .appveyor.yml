@@ -18,9 +18,10 @@ version: '{build}'
 
 init:
   - ps: "Add-Type -AssemblyName System.IO.Compression.FileSystem\nif (!(Test-Path -Path \"C:\\apache-maven\" )) {\n        Write-Host \"Downloading Maven $env:MAVEN_VERSION\"\n        (new-object System.Net.WebClient).DownloadFile(\"https://repo1.maven.org/maven2/org/apache/maven/apache-maven/$env:MAVEN_VERSION/apache-maven-$env:MAVEN_VERSION-bin.zip\", \"C:\\apache-maven-$env:MAVEN_VERSION-bin.zip\") \n        [System.IO.Compression.ZipFile]::ExtractToDirectory(\"C:\\apache-maven-$env:MAVEN_VERSION-bin.zip\", \"C:\\apache-maven\")\n      }"
+#  - ps: iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
 
 environment:
-  MAVEN_VERSION: 3.6.2
+  MAVEN_VERSION: 3.6.3
   matrix:
   - JAVA_HOME: C:\Program Files\Java\jdk11
 
@@ -31,10 +32,11 @@ install:
 
 cache:
   - C:\apache-maven -> appveyor.yml
-  - C:\Users\appveyor\.m2 -> pom.xml
+  - C:\Users\appveyor\.m2
 
 build_script:
-  - ps: mvn '-Denforcer.skip=true' '-Danimal.sniffer.skip=true' '-Dmaven.javadoc.skip=true' -B -Prun-its clean install
+  - echo "Working directory is %CD%"
+  - ps: mvn '-Denforcer.skip=true' '-Danimal.sniffer.skip=true' '-Dmaven.javadoc.skip=true' '-DforkCount=1.25C' '-DinvokerParallel=2' -B -Prun-its install
 
 #on_finish:
-#  - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
+# - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))

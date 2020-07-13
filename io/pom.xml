@@ -30,6 +30,10 @@
   <name>POM Manipulation Extension for Maven IO Library</name>
   <description>Input/Output Library (POM File, Maven Repository and REST)</description>
 
+  <properties>
+    <forkCount>1.5C</forkCount>
+  </properties>
+
   <dependencies>
     <dependency>
       <groupId>org.commonjava.maven.ext</groupId>
