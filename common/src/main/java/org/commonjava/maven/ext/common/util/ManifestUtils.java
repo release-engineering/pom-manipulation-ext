@@ -23,6 +23,7 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.security.CodeSource;
 import java.util.jar.JarInputStream;
 import java.util.jar.Manifest;
 
@@ -50,21 +51,30 @@ public class ManifestUtils
 
         try
         {
-            final URL jarUrl = target.getProtectionDomain().getCodeSource().getLocation();
-
-            if ( new File( jarUrl.getPath() ).isDirectory() )
+            final CodeSource cs = target.getProtectionDomain().getCodeSource();
+            if ( cs == null )
             {
-                logger.debug( "Unable to retrieve manifest for {} as location is a directory not a jar ({})",
+                logger.debug( "Unable to retrieve manifest for {} as CodeSource was null for the protection domain ({})",
                               target,
-                              jarUrl.getPath() );
+                              target.getProtectionDomain() );
             }
             else
             {
-                try (JarInputStream jarStream = new JarInputStream( jarUrl.openStream() ))
+                final URL jarUrl = cs.getLocation();
+
+                if ( new File( jarUrl.getPath() ).isDirectory() )
                 {
-                    final Manifest manifest = jarStream.getManifest();
-                    result = manifest.getMainAttributes().getValue( "Implementation-Version" );
-                    result += " ( SHA: " + manifest.getMainAttributes().getValue( "Scm-Revision" ) + " )";
+                    logger.debug( "Unable to retrieve manifest for {} as location is a directory not a jar ({})", target,
+                                  jarUrl.getPath() );
+                }
+                else
+                {
+                    try (JarInputStream jarStream = new JarInputStream( jarUrl.openStream() ))
+                    {
+                        final Manifest manifest = jarStream.getManifest();
+                        result = manifest.getMainAttributes().getValue( "Implementation-Version" );
+                        result += " ( SHA: " + manifest.getMainAttributes().getValue( "Scm-Revision" ) + " )";
+                    }
                 }
             }
         }
