@@ -15,6 +15,7 @@
  */
 package org.commonjava.maven.ext.common.util;
 
+import org.apache.maven.model.Model;
 import org.commonjava.maven.ext.common.ManipulationException;
 import org.junit.Rule;
 import org.junit.Test;
@@ -51,6 +52,14 @@ public class ManifestUtilsTest
                               .contains( "Unable to retrieve manifest for class "
                                                          + "org.commonjava.maven.ext.common.util.ManifestUtilsTest as "
                                                          + "location is a directory not a jar" ) );
+    }
+
+    @Test
+    public void testThirdPartyClass() throws ManipulationException
+    {
+        String result = ManifestUtils.getManifestInformation( Model.class );
+
+        assertTrue( result.contains( "3.5.0 ( SHA: null )" ) );
     }
 
     @Test
