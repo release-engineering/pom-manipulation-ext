@@ -173,7 +173,7 @@ public class BaseScriptTest
                                     .getDependencies()
                                     .stream()
                                     .filter( d -> d.getGroupId().equals( "org.commonjava.maven.galley" ) )
-                                    .filter( d -> d.getVersion().equals( "0.16.3" ) )
+                                    .filter( d -> d.getVersion().equals( "0.16.6" ) )
                                     .count() );
 
 

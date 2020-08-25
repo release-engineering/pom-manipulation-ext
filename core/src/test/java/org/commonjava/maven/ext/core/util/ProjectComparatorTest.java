@@ -61,7 +61,7 @@ public class ProjectComparatorTest
     public final TemporaryFolder temporaryFolder = new TemporaryFolder(  );
 
     @Rule
-    public final SystemOutRule systemOutRule = new SystemOutRule().enableLog();//.muteForSuccessfulTests();
+    public final SystemOutRule systemOutRule = new SystemOutRule().enableLog().muteForSuccessfulTests();
 
     private final WildcardMap<ProjectVersionRef> map = new WildcardMap<>();
 
@@ -126,8 +126,8 @@ public class ProjectComparatorTest
         System.out.println (result);
 
         String jsonString = JSONUtils.jsonToString(json);
-        assertTrue( jsonString.contains( "org.commonjava.maven.galley:galley-maven:0.16.3\" : {" ) );
-        assertTrue( jsonString.contains( "\"version\" : \"0.16.3-redhat-1\"" ) );
+        assertTrue( jsonString.contains( "org.commonjava.maven.galley:galley-maven:0.16.6\" : {" ) );
+        assertTrue( jsonString.contains( "\"version\" : \"0.16.6-redhat-1\"" ) );
 
         System.out.println (jsonString);
 

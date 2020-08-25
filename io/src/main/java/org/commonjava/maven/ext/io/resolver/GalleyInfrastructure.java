@@ -18,15 +18,12 @@ package org.commonjava.maven.ext.io.resolver;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.repository.MirrorSelector;
 import org.apache.maven.settings.Settings;
-import org.commonjava.maven.atlas.ident.ref.ProjectRef;
 import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.common.session.MavenSessionHandler;
-import org.commonjava.maven.galley.TransferException;
 import org.commonjava.maven.galley.TransferManager;
 import org.commonjava.maven.galley.auth.MemoryPasswordManager;
 import org.commonjava.maven.galley.cache.FileCacheProvider;
 import org.commonjava.maven.galley.config.TransportManagerConfig;
-import org.commonjava.maven.galley.event.EventMetadata;
 import org.commonjava.maven.galley.event.NoOpFileEventManager;
 import org.commonjava.maven.galley.filearc.FileTransport;
 import org.commonjava.maven.galley.filearc.ZipJarTransport;
@@ -54,10 +51,7 @@ import org.commonjava.maven.galley.maven.spi.defaults.MavenPluginDefaults;
 import org.commonjava.maven.galley.maven.spi.defaults.MavenPluginImplications;
 import org.commonjava.maven.galley.maven.spi.type.TypeMapper;
 import org.commonjava.maven.galley.maven.spi.version.VersionResolver;
-import org.commonjava.maven.galley.model.ConcreteResource;
 import org.commonjava.maven.galley.model.Location;
-import org.commonjava.maven.galley.model.Transfer;
-import org.commonjava.maven.galley.model.VirtualResource;
 import org.commonjava.maven.galley.nfc.MemoryNotFoundCache;
 import org.commonjava.maven.galley.spi.cache.CacheProvider;
 import org.commonjava.maven.galley.spi.event.FileEventManager;
@@ -74,13 +68,10 @@ import javax.inject.Named;
 import javax.inject.Singleton;
 import java.io.File;
 import java.net.MalformedURLException;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-
-import static org.commonjava.maven.galley.maven.util.ArtifactPathUtils.formatMetadataPath;
 
 /**
  * Manager component responsible for setting up and managing the Galley API instances used to resolve POMs and metadata.
@@ -92,12 +83,6 @@ import static org.commonjava.maven.galley.maven.util.ArtifactPathUtils.formatMet
 public class GalleyInfrastructure
     implements ExtensionInfrastructure
 {
-    /**
-     * Deprecated hidden property. This is only available in case local scanning causes a serious problem. We will
-     * scan by default.
-     */
-    private static final String LOCAL_REPO_SCANNING_PROP = "manipulator.local.repo.scanning";
-
     private final MirrorSelector mirrorSelector;
 
     private final MavenSessionHandler sessionHandler;
@@ -247,66 +232,7 @@ public class GalleyInfrastructure
                                      executor );
 
         final TypeMapper types = new StandardTypeMapper();
-        final ArtifactMetadataManager metadataManager = new ArtifactMetadataManagerImpl( transfers, locationExpander )
-        {
-            @Override
-            public List<Transfer> retrieveAll( final List<? extends Location> locations, final String groupId,
-                                               final String filename, final EventMetadata eventMetadata )
-                            throws TransferException
-            {
-                if ( localMetadataScanningEnabled() )
-                {
-                    final List<ConcreteResource> resources = new ArrayList<>();
-                    for ( Location l : locationExpander.expand( locations ) )
-                    {
-                        String p;
-                        if ( l.getUri().startsWith( "file:" ) )
-                        {
-                            p = formatMetadataPath( groupId, "maven-metadata-local.xml" );
-                        }
-                        else
-                        {
-                            p = formatMetadataPath( groupId, filename );
-                        }
-                        resources.add( new ConcreteResource( l, p ) );
-                    }
-                    return transfers.retrieveAll( new VirtualResource( resources ), eventMetadata );
-                }
-                else
-                {
-                    return super.retrieveAll( locations, groupId, filename, eventMetadata );
-                }
-            }
-
-            @Override
-            public List<Transfer> retrieveAll( final List<? extends Location> locations, final ProjectRef ref, final String filename, final EventMetadata eventMetadata )
-                            throws TransferException
-            {
-                if ( localMetadataScanningEnabled() )
-                {
-                    final List<ConcreteResource> resources = new ArrayList<>();
-                    for ( Location l : locationExpander.expand( locations ) )
-                    {
-                        String p;
-                        if ( l.getUri().startsWith( "file:" ) )
-                        {
-                            p = formatMetadataPath( ref, "maven-metadata-local.xml" );
-                        }
-                        else
-                        {
-                            p = formatMetadataPath( ref, filename );
-                        }
-                        resources.add( new ConcreteResource( l, p ) );
-                    }
-                    return transfers.retrieveAll( new VirtualResource( resources ), eventMetadata );
-                }
-                else
-                {
-                    return super.retrieveAll( locations, ref, filename, eventMetadata );
-                }
-            }
-        };
-
+        final ArtifactMetadataManager metadataManager = new ArtifactMetadataManagerImpl( transfers, locationExpander );
         final VersionResolver versionResolver =
             new VersionResolverImpl( new MavenMetadataReader( xml, locationExpander, metadataManager, xpaths ) );
 
@@ -321,12 +247,6 @@ public class GalleyInfrastructure
         metadataReader = new MavenMetadataReader( xml, locationExpander, metadataManager, xpaths );
 
         return this;
-    }
-
-    private boolean localMetadataScanningEnabled()
-    {
-        return sessionHandler == null || Boolean.parseBoolean(
-                        sessionHandler.getUserProperties().getProperty( LOCAL_REPO_SCANNING_PROP, "true" ) );
     }
 
     public MavenPomReader getPomReader()
