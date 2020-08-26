@@ -79,7 +79,7 @@
 
     <mavenVersion>3.5.0</mavenVersion>
     <atlasVersion>0.17.1</atlasVersion>
-    <galleyVersion>0.16.3</galleyVersion>
+    <galleyVersion>0.16.6</galleyVersion>
 
     <groovyVersion>2.5.7</groovyVersion>
     <unirestVersion>3.1.00</unirestVersion>
