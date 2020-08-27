@@ -82,14 +82,14 @@
     <galleyVersion>0.16.6</galleyVersion>
 
     <groovyVersion>2.5.7</groovyVersion>
-    <unirestVersion>3.1.00</unirestVersion>
+    <unirestVersion>3.10.00</unirestVersion>
     <jsonPathVersion>2.3.0</jsonPathVersion>
     <slf4jVersion>1.7.30</slf4jVersion>
 
     <!-- Both Jackson versions should be identical except if Jackson has not -->
     <!-- published javadoc for the micro version -->
-    <jacksonVersion>2.10.3</jacksonVersion>
-    <jacksonJavadocVersion>2.10</jacksonJavadocVersion>
+    <jacksonVersion>2.11.2</jacksonVersion>
+    <jacksonJavadocVersion>2.11</jacksonJavadocVersion>
   </properties>
 
 
@@ -447,6 +447,13 @@
         <groupId>com.squareup</groupId>
         <artifactId>javapoet</artifactId>
         <version>1.12.0</version>
+      </dependency>
+
+      <!-- Add this as Unirest / Galley have different versions -->
+      <dependency>
+        <groupId>org.apache.httpcomponents</groupId>
+        <artifactId>httpclient</artifactId>
+        <version>4.5.12</version>
       </dependency>
 
       <dependency>

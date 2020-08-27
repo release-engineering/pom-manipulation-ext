@@ -140,8 +140,8 @@ public class VersionTranslatorTest
 
         // All values with null bestMatchVersion should have been filtered out.
         Map<ProjectVersionRef, String> expectedResult = new HashMap<ProjectVersionRef, String>()
-        {{
-        }};
+        {
+        };
         assertEquals( expectedResult, actualResult );
     }
 
