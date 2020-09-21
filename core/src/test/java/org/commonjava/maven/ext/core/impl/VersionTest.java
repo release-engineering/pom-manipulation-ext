@@ -199,6 +199,10 @@ public class VersionTest
         assertThat( Version.getOsgiVersion( "-beta1" ), equalTo( "-beta1" ) );
         assertThat( Version.getOsgiVersion( "12.beta1_3-5.hello" ), equalTo( "12.0.0.beta1_3-5-hello" ) );
         assertThat( Version.getOsgiVersion( "1.0.0.Final-t20170516223844555-redhat-1" ), equalTo( "1.0.0.Final-t20170516223844555-redhat-1" ) );
+        assertThat ( Version.getOsgiVersion( "1-0-3.4-beta2.1" ), equalTo( "1.0.3.4-beta2-1" ));
+        assertThat ( Version.getOsgiVersion( "4.8-2" ), equalTo( "4.8.2" ));
+        assertThat ( Version.getOsgiVersion( "4.5.1-1" ), equalTo( "4.5.1.1" ));
+        assertThat ( Version.getOsgiVersion( "4.5.1-1.redhat-1" ), equalTo( "4.5.1.1-redhat-1" ));
     }
 
     @Test
@@ -224,6 +228,8 @@ public class VersionTest
 
         assertThat( Version.getQualifier( "1.5-3_beta-SNAPSHOT-1" ), equalTo( "beta-SNAPSHOT-1" ) );
         assertThat( Version.getQualifierWithDelim( "1.5-3_beta-SNAPSHOT-1" ), equalTo( "_beta-SNAPSHOT-1" ) );
+        assertThat( Version.getQualifierBase( "1.5-3_beta-SNAPSHOT-1" ), equalTo( "beta-SNAPSHOT" ) );
+        assertThat( Version.getOsgiVersion( "1.5-3_beta-SNAPSHOT-1" ), equalTo( "1.5.3.beta-SNAPSHOT-1" ) );
 
         assertThat( Version.getQualifier( "_beta-SNAPSHOT-1" ), equalTo( "beta-SNAPSHOT-1" ) );
         assertThat( Version.getQualifierWithDelim( "_beta-SNAPSHOT-1" ), equalTo( "_beta-SNAPSHOT-1" ) );
@@ -262,6 +268,8 @@ public class VersionTest
         assertThat(Version.getQualifierBase("1.0.0.Beta10-rebuild-3"), equalTo("Beta10-rebuild"));
         assertThat(Version.getQualifierBase("1.0.0.Final-Beta-1"), equalTo("Final-Beta"));
         assertThat(Version.getQualifierBase("1.0.0.Final-Beta10"), equalTo("Final-Beta"));
+        assertThat(Version.getQualifierBase("4.8-TWENTY"), equalTo("TWENTY"));
+        assertThat(Version.getQualifierBase("4.8-2"), equalTo(""));
     }
 
     @Test
