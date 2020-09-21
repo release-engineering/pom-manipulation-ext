@@ -498,6 +498,25 @@ public class VersioningCalculatorTest
     }
 
     @Test
+    public void applySuffixBeforeSNAPSHOT_OSGI_2()
+                    throws Exception
+    {
+        final Properties props = new Properties();
+
+        final String s = "rebuild-2";
+        props.setProperty( VersioningState.VERSION_SUFFIX_SYSPROP, s );
+        props.setProperty( VersioningState.VERSION_SUFFIX_SNAPSHOT_SYSPROP, "true" );
+        setupSession( props );
+
+        final String v = "4.8-2";
+        final String sn = "-SNAPSHOT";
+
+        final String result = calculate( v + sn );
+
+        assertThat( result, equalTo( "4.8.2." + s + sn ) );
+    }
+
+    @Test
     public void applySuffixBeforeSNAPSHOT_OverwriteExisting()
         throws Exception
     {
