@@ -29,7 +29,7 @@ assert plugin2.size() != 0
 
 def artifactItem1 = plugin2.executions.execution.configuration.artifactItems.artifactItem.find { it.groupId.text() == "junit" && it.artifactId.text() == "junit" }
 assert artifactItem1.size() != 0
-assert artifactItem1.version.text() == "4.1"
+assert artifactItem1.version.text().contains("junitProp")
 
 def artifactItem2 = plugin2.executions.execution.configuration.artifactItems.artifactItem.find { it.groupId.text() == "org.slf4j" && it.artifactId.text() == "slf4j-api" }
 assert artifactItem2.size() != 0
@@ -42,8 +42,17 @@ assert plugin3.size() != 0
 
 def artifactItem3 = plugin3.executions.execution.configuration.artifactItems.artifactItem.find { it.groupId.text() == "junit" && it.artifactId.text() == "junit" }
 assert artifactItem3.size() != 0
-assert artifactItem3.version.text() == "4.1"
+assert artifactItem3.version.text().contains("junitProp")
 
 def artifactItem4 = plugin3.executions.execution.configuration.artifactItems.artifactItem.find { it.groupId.text() == "org.slf4j" && it.artifactId.text() == "slf4j-api" }
 assert artifactItem4.size() != 0
 assert artifactItem4.version.text() == "1.7.30"
+
+def passed = false
+pom.properties.each {
+    if ( it.text().contains ("4.1") )
+    {
+        passed = true
+    }
+}
+assert (passed == true)

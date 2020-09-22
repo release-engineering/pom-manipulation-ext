@@ -15,6 +15,7 @@
  */
 package org.commonjava.maven.ext.core.impl;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.maven.model.ConfigurationContainer;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.DependencyManagement;
@@ -33,10 +34,10 @@ import org.commonjava.maven.ext.common.model.SimpleScopedArtifactRef;
 import org.commonjava.maven.ext.common.util.ProfileUtils;
 import org.commonjava.maven.ext.common.util.WildcardMap;
 import org.commonjava.maven.ext.core.ManipulationSession;
-import org.commonjava.maven.ext.core.state.DependencyState;
 import org.commonjava.maven.ext.core.state.PluginState;
 import org.commonjava.maven.ext.core.state.RelocationState;
 import org.commonjava.maven.ext.core.state.State;
+import org.commonjava.maven.ext.core.util.PropertiesUtils;
 import org.commonjava.maven.ext.io.resolver.GalleyAPIWrapper;
 import org.commonjava.maven.galley.maven.parse.GalleyMavenXMLException;
 import org.slf4j.Logger;
@@ -143,18 +144,18 @@ public class RelocationManipulator
         DependencyManagement dependencyManagement = model.getDependencyManagement();
         if ( dependencyManagement != null )
         {
-            result = updateDependencies( relocations, project.getResolvedManagedDependencies( session ) );
+            result = updateDependencies( project, relocations, project.getResolvedManagedDependencies( session ) );
         }
-        result |= updateDependencies( relocations, project.getAllResolvedDependencies( session ) );
+        result |= updateDependencies( project, relocations, project.getAllResolvedDependencies( session ) );
 
         for ( final Profile profile : ProfileUtils.getProfiles( session, model) )
         {
             dependencyManagement = profile.getDependencyManagement();
             if ( dependencyManagement != null )
             {
-                result |= updateDependencies( relocations, project.getResolvedProfileManagedDependencies( session ).get( profile ) );
+                result |= updateDependencies( project, relocations, project.getResolvedProfileManagedDependencies( session ).get( profile ) );
             }
-            result |= updateDependencies( relocations, project.getAllResolvedProfileDependencies( session ).get( profile ) );
+            result |= updateDependencies( project, relocations, project.getAllResolvedProfileDependencies( session ).get( profile ) );
 
         }
 
@@ -175,7 +176,8 @@ public class RelocationManipulator
         return result;
     }
 
-    private boolean updateDependencies( WildcardMap<ProjectVersionRef> relocations, Map<ArtifactRef, Dependency> dependencies )
+    private boolean updateDependencies( Project project, WildcardMap<ProjectVersionRef> relocations, Map<ArtifactRef, Dependency> dependencies )
+                    throws ManipulationException
     {
         final Map<ArtifactRef, Dependency> postFixUp = new HashMap<>();
         boolean result = false;
@@ -192,9 +194,6 @@ public class RelocationManipulator
                 if ( relocations.containsKey( pvr.asProjectRef() ) )
                 {
                     ProjectVersionRef relocation = relocations.get( pvr.asProjectRef() );
-
-                    updateDependencyExclusion( pvr, relocation );
-
                     Dependency dependency = dependencies.get( pvr );
 
                     logger.info( "Replacing groupId {} by {} and artifactId {} with {}",
@@ -204,6 +203,15 @@ public class RelocationManipulator
                     {
                         dependency.setArtifactId( relocation.getArtifactId() );
                     }
+                    if (relocation.getVersionString().equals( WildcardMap.WILDCARD ) )
+                    {
+                        logger.debug ("No version alignment to perform for relocations");
+                    }
+                    else
+                    {
+                        updateVersionString( project, relocation, dependency.getVersion(), dependency, null );
+                    }
+
                     dependency.setGroupId( relocation.getGroupId() );
 
                     // Unfortunately because we iterate using the resolved project keys if the relocation updates those
@@ -221,50 +229,78 @@ public class RelocationManipulator
         return result;
     }
 
+    private void updateVersionString( Project project, ProjectVersionRef relocation, String property, Dependency dependency,
+                                      Node versionNode ) throws ManipulationException
+    {
+        if ( property != null && property.contains( "$" ))
+        {
+            property = property.substring( 2, property.length() - 1 );
+            if ( StringUtils.countMatches( property, "${" ) > 1 )
+            {
+                throw new ManipulationException( "Relocations with multiple embedded version properties not supported" );
+            }
+            logger.debug( "Updating relocation for {} with property {} to new version {}",
+                          dependency == null ? versionNode : dependency, property, relocation.getVersionString() );
+            PropertiesUtils.updateProperties( session, project, true, property, relocation.getVersionString() );
+        }
+        else
+        {
+            if ( dependency == null )
+            {
+                versionNode.setTextContent( relocation.getVersionString() );
+            }
+            else
+            {
+                dependency.setVersion( relocation.getVersionString() );
+            }
+        }
+    }
+
     private boolean updatePlugins( final WildcardMap<ProjectVersionRef> relocations, final Project project, final Map<ProjectVersionRef, Plugin> pluginMap ) throws ManipulationException
     {
         final List<PluginReference> refs =  findPluginReferences( project, pluginMap );
         final int size = relocations.size();
 
-        logger.debug( "Got {} relocations for plugins", size );
+        logger.debug( "{} potential relocations for {} plugins", size, pluginMap.values().size() );
 
         boolean result = false;
 
         for ( int i = 0; i < size; i++ )
         {
-            final Iterator<PluginReference> it = refs.iterator();
-
-            while ( it.hasNext() )
+            for ( PluginReference pluginReference : refs )
             {
                 final Dependency dependency = new Dependency();
-                final PluginReference ref = it.next();
 
-                dependency.setGroupId( ref.groupIdNode.getTextContent() );
-                dependency.setArtifactId( ref.artifactIdNode.getTextContent() );
+                dependency.setGroupId( pluginReference.groupIdNode.getTextContent() );
+                dependency.setArtifactId( pluginReference.artifactIdNode.getTextContent() );
 
                 final boolean isUpdate = relocations.containsKey( dependency );
-
-                logger.debug( "Update plugin: {}", isUpdate );
 
                 if ( isUpdate )
                 {
                     final ProjectVersionRef relocation = relocations.get( dependency );
 
-                    ref.groupIdNode.setTextContent( relocation.getGroupId() );
+                    pluginReference.groupIdNode.setTextContent( relocation.getGroupId() );
 
                     if ( !relocation.getArtifactId().equals( WildcardMap.WILDCARD ) )
                     {
-                        ref.artifactIdNode.setTextContent( relocation.getArtifactId() );
+                        pluginReference.artifactIdNode.setTextContent( relocation.getArtifactId() );
                     }
 
-                    if ( ref.versionNode != null && !relocation.getVersionString().equals( WildcardMap.WILDCARD ) )
+                    if ( pluginReference.versionNode != null)
                     {
-                        ref.versionNode.setTextContent( relocation.getVersionString() );
+                        if ( relocation.getVersionString().equals( WildcardMap.WILDCARD ) )
+                        {
+                            logger.debug ("No version alignment to perform for relocations");
+                        }
+                        else
+                        {
+                            updateVersionString( project, relocation, pluginReference.versionNode.getTextContent(), null, pluginReference.versionNode );
+                        }
                     }
+                    pluginReference.container.setConfiguration( getConfigXml( pluginReference.groupIdNode ) );
 
-                    ref.container.setConfiguration( getConfigXml( ref.groupIdNode ) );
-
-                    logger.debug( "Update plugin: set {} to {}", relocation, ref );
+                    logger.debug( "Update plugin: set {} to {}", relocation, pluginReference );
 
                     result = true;
                 }
@@ -272,32 +308,6 @@ public class RelocationManipulator
         }
 
         return result;
-    }
-
-    /**
-     * @param depPvr the resolved dependency we are processing the exclusion for.
-     * @param relocation Map containing the update information for relocations.
-     */
-    private void updateDependencyExclusion( ProjectVersionRef depPvr, ProjectVersionRef relocation )
-    {
-        final DependencyState state = session.getState( DependencyState.class );
-
-        if (relocation.getVersionString().equals( WildcardMap.WILDCARD ) )
-        {
-            logger.debug ("No version alignment to perform for relocations");
-        }
-        else
-        {
-            String artifact = depPvr.getArtifactId();
-            if ( ! relocation.getArtifactId().equals( WildcardMap.WILDCARD ))
-            {
-                artifact = relocation.getArtifactId();
-            }
-
-            logger.debug ("Adding dependencyOverride {} & {}", relocation.getGroupId() + ':' + artifact + "@*",
-                          relocation.getVersionString() );
-            state.updateExclusions( relocation.getGroupId() + ':' + artifact + "@*", relocation.getVersionString() );
-        }
     }
 
     private PluginReference findPluginReference( final ConfigurationContainer container, final Node parent )
@@ -320,17 +330,17 @@ public class RelocationManipulator
         {
             final Node node = children.item( i );
 
-            if ( node.getNodeName().equals( "groupId" ) )
+            switch ( node.getNodeName() )
             {
-                groupIdNode = node;
-            }
-            else if ( node.getNodeName().equals( "artifactId" ) )
-            {
-                artifactIdNode = node;
-            }
-            else if ( node.getNodeName().equals( "version" ) )
-            {
-                versionNode = node;
+                case "groupId":
+                    groupIdNode = node;
+                    break;
+                case "artifactId":
+                    artifactIdNode = node;
+                    break;
+                case "version":
+                    versionNode = node;
+                    break;
             }
         }
 
@@ -371,12 +381,10 @@ public class RelocationManipulator
         return refs;
     }
 
-    public List<PluginReference> findPluginReferences( final Project project, final Map<ProjectVersionRef, Plugin> pluginMap ) throws ManipulationException
+    private List<PluginReference> findPluginReferences( final Project project, final Map<ProjectVersionRef, Plugin> pluginMap ) throws ManipulationException
     {
         final Collection<Plugin> plugins = pluginMap.values();
         final List<PluginReference> refs = new ArrayList<>();
-
-        logger.debug( "Found {} plugins in POM", plugins.size() );
 
         for ( final Plugin plugin : plugins )
         {
@@ -466,7 +474,7 @@ public class RelocationManipulator
     @Override
     public int getExecutionIndex()
     {
-        return 15;
+        return 7;
     }
 
     private static final class PluginReference

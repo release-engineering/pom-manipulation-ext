@@ -22,14 +22,14 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>org.commonjava.maven.ext.integration-test</groupId>
-  <artifactId>rest-version-manip-only-override</artifactId>
+  <artifactId>rest-version-manip-only-relocate</artifactId>
   <version>0.1.0-SNAPSHOT</version>
   <packaging>pom</packaging>
 
-  <name>Module to test REST manipulation of project version only</name>
+  <name>Module to test REST manipulation of project version with relocations</name>
 
   <properties>
-    <errai-tools>1.1-Final</errai-tools>
+    <errai-tools>1.1</errai-tools>
     <httpclient>3.1</httpclient>
     <httpclient-indirect>${httpclient}</httpclient-indirect>
   </properties>
@@ -42,7 +42,7 @@
         <version>1.5</version>
       </dependency>
       <dependency>
-        <groupId>org.jboss.errai</groupId>
+        <groupId>to-be-relocated-errai</groupId>
         <artifactId>errai-tools</artifactId>
         <version>${errai-tools}</version>
       </dependency>
@@ -56,9 +56,9 @@
       <version>${httpclient-indirect}</version>
     </dependency>
     <dependency>
-      <groupId>org.jboss.errai</groupId>
+      <groupId>to-be-relocated-errai</groupId>
       <artifactId>errai-common</artifactId>
-      <version>1.1-Final</version>
+      <version>1.1</version>
     </dependency>
   </dependencies>
 </project>

@@ -254,9 +254,4 @@ public class DependencyState
     {
         return dependencyOverrides;
     }
-
-    public void updateExclusions (String key, String value)
-    {
-        dependencyOverrides.put( key, value );
-    }
 }
