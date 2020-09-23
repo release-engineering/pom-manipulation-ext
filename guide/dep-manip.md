@@ -378,7 +378,15 @@ And the REST source returns 1.0.rebuild-2 for bar1 and rebuild-4 for bar2. In th
 
 ### Dependency Relocations
 
-In order to handle the situation where one GAV is changed to another (e.g. from community to product) the relocation manipulator can be used. An optional version component may be added; the version will override any prior version used in the dependency. Note this is akin to using the dependencyOverride functionality with an explicit version. The artifact override is optional.
+In order to handle the situation where one GAV is changed to another (e.g. from community to product) the relocation manipulator can be used. An optional version component may be added; the version will override any prior version used in the dependency. The artifact override is optional. The relocated GAV is subject to alignment ; if the developer wishes to force a particular version (i.e. one with an existing suffix) they may use `dependencyOverride`.
+
+<table bgcolor="#ffff00">
+<tr>
+<td>
+    <b>NOTE</b> : As of PME 4.1 dependency relocations <b>are</b> subject to alignment. The optional version is passed to DA for dependency alignment.
+</td>
+</tr>
+</table>
 
     -DdependencyRelocations.oldGroupId:[oldArtifact]@newGroupId:[newArtifactId]=[version],...
 
