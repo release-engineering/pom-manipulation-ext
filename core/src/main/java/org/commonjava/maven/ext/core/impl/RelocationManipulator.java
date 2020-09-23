@@ -139,7 +139,7 @@ public class RelocationManipulator
         final RelocationState state = session.getState( RelocationState.class );
         final WildcardMap<ProjectVersionRef> relocations = state.getDependencyRelocations();
 
-        logger.debug( "Applying relocation changes to: " + ga( project ) );
+        logger.debug( "Applying relocation changes ({}) to: {}", relocations, ga( project ) );
 
         DependencyManagement dependencyManagement = model.getDependencyManagement();
         if ( dependencyManagement != null )
@@ -205,7 +205,7 @@ public class RelocationManipulator
                     }
                     if (relocation.getVersionString().equals( WildcardMap.WILDCARD ) )
                     {
-                        logger.debug ("No version alignment to perform for relocations");
+                        logger.debug ("No version alignment to perform for relocation {}", relocation);
                     }
                     else
                     {
@@ -258,11 +258,8 @@ public class RelocationManipulator
 
     private boolean updatePlugins( final WildcardMap<ProjectVersionRef> relocations, final Project project, final Map<ProjectVersionRef, Plugin> pluginMap ) throws ManipulationException
     {
-        final List<PluginReference> refs =  findPluginReferences( project, pluginMap );
+        final List<PluginReference> refs = findPluginReferences( project, pluginMap );
         final int size = relocations.size();
-
-        logger.debug( "{} potential relocations for {} plugins", size, pluginMap.values().size() );
-
         boolean result = false;
 
         for ( int i = 0; i < size; i++ )
@@ -291,7 +288,7 @@ public class RelocationManipulator
                     {
                         if ( relocation.getVersionString().equals( WildcardMap.WILDCARD ) )
                         {
-                            logger.debug ("No version alignment to perform for relocations");
+                            logger.debug ("No version alignment to perform for relocation {}", relocation);
                         }
                         else
                         {

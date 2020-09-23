@@ -43,6 +43,11 @@
 
   <dependencies>
     <dependency>
+      <groupId>to-be-relocated-lang</groupId>
+      <artifactId>commons-lang</artifactId>
+      <version>1.5</version>
+    </dependency>
+    <dependency>
       <groupId>com.junit</groupId>
       <artifactId>junit</artifactId>
       <version>3.8.2</version>
@@ -58,4 +63,23 @@
     </dependency>
   </dependencies>
 
+
+  <profiles>
+    <profile>
+      <id>one</id>
+      <activation>
+        <activeByDefault>true</activeByDefault>
+      </activation>
+
+      <dependencyManagement>
+        <dependencies>
+          <dependency>
+            <groupId>com.junit</groupId>
+            <artifactId>junit-dep</artifactId>
+            <version>3.8.2</version>
+          </dependency>
+        </dependencies>
+      </dependencyManagement>
+    </profile>
+  </profiles>
 </project>

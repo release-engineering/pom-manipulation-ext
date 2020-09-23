@@ -56,3 +56,6 @@ pom.properties.each {
     }
 }
 assert (passed == true)
+
+plugin1 = pom.build.plugins.plugin.find { it.groupId.text() == "com.soebes.maven.plugins" }
+assert plugin1.artifactId.text() == "iterator-maven-plugin"
