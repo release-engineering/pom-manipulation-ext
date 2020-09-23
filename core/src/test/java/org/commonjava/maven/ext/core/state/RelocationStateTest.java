@@ -84,6 +84,18 @@ public class RelocationStateTest
         assertThat( state.isEnabled(), equalTo( true ) );
     }
 
+    @Test
+    public void testRelocationsWithWildcardEmptyVersion()
+                    throws ManipulationException
+    {
+        final Properties p = new Properties();
+        p.setProperty( RelocationState.DEPENDENCY_RELOCATIONS + "oldGroupId:@newGroupId:", "" );
+
+        final RelocationState state = new RelocationState( p );
+
+        assertThat( state.isEnabled(), equalTo( true ) );
+    }
+
     @Test(expected = ManipulationException.class)
     public void testRelocationsWithArtifactInvalid()
                     throws ManipulationException

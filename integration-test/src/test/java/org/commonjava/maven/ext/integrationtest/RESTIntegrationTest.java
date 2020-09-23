@@ -177,6 +177,13 @@ public class RESTIntegrationTest
         runLikeInvoker( test, mockServer.getUrl() );
     }
 
+    @Test
+    public void testRESTVersionManipRelocate() throws Exception
+    {
+        String test = getDefaultTestLocation( "rest-version-manip-only-relocate" );
+        runLikeInvoker( test, mockServer.getUrl() );
+    }
+
     @Test(expected = ManipulationException.class)
     public void testRESTBlacklist() throws Exception
     {

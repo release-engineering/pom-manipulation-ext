@@ -18,10 +18,13 @@ System.out.println( "Slurping POM: ${pomFile.getAbsolutePath()}" )
 
 def pom = new XmlSlurper().parse( pomFile )
 
-def dependency = pom.dependencies.dependency.find { it.artifactId.text() == "junit" }
+def dependency = pom.dependencyManagement.dependencies.dependency.find { it.artifactId.text() == "junit-dep" }
 assert dependency != null
 assert dependency.version.text() == "4.1"
 
+pom.dependencies.dependency.find { it.artifactId.text() == "junit" }
+assert dependency != null
+assert dependency.version.text() == "4.1"
 
 dependency = pom.dependencies.dependency.find { it.scope.text() == "test" }
 assert dependency != null
@@ -30,3 +33,16 @@ assert dependency.groupId.text() == "junit"
 dependency = pom.dependencies.dependency.find { it.artifactId.text() == "junit-dep" && it.scope.text() != "test" }
 assert dependency != null
 assert dependency.groupId.text() == "junit"
+
+dependency = pom.dependencies.dependency.find { it.artifactId.text() == "commons-lang" }
+assert dependency != null
+assert dependency.version.text() == "1.5"
+
+def buildLog = new File( basedir, 'build.log' )
+assert buildLog.getText().contains( 'No version alignment to perform for relocation commons-lang' )
+
+def profile1 = pom.profiles.profile.find { it.id.text() == "one" }
+assert profile1.size() != 0
+dependency = pom.dependencyManagement.dependencies.dependency.find { it.artifactId.text() == "junit-dep" }
+assert dependency != null
+assert dependency.version.text() == "4.1"

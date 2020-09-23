@@ -89,6 +89,11 @@
                   <overWrite>false</overWrite>
                   <outputDirectory>${project.build.directory}</outputDirectory>
                 </artifactItem>
+                <artifactItem>
+                  <groupId>org.apache.maven</groupId>
+                  <artifactId>maven-model-to-relocate</artifactId>
+                  <version>3.5.0</version>
+                </artifactItem>
               </artifactItems>
             </configuration>
           </execution>
