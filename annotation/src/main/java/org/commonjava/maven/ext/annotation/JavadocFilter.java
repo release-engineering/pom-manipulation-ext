@@ -16,10 +16,15 @@
 
 package org.commonjava.maven.ext.annotation;
 
-import com.sun.javadoc.DocErrorReporter;
-import com.sun.javadoc.LanguageVersion;
-import com.sun.javadoc.RootDoc;
-import com.sun.tools.doclets.standard.Standard;
+//import com.sun.javadoc.DocErrorReporter;
+//import com.sun.javadoc.LanguageVersion;
+//import com.sun.javadoc.RootDoc;
+//import com.sun.tools.doclets.standard.Standard;
+
+//import com.sun.javadoc.DocErrorReporter;
+//import com.sun.javadoc.LanguageVersion;
+//import com.sun.javadoc.RootDoc;
+//import com.sun.tools.doclets.standard.Standard;
 
 /**
  * A <a href="http://java.sun.com/javase/6/docs/jdk/api/javadoc/doclet/">Doclet</a>
@@ -31,24 +36,24 @@ import com.sun.tools.doclets.standard.Standard;
  */
 public class JavadocFilter
 {
-    @SuppressWarnings( "unused" )
-    public static boolean validOptions( String[][] options, DocErrorReporter reporter)
-    {
-        return Standard.validOptions(options, reporter);
-    }
-
-    @SuppressWarnings( "unused" )
-    public static LanguageVersion languageVersion() {
-        return LanguageVersion.JAVA_1_5;
-    }
-
-    @SuppressWarnings( "unused" )
-    public static int optionLength(String option) {
-        return Standard.optionLength(option);
-    }
-
-    public static boolean start(RootDoc root)
-    {
-        return Standard.start( RootDocProcessor.process( root ) );
-    }
+//    @SuppressWarnings( "unused" )
+//    public static boolean validOptions( String[][] options, DocErrorReporter reporter)
+//    {
+//        return Standard.validOptions( options, reporter);
+//    }
+//
+//    @SuppressWarnings( "unused" )
+//    public static LanguageVersion languageVersion() {
+//        return LanguageVersion.JAVA_1_5;
+//    }
+//
+//    @SuppressWarnings( "unused" )
+//    public static int optionLength(String option) {
+//        return Standard.optionLength(option);
+//    }
+//
+//    public static boolean start( RootDoc root)
+//    {
+//        return Standard.start( RootDocProcessor.process( root ) );
+//    }
 }

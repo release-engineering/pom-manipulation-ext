@@ -16,19 +16,20 @@
 
 package org.commonjava.maven.ext.annotation;
 
-import com.sun.javadoc.AnnotationDesc;
-import com.sun.javadoc.Doc;
-import com.sun.javadoc.PackageDoc;
-import com.sun.javadoc.ProgramElementDoc;
-import com.sun.javadoc.RootDoc;
+//import com.sun.javadoc.AnnotationDesc;
+//import com.sun.javadoc.Doc;
+//import com.sun.javadoc.PackageDoc;
+//import com.sun.javadoc.ProgramElementDoc;
+//import com.sun.javadoc.RootDoc;
+//
+//import java.lang.reflect.Array;
+//import java.lang.reflect.InvocationHandler;
+//import java.lang.reflect.InvocationTargetException;
+//import java.lang.reflect.Method;
+//import java.lang.reflect.Proxy;
+//import java.util.ArrayList;
+//import java.util.List;
 
-import java.lang.reflect.Array;
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Proxy;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Process the {@link RootDoc} by substituting with (nested) proxy objects that
@@ -39,106 +40,106 @@ import java.util.List;
  */
 class RootDocProcessor
 {
-    public static RootDoc process( RootDoc root )
-    {
-        return (RootDoc) process( root, RootDoc.class );
-    }
-
-    private static boolean exclude( Doc doc )
-    {
-        AnnotationDesc[] annotations = null;
-        if ( doc instanceof ProgramElementDoc )
-        {
-            annotations = ( (ProgramElementDoc) doc ).annotations();
-        }
-        else if ( doc instanceof PackageDoc )
-        {
-            annotations = ( (PackageDoc) doc ).annotations();
-        }
-        if ( annotations != null )
-        {
-            for ( AnnotationDesc annotation : annotations )
-            {
-                String qualifiedTypeName = annotation.annotationType().qualifiedTypeName();
-                if ( qualifiedTypeName.equals( JavadocExclude.class.getCanonicalName() ) )
-                {
-                    return true;
-                }
-            }
-        }
-        // nothing above found a reason to exclude
-        return false;
-    }
-
-    private static Object process( Object obj, Class<?> type )
-    {
-        if ( obj == null )
-            return null;
-        Class<?> cls = obj.getClass();
-        if ( cls.getName().startsWith( "com.sun." ) )
-        {
-            return Proxy.newProxyInstance( cls.getClassLoader(), cls.getInterfaces(), new ExcludeHandler( obj ) );
-        }
-        else if ( obj instanceof Object[] )
-        {
-            Class<?> componentType = type.isArray() ? type.getComponentType() : cls.getComponentType();
-            Object[] array = (Object[]) obj;
-            List<Object> list = new ArrayList<>( array.length );
-            for ( Object entry : array )
-            {
-                if ( ( entry instanceof Doc ) && exclude( (Doc) entry ) )
-                {
-                    continue;
-                }
-                list.add( process( entry, componentType ) );
-            }
-            return list.toArray( (Object[]) Array.newInstance( componentType, list.size() ) );
-        }
-        else
-        {
-            return obj;
-        }
-    }
-
-    private static class ExcludeHandler
-                    implements InvocationHandler
-    {
-        private final Object target;
-
-        public ExcludeHandler( Object target )
-        {
-            this.target = target;
-        }
-
-        @Override
-        public Object invoke( Object proxy, Method method, Object[] args ) throws Throwable
-        {
-            if ( args != null )
-            {
-                String methodName = method.getName();
-                if ( methodName.equals( "compareTo" ) || methodName.equals( "equals" ) || methodName.equals(
-                                "overrides" ) || methodName.equals( "subclassOf" ) )
-                {
-                    args[0] = unwrap( args[0] );
-                }
-            }
-            try
-            {
-                return process( method.invoke( target, args ), method.getReturnType() );
-            }
-            catch ( InvocationTargetException e )
-            {
-                throw e.getTargetException();
-            }
-        }
-
-        private Object unwrap( Object proxy )
-        {
-            if ( proxy instanceof Proxy )
-            {
-                return ( (ExcludeHandler) Proxy.getInvocationHandler( proxy ) ).target;
-            }
-            return proxy;
-        }
-    }
+//    public static RootDoc process( RootDoc root )
+//    {
+//        return (RootDoc) process( root, RootDoc.class );
+//    }
+//
+//    private static boolean exclude( Doc doc )
+//    {
+//        AnnotationDesc[] annotations = null;
+//        if ( doc instanceof ProgramElementDoc )
+//        {
+//            annotations = ( (ProgramElementDoc) doc ).annotations();
+//        }
+//        else if ( doc instanceof PackageDoc )
+//        {
+//            annotations = ( (PackageDoc) doc ).annotations();
+//        }
+//        if ( annotations != null )
+//        {
+//            for ( AnnotationDesc annotation : annotations )
+//            {
+//                String qualifiedTypeName = annotation.annotationType().qualifiedTypeName();
+//                if ( qualifiedTypeName.equals( JavadocExclude.class.getCanonicalName() ) )
+//                {
+//                    return true;
+//                }
+//            }
+//        }
+//        // nothing above found a reason to exclude
+//        return false;
+//    }
+//
+//    private static Object process( Object obj, Class<?> type )
+//    {
+//        if ( obj == null )
+//            return null;
+//        Class<?> cls = obj.getClass();
+//        if ( cls.getName().startsWith( "com.sun." ) )
+//        {
+//            return Proxy.newProxyInstance( cls.getClassLoader(), cls.getInterfaces(), new ExcludeHandler( obj ) );
+//        }
+//        else if ( obj instanceof Object[] )
+//        {
+//            Class<?> componentType = type.isArray() ? type.getComponentType() : cls.getComponentType();
+//            Object[] array = (Object[]) obj;
+//            List<Object> list = new ArrayList<>( array.length );
+//            for ( Object entry : array )
+//            {
+//                if ( ( entry instanceof Doc ) && exclude( (Doc) entry ) )
+//                {
+//                    continue;
+//                }
+//                list.add( process( entry, componentType ) );
+//            }
+//            return list.toArray( (Object[]) Array.newInstance( componentType, list.size() ) );
+//        }
+//        else
+//        {
+//            return obj;
+//        }
+//    }
+//
+//    private static class ExcludeHandler
+//                    implements InvocationHandler
+//    {
+//        private final Object target;
+//
+//        public ExcludeHandler( Object target )
+//        {
+//            this.target = target;
+//        }
+//
+//        @Override
+//        public Object invoke( Object proxy, Method method, Object[] args ) throws Throwable
+//        {
+//            if ( args != null )
+//            {
+//                String methodName = method.getName();
+//                if ( methodName.equals( "compareTo" ) || methodName.equals( "equals" ) || methodName.equals(
+//                                "overrides" ) || methodName.equals( "subclassOf" ) )
+//                {
+//                    args[0] = unwrap( args[0] );
+//                }
+//            }
+//            try
+//            {
+//                return process( method.invoke( target, args ), method.getReturnType() );
+//            }
+//            catch ( InvocationTargetException e )
+//            {
+//                throw e.getTargetException();
+//            }
+//        }
+//
+//        private Object unwrap( Object proxy )
+//        {
+//            if ( proxy instanceof Proxy )
+//            {
+//                return ( (ExcludeHandler) Proxy.getInvocationHandler( proxy ) ).target;
+//            }
+//            return proxy;
+//        }
+//    }
 }

@@ -48,7 +48,7 @@ import java.util.TreeMap;
 
 @SupportedAnnotationTypes( "org.commonjava.maven.ext.annotation.ConfigValue" )
 @SupportedOptions( { "generationDirectory", "packageName", "rootDirectory" } )
-@SupportedSourceVersion( SourceVersion.RELEASE_8)
+@SupportedSourceVersion( SourceVersion.RELEASE_11)
 public class ConfigValueProcessor extends AbstractProcessor
 {
     private static final String GENERATION_DIR = "generationDirectory";

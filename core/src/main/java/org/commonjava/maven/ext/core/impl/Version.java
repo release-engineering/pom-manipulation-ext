@@ -221,14 +221,15 @@ public class Version
      * This will return the OSGi qualifier portion without the numeric rebuild increment.
      * For example
      *
-     * <blockquote><table cellpadding=0 cellspacing=5 summary="">
+     * <blockquote><table>
+     *   <caption>Version conversion</caption>
      *   <tr>
      *      <th>Version</th><th>Qualifier</th>
      *   </tr>
-     *   <tr><td align=left>1.0.0.Beta1</td><td align=center>Beta1</td>
-     *   <tr><td align=left>1.0.0.Beta10-rebuild-1</td><td align=center>Beta10-rebuild</td>
-     *   <tr><td align=left>1.0.0.GA-rebuild1</td><td align=center>GA-rebuild</td>
-     *   <tr><td align=left>1.0.0.Final-Beta-1</td><td align=center>Final-Beta</td>
+     *   <tr><td>1.0.0.Beta1</td><td>Beta1</td>
+     *   <tr><td>1.0.0.Beta10-rebuild-1</td><td>Beta10-rebuild</td>
+     *   <tr><td>1.0.0.GA-rebuild1</td><td>GA-rebuild</td>
+     *   <tr><td>1.0.0.Final-Beta-1</td><td>Final-Beta</td>
      *   </tr>
      * </table></blockquote>
      *
