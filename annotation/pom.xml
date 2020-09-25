@@ -101,25 +101,6 @@
           </execution>
         </executions>
       </plugin>
-      <plugin>
-        <artifactId>maven-enforcer-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>enforce-commonjava-standards</id>
-            <configuration>
-              <rules>
-                <!-- Also ignore com.sun.javadoc -->
-                <illegalTransitiveDependencyCheck implementation="de.is24.maven.enforcer.rules.IllegalTransitiveDependencyCheck">
-                  <regexIgnoredClasses>
-                    <regexIgnoredClass>com\.sun\..+</regexIgnoredClass>
-                    <regexIgnoredClass>javax\..+</regexIgnoredClass>
-                  </regexIgnoredClasses>
-                </illegalTransitiveDependencyCheck>
-              </rules>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
     </plugins>
   </build>
 </project>

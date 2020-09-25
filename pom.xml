@@ -22,7 +22,7 @@
   <parent>
     <groupId>com.redhat.rcm</groupId>
     <artifactId>redhat-releng-tools</artifactId>
-    <version>10-SNAPSHOT</version>
+    <version>10</version>
   </parent>
 
   <groupId>org.commonjava.maven.ext</groupId>
@@ -72,7 +72,6 @@
 
   <properties>
     <projectOwner>Red Hat, Inc.</projectOwner>
-    <projectEmail>jcasey@redhat.com</projectEmail>
 
     <javaVersion>11</javaVersion>
     <javaTestVersion>${javaVersion}</javaTestVersion>
@@ -85,6 +84,7 @@
     <unirestVersion>3.10.00</unirestVersion>
     <jsonPathVersion>2.3.0</jsonPathVersion>
     <slf4jVersion>1.7.30</slf4jVersion>
+    <docletVersion>1.0-SNAPSHOT</docletVersion>
 
     <!-- Both Jackson versions should be identical except if Jackson has not -->
     <!-- published javadoc for the micro version -->
@@ -469,6 +469,12 @@
       </dependency>
 
       <dependency>
+        <groupId>org.goots.hiderdoclet</groupId>
+        <artifactId>doclet</artifactId>
+        <version>${docletVersion}</version>
+      </dependency>
+
+      <dependency>
         <groupId>junit</groupId>
         <artifactId>junit</artifactId>
         <version>4.13.1</version>
@@ -672,17 +678,17 @@
           <execution>
             <id>attach-javadocs</id>
             <configuration>
+              <source>11</source>
               <sourcepath>${project.build.directory}/javadoc-generated-sources</sourcepath>
-<!--              <doclet>org.commonjava.maven.ext.annotation.JavadocFilter</doclet>-->
-<!--              <docletArtifact>-->
-<!--                <groupId>org.commonjava.maven.ext</groupId>-->
-<!--                <artifactId>pom-manipulation-annotation</artifactId>-->
-<!--                <version>${project.version}</version>-->
-<!--              </docletArtifact>-->
+              <doclet>org.goots.hiderdoclet.doclet.JavadocFilter</doclet>
+              <docletArtifact>
+                <groupId>org.goots.hiderdoclet</groupId>
+                <artifactId>doclet</artifactId>
+                <version>${docletVersion}</version>
+              </docletArtifact>
               <detectJavaApiLink>true</detectJavaApiLink>
-              <quiet>true</quiet>
+              <!-- <quiet>true</quiet> -->
               <author>false</author>
-              <detectLinks>true</detectLinks>
               <links>
                 <!-- TODO: Doesn't seem to work in JDK 11 -->
 <!--                <link>https://www.javadoc.io/doc/org.commonjava.maven.ext/pom-manipulation-common/${project.version}</link>-->
@@ -705,6 +711,16 @@
                 <link>https://www.javadoc.io/doc/org.codehaus.groovy/groovy-all/${groovyVersion}</link>
                 <link>https://fasterxml.github.io/jackson-core/javadoc/${jacksonJavadocVersion}</link>
               </links>
+              <additionalJOptions>
+                <additionalJOption>--add-exports=jdk.javadoc/jdk.javadoc.internal.tool=hiderdoclet</additionalJOption>
+                <additionalJOption>--add-exports=jdk.compiler/com.sun.tools.javac.parser=hiderdoclet</additionalJOption>
+                <additionalJOption>--add-exports=jdk.compiler/com.sun.tools.javac.tree=hiderdoclet</additionalJOption>
+                <additionalJOption>--add-exports=jdk.compiler/com.sun.tools.javac.model=hiderdoclet</additionalJOption>
+                <additionalJOption>-J--add-exports=jdk.javadoc/jdk.javadoc.internal.tool=ALL-UNNAMED</additionalJOption>
+                <additionalJOption>-J--add-exports=jdk.compiler/com.sun.tools.javac.parser=ALL-UNNAMED</additionalJOption>
+                <additionalJOption>-J--add-exports=jdk.compiler/com.sun.tools.javac.tree=ALL-UNNAMED</additionalJOption>
+                <additionalJOption>-J--add-exports=jdk.compiler/com.sun.tools.javac.model=ALL-UNNAMED</additionalJOption>
+              </additionalJOptions>
             </configuration>
           </execution>
         </executions>

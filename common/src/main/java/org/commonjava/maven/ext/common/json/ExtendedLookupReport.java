@@ -19,7 +19,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
-import org.commonjava.maven.ext.annotation.JavadocExclude;
+import org.goots.hiderdoclet.doclet.JavadocExclude;
 import org.jboss.da.reports.model.response.LookupReport;
 
 @Setter

@@ -32,7 +32,7 @@ import com.fasterxml.jackson.databind.node.JsonNodeType;
 import kong.unirest.jackson.JacksonObjectMapper;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef;
-import org.commonjava.maven.ext.annotation.JavadocExclude;
+import org.goots.hiderdoclet.doclet.JavadocExclude;
 import org.commonjava.maven.ext.common.json.ExtendedLookupReport;
 import org.commonjava.maven.ext.common.json.PME;
 import org.jboss.da.reports.model.response.LookupReport;
