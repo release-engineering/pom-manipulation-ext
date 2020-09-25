@@ -64,6 +64,10 @@
     <pluginManagement>
       <plugins>
         <plugin>
+          <artifactId>maven-compiler-plugin</artifactId>
+          <version>3.8.1</version>
+        </plugin>
+        <plugin>
           <groupId>org.commonjava.maven.ext.integration-test</groupId>
           <artifactId>project-version</artifactId>
           <version>\${project.version}</version>
@@ -84,7 +88,7 @@
       <id>ibmjdk</id>
       <activation>
         <file>
-          <exists>\${java.home}/../lib/tools.jar</exists>
+          <exists>\${user.dir}/pom.xml</exists>
         </file>
       </activation>
 

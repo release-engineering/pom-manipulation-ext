@@ -20,11 +20,11 @@ def pom = new XmlSlurper().parse( pomFile )
 
 def plugin = pom.build.pluginManagement.plugins.plugin.find { it.artifactId.text() == "maven-compiler-plugin" }
 assert plugin != null
-assert plugin.version.text() == "3.1"
+assert plugin.version.text() == "3.8.1"
 
 plugin = pom.build.pluginManagement.plugins.plugin.find { it.artifactId.text() == "maven-compiler-plugin" }
 assert plugin != null
-assert plugin.version.text() == "3.1"
+assert plugin.version.text() == "3.8.1"
 
 def message = 0
 pomFile.eachLine {

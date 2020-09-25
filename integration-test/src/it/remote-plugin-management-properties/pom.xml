@@ -41,6 +41,9 @@
 
     <junitGrouppArtifactId>junit</junitGrouppArtifactId>
     <junitVersion>4.1</junitVersion>
+
+    <maven.compiler.source>1.6</maven.compiler.source>
+    <maven.compiler.target>1.6</maven.compiler.target>
   </properties>
 
   <dependencies>
@@ -82,8 +85,10 @@
             <debug>false</debug>
             <showDeprecation>true</showDeprecation>
             <showWarnings>true</showWarnings>
+            <source>${maven.compiler.source}</source>
+            <target>${maven.compiler.target}</target>
             <testSource>${maven.compiler.source}</testSource>
-            <testTarget>${maven.compiler.source}</testTarget>
+            <testTarget>${maven.compiler.target}</testTarget>
           </configuration>
         </plugin>
       </plugins>

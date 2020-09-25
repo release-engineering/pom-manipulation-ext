@@ -20,6 +20,6 @@ def pom = new XmlSlurper().parse( pomFile )
 
 def plugin = pom.build.pluginManagement.plugins.plugin.find { it.artifactId.text() == "maven-compiler-plugin" }
 assert plugin != null
-assert plugin.version.text() == "3.1"
+assert plugin.version.text() == "3.8.1"
 
 assert pom.build.pluginManagement.plugins.list().size() == 1

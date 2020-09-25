@@ -34,7 +34,7 @@ dependency = pom.dependencyManagement.dependencies.dependency.find { it.artifact
 assert dependency != null
 assert dependency.version.text() == "2.0"
 
-assert pomFile.text.contains("java.home")
+assert pomFile.text.contains("user.dir")
 
 def passed = false
 pomFile.eachLine {

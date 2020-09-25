@@ -24,7 +24,7 @@
   <parent>
       <groupId>org.jboss</groupId>
       <artifactId>jboss-parent</artifactId>
-      <version>11</version>
+      <version>35</version>
       <relativePath></relativePath>
   </parent>
 
@@ -37,8 +37,6 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <maven.compiler.source>1.6</maven.compiler.source>
-    <maven.compiler.target>1.6</maven.compiler.target>
   </properties>
 
   <modules>

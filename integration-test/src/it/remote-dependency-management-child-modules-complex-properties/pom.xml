@@ -43,6 +43,17 @@
     <jetty>\${jetty.major}.4.12.${jetty.qualifier}</jetty>
   </properties>
 
+  <build>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <artifactId>maven-compiler-plugin</artifactId>
+          <version>3.8.1</version>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+  </build>
+
   <dependencyManagement>
     <dependencies>
       <dependency>
@@ -67,8 +78,6 @@
       </dependency>
     </dependencies>
   </dependencyManagement>
-
-
 
   <modules>
     <module>child</module>

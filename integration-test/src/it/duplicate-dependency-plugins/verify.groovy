@@ -28,7 +28,7 @@ assert pomFile.text.contains("exclusions")
 
 def plugin = pom.build.pluginManagement.plugins.plugin.find { it.artifactId.text() == "maven-compiler-plugin" }
 assert plugin != null
-assert plugin.version.text() == "3.1"
+assert plugin.version.text() == "3.8.1"
 assert ! pomFile.text.contains("<debug>false</debug")
 
 def message = 0
