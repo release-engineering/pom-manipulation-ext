@@ -90,11 +90,13 @@ public class TestUtils
         return result;
     }
 
+    // Public API for manipulator-examples-project
     public static ManipulationSession createSession( Properties p ) throws ManipulationException
     {
         return createSessionAndManager( p ).getSession();
     }
 
+    // Public API for manipulator-examples-project
     @SuppressWarnings( "deprecation" )
     public static SMContainer createSessionAndManager( Properties p ) throws ManipulationException
     {
