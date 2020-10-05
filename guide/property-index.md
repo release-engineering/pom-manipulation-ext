@@ -17,6 +17,7 @@ title: "Index of Properties"
   * [groovyScripts](groovy.html)
   * [jsonUpdate](json.html)
   * [manipulation.disable](index.html#disabling-the-extension)
+  * [nexusStagingMavenPluginRemoval](plugin-manip.html#nexus-staging-maven-plugin-removal)
   * [overrideTransitive](dep-manip.html#directtransitive-dependencies)
   * [parentInjection](misc.html#parent-injection)
   * [pluginManagement](plugin-manip.html#basic-plugin-alignment)
