@@ -22,12 +22,12 @@ import java.util.ArrayList;
 import java.util.Properties;
 
 /**
- * Basic list of methods that state collections related to different {@link Manipulator}'s should implement. This is also a marker interface to 
+ * Basic list of methods that state collections related to different {@link Manipulator}'s should implement. This is also a marker interface to
  * help ensure the validity of content stored in the session.
- * 
+ *
  * A State implementation can contain a mixture of configuration (parsed/configured from command-line properties or other sources) and storage output
  * from the Manipulators.
- * 
+ *
  * @author jdcasey
  */
 public interface State
@@ -42,5 +42,5 @@ public interface State
      */
     boolean isEnabled();
 
-    void initialise ( Properties userProperties) throws ManipulationException;
+    void initialise( Properties userProperties ) throws ManipulationException;
 }

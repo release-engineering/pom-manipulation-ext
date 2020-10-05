@@ -15,16 +15,19 @@
  */
 package org.commonjava.maven.ext.core.state;
 
+import lombok.NoArgsConstructor;
 import org.commonjava.maven.atlas.ident.ref.ProjectRef;
 import org.commonjava.maven.ext.annotation.ConfigValue;
 import org.commonjava.maven.ext.core.util.IdUtils;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
 
 /**
  * Captures configuration relating to plugin removal from the POMs.
  */
+@NoArgsConstructor
 public class PluginRemovalState
     implements State
 {
@@ -39,7 +42,7 @@ public class PluginRemovalState
 
     private List<ProjectRef> pluginRemoval;
 
-    public PluginRemovalState( final Properties userProps )
+    public PluginRemovalState( Properties userProps )
     {
         initialise( userProps );
     }
@@ -62,6 +65,6 @@ public class PluginRemovalState
 
     public List<ProjectRef> getPluginRemoval()
     {
-        return pluginRemoval;
+        return Collections.unmodifiableList( pluginRemoval );
     }
 }
