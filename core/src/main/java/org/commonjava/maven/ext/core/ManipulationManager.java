@@ -53,6 +53,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import lombok.Getter;
+
 import static org.apache.commons.lang.StringUtils.isNotEmpty;
 import static org.commonjava.maven.ext.common.util.ProfileUtils.PROFILE_SCANNING;
 import static org.commonjava.maven.ext.common.util.ProfileUtils.PROFILE_SCANNING_DEFAULT;
@@ -111,6 +113,7 @@ public class ManipulationManager
     /**
      * Determined from {@link Manipulator#getExecutionIndex()} comparisons during {@link #init(ManipulationSession)}.
      */
+    @Getter
     private List<Manipulator> orderedManipulators;
 
     /**

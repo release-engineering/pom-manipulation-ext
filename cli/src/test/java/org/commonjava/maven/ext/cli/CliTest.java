@@ -37,13 +37,16 @@ import java.nio.file.StandardCopyOption;
 import java.util.UUID;
 
 import static org.commonjava.maven.ext.core.fixture.TestUtils.INTEGRATION_TEST;
+import static org.commonjava.maven.ext.core.fixture.TestUtils.ROOT_DIRECTORY;
+import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 public class CliTest
 {
     @Rule
-    public TemporaryFolder temp = new TemporaryFolder( );
+    public TemporaryFolder temp = new TemporaryFolder();
 
     @Rule
     public final SystemOutRule systemOutRule = new SystemOutRule().enableLog().muteForSuccessfulTests();
@@ -54,7 +57,7 @@ public class CliTest
     @Rule
     public final ExpectedSystemExit expectedSystemExit = ExpectedSystemExit.none();
 
-    private File writeSettings (File f) throws IOException
+    private File writeSettings( File f ) throws IOException
     {
         FileUtils.writeStringToFile( f, "<?xml version=\"1.0\" encoding=\"utf-8\"?>"
                         + "<settings xmlns=\"http://maven.apache.org/SETTINGS/1.0.0\""
@@ -76,7 +79,7 @@ public class CliTest
     public void checkInvalidParam()
     {
         expectedSystemExit.expectSystemExitWithStatus( 10 );
-        Cli.main( new String[] { "-FOOBAR"} );
+        Cli.main( new String[] { "-FOOBAR" } );
         assertTrue( systemOutRule.getLog().contains( "usage: ..." ) );
     }
 
@@ -84,8 +87,8 @@ public class CliTest
     public void checkTargetMatches() throws Exception
     {
         Cli c = new Cli();
-        File pom1 = temp.newFile( );
-        File settings = writeSettings( temp.newFile( ));
+        File pom1 = temp.newFile();
+        File settings = writeSettings( temp.newFile() );
 
         TestUtils.executeMethod( c, "createSession", new Object[] { pom1, settings } );
 
@@ -97,7 +100,7 @@ public class CliTest
     public void checkTargetMatchesWithRun() throws Exception
     {
         Cli c = new Cli();
-        File pom1 = temp.newFile( );
+        File pom1 = temp.newFile();
 
         c.run( new String[] { "-f", pom1.toString() } );
 
@@ -121,18 +124,16 @@ public class CliTest
     public void checkLocalRepositoryWithDefaults() throws Exception
     {
         Cli c = new Cli();
-        File settings = writeSettings( temp.newFile());
+        File settings = writeSettings( temp.newFile() );
 
-        TestUtils.executeMethod( c, "run", new Object[] { new String[] { "-s", settings.toString()} } );
+        TestUtils.executeMethod( c, "run", new Object[] { new String[] { "-s", settings.toString() } } );
 
         ManipulationSession session = (ManipulationSession) FieldUtils.readField( c, "session", true );
-        MavenSession ms = (MavenSession)FieldUtils.readField( session, "mavenSession", true );
+        MavenSession ms = (MavenSession) FieldUtils.readField( session, "mavenSession", true );
 
-        assertEquals( ms.getRequest().getLocalRepository().getBasedir(),
-                      ms.getRequest().getLocalRepositoryPath().toString() );
+        assertEquals( ms.getRequest().getLocalRepository().getBasedir(), ms.getRequest().getLocalRepositoryPath().toString() );
         assertEquals( "File " + new File( ms.getRequest().getLocalRepository().getBasedir() ).getParentFile().toString()
-                                      + " was not equal to " + System.getProperty( "user.home" ) + File.separatorChar
-                                      + ".m2",
+                                      + " was not equal to " + System.getProperty( "user.home" ) + File.separatorChar + ".m2",
                       new File( ms.getRequest().getLocalRepository().getBasedir() ).getParentFile().toString(),
                       System.getProperty( "user.home" ) + File.separatorChar + ".m2" );
 
@@ -142,17 +143,18 @@ public class CliTest
     public void checkLocalRepositoryWithDefaultsAndModifiedUserSettings() throws Exception
     {
         boolean restore = false;
-        Path source = Paths.get ( System.getProperty( "user.home" ) + File.separatorChar + ".m2" + File.separatorChar + "settings.xml");
+        Path source = Paths.get( System.getProperty( "user.home" ) + File.separatorChar + ".m2" + File.separatorChar
+                                                 + "settings.xml" );
         Path backup = Paths.get( source.toString() + '.' + UUID.randomUUID().toString() );
-        Path tmpSettings = Paths.get ( getClass().getResource("/settings-test.xml").toURI() );
+        Path tmpSettings = Paths.get( getClass().getResource( "/settings-test.xml" ).toURI() );
 
         try
         {
             if ( source.toFile().exists() )
             {
-                System.out.println ("Backing up settings.xml to " + backup);
+                System.out.println( "Backing up settings.xml to " + backup );
                 restore = true;
-                Files.move( source, backup, StandardCopyOption.ATOMIC_MOVE);
+                Files.move( source, backup, StandardCopyOption.ATOMIC_MOVE );
             }
             Files.copy( tmpSettings, source );
 
@@ -172,7 +174,7 @@ public class CliTest
         {
             if ( restore )
             {
-                Files.move( backup, source, StandardCopyOption.ATOMIC_MOVE);
+                Files.move( backup, source, StandardCopyOption.ATOMIC_MOVE );
             }
             else
             {
@@ -185,32 +187,31 @@ public class CliTest
     public void checkProfileActivation() throws Exception
     {
         File folder = temp.newFolder();
-        File target = temp.newFile( );
+        File target = temp.newFile();
         // Locate the PME project pom file. Use that to verify inheritance tracking.
-        Files.copy( Paths.get( INTEGRATION_TEST.toString(),  "pom.xml" ), target.toPath(), StandardCopyOption.REPLACE_EXISTING );
+        Files.copy( Paths.get( INTEGRATION_TEST.toString(), "pom.xml" ), target.toPath(), StandardCopyOption.REPLACE_EXISTING );
 
         Cli c = new Cli();
         TestUtils.executeMethod( c, "run", new Object[] {
                         new String[] { "-d", "--settings=" + getClass().getResource( "/settings-test.xml" ).getFile(),
                                         "-Dmaven.repo.local=" + folder.toString(), "-Prun-its", "--file",
-                                        target.getCanonicalPath() } });
+                                        target.getCanonicalPath() } } );
 
-        assertTrue ( systemOutRule.getLog().contains( "Explicitly activating [run-its]" ));
-        assertTrue ( systemOutRule.getLog().contains( "Will not scan all profiles and returning active profiles of [run-its]" ));
+        assertTrue( systemOutRule.getLog().contains( "Explicitly activating [run-its]" ) );
+        assertTrue( systemOutRule.getLog().contains( "Will not scan all profiles and returning active profiles of [run-its]" ) );
     }
-
 
     @Test
     public void checkLocalRepositoryWithSettings() throws Exception
     {
         Cli c = new Cli();
-        TestUtils.executeMethod( c, "run", new Object[] { new String[] { "-settings=" + getClass().getResource( "/settings-test.xml").getFile() }} );
+        TestUtils.executeMethod( c, "run", new Object[] { new String[] {
+                        "-settings=" + getClass().getResource( "/settings-test.xml" ).getFile() } } );
 
         ManipulationSession session = (ManipulationSession) FieldUtils.readField( c, "session", true );
-        MavenSession ms = (MavenSession)FieldUtils.readField( session, "mavenSession", true );
+        MavenSession ms = (MavenSession) FieldUtils.readField( session, "mavenSession", true );
 
-        assertEquals( ms.getRequest().getLocalRepository().getBasedir(),
-                      ms.getRequest().getLocalRepositoryPath().toString() );
+        assertEquals( ms.getRequest().getLocalRepository().getBasedir(), ms.getRequest().getLocalRepositoryPath().toString() );
     }
 
     @Test
@@ -218,13 +219,12 @@ public class CliTest
     {
         File folder = temp.newFolder();
         Cli c = new Cli();
-        TestUtils.executeMethod( c, "run", new Object[] { new String[] { "-Dmaven.repo.local=" + folder.toString() }} );
+        TestUtils.executeMethod( c, "run", new Object[] { new String[] { "-Dmaven.repo.local=" + folder.toString() } } );
 
         ManipulationSession session = (ManipulationSession) FieldUtils.readField( c, "session", true );
-        MavenSession ms = (MavenSession)FieldUtils.readField( session, "mavenSession", true );
+        MavenSession ms = (MavenSession) FieldUtils.readField( session, "mavenSession", true );
 
-        assertEquals( ms.getRequest().getLocalRepository().getBasedir(),
-                      ms.getRequest().getLocalRepositoryPath().toString() );
+        assertEquals( ms.getRequest().getLocalRepository().getBasedir(), ms.getRequest().getLocalRepositoryPath().toString() );
     }
 
     @Test
@@ -232,36 +232,165 @@ public class CliTest
     {
         File folder = temp.newFolder();
         Cli c = new Cli();
-        TestUtils.executeMethod( c, "run", new Object[] { new String[]
-                        { "--settings=" + getClass().getResource("/settings-test.xml").getFile(),
-                                        "-Dmaven.repo.local=" + folder.toString() }} );
+        TestUtils.executeMethod( c, "run", new Object[] { new String[] {
+                        "--settings=" + getClass().getResource( "/settings-test.xml" ).getFile(),
+                        "-Dmaven.repo.local=" + folder.toString() } } );
 
         ManipulationSession session = (ManipulationSession) FieldUtils.readField( c, "session", true );
-        MavenSession ms = (MavenSession)FieldUtils.readField( session, "mavenSession", true );
+        MavenSession ms = (MavenSession) FieldUtils.readField( session, "mavenSession", true );
 
         assertEquals( ms.getLocalRepository().getBasedir(), folder.toString() );
-        assertEquals( ms.getRequest().getLocalRepository().getBasedir(),
-                      ms.getRequest().getLocalRepositoryPath().toString() );
+        assertEquals( ms.getRequest().getLocalRepository().getBasedir(), ms.getRequest().getLocalRepositoryPath().toString() );
     }
-
 
     @Test
     public void checkUnknownProperty() throws Exception
     {
         File folder = temp.newFolder();
-        File target = temp.newFile( );
+        File target = temp.newFile();
         // Locate the PME project pom file. Use that to verify inheritance tracking.
-        Files.copy( Paths.get( INTEGRATION_TEST.toString(),  "pom.xml" ), target.toPath(), StandardCopyOption.REPLACE_EXISTING );
+        Files.copy( Paths.get( INTEGRATION_TEST.toString(), "pom.xml" ), target.toPath(), StandardCopyOption.REPLACE_EXISTING );
 
         Cli c = new Cli();
-        c.run( new String[]{"-d",
-                        "--settings=" + getClass().getResource("/settings-test.xml").getFile(),
-                        "-Dmaven.repo.local=" + folder.toString(),
-                        "-DUNKNOWN_PROPERTY=DUMMY",
-                        "-Prun-its",
-                        "--file",
+        c.run( new String[] { "-d", "--settings=" + getClass().getResource( "/settings-test.xml" ).getFile(),
+                        "-Dmaven.repo.local=" + folder.toString(), "-DUNKNOWN_PROPERTY=DUMMY", "-Prun-its", "--file",
                         target.getCanonicalPath() } );
 
-        assertTrue ( systemOutRule.getLog().contains( "Unknown configuration value UNKNOWN_PROPERTY" ));
+        assertTrue( systemOutRule.getLog().contains( "Unknown configuration value UNKNOWN_PROPERTY" ) );
+    }
+
+    @Test
+    public void checkVersionAndExit()
+    {
+        expectedSystemExit.expectSystemExitWithStatus( 0 );
+        Cli.main( new String[] { "--version" } );
+        assertTrue( systemOutRule.getLog().contains( "PME CLI" ) );
+        assertTrue( systemOutRule.getLog().contains( "SHA" ) );
+    }
+
+    @Test
+    public void checkDependencies()
+    {
+        final File root = Paths.get( ROOT_DIRECTORY.toString(), "pom.xml" ).toFile();
+
+        expectedSystemExit.expectSystemExitWithStatus( 0 );
+        Cli.main( new String[] { "--printProjectDeps", "--file", root.getAbsolutePath() } );
+
+        assertThat( systemOutRule.getLog(), equalTo( "INFO org.commonjava.maven.ext.cli.Cli - Found 82 dependencies\n" + "ch.qos.logback:logback-classic:1.2.3                                            jar                 compile             \n"
+                                                                     + "ch.qos.logback:logback-core:1.2.3                                               jar                 compile             \n"
+                                                                     + "com.fasterxml.jackson.core:jackson-annotations:2.11.2                           jar                 compile             \n"
+                                                                     + "com.fasterxml.jackson.core:jackson-core:2.11.2                                  jar                 compile             \n"
+                                                                     + "com.fasterxml.jackson.core:jackson-databind:2.11.2                              jar                 compile             \n"
+                                                                     + "com.github.olivergondza:maven-jdk-tools-wrapper:0.1                             jar                 compile             \n"
+                                                                     + "com.github.stefanbirkner:system-rules:1.18.0                                    jar                 test                \n"
+                                                                     + "com.google.inject:guice:4.0                                                     jar                 compile             \n"
+                                                                     + "com.jayway.jsonpath:json-path:2.3.0                                             jar                 compile             \n"
+                                                                     + "com.konghq:unirest-java:3.10.00                                                 jar                 compile             \n"
+                                                                     + "com.konghq:unirest-objectmapper-jackson:3.10.00                                 jar                 compile             \n"
+                                                                     + "com.redhat.rcm:redhat-releng-tools:9                                            pom                 compile             \n"
+                                                                     + "com.soebes.maven.plugins:iterator-maven-plugin:0.3                              maven-plugin                            \n"
+                                                                     + "com.squareup:javapoet:1.12.0                                                    jar                 compile             \n"
+                                                                     + "commons-codec:commons-codec:1.11                                                jar                 compile             \n"
+                                                                     + "commons-io:commons-io:2.6                                                       jar                 compile             \n"
+                                                                     + "commons-lang:commons-lang:2.6                                                   jar                 compile             \n"
+                                                                     + "commons-logging:commons-logging:1.2                                             jar                 compile             \n"
+                                                                     + "info.picocli:picocli:4.5.1                                                      jar                 compile             \n"
+                                                                     + "javax.inject:javax.inject:1                                                     jar                 compile             \n"
+                                                                     + "junit:junit:4.12                                                                jar                 test                \n"
+                                                                     + "org.apache.httpcomponents:httpclient:4.5.12                                     jar                 compile             \n"
+                                                                     + "org.apache.ivy:ivy:2.4.0                                                        jar                 compile             \n"
+                                                                     + "org.apache.maven:apache-maven:3.5.0                                             zip                 test                \n"
+                                                                     + "org.apache.maven:maven-artifact:3.5.0                                           jar                 provided            \n"
+                                                                     + "org.apache.maven:maven-compat:3.5.0                                             jar                 provided            \n"
+                                                                     + "org.apache.maven:maven-core:3.5.0                                               jar                 provided            \n"
+                                                                     + "org.apache.maven:maven-model:3.5.0                                              jar                 provided            \n"
+                                                                     + "org.apache.maven:maven-model-builder:3.5.0                                      jar                 provided            \n"
+                                                                     + "org.apache.maven:maven-settings:3.5.0                                           jar                 provided            \n"
+                                                                     + "org.apache.maven:maven-settings-builder:3.5.0                                   jar                 provided            \n"
+                                                                     + "org.apache.maven.plugins:maven-assembly-plugin:2.2-beta-5                       maven-plugin                            \n"
+                                                                     + "org.apache.maven.plugins:maven-dependency-plugin:3.1.1                          maven-plugin                            \n"
+                                                                     + "org.apache.maven.plugins:maven-invoker-plugin:3.2.1                             maven-plugin                            \n"
+                                                                     + "org.apache.maven.plugins:maven-jar-plugin:2.4                                   maven-plugin                            \n"
+                                                                     + "org.apache.maven.plugins:maven-project-info-reports-plugin:3.0.0                maven-plugin                            \n"
+                                                                     + "org.apache.maven.plugins:maven-release-plugin:2.3.2                             maven-plugin                            \n"
+                                                                     + "org.apache.maven.plugins:maven-resources-plugin:2.6                             maven-plugin                            \n"
+                                                                     + "org.apache.maven.plugins:maven-shade-plugin:3.2.1                               maven-plugin                            \n"
+                                                                     + "org.apache.maven.plugins:maven-surefire-plugin:2.12.4                           maven-plugin                            \n"
+                                                                     + "org.apache.maven.release:maven-release-api:3.0.0-M1                             jar                 compile             \n"
+                                                                     + "org.apache.maven.release:maven-release-manager:3.0.0-M1                         jar                 compile             \n"
+                                                                     + "org.bsc.maven:maven-processor-plugin:3.3.3                                      maven-plugin                            \n"
+                                                                     + "org.codehaus.groovy:groovy:2.5.7                                                jar                 compile             \n"
+                                                                     + "org.codehaus.groovy:groovy-json:2.5.7                                           jar                 compile             \n"
+                                                                     + "org.codehaus.groovy:groovy-xml:2.5.7                                            jar                 compile             \n"
+                                                                     + "org.codehaus.mojo:animal-sniffer-maven-plugin:1.18                              maven-plugin                            \n"
+                                                                     + "org.codehaus.plexus:plexus-interpolation:1.24                                   jar                 provided            \n"
+                                                                     + "org.codehaus.plexus:plexus-utils:3.1.0                                          jar                 compile             \n"
+                                                                     + "org.commonjava.maven.atlas:atlas-identities:0.17.1                              jar                 compile             \n"
+                                                                     + "org.commonjava.maven.ext:pom-manipulation-annotation:4.1                        jar                 compile             \n"
+                                                                     + "org.commonjava.maven.ext:pom-manipulation-cli:4.1                               jar                 compile             \n"
+                                                                     + "org.commonjava.maven.ext:pom-manipulation-cli:4.1                               jar                 compile             \n"
+                                                                     + "org.commonjava.maven.ext:pom-manipulation-common:4.1                            jar                 compile             \n"
+                                                                     + "org.commonjava.maven.ext:pom-manipulation-core:4.1                              jar                 compile             \n"
+                                                                     + "org.commonjava.maven.ext:pom-manipulation-core:4.1                              test-jar            compile             \n"
+                                                                     + "org.commonjava.maven.ext:pom-manipulation-ext:4.1                               jar                 compile             \n"
+                                                                     + "org.commonjava.maven.ext:pom-manipulation-integration-test:4.1                  test-jar            compile             \n"
+                                                                     + "org.commonjava.maven.ext:pom-manipulation-integration-test:4.1                  jar                 compile             \n"
+                                                                     + "org.commonjava.maven.ext:pom-manipulation-io:4.1                                jar                 compile             \n"
+                                                                     + "org.commonjava.maven.ext:pom-manipulation-io:4.1                                test-jar            compile             \n"
+                                                                     + "org.commonjava.maven.ext:pom-manipulation-parent:4.1                            pom                 compile             \n"
+                                                                     + "org.commonjava.maven.galley:galley-api:0.16.6                                   jar                 compile             \n"
+                                                                     + "org.commonjava.maven.galley:galley-core:0.16.6                                  jar                 compile             \n"
+                                                                     + "org.commonjava.maven.galley:galley-maven:0.16.6                                 jar                 compile             \n"
+                                                                     + "org.commonjava.maven.galley:galley-transport-filearc:0.16.6                     jar                 compile             \n"
+                                                                     + "org.commonjava.maven.galley:galley-transport-httpclient:0.16.6                  jar                 compile             \n"
+                                                                     + "org.commonjava.util:http-testserver:1.1                                         jar                 test                \n"
+                                                                     + "org.eclipse.aether:aether-api:1.1.0                                             jar                 provided            \n"
+                                                                     + "org.eclipse.jetty:jetty-server:9.4.17.v20190418                                 jar                 compile             \n"
+                                                                     + "org.eclipse.sisu:org.eclipse.sisu.plexus:0.3.3                                  jar                 compile             \n"
+                                                                     + "org.hamcrest:hamcrest-all:1.3                                                   jar                 test                \n"
+                                                                     + "org.jacoco:jacoco-maven-plugin:0.8.5                                            maven-plugin                            \n"
+                                                                     + "org.jboss.byteman:byteman-bmunit:4.0.4                                          jar                 test                \n"
+                                                                     + "org.jboss.da:reports-model:1.7.0                                                jar                 compile             \n"
+                                                                     + "org.jdom:jdom:1.1.3                                                             jar                 compile             \n"
+                                                                     + "org.projectlombok:lombok:1.18.12                                                jar                 provided            \n"
+                                                                     + "org.projectlombok:lombok-maven-plugin:1.18.12.0                                 maven-plugin                            \n"
+                                                                     + "org.slf4j:slf4j-api:1.7.30                                                      jar                 compile             \n"
+                                                                     + "org.xmlunit:xmlunit-core:2.1.1                                                  jar                 test                \n"
+                                                                     + "org.xmlunit:xmlunit-matchers:2.1.1                                              jar                 test                \n"
+                                                                     + "org.yaml:snakeyaml:1.17                                                         jar                 compile             \n" ) );
+
+    }
+
+    @Test
+    public void checkManipulatorOrder()
+    {
+        expectedSystemExit.expectSystemExitWithStatus( 0 );
+        Cli.main( new String[] { "--printManipulatorOrder" } );
+        assertThat( systemOutRule.getLog(), equalTo( "[INFO] Running Maven Manipulation Extension (PME) \n"
+                                                                     + "Manipulator order is:\n"
+                                                                     + "         1          InitialGroovyManipulator                \n"
+                                                                     + "         2          RangeResolver                           \n"
+                                                                     + "         4          RESTBOMCollector                        \n"
+                                                                     + "         5          ProfileInjectionManipulator             \n"
+                                                                     + "         6          SuffixManipulator                       \n"
+                                                                     + "         7          RelocationManipulator                   \n"
+                                                                     + "         10         RESTCollector                           \n"
+                                                                     + "         20         ProjectVersioningManipulator            \n"
+                                                                     + "         25         ParentInjectionManipulator              \n"
+                                                                     + "         30         PropertyManipulator                     \n"
+                                                                     + "         35         PluginManipulator                       \n"
+                                                                     + "         40         DependencyManipulator                   \n"
+                                                                     + "         50         RepoAndReportingRemovalManipulator      \n"
+                                                                     + "         51         DependencyRemovalManipulator            \n"
+                                                                     + "         52         PluginRemovalManipulator                \n"
+                                                                     + "         53         ProfileRemovalManipulator               \n"
+                                                                     + "         60         PluginInjectingManipulator              \n"
+                                                                     + "         65         RepositoryInjectionManipulator          \n"
+                                                                     + "         70         ProjectVersionEnforcingManipulator      \n"
+                                                                     + "         75         DistributionEnforcingManipulator        \n"
+                                                                     + "         80         BOMBuilderManipulator                   \n"
+                                                                     + "         90         JSONManipulator                         \n"
+                                                                     + "         91         XMLManipulator                          \n"
+                                                                     + "         99         FinalGroovyManipulator                  \n" ) );
     }
 }
