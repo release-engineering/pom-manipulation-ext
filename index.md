@@ -31,20 +31,13 @@ It supports the following arguments
     -f,--file <arg>           POM file
     -h,--help                 Print help
     -l,--log <arg>            Log file to output logging to
-    --log-context <arg>       Add log-context ID
-    -o,--outputFile <arg>     outputFile to output dependencies to. Only
-                              used with '-p' (Print all project
-                              dependencies)
     -P,--activeProfiles <arg> Comma separated list of active profiles.
-    -p,--printDeps            Print all project dependencies
-    --printGAVTC              Print all project dependencies in
-                              group:artifact:version:type:classifier with
-                              scope information
     -s,--settings <arg>       Optional settings.xml file
     -t,--trace                Enable trace
-    -x <arg> <arg>            XPath tester ( file : xpath )
+    -p,--printDeps            Print all project dependencies
+    --printManipulatorOrder   Print the current manipulator order
 
-Note that all property arguments are the equivalent to those used when it is used as a Maven extension.
+Note that all property arguments are the equivalent to those used when it is used as a Maven extension. The latter two commands do not run the entire tool.
 
 #### Installation as an Extension
 
