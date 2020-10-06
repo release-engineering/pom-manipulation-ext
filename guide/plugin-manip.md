@@ -149,6 +149,20 @@ If the property `pluginRemoval` (*Deprecated property `plugin-removal` for versi
 
     -DpluginRemoval=group:artifact,....
 
+#### Removal of nexus-staging-maven-plugin
+
+<table bgcolor="#ffff00">
+<tr>
+<td>
+    <b>NOTE</b> : From version 4.1, the default behavior has changed as follows:
+</td>
+</tr>
+</table>
+
+Because nexus-staging-maven-plugin prevents `mvn -DaltDeploymentRepository=... deploy` from working, it is removed by
+default starting from version 4.1. If you wish to prevent nexus-staging-maven-plugin from being removed, set the
+property `nexusStagingMavenPluginRemoval` to `false`.
+
 ### Miscellaneous
 
 #### Install and Deploy Skip Flag Alignment
