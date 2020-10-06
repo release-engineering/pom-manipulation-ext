@@ -15,19 +15,19 @@
  */
 package org.commonjava.maven.ext.cli;
 
-import ch.qos.logback.classic.Level;
-import ch.qos.logback.classic.LoggerContext;
-import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
-import ch.qos.logback.classic.spi.ILoggingEvent;
-import ch.qos.logback.core.FileAppender;
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.CommandLineParser;
-import org.apache.commons.cli.DefaultParser;
-import org.apache.commons.cli.HelpFormatter;
-import org.apache.commons.cli.Option;
-import org.apache.commons.cli.Options;
-import org.apache.commons.cli.ParseException;
+import java.io.File;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Properties;
+import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.stream.Collectors;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.artifact.repository.MavenArtifactRepository;
 import org.apache.maven.execution.DefaultMavenExecutionRequest;
@@ -55,6 +55,7 @@ import org.codehaus.plexus.component.repository.exception.ComponentLookupExcepti
 import org.commonjava.maven.atlas.ident.ref.ArtifactRef;
 import org.commonjava.maven.atlas.ident.ref.InvalidRefException;
 import org.commonjava.maven.ext.common.ManipulationException;
+import org.commonjava.maven.ext.common.model.SimpleScopedArtifactRef;
 import org.commonjava.maven.ext.core.ManipulationManager;
 import org.commonjava.maven.ext.core.ManipulationSession;
 import org.commonjava.maven.ext.core.impl.RESTCollector;
@@ -62,29 +63,24 @@ import org.commonjava.maven.ext.core.state.RESTState;
 import org.commonjava.maven.ext.core.util.PropertiesUtils;
 import org.commonjava.maven.ext.io.ConfigIO;
 import org.commonjava.maven.ext.io.PomIO;
-import org.commonjava.maven.ext.io.XMLIO;
 import org.commonjava.maven.ext.io.rest.RestException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.w3c.dom.Document;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.LoggerContext;
+import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.FileAppender;
+import picocli.CommandLine;
+import picocli.CommandLine.Command;
+import picocli.CommandLine.Option;
 
-import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathFactory;
-import java.io.File;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Properties;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-public class Cli
+@Command( name = "PME",
+          description = "CLI to run PME",
+          mixinStandardHelpOptions = true, // add --help and --version options
+          exitCodeOnInvalidInput = 10,
+          versionProvider = ManifestVersionProvider.class)
+public class Cli implements Callable<Integer>
 {
     private static final File DEFAULT_GLOBAL_SETTINGS_FILE =
         new File( System.getProperty( "maven.home" ), "conf" + File.separator + "settings.xml" );
@@ -102,17 +98,44 @@ public class Cli
     /**
      * Default pom file to operate against.
      */
+    @SuppressWarnings("FieldMayBeFinal")
+    @Option(names = {"-f", "--file"}, description = "POM File")
     private File target = new File( System.getProperty( "user.dir" ), "pom.xml" );
 
     /**
      * Optional settings.xml file.
      */
+    @Option( names = {"-s", "--settings"}, description = "Optional settings.xml file")
     private File settings;
+
+    /**
+     * Optional logging file.
+     */
+    @SuppressWarnings("unused")
+    @Option(names = {"-l", "--log"}, description = "Optional file to log output to")
+    private String logFile;
 
     /**
      * Properties a user may define on the command line.
      */
+    @Option( names = "-D", description = "Pass Java Properties")
+    @SuppressWarnings("unused")
     private Properties userProps;
+
+    @Option( names = {"-P", "--activeProfiles"}, description = "Comma separated list of active profiles.", split = ",")
+    private final Set<String> profiles = new HashSet<>();
+
+    @Option( names = { "-d", "--debug"}, description = "Enable debug logging")
+    boolean debug;
+
+    @Option( names = { "-t", "--trace"}, description = "Enable trace logging")
+    boolean trace;
+
+    @Option( names = { "-p", "--printProjectDeps"}, description = "Print project dependencies")
+    boolean printProjectDeps;
+
+    @Option( names = { "--printManipulatorOrder"}, description = "Print current manipulator order")
+    boolean printManipulatorOrder;
 
     public static void main( String[] args )
     {
@@ -125,99 +148,23 @@ public class Cli
      * @return the exit code.
      */
     @SuppressWarnings("WeakerAccess") // Public API.
-    public int run( String[] args )
-    {
-        Options options = new Options();
-        options.addOption( "h", false, "Print this help message." );
-        options.addOption( Option.builder( "d" ).longOpt( "debug" ).desc( "Enable debug" ).build() );
-        options.addOption( Option.builder( "t" ).longOpt( "trace" ).desc( "Enable trace" ).build() );
-        options.addOption( Option.builder( "h" ).longOpt( "help" ).desc( "Print help" ).build() );
-        options.addOption( Option.builder( "f" )
-                                 .longOpt( "file" )
-                                 .hasArgs()
-                                 .numberOfArgs( 1 )
-                                 .desc( "POM file" )
-                                 .build() );
-        options.addOption( Option.builder( "l" )
-                                 .longOpt( "log" )
-                                 .desc( "Log file to output logging to" )
-                                 .numberOfArgs( 1 )
-                                 .build() );
-        options.addOption( Option.builder( "s" )
-                                 .longOpt( "settings" )
-                                 .hasArgs()
-                                 .numberOfArgs( 1 )
-                                 .desc( "Optional settings.xml file" )
-                                 .build() );
-        options.addOption( Option.builder( "P" )
-                                 .longOpt( "activeProfiles" )
-                                 .desc( "Comma separated list of active profiles." )
-                                 .numberOfArgs( 1 )
-                                 .build() );
-        options.addOption( Option.builder( "o" )
-                                 .longOpt( "outputFile" )
-                                 .desc( "outputFile to output dependencies to. Only used with '-p' (Print all project dependencies)" )
-                                 .numberOfArgs( 1 )
-                                 .build() );
-        options.addOption( Option.builder( "p" ).longOpt( "printDeps" ).desc( "Print all project dependencies" ).build() );
-        options.addOption( Option.builder()
-                                 .longOpt( "printGAVTC" )
-                                 .desc( "Print all project dependencies as group:artifact:version:type:classifier" )
-                                 .build() );
-        options.addOption( Option.builder( "D" )
-                                 .hasArgs()
-                                 .numberOfArgs( 2 )
-                                 .valueSeparator( '=' )
-                                 .desc( "Java Properties" )
-                                 .build() );
-        options.addOption( Option.builder( "x" )
-                                 .hasArgs()
-                                 .numberOfArgs( 2 )
-                                 .desc( "XPath tester ( file : xpath )" )
-                                 .build() );
+    public int run( String[] args ) {
+        CommandLine cl = new CommandLine(this);
+        cl.setUsageHelpAutoWidth(true);
+        cl.setExecutionStrategy(new CommandLine.RunAll());
+        cl.setOverwrittenOptionsAllowed(true);
 
-        CommandLineParser parser = new DefaultParser();
-        CommandLine cmd;
-        try
-        {
-            cmd = parser.parse( options, args );
-        }
-        catch ( ParseException e )
-        {
-            logger.debug( "Caught problem parsing ", e );
-            System.err.println( e.getMessage() );
+        return cl.execute(args);
+    }
 
-            HelpFormatter formatter = new HelpFormatter();
-            formatter.printHelp( "...", options );
-            return 10;
-        }
-
-        if ( cmd.hasOption( 'h' ) )
-        {
-            HelpFormatter formatter = new HelpFormatter();
-            formatter.printHelp( "...", options );
-            System.exit( 0 );
-        }
-        if ( cmd.hasOption( 'D' ) )
-        {
-            userProps = cmd.getOptionProperties( "D" );
-        }
-        if ( cmd.hasOption( 'f' ) )
-        {
-            target = new File( cmd.getOptionValue( 'f' ) );
-        }
-        if ( cmd.hasOption( 's' ) )
-        {
-            settings = new File( cmd.getOptionValue( 's' ) );
-        }
-
+    @Override
+    public Integer call() {
         createSession( target, settings );
 
         final Logger rootLogger = LoggerFactory.getLogger( org.slf4j.Logger.ROOT_LOGGER_NAME );
-
         final ch.qos.logback.classic.Logger root = (ch.qos.logback.classic.Logger) rootLogger;
 
-        if ( cmd.hasOption( 'l' ) )
+        if ( logFile != null )
         {
             LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
             loggerContext.reset();
@@ -232,7 +179,7 @@ public class Cli
             fileAppender.setContext( loggerContext );
             fileAppender.setName( "fileLogging" );
             fileAppender.setAppend( false );
-            fileAppender.setFile( cmd.getOptionValue( "l" ) );
+            fileAppender.setFile( logFile );
             fileAppender.start();
 
             root.addAppender( fileAppender );
@@ -240,11 +187,11 @@ public class Cli
         }
         // Set debug logging after session creation else we get the log filled with Plexus
         // creation stuff.
-        if ( cmd.hasOption( 'd' ) )
+        if (debug)
         {
             root.setLevel( Level.DEBUG );
         }
-        if ( cmd.hasOption( 't' ) )
+        if (trace)
         {
             root.setLevel( Level.TRACE );
         }
@@ -259,8 +206,8 @@ public class Cli
             logger.info( "Manipulation engine disabled. Project {} cannot be found.", target );
             return 10;
         }
-        // Don't bother skipping if we're just trying to analyse deps.
-        else if ( new File( target.getParentFile(), ManipulationManager.MARKER_FILE ).exists() && !cmd.hasOption( 'p' ) )
+        // Don't bother skipping if we're just trying to analyse dependencies/print manipulator order.
+        else if ( new File( target.getParentFile(), ManipulationManager.MARKER_FILE ).exists() && !printManipulatorOrder && !printProjectDeps)
         {
             logger.info( "Skipping manipulation as previous execution found." );
             return 0;
@@ -295,76 +242,41 @@ public class Cli
             }
             manipulationManager.init( session );
 
-            Set<String> activeProfiles = null;
-            if ( cmd.hasOption( 'P' ) )
+            if (!profiles.isEmpty())
             {
-                activeProfiles = new HashSet<>();
-                Collections.addAll( activeProfiles, cmd.getOptionValue( 'P' ).trim().split( "," ) );
-                session.getActiveProfiles().addAll( activeProfiles );
-                logger.info ("Setting active profiles of {}", activeProfiles);
+                session.getActiveProfiles().addAll( profiles );
+                logger.debug ("Setting active profiles of {}", profiles);
             }
             else
             {
-                logger.info ("NOT activating any profiles.");
+                logger.debug ("NOT activating any profiles.");
             }
 
-            if ( cmd.hasOption( 'x' ) )
-            {
-                String []params = cmd.getOptionValues( 'x' );
-                if ( params.length != 2)
-                {
-                    throw new ManipulationException( "Invalid number of parameters ({}); should be <file> <xpath>", params.length );
-                }
-                XMLIO xmlIO = new XMLIO();
-
-                Document doc = xmlIO.parseXML( new File ( params[0] ) );
-                XPath xPath = XPathFactory.newInstance().newXPath();
-                NodeList nodeList = (NodeList) xPath.evaluate( params[1], doc, XPathConstants.NODESET);
-                logger.info ("Found {} node", nodeList.getLength());
-
-                for ( int i = 0; i < nodeList.getLength(); i++)
-                {
-                    Node node = nodeList.item( i );
-                    logger.info  ("Found node {} and value {} ", node.getNodeName(), node.getTextContent());
-                }
-            }
-            else if ( cmd.hasOption( 'p' ) || cmd.hasOption( "printGAVTC" ) )
+            if (printProjectDeps)
             {
                 List<ArtifactRef> ts = RESTCollector.establishAllDependencies( session, pomIO.parseProject( session.getPom() ),
-                                                                              activeProfiles ).stream().sorted().collect(Collectors.toList());
-                logger.info( "Found {} dependencies. {}", ts.size(), ts );
-                File output = null;
+                                                                              profiles ).stream().sorted().collect(Collectors.toList());
+                logger.info( "Found {} dependencies", ts.size());
 
-                if ( cmd.hasOption( 'o' ) )
-                {
-                    output = new File( cmd.getOptionValue( 'o' ) );
-                    output.delete();
-                }
                 for ( ArtifactRef a : ts )
                 {
-                    if ( cmd.hasOption( 'o' ) )
+                    if ( a instanceof SimpleScopedArtifactRef )
                     {
-                        if ( cmd.hasOption( "printGAVTC" ) )
-                        {
-                            FileUtils.writeStringToFile( output, String.format( "%-80s%n", a ), StandardCharsets.UTF_8, true );
-                        }
-                        else
-                        {
-                            FileUtils.writeStringToFile( output, a.asProjectVersionRef().toString() + System.lineSeparator(), StandardCharsets.UTF_8, true );
-                        }
-                    }
-                    else
-                    {
-                        if ( cmd.hasOption( "printGAVTC" ) )
-                        {
-                            System.out.format( "%-80s%n", a );
-                        }
-                        else
-                        {
-                            System.out.println( a.asProjectVersionRef() );
-                        }
+                        boolean isPlugin =  "maven-plugin".equals( a.getTypeAndClassifier().getType() );
+                        String scope = ( (SimpleScopedArtifactRef) a ).getScope() == null ? "compile" : ( (SimpleScopedArtifactRef) a ).getScope();
+                        System.out.format("%-80s%-20s%-20s%n", a.asProjectVersionRef(),
+                                          a.getTypeAndClassifier().getType(),
+                                          isPlugin ? "" : scope);
                     }
                 }
+            }
+            else if (printManipulatorOrder)
+            {
+                System.out.println ("Manipulator order is:");
+                manipulationManager.getOrderedManipulators().forEach
+                        (m -> System.out.format( "%-20s%-40s%n",
+                                                 StringUtils.center( String.valueOf( m.getExecutionIndex() ), 20),
+                                                 m.getClass().getSimpleName()));
             }
             else
             {

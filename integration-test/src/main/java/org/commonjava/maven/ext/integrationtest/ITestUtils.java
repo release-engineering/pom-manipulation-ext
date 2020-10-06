@@ -138,8 +138,10 @@ public class ITestUtils
             args.add( "-s" );
             args.add( getDefaultTestLocation( "settings.xml" ) );
             args.add( "-d" );
-            args.add( toFlagsParams( e.getFlags() ) );
-
+            if ( e.getFlags() != null )
+            {
+                args.add( toFlagsParams( e.getFlags() ) );
+            }
             // Run PME-Cli
             int cliExitValue = 0;
             if ( !StringUtils.contains( e.getMvnCommand(), "manipulation.disable=true" ) )
@@ -196,7 +198,10 @@ public class ITestUtils
     static Integer runCli( List<String> args, Map<String, String> params, String workingDir )
     {
         ArrayList<String> arguments = new ArrayList<>( args );
-        Collections.addAll( arguments, toJavaParams( params ).split( "\\s+" ) );
+        if (!params.isEmpty() )
+        {
+            Collections.addAll( arguments, toJavaParams( params ).split( "\\s+" ) );
+        }
         boolean argsContainsFile = false;
         for ( String s : args)
         {
@@ -311,11 +316,6 @@ public class ITestUtils
      */
     private static String toJavaParams( Map<String, String> params )
     {
-        if ( params == null )
-        {
-            return "";
-        }
-
         StringBuilder stringParams = new StringBuilder();
         Iterator<String> it = params.keySet().iterator();
         while ( it.hasNext() )
@@ -338,11 +338,6 @@ public class ITestUtils
      */
     private static String toFlagsParams( Map<String, String> params )
     {
-        if ( params == null )
-        {
-            return "";
-        }
-
         StringBuilder stringParams = new StringBuilder();
         Iterator<String> it = params.keySet().iterator();
         while ( it.hasNext() )
