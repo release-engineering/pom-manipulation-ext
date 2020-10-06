@@ -19,7 +19,12 @@ System.out.println( "Slurping POM: ${pomFile.getAbsolutePath()}" )
 def pom = new XmlSlurper().parse( pomFile )
 System.out.println( "POM Version: ${pom.version.text()}" )
 
-assert pom.version.text().endsWith( '-redhat-1' )
+def plugin = pom.build.plugins.plugin.find { it.artifactId.text() == "nexus-staging-maven-plugin" }
+assert (plugin == null || plugin == "")
+
+def profile = pom.profiles.children().find { it.id.text() == 'extra-plugins' }
+def profileplugin = profile.build.plugins.plugin.find { it.artifactId.text() == "nexus-staging-maven-plugin" }
+assert (profileplugin == null || profileplugin == "")
 
 def jar = new File(basedir, "target/${pom.artifactId.text()}-${pom.version.text()}.jar" )
 System.out.println( "Checking for jar: ${jar.getAbsolutePath()}")

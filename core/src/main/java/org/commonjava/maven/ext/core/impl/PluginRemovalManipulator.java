@@ -25,7 +25,6 @@ import org.commonjava.maven.ext.common.util.ProfileUtils;
 import org.commonjava.maven.ext.core.ManipulationSession;
 import org.commonjava.maven.ext.core.state.PluginRemovalState;
 import org.commonjava.maven.ext.core.state.PluginState;
-import org.commonjava.maven.ext.core.state.State;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,7 +40,8 @@ import static org.commonjava.maven.ext.core.util.IdUtils.ga;
 
 /**
  * {@link Manipulator} implementation that can remove specified plugins from a project's pom file.
- * Configuration is stored in a {@link PluginState} instance, which is in turn stored in the {@link ManipulationSession}.
+ * Configuration is stored in a {@link PluginState} instance, which is in turn stored in the
+ * {@link ManipulationSession}.
  */
 @Named("plugin-removal-manipulator")
 @Singleton
@@ -50,12 +50,14 @@ public class PluginRemovalManipulator
 {
     private final Logger logger = LoggerFactory.getLogger( getClass() );
 
-    private ManipulationSession session;
+    protected ManipulationSession session;
 
     /**
      * Initialize the {@link PluginState} state holder in the {@link ManipulationSession}. This state holder detects
-     * version-change configuration from the Maven user properties (-D properties from the CLI) and makes it available for
-     * later.
+     * version-change configuration from the Maven user properties (-D properties from the CLI) and makes it available
+     * for later.
+     *
+     * @param session the session
      */
     @Override
     public void init( final ManipulationSession session )
@@ -65,16 +67,28 @@ public class PluginRemovalManipulator
     }
 
     /**
-     * Apply the alignment changes to the list of {@link Project}'s given.
+     *
+     * @param projects the projects to apply the changes to
+     * @return the set of projects with changes
      */
     @Override
     public Set<Project> applyChanges( final List<Project> projects )
     {
-        final State state = session.getState( PluginRemovalState.class );
+        return applyChanges( projects, session.getState( PluginRemovalState.class ) );
+    }
 
+    /**
+     * Apply the alignment changes to the list of {@link Project}'s given.
+     *
+     * @param projects the projects to apply changes to
+     * @param state the state
+     * @return the set of projects with changes
+     */
+    protected Set<Project> applyChanges( final List<Project> projects, final PluginRemovalState state )
+    {
         if ( !session.isEnabled() || !state.isEnabled() )
         {
-            logger.debug( getClass().getSimpleName() + ": Nothing to do!" );
+            logger.debug( "{}: Nothing to do!", getClass().getSimpleName() );
             return Collections.emptySet();
         }
 
@@ -84,7 +98,7 @@ public class PluginRemovalManipulator
         {
             final Model model = project.getModel();
 
-            if ( apply( project, model ) )
+            if ( apply( project, model, state ) )
             {
                 changed.add( project );
             }
@@ -93,15 +107,12 @@ public class PluginRemovalManipulator
         return changed;
     }
 
-    private boolean apply( final Project project, final Model model )
+    protected boolean apply( final Project project, final Model model, final PluginRemovalState state )
     {
-        final PluginRemovalState state = session.getState( PluginRemovalState.class );
-
-        if (logger.isDebugEnabled())
+        if ( logger.isDebugEnabled() )
         {
             logger.debug( "Applying plugin changes to: {}", ga( project ) );
         }
-
 
         boolean result = false;
         List<ProjectRef> pluginsToRemove = state.getPluginRemoval();
@@ -140,6 +151,12 @@ public class PluginRemovalManipulator
         return result;
     }
 
+    /**
+     * Determines the order in which manipulators are run, with the lowest number running first.
+     * Uses a 100-point scale.
+     *
+     * @return the execution index for {@code PluginRemovalManipulator} which is 52
+     */
     @Override
     public int getExecutionIndex()
     {

@@ -19,7 +19,12 @@ System.out.println( "Slurping POM: ${pomFile.getAbsolutePath()}" )
 def pom = new XmlSlurper().parse( pomFile )
 System.out.println( "POM Version: ${pom.version.text()}" )
 
-assert pom.version.text().endsWith( '-redhat-1' )
+def plugin = pom.build.plugins.plugin.find { it.artifactId.text() == "nexus-staging-maven-plugin" }
+assert (plugin != null && plugin != "")
+
+def profile = pom.profiles.children().find { it.id.text() == 'extra-plugins' }
+def profileplugin = profile.build.plugins.plugin.find { it.artifactId.text() == "nexus-staging-maven-plugin" }
+assert (profileplugin != null && profileplugin != "")
 
 def jar = new File(basedir, "target/${pom.artifactId.text()}-${pom.version.text()}.jar" )
 System.out.println( "Checking for jar: ${jar.getAbsolutePath()}")
@@ -34,7 +39,11 @@ def repopom = new File( repodir, "${pom.artifactId.text()}-${pom.version.text()}
 System.out.println( "Checking for installed pom: ${repopom.getAbsolutePath()}")
 assert repopom.exists()
 
+
 def deploydir = new File("${project.build.directory}/local-deploy", "${pom.groupId.text().replace('.', '/')}/${pom.artifactId.text()}/${pom.version.text()}" )
 def deploypom = new File( deploydir, "${pom.artifactId.text()}-${pom.version.text()}.pom" )
 System.out.println( "Checking for deployed pom: ${deploypom.getAbsolutePath()}")
-assert deploypom.exists()
+assert !deploypom.exists()
+
+def buildLog = new File( basedir, "build.log" )
+assert buildLog.text.contains( "Deployment failed" )
