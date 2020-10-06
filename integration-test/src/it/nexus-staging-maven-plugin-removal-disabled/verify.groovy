@@ -40,7 +40,7 @@ System.out.println( "Checking for installed pom: ${repopom.getAbsolutePath()}")
 assert repopom.exists()
 
 
-def deploydir = new File("${project.build.directory}/deploy-local", "${pom.groupId.text().replace('.', '/')}/${pom.artifactId.text()}/${pom.version.text()}" )
+def deploydir = new File("${project.build.directory}/local-deploy", "${pom.groupId.text().replace('.', '/')}/${pom.artifactId.text()}/${pom.version.text()}" )
 def deploypom = new File( deploydir, "${pom.artifactId.text()}-${pom.version.text()}.pom" )
 System.out.println( "Checking for deployed pom: ${deploypom.getAbsolutePath()}")
 assert !deploypom.exists()

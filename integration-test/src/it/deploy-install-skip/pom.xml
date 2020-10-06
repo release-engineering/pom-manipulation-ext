@@ -57,7 +57,7 @@
         <configuration>
           <skip>true</skip>
 
-          <altDeploymentRepository>local-repo::default::file://${basedir}/target/deploy-local</altDeploymentRepository>
+          <altDeploymentRepository>local-repo::default::file://${basedir}/target/local-deploy</altDeploymentRepository>
 
         </configuration>
       </plugin>
