@@ -42,6 +42,11 @@ public final class NexusStagingMavenPluginRemovalState
     /** Whether or not this manipulator is enabled. Defaults to {@code true}. */
     private boolean enabled = true;
 
+    static
+    {
+        State.activeByDefault.add( NexusStagingMavenPluginRemovalState.class );
+    }
+
     public NexusStagingMavenPluginRemovalState( final Properties userProps )
     {
         initialise( userProps );
