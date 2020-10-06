@@ -198,7 +198,7 @@ public class ITestUtils
     static Integer runCli( List<String> args, Map<String, String> params, String workingDir )
     {
         ArrayList<String> arguments = new ArrayList<>( args );
-        if (params.size() > 0 )
+        if (!params.isEmpty() )
         {
             Collections.addAll( arguments, toJavaParams( params ).split( "\\s+" ) );
         }

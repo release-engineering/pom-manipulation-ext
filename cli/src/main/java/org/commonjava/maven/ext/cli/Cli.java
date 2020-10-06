@@ -131,7 +131,7 @@ public class Cli implements Callable<Integer>
     @Option( names = { "-t", "--trace"}, description = "Enable trace logging")
     boolean trace;
 
-    @Option( names = { "--printProjectDeps"}, description = "Print project dependencies")
+    @Option( names = { "-p", "--printProjectDeps"}, description = "Print project dependencies")
     boolean printProjectDeps;
 
     @Option( names = { "--printManipulatorOrder"}, description = "Print current manipulator order")
@@ -206,8 +206,8 @@ public class Cli implements Callable<Integer>
             logger.info( "Manipulation engine disabled. Project {} cannot be found.", target );
             return 10;
         }
-        // Don't bother skipping if we're just trying to analyse deps.
-        else if ( new File( target.getParentFile(), ManipulationManager.MARKER_FILE ).exists() )
+        // Don't bother skipping if we're just trying to analyse dependencies/print manipulator order.
+        else if ( new File( target.getParentFile(), ManipulationManager.MARKER_FILE ).exists() && !printManipulatorOrder && !printProjectDeps)
         {
             logger.info( "Skipping manipulation as previous execution found." );
             return 0;

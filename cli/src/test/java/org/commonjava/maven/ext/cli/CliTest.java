@@ -22,7 +22,6 @@ import org.commonjava.maven.ext.core.ManipulationSession;
 import org.commonjava.maven.ext.core.fixture.TestUtils;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.contrib.java.lang.system.ExpectedSystemExit;
 import org.junit.contrib.java.lang.system.SystemErrRule;
 import org.junit.contrib.java.lang.system.SystemOutRule;
 import org.junit.rules.TemporaryFolder;
@@ -38,9 +37,7 @@ import java.util.UUID;
 
 import static org.commonjava.maven.ext.core.fixture.TestUtils.INTEGRATION_TEST;
 import static org.commonjava.maven.ext.core.fixture.TestUtils.ROOT_DIRECTORY;
-import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 public class CliTest
@@ -53,9 +50,6 @@ public class CliTest
 
     @Rule
     public final SystemErrRule systemErrRule = new SystemErrRule().enableLog().muteForSuccessfulTests();
-
-    @Rule
-    public final ExpectedSystemExit expectedSystemExit = ExpectedSystemExit.none();
 
     private File writeSettings( File f ) throws IOException
     {
@@ -70,17 +64,15 @@ public class CliTest
     @Test
     public void checkHelpAndExit()
     {
-        expectedSystemExit.expectSystemExitWithStatus( 0 );
-        Cli.main( new String[] { "-h" } );
-        assertTrue( systemOutRule.getLog().contains( "usage: ..." ) );
+        new Cli().run( new String[] { "-h" } );
+        assertTrue( systemOutRule.getLog().contains( "Usage: PME" ) );
     }
 
     @Test
     public void checkInvalidParam()
     {
-        expectedSystemExit.expectSystemExitWithStatus( 10 );
-        Cli.main( new String[] { "-FOOBAR" } );
-        assertTrue( systemOutRule.getLog().contains( "usage: ..." ) );
+        new Cli().run( new String[] { "-FOOBAR" } );
+        assertTrue( systemErrRule.getLog().contains( "Unknown option" ) );
     }
 
     @Test
@@ -262,10 +254,8 @@ public class CliTest
     @Test
     public void checkVersionAndExit()
     {
-        expectedSystemExit.expectSystemExitWithStatus( 0 );
-        Cli.main( new String[] { "--version" } );
+        new Cli().run( new String[] { "--version" } );
         assertTrue( systemOutRule.getLog().contains( "PME CLI" ) );
-        assertTrue( systemOutRule.getLog().contains( "SHA" ) );
     }
 
     @Test
@@ -273,10 +263,10 @@ public class CliTest
     {
         final File root = Paths.get( ROOT_DIRECTORY.toString(), "pom.xml" ).toFile();
 
-        expectedSystemExit.expectSystemExitWithStatus( 0 );
-        Cli.main( new String[] { "--printProjectDeps", "--file", root.getAbsolutePath() } );
+        new Cli().run( new String[] { "--printProjectDeps", "--file", root.getAbsolutePath() } );
 
-        assertThat( systemOutRule.getLog(), equalTo( "INFO org.commonjava.maven.ext.cli.Cli - Found 82 dependencies\n" + "ch.qos.logback:logback-classic:1.2.3                                            jar                 compile             \n"
+        assertTrue( systemOutRule.getLog().contains( "org.commonjava.maven.ext.cli.Cli - Found 82" ) );
+        assertTrue( systemOutRule.getLogWithNormalizedLineSeparator().contains( "ch.qos.logback:logback-classic:1.2.3                                            jar                 compile             \n"
                                                                      + "ch.qos.logback:logback-core:1.2.3                                               jar                 compile             \n"
                                                                      + "com.fasterxml.jackson.core:jackson-annotations:2.11.2                           jar                 compile             \n"
                                                                      + "com.fasterxml.jackson.core:jackson-core:2.11.2                                  jar                 compile             \n"
@@ -364,10 +354,8 @@ public class CliTest
     @Test
     public void checkManipulatorOrder()
     {
-        expectedSystemExit.expectSystemExitWithStatus( 0 );
-        Cli.main( new String[] { "--printManipulatorOrder" } );
-        assertThat( systemOutRule.getLog(), equalTo( "[INFO] Running Maven Manipulation Extension (PME) \n"
-                                                                     + "Manipulator order is:\n"
+        new Cli().run( new String[] { "--printManipulatorOrder" } );
+        assertTrue( systemOutRule.getLogWithNormalizedLineSeparator().contains( "Manipulator order is:\n"
                                                                      + "         1          InitialGroovyManipulator                \n"
                                                                      + "         2          RangeResolver                           \n"
                                                                      + "         4          RESTBOMCollector                        \n"
@@ -383,7 +371,8 @@ public class CliTest
                                                                      + "         50         RepoAndReportingRemovalManipulator      \n"
                                                                      + "         51         DependencyRemovalManipulator            \n"
                                                                      + "         52         PluginRemovalManipulator                \n"
-                                                                     + "         53         ProfileRemovalManipulator               \n"
+                                                                     + "         53         NexusStagingMavenPluginRemovalManipulator\n"
+                                                                     + "         55         ProfileRemovalManipulator               \n"
                                                                      + "         60         PluginInjectingManipulator              \n"
                                                                      + "         65         RepositoryInjectionManipulator          \n"
                                                                      + "         70         ProjectVersionEnforcingManipulator      \n"

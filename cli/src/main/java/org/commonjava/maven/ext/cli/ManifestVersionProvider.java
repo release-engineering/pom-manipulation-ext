@@ -33,7 +33,6 @@ package org.commonjava.maven.ext.cli;
  */
 
 import org.commonjava.maven.ext.common.ManipulationException;
-import org.commonjava.maven.ext.common.ManipulationUncheckedException;
 import org.commonjava.maven.ext.common.util.ManifestUtils;
 import picocli.CommandLine;
 
@@ -48,17 +47,5 @@ public class ManifestVersionProvider
     public String[] getVersion() throws ManipulationException
     {
         return new String[] { "PME CLI " + ManifestUtils.getManifestInformation(ManifestVersionProvider.class) };
-    }
-
-    @Override
-    public String toString() {
-        try
-        {
-            return getVersion()[0];
-        }
-        catch ( ManipulationException e )
-        {
-            throw new ManipulationUncheckedException( e );
-        }
     }
 }
