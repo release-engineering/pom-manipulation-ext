@@ -37,7 +37,7 @@ public class ProjectVersionEnforcingState
     }
 
     // Default to on.
-    private boolean mode = true;
+    private boolean enabled = true;
 
     public ProjectVersionEnforcingState( final Properties userProps )
     {
@@ -46,15 +46,7 @@ public class ProjectVersionEnforcingState
 
     public void initialise( Properties userProps )
     {
-        final String value = userProps.getProperty( ENFORCE_PROJECT_VERSION );
-        if ( value != null )
-        {
-            mode = Boolean.parseBoolean( value );
-        }
-        else
-        {
-            mode = true;
-        }
+        enabled = Boolean.parseBoolean( userProps.getProperty( ENFORCE_PROJECT_VERSION, "true" ) );
     }
 
     /**
@@ -67,6 +59,6 @@ public class ProjectVersionEnforcingState
     @Override
     public boolean isEnabled()
     {
-        return mode;
+        return enabled;
     }
 }
