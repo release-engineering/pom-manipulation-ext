@@ -256,23 +256,26 @@ public class Cli implements Callable<Integer>
             {
                 List<ArtifactRef> ts = RESTCollector.establishAllDependencies( session, pomIO.parseProject( session.getPom() ),
                                                                               profiles ).stream().sorted().collect(Collectors.toList());
-                logger.info( "Found {} dependencies", ts.size());
+                System.out.format( "Found %s dependencies\n", ts.size());
+                System.out.format("\u001B[32m%-80s%-20s%-20s%-20s\033[0m%n",
+                                  StringUtils.center( "GAV", 60 ), "TYPE", "CLASSIFIER", "SCOPE" );
 
                 for ( ArtifactRef a : ts )
                 {
                     if ( a instanceof SimpleScopedArtifactRef )
                     {
-                        boolean isPlugin =  "maven-plugin".equals( a.getTypeAndClassifier().getType() );
-                        String scope = ( (SimpleScopedArtifactRef) a ).getScope() == null ? "compile" : ( (SimpleScopedArtifactRef) a ).getScope();
-                        System.out.format("%-80s%-20s%-20s%n", a.asProjectVersionRef(),
+                        final boolean isPlugin =  "maven-plugin".equals( a.getTypeAndClassifier().getType() );
+                        final String scope = ( (SimpleScopedArtifactRef) a ).getScope() == null ? "compile" : ( (SimpleScopedArtifactRef) a ).getScope();
+                        System.out.format("%-80s%-20s%-20s%-20s%n", a.asProjectVersionRef(),
                                           a.getTypeAndClassifier().getType(),
+                                          a.getTypeAndClassifier().getClassifier() == null ? "" : a.getTypeAndClassifier().getClassifier(),
                                           isPlugin ? "" : scope);
                     }
                 }
             }
             else if (printManipulatorOrder)
             {
-                System.out.println ("Manipulator order is:");
+                System.out.println ("\u001B[32mManipulator order is:\033[0m");
                 manipulationManager.getOrderedManipulators().forEach
                         (m -> System.out.format( "%-20s%-40s%n",
                                                  StringUtils.center( String.valueOf( m.getExecutionIndex() ), 20),

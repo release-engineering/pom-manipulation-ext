@@ -22,6 +22,7 @@ import org.commonjava.maven.ext.core.ManipulationSession;
 import org.commonjava.maven.ext.core.fixture.TestUtils;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.contrib.java.lang.system.ExpectedSystemExit;
 import org.junit.contrib.java.lang.system.SystemErrRule;
 import org.junit.contrib.java.lang.system.SystemOutRule;
 import org.junit.rules.TemporaryFolder;
@@ -51,6 +52,9 @@ public class CliTest
     @Rule
     public final SystemErrRule systemErrRule = new SystemErrRule().enableLog().muteForSuccessfulTests();
 
+    @Rule
+    public final ExpectedSystemExit exit = ExpectedSystemExit.none();
+
     private File writeSettings( File f ) throws IOException
     {
         FileUtils.writeStringToFile( f, "<?xml version=\"1.0\" encoding=\"utf-8\"?>"
@@ -64,8 +68,9 @@ public class CliTest
     @Test
     public void checkHelpAndExit()
     {
-        new Cli().run( new String[] { "-h" } );
-        assertTrue( systemOutRule.getLog().contains( "Usage: PME" ) );
+        exit.expectSystemExitWithStatus( 0 );
+        exit.checkAssertionAfterwards( () -> assertTrue( systemOutRule.getLog().contains( "Usage: PME" ) ) );
+        Cli.main( new String[] { "-h" } );
     }
 
     @Test
@@ -265,89 +270,81 @@ public class CliTest
 
         new Cli().run( new String[] { "--printProjectDeps", "--file", root.getAbsolutePath() } );
 
-        assertTrue( systemOutRule.getLog().contains( "org.commonjava.maven.ext.cli.Cli - Found 82" ) );
-        assertTrue( systemOutRule.getLogWithNormalizedLineSeparator().contains( "ch.qos.logback:logback-classic:1.2.3                                            jar                 compile             \n"
-                                                                     + "ch.qos.logback:logback-core:1.2.3                                               jar                 compile             \n"
-                                                                     + "com.fasterxml.jackson.core:jackson-annotations:2.11.2                           jar                 compile             \n"
-                                                                     + "com.fasterxml.jackson.core:jackson-core:2.11.2                                  jar                 compile             \n"
-                                                                     + "com.fasterxml.jackson.core:jackson-databind:2.11.2                              jar                 compile             \n"
-                                                                     + "com.github.olivergondza:maven-jdk-tools-wrapper:0.1                             jar                 compile             \n"
-                                                                     + "com.github.stefanbirkner:system-rules:1.18.0                                    jar                 test                \n"
-                                                                     + "com.google.inject:guice:4.0                                                     jar                 compile             \n"
-                                                                     + "com.jayway.jsonpath:json-path:2.3.0                                             jar                 compile             \n"
-                                                                     + "com.konghq:unirest-java:3.10.00                                                 jar                 compile             \n"
-                                                                     + "com.konghq:unirest-objectmapper-jackson:3.10.00                                 jar                 compile             \n"
-                                                                     + "com.redhat.rcm:redhat-releng-tools:9                                            pom                 compile             \n"
-                                                                     + "com.soebes.maven.plugins:iterator-maven-plugin:0.3                              maven-plugin                            \n"
-                                                                     + "com.squareup:javapoet:1.12.0                                                    jar                 compile             \n"
-                                                                     + "commons-codec:commons-codec:1.11                                                jar                 compile             \n"
-                                                                     + "commons-io:commons-io:2.6                                                       jar                 compile             \n"
-                                                                     + "commons-lang:commons-lang:2.6                                                   jar                 compile             \n"
-                                                                     + "commons-logging:commons-logging:1.2                                             jar                 compile             \n"
-                                                                     + "info.picocli:picocli:4.5.1                                                      jar                 compile             \n"
-                                                                     + "javax.inject:javax.inject:1                                                     jar                 compile             \n"
-                                                                     + "junit:junit:4.12                                                                jar                 test                \n"
-                                                                     + "org.apache.httpcomponents:httpclient:4.5.12                                     jar                 compile             \n"
-                                                                     + "org.apache.ivy:ivy:2.4.0                                                        jar                 compile             \n"
-                                                                     + "org.apache.maven:apache-maven:3.5.0                                             zip                 test                \n"
-                                                                     + "org.apache.maven:maven-artifact:3.5.0                                           jar                 provided            \n"
-                                                                     + "org.apache.maven:maven-compat:3.5.0                                             jar                 provided            \n"
-                                                                     + "org.apache.maven:maven-core:3.5.0                                               jar                 provided            \n"
-                                                                     + "org.apache.maven:maven-model:3.5.0                                              jar                 provided            \n"
-                                                                     + "org.apache.maven:maven-model-builder:3.5.0                                      jar                 provided            \n"
-                                                                     + "org.apache.maven:maven-settings:3.5.0                                           jar                 provided            \n"
-                                                                     + "org.apache.maven:maven-settings-builder:3.5.0                                   jar                 provided            \n"
-                                                                     + "org.apache.maven.plugins:maven-assembly-plugin:2.2-beta-5                       maven-plugin                            \n"
-                                                                     + "org.apache.maven.plugins:maven-dependency-plugin:3.1.1                          maven-plugin                            \n"
-                                                                     + "org.apache.maven.plugins:maven-invoker-plugin:3.2.1                             maven-plugin                            \n"
-                                                                     + "org.apache.maven.plugins:maven-jar-plugin:2.4                                   maven-plugin                            \n"
-                                                                     + "org.apache.maven.plugins:maven-project-info-reports-plugin:3.0.0                maven-plugin                            \n"
-                                                                     + "org.apache.maven.plugins:maven-release-plugin:2.3.2                             maven-plugin                            \n"
-                                                                     + "org.apache.maven.plugins:maven-resources-plugin:2.6                             maven-plugin                            \n"
-                                                                     + "org.apache.maven.plugins:maven-shade-plugin:3.2.1                               maven-plugin                            \n"
-                                                                     + "org.apache.maven.plugins:maven-surefire-plugin:2.12.4                           maven-plugin                            \n"
-                                                                     + "org.apache.maven.release:maven-release-api:3.0.0-M1                             jar                 compile             \n"
-                                                                     + "org.apache.maven.release:maven-release-manager:3.0.0-M1                         jar                 compile             \n"
-                                                                     + "org.bsc.maven:maven-processor-plugin:3.3.3                                      maven-plugin                            \n"
-                                                                     + "org.codehaus.groovy:groovy:2.5.7                                                jar                 compile             \n"
-                                                                     + "org.codehaus.groovy:groovy-json:2.5.7                                           jar                 compile             \n"
-                                                                     + "org.codehaus.groovy:groovy-xml:2.5.7                                            jar                 compile             \n"
-                                                                     + "org.codehaus.mojo:animal-sniffer-maven-plugin:1.18                              maven-plugin                            \n"
-                                                                     + "org.codehaus.plexus:plexus-interpolation:1.24                                   jar                 provided            \n"
-                                                                     + "org.codehaus.plexus:plexus-utils:3.1.0                                          jar                 compile             \n"
-                                                                     + "org.commonjava.maven.atlas:atlas-identities:0.17.1                              jar                 compile             \n"
-                                                                     + "org.commonjava.maven.ext:pom-manipulation-annotation:4.1                        jar                 compile             \n"
-                                                                     + "org.commonjava.maven.ext:pom-manipulation-cli:4.1                               jar                 compile             \n"
-                                                                     + "org.commonjava.maven.ext:pom-manipulation-cli:4.1                               jar                 compile             \n"
-                                                                     + "org.commonjava.maven.ext:pom-manipulation-common:4.1                            jar                 compile             \n"
-                                                                     + "org.commonjava.maven.ext:pom-manipulation-core:4.1                              jar                 compile             \n"
-                                                                     + "org.commonjava.maven.ext:pom-manipulation-core:4.1                              test-jar            compile             \n"
-                                                                     + "org.commonjava.maven.ext:pom-manipulation-ext:4.1                               jar                 compile             \n"
-                                                                     + "org.commonjava.maven.ext:pom-manipulation-integration-test:4.1                  test-jar            compile             \n"
-                                                                     + "org.commonjava.maven.ext:pom-manipulation-integration-test:4.1                  jar                 compile             \n"
-                                                                     + "org.commonjava.maven.ext:pom-manipulation-io:4.1                                jar                 compile             \n"
-                                                                     + "org.commonjava.maven.ext:pom-manipulation-io:4.1                                test-jar            compile             \n"
-                                                                     + "org.commonjava.maven.ext:pom-manipulation-parent:4.1                            pom                 compile             \n"
-                                                                     + "org.commonjava.maven.galley:galley-api:0.16.6                                   jar                 compile             \n"
-                                                                     + "org.commonjava.maven.galley:galley-core:0.16.6                                  jar                 compile             \n"
-                                                                     + "org.commonjava.maven.galley:galley-maven:0.16.6                                 jar                 compile             \n"
-                                                                     + "org.commonjava.maven.galley:galley-transport-filearc:0.16.6                     jar                 compile             \n"
-                                                                     + "org.commonjava.maven.galley:galley-transport-httpclient:0.16.6                  jar                 compile             \n"
-                                                                     + "org.commonjava.util:http-testserver:1.1                                         jar                 test                \n"
-                                                                     + "org.eclipse.aether:aether-api:1.1.0                                             jar                 provided            \n"
-                                                                     + "org.eclipse.jetty:jetty-server:9.4.17.v20190418                                 jar                 compile             \n"
-                                                                     + "org.eclipse.sisu:org.eclipse.sisu.plexus:0.3.3                                  jar                 compile             \n"
-                                                                     + "org.hamcrest:hamcrest-all:1.3                                                   jar                 test                \n"
-                                                                     + "org.jacoco:jacoco-maven-plugin:0.8.5                                            maven-plugin                            \n"
-                                                                     + "org.jboss.byteman:byteman-bmunit:4.0.4                                          jar                 test                \n"
-                                                                     + "org.jboss.da:reports-model:1.7.0                                                jar                 compile             \n"
-                                                                     + "org.jdom:jdom:1.1.3                                                             jar                 compile             \n"
-                                                                     + "org.projectlombok:lombok:1.18.12                                                jar                 provided            \n"
-                                                                     + "org.projectlombok:lombok-maven-plugin:1.18.12.0                                 maven-plugin                            \n"
-                                                                     + "org.slf4j:slf4j-api:1.7.30                                                      jar                 compile             \n"
-                                                                     + "org.xmlunit:xmlunit-core:2.1.1                                                  jar                 test                \n"
-                                                                     + "org.xmlunit:xmlunit-matchers:2.1.1                                              jar                 test                \n"
-                                                                     + "org.yaml:snakeyaml:1.17                                                         jar                 compile             \n" ) );
+        // Strip out PME itself otherwise it causes issues on releasing a new version.
+        String cliOutput = systemOutRule.getLogWithNormalizedLineSeparator().replaceAll( "org.commonjava.maven.ext:pom-manipulation-.*\\n", "" );
+
+        assertTrue( cliOutput.contains( "Found 82" ) );
+        assertTrue( cliOutput.contains( ""
+                + "ch.qos.logback:logback-classic:1.2.3                                            jar                                     compile             \n"
+                + "ch.qos.logback:logback-core:1.2.3                                               jar                                     compile             \n"
+                + "com.fasterxml.jackson.core:jackson-annotations:2.11.2                           jar                                     compile             \n"
+                + "com.fasterxml.jackson.core:jackson-core:2.11.2                                  jar                                     compile             \n"
+                + "com.fasterxml.jackson.core:jackson-databind:2.11.2                              jar                                     compile             \n"
+                + "com.github.olivergondza:maven-jdk-tools-wrapper:0.1                             jar                                     compile             \n"
+                + "com.github.stefanbirkner:system-rules:1.18.0                                    jar                                     test                \n"
+                + "com.google.inject:guice:4.0                                                     jar                 no_aop              compile             \n"
+                + "com.jayway.jsonpath:json-path:2.3.0                                             jar                                     compile             \n"
+                + "com.konghq:unirest-java:3.10.00                                                 jar                                     compile             \n"
+                + "com.konghq:unirest-objectmapper-jackson:3.10.00                                 jar                                     compile             \n"
+                + "com.redhat.rcm:redhat-releng-tools:9                                            pom                                     compile             \n"
+                + "com.soebes.maven.plugins:iterator-maven-plugin:0.3                              maven-plugin                                                \n"
+                + "com.squareup:javapoet:1.12.0                                                    jar                                     compile             \n"
+                + "commons-codec:commons-codec:1.11                                                jar                                     compile             \n"
+                + "commons-io:commons-io:2.6                                                       jar                                     compile             \n"
+                + "commons-lang:commons-lang:2.6                                                   jar                                     compile             \n"
+                + "commons-logging:commons-logging:1.2                                             jar                                     compile             \n"
+                + "info.picocli:picocli:4.5.1                                                      jar                                     compile             \n"
+                + "javax.inject:javax.inject:1                                                     jar                                     compile             \n"
+                + "junit:junit:4.12                                                                jar                                     test                \n"
+                + "org.apache.httpcomponents:httpclient:4.5.12                                     jar                                     compile             \n"
+                + "org.apache.ivy:ivy:2.4.0                                                        jar                                     compile             \n"
+                + "org.apache.maven:apache-maven:3.5.0                                             zip                 bin                 test                \n"
+                + "org.apache.maven:maven-artifact:3.5.0                                           jar                                     provided            \n"
+                + "org.apache.maven:maven-compat:3.5.0                                             jar                                     provided            \n"
+                + "org.apache.maven:maven-core:3.5.0                                               jar                                     provided            \n"
+                + "org.apache.maven:maven-model:3.5.0                                              jar                                     provided            \n"
+                + "org.apache.maven:maven-model-builder:3.5.0                                      jar                                     provided            \n"
+                + "org.apache.maven:maven-settings:3.5.0                                           jar                                     provided            \n"
+                + "org.apache.maven:maven-settings-builder:3.5.0                                   jar                                     provided            \n"
+                + "org.apache.maven.plugins:maven-assembly-plugin:2.2-beta-5                       maven-plugin                                                \n"
+                + "org.apache.maven.plugins:maven-dependency-plugin:3.1.1                          maven-plugin                                                \n"
+                + "org.apache.maven.plugins:maven-invoker-plugin:3.2.1                             maven-plugin                                                \n"
+                + "org.apache.maven.plugins:maven-jar-plugin:2.4                                   maven-plugin                                                \n"
+                + "org.apache.maven.plugins:maven-project-info-reports-plugin:3.0.0                maven-plugin                                                \n"
+                + "org.apache.maven.plugins:maven-release-plugin:2.3.2                             maven-plugin                                                \n"
+                + "org.apache.maven.plugins:maven-resources-plugin:2.6                             maven-plugin                                                \n"
+                + "org.apache.maven.plugins:maven-shade-plugin:3.2.1                               maven-plugin                                                \n"
+                + "org.apache.maven.plugins:maven-surefire-plugin:2.12.4                           maven-plugin                                                \n"
+                + "org.apache.maven.release:maven-release-api:3.0.0-M1                             jar                                     compile             \n"
+                + "org.apache.maven.release:maven-release-manager:3.0.0-M1                         jar                                     compile             \n"
+                + "org.bsc.maven:maven-processor-plugin:3.3.3                                      maven-plugin                                                \n"
+                + "org.codehaus.groovy:groovy:2.5.7                                                jar                                     compile             \n"
+                + "org.codehaus.groovy:groovy-json:2.5.7                                           jar                                     compile             \n"
+                + "org.codehaus.groovy:groovy-xml:2.5.7                                            jar                                     compile             \n"
+                + "org.codehaus.mojo:animal-sniffer-maven-plugin:1.18                              maven-plugin                                                \n"
+                + "org.codehaus.plexus:plexus-interpolation:1.24                                   jar                                     provided            \n"
+                + "org.codehaus.plexus:plexus-utils:3.1.0                                          jar                                     compile             \n"
+                + "org.commonjava.maven.atlas:atlas-identities:0.17.1                              jar                                     compile             \n"
+                + "org.commonjava.maven.galley:galley-api:0.16.6                                   jar                                     compile             \n"
+                + "org.commonjava.maven.galley:galley-core:0.16.6                                  jar                                     compile             \n"
+                + "org.commonjava.maven.galley:galley-maven:0.16.6                                 jar                                     compile             \n"
+                + "org.commonjava.maven.galley:galley-transport-filearc:0.16.6                     jar                                     compile             \n"
+                + "org.commonjava.maven.galley:galley-transport-httpclient:0.16.6                  jar                                     compile             \n"
+                + "org.commonjava.util:http-testserver:1.1                                         jar                                     test                \n"
+                + "org.eclipse.aether:aether-api:1.1.0                                             jar                                     provided            \n"
+                + "org.eclipse.jetty:jetty-server:9.4.17.v20190418                                 jar                                     compile             \n"
+                + "org.eclipse.sisu:org.eclipse.sisu.plexus:0.3.3                                  jar                                     compile             \n"
+                + "org.hamcrest:hamcrest-all:1.3                                                   jar                                     test                \n"
+                + "org.jacoco:jacoco-maven-plugin:0.8.5                                            maven-plugin                                                \n"
+                + "org.jboss.byteman:byteman-bmunit:4.0.4                                          jar                                     test                \n"
+                + "org.jboss.da:reports-model:1.7.0                                                jar                                     compile             \n"
+                + "org.jdom:jdom:1.1.3                                                             jar                                     compile             \n"
+                + "org.projectlombok:lombok:1.18.12                                                jar                                     provided            \n"
+                + "org.projectlombok:lombok-maven-plugin:1.18.12.0                                 maven-plugin                                                \n"
+                + "org.slf4j:slf4j-api:1.7.30                                                      jar                                     compile             \n"
+                + "org.xmlunit:xmlunit-core:2.1.1                                                  jar                                     test                \n"
+                + "org.xmlunit:xmlunit-matchers:2.1.1                                              jar                                     test                \n"
+                + "org.yaml:snakeyaml:1.17                                                         jar                                     compile") );
 
     }
 
@@ -355,31 +352,32 @@ public class CliTest
     public void checkManipulatorOrder()
     {
         new Cli().run( new String[] { "--printManipulatorOrder" } );
-        assertTrue( systemOutRule.getLogWithNormalizedLineSeparator().contains( "Manipulator order is:\n"
-                                                                     + "         1          InitialGroovyManipulator                \n"
-                                                                     + "         2          RangeResolver                           \n"
-                                                                     + "         4          RESTBOMCollector                        \n"
-                                                                     + "         5          ProfileInjectionManipulator             \n"
-                                                                     + "         6          SuffixManipulator                       \n"
-                                                                     + "         7          RelocationManipulator                   \n"
-                                                                     + "         10         RESTCollector                           \n"
-                                                                     + "         20         ProjectVersioningManipulator            \n"
-                                                                     + "         25         ParentInjectionManipulator              \n"
-                                                                     + "         30         PropertyManipulator                     \n"
-                                                                     + "         35         PluginManipulator                       \n"
-                                                                     + "         40         DependencyManipulator                   \n"
-                                                                     + "         50         RepoAndReportingRemovalManipulator      \n"
-                                                                     + "         51         DependencyRemovalManipulator            \n"
-                                                                     + "         52         PluginRemovalManipulator                \n"
-                                                                     + "         53         NexusStagingMavenPluginRemovalManipulator\n"
-                                                                     + "         55         ProfileRemovalManipulator               \n"
-                                                                     + "         60         PluginInjectingManipulator              \n"
-                                                                     + "         65         RepositoryInjectionManipulator          \n"
-                                                                     + "         70         ProjectVersionEnforcingManipulator      \n"
-                                                                     + "         75         DistributionEnforcingManipulator        \n"
-                                                                     + "         80         BOMBuilderManipulator                   \n"
-                                                                     + "         90         JSONManipulator                         \n"
-                                                                     + "         91         XMLManipulator                          \n"
-                                                                     + "         99         FinalGroovyManipulator                  \n" ) );
+        assertTrue( systemOutRule.getLogWithNormalizedLineSeparator().contains( "Manipulator order is:" ) );
+        assertTrue( systemOutRule.getLogWithNormalizedLineSeparator().contains( ""
+                                                            + "         1          InitialGroovyManipulator                \n"
+                                                            + "         2          RangeResolver                           \n"
+                                                            + "         4          RESTBOMCollector                        \n"
+                                                            + "         5          ProfileInjectionManipulator             \n"
+                                                            + "         6          SuffixManipulator                       \n"
+                                                            + "         7          RelocationManipulator                   \n"
+                                                            + "         10         RESTCollector                           \n"
+                                                            + "         20         ProjectVersioningManipulator            \n"
+                                                            + "         25         ParentInjectionManipulator              \n"
+                                                            + "         30         PropertyManipulator                     \n"
+                                                            + "         35         PluginManipulator                       \n"
+                                                            + "         40         DependencyManipulator                   \n"
+                                                            + "         50         RepoAndReportingRemovalManipulator      \n"
+                                                            + "         51         DependencyRemovalManipulator            \n"
+                                                            + "         52         PluginRemovalManipulator                \n"
+                                                            + "         53         NexusStagingMavenPluginRemovalManipulator\n"
+                                                            + "         55         ProfileRemovalManipulator               \n"
+                                                            + "         60         PluginInjectingManipulator              \n"
+                                                            + "         65         RepositoryInjectionManipulator          \n"
+                                                            + "         70         ProjectVersionEnforcingManipulator      \n"
+                                                            + "         75         DistributionEnforcingManipulator        \n"
+                                                            + "         80         BOMBuilderManipulator                   \n"
+                                                            + "         90         JSONManipulator                         \n"
+                                                            + "         91         XMLManipulator                          \n"
+                                                            + "         99         FinalGroovyManipulator                  \n" ) );
     }
 }
