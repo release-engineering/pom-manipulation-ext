@@ -274,7 +274,7 @@ public class CliTest
         String cliOutput = systemOutRule.getLogWithNormalizedLineSeparator().replaceAll( "org.commonjava.maven.ext:pom-manipulation-.*\\n", "" );
 
         assertTrue( cliOutput.contains( "Found 82" ) );
-        assertTrue( cliOutput.contains( ""
+        assertTrue( cliOutput.matches( "(?s).*"
                 + "ch.qos.logback:logback-classic:1.2.3                                            jar                                     compile             \n"
                 + "ch.qos.logback:logback-core:1.2.3                                               jar                                     compile             \n"
                 + "com.fasterxml.jackson.core:jackson-annotations:2.11.2                           jar                                     compile             \n"
@@ -295,7 +295,7 @@ public class CliTest
                 + "commons-logging:commons-logging:1.2                                             jar                                     compile             \n"
                 + "info.picocli:picocli:4.5.1                                                      jar                                     compile             \n"
                 + "javax.inject:javax.inject:1                                                     jar                                     compile             \n"
-                + "junit:junit:4.12                                                                jar                                     test                \n"
+                + "junit:junit:4[.*\\d+]+                                                                jar                                     test                \n"
                 + "org.apache.httpcomponents:httpclient:4.5.12                                     jar                                     compile             \n"
                 + "org.apache.ivy:ivy:2.4.0                                                        jar                                     compile             \n"
                 + "org.apache.maven:apache-maven:3.5.0                                             zip                 bin                 test                \n"
@@ -344,7 +344,7 @@ public class CliTest
                 + "org.slf4j:slf4j-api:1.7.30                                                      jar                                     compile             \n"
                 + "org.xmlunit:xmlunit-core:2.1.1                                                  jar                                     test                \n"
                 + "org.xmlunit:xmlunit-matchers:2.1.1                                              jar                                     test                \n"
-                + "org.yaml:snakeyaml:1.17                                                         jar                                     compile") );
+                + "org.yaml:snakeyaml:1.17                                                         jar                                     compile.*") );
 
     }
 
