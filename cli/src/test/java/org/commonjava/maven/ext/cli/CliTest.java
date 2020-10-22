@@ -295,7 +295,7 @@ public class CliTest
                 + "commons-logging:commons-logging:1.2                                             jar                                     compile             \n"
                 + "info.picocli:picocli:4.5.1                                                      jar                                     compile             \n"
                 + "javax.inject:javax.inject:1                                                     jar                                     compile             \n"
-                + "junit:junit:4[.*\\d+]+                                                                jar                                     test                \n"
+                + "junit:junit:4[.\\d+]+\\s+                                                       jar                                     test                \n"
                 + "org.apache.httpcomponents:httpclient:4.5.12                                     jar                                     compile             \n"
                 + "org.apache.ivy:ivy:2.4.0                                                        jar                                     compile             \n"
                 + "org.apache.maven:apache-maven:3.5.0                                             zip                 bin                 test                \n"
