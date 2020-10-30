@@ -84,7 +84,7 @@
     <unirestVersion>3.10.00</unirestVersion>
     <jsonPathVersion>2.3.0</jsonPathVersion>
     <slf4jVersion>1.7.30</slf4jVersion>
-    <docletVersion>1.0-SNAPSHOT</docletVersion>
+    <docletVersion>1.1</docletVersion>
 
     <!-- Both Jackson versions should be identical except if Jackson has not -->
     <!-- published javadoc for the micro version -->
@@ -674,11 +674,16 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-javadoc-plugin</artifactId>
+        <configuration>
+          <source>8</source>
+          <quiet>true</quiet>
+          <detectJavaApiLink>true</detectJavaApiLink>
+          <author>false</author>
+        </configuration>
         <executions>
           <execution>
             <id>attach-javadocs</id>
             <configuration>
-              <source>11</source>
               <sourcepath>${project.build.directory}/javadoc-generated-sources</sourcepath>
               <doclet>org.goots.hiderdoclet.doclet.JavadocFilter</doclet>
               <docletArtifact>
@@ -686,9 +691,6 @@
                 <artifactId>doclet</artifactId>
                 <version>${docletVersion}</version>
               </docletArtifact>
-              <detectJavaApiLink>true</detectJavaApiLink>
-              <!-- <quiet>true</quiet> -->
-              <author>false</author>
               <links>
                 <!-- TODO: Doesn't seem to work in JDK 11 -->
 <!--                <link>https://www.javadoc.io/doc/org.commonjava.maven.ext/pom-manipulation-common/${project.version}</link>-->
@@ -712,14 +714,7 @@
                 <link>https://fasterxml.github.io/jackson-core/javadoc/${jacksonJavadocVersion}</link>
               </links>
               <additionalJOptions>
-                <additionalJOption>--add-exports=jdk.javadoc/jdk.javadoc.internal.tool=hiderdoclet</additionalJOption>
-                <additionalJOption>--add-exports=jdk.compiler/com.sun.tools.javac.parser=hiderdoclet</additionalJOption>
-                <additionalJOption>--add-exports=jdk.compiler/com.sun.tools.javac.tree=hiderdoclet</additionalJOption>
-                <additionalJOption>--add-exports=jdk.compiler/com.sun.tools.javac.model=hiderdoclet</additionalJOption>
                 <additionalJOption>-J--add-exports=jdk.javadoc/jdk.javadoc.internal.tool=ALL-UNNAMED</additionalJOption>
-                <additionalJOption>-J--add-exports=jdk.compiler/com.sun.tools.javac.parser=ALL-UNNAMED</additionalJOption>
-                <additionalJOption>-J--add-exports=jdk.compiler/com.sun.tools.javac.tree=ALL-UNNAMED</additionalJOption>
-                <additionalJOption>-J--add-exports=jdk.compiler/com.sun.tools.javac.model=ALL-UNNAMED</additionalJOption>
               </additionalJOptions>
             </configuration>
           </execution>

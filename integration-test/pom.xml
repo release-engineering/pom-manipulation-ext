@@ -171,7 +171,6 @@
                 <goal>test-jar</goal>
               </goals>
               <configuration>
-                <quiet>true</quiet>
                 <sourcepath>${basedir}/src/test/java</sourcepath>
               </configuration>
             </execution>
