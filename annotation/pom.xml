@@ -95,8 +95,9 @@
           <execution>
             <id>attach-javadocs</id>
               <!-- Standard configuration uses a custom doclet so revert all config to standard -->
-            <configuration combine.self="override">
-              <quiet>true</quiet>
+              <configuration combine.self="override">
+               <source>8</source>
+               <quiet>true</quiet>
             </configuration>
           </execution>
         </executions>

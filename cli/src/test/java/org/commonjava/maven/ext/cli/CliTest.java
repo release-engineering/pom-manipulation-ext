@@ -273,7 +273,7 @@ public class CliTest
         // Strip out PME itself otherwise it causes issues on releasing a new version.
         String cliOutput = systemOutRule.getLogWithNormalizedLineSeparator().replaceAll( "org.commonjava.maven.ext:pom-manipulation-.*\\n", "" );
 
-        assertTrue( cliOutput.contains( "Found 82" ) );
+        assertTrue( cliOutput.contains( "Found 83" ) );
         assertTrue( cliOutput.matches( "(?s).*"
                 + "ch.qos.logback:logback-classic:1.2.3                                            jar                                     compile             \n"
                 + "ch.qos.logback:logback-core:1.2.3                                               jar                                     compile             \n"
@@ -321,6 +321,7 @@ public class CliTest
                 + "org.codehaus.groovy:groovy:[.\\d+]+\\s+                                         jar                                     compile             \n"
                 + "org.codehaus.groovy:groovy-json:[.\\d+]+\\s+                                    jar                                     compile             \n"
                 + "org.codehaus.groovy:groovy-xml:[.\\d+]+\\s+                                     jar                                     compile             \n"
+                + "org.codehaus.mojo:animal-sniffer-maven-plugin:1.18                              maven-plugin                                                \n"
                 + "org.codehaus.plexus:plexus-interpolation:1.24                                   jar                                     provided            \n"
                 + "org.codehaus.plexus:plexus-utils:3.1.0                                          jar                                     compile             \n"
                 + "org.commonjava.maven.atlas:atlas-identities:0.17.1                              jar                                     compile             \n"
