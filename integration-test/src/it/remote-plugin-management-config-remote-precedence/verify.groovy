@@ -27,7 +27,7 @@ pomFile.eachLine {
    if (it.contains( "<debug>true</debug>")) {
       message++
    }
-   if (it.contains( "<source>1.6</source>")) {
+   if (it.contains( "<source>1.8</source>")) {
       message++
    }
 }
