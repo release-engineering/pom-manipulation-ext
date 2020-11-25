@@ -27,7 +27,7 @@ import java.util.Set;
 /**
  * Used to hold multiple mapping information when mapping properties to update within the Manipulators.
  * For instance, normally we map:
- * Project -> String(PropertyName) : PropertyMapper
+ * Project -&gt; String(PropertyName) : PropertyMapper
  * And this then allows us to record the new version, the old version and any groupId:artifactId of the
  * various Dependencies and Plugins that attempt to update this property.
  */

@@ -113,6 +113,11 @@
     </dependency>
 
     <dependency>
+      <groupId>org.goots.hiderdoclet</groupId>
+      <artifactId>doclet</artifactId>
+    </dependency>
+
+    <dependency>
       <groupId>org.jdom</groupId>
       <artifactId>jdom</artifactId>
     </dependency>
@@ -143,6 +148,16 @@
       <plugin>
         <groupId>org.eclipse.sisu</groupId>
         <artifactId>sisu-maven-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <configuration>
+          <excludePackageNames>org.commonjava.maven.ext.common.jdom</excludePackageNames>
+          <!-- Remove once https://github.com/rzwitserloot/lombok/issues/1520 is fixed as the getter/setter
+               in the json package causes issues -->
+          <doclint>none</doclint>
+        </configuration>
       </plugin>
     </plugins>
   </build>

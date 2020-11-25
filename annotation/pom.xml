@@ -95,27 +95,9 @@
           <execution>
             <id>attach-javadocs</id>
               <!-- Standard configuration uses a custom doclet so revert all config to standard -->
-            <configuration combine.self="override">
-              <quiet>true</quiet>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
-        <artifactId>maven-enforcer-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>enforce-commonjava-standards</id>
-            <configuration>
-              <rules>
-                <!-- Also ignore com.sun.javadoc -->
-                <illegalTransitiveDependencyCheck implementation="de.is24.maven.enforcer.rules.IllegalTransitiveDependencyCheck">
-                  <regexIgnoredClasses>
-                    <regexIgnoredClass>com\.sun\..+</regexIgnoredClass>
-                    <regexIgnoredClass>javax\..+</regexIgnoredClass>
-                  </regexIgnoredClasses>
-                </illegalTransitiveDependencyCheck>
-              </rules>
+              <configuration combine.self="override">
+               <source>8</source>
+               <quiet>true</quiet>
             </configuration>
           </execution>
         </executions>

@@ -76,8 +76,10 @@ public class XMLIOTest
 
         String strResult = xmlIO.convert( doc );
 
-        Diff diff = DiffBuilder.compare( fromFile( xmlFile ) ).withTest( Input.fromString( strResult ) ).build();
+        Diff diff = DiffBuilder.compare( fromFile( xmlFile ) ).ignoreWhitespace().withTest( Input.fromString( strResult ) ).build();
 
+        System.out.println ("### Original " + strResult);
+        System.out.println ("### Dif is " + diff.toString());
         assertFalse (diff.toString(), diff.hasDifferences());
     }
 
@@ -90,7 +92,7 @@ public class XMLIOTest
 
         xmlIO.writeXML( target, doc );
 
-        Diff diff = DiffBuilder.compare( fromFile( xmlFile ) ).withTest( Input.fromFile( target ) ).build();
+        Diff diff = DiffBuilder.compare( fromFile( xmlFile ) ).ignoreWhitespace().withTest( Input.fromFile( target ) ).build();
 
         assertFalse (diff.toString(), diff.hasDifferences());
     }

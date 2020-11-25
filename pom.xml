@@ -22,7 +22,7 @@
   <parent>
     <groupId>com.redhat.rcm</groupId>
     <artifactId>redhat-releng-tools</artifactId>
-    <version>9</version>
+    <version>10</version>
   </parent>
 
   <groupId>org.commonjava.maven.ext</groupId>
@@ -72,7 +72,6 @@
 
   <properties>
     <projectOwner>Red Hat, Inc.</projectOwner>
-    <projectEmail>jcasey@redhat.com</projectEmail>
 
     <javaVersion>1.8</javaVersion>
     <javaTestVersion>${javaVersion}</javaTestVersion>
@@ -81,15 +80,18 @@
     <atlasVersion>0.17.1</atlasVersion>
     <galleyVersion>0.16.6</galleyVersion>
 
-    <groovyVersion>2.5.7</groovyVersion>
+    <groovyVersion>3.0.5</groovyVersion>
     <unirestVersion>3.10.00</unirestVersion>
     <jsonPathVersion>2.3.0</jsonPathVersion>
     <slf4jVersion>1.7.30</slf4jVersion>
+    <docletVersion>1.1</docletVersion>
 
     <!-- Both Jackson versions should be identical except if Jackson has not -->
     <!-- published javadoc for the micro version -->
     <jacksonVersion>2.11.2</jacksonVersion>
     <jacksonJavadocVersion>2.11</jacksonJavadocVersion>
+
+    <argLine></argLine>
   </properties>
 
 
@@ -398,7 +400,7 @@
       <dependency>
         <groupId>org.eclipse.sisu</groupId>
         <artifactId>org.eclipse.sisu.plexus</artifactId>
-        <version>0.3.3</version>
+        <version>0.3.4</version>
       </dependency>
 
       <dependency>
@@ -469,6 +471,12 @@
       </dependency>
 
       <dependency>
+        <groupId>org.goots.hiderdoclet</groupId>
+        <artifactId>doclet</artifactId>
+        <version>${docletVersion}</version>
+      </dependency>
+
+      <dependency>
         <groupId>junit</groupId>
         <artifactId>junit</artifactId>
         <version>4.13.1</version>
@@ -483,7 +491,7 @@
       <dependency>
         <groupId>org.jboss.byteman</groupId>
         <artifactId>byteman-bmunit</artifactId>
-        <version>4.0.4</version>
+        <version>4.0.13</version>
         <scope>test</scope>
       </dependency>
       <dependency>
@@ -495,13 +503,13 @@
       <dependency>
         <groupId>org.xmlunit</groupId>
         <artifactId>xmlunit-core</artifactId>
-        <version>2.1.1</version>
+        <version>2.7.0</version>
         <scope>test</scope>
       </dependency>
       <dependency>
         <groupId>org.xmlunit</groupId>
         <artifactId>xmlunit-matchers</artifactId>
-        <version>2.1.1</version>
+        <version>2.7.0</version>
         <scope>test</scope>
       </dependency>
       <dependency>
@@ -588,10 +596,21 @@
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-surefire-plugin</artifactId>
           <configuration>
+            <argLine>@{argLine} -Djdk.attach.allowAttachSelf</argLine>
             <redirectTestOutputToFile>true</redirectTestOutputToFile>
             <additionalClasspathElements>
               <additionalClasspathElement>${java.home}/../lib/tools.jar</additionalClasspathElement>
             </additionalClasspathElements>
+            <!-- ensure we don't inherit a byteman jar from any env settings -->
+            <environmentVariables>
+              <BYTEMAN_HOME/>
+            </environmentVariables>
+            <systemProperties>
+                <property>
+                    <name>org.jboss.byteman.home</name>
+                  <value/>
+                </property>
+            </systemProperties>
           </configuration>
         </plugin>
         <plugin>
@@ -618,7 +637,7 @@
         <plugin>
           <groupId>org.jacoco</groupId>
           <artifactId>jacoco-maven-plugin</artifactId>
-          <version>0.8.5</version>
+          <version>0.8.6</version>
         </plugin>
         <plugin>
           <groupId>org.bsc.maven</groupId>
@@ -662,27 +681,31 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-javadoc-plugin</artifactId>
+        <configuration>
+          <source>8</source>
+          <quiet>true</quiet>
+          <detectJavaApiLink>true</detectJavaApiLink>
+          <author>false</author>
+        </configuration>
         <executions>
           <execution>
             <id>attach-javadocs</id>
             <configuration>
               <sourcepath>${project.build.directory}/javadoc-generated-sources</sourcepath>
-              <doclet>org.commonjava.maven.ext.annotation.JavadocFilter</doclet>
+              <doclet>org.goots.hiderdoclet.doclet.JavadocFilter</doclet>
               <docletArtifact>
-                <groupId>org.commonjava.maven.ext</groupId>
-                <artifactId>pom-manipulation-annotation</artifactId>
-                <version>${project.version}</version>
+                <groupId>org.goots.hiderdoclet</groupId>
+                <artifactId>doclet</artifactId>
+                <version>${docletVersion}</version>
               </docletArtifact>
-              <detectJavaApiLink>true</detectJavaApiLink>
-              <quiet>true</quiet>
-              <author>false</author>
               <links>
-                <link>https://www.javadoc.io/doc/org.commonjava.maven.ext/pom-manipulation-common/${project.version}</link>
-                <link>https://www.javadoc.io/doc/org.commonjava.maven.ext/pom-manipulation-io/${project.version}</link>
-                <link>https://www.javadoc.io/doc/org.commonjava.maven.ext/pom-manipulation-core/${project.version}</link>
-                <link>https://www.javadoc.io/doc/org.commonjava.maven.ext/pom-manipulation-cli/${project.version}</link>
-                <link>https://www.javadoc.io/doc/org.commonjava.maven.ext/pom-manipulation-ext/${project.version}</link>
-                <link>https://www.javadoc.io/doc/org.commonjava.maven.ext/pom-manipulation-integration-test/${project.version}</link>
+                <!-- TODO: Doesn't seem to work in JDK 11 -->
+<!--                <link>https://www.javadoc.io/doc/org.commonjava.maven.ext/pom-manipulation-common/${project.version}</link>-->
+<!--                <link>https://www.javadoc.io/doc/org.commonjava.maven.ext/pom-manipulation-io/${project.version}</link>-->
+<!--                <link>https://www.javadoc.io/doc/org.commonjava.maven.ext/pom-manipulation-core/${project.version}</link>-->
+<!--                <link>https://www.javadoc.io/doc/org.commonjava.maven.ext/pom-manipulation-cli/${project.version}</link>-->
+<!--                <link>https://www.javadoc.io/doc/org.commonjava.maven.ext/pom-manipulation-ext/${project.version}</link>-->
+<!--                <link>https://www.javadoc.io/doc/org.commonjava.maven.ext/pom-manipulation-integration-test/${project.version}</link>-->
 
                 <link>https://javadoc.io/doc/org.commonjava.maven.atlas/atlas-identities/${atlasVersion}</link>
                 <link>https://javadoc.io/doc/org.commonjava.maven.galley/galley-api/${galleyVersion}</link>
@@ -694,9 +717,12 @@
 
                 <link>https://www.javadoc.io/doc/org.slf4j/slf4j-api/${slf4jVersion}</link>
                 <link>https://www.javadoc.io/doc/com.jayway.jsonpath/json-path/${jsonPathVersion}</link>
-                <link>https://www.javadoc.io/doc/org.codehause.groovy/groovy-all/${groovyVersion}</link>
+                <link>https://www.javadoc.io/doc/org.codehaus.groovy/groovy-all/${groovyVersion}</link>
                 <link>https://fasterxml.github.io/jackson-core/javadoc/${jacksonJavadocVersion}</link>
               </links>
+              <additionalJOptions>
+                <additionalJOption>-J--add-exports=jdk.javadoc/jdk.javadoc.internal.tool=ALL-UNNAMED</additionalJOption>
+              </additionalJOptions>
             </configuration>
           </execution>
         </executions>

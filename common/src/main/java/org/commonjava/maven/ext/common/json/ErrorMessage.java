@@ -17,7 +17,7 @@ package org.commonjava.maven.ext.common.json;
 
 import lombok.Getter;
 import lombok.Setter;
-import org.commonjava.maven.ext.annotation.JavadocExclude;
+import org.goots.hiderdoclet.doclet.JavadocExclude;
 
 @Setter
 @Getter

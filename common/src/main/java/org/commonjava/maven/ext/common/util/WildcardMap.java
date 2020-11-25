@@ -56,7 +56,7 @@ public class WildcardMap<T>
 
     /**
      * @param key the key to look for
-     * @return <tt>true</tt> if this map contains a mapping for the specified
+     * @return true if this map contains a mapping for the specified
      * key.
      */
     public boolean containsKey(Dependency key)
@@ -69,7 +69,7 @@ public class WildcardMap<T>
 
     /**
      * @param key the key to look for
-     * @return <tt>true</tt> if this map contains a mapping for the specified
+     * @return true if this map contains a mapping for the specified
      * key.
      */
     public boolean containsKey(ProjectRef key)
