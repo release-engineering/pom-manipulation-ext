@@ -23,7 +23,7 @@
 
 ## Prerequisites
 
-* Java 1.8 or later
+* Java 11 or later (to build, it requires 1.8 or later to run)
 * Maven 3.3.9 or later (to build, it requires 3.1 or later to run)
 
 ## Coding
