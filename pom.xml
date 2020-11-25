@@ -527,6 +527,11 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-assembly-plugin</artifactId>
+          <configuration>
+            <archive>
+              <index>false</index>
+            </archive>
+          </configuration>
           <executions>
             <execution>
               <id>make-assembly</id>
@@ -648,6 +653,14 @@
           <groupId>org.projectlombok</groupId>
           <artifactId>lombok-maven-plugin</artifactId>
           <version>1.18.12.0</version>
+        </plugin>
+        <plugin>
+          <artifactId>maven-jar-plugin</artifactId>
+          <configuration>
+            <archive>
+              <index>false</index>
+            </archive>
+          </configuration>
         </plugin>
       </plugins>
     </pluginManagement>
