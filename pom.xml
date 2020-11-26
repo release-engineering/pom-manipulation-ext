@@ -27,7 +27,7 @@
 
   <groupId>org.commonjava.maven.ext</groupId>
   <artifactId>pom-manipulation-parent</artifactId>
-  <version>4.2</version>
+  <version>4.3-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <name>POM Manipulation Extension for Maven</name>
@@ -67,7 +67,7 @@
     <connection>scm:git:http://github.com/release-engineering/pom-manipulation-ext.git</connection>
     <developerConnection>scm:git:git@github.com:release-engineering/pom-manipulation-ext.git</developerConnection>
     <url>http://github.com/release-engineering/pom-manipulation-ext</url>
-    <tag>pom-manipulation-parent-4.2</tag>
+    <tag>HEAD</tag>
   </scm>
 
   <properties>
@@ -100,60 +100,60 @@
       <dependency>
         <groupId>org.commonjava.maven.ext</groupId>
         <artifactId>pom-manipulation-annotation</artifactId>
-        <version>4.2</version>
+        <version>4.3-SNAPSHOT</version>
       </dependency>
       <dependency>
         <groupId>org.commonjava.maven.ext</groupId>
         <artifactId>pom-manipulation-common</artifactId>
-        <version>4.2</version>
+        <version>4.3-SNAPSHOT</version>
       </dependency>
       <dependency>
         <groupId>org.commonjava.maven.ext</groupId>
         <artifactId>pom-manipulation-cli</artifactId>
-        <version>4.2</version>
+        <version>4.3-SNAPSHOT</version>
       </dependency>
       <dependency>
         <groupId>org.commonjava.maven.ext</groupId>
         <artifactId>pom-manipulation-cli</artifactId>
         <classifier>minimal</classifier>
-        <version>4.2</version>
+        <version>4.3-SNAPSHOT</version>
       </dependency>
       <dependency>
         <groupId>org.commonjava.maven.ext</groupId>
         <artifactId>pom-manipulation-core</artifactId>
-        <version>4.2</version>
+        <version>4.3-SNAPSHOT</version>
       </dependency>
       <dependency>
         <groupId>org.commonjava.maven.ext</groupId>
         <artifactId>pom-manipulation-core</artifactId>
-        <version>4.2</version>
+        <version>4.3-SNAPSHOT</version>
         <type>test-jar</type>
       </dependency>
       <dependency>
         <groupId>org.commonjava.maven.ext</groupId>
         <artifactId>pom-manipulation-ext</artifactId>
-        <version>4.2</version>
+        <version>4.3-SNAPSHOT</version>
       </dependency>
       <dependency>
         <groupId>org.commonjava.maven.ext</groupId>
         <artifactId>pom-manipulation-io</artifactId>
-        <version>4.2</version>
+        <version>4.3-SNAPSHOT</version>
       </dependency>
       <dependency>
         <groupId>org.commonjava.maven.ext</groupId>
         <artifactId>pom-manipulation-io</artifactId>
-        <version>4.2</version>
+        <version>4.3-SNAPSHOT</version>
         <type>test-jar</type>
       </dependency>
       <dependency>
         <groupId>org.commonjava.maven.ext</groupId>
         <artifactId>pom-manipulation-integration-test</artifactId>
-        <version>4.2</version>
+        <version>4.3-SNAPSHOT</version>
       </dependency>
       <dependency>
         <groupId>org.commonjava.maven.ext</groupId>
         <artifactId>pom-manipulation-integration-test</artifactId>
-        <version>4.2</version>
+        <version>4.3-SNAPSHOT</version>
         <type>test-jar</type>
       </dependency>
 
