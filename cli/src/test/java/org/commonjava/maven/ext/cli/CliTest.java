@@ -16,6 +16,8 @@
 package org.commonjava.maven.ext.cli;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.filefilter.DirectoryFileFilter;
+import org.apache.commons.io.filefilter.FileFilterUtils;
 import org.apache.commons.lang.reflect.FieldUtils;
 import org.apache.maven.execution.MavenSession;
 import org.commonjava.maven.ext.core.ManipulationSession;
@@ -39,6 +41,7 @@ import java.util.UUID;
 import static org.commonjava.maven.ext.core.fixture.TestUtils.INTEGRATION_TEST;
 import static org.commonjava.maven.ext.core.fixture.TestUtils.ROOT_DIRECTORY;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 public class CliTest
@@ -380,5 +383,46 @@ public class CliTest
                                                             + "         90         JSONManipulator                         \n"
                                                             + "         91         XMLManipulator                          \n"
                                                             + "         99         FinalGroovyManipulator                  \n" ) );
+    }
+
+    @Test
+    public void checkLogging() throws Exception
+    {
+        File folder = temp.newFolder();
+        File target = new File( folder, "pom.xml" );
+
+        FileUtils.copyDirectory(
+                        ROOT_DIRECTORY.toFile(),
+                        folder,
+                        FileFilterUtils.or( DirectoryFileFilter.DIRECTORY, FileFilterUtils.suffixFileFilter("xml")));
+
+        Cli c = new Cli();
+        TestUtils.executeMethod( c, "run", new Object[] {
+                        new String[] { "--settings=" + getClass().getResource( "/settings-test.xml" ).getFile(),
+                                        "-Dmaven.repo.local=" + folder.toString(), "-Prun-its", "--file",
+                                        target.getCanonicalPath() } } );
+        assertTrue( systemOutRule.getLog().contains( "Running manipulator" ) );
+
+        systemOutRule.clearLog();
+
+        c = new Cli();
+        TestUtils.executeMethod( c, "run", new Object[] {
+                        new String[] { "-q", "--settings=" + getClass().getResource( "/settings-test.xml" ).getFile(),
+                                        "-Dmaven.repo.local=" + folder.toString(), "-Prun-its", "--file",
+                                        target.getCanonicalPath() } } );
+
+        assertFalse( systemOutRule.getLog().contains( "Running manipulator" ) );
+
+        systemOutRule.clearLog();
+
+        c = new Cli();
+        TestUtils.executeMethod( c, "run", new Object[] {
+                        new String[] { "-t", "--settings=" + getClass().getResource( "/settings-test.xml" ).getFile(),
+                                        "-DdependencyRelocations.commons-io:commons0io@newGroupId:newArtifactId=1.0",
+                                        "-DversionSuffix=rebuild-1",
+                                        "-Dmaven.repo.local=" + folder.toString(), "-Prun-its", "--file",
+                                        target.getCanonicalPath() } } );
+
+        assertTrue( systemOutRule.getLog().contains( "Wildcard map " ) );
     }
 }

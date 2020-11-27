@@ -54,7 +54,7 @@ public abstract class BaseScriptUtils extends Script implements MavenBaseScript
      */
     public void inlineProperty ( Project currentProject, ProjectRef groupArtifact ) throws ManipulationException
     {
-        logger.info( "Inlining property for {} with reference {}", currentProject, groupArtifact );
+        logger.debug( "Inlining property for {} with reference {}", currentProject, groupArtifact );
         try
         {
             currentProject.getResolvedManagedDependencies( getSession() )
@@ -91,7 +91,7 @@ public abstract class BaseScriptUtils extends Script implements MavenBaseScript
      */
     public void inlineProperty ( Project currentProject, String propertyKey ) throws ManipulationException
     {
-        logger.info( "Inlining property for {} with reference {}", currentProject, propertyKey );
+        logger.debug( "Inlining property for {} with reference {}", currentProject, propertyKey );
         try
         {
             currentProject.getResolvedManagedDependencies( getSession() )

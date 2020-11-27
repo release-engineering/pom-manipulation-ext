@@ -125,6 +125,9 @@ public class Cli implements Callable<Integer>
     @Option( names = {"-P", "--activeProfiles"}, description = "Comma separated list of active profiles.", split = ",")
     private final Set<String> profiles = new HashSet<>();
 
+    @Option( names = { "-q", "--quiet"}, description = "Enable quiet logging (warn/error level)")
+    boolean quiet;
+
     @Option( names = { "-d", "--debug"}, description = "Enable debug logging")
     boolean debug;
 
@@ -187,13 +190,17 @@ public class Cli implements Callable<Integer>
         }
         // Set debug logging after session creation else we get the log filled with Plexus
         // creation stuff.
+        if (trace)
+        {
+            root.setLevel( Level.TRACE );
+        }
         if (debug)
         {
             root.setLevel( Level.DEBUG );
         }
-        if (trace)
+        if (quiet)
         {
-            root.setLevel( Level.TRACE );
+            root.setLevel( Level.WARN );
         }
 
         if ( !session.isEnabled() )
