@@ -26,13 +26,14 @@ Obtain the jar from [here](https://repo1.maven.org/maven2/org/commonjava/maven/e
 
 It supports the following arguments
 
-    -d,--debug                Enable debug
     -D <arg>                  Java Properties
     -f,--file <arg>           POM file
     -h,--help                 Print help
     -l,--log <arg>            Log file to output logging to
     -P,--activeProfiles <arg> Comma separated list of active profiles.
     -s,--settings <arg>       Optional settings.xml file
+    -q,--quiet                Enable quiet
+    -d,--debug                Enable debug
     -t,--trace                Enable trace
     -p,--printDeps            Print all project dependencies
     --printManipulatorOrder   Print the current manipulator order

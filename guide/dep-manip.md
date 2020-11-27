@@ -118,7 +118,7 @@ The blacklist REST endpoint should follow:
 
 ##### REST Timeouts and retries
 
-In case of a 503 response from DA, by default the operations will be retried after a waiting period of 30 seconds. This value can be optionally configured with `-DrestRetryDuration=<...>`, expressed in seconds.
+In case of a 504 response from DA, by default the operations will be retried after a waiting period of 30 seconds. This value can be optionally configured with `-DrestRetryDuration=<...>`, expressed in seconds.
 
 The underlying HTTP client library responsible for calling the REST endpoints is set by default with a socket timeout of 10 minutes, and a connection timeout of 30 seconds. The values can be optionally configured respectively with `-DrestSocketTimeout=<...>` and `-DrestConnectionTimeout=<...>`, expressed in seconds.
 
