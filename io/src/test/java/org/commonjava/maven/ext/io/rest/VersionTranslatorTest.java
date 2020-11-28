@@ -17,6 +17,7 @@ package org.commonjava.maven.ext.io.rest;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.valfirst.slf4jtest.TestLoggerFactory;
 import kong.unirest.Unirest;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef;
@@ -30,6 +31,7 @@ import org.junit.Test;
 import org.junit.rules.TestName;
 import org.junit.runners.MethodSorters;
 import org.slf4j.LoggerFactory;
+import uk.org.lidalia.slf4jext.Level;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -43,9 +45,8 @@ import java.util.Scanner;
 import static org.commonjava.maven.ext.io.rest.Translator.DEFAULT_CONNECTION_TIMEOUT_SEC;
 import static org.commonjava.maven.ext.io.rest.Translator.DEFAULT_SOCKET_TIMEOUT_SEC;
 import static org.commonjava.maven.ext.io.rest.Translator.RETRY_DURATION_SEC;
-import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 /**
@@ -112,7 +113,7 @@ public class VersionTranslatorTest
             put( new SimpleProjectVersionRef( "org.commonjava", "example", "1.1" ), "1.1-redhat-1" );
         }};
 
-        assertThat( actualResult, is( expectedResult ) );
+        assertEquals( actualResult, expectedResult );
     }
 
 
@@ -163,11 +164,23 @@ public class VersionTranslatorTest
         }
     }
 
-    @Test( timeout = 2000 )
+    @Test
     public void testTranslateVersionsPerformance() throws RestException
     {
-        // Disable logging for this test as impacts timing.
-        versionTranslator.translateVersions( aLotOfGavs );
+        TestLoggerFactory.getInstance().setPrintLevel( Level.OFF );
+        try
+        {
+            // Disable logging for this test as impacts timing.
+            long startTime = System.currentTimeMillis();
+            versionTranslator.translateVersions( aLotOfGavs );
+            long endTime = System.currentTimeMillis();
+            System.out.println ("### Timing was " + ( endTime - startTime ));
+            assertTrue( ( endTime - startTime ) < 2000 );
+        }
+        finally
+        {
+            TestLoggerFactory.getInstance().setPrintLevel( Level.DEBUG );
+        }
     }
 
     static List<ProjectVersionRef> loadALotOfGAVs() throws IOException {

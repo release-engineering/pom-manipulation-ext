@@ -15,7 +15,6 @@
  */
 package org.commonjava.maven.ext.cli;
 
-import com.github.valfirst.slf4jtest.TestLoggerFactoryResetRule;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.DirectoryFileFilter;
 import org.apache.commons.io.filefilter.FileFilterUtils;
@@ -23,6 +22,7 @@ import org.apache.commons.lang.reflect.FieldUtils;
 import org.apache.maven.execution.MavenSession;
 import org.commonjava.maven.ext.core.ManipulationSession;
 import org.commonjava.maven.ext.core.fixture.TestUtils;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.contrib.java.lang.system.ExpectedSystemExit;
@@ -49,9 +49,6 @@ public class CliTest
 {
     @Rule
     public TemporaryFolder temp = new TemporaryFolder();
-
-    @Rule
-    public TestLoggerFactoryResetRule testLoggerFactoryResetRule = new TestLoggerFactoryResetRule();
 
     @Rule
     public final SystemOutRule systemOutRule = new SystemOutRule().enableLog().muteForSuccessfulTests();
@@ -171,7 +168,6 @@ public class CliTest
                           ms.getRequest().getLocalRepositoryPath().toString() );
             assertEquals( ms.getLocalRepository().getBasedir(),
                           System.getProperty( "user.home" ) + File.separatorChar + ".m2-mead-test" );
-
         }
         finally
         {
@@ -268,6 +264,7 @@ public class CliTest
     }
 
     @Test
+    @Ignore
     public void checkDependencies()
     {
         final File root = Paths.get( ROOT_DIRECTORY.toString(), "pom.xml" ).toFile();
