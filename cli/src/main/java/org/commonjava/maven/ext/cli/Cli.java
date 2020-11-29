@@ -16,7 +16,9 @@
 package org.commonjava.maven.ext.cli;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -26,6 +28,8 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.maven.artifact.repository.ArtifactRepository;
@@ -84,6 +88,8 @@ public class Cli implements Callable<Integer>
 {
     private static final File DEFAULT_GLOBAL_SETTINGS_FILE =
         new File( System.getProperty( "maven.home" ), "conf" + File.separator + "settings.xml" );
+
+    private static final String CGROUPS = "/proc/1/cgroup";
 
     private final Logger logger = LoggerFactory.getLogger( getClass() );
 
@@ -164,29 +170,37 @@ public class Cli implements Callable<Integer>
     public Integer call() {
         createSession( target, settings );
 
+        final boolean runningInContainer = runningInContainer();
         final Logger rootLogger = LoggerFactory.getLogger( org.slf4j.Logger.ROOT_LOGGER_NAME );
         final ch.qos.logback.classic.Logger root = (ch.qos.logback.classic.Logger) rootLogger;
 
         if ( logFile != null )
         {
-            LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
-            loggerContext.reset();
+            if (runningInContainer)
+            {
+                logger.error( "Disabling log file as running in container!" );
+            }
+            else
+            {
+                LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
+                loggerContext.reset();
 
-            PatternLayoutEncoder ple = new PatternLayoutEncoder();
-            ple.setPattern( "%level %logger{36} %msg%n" );
-            ple.setContext( loggerContext );
-            ple.start();
+                PatternLayoutEncoder ple = new PatternLayoutEncoder();
+                ple.setPattern( "%level %logger{36} %msg%n" );
+                ple.setContext( loggerContext );
+                ple.start();
 
-            FileAppender<ILoggingEvent> fileAppender = new FileAppender<>();
-            fileAppender.setEncoder( ple );
-            fileAppender.setContext( loggerContext );
-            fileAppender.setName( "fileLogging" );
-            fileAppender.setAppend( false );
-            fileAppender.setFile( logFile );
-            fileAppender.start();
+                FileAppender<ILoggingEvent> fileAppender = new FileAppender<>();
+                fileAppender.setEncoder( ple );
+                fileAppender.setContext( loggerContext );
+                fileAppender.setName( "fileLogging" );
+                fileAppender.setAppend( false );
+                fileAppender.setFile( logFile );
+                fileAppender.start();
 
-            root.addAppender( fileAppender );
-            root.setLevel( Level.INFO );
+                root.addAppender( fileAppender );
+                root.setLevel( Level.INFO );
+            }
         }
         // Set debug logging after session creation else we get the log filled with Plexus
         // creation stuff.
@@ -432,5 +446,30 @@ public class Cli implements Callable<Integer>
         effectiveSettings.setActiveProfiles( activeProfiles );
 
         return effectiveSettings;
+    }
+
+    /**
+     * Determine whether the process is running inside an image.
+     * See <a href="https://hackmd.io/gTlORH1KTuOuoWoAAzD42g">here</a>
+     *
+     * @return true if running in a container
+     */
+    private boolean runningInContainer()
+    {
+        boolean result = false;
+
+        try (Stream<String> stream = Files.lines( Paths.get( CGROUPS ) ) )
+        {
+            result = stream.anyMatch( line -> line.contains( "docker") || line.contains( "kubepods" ) );
+        }
+        catch ( IOException e )
+        {
+            logger.error( "Unable to determine if running in a container", e );
+        }
+        if ( !result )
+        {
+            result = System.getenv().containsKey( "container" ) || System.getenv().containsKey( "KUBERNETES_PORT" );
+        }
+        return result;
     }
 }
