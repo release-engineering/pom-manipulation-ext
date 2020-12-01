@@ -15,21 +15,11 @@
  */
 package org.commonjava.maven.ext.cli;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Properties;
-import java.util.Set;
-import java.util.concurrent.Callable;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.LoggerContext;
+import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.FileAppender;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.maven.artifact.repository.ArtifactRepository;
@@ -70,14 +60,24 @@ import org.commonjava.maven.ext.io.PomIO;
 import org.commonjava.maven.ext.io.rest.RestException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import ch.qos.logback.classic.Level;
-import ch.qos.logback.classic.LoggerContext;
-import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
-import ch.qos.logback.classic.spi.ILoggingEvent;
-import ch.qos.logback.core.FileAppender;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
+
+import java.io.File;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Properties;
+import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Command( name = "PME",
           description = "CLI to run PME",
@@ -88,8 +88,6 @@ public class Cli implements Callable<Integer>
 {
     private static final File DEFAULT_GLOBAL_SETTINGS_FILE =
         new File( System.getProperty( "maven.home" ), "conf" + File.separator + "settings.xml" );
-
-    private static final String CGROUPS = "/proc/1/cgroup";
 
     private final Logger logger = LoggerFactory.getLogger( getClass() );
 
@@ -458,7 +456,8 @@ public class Cli implements Callable<Integer>
     {
         boolean result = false;
 
-        try (Stream<String> stream = Files.lines( Paths.get( CGROUPS ) ) )
+        // Don't use Paths.get as causes issues on Windows.
+        try (Stream<String> stream = Files.lines( new File( getCGroups() ).toPath() ) )
         {
             result = stream.anyMatch( line -> line.contains( "docker") || line.contains( "kubepods" ) );
         }
@@ -468,8 +467,14 @@ public class Cli implements Callable<Integer>
         }
         if ( !result )
         {
-            result = System.getenv().containsKey( "container" ) || System.getenv().containsKey( "KUBERNETES_PORT" );
+            result = System.getenv().containsKey( "container" );
         }
         return result;
+    }
+
+    // Split into separate method for testing only.
+    private String getCGroups()
+    {
+        return "/proc/1/cgroup";
     }
 }

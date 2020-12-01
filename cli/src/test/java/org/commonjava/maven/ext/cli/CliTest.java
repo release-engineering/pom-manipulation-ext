@@ -386,7 +386,7 @@ public class CliTest
     }
 
     @Test
-    public void checkLogging() throws Exception
+    public void checkLogLevels() throws Exception
     {
         File folder = temp.newFolder();
         File target = new File( folder, "pom.xml" );
