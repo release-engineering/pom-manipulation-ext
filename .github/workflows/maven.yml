@@ -8,9 +8,11 @@ on:
     branches: master
   pull_request:
     branches: master
-    
+
 jobs:
   build:
+    # https://docs.github.com/en/free-pro-team@latest/actions/reference/workflow-syntax-for-github-actions#jobsjob_idif
+    if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
@@ -20,12 +22,13 @@ jobs:
         java-version: 11
     - name: Build with Maven
       run: mvn -B -V install -Prun-its
+    # - name: Setup tmate session
+    #   uses: mxschmitt/action-tmate@v3
     - name: Codecov
       uses: codecov/codecov-action@v1.0.15
-      with:
-        verbose: true
 
   snapshot:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
@@ -37,8 +40,13 @@ jobs:
     - name: Maven Settings
       uses: s4u/maven-settings-action@v2.2.0
       with:
+        sonatypeSnapshots: true
         githubServer: false
-        servers: '[{"id": "sonatype-nexus-snapshots, "username": "${{ secrets.sonatype_username }}", "password": "${{ secrets.sonatype_password }}"}]'
+        servers: |
+            [{
+                "id": "sonatype-nexus-snapshots",
+                "username": "${{ secrets.SONATYPE_USERNAME }}",
+                "password": "${{ secrets.SONATYPE_PASSWORD }}"
+            }]
     - name: Deploy Snapshot
-      if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}
       run: mvn -B -V org.apache.maven.plugins:maven-source-plugin:jar-no-fork deploy -Prun-its
