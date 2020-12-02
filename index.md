@@ -38,7 +38,11 @@ It supports the following arguments
     -p,--printDeps            Print all project dependencies
     --printManipulatorOrder   Print the current manipulator order
 
-Note that all property arguments are the equivalent to those used when it is used as a Maven extension. The latter two commands do not run the entire tool.
+**Note:**
+* All property arguments are the equivalent to those used when it is used as a Maven extension.
+* The latter two commands do not run the entire tool.
+* Log file output will be disabled if running inside a container image.
+
 
 #### Installation as an Extension
 
