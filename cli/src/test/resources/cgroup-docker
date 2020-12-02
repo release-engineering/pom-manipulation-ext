@@ -1,0 +1,3 @@
+11:cpuset:/system.slice/docker-143ecdad7c48c7457c33bbc2694f4dbe3b465b797bebf8749dc554c4e918ccb7.scope
+10:cpu,cpuacct:/system.slice/docker-143ecdad7c48c7457c33bbc2694f4dbe3b465b797bebf8749dc554c4e918ccb7.scope
+9:freezer:/system.slice/docker-143ecdad7c48c7457c33bbc2694f4dbe3b465b797bebf8749dc554c4e918ccb7.scope

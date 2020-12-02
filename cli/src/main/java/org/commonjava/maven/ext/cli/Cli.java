@@ -15,17 +15,11 @@
  */
 package org.commonjava.maven.ext.cli;
 
-import java.io.File;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Properties;
-import java.util.Set;
-import java.util.concurrent.Callable;
-import java.util.stream.Collectors;
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.LoggerContext;
+import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.FileAppender;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.maven.artifact.repository.ArtifactRepository;
@@ -66,14 +60,24 @@ import org.commonjava.maven.ext.io.PomIO;
 import org.commonjava.maven.ext.io.rest.RestException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import ch.qos.logback.classic.Level;
-import ch.qos.logback.classic.LoggerContext;
-import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
-import ch.qos.logback.classic.spi.ILoggingEvent;
-import ch.qos.logback.core.FileAppender;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
+
+import java.io.File;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Properties;
+import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Command( name = "PME",
           description = "CLI to run PME",
@@ -164,29 +168,37 @@ public class Cli implements Callable<Integer>
     public Integer call() {
         createSession( target, settings );
 
+        final boolean runningInContainer = runningInContainer();
         final Logger rootLogger = LoggerFactory.getLogger( org.slf4j.Logger.ROOT_LOGGER_NAME );
         final ch.qos.logback.classic.Logger root = (ch.qos.logback.classic.Logger) rootLogger;
 
         if ( logFile != null )
         {
-            LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
-            loggerContext.reset();
+            if (runningInContainer)
+            {
+                logger.error( "Disabling log file as running in container!" );
+            }
+            else
+            {
+                LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
+                loggerContext.reset();
 
-            PatternLayoutEncoder ple = new PatternLayoutEncoder();
-            ple.setPattern( "%level %logger{36} %msg%n" );
-            ple.setContext( loggerContext );
-            ple.start();
+                PatternLayoutEncoder ple = new PatternLayoutEncoder();
+                ple.setPattern( "%level %logger{36} %msg%n" );
+                ple.setContext( loggerContext );
+                ple.start();
 
-            FileAppender<ILoggingEvent> fileAppender = new FileAppender<>();
-            fileAppender.setEncoder( ple );
-            fileAppender.setContext( loggerContext );
-            fileAppender.setName( "fileLogging" );
-            fileAppender.setAppend( false );
-            fileAppender.setFile( logFile );
-            fileAppender.start();
+                FileAppender<ILoggingEvent> fileAppender = new FileAppender<>();
+                fileAppender.setEncoder( ple );
+                fileAppender.setContext( loggerContext );
+                fileAppender.setName( "fileLogging" );
+                fileAppender.setAppend( false );
+                fileAppender.setFile( logFile );
+                fileAppender.start();
 
-            root.addAppender( fileAppender );
-            root.setLevel( Level.INFO );
+                root.addAppender( fileAppender );
+                root.setLevel( Level.INFO );
+            }
         }
         // Set debug logging after session creation else we get the log filled with Plexus
         // creation stuff.
@@ -432,5 +444,37 @@ public class Cli implements Callable<Integer>
         effectiveSettings.setActiveProfiles( activeProfiles );
 
         return effectiveSettings;
+    }
+
+    /**
+     * Determine whether the process is running inside an image.
+     * See <a href="https://hackmd.io/gTlORH1KTuOuoWoAAzD42g">here</a>
+     *
+     * @return true if running in a container
+     */
+    private boolean runningInContainer()
+    {
+        boolean result = false;
+
+        // Don't use Paths.get as causes issues on Windows.
+        try (Stream<String> stream = Files.lines( new File( getCGroups() ).toPath() ) )
+        {
+            result = stream.anyMatch( line -> line.contains( "docker") || line.contains( "kubepods" ) );
+        }
+        catch ( IOException e )
+        {
+            logger.error( "Unable to determine if running in a container", e );
+        }
+        if ( !result )
+        {
+            result = System.getenv().containsKey( "container" );
+        }
+        return result;
+    }
+
+    // Split into separate method for testing only.
+    private String getCGroups()
+    {
+        return "/proc/1/cgroup";
     }
 }
