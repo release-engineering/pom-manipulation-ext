@@ -1,6 +1,5 @@
 
-
-[![Build Status (Travis CI)](https://travis-ci.org/release-engineering/pom-manipulation-ext.svg?branch=master)](https://travis-ci.org/release-engineering/pom-manipulation-ext.svg?branch=master)
+![Build status (GitHub Actions)](https://github.com/release-engineering/pom-manipulation-ext/workflows/CI/badge.svg) [![Build Status (Travis CI)](https://travis-ci.org/release-engineering/pom-manipulation-ext.svg?branch=master)](https://travis-ci.org/release-engineering/pom-manipulation-ext.svg?branch=master)
 
 
 # Table of Contents
