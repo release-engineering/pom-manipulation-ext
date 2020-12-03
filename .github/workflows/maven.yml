@@ -12,7 +12,7 @@ on:
 jobs:
   build:
     # https://docs.github.com/en/free-pro-team@latest/actions/reference/workflow-syntax-for-github-actions#jobsjob_idif
-    if: github.event_name == 'pull_request'
+    if: github.repository == 'release-engineering/pom-manipulation-ext' && github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
@@ -35,7 +35,7 @@ jobs:
       uses: codecov/codecov-action@v1.0.15
 
   snapshot:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    if: github.repository == 'release-engineering/pom-manipulation-ext' && github.event_name == 'push' && github.ref == 'refs/heads/master'
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
