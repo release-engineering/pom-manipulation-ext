@@ -80,7 +80,7 @@
     <atlasVersion>0.17.1</atlasVersion>
     <galleyVersion>0.16.6</galleyVersion>
 
-    <groovyVersion>3.0.5</groovyVersion>
+    <groovyVersion>3.0.7</groovyVersion>
     <unirestVersion>3.10.00</unirestVersion>
     <jsonPathVersion>2.3.0</jsonPathVersion>
     <slf4jVersion>1.7.30</slf4jVersion>
