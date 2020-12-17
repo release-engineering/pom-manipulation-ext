@@ -19,7 +19,7 @@ import org.commonjava.maven.ext.io.rest.handler.AddSuffixJettyHandler;
 import org.commonjava.maven.ext.io.rest.rule.MockServer;
 import org.junit.Before;
 import org.junit.BeforeClass;
-import org.junit.ClassRule;
+import org.junit.Rule;
 import org.junit.Test;
 
 import java.io.File;
@@ -31,10 +31,10 @@ import static org.commonjava.maven.ext.integrationtest.ITestUtils.runMaven;
 
 public class CircularIntegrationTest
 {
-    private static AddSuffixJettyHandler handler = new AddSuffixJettyHandler( "/", null );
+    private final AddSuffixJettyHandler handler = new AddSuffixJettyHandler( "/", null );
 
-    @ClassRule
-    public static MockServer mockServer = new MockServer( handler );
+    @Rule
+    public MockServer mockServer = new MockServer( handler );
 
     @BeforeClass
     public static void setUp()

@@ -21,7 +21,6 @@ import org.commonjava.maven.ext.core.ManipulationManager;
 import org.commonjava.maven.ext.core.state.VersioningState;
 import org.commonjava.maven.ext.io.rest.handler.AddSuffixJettyHandler;
 import org.commonjava.maven.ext.io.rest.rule.MockServer;
-import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -49,12 +48,12 @@ import static org.junit.Assert.assertTrue;
  */
 public class ResultJsonFileTest
 {
-    @ClassRule
-    public static MockServer mockServer = new MockServer( new AddSuffixJettyHandler("/", AddSuffixJettyHandler.DEFAULT_SUFFIX) );
+    private final File workingDirectory = new File ( System.getProperty( "user.dir" ) );
 
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private final ObjectMapper MAPPER = new ObjectMapper();
 
-    private static final File workingDirectory = new File ( System.getProperty( "user.dir" ) );
+    @Rule
+    public MockServer mockServer = new MockServer( new AddSuffixJettyHandler("/", AddSuffixJettyHandler.DEFAULT_SUFFIX) );
 
     @Rule
     public TemporaryFolder tmpFolderRule = new TemporaryFolder();

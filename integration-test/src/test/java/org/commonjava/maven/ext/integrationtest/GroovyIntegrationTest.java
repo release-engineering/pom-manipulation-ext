@@ -18,7 +18,7 @@ package org.commonjava.maven.ext.integrationtest;
 import org.commonjava.maven.ext.io.rest.handler.StaticResourceHandler;
 import org.commonjava.maven.ext.io.rest.rule.MockServer;
 import org.junit.BeforeClass;
-import org.junit.ClassRule;
+import org.junit.Rule;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,10 +35,10 @@ public class GroovyIntegrationTest
 {
     private static final Logger LOGGER = LoggerFactory.getLogger( DefaultCliIntegrationTest.class );
 
-    private static StaticResourceHandler handler = new StaticResourceHandler( "src/it/setup/depMgmt2/POMModifier.groovy" );
+    private final StaticResourceHandler handler = new StaticResourceHandler( "src/it/setup/depMgmt2/POMModifier.groovy" );
 
-    @ClassRule
-    public static MockServer mockServer = new MockServer( handler );
+    @Rule
+    public MockServer mockServer = new MockServer( handler );
 
     @BeforeClass
     public static void setUp()

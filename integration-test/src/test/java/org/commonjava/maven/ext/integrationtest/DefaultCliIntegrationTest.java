@@ -33,11 +33,11 @@ import static org.commonjava.maven.ext.integrationtest.ITestUtils.getDefaultTest
 import static org.commonjava.maven.ext.integrationtest.ITestUtils.runLikeInvoker;
 import static org.commonjava.maven.ext.integrationtest.ITestUtils.runMaven;
 
-@SuppressWarnings( "ConstantConditions" )
 @RunWith( Parameterized.class )
 public class DefaultCliIntegrationTest
 {
     private static final Logger LOGGER = LoggerFactory.getLogger( DefaultCliIntegrationTest.class );
+    private static final Logger logger = LoggerFactory.getLogger( DefaultCliIntegrationTest.class );
 
     @Parameters( name = "{0}" )
     public static Collection<Object[]> getFiles()
@@ -98,7 +98,7 @@ public class DefaultCliIntegrationTest
         {
             testRelativeLocation = ITestUtils.LOCATION_REWRITE.get( this.testRelativeLocation );
         }
-        LOGGER.info ("Testing {}", testRelativeLocation);
+        logger.info ("Testing {}", testRelativeLocation);
         String test = getDefaultTestLocation( testRelativeLocation );
         runLikeInvoker( test, null );
     }
@@ -119,7 +119,7 @@ public class DefaultCliIntegrationTest
                 {
                     if ( t2.exists() && dir.exists() && dir.listFiles() != null && dir.listFiles().length > 0)
                     {
-                        LOGGER.info( "Setup has already been run for {}", test);
+                        logger.info( "Setup has already been run for {}", test);
                         return true;
                     }
                 }

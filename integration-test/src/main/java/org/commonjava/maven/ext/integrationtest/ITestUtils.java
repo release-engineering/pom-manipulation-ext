@@ -198,38 +198,24 @@ public class ITestUtils
     static Integer runCli( List<String> args, Map<String, String> params, String workingDir )
     {
         ArrayList<String> arguments = new ArrayList<>( args );
-        if (!params.isEmpty() )
+        Collections.addAll( arguments, toJavaParams( params ).split( "\\s+" ) );
+        arguments.add( "--log=" + workingDir + File.separator + "build.log" );
+
+        if ( args.stream().noneMatch( s -> s.startsWith( "--file" ) ) )
         {
-            Collections.addAll( arguments, toJavaParams( params ).split( "\\s+" ) );
-        }
-        boolean argsContainsFile = false;
-        for ( String s : args)
-        {
-            if ( s.startsWith( "--file" ) )
-            {
-                argsContainsFile = true;
-                break;
-            }
-        }
-        if ( ! argsContainsFile )
-        {
-            arguments.add( "--log=" + workingDir + File.separator + "build.log" );
             arguments.add( "--file=" + workingDir + File.separator + "pom.xml" );
         }
         logger.info( "Invoking CLI with {} ", arguments );
-        Cli cli = new Cli();
-        int result = cli.run( arguments.toArray( new String[0] ) );
-
-        // Close unirest client down to prevent any hanging.
-        // Unirest.shutdown();
+        int result = new Cli().run( arguments.toArray( new String[0] ) );
 
         // This is a bit of a hack. The CLI, if log-to-file is enabled resets the logging. As we don't fork and run
         // in the same process this means we need to reset it back again. The benefit of not forking is a simpler test
         // harness and it saves time when running the tests.
         final ch.qos.logback.classic.Logger root = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger( org.slf4j.Logger.ROOT_LOGGER_NAME );
 
+        root.detachAndStopAllAppenders();
+
         LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
-        loggerContext.reset();
 
         PatternLayoutEncoder ple = new PatternLayoutEncoder();
         ple.setPattern( "[%t] %level %logger{32} - %msg%n" );
