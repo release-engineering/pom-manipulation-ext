@@ -46,8 +46,6 @@ public class AddSuffixJettyHandler
                 extends AbstractHandler
                 implements Handler
 {
-    private static final Logger LOGGER = LoggerFactory.getLogger( AddSuffixJettyHandler.class );
-
     private static final String DEFAULT_ENDPOINT = "/reports/lookup/gavs";
 
     public static final String SUFFIX = "redhat";
@@ -60,11 +58,13 @@ public class AddSuffixJettyHandler
 
     public static final String TIMESTAMP_SUFFIX = "t20180920-163311-423-" + DEFAULT_SUFFIX;
 
+    private final Logger logger = LoggerFactory.getLogger( AddSuffixJettyHandler.class );
+
     private final String endpoint;
 
-    private String suffix;
+    private final JSONUtils.InternalObjectMapper objectMapper = new JSONUtils.InternalObjectMapper( new ObjectMapper(  ));
 
-    private JSONUtils.InternalObjectMapper objectMapper = new JSONUtils.InternalObjectMapper( new ObjectMapper(  ));
+    private String suffix;
 
     private String blacklistVersion = null;
 
@@ -84,15 +84,15 @@ public class AddSuffixJettyHandler
                                   HttpServletResponse response )
                     throws IOException
     {
-        LOGGER.info( "Handling with AddSuffixJettyHandler: {} {}", request.getMethod(), request.getPathInfo() );
+        logger.info( "Handling with AddSuffixJettyHandler: {} {}", request.getMethod(), request.getPathInfo() );
 
-        if ( LOGGER.isDebugEnabled() )
+        if ( logger.isDebugEnabled() )
         {
             Enumeration<String> e = request.getHeaderNames();
             while( e.hasMoreElements() )
             {
                 String name = e.nextElement();
-                LOGGER.debug( "Request has header: {}: {}", name, request.getHeader( name ) );
+                logger.debug( "Request has header: {}: {}", name, request.getHeader( name ) );
             }
         }
 
@@ -111,10 +111,10 @@ public class AddSuffixJettyHandler
             }
             catch ( Exception e )
             {
-                LOGGER.warn( "Error reading request body. {}", e.getMessage() );
+                logger.warn( "Error reading request body. {}", e.getMessage() );
                 return;
             }
-            LOGGER.info( "Read request body '{}' and read parameters '{}'.", jb , request.getParameterMap() );
+            logger.info( "Read request body '{}' and read parameters '{}'.", jb , request.getParameterMap() );
 
             List<GAV> requestBody;
 
@@ -139,7 +139,7 @@ public class AddSuffixJettyHandler
                     String version = gav.getVersion();
                     String bestMatchVersion;
 
-                    LOGGER.debug( "Processing artifactId {} with version {}", gav.getArtifactId(), version );
+                    logger.debug( "Processing artifactId {} with version {}", gav.getArtifactId(), version );
 
                     // Specific to certain integration tests. For the SNAPSHOT test we want to verify it can handle
                     // a already built version. The PME code should remove SNAPSHOT before sending it.
@@ -222,7 +222,7 @@ public class AddSuffixJettyHandler
                     {
                         bestMatchVersion = version + "-" + this.suffix;
                     }
-                    LOGGER.info( "For GA {}, requesting version {} and got bestMatch {} with availableVersions {} ", gav, version,
+                    logger.info( "For GA {}, requesting version {} and got bestMatch {} with availableVersions {} ", gav, version,
                                  bestMatchVersion, availableVersions );
 
                     availableVersions.add( bestMatchVersion );
@@ -237,7 +237,7 @@ public class AddSuffixJettyHandler
                     responseBody.add( lr );
                 }
 
-                LOGGER.info( "Returning response body size {}", responseBody.size() );
+                logger.info( "Returning response body size {}", responseBody.size() );
 
                 response.getWriter().println( objectMapper.writeValue( responseBody ) );
             }
@@ -265,7 +265,7 @@ public class AddSuffixJettyHandler
         }
         else
         {
-            LOGGER.info( "Handling: {} with AddSuffixJettyHandler failed, because expected method was {} and endpoint {}",
+            logger.info( "Handling: {} with AddSuffixJettyHandler failed, because expected method was {} and endpoint {}",
                          request.getMethod(), request.getPathInfo(), this.endpoint );
         }
     }

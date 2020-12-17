@@ -22,7 +22,6 @@ import org.eclipse.jetty.server.handler.AbstractHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.BufferedReader;
@@ -36,16 +35,13 @@ import java.util.Map;
  *
  * @author Jakub Senko <jsenko@redhat.com>
  */
-@SuppressWarnings( "unchecked" )
 public class SpyFailJettyHandler extends AbstractHandler implements Handler
 {
-    private static final Logger LOGGER = LoggerFactory.getLogger( SpyFailJettyHandler.class );
-
     private static final String ENDPOINT = "/";
 
     private static final String METHOD = "POST";
 
-    private static final int ERROR_STATUS_CODE = HttpServletResponse.SC_GATEWAY_TIMEOUT;
+    private final Logger logger = LoggerFactory.getLogger( SpyFailJettyHandler.class );
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -55,14 +51,14 @@ public class SpyFailJettyHandler extends AbstractHandler implements Handler
 
     @Override public void handle( String target, Request baseRequest, HttpServletRequest request,
                                   HttpServletResponse response )
-                    throws IOException, ServletException
+                    throws IOException
     {
 
-        LOGGER.info( "Handling: {} {}", request.getMethod(), request.getPathInfo() );
+        logger.info( "Handling: {} {}", request.getMethod(), request.getPathInfo() );
 
         if ( target.startsWith( ENDPOINT ) && request.getMethod().equals( METHOD ) )
         {
-            LOGGER.info( "Handling with SpyFailJettyHandler" );
+            logger.info( "Handling with SpyFailJettyHandler" );
 
             // Get Request Body
             StringBuilder jb = new StringBuilder();
@@ -78,7 +74,7 @@ public class SpyFailJettyHandler extends AbstractHandler implements Handler
             }
             catch ( Exception e )
             {
-                LOGGER.warn( "Error reading request body. {}", e.getMessage() );
+                logger.warn( "Error reading request body. {}", e.getMessage() );
                 return;
             }
 
@@ -88,7 +84,7 @@ public class SpyFailJettyHandler extends AbstractHandler implements Handler
             GAVSchema gavSchema = objectMapper.readValue( jb.toString(), GAVSchema.class );
             requestBody = gavSchema.gavs;
 
-            LOGGER.debug( "Adding to requestBody of size {}", requestBody.size() );
+            logger.debug( "Adding to requestBody of size {}", requestBody.size() );
 
             requestData.add(requestBody);
 
@@ -98,7 +94,7 @@ public class SpyFailJettyHandler extends AbstractHandler implements Handler
         }
         else
         {
-            LOGGER.info("Handling with SpyFailJettyHandler failed.");
+            logger.info( "Handling with SpyFailJettyHandler failed.");
         }
     }
 

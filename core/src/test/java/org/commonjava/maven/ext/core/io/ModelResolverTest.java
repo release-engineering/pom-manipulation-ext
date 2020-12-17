@@ -28,7 +28,6 @@ import org.jboss.byteman.contrib.bmunit.BMRule;
 import org.jboss.byteman.contrib.bmunit.BMUnitRunner;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.contrib.java.lang.system.SystemOutRule;
 import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
 
@@ -38,9 +37,6 @@ import static org.junit.Assert.assertNull;
 @RunWith(BMUnitRunner.class)
 public class ModelResolverTest
 {
-    @Rule
-    public final SystemOutRule systemRule = new SystemOutRule().enableLog().muteForSuccessfulTests();
-
     @Rule
     public TemporaryFolder temp = new TemporaryFolder();
 

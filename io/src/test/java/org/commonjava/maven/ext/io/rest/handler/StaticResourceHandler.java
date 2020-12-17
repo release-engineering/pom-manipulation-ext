@@ -24,11 +24,11 @@ public class StaticResourceHandler
                 extends ResourceHandler
                 implements Handler
 {
-    private static final Logger LOGGER = LoggerFactory.getLogger( StaticResourceHandler.class );
+    private final Logger logger = LoggerFactory.getLogger( StaticResourceHandler.class );
 
     public StaticResourceHandler( String target )
     {
-        LOGGER.info( "Handling: {} ", target );
+        logger.info( "Handling: {} ", target );
 
         setDirectoriesListed(true);
         setWelcomeFiles(new String[]{ target });

@@ -50,17 +50,18 @@ public class HandleServiceUnavailableTest
 {
     private static List<ProjectVersionRef> aLotOfGavs;
 
+    private final Logger logger = LoggerFactory.getLogger( HandleServiceUnavailableTest.class );
+
     private DefaultTranslator versionTranslator;
 
     @Rule
     public TestName testName = new TestName();
 
-    private static SpyFailJettyHandler handler = new SpyFailJettyHandler();
+    private final SpyFailJettyHandler handler = new SpyFailJettyHandler();
 
     @Rule
     public MockServer mockServer = new MockServer( handler );
 
-    private static final Logger LOG = LoggerFactory.getLogger( HandleServiceUnavailableTest.class );
 
     @BeforeClass
     public static void startUp() throws IOException
@@ -72,7 +73,7 @@ public class HandleServiceUnavailableTest
     @Before
     public void before()
     {
-        LOG.info( "Executing test " + testName.getMethodName() );
+        logger.info( "Executing test " + testName.getMethodName() );
 
         handler.setStatusCode( HttpServletResponse.SC_SERVICE_UNAVAILABLE );
         versionTranslator = new DefaultTranslator( mockServer.getUrl(), 0, Translator.CHUNK_SPLIT_COUNT,
@@ -120,7 +121,7 @@ public class HandleServiceUnavailableTest
         // split 4 -> 1, 1, 1, 1
         // 37, 9, 9, 9, 10, 2, 2, 2, 3, ..., 2, 2, 2, 4, 1, 1, 1, 1 -> total 21 chunks
         // However, split fails after the 6th attempt
-        LOG.debug( requestData.toString() );
+        logger.debug( requestData.toString() );
         assertEquals( 6, requestData.size() );
         assertEquals( 37, requestData.get( 0 ).size() );
         for ( int i = 1; i < 4; i++ )

@@ -198,7 +198,10 @@ public class ITestUtils
     static Integer runCli( List<String> args, Map<String, String> params, String workingDir )
     {
         ArrayList<String> arguments = new ArrayList<>( args );
-        Collections.addAll( arguments, toJavaParams( params ).split( "\\s+" ) );
+        if (!params.isEmpty())
+        {
+            Collections.addAll( arguments, toJavaParams( params ).split( "\\s+" ) );
+        }
         arguments.add( "--log=" + workingDir + File.separator + "build.log" );
 
         if ( args.stream().noneMatch( s -> s.startsWith( "--file" ) ) )

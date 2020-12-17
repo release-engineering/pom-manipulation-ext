@@ -47,15 +47,15 @@ public class AutoSplitTest
 {
     private static List<ProjectVersionRef> aLotOfGavs;
 
+    private final Logger logger = LoggerFactory.getLogger( AutoSplitTest.class );
+
+    private final SpyFailJettyHandler handler = new SpyFailJettyHandler();
+
     @Rule
     public TestName testName = new TestName();
 
-    private static SpyFailJettyHandler handler = new SpyFailJettyHandler();
-
     @Rule
     public MockServer mockServer = new MockServer( handler );
-
-    private static final Logger LOG = LoggerFactory.getLogger( AutoSplitTest.class );
 
     @BeforeClass
     public static void startUp() throws IOException
@@ -67,7 +67,7 @@ public class AutoSplitTest
     @Before
     public void before()
     {
-        LOG.info( "Executing test " + testName.getMethodName() );
+        logger.info( "Executing test " + testName.getMethodName() );
 
         handler.setStatusCode( HttpServletResponse.SC_OK );
     }
@@ -108,7 +108,7 @@ public class AutoSplitTest
     {
         List<List<Map<String, Object>>> requestData = translate(payload);
 
-        LOG.debug( requestData.toString() );
+        logger.debug( requestData.toString() );
         assertEquals( chunkCount, requestData.size() );
         int i = 0;
         for (List<Map<String, Object>> partition : requestData)

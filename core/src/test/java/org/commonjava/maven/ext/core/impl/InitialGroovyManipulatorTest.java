@@ -25,7 +25,6 @@ import org.commonjava.maven.ext.core.fixture.TestUtils;
 import org.commonjava.maven.ext.io.PomIO;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.contrib.java.lang.system.SystemOutRule;
 import org.junit.rules.TemporaryFolder;
 
 import java.io.File;
@@ -48,9 +47,6 @@ public class InitialGroovyManipulatorTest
 {
     @Rule
     public TemporaryFolder tf = new TemporaryFolder();
-
-    @Rule
-    public final SystemOutRule systemRule = new SystemOutRule().enableLog().muteForSuccessfulTests();
 
     @Test
     public void shouldRemoveProjectInGroovyScript() throws Exception

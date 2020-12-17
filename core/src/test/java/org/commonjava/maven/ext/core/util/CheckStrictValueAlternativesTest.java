@@ -20,9 +20,7 @@ import org.commonjava.maven.ext.core.ManipulationSession;
 import org.commonjava.maven.ext.core.state.CommonState;
 import org.commonjava.maven.ext.core.state.VersioningState;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.contrib.java.lang.system.SystemOutRule;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
@@ -35,11 +33,6 @@ import static org.junit.Assert.assertEquals;
 @RunWith(Parameterized.class)
 public class CheckStrictValueAlternativesTest
 {
-    private static final ManipulationSession session = new ManipulationSession();
-
-    @Rule
-    public final SystemOutRule systemOutRule = new SystemOutRule().enableLog().muteForSuccessfulTests();
-
     @Before
     public void beforeTest() throws ManipulationException
     {
@@ -91,10 +84,11 @@ public class CheckStrictValueAlternativesTest
         });
     }
 
-    private String source;
-    private String target;
-    private boolean result;
-    private boolean strictIgnoreSuffix;
+    private final String source;
+    private final String target;
+    private final boolean result;
+    private final boolean strictIgnoreSuffix;
+    private final ManipulationSession session = new ManipulationSession();
 
     public CheckStrictValueAlternativesTest( String source, String target, boolean result, boolean strictIgnoreSuffix)
     {

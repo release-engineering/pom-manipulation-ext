@@ -49,17 +49,17 @@ public class VersionTranslatorSplitTest
 {
     private static List<ProjectVersionRef> aLotOfGavs;
 
+    private final Logger logger = LoggerFactory.getLogger( getClass() );
+
     private DefaultTranslator versionTranslator;
+
+    private final SpyFailJettyHandler handler = new SpyFailJettyHandler();
 
     @Rule
     public TestName testName = new TestName();
 
-    private static SpyFailJettyHandler handler = new SpyFailJettyHandler();
-
     @Rule
     public MockServer mockServer = new MockServer( handler );
-
-    private static final Logger LOG = LoggerFactory.getLogger( VersionTranslatorSplitTest.class );
 
     @BeforeClass
     public static void startUp() throws IOException
@@ -71,7 +71,7 @@ public class VersionTranslatorSplitTest
     @Before
     public void before()
     {
-        LOG.info( "Executing test " + testName.getMethodName() );
+        logger.info( "Executing test " + testName.getMethodName() );
 
         handler.setStatusCode( HttpServletResponse.SC_GATEWAY_TIMEOUT );
         versionTranslator = new DefaultTranslator( mockServer.getUrl(), 0, Translator.CHUNK_SPLIT_COUNT,
@@ -113,7 +113,7 @@ public class VersionTranslatorSplitTest
         // split 4 -> 1, 1, 1, 1
         // 37, 9, 9, 9, 10, 2, 2, 2, 3, ..., 2, 2, 2, 4, 1, 1, 1, 1 -> total 21 chunks
         // However, split fails after the 6th attempt
-        LOG.debug( requestData.toString() );
+        logger.debug( requestData.toString() );
         assertEquals( 6, requestData.size() );
         assertEquals( 37, requestData.get( 0 ).size() );
         for ( int i = 1; i < 4; i++ )
@@ -150,7 +150,7 @@ public class VersionTranslatorSplitTest
         // split 9 -> 2, 2, 2, 3 (x4)
         // 36, 9, 9, 9, 9, 2, 2, 2, 3, ... -> total 21 chunks
         // Split fails after the 6th attempt
-        LOG.debug( requestData.toString() );
+        logger.debug( requestData.toString() );
         assertEquals( 6, requestData.size() );
         assertEquals( 36, requestData.get( 0 ).size() );
         for ( int i = 1; i < 5; i++ )
@@ -191,7 +191,7 @@ public class VersionTranslatorSplitTest
         // split       10,2,2,2,4,2,2,2,4
         // split          2,2....
         // = 10 : 10 : 10 : 2
-        LOG.debug( requestData.toString() );
+        logger.debug( requestData.toString() );
         assertEquals( 4, requestData.size() );
         for ( int i = 0; i < 3; i++ )
         {
@@ -224,7 +224,7 @@ public class VersionTranslatorSplitTest
         }
         List<List<Map<String, Object>>> requestData = handler.getRequestData();
 
-        LOG.debug( requestData.toString() );
+        logger.debug( requestData.toString() );
 
         // Due to this returning a non-504 it shouldn't do any splits so we should get size 1 containing 36 back
         assertEquals( 1, requestData.size() );
@@ -268,7 +268,7 @@ public class VersionTranslatorSplitTest
         // split                                4,1...
         // split                                   1...
         // Count of 16 (all outer edges )
-        LOG.debug( requestData.toString() );
+        logger.debug( requestData.toString() );
         assertEquals( 16, requestData.size() );
         for ( int i = 0; i < 3; i++ )
         {

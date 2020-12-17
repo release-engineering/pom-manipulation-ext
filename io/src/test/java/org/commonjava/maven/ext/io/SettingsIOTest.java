@@ -44,7 +44,7 @@ public class SettingsIOTest
     public TemporaryFolder folder = new TemporaryFolder();
 
     @Test
-    public void verifySettingsEncoding() throws IOException, ManipulationException
+    public void verifySettingsEncoding() throws IOException
     {
         URL resource = SettingsIOTest.class.getResource( "settings.xml" );
         assertNotNull( resource );

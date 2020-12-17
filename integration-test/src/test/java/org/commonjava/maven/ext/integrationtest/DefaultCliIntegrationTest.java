@@ -36,7 +36,6 @@ import static org.commonjava.maven.ext.integrationtest.ITestUtils.runMaven;
 @RunWith( Parameterized.class )
 public class DefaultCliIntegrationTest
 {
-    private static final Logger LOGGER = LoggerFactory.getLogger( DefaultCliIntegrationTest.class );
     private static final Logger logger = LoggerFactory.getLogger( DefaultCliIntegrationTest.class );
 
     @Parameters( name = "{0}" )
@@ -79,7 +78,7 @@ public class DefaultCliIntegrationTest
     {
         for ( File setupTest : new File( getDefaultTestLocation( "setup" ) ).listFiles() )
         {
-            LOGGER.info ("Running install for {}", setupTest.toString());
+            logger.info ("Running install for {}", setupTest.toString());
 
             // Try to do some simplistic checks to see if this has already been done.
             if ( ! setupExists( setupTest ))

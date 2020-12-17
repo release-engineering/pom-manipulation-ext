@@ -41,7 +41,6 @@ import org.commonjava.maven.ext.io.PomIO;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.contrib.java.lang.system.SystemOutRule;
 import org.junit.rules.TemporaryFolder;
 
 import java.io.File;
@@ -68,9 +67,6 @@ import static org.junit.Assert.fail;
 public class PropertiesUtilsTest
 {
     private static final String RESOURCE_BASE = "properties/";
-
-    @Rule
-    public final SystemOutRule systemRule = new SystemOutRule().enableLog().muteForSuccessfulTests();
 
     @Rule
     public TemporaryFolder temp = new TemporaryFolder();
@@ -297,9 +293,8 @@ public class PropertiesUtilsTest
                         new WildcardMap<>() :
                         session.getState( RelocationState.class ).getDependencyRelocations() );
         String result = ProjectComparator.compareProjects( session, new PME(), map, projects, newprojects );
-        System.out.println( result );
 
-        assertTrue( systemRule.getLog().contains( "------------------- project org.infinispan:infinispan-bom" + System.lineSeparator() ) );
+        assertTrue( result.contains( "------------------- project org.infinispan:infinispan-bom" + System.lineSeparator() ) );
     }
 
     private Project getProject() throws Exception

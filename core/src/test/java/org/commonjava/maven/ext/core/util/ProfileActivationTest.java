@@ -22,7 +22,6 @@ import org.commonjava.maven.ext.io.PomIO;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.contrib.java.lang.system.RestoreSystemProperties;
-import org.junit.contrib.java.lang.system.SystemOutRule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,12 +38,6 @@ public class ProfileActivationTest
     private final Logger logger = LoggerFactory.getLogger( getClass() );
 
     private static final String RESOURCE_BASE = "";
-
-    @Rule
-    public final SystemOutRule systemRule = new SystemOutRule().enableLog().muteForSuccessfulTests();
-
-    @Rule
-	public final RestoreSystemProperties restoreSystemProperties = new RestoreSystemProperties();
 
     private List<Project> getProject() throws Exception
     {

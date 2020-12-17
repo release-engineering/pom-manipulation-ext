@@ -38,7 +38,6 @@ import org.commonjava.maven.ext.core.state.VersioningState;
 import org.commonjava.maven.ext.io.PomIO;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.contrib.java.lang.system.SystemOutRule;
 import org.junit.rules.TemporaryFolder;
 import org.slf4j.helpers.FormattingTuple;
 import org.slf4j.helpers.MessageFormatter;
@@ -60,9 +59,6 @@ public class ProjectComparatorTest
     @Rule
     public final TemporaryFolder temporaryFolder = new TemporaryFolder(  );
 
-    @Rule
-    public final SystemOutRule systemOutRule = new SystemOutRule().enableLog().muteForSuccessfulTests();
-
     private final WildcardMap<ProjectVersionRef> map = new WildcardMap<>();
 
     @Test
@@ -80,10 +76,10 @@ public class ProjectComparatorTest
         List<Project> projectOriginal = pomIO.parseProject( projectroot );
         List<Project> projectNew = pomIO.parseProject( projectroot );
 
-        ProjectComparator.compareProjects( session, new PME(), map,
+        String result = ProjectComparator.compareProjects( session, new PME(), map,
                                            projectOriginal, projectNew );
 
-        assertFalse( systemOutRule.getLog().contains( "-->" ) );
+        assertFalse( result.contains( "-->" ) );
     }
 
     @Test
@@ -123,22 +119,18 @@ public class ProjectComparatorTest
 
         String result = ProjectComparator.compareProjects( session, json, relocationState.getDependencyRelocations(),
                                            projectOriginal, projectNew );
-        System.out.println (result);
+        assertTrue( result.contains( "Managed dependencies :" ) );
+        assertTrue( result.contains( "Project version :" ) );
+        assertTrue( result.contains( "-redhat-1" ) );
+        assertTrue( result.contains( "-->" ) );
+        assertTrue( result.contains( "Unversioned relocation" ) );
+        assertTrue( result.contains( "org.foobar" ) );
+        assertFalse( result.contains( "Non-Aligned Managed dependencies" ) );
+        assertFalse( result.contains( "Non-Aligned Managed plugins" ) );
 
         String jsonString = JSONUtils.jsonToString(json);
         assertTrue( jsonString.contains( "org.commonjava.maven.galley:galley-maven:0.16.6\" : {" ) );
         assertTrue( jsonString.contains( "\"version\" : \"0.16.6-redhat-1\"" ) );
-
-        System.out.println (jsonString);
-
-        assertTrue( systemOutRule.getLog().contains( "Managed dependencies :" ) );
-        assertTrue( systemOutRule.getLog().contains( "Project version :" ) );
-        assertTrue( systemOutRule.getLog().contains( "-redhat-1" ) );
-        assertTrue( systemOutRule.getLog().contains( "-->" ) );
-        assertTrue( systemOutRule.getLog().contains( "Unversioned relocation" ) );
-        assertTrue( systemOutRule.getLog().contains( "org.foobar" ) );
-        assertFalse( systemOutRule.getLog().contains( "Non-Aligned Managed dependencies" ) );
-        assertFalse( systemOutRule.getLog().contains( "Non-Aligned Managed plugins" ) );
     }
 
     @Test
@@ -175,16 +167,14 @@ public class ProjectComparatorTest
 
         String result = ProjectComparator.compareProjects( session, new PME(), relocationState.getDependencyRelocations(),
                                            projectOriginal, projectNew );
-        System.out.println (result);
-
-
-        assertTrue( systemOutRule.getLog().contains( "Managed dependencies :" ) );
-        assertTrue( systemOutRule.getLog().contains( "Project version :" ) );
-        assertTrue( systemOutRule.getLog().contains( "-redhat-1" ) );
-        assertTrue( systemOutRule.getLog().contains( "-->" ) );
-        assertFalse( systemOutRule.getLog().contains( "org.foobar" ) );
-        assertTrue( systemOutRule.getLog().contains( "Non-Aligned Managed dependencies : com.fasterxml.jackson.core:jackson-annotations:jar:2." ) );
-        assertTrue( systemOutRule.getLog().contains( "Non-Aligned Managed plugins : org.apache.maven.plugins:maven-surefire-plugin:2" ) );
+   
+        assertTrue( result.contains( "Managed dependencies :" ) );
+        assertTrue( result.contains( "Project version :" ) );
+        assertTrue( result.contains( "-redhat-1" ) );
+        assertTrue( result.contains( "-->" ) );
+        assertFalse( result.contains( "org.foobar" ) );
+        assertTrue( result.contains( "Non-Aligned Managed dependencies : com.fasterxml.jackson.core:jackson-annotations:jar:2." ) );
+        assertTrue( result.contains( "Non-Aligned Managed plugins : org.codehaus.mojo:animal-sniffer-maven-plugin:1.1" ) );
     }
 
     @Test
@@ -226,15 +216,14 @@ public class ProjectComparatorTest
 
         String result = ProjectComparator.compareProjects( session, new PME(), relocationState.getDependencyRelocations(),
                                            projectOriginal, projectNew );
-        System.out.println (result);
         FileUtils.writeStringToFile( resultFile, result, StandardCharsets.UTF_8 );
 
-        assertTrue( systemOutRule.getLog().contains( "Managed dependencies :" ) );
-        assertTrue( systemOutRule.getLog().contains( "Project version :" ) );
-        assertTrue( systemOutRule.getLog().contains( "-redhat-1" ) );
-        assertTrue( systemOutRule.getLog().contains( "-->" ) );
-        assertTrue( systemOutRule.getLog().contains( "Unversioned relocation" ) );
-        assertTrue( systemOutRule.getLog().contains( "org.foobar" ) );
+        assertTrue( result.contains( "Managed dependencies :" ) );
+        assertTrue( result.contains( "Project version :" ) );
+        assertTrue( result.contains( "-redhat-1" ) );
+        assertTrue( result.contains( "-->" ) );
+        assertTrue( result.contains( "Unversioned relocation" ) );
+        assertTrue( result.contains( "org.foobar" ) );
 
         assertTrue( resultFile.exists() );
         String contents = FileUtils.readFileToString( resultFile, StandardCharsets.UTF_8 );

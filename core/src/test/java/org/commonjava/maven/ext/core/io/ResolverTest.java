@@ -24,7 +24,6 @@ import org.commonjava.maven.ext.io.resolver.GalleyAPIWrapper;
 import org.commonjava.maven.ext.io.resolver.GalleyInfrastructure;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.contrib.java.lang.system.SystemOutRule;
 import org.junit.rules.TemporaryFolder;
 
 import java.io.File;
@@ -34,9 +33,6 @@ import static junit.framework.TestCase.assertTrue;
 
 public class ResolverTest
 {
-    @Rule
-    public final SystemOutRule systemRule = new SystemOutRule().enableLog().muteForSuccessfulTests();
-
     @Rule
     public TemporaryFolder temp = new TemporaryFolder();
 

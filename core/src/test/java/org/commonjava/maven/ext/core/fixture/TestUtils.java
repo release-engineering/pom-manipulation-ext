@@ -161,24 +161,6 @@ public class TestUtils
     }
 
     /**
-     * Executes a method on an object instance.  The name and parameters of
-     * the method are specified.  The method will be executed and the value
-     * of it returned, even if the method would have private or protected access.
-     */
-    public static void executeMethod( Object instance, String name, Object[] params ) throws Exception
-    {
-        // Fetch the Class types of all method parameters
-        Class<?>[] types = new Class[params.length];
-
-        for ( int i = 0; i < params.length; i++ )
-        {
-            types[i] = params[i].getClass();
-        }
-
-        executeMethod( instance, name, types, params );
-    }
-
-    /**
      * Container object to allow a {@link ManipulationSession} to be created but also return the {@link ManipulationManager}
      * and {@link MavenExecutionRequest}.
      */

@@ -31,7 +31,6 @@ import org.commonjava.maven.ext.io.rest.rule.MockServer;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.contrib.java.lang.system.RestoreSystemProperties;
-import org.junit.contrib.java.lang.system.SystemOutRule;
 import org.junit.rules.TemporaryFolder;
 import org.junit.rules.TestRule;
 
@@ -51,9 +50,6 @@ public class GroovyFunctionsTest
 
     @Rule
     public TemporaryFolder temporaryFolder = new TemporaryFolder();
-
-    @Rule
-    public final SystemOutRule systemOutRule = new SystemOutRule().enableLog().muteForSuccessfulTests();
 
     @Rule
     public final TestRule restoreSystemProperties = new RestoreSystemProperties();

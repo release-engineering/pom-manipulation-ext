@@ -25,7 +25,6 @@ import org.commonjava.maven.ext.core.fixture.TestUtils;
 import org.commonjava.maven.ext.io.PomIO;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.contrib.java.lang.system.SystemOutRule;
 import org.junit.rules.TemporaryFolder;
 
 import java.io.File;
@@ -45,9 +44,6 @@ import static org.junit.Assert.assertTrue;
 public class ProjectInheritanceTest
 {
     private static final String RESOURCE_BASE = "properties/";
-
-    @Rule
-    public final SystemOutRule systemOutRule = new SystemOutRule().enableLog().muteForSuccessfulTests();
 
     @Rule
     public final TemporaryFolder temporaryFolder = new TemporaryFolder();

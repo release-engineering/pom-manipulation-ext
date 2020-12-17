@@ -90,7 +90,7 @@ public class CliTest
         File pom1 = temp.newFile();
         File settings = writeSettings( temp.newFile() );
 
-        TestUtils.executeMethod( c, "createSession", new Object[] { pom1, settings } );
+        TestUtils.executeMethod( c, "createSession", new Class[] { File.class, File.class }, new Object[] { pom1, settings } );
 
         assertEquals( "Session file should match", pom1,
                       ( (ManipulationSession) FieldUtils.readField( c, "session", true ) ).getPom() );
@@ -125,8 +125,7 @@ public class CliTest
     {
         Cli c = new Cli();
         File settings = writeSettings( temp.newFile() );
-
-        TestUtils.executeMethod( c, "run", new Object[] { new String[] { "-s", settings.toString() } } );
+        c.run( new String[] { "-s", settings.toString()} );
 
         ManipulationSession session = (ManipulationSession) FieldUtils.readField( c, "session", true );
         MavenSession ms = (MavenSession) FieldUtils.readField( session, "mavenSession", true );
@@ -159,7 +158,7 @@ public class CliTest
             Files.copy( tmpSettings, source );
 
             Cli c = new Cli();
-            TestUtils.executeMethod( c, "run", new Object[] { new String[] {} } );
+            c.run( new String[]{} );
 
             ManipulationSession session = (ManipulationSession) FieldUtils.readField( c, "session", true );
             MavenSession ms = (MavenSession) FieldUtils.readField( session, "mavenSession", true );
@@ -192,10 +191,9 @@ public class CliTest
         Files.copy( Paths.get( INTEGRATION_TEST.toString(), "pom.xml" ), target.toPath(), StandardCopyOption.REPLACE_EXISTING );
 
         Cli c = new Cli();
-        TestUtils.executeMethod( c, "run", new Object[] {
-                        new String[] { "-d", "--settings=" + getClass().getResource( "/settings-test.xml" ).getFile(),
+        c.run( new String[] { "-d", "--settings=" + getClass().getResource( "/settings-test.xml" ).getFile(),
                                         "-Dmaven.repo.local=" + folder.toString(), "-Prun-its", "--file",
-                                        target.getCanonicalPath() } } );
+                                        target.getCanonicalPath() } );
 
         assertTrue( systemOutRule.getLog().contains( "Explicitly activating [run-its]" ) );
         assertTrue( systemOutRule.getLog().contains( "Will not scan all profiles and returning active profiles of [run-its]" ) );
@@ -205,8 +203,7 @@ public class CliTest
     public void checkLocalRepositoryWithSettings() throws Exception
     {
         Cli c = new Cli();
-        TestUtils.executeMethod( c, "run", new Object[] { new String[] {
-                        "-settings=" + getClass().getResource( "/settings-test.xml" ).getFile() } } );
+        c.run( new String[] { "-settings=" + getClass().getResource( "/settings-test.xml").getFile() } );
 
         ManipulationSession session = (ManipulationSession) FieldUtils.readField( c, "session", true );
         MavenSession ms = (MavenSession) FieldUtils.readField( session, "mavenSession", true );
@@ -219,7 +216,7 @@ public class CliTest
     {
         File folder = temp.newFolder();
         Cli c = new Cli();
-        TestUtils.executeMethod( c, "run", new Object[] { new String[] { "-Dmaven.repo.local=" + folder.toString() } } );
+        c.run( new String[] { "-Dmaven.repo.local=" + folder.toString() } );
 
         ManipulationSession session = (ManipulationSession) FieldUtils.readField( c, "session", true );
         MavenSession ms = (MavenSession) FieldUtils.readField( session, "mavenSession", true );
@@ -232,9 +229,9 @@ public class CliTest
     {
         File folder = temp.newFolder();
         Cli c = new Cli();
-        TestUtils.executeMethod( c, "run", new Object[] { new String[] {
-                        "--settings=" + getClass().getResource( "/settings-test.xml" ).getFile(),
-                        "-Dmaven.repo.local=" + folder.toString() } } );
+        c.run( new String[]
+                        { "--settings=" + getClass().getResource("/settings-test.xml").getFile(),
+                                        "-Dmaven.repo.local=" + folder.toString() } );
 
         ManipulationSession session = (ManipulationSession) FieldUtils.readField( c, "session", true );
         MavenSession ms = (MavenSession) FieldUtils.readField( session, "mavenSession", true );
@@ -397,31 +394,28 @@ public class CliTest
                         FileFilterUtils.or( DirectoryFileFilter.DIRECTORY, FileFilterUtils.suffixFileFilter("xml")));
 
         Cli c = new Cli();
-        TestUtils.executeMethod( c, "run", new Object[] {
-                        new String[] { "--settings=" + getClass().getResource( "/settings-test.xml" ).getFile(),
+        c.run( new String[] { "--settings=" + getClass().getResource( "/settings-test.xml" ).getFile(),
                                         "-Dmaven.repo.local=" + folder.toString(), "-Prun-its", "--file",
-                                        target.getCanonicalPath() } } );
+                                        target.getCanonicalPath() } );
         assertTrue( systemOutRule.getLog().contains( "Running manipulator" ) );
 
         systemOutRule.clearLog();
 
         c = new Cli();
-        TestUtils.executeMethod( c, "run", new Object[] {
-                        new String[] { "-q", "--settings=" + getClass().getResource( "/settings-test.xml" ).getFile(),
+        c.run( new String[] { "-q", "--settings=" + getClass().getResource( "/settings-test.xml" ).getFile(),
                                         "-Dmaven.repo.local=" + folder.toString(), "-Prun-its", "--file",
-                                        target.getCanonicalPath() } } );
+                                        target.getCanonicalPath() } );
 
         assertFalse( systemOutRule.getLog().contains( "Running manipulator" ) );
 
         systemOutRule.clearLog();
 
         c = new Cli();
-        TestUtils.executeMethod( c, "run", new Object[] {
-                        new String[] { "-t", "--settings=" + getClass().getResource( "/settings-test.xml" ).getFile(),
+        c.run( new String[] { "-t", "--settings=" + getClass().getResource( "/settings-test.xml" ).getFile(),
                                         "-DdependencyRelocations.commons-io:commons0io@newGroupId:newArtifactId=1.0",
                                         "-DversionSuffix=rebuild-1",
                                         "-Dmaven.repo.local=" + folder.toString(), "-Prun-its", "--file",
-                                        target.getCanonicalPath() } } );
+                                        target.getCanonicalPath() } );
 
         assertTrue( systemOutRule.getLog().contains( "Wildcard map " ) );
     }
