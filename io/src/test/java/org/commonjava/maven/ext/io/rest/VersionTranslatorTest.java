@@ -15,8 +15,6 @@
  */
 package org.commonjava.maven.ext.io.rest;
 
-import ch.qos.logback.classic.Level;
-import ch.qos.logback.classic.Logger;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import kong.unirest.Unirest;
@@ -29,7 +27,6 @@ import org.junit.BeforeClass;
 import org.junit.FixMethodOrder;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.contrib.java.lang.system.SystemOutRule;
 import org.junit.rules.TestName;
 import org.junit.runners.MethodSorters;
 import org.slf4j.LoggerFactory;
@@ -66,9 +63,6 @@ public class VersionTranslatorTest
 
     @Rule
     public MockServer mockServer = new MockServer( new AddSuffixJettyHandler() );
-
-    @Rule
-    public final SystemOutRule systemOutRule = new SystemOutRule().enableLog().muteForSuccessfulTests();
 
     @BeforeClass
     public static void startUp()
@@ -136,12 +130,8 @@ public class VersionTranslatorTest
 
         Map<ProjectVersionRef, String> actualResult = versionTranslator.translateVersions( gavs );
 
-        System.out.println ("### actual " + actualResult);
-
         // All values with null bestMatchVersion should have been filtered out.
-        Map<ProjectVersionRef, String> expectedResult = new HashMap<ProjectVersionRef, String>()
-        {
-        };
+        Map<ProjectVersionRef, String> expectedResult = new HashMap<>();
         assertEquals( expectedResult, actualResult );
     }
 
@@ -164,7 +154,7 @@ public class VersionTranslatorTest
         }
         catch ( RestException ex )
         {
-            System.out.println( "Caught ex" + ex );
+            // System.out.println( "Caught ex " + ex );
             // Pass
         }
         catch ( Exception ex )
@@ -176,19 +166,8 @@ public class VersionTranslatorTest
     @Test( timeout = 2000 )
     public void testTranslateVersionsPerformance() throws RestException
     {
-        Logger logbackLogger = ( (Logger) LoggerFactory.getLogger( Logger.ROOT_LOGGER_NAME ) );
-        Level originalLevel = logbackLogger.getLevel();
-
-        try
-        {
-            // Disable logging for this test as impacts timing.
-            logbackLogger.setLevel( Level.OFF );
-            versionTranslator.translateVersions( aLotOfGavs );
-        }
-        finally
-        {
-            logbackLogger.setLevel( originalLevel );
-        }
+        // Disable logging for this test as impacts timing.
+        versionTranslator.translateVersions( aLotOfGavs );
     }
 
     static List<ProjectVersionRef> loadALotOfGAVs() throws IOException {

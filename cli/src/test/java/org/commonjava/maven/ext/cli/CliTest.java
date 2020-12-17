@@ -15,6 +15,7 @@
  */
 package org.commonjava.maven.ext.cli;
 
+import com.github.valfirst.slf4jtest.TestLoggerFactoryResetRule;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.DirectoryFileFilter;
 import org.apache.commons.io.filefilter.FileFilterUtils;
@@ -48,6 +49,9 @@ public class CliTest
 {
     @Rule
     public TemporaryFolder temp = new TemporaryFolder();
+
+    @Rule
+    public TestLoggerFactoryResetRule testLoggerFactoryResetRule = new TestLoggerFactoryResetRule();
 
     @Rule
     public final SystemOutRule systemOutRule = new SystemOutRule().enableLog().muteForSuccessfulTests();

@@ -43,6 +43,12 @@
       <artifactId>pom-manipulation-io</artifactId>
       <type>test-jar</type>
       <scope>test</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>com.github.valfirst</groupId>
+          <artifactId>slf4j-test</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <!-- Note: we are not depending on full pom-manipulation-cli as its a shaded jar and -->
     <!-- causes SLF4J binding issues -->
@@ -50,12 +56,6 @@
       <groupId>org.commonjava.maven.ext</groupId>
       <artifactId>pom-manipulation-cli</artifactId>
       <classifier>minimal</classifier>
-      <exclusions>
-        <exclusion>
-          <groupId>ch.qos.logback</groupId>
-          <artifactId>logback-classic</artifactId>
-        </exclusion>
-      </exclusions>
     </dependency>
 
     <dependency>
@@ -156,7 +156,7 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-surefire-plugin</artifactId>
-          <configuration>
+          <configuration combine.self="override">
             <skipTests>true</skipTests>
           </configuration>
         </plugin>
@@ -198,7 +198,6 @@
   <profiles>
     <profile>
       <id>run-its</id>
-
       <build>
         <plugins>
           <plugin>
@@ -305,6 +304,7 @@
                 </goals>
                 <configuration>
                   <debug>true</debug>
+                  <parallelThreads>10</parallelThreads>
                   <goals>
                     <goal>clean</goal>
                     <goal>package</goal>
@@ -339,12 +339,22 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-surefire-plugin</artifactId>
-            <configuration>
+            <configuration combine.self="override">
               <skipTests>false</skipTests>
+              <redirectTestOutputToFile>true</redirectTestOutputToFile>
+              <additionalClasspathElements>
+                <additionalClasspathElement>${java.home}/../lib/tools.jar</additionalClasspathElement>
+              </additionalClasspathElements>
+              <forkCount>2.5C</forkCount>
+              <!-- Attempting to run DefaultCliIntegrationTest with parallel methods causes problems in Maven downloads -->
+              <!-- and processing - potential race conditions -->
+              <!--<parallel>classesAndMethods</parallel>-->
+              <!--<useUnlimitedThreads>true</useUnlimitedThreads>-->
               <runOrder>alphabetical</runOrder>
               <systemPropertyVariables>
                 <buildDirectory>${project.build.directory}</buildDirectory>
                 <maven.home>${it.maven.home}</maven.home>
+                <selectedTest>${selectedTest}</selectedTest>
                 <localRepositoryPath>${localRepositoryUrlCli}</localRepositoryPath>
               </systemPropertyVariables>
             </configuration>

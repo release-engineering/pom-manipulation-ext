@@ -15,6 +15,7 @@
  */
 package org.commonjava.maven.ext.core.fixture;
 
+import com.github.valfirst.slf4jtest.TestLogger;
 import lombok.Getter;
 import org.apache.commons.lang.StringUtils;
 import org.apache.maven.artifact.repository.ArtifactRepository;
@@ -59,6 +60,13 @@ public class TestUtils
     public static final Path INTEGRATION_TEST = Paths.get( ROOT_DIRECTORY.toString(), "integration-test");
 
     public static final String MVN_CENTRAL = "https://repo1.maven.org/maven2";
+
+    @SuppressWarnings( "unused" )
+    public static void dumpLoggingEvents( TestLogger logger )
+    {
+        logger.getLoggingEvents().forEach( e -> System.out.println( "### getLoggingEvents: " + e.getFormattedMessage() ) );
+        logger.getAllLoggingEvents().forEach( e -> System.out.println( "### getAllLoggingEvents: " + e.getFormattedMessage() ) );
+    }
 
     public static Model resolveModelResource( final String resourceBase, final String resourceName )
         throws Exception

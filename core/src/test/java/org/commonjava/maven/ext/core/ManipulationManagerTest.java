@@ -15,6 +15,7 @@
  */
 package org.commonjava.maven.ext.core;
 
+import net.jcip.annotations.NotThreadSafe;
 import org.commonjava.maven.ext.core.fixture.PlexusTestRunner;
 import org.commonjava.maven.ext.core.impl.Manipulator;
 import org.junit.Rule;
@@ -31,11 +32,11 @@ import static org.junit.Assert.assertTrue;
 
 @RunWith( PlexusTestRunner.class )
 @Named
+@NotThreadSafe
 public class ManipulationManagerTest
 {
     @Rule
     public final SystemOutRule systemRule = new SystemOutRule().enableLog().muteForSuccessfulTests();
-
 
     @SuppressWarnings( "unused" )
     @Inject

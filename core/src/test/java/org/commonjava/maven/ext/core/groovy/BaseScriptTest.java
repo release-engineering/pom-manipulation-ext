@@ -15,6 +15,10 @@
  */
 package org.commonjava.maven.ext.core.groovy;
 
+import com.github.valfirst.slf4jtest.TestLogger;
+import com.github.valfirst.slf4jtest.TestLoggerFactory;
+import com.github.valfirst.slf4jtest.TestLoggerFactoryResetRule;
+import net.jcip.annotations.NotThreadSafe;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.reflect.FieldUtils;
 import org.codehaus.plexus.DefaultContainerConfiguration;
@@ -55,17 +59,23 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+@NotThreadSafe
 public class BaseScriptTest
 {
     private static final String RESOURCE_BASE = "properties";
 
     private final Logger logger = LoggerFactory.getLogger( getClass() );
 
+    private final TestLogger finalGroovyManipulator = TestLoggerFactory.getTestLogger( FinalGroovyManipulator.class);
+
+    @Rule
+    public final SystemOutRule systemRule = new SystemOutRule().enableLog().muteForSuccessfulTests();
+
     @Rule
     public TemporaryFolder temporaryFolder = new TemporaryFolder();
 
     @Rule
-    public final SystemOutRule systemRule = new SystemOutRule().enableLog().muteForSuccessfulTests();
+    public TestLoggerFactoryResetRule testLoggerFactoryResetRule = new TestLoggerFactoryResetRule();
 
     @Test
     public void testGroovyAnnotation() throws Exception
@@ -107,7 +117,7 @@ public class BaseScriptTest
         TestUtils.executeMethod( gm, "applyGroovyScript", new Class[] { List.class, Project.class, File.class },
                                  new Object[] { projects, root, groovy } );
 
-        assertTrue( systemRule.getLog().contains( "Ignoring script" ) );
+        assertTrue( finalGroovyManipulator.getLoggingEvents().stream().anyMatch( e -> e.getFormattedMessage().contains( "Ignoring script" ) ) );
         assertFalse( systemRule.getLog().contains( "BASESCRIPT" ) );
     }
 

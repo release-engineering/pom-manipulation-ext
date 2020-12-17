@@ -15,45 +15,29 @@
  */
 package org.commonjava.maven.ext.common.util;
 
-import ch.qos.logback.classic.Logger;
-import ch.qos.logback.classic.spi.ILoggingEvent;
-import ch.qos.logback.core.read.ListAppender;
+import com.github.valfirst.slf4jtest.TestLogger;
+import com.github.valfirst.slf4jtest.TestLoggerFactory;
+import com.github.valfirst.slf4jtest.TestLoggerFactoryResetRule;
 import org.commonjava.maven.atlas.ident.ref.ProjectRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleProjectRef;
-import org.hamcrest.Matchers;
-import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.contrib.java.lang.system.SystemOutRule;
-import org.slf4j.LoggerFactory;
 
 public class WildcardMapTest
 {
     private WildcardMap<String> map;
-    private ListAppender<ILoggingEvent> m_listAppender;
+
+    TestLogger logger = TestLoggerFactory.getTestLogger( WildcardMap.class);
 
     @Rule
-    public final SystemOutRule systemOutRule = new SystemOutRule().enableLog().muteForSuccessfulTests();
+    public TestLoggerFactoryResetRule testLoggerFactoryResetRule = new TestLoggerFactoryResetRule();
 
     @Before
     public void setUp()
     {
-        m_listAppender = new ListAppender<>();
-        m_listAppender.start();
-
-        Logger root = (Logger) LoggerFactory.getLogger(WildcardMap.class);
-        root.addAppender(m_listAppender);
-
         map = new WildcardMap<>();
-    }
-
-    @After
-    public void tearDown()
-    {
-        Logger root = (Logger) LoggerFactory.getLogger(WildcardMap.class);
-        root.detachAppender(m_listAppender);
     }
 
     @Test
@@ -115,8 +99,7 @@ public class WildcardMapTest
         Assert.assertTrue( "Should have retrieved wildcard value", map.containsKey( key2));
         Assert.assertTrue( "Should have retrieved wildcard value", map.containsKey( key1));
 
-        Assert.assertThat( m_listAppender.list.toString(),
-                           Matchers.containsString( "Unable to add org.group:new-artifact with value 1.2 as wildcard mapping for org.group already exists"));
+        Assert.assertTrue( logger.getLoggingEvents().stream().anyMatch( e -> e.getMessage().contains( "Unable to add org.group:new-artifact with value 1.2 as wildcard mapping for org.group already exists")));
 
     }
 
@@ -133,8 +116,6 @@ public class WildcardMapTest
         Assert.assertTrue( "Should have retrieved wildcard value", map.containsKey( key2));
         Assert.assertNotEquals( "Should not have retrieved value 1.1", "1.1", map.get( key1 ) );
 
-        Assert.assertThat( m_listAppender.list.toString(),
-                           Matchers.containsString( "Emptying map with keys [artifact] as replacing with wildcard mapping org.group:*"));
-
+        Assert.assertTrue( logger.getLoggingEvents().stream().anyMatch( e -> e.getMessage().contains( "Emptying map with keys [artifact] as replacing with wildcard mapping org.group:*")));
     }
 }

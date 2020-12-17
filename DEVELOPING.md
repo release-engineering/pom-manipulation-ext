@@ -95,17 +95,7 @@ The tool has both unit tests and integration tests. The integration tests will o
 
     mvn clean install -Prun-its
 
-The unit tests make use of the `system-rules` library e.g.
 
-    @Rule
-    public final SystemOutRule systemOutRule = new SystemOutRule().enableLog().muteForSuccessfulTests();
-
-    @Rule
-    public final TestRule restoreSystemProperties = new RestoreSystemProperties();
-
-See https://stefanbirkner.github.io/system-rules for further information on this.
-
-For the CLI/Integration tests, it is possible to run a specific one by passing e.g.
 
 
 A subset of the integration tests may be run by using the following example commands:
@@ -117,6 +107,42 @@ A subset of the integration tests may be run by using the following example comm
         -Dtest=DefaultCliIntegrationTest -DselectedTest=<test name e.g. depmgmt-strict-mode-exact>
 
 The main test is the `DefaultCliIntegrationTest`. Adding `-Dmaven.javadoc.skip=true -Denforcer.skip=true` will also skip some time consuming plugins.
+
+### Asserting Logging
+
+The unit tests make use of the [system-rules](https://github.com/stefanbirkner/system-rules) library and the [slf4j-test](https://github.com/valfirst/slf4j-test) library. This allows assertions upon system out/err logging and assertions upon standard logging. The reason for using the latter library is to provide better support for parallel tests. If we used purely the system-rules library (which resets the standard streams) this causes multiple test failures due to clashing reset of the stream.
+
+If you wish to use the system-rules library it is highly recommended to use the annotation `@net.jcip.annotations.NotThreadSafe` on the class. Example usage is:
+
+    @Rule
+    public final SystemOutRule systemOutRule = new SystemOutRule().enableLog().muteForSuccessfulTests();
+
+    @Rule
+    public final TestRule restoreSystemProperties = new RestoreSystemProperties();
+
+See https://stefanbirkner.github.io/system-rules for further information on this.
+
+To use the slf4j-test library, the following pattern is recommended:
+
+    @Rule
+    public TestLoggerFactoryResetRule testLoggerFactoryResetRule = new TestLoggerFactoryResetRule();
+
+    private final TestLogger finalGroovyManipulator = TestLoggerFactory.getTestLogger( FinalGroovyManipulator.class);
+
+    ... test method ...
+    {
+        assertTrue( finalGroovyManipulator.getLoggingEvents().stream().anyMatch(
+                        e -> e.getFormattedMessage().contains( "Ignoring script" ) ) );
+    }
+
+Note it is possible to combine both libraries in a single test ; see `BaseScriptTest` for an example.
+
+To work out which class you need to activate logging on you can add this ClassRule:
+
+    @ClassRule
+    public static ProvideSystemProperty psp = new ProvideSystemProperty("slf4jtest.print.level", "DEBUG");
+
+A utility function in TestUtils::dumpLoggingEvents is also available to log events to stdout for diagnostic purposes.
 
 ### Code Coverage
 

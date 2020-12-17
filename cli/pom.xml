@@ -162,6 +162,10 @@
       <artifactId>byteman-bmunit</artifactId>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>com.github.valfirst</groupId>
+      <artifactId>slf4j-test</artifactId>
+    </dependency>
   </dependencies>
 
 
@@ -186,6 +190,13 @@
             </configuration>
           </execution>
         </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration combine.self="override">
+          <redirectTestOutputToFile>true</redirectTestOutputToFile>
+        </configuration>
       </plugin>
 
       <plugin>

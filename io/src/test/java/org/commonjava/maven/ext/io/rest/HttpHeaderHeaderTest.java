@@ -15,6 +15,9 @@
  */
 package org.commonjava.maven.ext.io.rest;
 
+import com.github.valfirst.slf4jtest.TestLogger;
+import com.github.valfirst.slf4jtest.TestLoggerFactory;
+import com.github.valfirst.slf4jtest.TestLoggerFactoryResetRule;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef;
 import org.commonjava.maven.ext.io.rest.rule.MockServer;
@@ -23,7 +26,6 @@ import org.eclipse.jetty.server.handler.AbstractHandler;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.contrib.java.lang.system.SystemOutRule;
 import org.junit.rules.TestName;
 import org.slf4j.LoggerFactory;
 
@@ -42,7 +44,7 @@ import static org.junit.Assert.fail;
 public class HttpHeaderHeaderTest
 {
     @Rule
-    public final SystemOutRule systemOutRule = new SystemOutRule().enableLog();
+    public TestLoggerFactoryResetRule testLoggerFactoryResetRule = new TestLoggerFactoryResetRule();
 
     @Rule
     public final TestName testName = new TestName();
@@ -84,6 +86,8 @@ public class HttpHeaderHeaderTest
     @Test
     public void testVerifyContentHeaderMessage()
     {
+        TestLogger logger = TestLoggerFactory.getTestLogger( DefaultTranslator.class);
+
         List<ProjectVersionRef> gavs = Collections.singletonList(
             new SimpleProjectVersionRef( "com.example", "example", "1.0" ));
 
@@ -94,7 +98,7 @@ public class HttpHeaderHeaderTest
         }
         catch ( RestException ex )
         {
-            assertTrue( systemOutRule.getLog().contains( "errorType" ) );
+            assertTrue( logger.getLoggingEvents().stream().anyMatch( e -> e.getFormattedMessage().contains( "errorType" ) ) );
         }
     }
 
@@ -104,6 +108,7 @@ public class HttpHeaderHeaderTest
         testResponseStart = "{\"errorMessage\":\"";
         testResponseEnd = "\"}";
 
+        TestLogger logger = TestLoggerFactory.getTestLogger( DefaultTranslator.class);
         List<ProjectVersionRef> gavs = Collections.singletonList(
             new SimpleProjectVersionRef( "com.example", "example", "1.0" ) );
 
@@ -114,7 +119,7 @@ public class HttpHeaderHeaderTest
         }
         catch ( RestException ex )
         {
-            assertTrue( systemOutRule.getLog().contains( "errorMessage" ) );
+            assertTrue( logger.getLoggingEvents().stream().anyMatch( e -> e.getFormattedMessage().contains( "errorMessage" ) ) );
         }
     }
 
@@ -144,6 +149,7 @@ public class HttpHeaderHeaderTest
         testResponseStart = "{\"errorType\":\"MY-TYPE\",\"errorMessage\":\"MY-MESSAGE\"}";
         testResponseEnd = null;
 
+        TestLogger logger = TestLoggerFactory.getTestLogger( DefaultTranslator.class);
         List<ProjectVersionRef> gavs = Collections.singletonList(
             new SimpleProjectVersionRef( "com.example", "example", "1.0" ) );
 
@@ -154,7 +160,7 @@ public class HttpHeaderHeaderTest
         }
         catch ( RestException ex )
         {
-            assertTrue( systemOutRule.getLog().contains( "MY-TYPE MY-MESSAGE" ) );
+            assertTrue( logger.getLoggingEvents().stream().anyMatch( e -> e.getFormattedMessage().contains( "MY-TYPE MY-MESSAGE" ) ) );
             assertTrue( ex.getMessage().contains( "MY-TYPE MY-MESSAGE" ) );
         }
     }
@@ -167,6 +173,7 @@ public class HttpHeaderHeaderTest
             "</body></html>";
         testResponseEnd = null;
 
+        TestLogger logger = TestLoggerFactory.getTestLogger( DefaultTranslator.class);
         List<ProjectVersionRef> gavs = Collections.singletonList(
             new SimpleProjectVersionRef( "com.example", "example", "1.0" ) );
 
@@ -177,7 +184,7 @@ public class HttpHeaderHeaderTest
         }
         catch ( RestException ex )
         {
-            assertTrue( systemOutRule.getLog().contains( "504 Gateway Time-out The server didn't respond in time" ) );
+            assertTrue( logger.getLoggingEvents().stream().anyMatch( e -> e.getFormattedMessage().contains( "504 Gateway Time-out The server didn't respond in time" ) ) );
         }
     }
 }

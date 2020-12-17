@@ -16,10 +16,12 @@
 package org.commonjava.maven.ext.common.util;
 
 import org.apache.maven.model.Model;
+import com.github.valfirst.slf4jtest.TestLogger;
+import com.github.valfirst.slf4jtest.TestLoggerFactory;
+import com.github.valfirst.slf4jtest.TestLoggerFactoryResetRule;
 import org.commonjava.maven.ext.common.ManipulationException;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.contrib.java.lang.system.SystemOutRule;
 
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -27,7 +29,7 @@ import static org.junit.Assert.fail;
 public class ManifestUtilsTest
 {
     @Rule
-    public final SystemOutRule systemRule = new SystemOutRule().enableLog().muteForSuccessfulTests();
+    public TestLoggerFactoryResetRule testLoggerFactoryResetRule = new TestLoggerFactoryResetRule();
 
     @Test
     public void testNoClass()
@@ -46,12 +48,13 @@ public class ManifestUtilsTest
     @Test
     public void testThisClass() throws ManipulationException
     {
+        TestLogger logger = TestLoggerFactory.getTestLogger( ManifestUtils.class);
+
         ManifestUtils.getManifestInformation( ManifestUtilsTest.class );
 
-        assertTrue( systemRule.getLog()
-                              .contains( "Unable to retrieve manifest for class "
+        assertTrue( logger.getLoggingEvents().stream().anyMatch( e -> e.getFormattedMessage().contains( "Unable to retrieve manifest for class "
                                                          + "org.commonjava.maven.ext.common.util.ManifestUtilsTest as "
-                                                         + "location is a directory not a jar" ) );
+                                                         + "location is a directory not a jar" ) ) );
     }
 
     @Test

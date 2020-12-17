@@ -15,10 +15,14 @@
  */
 package org.commonjava.maven.ext.io.rest;
 
+import com.github.valfirst.slf4jtest.TestLogger;
+import com.github.valfirst.slf4jtest.TestLoggerFactory;
+import com.github.valfirst.slf4jtest.TestLoggerFactoryResetRule;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef;
 import org.jboss.byteman.contrib.bmunit.BMRule;
 import org.jboss.byteman.contrib.bmunit.BMUnitRunner;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -31,11 +35,14 @@ import static org.junit.Assert.fail;
 @RunWith(BMUnitRunner.class)
 public class HttpEndpointTest extends HttpHeaderHeaderTest
 {
-    static
-    {
+    @Rule
+    public TestLoggerFactoryResetRule testLoggerFactoryResetRule = new TestLoggerFactoryResetRule();
+
+//    static
+//    {
 //        System.setProperty( "org.jboss.byteman.verbose", "true" );
 //        System.setProperty( "org.jboss.byteman.debug", "true" );
-    }
+//    }
 
     @Test
     @BMRule(name = "check-duplicate-endpoint",
@@ -52,6 +59,7 @@ public class HttpEndpointTest extends HttpHeaderHeaderTest
             "</body></html>";
         testResponseEnd = null;
 
+        TestLogger logger = TestLoggerFactory.getTestLogger( DefaultTranslator.class);
         List<ProjectVersionRef> gavs = Arrays.asList(
              new SimpleProjectVersionRef( "com.example", "example", "1.0" ),
              new SimpleProjectVersionRef( "com.example", "example-one", "1.1" ),
@@ -69,7 +77,7 @@ public class HttpEndpointTest extends HttpHeaderHeaderTest
         }
         catch ( RestException ex )
         {
-            assertTrue( systemOutRule.getLog().contains( "504 Gateway Time-out The server didn't respond in time" ) );
+            assertTrue(  logger.getLoggingEvents().stream().anyMatch( e -> e.getFormattedMessage().contains( "504 Gateway Time-out The server didn't respond in time" ) ) );
         }
     }
 }
