@@ -75,7 +75,7 @@ public class VersionTranslatorSplitTest
 
         handler.setStatusCode( HttpServletResponse.SC_GATEWAY_TIMEOUT );
         versionTranslator = new DefaultTranslator( mockServer.getUrl(), 0, Translator.CHUNK_SPLIT_COUNT,
-                                                   "", "", DEFAULT_CONNECTION_TIMEOUT_SEC, 
+                                                   "", null, null, "", DEFAULT_CONNECTION_TIMEOUT_SEC,
                                                    DEFAULT_SOCKET_TIMEOUT_SEC, RETRY_DURATION_SEC );
     }
 
@@ -116,8 +116,9 @@ public class VersionTranslatorSplitTest
         logger.debug( requestData.toString() );
         assertEquals( 6, requestData.size() );
         assertEquals( 37, requestData.get( 0 ).size() );
-        for ( int i = 1; i < 4; i++ )
+        for ( int i = 1; i < 4; i++ ) {
             assertEquals( 9, requestData.get( i ).size() );
+        }
         assertEquals( 10, requestData.get( 4 ).size() );
         assertEquals( 2, requestData.get( 5 ).size() );
 
@@ -153,8 +154,9 @@ public class VersionTranslatorSplitTest
         logger.debug( requestData.toString() );
         assertEquals( 6, requestData.size() );
         assertEquals( 36, requestData.get( 0 ).size() );
-        for ( int i = 1; i < 5; i++ )
+        for ( int i = 1; i < 5; i++ ) {
             assertEquals( 9, requestData.get( i ).size() );
+        }
         assertEquals( 2, requestData.get( 5 ).size() );
 
         Set<Map<String, Object>> original = new HashSet<>( requestData.get( 0 ) );
@@ -171,7 +173,7 @@ public class VersionTranslatorSplitTest
     public void testTranslateVersionsCorrectSplitMaxSize()
     {
         this.versionTranslator = new DefaultTranslator( mockServer.getUrl(), 10, Translator.CHUNK_SPLIT_COUNT,
-                                                        "", "", DEFAULT_CONNECTION_TIMEOUT_SEC, 
+                                                        "", null, null, "", DEFAULT_CONNECTION_TIMEOUT_SEC,
                                                         DEFAULT_SOCKET_TIMEOUT_SEC, RETRY_DURATION_SEC );
 
         List<ProjectVersionRef> data = aLotOfGavs.subList( 0, 30 );
@@ -234,8 +236,8 @@ public class VersionTranslatorSplitTest
     @Test
     public void testTranslateVersionsCorrectSplitMaxSizeWithMin()
     {
-        this.versionTranslator = new DefaultTranslator( mockServer.getUrl(), 10, 1, "",
-                                                        "", DEFAULT_CONNECTION_TIMEOUT_SEC, 
+        this.versionTranslator = new DefaultTranslator( mockServer.getUrl(), 10, 1, "", null, null,
+                                                        "", DEFAULT_CONNECTION_TIMEOUT_SEC,
                                                         DEFAULT_SOCKET_TIMEOUT_SEC, RETRY_DURATION_SEC );
 
         List<ProjectVersionRef> data = aLotOfGavs.subList( 0, 30 );

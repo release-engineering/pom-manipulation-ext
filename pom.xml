@@ -78,6 +78,7 @@
 
     <mavenVersion>3.5.0</mavenVersion>
     <atlasVersion>0.17.1</atlasVersion>
+    <daVersion>2.1.0.Api-1</daVersion>
     <galleyVersion>0.16.6</galleyVersion>
 
     <groovyVersion>3.0.7</groovyVersion>
@@ -266,7 +267,7 @@
       <dependency>
         <groupId>org.jboss.da</groupId>
         <artifactId>reports-model</artifactId>
-        <version>1.7.0</version>
+        <version>${daVersion}</version>
       </dependency>
 
       <!-- Plexus Dependencies Reference: -->

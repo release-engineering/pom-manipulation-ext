@@ -54,7 +54,7 @@ public class RESTHeaderTest
         headers.put( "Foo", "bar" );
         headers.put( "Bar", "baz" );
         new DefaultTranslator( mockServer.getUrl(), 0,
-                Translator.CHUNK_SPLIT_COUNT, null, "", headers, DEFAULT_CONNECTION_TIMEOUT_SEC, 
+                Translator.CHUNK_SPLIT_COUNT, null, null, null, "", headers, DEFAULT_CONNECTION_TIMEOUT_SEC,
                 DEFAULT_SOCKET_TIMEOUT_SEC, RETRY_DURATION_SEC );
     }
 }
