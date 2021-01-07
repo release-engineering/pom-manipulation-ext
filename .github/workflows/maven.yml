@@ -32,7 +32,7 @@ jobs:
     # - name: Setup tmate session
     #   uses: mxschmitt/action-tmate@v3
     - name: Codecov
-      uses: codecov/codecov-action@v1.0.15
+      uses: codecov/codecov-action@v1
 
   snapshot:
     if: github.repository == 'release-engineering/pom-manipulation-ext' && github.event_name == 'push' && github.ref == 'refs/heads/master'
@@ -40,7 +40,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Cache local Maven repository
-      uses: actions/cache@v2.1.3
+      uses: actions/cache@v2
       with:
         path: ~/.m2/repository
         key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
@@ -52,7 +52,7 @@ jobs:
         java-version: 11
     # https://github.com/marketplace/actions/maven-setings-action
     - name: Maven Settings
-      uses: s4u/maven-settings-action@v2.2.0
+      uses: s4u/maven-settings-action@v2
       with:
         sonatypeSnapshots: true
         githubServer: false
@@ -64,3 +64,5 @@ jobs:
             }]
     - name: Deploy Snapshot
       run: mvn -B -V org.apache.maven.plugins:maven-source-plugin:jar-no-fork deploy -Prun-its
+    - name: Codecov
+      uses: codecov/codecov-action@v1
