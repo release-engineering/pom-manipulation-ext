@@ -25,6 +25,7 @@ import org.commonjava.maven.ext.core.fixture.TestUtils;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.contrib.java.lang.system.ExpectedSystemExit;
+import org.junit.contrib.java.lang.system.ProvideSystemProperty;
 import org.junit.contrib.java.lang.system.SystemErrRule;
 import org.junit.contrib.java.lang.system.SystemOutRule;
 import org.junit.rules.TemporaryFolder;
@@ -46,6 +47,9 @@ import static org.junit.Assert.assertTrue;
 
 public class CliTest
 {
+    @Rule
+    public final ProvideSystemProperty ansiOFF = new ProvideSystemProperty( "picocli.ansi", "false" );
+
     @Rule
     public TemporaryFolder temp = new TemporaryFolder();
 
@@ -254,6 +258,22 @@ public class CliTest
                         target.getCanonicalPath() } );
 
         assertTrue( systemOutRule.getLog().contains( "Unknown configuration value UNKNOWN_PROPERTY" ) );
+    }
+
+    @Test
+    public void checkPropertyWithoutValue() throws Exception
+    {
+        File folder = temp.newFolder();
+        File target = temp.newFile();
+        // Locate the PME project pom file. Use that to verify inheritance tracking.
+        Files.copy( Paths.get( INTEGRATION_TEST.toString(), "pom.xml" ), target.toPath(), StandardCopyOption.REPLACE_EXISTING );
+
+        Cli c = new Cli();
+        c.run( new String[] { "-d", "--settings=" + getClass().getResource( "/settings-test.xml" ).getFile(),
+                "-Dmaven.repo.local=" + folder.toString(), "-DBOOLEAN_PROPERTY", "-Prun-its", "--file",
+                target.getCanonicalPath() } );
+
+        assertTrue( systemOutRule.getLog().contains( "BOOLEAN_PROPERTY=true" ) );
     }
 
     @Test

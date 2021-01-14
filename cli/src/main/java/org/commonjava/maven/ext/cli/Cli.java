@@ -122,8 +122,8 @@ public class Cli implements Callable<Integer>
     /**
      * Properties a user may define on the command line.
      */
-    @Option( names = "-D", description = "Pass Java Properties")
-    @SuppressWarnings("unused")
+    @Option( names = "-D", mapFallbackValue = "true", description = "Pass Java Properties (default value ${MAP-FALLBACK-VALUE})" )
+    @SuppressWarnings( "unused" )
     private Properties userProps;
 
     @Option( names = {"-P", "--activeProfiles"}, description = "Comma separated list of active profiles.", split = ",")
