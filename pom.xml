@@ -88,8 +88,8 @@
 
     <!-- Both Jackson versions should be identical except if Jackson has not -->
     <!-- published javadoc for the micro version -->
-    <jacksonVersion>2.11.2</jacksonVersion>
-    <jacksonJavadocVersion>2.11</jacksonJavadocVersion>
+    <jacksonVersion>2.12.1</jacksonVersion>
+    <jacksonJavadocVersion>2.12</jacksonJavadocVersion>
 
     <argLine />
   </properties>
@@ -690,6 +690,9 @@
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>buildnumber-maven-plugin</artifactId>
+        <configuration>
+          <getRevisionOnlyOnce>true</getRevisionOnlyOnce>
+        </configuration>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>

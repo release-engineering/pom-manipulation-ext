@@ -38,9 +38,7 @@ import java.io.File;
 import java.util.List;
 import java.util.Properties;
 
-import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
 
 public class GroovyFunctionsTest
 {
@@ -94,7 +92,7 @@ public class GroovyFunctionsTest
         final PomIO pomIO = container.lookup( PomIO.class );
         final List<Project> projects = pomIO.parseProject( new File( root, "pom.xml" ) );
 
-        assertThat( projects.size(), equalTo(3) );
+        assertEquals( projects.size(), 3 );
 
         BaseScriptImplTest impl = new BaseScriptImplTest();
         Properties p = new Properties(  );
@@ -124,7 +122,7 @@ public class GroovyFunctionsTest
         final PomIO pomIO = container.lookup( PomIO.class );
         final List<Project> projects = pomIO.parseProject( target );
 
-        assertThat( projects.size(), equalTo(1) );
+        assertEquals( 1, projects.size() );
 
         BaseScriptImplTest impl = new BaseScriptImplTest();
         Properties p = new Properties(  );
