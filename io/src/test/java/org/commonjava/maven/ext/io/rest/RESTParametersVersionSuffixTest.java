@@ -30,7 +30,6 @@ import org.junit.rules.TestName;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.BufferedReader;
@@ -48,10 +47,6 @@ public class RESTParametersVersionSuffixTest
 {
     private static final Logger LOGGER = LoggerFactory.getLogger( AddSuffixJettyHandler.class );
 
-    private final String group = "indyGroup";
-
-    private final String suffix = "rebuild";
-
     private DefaultTranslator versionTranslator;
 
     private GAVSchema gavSchema;
@@ -64,7 +59,7 @@ public class RESTParametersVersionSuffixTest
     {
         @Override
         public void handle( String target, Request baseRequest, HttpServletRequest request,
-                            HttpServletResponse response ) throws IOException, ServletException
+                            HttpServletResponse response ) throws IOException
         {
             ObjectMapper objectMapper = new ObjectMapper();
             StringBuilder jb = new StringBuilder();
@@ -90,8 +85,9 @@ public class RESTParametersVersionSuffixTest
     @Test
     public void testVerifySuffix() throws RestException
     {
+        String suffix = "rebuild";
         this.versionTranslator = new DefaultTranslator( mockServer.getUrl(), 0,
-                                                        Translator.CHUNK_SPLIT_COUNT, "", suffix, DEFAULT_CONNECTION_TIMEOUT_SEC, 
+                                                        Translator.CHUNK_SPLIT_COUNT, "", suffix, DEFAULT_CONNECTION_TIMEOUT_SEC,
                                                         DEFAULT_SOCKET_TIMEOUT_SEC, RETRY_DURATION_SEC );
         List<ProjectVersionRef> gavs = Collections.singletonList(
             new SimpleProjectVersionRef( "com.example", "example", "1.0" ) );

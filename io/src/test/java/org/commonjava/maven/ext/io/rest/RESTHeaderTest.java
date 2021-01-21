@@ -23,7 +23,6 @@ import org.junit.Test;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -32,6 +31,7 @@ import static org.commonjava.maven.ext.io.rest.Translator.DEFAULT_SOCKET_TIMEOUT
 import static org.commonjava.maven.ext.io.rest.Translator.RETRY_DURATION_SEC;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class RESTHeaderTest
 {
@@ -40,20 +40,20 @@ public class RESTHeaderTest
     {
         @Override
         public void handle( String target, Request baseRequest, HttpServletRequest request,
-                            HttpServletResponse response ) throws IOException
+                            HttpServletResponse response )
         {
-            assertEquals( request.getHeader( "Foo" ),  is( "bar" ) );
-            assertEquals( request.getHeader( "Bar" ),  is( "baz" ) );
+            assertEquals( "bar", request.getHeader( "Foo" ) );
+            assertEquals( "baz", request.getHeader( "Bar" ) );
         }
     } );
 
     @Test
-    public void testVerifyHeader() throws RestException
+    public void testVerifyHeader()
     {
         Map<String, String> headers = new LinkedHashMap<>( 2 );
         headers.put( "Foo", "bar" );
         headers.put( "Bar", "baz" );
-        DefaultTranslator translator = new DefaultTranslator( mockServer.getUrl(), 0,
+        new DefaultTranslator( mockServer.getUrl(), 0,
                 Translator.CHUNK_SPLIT_COUNT, null, "", headers, DEFAULT_CONNECTION_TIMEOUT_SEC, 
                 DEFAULT_SOCKET_TIMEOUT_SEC, RETRY_DURATION_SEC );
     }
