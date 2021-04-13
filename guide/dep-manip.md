@@ -40,7 +40,11 @@ PME will then call the following endpoints
     reports/lookup/gavs
     listings/blacklist/ga
 
-It will initially call the `lookup/gavs` endpoint. By default PME will pass *all* the GAVs to the endpoint **automatically auto-sizing** the data sent to DA according to the project size. Note that the initial split batches can also be configured manually via `-DrestMaxSize=<...>`. If that value is set to 0, then everything is sent without any auto-sizing. If the endpoint returns a 503 or 504 timeout the batch is automatically split into smaller chunks in an attempt to reduce load on the endpoint and the request retried. It will by default chunk down to size of 4 before aborting. This can be configured with `-DrestMinSize=<...>`. An optional `restRepositoryGroup` parameter may be specified so that the endpoint can use a particular repository group.
+It will initially call the `lookup/gavs` endpoint. By default PME will pass *all* the GAVs to the endpoint **automatically auto-sizing** the data sent to DA according to the project size. Note that the initial split batches can also be configured manually via `-DrestMaxSize=<...>`. If that value is set to 0, then everything is sent without any auto-sizing. If the endpoint returns a 503 or 504 timeout the batch is automatically split into smaller chunks in an attempt to reduce load on the endpoint and the request retried. It will by default chunk down to size of 4 before aborting. This can be configured with `-DrestMinSize=<...>`.
+
+An optional `restRepositoryGroup` parameter may be specified so that the endpoint can use a particular repository group. This parameter is meant to be used with DA versions up to 2.0.
+
+With DA 2.1 it is being replaced with a boolean flag `restBrewPullActive` and a string identifier `restMode`. The `restBrewPullActive` flag switches on and off the version lookup in Brew. Switching it off might have positive effect on performance. The `restMode` indicates type of versions to lookup. Modes are configurable in DA, so it is needed to check the DA config/consult with DA maintainers for the list of available modes.
 
 Finally it will call the `blacklist/ga` endpoint in order to check that the version being build is not in the blacklist.
 
@@ -55,7 +59,9 @@ The lookup REST endpoint should follow:
 <td>
    <pre lang="xml" style="font-size: 10px">
 [
-    [ "repositoryGroup" : "id" ]
+    [ "repositoryGroup" : "id", ]
+    [ "brewPullActive": true, ]
+    [ "mode": "MODE-ID", ]
     {
         "groupId": "org.foo",
         "artifactId": "bar",
