@@ -53,6 +53,6 @@ buildLog.eachLine {
 }
 assert executionRoot == true
 
-File json = new File( basedir, 'target/manipulation.json' )
+File json = new File( basedir, 'target/alignmentReport.json' /* + ManipulationManager.REPORT_JSON_DEFAULT*/ )
 assert json.exists()
 assert json.text.contains("redhat-1")

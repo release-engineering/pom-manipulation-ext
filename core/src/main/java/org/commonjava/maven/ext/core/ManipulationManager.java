@@ -80,7 +80,7 @@ public class ManipulationManager
 
     public static final String MARKER_FILE = MARKER_PATH + File.separatorChar + "pom-manip-ext-marker.txt";
 
-    private static final String REPORT_JSON_DEFAULT = File.separatorChar + "manipulation.json";
+    public static final String REPORT_JSON_DEFAULT = "alignmentReport.json";
 
     @ConfigValue( docIndex = "index.html#summary-logging")
     public static final String REPORT_TXT_OUTPUT_FILE = "reportTxtOutputFile";
@@ -221,7 +221,7 @@ public class ManipulationManager
 
                 WildcardMap<ProjectVersionRef> map = (session.getState( RelocationState.class) == null ? new WildcardMap<>() : session.getState( RelocationState.class ).getDependencyRelocations());
                 String report = ProjectComparator.compareProjects( session, jsonReport, map , originalProjects, currentProjects );
-                logger.info( report );
+                logger.info( "{}{}", System.lineSeparator(), report );
 
                 final String reportTxtOutputFile = session.getUserProperties().getProperty( REPORT_TXT_OUTPUT_FILE, "");
                 if ( isNotEmpty( reportTxtOutputFile ) )
