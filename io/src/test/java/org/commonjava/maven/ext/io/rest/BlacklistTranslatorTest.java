@@ -56,7 +56,7 @@ public class BlacklistTranslatorTest
         LoggerFactory.getLogger( BlacklistTranslatorTest.class ).info( "Executing test " + testName.getMethodName() );
 
         this.blacklistTranslator = new DefaultTranslator( mockServer.getUrl(), 0, Translator.CHUNK_SPLIT_COUNT, "",
-                                                          "", DEFAULT_CONNECTION_TIMEOUT_SEC, 
+                                                          null, null, "", DEFAULT_CONNECTION_TIMEOUT_SEC,
                                                           DEFAULT_SOCKET_TIMEOUT_SEC, RETRY_DURATION_SEC );
     }
 

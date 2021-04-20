@@ -76,6 +76,10 @@ public class DefaultTranslator
 
     private final String repositoryGroup;
 
+    private final Boolean brewPullActive;
+
+    private final String mode;
+
     private final String incrementalSerialSuffix;
 
     private final Map<String, String> restHeaders;
@@ -101,15 +105,21 @@ public class DefaultTranslator
      * @param endpointUrl is the URL to talk to.
      * @param restMaxSize initial (maximum) size of the rest call; if zero will send everything.
      * @param restMinSize minimum size for the call
-     * @param repositoryGroup the group to pass to the endpoint.
+     * @param repositoryGroup the group to pass to the endpoint, still can be used, but is replaced by
+     *        brewPullActive flag and mode when used in combination with DA 2.1 and above
+     * @param brewPullActive flag saying if brew pull should be used for version retrieval
+     * @param mode lookup mode, either STANDARD (default if empty) or SERVICE
      * @param incrementalSerialSuffix the suffix to pass to the endpoint.
      * @param restHeaders the headers to pass to the endpoint
      */
     public DefaultTranslator( String endpointUrl, int restMaxSize, int restMinSize, String repositoryGroup,
-                              String incrementalSerialSuffix, Map<String, String> restHeaders,
-                              int restConnectionTimeout, int restSocketTimeout, int restRetryDuration )
+                              Boolean brewPullActive, String mode, String incrementalSerialSuffix,
+                              Map<String, String> restHeaders, int restConnectionTimeout, int restSocketTimeout,
+                              int restRetryDuration )
     {
         this.repositoryGroup = repositoryGroup;
+        this.brewPullActive = brewPullActive;
+        this.mode = mode;
         this.incrementalSerialSuffix = incrementalSerialSuffix;
         this.endpointUrl = endpointUrl + ( isNotBlank( endpointUrl ) ? endpointUrl.endsWith( "/" ) ? "" : "/" : "");
         this.initialRestMaxSize = restMaxSize;
@@ -125,13 +135,17 @@ public class DefaultTranslator
      * @param restMaxSize initial (maximum) size of the rest call; if zero will send everything.
      * @param restMinSize minimum size for the call
      * @param repositoryGroup the group to pass to the endpoint.
+     * @param brewPullActive flag saying if brew pull should be used for version retrieval
+     * @param mode lookup mode, either STANDARD (default if empty) or SERVICE
      * @param incrementalSerialSuffix the suffix to pass to the endpoint.
      */
-    public DefaultTranslator( String endpointUrl, int restMaxSize, int restMinSize, String repositoryGroup, String incrementalSerialSuffix,
+    public DefaultTranslator( String endpointUrl, int restMaxSize, int restMinSize, String repositoryGroup,
+                              Boolean brewPullActive, String mode, String incrementalSerialSuffix,
                               int restConnectionTimeout, int restSocketTimeout, int restRetryDuration)
     {
-        this ( endpointUrl, restMaxSize, restMinSize, repositoryGroup, incrementalSerialSuffix,
-               Collections.emptyMap(), restConnectionTimeout, restSocketTimeout, restRetryDuration );
+        this ( endpointUrl, restMaxSize, restMinSize, repositoryGroup, brewPullActive, mode,
+               incrementalSerialSuffix, Collections.emptyMap(), restConnectionTimeout, restSocketTimeout,
+               restRetryDuration );
     }
 
     private void partition(List<ProjectVersionRef> projects, Queue<Task> queue) {
@@ -302,6 +316,7 @@ public class DefaultTranslator
      * There may be a lot of them, possibly causing timeouts or other issues.
      * This is mitigated by splitting them into smaller chunks when an error occurs and retrying.
      */
+    @Override
     public Map<ProjectVersionRef, String> translateVersions( List<ProjectVersionRef> p ) throws RestException
     {
         final List<ProjectVersionRef> projects = p.stream().distinct().collect( Collectors.toList() );
@@ -419,7 +434,8 @@ public class DefaultTranslator
             {
                 LookupGAVsRequest request =
                                 new LookupGAVsRequest( Collections.emptySet(), Collections.emptySet(), repositoryGroup,
-                                                       incrementalSerialSuffix, GAVUtils.generateGAVs( chunk ) );
+                                                       brewPullActive, mode, incrementalSerialSuffix,
+                                                       GAVUtils.generateGAVs( chunk ) );
 
                 r = Unirest.post( this.endpointUrl )
                            .header( "accept", "application/json" )
@@ -467,6 +483,9 @@ public class DefaultTranslator
                                        this.errorString = failedResponse.mapError( ErrorMessage.class ).toString();
 
                                        logger.debug( "Read message string {}, processed to {} ", originalBody, errorString );
+                                   }
+                                   else if (originalBody.startsWith( "javax.validation.ValidationException: " )) {
+                                       this.errorString = originalBody;
                                    }
                                    else
                                    {

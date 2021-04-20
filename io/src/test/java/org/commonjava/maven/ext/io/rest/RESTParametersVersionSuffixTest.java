@@ -87,8 +87,9 @@ public class RESTParametersVersionSuffixTest
     {
         String suffix = "rebuild";
         this.versionTranslator = new DefaultTranslator( mockServer.getUrl(), 0,
-                                                        Translator.CHUNK_SPLIT_COUNT, "", suffix, DEFAULT_CONNECTION_TIMEOUT_SEC,
-                                                        DEFAULT_SOCKET_TIMEOUT_SEC, RETRY_DURATION_SEC );
+                                                        Translator.CHUNK_SPLIT_COUNT, "", null, null, suffix,
+                                                        DEFAULT_CONNECTION_TIMEOUT_SEC, DEFAULT_SOCKET_TIMEOUT_SEC,
+                                                        RETRY_DURATION_SEC );
         List<ProjectVersionRef> gavs = Collections.singletonList(
             new SimpleProjectVersionRef( "com.example", "example", "1.0" ) );
 
@@ -100,8 +101,9 @@ public class RESTParametersVersionSuffixTest
     public void testVerifyNoSuffix() throws RestException
     {
         this.versionTranslator = new DefaultTranslator( mockServer.getUrl(), 0,
-                                                        Translator.CHUNK_SPLIT_COUNT, "", "", DEFAULT_CONNECTION_TIMEOUT_SEC, 
-                                                        DEFAULT_SOCKET_TIMEOUT_SEC, RETRY_DURATION_SEC );
+                                                        Translator.CHUNK_SPLIT_COUNT, "", null, null, "",
+                                                        DEFAULT_CONNECTION_TIMEOUT_SEC, DEFAULT_SOCKET_TIMEOUT_SEC,
+                                                        RETRY_DURATION_SEC );
         List<ProjectVersionRef> gavs = Collections.singletonList(
             new SimpleProjectVersionRef( "com.example", "example", "1.0" ) );
 

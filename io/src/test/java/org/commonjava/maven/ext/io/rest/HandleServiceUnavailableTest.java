@@ -77,7 +77,7 @@ public class HandleServiceUnavailableTest
 
         handler.setStatusCode( HttpServletResponse.SC_SERVICE_UNAVAILABLE );
         versionTranslator = new DefaultTranslator( mockServer.getUrl(), 0, Translator.CHUNK_SPLIT_COUNT,
-                                                   "", "", DEFAULT_CONNECTION_TIMEOUT_SEC, 
+                                                   "", null, null, "", DEFAULT_CONNECTION_TIMEOUT_SEC,
                                                    DEFAULT_SOCKET_TIMEOUT_SEC, RETRY_DURATION_SEC );
     }
 
@@ -124,8 +124,9 @@ public class HandleServiceUnavailableTest
         logger.debug( requestData.toString() );
         assertEquals( 6, requestData.size() );
         assertEquals( 37, requestData.get( 0 ).size() );
-        for ( int i = 1; i < 4; i++ )
+        for ( int i = 1; i < 4; i++ ) {
             assertEquals( 9, requestData.get( i ).size() );
+        }
         assertEquals( 10, requestData.get( 4 ).size() );
         assertEquals( 2, requestData.get( 5 ).size() );
 

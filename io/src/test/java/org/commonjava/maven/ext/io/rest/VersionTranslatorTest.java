@@ -83,7 +83,7 @@ public class VersionTranslatorTest
         LoggerFactory.getLogger( VersionTranslatorTest.class ).info( "Executing test " + testName.getMethodName() );
 
         this.versionTranslator = new DefaultTranslator( mockServer.getUrl(), 0, Translator.CHUNK_SPLIT_COUNT, "indyGroup",
-                                                        "", DEFAULT_CONNECTION_TIMEOUT_SEC, 
+                                                        null, null, "", DEFAULT_CONNECTION_TIMEOUT_SEC,
                                                         DEFAULT_SOCKET_TIMEOUT_SEC, RETRY_DURATION_SEC );
     }
 
@@ -126,7 +126,7 @@ public class VersionTranslatorTest
     public void testTranslateVersionsWithNulls() throws RestException
     {
         this.versionTranslator = new DefaultTranslator( mockServer.getUrl(), 0, Translator.CHUNK_SPLIT_COUNT, "NullBestMatchVersion",
-                                                        "", DEFAULT_CONNECTION_TIMEOUT_SEC, 
+                                                        null, null, "", DEFAULT_CONNECTION_TIMEOUT_SEC,
                                                         DEFAULT_SOCKET_TIMEOUT_SEC, RETRY_DURATION_SEC );
         List<ProjectVersionRef> gavs = Arrays.asList(
                         new SimpleProjectVersionRef( "com.example", "example", "1.0" ),
@@ -151,7 +151,7 @@ public class VersionTranslatorTest
         // Some url that doesn't exist used here
         Translator translator = new DefaultTranslator( "http://127.0.0.2", 0,
                                                        Translator.CHUNK_SPLIT_COUNT, "",
-                                                       "", DEFAULT_CONNECTION_TIMEOUT_SEC, 
+                                                       null, null, "", DEFAULT_CONNECTION_TIMEOUT_SEC,
                                                        DEFAULT_SOCKET_TIMEOUT_SEC, RETRY_DURATION_SEC );
 
         List<ProjectVersionRef> gavs = Collections.singletonList(

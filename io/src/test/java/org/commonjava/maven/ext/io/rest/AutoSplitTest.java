@@ -87,8 +87,8 @@ public class AutoSplitTest
 
     private List<List<Map<String, Object>>> translate(int size) {
         final DefaultTranslator versionTranslator = new DefaultTranslator(
-                        mockServer.getUrl(), -1, 0, "",
-                        "", DEFAULT_CONNECTION_TIMEOUT_SEC, 
+                        mockServer.getUrl(), -1, 0, "", null, null,
+                        "", DEFAULT_CONNECTION_TIMEOUT_SEC,
                         DEFAULT_SOCKET_TIMEOUT_SEC, RETRY_DURATION_SEC);
 
         List<ProjectVersionRef> data = aLotOfGavs.subList( 0, size );
