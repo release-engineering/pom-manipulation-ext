@@ -44,7 +44,7 @@ It will initially call the `lookup/gavs` endpoint. By default PME will pass *all
 
 An optional `restRepositoryGroup` parameter may be specified so that the endpoint can use a particular repository group. This parameter is meant to be used with DA versions up to 2.0.
 
-With DA 2.1 it is being replaced with a boolean flag `restBrewPullActive` and a string identifier `restMode`. The `restBrewPullActive` flag switches on and off the version lookup in Brew. Switching it off might have positive effect on performance. The `restMode` indicates type of versions to lookup. Modes are configurable in DA, so it is needed to check the DA config/consult with DA maintainers for the list of available modes.
+With DA 2.1 it is being replaced with a boolean flag `restBrewPullActive` and a string identifier `restMode`. The `restBrewPullActive` flag switches on and off the version lookup in Brew and the default value is false. Switching it off might have positive effect on performance. The `restMode` indicates type of versions to lookup. Modes are configurable in DA, so it is needed to check the DA config/consult with DA maintainers for the list of configured modes. Usual modes mmight be e.g. PERSISTENT and TEMPORARY.
 
 Finally it will call the `blacklist/ga` endpoint in order to check that the version being build is not in the blacklist.
 
