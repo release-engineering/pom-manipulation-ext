@@ -31,7 +31,7 @@ Multiple remote dependency-management poms can be specified using a comma separa
 
 #### REST Endpoint
 
-Alternatively, rather than using a remote BOM file as a source, it is possible to instruct PME to prescan the project, collect up all group:artifact:version's used and call a REST endpoint using the endpoint property `restURL` (provided from the Dependency Analysis tool [here](https://github.com/project-ncl/dependency-analysis)) **and** specifying `dependencySource` of `REST`, which will then return a list of possible new versions. Note that the URL should be the subset of the endpoint e.g.
+Alternatively, rather than using a remote BOM file as a source, it is possible to instruct PME to prescan the project, collect up all group:artifact:version's used and call a REST endpoint using the endpoint property `restURL` (provided from the Dependency Analysis tool [here](https://github.com/project-ncl/dependency-analysis), hereinafter referred to as DA) **and** specifying `dependencySource` of `REST`, which will then return a list of possible new versions. Note that the URL should be the subset of the endpoint e.g.
 
     http://foo.bar.com/da/rest/v-1
 
@@ -40,7 +40,11 @@ PME will then call the following endpoints
     reports/lookup/gavs
     listings/blacklist/ga
 
-It will initially call the `lookup/gavs` endpoint. By default PME will pass *all* the GAVs to the endpoint **automatically auto-sizing** the data sent to DA according to the project size. Note that the initial split batches can also be configured manually via `-DrestMaxSize=<...>`. If that value is set to 0, then everything is sent without any auto-sizing. If the endpoint returns a 503 or 504 timeout the batch is automatically split into smaller chunks in an attempt to reduce load on the endpoint and the request retried. It will by default chunk down to size of 4 before aborting. This can be configured with `-DrestMinSize=<...>`. An optional `restRepositoryGroup` parameter may be specified so that the endpoint can use a particular repository group.
+It will initially call the `lookup/gavs` endpoint. By default PME will pass *all* the GAVs to the endpoint **automatically auto-sizing** the data sent to DA according to the project size. Note that the initial split batches can also be configured manually via `-DrestMaxSize=<...>`. If that value is set to 0, then everything is sent without any auto-sizing. If the endpoint returns a 503 or 504 timeout the batch is automatically split into smaller chunks in an attempt to reduce load on the endpoint and the request retried. It will by default chunk down to size of 4 before aborting. This can be configured with `-DrestMinSize=<...>`.
+
+An optional `restRepositoryGroup` parameter may be specified so that the endpoint can use a particular repository group. This parameter is meant to be used with DA versions up to 2.0.
+
+With DA 2.1 it is being replaced with a boolean flag `restBrewPullActive` and a string identifier `restMode`. The `restBrewPullActive` flag switches on and off the version lookup in Brew and the default value is false. Switching it off might have positive effect on performance. The `restMode` indicates type of versions to lookup. Modes are configurable in DA, so it is needed to check the DA config/consult with DA maintainers for the list of configured modes. Usual modes mmight be e.g. PERSISTENT and TEMPORARY.
 
 Finally it will call the `blacklist/ga` endpoint in order to check that the version being build is not in the blacklist.
 
@@ -55,7 +59,9 @@ The lookup REST endpoint should follow:
 <td>
    <pre lang="xml" style="font-size: 10px">
 [
-    [ "repositoryGroup" : "id" ]
+    [ "repositoryGroup" : "id", ]
+    [ "brewPullActive": true, ]
+    [ "mode": "MODE-ID", ]
     {
         "groupId": "org.foo",
         "artifactId": "bar",
