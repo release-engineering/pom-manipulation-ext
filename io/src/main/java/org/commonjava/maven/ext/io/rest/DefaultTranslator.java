@@ -484,6 +484,9 @@ public class DefaultTranslator
 
                                        logger.debug( "Read message string {}, processed to {} ", originalBody, errorString );
                                    }
+                                   else if (originalBody.startsWith( "javax.validation.ValidationException: " )) {
+                                       this.errorString = originalBody;
+                                   }
                                    else
                                    {
                                        throw new ManipulationUncheckedException( "Problem in HTTP communication with status code {} and message {}",
