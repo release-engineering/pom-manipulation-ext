@@ -107,7 +107,7 @@ public class ResultJsonFileTest
 
         assertEquals( (Integer) 0, exitValue );
 
-        File outputJsonFile = Paths.get( basePath, "target", "manipulation.json" ).toFile();
+        File outputJsonFile = Paths.get( basePath, "target", ManipulationManager.REPORT_JSON_DEFAULT ).toFile();
         assertTrue( outputJsonFile.exists() );
 
         JsonNode rootNode = MAPPER.readTree( outputJsonFile );
@@ -154,7 +154,7 @@ public class ResultJsonFileTest
 
         assertEquals( (Integer) 0, exitValue );
 
-        File outputJsonFile = Paths.get( basePath, "target", "manipulation.json" ).toFile();
+        File outputJsonFile = Paths.get( basePath, "target", ManipulationManager.REPORT_JSON_DEFAULT ).toFile();
 
         assertTrue( outputJsonFile.exists() );
 
@@ -199,7 +199,7 @@ public class ResultJsonFileTest
 
         assertEquals( (Integer) 0, exitValue );
 
-        File outputJsonFile = Paths.get( basePath, "target", "manipulation.json" ).toFile();
+        File outputJsonFile = Paths.get( basePath, "target", ManipulationManager.REPORT_JSON_DEFAULT ).toFile();
 
         assertTrue( outputJsonFile.exists() );
 
@@ -247,7 +247,8 @@ public class ResultJsonFileTest
         params.put( "restURL", mockServer.getUrl() );
         params.put( VersioningState.INCREMENT_SERIAL_SUFFIX_SYSPROP, AddSuffixJettyHandler.SUFFIX );
         params.put( VersioningState.INCREMENT_SERIAL_SUFFIX_PADDING_SYSPROP, "0" );
-        params.put( ManipulationManager.REPORT_JSON_OUTPUT_FILE, outputDir.toString() + File.separator + "manipulation.json" );
+        params.put( ManipulationManager.REPORT_JSON_OUTPUT_FILE, outputDir.toString() + File.separator
+                +  ManipulationManager.REPORT_JSON_DEFAULT );
 
         Integer exitValue = runCli( Collections.emptyList(), params, baseDir.getCanonicalPath() );
 
@@ -255,7 +256,7 @@ public class ResultJsonFileTest
 
         assertEquals( (Integer) 0, exitValue );
 
-        File outputJsonFile = new File( outputDir, "manipulation.json" );
+        File outputJsonFile = new File( outputDir, ManipulationManager.REPORT_JSON_DEFAULT );
         assertTrue( outputJsonFile.exists() );
 
         JsonNode rootNode = MAPPER.readTree( outputJsonFile );

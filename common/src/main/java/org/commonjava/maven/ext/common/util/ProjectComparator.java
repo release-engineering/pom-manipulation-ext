@@ -63,7 +63,6 @@ public class ProjectComparator
      */
     private static final AtomicBoolean spacerLine = new AtomicBoolean();
 
-
     enum Type
     {
         DEPENDENCIES,
@@ -132,7 +131,7 @@ public class ProjectComparator
                             append( builder, "------------------- project {}", newProject.getKey().asProjectRef() );
                             if ( ! originalProject.getVersion().equals( newProject.getVersion() ) )
                             {
-                                append( builder, "\tProject version : {} ---> {}", originalProject.getVersion(), newProject.getVersion() );
+                                append( builder, "\tProject version : {} --> {}", originalProject.getVersion(), newProject.getVersion() );
                                 spacerLine.set( true );
                             }
                             injectSpacerLine(builder);
@@ -143,7 +142,7 @@ public class ProjectComparator
                                     if ( oKey != null && oKey.equals( nKey ) &&  oValue != null &&  !oValue.equals( nValue ) )
                                     {
                                         module.getProperties().put( oKey.toString(), new PropertiesItem( oValue.toString(), nValue.toString() ) );
-                                        append( builder, "\tProperty : key {} ; value {} ---> {}", oKey, oValue, nValue);
+                                        append( builder, "\tProperty : key {} ; value {} --> {}", oKey, oValue, nValue );
                                         spacerLine.set( true );
                                     }
                                 } )
@@ -206,7 +205,7 @@ public class ProjectComparator
 
                                         if ( oKey != null && oKey.equals( nKey ) &&  oValue != null &&  !oValue.equals( nValue ) )
                                         {
-                                            append( builder, "\tProfile property : key {} ; value {} ---> {}", oKey, oValue, nValue );
+                                            append( builder, "\tProfile property : key {} ; value {} --> {}", oKey, oValue, nValue );
                                             spacerLine.set( true );
                                         }
                                     } )
@@ -289,7 +288,7 @@ public class ProjectComparator
 
                     alignedDependencies.put( originalDep.asProjectVersionRef().toString(), n );
 
-                    append( builder, "\tUnversioned relocation : {} ---> {}", originalDep, n );
+                    append( builder, "\tUnversioned relocation : {} --> {}", originalDep, n );
                     spacerLine.set( true );
                 }
             } );
@@ -326,7 +325,7 @@ public class ProjectComparator
                     if ( dependencyRelocations.containsKey( orig ) )
                     {
                         ProjectVersionRef p = dependencyRelocations.get( orig );
-                        append( builder, "\tRelocation : {} ---> {}:{}:{}", originalDep, p.getGroupId(),
+                        append( builder, "\tRelocation : {} --> {}:{}:{}", originalDep, p.getGroupId(),
                                 p.getArtifactId().equals( "*" ) ? orig.getArtifactId() : p.getArtifactId(),
                                 p.getVersionString() );
                         spacerLine.set( true );
