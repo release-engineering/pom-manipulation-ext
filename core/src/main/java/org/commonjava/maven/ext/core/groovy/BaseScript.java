@@ -17,13 +17,16 @@ package org.commonjava.maven.ext.core.groovy;
 
 import lombok.Getter;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
+import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.common.model.Project;
 import org.commonjava.maven.ext.common.session.MavenSessionHandler;
 import org.commonjava.maven.ext.core.ManipulationSession;
 import org.commonjava.maven.ext.core.impl.InitialGroovyManipulator;
+import org.commonjava.maven.ext.core.state.RESTState;
 import org.commonjava.maven.ext.io.FileIO;
 import org.commonjava.maven.ext.io.ModelIO;
 import org.commonjava.maven.ext.io.PomIO;
+import org.commonjava.maven.ext.io.rest.Translator;
 
 import java.io.File;
 import java.util.List;
@@ -65,6 +68,7 @@ public abstract class BaseScript extends BaseScriptUtils
      * Return the current Project
      * @return a {@link org.commonjava.maven.ext.common.model.Project} instance.
      */
+    @Override
     public Project getProject()
     {
         return project;
@@ -92,6 +96,7 @@ public abstract class BaseScript extends BaseScriptUtils
      * Get the working directory (the execution root).
      * @return a {@link java.io.File} reference.
      */
+    @Override
     public File getBaseDir()
     {
         return basedir;
@@ -101,6 +106,7 @@ public abstract class BaseScript extends BaseScriptUtils
      * Get the user properties
      * @return a {@link java.util.Properties} reference.
      */
+    @Override
     public Properties getUserProperties()
     {
         return userProperties;
@@ -119,9 +125,22 @@ public abstract class BaseScript extends BaseScriptUtils
      * Get the current stage
      * @return a {@link InvocationStage} reference.
      */
+    @Override
     public InvocationStage getInvocationStage()
     {
         return stage;
+    }
+
+    /**
+     * Gets a configured VersionTranslator to make REST calls to DA
+     * @return a VersionTranslator
+     * @throws ManipulationException if an error occurs
+     */
+    @Override
+    public Translator getRESTAPI() throws ManipulationException
+    {
+        validateSession();
+        return ((ManipulationSession)getSession()).getState( RESTState.class ).getVersionTranslator();
     }
 
     /**

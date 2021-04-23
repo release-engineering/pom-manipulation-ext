@@ -15,7 +15,9 @@
  */
 package org.commonjava.maven.ext.core.groovy;
 
+import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.io.FileIO;
+import org.commonjava.maven.ext.io.rest.Translator;
 
 import java.io.File;
 import java.util.Properties;
@@ -49,4 +51,9 @@ public interface CommonBaseScript
      */
     FileIO getFileIO ();
 
+    /**
+     * Gets a configured VersionTranslator to make REST calls to DA
+     * @return a VersionTranslator
+     */
+    Translator getRESTAPI() throws ManipulationException;
 }
