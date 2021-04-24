@@ -118,7 +118,7 @@ public abstract class BaseScriptUtils extends Script implements MavenBaseScript
     }
 
 
-    private void validateSession() throws ManipulationException
+    protected void validateSession() throws ManipulationException
     {
         if ( ! ( getSession() instanceof ManipulationSession ) )
         {
@@ -137,13 +137,6 @@ public abstract class BaseScriptUtils extends Script implements MavenBaseScript
         ((ManipulationSession)getSession()).reinitialiseStates();
     }
 
-
-    protected Translator getRESTAPI() throws ManipulationException
-    {
-        validateSession();
-        RESTState rs = ((ManipulationSession)getSession()).getState( RESTState.class );
-        return rs.getVersionTranslator();
-    }
 
     /**
      * This is useful for a series of builds with circular dependencies. It will allow a developer
