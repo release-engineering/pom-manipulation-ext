@@ -310,7 +310,7 @@ public class CliTest
                 + "com.soebes.maven.plugins:iterator-maven-plugin:0.3                              maven-plugin                                                \n"
                 + "com.squareup:javapoet:1.[.\\d+]+\\s+                                            jar                                     compile             \n"
                 + "commons-codec:commons-codec:1.11                                                jar                                     compile             \n"
-                + "commons-io:commons-io:2.6                                                       jar                                     compile             \n"
+                + "commons-io:commons-io:[.\\d+]+\\s+                                              jar                                     compile             \n"
                 + "commons-lang:commons-lang:2.6                                                   jar                                     compile             \n"
                 + "commons-logging:commons-logging:1.2                                             jar                                     compile             \n"
                 + "info.picocli:picocli:4.[.\\d+]+\\s+                                             jar                                     compile             \n"
