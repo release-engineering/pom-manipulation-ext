@@ -48,7 +48,7 @@ It supports the following arguments
 
 Installing PME is as simple as [grabbing the binary](https://repo1.maven.org/maven2/org/commonjava/maven/ext/pom-manipulation-ext) and copying it to your `${MAVEN_HOME}/lib/ext` directory. Once PME is installed, Maven should output something like the following when run:
 
-	[INFO] Maven-Manipulation-Extension
+    [INFO] Maven-Manipulation-Extension
 
 Uninstalling the extension is equally simple: just delete it from `${MAVEN_HOME}/lib/ext`.
 
@@ -56,7 +56,7 @@ Uninstalling the extension is equally simple: just delete it from `${MAVEN_HOME}
 
 You can disable PME using the `manipulation.disable` property:
 
-	$ mvn -Dmanipulation.disable=true clean install
+    $ mvn -Dmanipulation.disable=true clean install
 
 If you want to make it more permanent, you could add it to your `settings.xml`:
 
@@ -98,9 +98,16 @@ Removing the target directory will allow PME to be run again.
 
 ### Summary Logging
 
-PME will output a summary of its changes at the end of the run. As well as reporting version, property, dependency and plugin alignment it is also possible to report what _hasn't_ been aligned by setting the property `reportNonAligned=true`. This summary may also be output to a file if `reportTxtOutputFile` is set.
+PME will output a summary of its changes at the end of the run. As well as reporting version, property, dependency and
+plugin alignment, it is also possible to report what _hasn't_ been aligned by setting the property
+`reportNonAligned=true`. This summary may also be output to a file by setting the property `reportTxtOutputFile` to the
+name of the file, e.g., `alignmentReport.txt`. The file's path will always be relative to the execution root `target`
+directory (next to the marker file above).
 
-Finally it will also output the comparator summary as a JSON file. By default this report will be placed within the execution root `target` directory (next to the marker file above). However it may be configured by setting `reportJSONOutputFile`.
+Finally, it will also output the comparator summary as a JSON file. The file's path will always be relative to the
+execution root `target` directory (next to the marker file above). By default, the file will be named
+`alignmentReport.json`. However, the name of this file may be changed by setting the `reportJSONOutputFile` property to
+an alternate name for the file.
 
     {
       "executionRoot" : {
@@ -119,7 +126,9 @@ Finally it will also output the comparator summary as a JSON file. By default th
         "properties" : {
         ...
 
-This JSON file may be read as POJO by using the [JSONUtils](https://github.com/release-engineering/pom-manipulation-ext/blob/master/common/src/main/java/org/commonjava/maven/ext/common/util/JSONUtils.java) class which utilises the [json](https://github.com/release-engineering/pom-manipulation-ext/blob/master/common/src/main/java/org/commonjava/maven/ext/common/json) package.
+This JSON file may be read as POJO by using the [JSONUtils](https://github.com/release-engineering/pom-manipulation-ext/blob/master/common/src/main/java/org/commonjava/maven/ext/common/util/JSONUtils.java)
+class which utilises the [json](https://github.com/release-engineering/pom-manipulation-ext/blob/master/common/src/main/java/org/commonjava/maven/ext/common/json)
+package.
 
 ### Javadoc
 
