@@ -28,7 +28,7 @@
               <repository>
                   <id>rh-repository</id>
                   <name>Red Hat repository (all)</name>
-                  <url>http://maven.repository.redhat.com/ga/</url>
+                  <url>https://maven.repository.redhat.com/ga/</url>
                   <layout>default</layout>
                   <releases>
                       <enabled>true</enabled>
@@ -44,7 +44,7 @@
               <pluginRepository>
                   <id>rh-repository</id>
                   <name>Red Hat repository (all)</name>
-                  <url>http://maven.repository.redhat.com/ga/</url>
+                  <url>https://maven.repository.redhat.com/ga/</url>
                   <layout>default</layout>
                   <releases>
                       <enabled>true</enabled>
