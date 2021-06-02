@@ -20,7 +20,7 @@ System.out.println( "Slurping POM: ${pomFile.getAbsolutePath()}" )
 def pom = new XmlSlurper().parse( pomFile )
 
 System.out.println( "POM Version: ${pom.version.text()}" )
-assert pom.version.text().endsWith( '.redhat-2' )
+assert pom.version.text().equals( '2.7.2.3-fuse-redhat-2' )
 
 v = pom.parent.version.text()
 System.out.println( "POM Version: ${v}" )
