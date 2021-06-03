@@ -218,6 +218,11 @@ public class AddSuffixJettyHandler
                             bestMatchVersion = version + "-" + MIXED_SUFFIX;
                         }
                     }
+                    else if ( gav.getVersion().equals("2.7.2_3-fuse") )
+                    {
+                        // For RESTVersionManipOnly - simulate whether version modification has been already performed or not.
+                        bestMatchVersion = version;
+                    }
                     else
                     {
                         bestMatchVersion = version + "-" + this.suffix;

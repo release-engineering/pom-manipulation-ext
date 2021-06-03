@@ -92,11 +92,10 @@ public class RESTCollector
         {
             if ( isEmpty( override ) )
             {
-                // TODO: Check this : For the rest API I think we need to check every project GA not just inheritance root.
-                // Strip SNAPSHOT and handle alternate suffixes from the version for matching. DA will handle OSGi conversion.
+                // Strip SNAPSHOT and handle OSGi and alternate suffixes from the version for matching.
                 newProjectKeys.add( new SimpleProjectVersionRef(
                                 project.getKey().asProjectRef(), handlePotentialSnapshotVersion(
-                                                vs, VersionCalculator.handleAlternate( vs, project.getVersion() ) ) ) );
+                                                vs, Version.getOsgiVersion(VersionCalculator.handleAlternate( vs, project.getVersion() ) ) ) ) );
             }
             else if ( project.isExecutionRoot() )
             {
@@ -380,7 +379,7 @@ public class RESTCollector
             }
             // If we are not (re)aligning suffixed dependencies then ignore them.
             // Null check to avoid problems with some tests where state is not instantiated.
-            if ( state != null && !state.isRestSuffixAlign() &&
+            else if ( state != null && !state.isRestSuffixAlign() &&
                             ( sa.getVersionString().contains( vs.getRebuildSuffix() ) ||
                                             vs.getSuffixAlternatives().stream().anyMatch( s -> sa.getVersionString().contains( s ) ) ) )
             {
