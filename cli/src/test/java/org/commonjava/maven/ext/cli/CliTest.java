@@ -365,7 +365,7 @@ public class CliTest
                 + "org.slf4j:slf4j-api:1.[.\\d+]+\\s+                                              jar                                     compile             \n"
                 + "org.xmlunit:xmlunit-core:2.7.0                                                  jar                                     test                \n"
                 + "org.xmlunit:xmlunit-matchers:2.7.0                                              jar                                     test                \n"
-                + "org.yaml:snakeyaml:1.17                                                         jar                                     compile.*") );
+                + "org.yaml:snakeyaml:1.[.\\d+]+\\s+                                               jar                                     compile.*") );
 
     }
 
