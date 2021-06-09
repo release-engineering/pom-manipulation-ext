@@ -15,6 +15,23 @@
  */
 package org.commonjava.maven.ext.io;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
+
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.inject.Singleton;
+
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.reflect.FieldUtils;
 import org.apache.maven.model.Model;
@@ -33,27 +50,13 @@ import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.common.jdom.JDOMModelConverter;
 import org.commonjava.maven.ext.common.model.Project;
+import org.commonjava.maven.ext.common.session.MavenSessionHandler;
 import org.commonjava.maven.ext.common.util.LineSeparator;
 import org.commonjava.maven.ext.common.util.ManifestUtils;
 import org.commonjava.maven.galley.maven.parse.PomPeek;
 import org.jdom.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.inject.Named;
-import javax.inject.Singleton;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
 
 /**
  * Utility class used to read raw models for POMs, and rewrite any project POMs that were changed.
@@ -64,6 +67,9 @@ import java.util.Set;
 @Singleton
 public class PomIO
 {
+    // TODO: Remove this if no side affects reported in 2022.
+    public static final String PARSE_POM_TEMPLATES = "parsePomTemplates";
+
     private static final String MODIFIED_BY = "Modified by POM Manipulation Extension for Maven";
 
     private static final Logger logger = LoggerFactory.getLogger( PomIO.class );
@@ -73,7 +79,22 @@ public class PomIO
 
     private final JDOMModelConverter jdomModelConverter = new JDOMModelConverter( );
 
+    private final boolean parsePomTemplates;
+
     private String manifestComment;
+
+    @Inject
+    public PomIO(MavenSessionHandler handler )
+    {
+        parsePomTemplates = Boolean.parseBoolean(
+                        handler.getUserProperties().getProperty( PARSE_POM_TEMPLATES, "true" ) );
+    }
+
+    // Test use only.
+    public PomIO()
+    {
+        parsePomTemplates = true;
+    }
 
     public List<Project> parseProject( final File pom ) throws ManipulationException
     {
@@ -343,8 +364,13 @@ public class PomIO
                 logger.debug("PEEK: {}", pom);
 
                 final PomPeek peek = new PomPeek( pom );
-                final ProjectVersionRef key = peek.getKey();
-                if ( key != null )
+
+                // Deprecated : we now default to scanning every XML file even templated
+                // ones but the if block provides a fallback if there are issues.
+                //
+                // Effectively either parse_pom_templates [default to true] ||
+                //      parse_pom_templates overridden to false so key MUST be NOT null
+                if ( parsePomTemplates || peek.getKey() != null )
                 {
                     peeked.add( peek );
 
@@ -410,7 +436,6 @@ public class PomIO
                 else
                 {
                     logger.debug( "Skipping {} as its a template file.", pom);
-
                 }
             }
 
@@ -418,10 +443,11 @@ public class PomIO
 
             for ( final PomPeek p : peeked )
             {
-                projectrefs.add( p.getKey() );
-
-                if ( p.getPom()
-                      .equals( topLevelParent ) )
+                if ( p.getKey() != null )
+                {
+                    projectrefs.add( p.getKey() );
+                }
+                if ( p.getPom().equals( topLevelParent ) )
                 {
                     logger.debug("Setting top level parent to {} :: {}", p.getPom(), p.getKey());
                     p.setInheritanceRoot( true );
