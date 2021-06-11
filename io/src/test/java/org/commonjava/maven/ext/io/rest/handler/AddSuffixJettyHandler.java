@@ -20,9 +20,9 @@ import org.commonjava.maven.ext.common.util.JSONUtils;
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.handler.AbstractHandler;
+import org.jboss.da.lookup.model.MavenLookupRequest;
+import org.jboss.da.lookup.model.MavenLookupResult;
 import org.jboss.da.model.rest.GAV;
-import org.jboss.da.reports.model.request.LookupGAVsRequest;
-import org.jboss.da.reports.model.response.LookupReport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,6 +36,7 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static org.apache.commons.lang.StringUtils.isEmpty;
 
@@ -46,7 +47,7 @@ public class AddSuffixJettyHandler
                 extends AbstractHandler
                 implements Handler
 {
-    private static final String DEFAULT_ENDPOINT = "/reports/lookup/gavs";
+    private static final String DEFAULT_ENDPOINT = "/lookup/maven";
 
     public static final String SUFFIX = "redhat";
 
@@ -116,25 +117,24 @@ public class AddSuffixJettyHandler
             }
             logger.info( "Read request body '{}' and read parameters '{}'.", jb , request.getParameterMap() );
 
-            List<GAV> requestBody;
+            Set<GAV> requestBody;
 
             if ( target.equals( DEFAULT_ENDPOINT ) )
             {
-                List<LookupReport> responseBody = new ArrayList<>();
+                List<MavenLookupResult> responseBody = new ArrayList<>();
 
                 // Protocol analysis
-                LookupGAVsRequest lookupGAVsRequest = objectMapper.readValue( jb.toString(), LookupGAVsRequest.class );
-                requestBody = lookupGAVsRequest.getGavs();
+                MavenLookupRequest lookupGAVsRequest = objectMapper.readValue( jb.toString(), MavenLookupRequest.class );
+                requestBody = lookupGAVsRequest.getArtifacts();
 
-                boolean returnNullBestMatch = "NullBestMatchVersion".equals( lookupGAVsRequest.getRepositoryGroup() );
+                boolean returnNullBestMatch = "NullBestMatchVersion".equals( lookupGAVsRequest.getMode() );
                 boolean useCustomMixedSuffix = requestBody.stream().anyMatch( r -> r.getArtifactId().equals( "rest-version-manip-mixed-suffix-orig-rh" ) );
                 boolean usePartialCustomMixedSuffix = requestBody.stream().anyMatch( r -> r.getArtifactId().equals( "rest-version-manip-mixed-suffix-orig-rh-norhalign" ) );
 
                 // Prepare Response
                 for ( GAV gav : requestBody )
                 {
-                    LookupReport lr = new LookupReport( gav );
-                    List<String> availableVersions = new ArrayList<>();
+                    MavenLookupResult lr;
 
                     String version = gav.getVersion();
                     String bestMatchVersion;
@@ -171,7 +171,7 @@ public class AddSuffixJettyHandler
                             bestMatchVersion = version + "-" + EXTENDED_SUFFIX;
                         }
                     }
-                    else if ( useCustomMixedSuffix || usePartialCustomMixedSuffix || "GroovyWithTemporary".equals( lookupGAVsRequest.getRepositoryGroup() ) )
+                    else if ( useCustomMixedSuffix || usePartialCustomMixedSuffix || "GroovyWithTemporary".equals( lookupGAVsRequest.getMode() ) )
                     {
                         if ( useCustomMixedSuffix && gav.getArtifactId().equals( "commons-lang" ) )
                         {
@@ -227,17 +227,9 @@ public class AddSuffixJettyHandler
                     {
                         bestMatchVersion = version + "-" + this.suffix;
                     }
-                    logger.info( "For GA {}, requesting version {} and got bestMatch {} with availableVersions {} ", gav, version,
-                                 bestMatchVersion, availableVersions );
+                    logger.info( "For GA {}, requesting version {} and got bestMatch {}", gav, version, bestMatchVersion);
 
-                    availableVersions.add( bestMatchVersion );
-
-                    if ( !returnNullBestMatch )
-                    {
-                        lr.setBestMatchVersion( bestMatchVersion );
-                    }
-                    lr.setBlacklisted( false );
-                    lr.setAvailableVersions( availableVersions );
+                    lr = new MavenLookupResult( gav, !returnNullBestMatch ? bestMatchVersion : null );
 
                     responseBody.add( lr );
                 }

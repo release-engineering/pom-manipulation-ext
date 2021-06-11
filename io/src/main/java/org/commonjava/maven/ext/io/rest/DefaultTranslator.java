@@ -24,12 +24,12 @@ import org.commonjava.maven.atlas.ident.ref.ProjectRef;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.ext.common.ManipulationUncheckedException;
 import org.commonjava.maven.ext.common.json.ErrorMessage;
-import org.commonjava.maven.ext.common.json.ExtendedLookupReport;
+import org.commonjava.maven.ext.common.json.ExtendedMavenLookupResult;
 import org.commonjava.maven.ext.common.util.GAVUtils;
 import org.commonjava.maven.ext.common.util.JSONUtils.InternalObjectMapper;
 import org.commonjava.maven.ext.common.util.ListUtils;
-import org.jboss.da.reports.model.request.LookupGAVsRequest;
-import org.jboss.da.reports.model.response.LookupReport;
+import org.jboss.da.lookup.model.MavenLookupRequest;
+import org.jboss.da.lookup.model.MavenLookupResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,14 +55,14 @@ import static org.apache.http.HttpStatus.SC_OK;
 public class DefaultTranslator
     implements Translator
 {
-    private static final GenericType<List<LookupReport>> lookupType = new GenericType<List<LookupReport>>()
+    private static final GenericType<List<MavenLookupResult>> lookupType = new GenericType<List<MavenLookupResult>>()
     {
     };
     private static final GenericType<List<ProjectVersionRef>> pvrTyoe = new GenericType<List<ProjectVersionRef>>()
     {
     };
 
-    private static final String REPORTS_LOOKUP_GAVS = "reports/lookup/gavs";
+    private static final String LOOKUP_GAVS = "lookup/maven";
 
     private static final String LISTING_BLACKLIST_GA = "listings/blacklist/ga";
 
@@ -74,13 +74,9 @@ public class DefaultTranslator
 
     private final int initialRestMinSize;
 
-    private final String repositoryGroup;
-
     private final Boolean brewPullActive;
 
     private final String mode;
-
-    private final String incrementalSerialSuffix;
 
     private final Map<String, String> restHeaders;
 
@@ -105,22 +101,16 @@ public class DefaultTranslator
      * @param endpointUrl is the URL to talk to.
      * @param restMaxSize initial (maximum) size of the rest call; if zero will send everything.
      * @param restMinSize minimum size for the call
-     * @param repositoryGroup the group to pass to the endpoint, still can be used, but is replaced by
-     *        brewPullActive flag and mode when used in combination with DA 2.1 and above
      * @param brewPullActive flag saying if brew pull should be used for version retrieval
      * @param mode lookup mode, either STANDARD (default if empty) or SERVICE
-     * @param incrementalSerialSuffix the suffix to pass to the endpoint.
      * @param restHeaders the headers to pass to the endpoint
      */
-    public DefaultTranslator( String endpointUrl, int restMaxSize, int restMinSize, String repositoryGroup,
-                              Boolean brewPullActive, String mode, String incrementalSerialSuffix,
+    public DefaultTranslator( String endpointUrl, int restMaxSize, int restMinSize, Boolean brewPullActive, String mode,
                               Map<String, String> restHeaders, int restConnectionTimeout, int restSocketTimeout,
                               int restRetryDuration )
     {
-        this.repositoryGroup = repositoryGroup;
         this.brewPullActive = brewPullActive;
         this.mode = mode;
-        this.incrementalSerialSuffix = incrementalSerialSuffix;
         this.endpointUrl = endpointUrl + ( isNotBlank( endpointUrl ) ? endpointUrl.endsWith( "/" ) ? "" : "/" : "");
         this.initialRestMaxSize = restMaxSize;
         this.initialRestMinSize = restMinSize;
@@ -130,23 +120,6 @@ public class DefaultTranslator
         this.retryDuration = restRetryDuration;
     }
 
-    /**
-     * @param endpointUrl is the URL to talk to.
-     * @param restMaxSize initial (maximum) size of the rest call; if zero will send everything.
-     * @param restMinSize minimum size for the call
-     * @param repositoryGroup the group to pass to the endpoint.
-     * @param brewPullActive flag saying if brew pull should be used for version retrieval
-     * @param mode lookup mode, either STANDARD (default if empty) or SERVICE
-     * @param incrementalSerialSuffix the suffix to pass to the endpoint.
-     */
-    public DefaultTranslator( String endpointUrl, int restMaxSize, int restMinSize, String repositoryGroup,
-                              Boolean brewPullActive, String mode, String incrementalSerialSuffix,
-                              int restConnectionTimeout, int restSocketTimeout, int restRetryDuration)
-    {
-        this ( endpointUrl, restMaxSize, restMinSize, repositoryGroup, brewPullActive, mode,
-               incrementalSerialSuffix, Collections.emptyMap(), restConnectionTimeout, restSocketTimeout,
-               restRetryDuration );
-    }
 
     private void partition(List<ProjectVersionRef> projects, Queue<Task> queue) {
         if ( initialRestMaxSize != 0 )
@@ -169,7 +142,7 @@ public class DefaultTranslator
     private void noOpPartition(List<ProjectVersionRef> projects, Queue<Task> queue) {
         logger.info("Using NO-OP partition strategy");
 
-        queue.add(new Task( projects, endpointUrl + REPORTS_LOOKUP_GAVS));
+        queue.add(new Task( projects, endpointUrl + LOOKUP_GAVS ));
     }
 
     private void userDefinedPartition(List<ProjectVersionRef> projects, Queue<Task> queue) {
@@ -180,7 +153,7 @@ public class DefaultTranslator
 
         for ( List<ProjectVersionRef> p : partition )
         {
-            queue.add( new Task( p, endpointUrl + REPORTS_LOOKUP_GAVS ) );
+            queue.add( new Task( p, endpointUrl + LOOKUP_GAVS ) );
         }
 
         logger.debug( "For initial sizing of {} have split the queue into {} ", initialRestMaxSize , queue.size() );
@@ -209,7 +182,7 @@ public class DefaultTranslator
 
         for ( List<ProjectVersionRef> p : partition )
         {
-            queue.add( new Task( p, endpointUrl + REPORTS_LOOKUP_GAVS ) );
+            queue.add( new Task( p, endpointUrl + LOOKUP_GAVS ) );
         }
     }
 
@@ -265,6 +238,7 @@ public class DefaultTranslator
                                }
                                else
                                {
+                                   logger.error( "### HTTP comm failure: {}", originalBody );
                                    throw new ManipulationUncheckedException( "Problem in HTTP communication with status code {} and message {}",
                                                                              failedResponse.getStatus(), failedResponse.getStatusText() );
                                }
@@ -428,14 +402,17 @@ public class DefaultTranslator
 
         void executeTranslate()
         {
-            HttpResponse<List<LookupReport>> r;
+            HttpResponse<List<MavenLookupResult>> r;
 
             try
             {
-                LookupGAVsRequest request =
-                                new LookupGAVsRequest( Collections.emptySet(), Collections.emptySet(), repositoryGroup,
-                                                       brewPullActive, mode, incrementalSerialSuffix,
-                                                       GAVUtils.generateGAVs( chunk ) );
+                MavenLookupRequest request = MavenLookupRequest
+                                .builder()
+                                .mode( mode )
+                                .brewPullActive( brewPullActive )
+                                .artifacts( GAVUtils.generateGAVs( chunk ) )
+                                .build();
+
 
                 r = Unirest.post( this.endpointUrl )
                            .header( "accept", "application/json" )
@@ -448,14 +425,17 @@ public class DefaultTranslator
                            .ifSuccess( successResponse -> result = successResponse.getBody()
                                                                                   .stream()
                                                                                   .filter( f -> isNotBlank( f.getBestMatchVersion() ) )
-                                                                                  .collect( Collectors.toMap(
-                                                                                                  e -> ( (ExtendedLookupReport) e ).getProjectVersionRef(),
-                                                                                                  LookupReport::getBestMatchVersion,
+                                                                                  .collect(
+                                                                                                  Collectors.toMap(
+                                                                                                  e -> ( (ExtendedMavenLookupResult) e ).getProjectVersionRef(),
+                                                                                                  MavenLookupResult::getBestMatchVersion,
                                                                                                   // If there is a duplicate key, use the original.
                                                                                                   (o, n) -> {
                                                                                                       logger.warn( "Located duplicate key {}", o);
                                                                                                       return o;
-                                                                                                  } ) ) )
+                                                                                                  } )
+                                                                                  )
+                           )
                            .ifFailure( failedResponse -> {
                                if ( !failedResponse.getParsingError().isPresent() )
                                {
@@ -489,6 +469,7 @@ public class DefaultTranslator
                                    }
                                    else
                                    {
+                                       logger.error( "### HTTP comm failure: {}", failedResponse.getParsingError().get().getMessage() );
                                        throw new ManipulationUncheckedException( "Problem in HTTP communication with status code {} and message {}",
                                                                                  failedResponse.getStatus(), failedResponse.getStatusText() );
                                    }

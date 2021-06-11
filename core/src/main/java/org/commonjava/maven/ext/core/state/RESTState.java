@@ -38,9 +38,6 @@ public class RESTState implements State
     public static final String REST_URL = "restURL";
 
     @ConfigValue( docIndex = "dep-manip.html#rest-endpoint" )
-    public static final String REST_REPO_GROUP = "restRepositoryGroup";
-
-    @ConfigValue( docIndex = "dep-manip.html#rest-endpoint" )
     public static final String REST_BREW_PULL_ACTIVE = "restBrewPullActive";
 
     @ConfigValue( docIndex = "dep-manip.html#rest-endpoint" )
@@ -85,14 +82,11 @@ public class RESTState implements State
     @Override
     public void initialise( Properties userProps )
     {
-        final VersioningState vState = session.getState( VersioningState.class );
-
         restURL = userProps.getProperty( REST_URL );
         restSuffixAlign = Boolean.parseBoolean( userProps.getProperty( REST_SUFFIX, "true" ) );
 
-        String repositoryGroup = userProps.getProperty( REST_REPO_GROUP, "" );
         Boolean brewPullActive = Boolean.parseBoolean( userProps.getProperty( REST_BREW_PULL_ACTIVE ) );
-        String mode = userProps.getProperty( REST_MODE );
+        String mode = userProps.getProperty( REST_MODE, "" );
         int restMaxSize = Integer.parseInt( userProps.getProperty( REST_MAX_SIZE, "-1" ) );
         int restMinSize = Integer.parseInt( userProps.getProperty( REST_MIN_SIZE,
                                                                    String.valueOf( DefaultTranslator.CHUNK_SPLIT_COUNT ) ) );
@@ -104,8 +98,8 @@ public class RESTState implements State
         int restRetryDuration = Integer.parseInt( userProps.getProperty( REST_RETRY_DURATION_SEC,
                                                                          String.valueOf( DefaultTranslator.RETRY_DURATION_SEC ) ) );
 
-        restEndpoint = new DefaultTranslator( restURL, restMaxSize, restMinSize, repositoryGroup, brewPullActive, mode,
-                                              vState.getIncrementalSerialSuffix(), restHeaders, restConnectionTimeout,
+        restEndpoint = new DefaultTranslator( restURL, restMaxSize, restMinSize, brewPullActive, mode,
+                                              restHeaders, restConnectionTimeout,
                                               restSocketTimeout, restRetryDuration );
     }
 

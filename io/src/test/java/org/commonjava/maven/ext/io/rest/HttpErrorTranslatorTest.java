@@ -38,6 +38,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
@@ -96,8 +97,9 @@ public class HttpErrorTranslatorTest
         LoggerFactory.getLogger( HttpErrorTranslatorTest.class ).info ( "Executing test " + testName.getMethodName());
 
         this.versionTranslator = new DefaultTranslator( mockServer.getUrl(), 0,
-                                                        Translator.CHUNK_SPLIT_COUNT, "", null, null,
-                                                        "", DEFAULT_CONNECTION_TIMEOUT_SEC,
+                                                        Translator.CHUNK_SPLIT_COUNT, false, "",
+                                                        Collections.emptyMap(),
+                                                        DEFAULT_CONNECTION_TIMEOUT_SEC,
                                                         DEFAULT_SOCKET_TIMEOUT_SEC, RETRY_DURATION_SEC );
     }
 

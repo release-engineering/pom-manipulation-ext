@@ -82,8 +82,9 @@ public class VersionTranslatorTest
     {
         LoggerFactory.getLogger( VersionTranslatorTest.class ).info( "Executing test " + testName.getMethodName() );
 
-        this.versionTranslator = new DefaultTranslator( mockServer.getUrl(), 0, Translator.CHUNK_SPLIT_COUNT, "indyGroup",
-                                                        null, null, "", DEFAULT_CONNECTION_TIMEOUT_SEC,
+        this.versionTranslator = new DefaultTranslator( mockServer.getUrl(), 0, Translator.CHUNK_SPLIT_COUNT, false, "",
+                                                        Collections.emptyMap(),
+                                                        DEFAULT_CONNECTION_TIMEOUT_SEC,
                                                         DEFAULT_SOCKET_TIMEOUT_SEC, RETRY_DURATION_SEC );
     }
 
@@ -125,9 +126,9 @@ public class VersionTranslatorTest
     @Test
     public void testTranslateVersionsWithNulls() throws RestException
     {
-        this.versionTranslator = new DefaultTranslator( mockServer.getUrl(), 0, Translator.CHUNK_SPLIT_COUNT, "NullBestMatchVersion",
-                                                        null, null, "", DEFAULT_CONNECTION_TIMEOUT_SEC,
-                                                        DEFAULT_SOCKET_TIMEOUT_SEC, RETRY_DURATION_SEC );
+        this.versionTranslator = new DefaultTranslator( mockServer.getUrl(), 0, Translator.CHUNK_SPLIT_COUNT,
+                                                        false, "NullBestMatchVersion", Collections.emptyMap(),
+                                                        DEFAULT_CONNECTION_TIMEOUT_SEC, DEFAULT_SOCKET_TIMEOUT_SEC, RETRY_DURATION_SEC );
         List<ProjectVersionRef> gavs = Arrays.asList(
                         new SimpleProjectVersionRef( "com.example", "example", "1.0" ),
                         new SimpleProjectVersionRef( "com.example", "example-dep", "2.0" ),
@@ -150,8 +151,9 @@ public class VersionTranslatorTest
     {
         // Some url that doesn't exist used here
         Translator translator = new DefaultTranslator( "http://127.0.0.2", 0,
-                                                       Translator.CHUNK_SPLIT_COUNT, "",
-                                                       null, null, "", DEFAULT_CONNECTION_TIMEOUT_SEC,
+                                                       Translator.CHUNK_SPLIT_COUNT, false, "",
+                                                       Collections.emptyMap(),
+                                                       DEFAULT_CONNECTION_TIMEOUT_SEC,
                                                        DEFAULT_SOCKET_TIMEOUT_SEC, RETRY_DURATION_SEC );
 
         List<ProjectVersionRef> gavs = Collections.singletonList(

@@ -29,6 +29,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -68,14 +69,13 @@ public class VersionTranslatorSplitTest
         assertTrue( aLotOfGavs.size() >= 37 );
     }
 
-    @Before
-    public void before()
+    @Before public void before()
     {
         logger.info( "Executing test " + testName.getMethodName() );
 
         handler.setStatusCode( HttpServletResponse.SC_GATEWAY_TIMEOUT );
-        versionTranslator = new DefaultTranslator( mockServer.getUrl(), 0, Translator.CHUNK_SPLIT_COUNT,
-                                                   "", null, null, "", DEFAULT_CONNECTION_TIMEOUT_SEC,
+        versionTranslator = new DefaultTranslator( mockServer.getUrl(), 0, Translator.CHUNK_SPLIT_COUNT, false, "",
+                                                   Collections.emptyMap(), DEFAULT_CONNECTION_TIMEOUT_SEC,
                                                    DEFAULT_SOCKET_TIMEOUT_SEC, RETRY_DURATION_SEC );
     }
 
@@ -172,8 +172,8 @@ public class VersionTranslatorSplitTest
     @Test
     public void testTranslateVersionsCorrectSplitMaxSize()
     {
-        this.versionTranslator = new DefaultTranslator( mockServer.getUrl(), 10, Translator.CHUNK_SPLIT_COUNT,
-                                                        "", null, null, "", DEFAULT_CONNECTION_TIMEOUT_SEC,
+        this.versionTranslator = new DefaultTranslator( mockServer.getUrl(), 10, Translator.CHUNK_SPLIT_COUNT, false, "",
+                                                        Collections.emptyMap(), DEFAULT_CONNECTION_TIMEOUT_SEC,
                                                         DEFAULT_SOCKET_TIMEOUT_SEC, RETRY_DURATION_SEC );
 
         List<ProjectVersionRef> data = aLotOfGavs.subList( 0, 30 );
@@ -236,8 +236,8 @@ public class VersionTranslatorSplitTest
     @Test
     public void testTranslateVersionsCorrectSplitMaxSizeWithMin()
     {
-        this.versionTranslator = new DefaultTranslator( mockServer.getUrl(), 10, 1, "", null, null,
-                                                        "", DEFAULT_CONNECTION_TIMEOUT_SEC,
+        this.versionTranslator = new DefaultTranslator( mockServer.getUrl(), 10, 1, false, "",
+                                                        Collections.emptyMap(), DEFAULT_CONNECTION_TIMEOUT_SEC,
                                                         DEFAULT_SOCKET_TIMEOUT_SEC, RETRY_DURATION_SEC );
 
         List<ProjectVersionRef> data = aLotOfGavs.subList( 0, 30 );

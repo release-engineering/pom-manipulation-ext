@@ -82,7 +82,7 @@ public class SpyFailJettyHandler extends AbstractHandler implements Handler
 
             // Protocol analysis
             GAVSchema gavSchema = objectMapper.readValue( jb.toString(), GAVSchema.class );
-            requestBody = gavSchema.gavs;
+            requestBody = gavSchema.artifacts;
 
             logger.debug( "Adding to requestBody of size {}", requestBody.size() );
 

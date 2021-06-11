@@ -127,7 +127,7 @@ public class GroovyFunctionsTest
         BaseScriptImplTest impl = new BaseScriptImplTest();
         Properties p = new Properties(  );
         p.setProperty( "versionIncrementalSuffix", "temporary-redhat" );
-        p.setProperty( "restRepositoryGroup", "GroovyWithTemporary" );
+        p.setProperty( "restMode", "GroovyWithTemporary" );
         p.setProperty( "restURL", mockServer.getUrl() );
 
         impl.setValues(pomIO, null, null, TestUtils.createSession( p ), projects, projects.get( 0 ), InvocationStage.FIRST );
