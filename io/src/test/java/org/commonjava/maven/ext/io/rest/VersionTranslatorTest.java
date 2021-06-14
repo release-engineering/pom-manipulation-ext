@@ -110,7 +110,7 @@ public class VersionTranslatorTest
             new SimpleProjectVersionRef( "org.commonjava", "example", "1.0" ),
             new SimpleProjectVersionRef( "org.commonjava", "example", "1.1" ));
 
-        Map<ProjectVersionRef, String> actualResult = versionTranslator.translateVersions( gavs );
+        Map<ProjectVersionRef, String> actualResult = versionTranslator.lookupVersions( gavs );
         Map<ProjectVersionRef, String> expectedResult = new HashMap<ProjectVersionRef, String>()
         {{
             put( new SimpleProjectVersionRef( "com.example", "example", "1.0" ), "1.0-redhat-1" );
@@ -135,7 +135,7 @@ public class VersionTranslatorTest
                         new SimpleProjectVersionRef( "org.commonjava", "example", "1.0" ),
                         new SimpleProjectVersionRef( "org.commonjava", "example", "1.1" ));
 
-        Map<ProjectVersionRef, String> actualResult = versionTranslator.translateVersions( gavs );
+        Map<ProjectVersionRef, String> actualResult = versionTranslator.lookupVersions( gavs );
 
         System.out.println ("### actual " + actualResult);
 
@@ -161,7 +161,7 @@ public class VersionTranslatorTest
 
         try
         {
-            translator.translateVersions( gavs );
+            translator.lookupVersions( gavs );
             fail( "Failed to throw RestException when server failed to respond." );
         }
         catch ( RestException ex )
@@ -185,7 +185,7 @@ public class VersionTranslatorTest
         {
             // Disable logging for this test as impacts timing.
             logbackLogger.setLevel( Level.OFF );
-            versionTranslator.translateVersions( aLotOfGavs );
+            versionTranslator.lookupVersions( aLotOfGavs );
         }
         finally
         {

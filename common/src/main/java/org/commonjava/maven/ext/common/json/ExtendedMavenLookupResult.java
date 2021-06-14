@@ -23,7 +23,6 @@ import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.goots.hiderdoclet.doclet.JavadocExclude;
 import org.jboss.da.lookup.model.MavenLookupResult;
 import org.jboss.da.model.rest.GAV;
-import org.jboss.da.reports.model.response.LookupReport;
 
 @Setter
 @Getter

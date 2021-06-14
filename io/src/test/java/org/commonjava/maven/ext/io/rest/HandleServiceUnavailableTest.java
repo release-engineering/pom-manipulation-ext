@@ -109,7 +109,7 @@ public class HandleServiceUnavailableTest
         {
             // Decrease the wait time so that the test does not take too long
             FieldUtils.writeField( versionTranslator, "retryDuration", 5, true);
-            versionTranslator.translateVersions( data );
+            versionTranslator.lookupVersions( data );
             fail();
         }
         catch ( RestException ex )

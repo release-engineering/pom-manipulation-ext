@@ -16,6 +16,7 @@
 package org.commonjava.maven.ext.io.rest.handler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.Setter;
 import org.commonjava.maven.ext.common.util.JSONUtils;
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Request;
@@ -65,9 +66,17 @@ public class AddSuffixJettyHandler
 
     private final JSONUtils.InternalObjectMapper objectMapper = new JSONUtils.InternalObjectMapper( new ObjectMapper(  ));
 
+    @Setter
     private String suffix;
 
-    private String blacklistVersion = null;
+    @Setter
+    private String blacklistVersion;
+
+    @Setter
+    private boolean useCustomMixedSuffix;
+
+    @Setter
+    private boolean usePartialCustomMixedSuffix;
 
     public AddSuffixJettyHandler()
     {
@@ -128,8 +137,8 @@ public class AddSuffixJettyHandler
                 requestBody = lookupGAVsRequest.getArtifacts();
 
                 boolean returnNullBestMatch = "NullBestMatchVersion".equals( lookupGAVsRequest.getMode() );
-                boolean useCustomMixedSuffix = requestBody.stream().anyMatch( r -> r.getArtifactId().equals( "rest-version-manip-mixed-suffix-orig-rh" ) );
-                boolean usePartialCustomMixedSuffix = requestBody.stream().anyMatch( r -> r.getArtifactId().equals( "rest-version-manip-mixed-suffix-orig-rh-norhalign" ) );
+                logger.error( "### AddSuffixJetty ; usePartialCustomMisxed {} returnNull {} useCustomMixed {}" ,
+                              usePartialCustomMixedSuffix, returnNullBestMatch, useCustomMixedSuffix );
 
                 // Prepare Response
                 for ( GAV gav : requestBody )
@@ -266,15 +275,4 @@ public class AddSuffixJettyHandler
                          request.getMethod(), request.getPathInfo(), this.endpoint );
         }
     }
-
-    public void setBlacklist( String s )
-    {
-        blacklistVersion = s;
-    }
-
-    public void setSuffix( String suffix )
-    {
-        this.suffix = suffix;
-    }
-
 }

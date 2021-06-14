@@ -20,7 +20,6 @@ import kong.unirest.HttpResponse;
 import kong.unirest.Unirest;
 import kong.unirest.UnirestException;
 import org.apache.http.HttpStatus;
-import org.commonjava.maven.atlas.ident.ref.ProjectRef;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.ext.common.ManipulationUncheckedException;
 import org.commonjava.maven.ext.common.json.ErrorMessage;
@@ -41,7 +40,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang.StringUtils.isNotBlank;
@@ -63,8 +61,6 @@ public class DefaultTranslator
     };
 
     private static final String LOOKUP_GAVS = "lookup/maven";
-
-    private static final String LISTING_BLACKLIST_GA = "listings/blacklist/ga";
 
     private final Logger logger = LoggerFactory.getLogger( getClass() );
 
@@ -187,76 +183,82 @@ public class DefaultTranslator
     }
 
     @Override
-    public List<ProjectVersionRef> findBlacklisted( ProjectRef ga ) throws RestException
+    public Map<ProjectVersionRef, String>  lookupProjectVersions( List<ProjectVersionRef> projects ) throws RestException
     {
-        final String blacklistEndpointUrl = endpointUrl + LISTING_BLACKLIST_GA;
-        final AtomicReference<List<ProjectVersionRef>> result = new AtomicReference<>();
-        final String[] errorString = new String[1];
-        final HttpResponse<List<ProjectVersionRef>> r;
-
-        logger.debug( "Called findBlacklisted to {} with {} and custom headers {}", blacklistEndpointUrl, ga, restHeaders );
-
-        try
-        {
-            r = Unirest.get( blacklistEndpointUrl )
-                       .header( "accept", "application/json" )
-                       .header( "Content-Type", "application/json" )
-                       .headers( restHeaders )
-                       .connectTimeout(restConnectionTimeout * 1000)
-                       .socketTimeout(restSocketTimeout * 1000)
-                       .queryString( "groupid", ga.getGroupId() )
-                       .queryString( "artifactid", ga.getArtifactId() )
-                       .asObject( pvrTyoe )
-                       .ifSuccess( successResponse -> result.set( successResponse.getBody() ) )
-                       .ifFailure( failedResponse -> {
-                           if ( !failedResponse.getParsingError().isPresent() )
-                           {
-                               logger.debug( "Parsing error but no message. Status text {}", failedResponse.getStatusText() );
-                               throw new ManipulationUncheckedException( failedResponse.getStatusText() );
-                           }
-                           else
-                           {
-                               String originalBody = failedResponse.getParsingError().get().getOriginalBody();
-
-                               if ( originalBody.length() == 0 )
-                               {
-                                   errorString[0] = "No content to read.";
-                               }
-                               else if ( originalBody.startsWith( "<" ) )
-                               {
-                                   // Read an HTML string.
-                                   String stripped = originalBody.replaceAll( "<.*?>", "" ).replaceAll( "\n", " " ).trim();
-                                   logger.debug( "Read HTML string '{}' rather than a JSON stream; stripping message to '{}'",
-                                                 originalBody, stripped );
-                                   errorString[0] = stripped;
-                               }
-                               else if ( originalBody.startsWith( "{\"" ) )
-                               {
-                                   errorString[0] = failedResponse.mapError( ErrorMessage.class ).toString();
-
-                                   logger.debug( "Read message string {}, processed to {} ", originalBody, errorString );
-                               }
-                               else
-                               {
-                                   logger.error( "### HTTP comm failure: {}", originalBody );
-                                   throw new ManipulationUncheckedException( "Problem in HTTP communication with status code {} and message {}",
-                                                                             failedResponse.getStatus(), failedResponse.getStatusText() );
-                               }
-                           }
-                       } );
-
-            if ( !r.isSuccess() )
-            {
-                throw new RestException( "Failed to establish blacklist calling {} with error {}", endpointUrl, errorString[0] );
-            }
-        }
-        catch ( ManipulationUncheckedException | UnirestException e )
-        {
-            throw new RestException( "Unable to contact DA", e );
-        }
-
-        return result.get();
+        // TODO: ### Implement
+        return lookupVersions( projects );
     }
+
+//    @Override
+//    public List<ProjectVersionRef> findBlacklisted( ProjectRef ga ) throws RestException
+//    {
+//        final String blacklistEndpointUrl = endpointUrl + LISTING_BLACKLIST_GA;
+//        final AtomicReference<List<ProjectVersionRef>> result = new AtomicReference<>();
+//        final String[] errorString = new String[1];
+//        final HttpResponse<List<ProjectVersionRef>> r;
+//
+//        logger.debug( "Called findBlacklisted to {} with {} and custom headers {}", blacklistEndpointUrl, ga, restHeaders );
+//
+//        try
+//        {
+//            r = Unirest.get( blacklistEndpointUrl )
+//                       .header( "accept", "application/json" )
+//                       .header( "Content-Type", "application/json" )
+//                       .headers( restHeaders )
+//                       .connectTimeout(restConnectionTimeout * 1000)
+//                       .socketTimeout(restSocketTimeout * 1000)
+//                       .queryString( "groupid", ga.getGroupId() )
+//                       .queryString( "artifactid", ga.getArtifactId() )
+//                       .asObject( pvrTyoe )
+//                       .ifSuccess( successResponse -> result.set( successResponse.getBody() ) )
+//                       .ifFailure( failedResponse -> {
+//                           if ( !failedResponse.getParsingError().isPresent() )
+//                           {
+//                               logger.debug( "Parsing error but no message. Status text {}", failedResponse.getStatusText() );
+//                               throw new ManipulationUncheckedException( failedResponse.getStatusText() );
+//                           }
+//                           else
+//                           {
+//                               String originalBody = failedResponse.getParsingError().get().getOriginalBody();
+//
+//                               if ( originalBody.length() == 0 )
+//                               {
+//                                   errorString[0] = "No content to read.";
+//                               }
+//                               else if ( originalBody.startsWith( "<" ) )
+//                               {
+//                                   // Read an HTML string.
+//                                   String stripped = originalBody.replaceAll( "<.*?>", "" ).replaceAll( "\n", " " ).trim();
+//                                   logger.debug( "Read HTML string '{}' rather than a JSON stream; stripping message to '{}'",
+//                                                 originalBody, stripped );
+//                                   errorString[0] = stripped;
+//                               }
+//                               else if ( originalBody.startsWith( "{\"" ) )
+//                               {
+//                                   errorString[0] = failedResponse.mapError( ErrorMessage.class ).toString();
+//
+//                                   logger.debug( "Read message string {}, processed to {} ", originalBody, errorString );
+//                               }
+//                               else
+//                               {
+//                                   throw new ManipulationUncheckedException( "Problem in HTTP communication with status code {} and message {}",
+//                                                                             failedResponse.getStatus(), failedResponse.getStatusText() );
+//                               }
+//                           }
+//                       } );
+//
+//            if ( !r.isSuccess() )
+//            {
+//                throw new RestException( "Failed to establish blacklist calling {} with error {}", endpointUrl, errorString[0] );
+//            }
+//        }
+//        catch ( ManipulationUncheckedException | UnirestException e )
+//        {
+//            throw new RestException( "Unable to contact DA", e );
+//        }
+//
+//        return result.get();
+//    }
 
 
 
@@ -291,7 +293,7 @@ public class DefaultTranslator
      * This is mitigated by splitting them into smaller chunks when an error occurs and retrying.
      */
     @Override
-    public Map<ProjectVersionRef, String> translateVersions( List<ProjectVersionRef> p ) throws RestException
+    public Map<ProjectVersionRef, String> lookupVersions( List<ProjectVersionRef> p ) throws RestException
     {
         final List<ProjectVersionRef> projects = p.stream().distinct().collect( Collectors.toList() );
         if ( p.size() != projects.size() )

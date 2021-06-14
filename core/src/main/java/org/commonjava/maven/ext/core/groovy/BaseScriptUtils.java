@@ -25,9 +25,7 @@ import org.commonjava.maven.ext.common.model.Project;
 import org.commonjava.maven.ext.common.util.PropertyResolver;
 import org.commonjava.maven.ext.core.ManipulationSession;
 import org.commonjava.maven.ext.core.impl.Version;
-import org.commonjava.maven.ext.core.state.RESTState;
 import org.commonjava.maven.ext.core.state.VersioningState;
-import org.commonjava.maven.ext.io.rest.Translator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -158,7 +156,7 @@ public abstract class BaseScriptUtils extends Script implements MavenBaseScript
         source.add( gav );
         source.add( getGAV() );
 
-        Map<ProjectVersionRef, String> restResult = getRESTAPI().translateVersions( source );
+        Map<ProjectVersionRef, String> restResult = getRESTAPI().lookupVersions( source );
         String targetBuild = restResult.get( gav );
         String thisMapping = restResult.get( getGAV() );
 
