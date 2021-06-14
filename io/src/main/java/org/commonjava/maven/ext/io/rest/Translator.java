@@ -42,5 +42,14 @@ public interface Translator
      */
     Map<ProjectVersionRef, String> lookupVersions( List<ProjectVersionRef> projects ) throws RestException;
 
-    Map<ProjectVersionRef, String>  lookupProjectVersions( List<ProjectVersionRef> project ) throws RestException;
+    /**
+     * Executes HTTP request to a REST service that translates versions. While similar to {@link Translator#lookupVersions(List)}
+     * for this version, the DependencyAnalyser will ignore suffix priority and return the latest version for the
+     * configured suffix mode. This is typically used for project version lookups.
+     *
+     * @param projects - List of projects (GAVs)
+     * @return Map of ProjectVersionRef objects as keys and translated versions as values
+     * @throws RestException if an error occurs.
+     */
+    Map<ProjectVersionRef, String>  lookupProjectVersions( List<ProjectVersionRef> projects ) throws RestException;
 }

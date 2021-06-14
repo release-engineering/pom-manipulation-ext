@@ -84,7 +84,7 @@ public class RESTCollector
             return;
         }
 
-        final ArrayList<ProjectVersionRef> restLookupProjectVersionParamList = new ArrayList<>();
+        final List<ProjectVersionRef> restLookupProjectVersionParamList = new ArrayList<>();
         final String override = vs.getOverride();
 
         for ( final Project project : projects )
@@ -105,7 +105,6 @@ public class RESTCollector
             }
         }
 
-        // TODO: ### Remove newProjectKeys from initial rest call
         final List<ProjectVersionRef> restLookupVersionsParamList = new ArrayList<>();
         final Set<ArtifactRef> localDeps = establishAllDependencies( session, projects, null );
 
@@ -115,11 +114,6 @@ public class RESTCollector
         {
             restLookupVersionsParamList.add( p.asProjectVersionRef() );
         }
-
-        // TODO: ### : test to see if this is affecting the tests.
-        //   For Monday: yes, so it means AddSuffixJettyHandler must be expecting the project types to do checks on what to return for deps.
-        //   Solution: depends on how many occurrences .... adapt `setSuffix` to set mixed/custom as desired ?
-        // restLookupVersionsParamList.addAll( restLookupProjectVersionParamList );
 
         // Call the REST to populate the result.
         logger.debug ("Passing {} GAVs into the REST client api {} ", restLookupVersionsParamList.size(), restLookupVersionsParamList);
@@ -135,8 +129,6 @@ public class RESTCollector
             versions.add( value );
         } );
         vs.setRESTMetadata( versionStates );
-        // TODO: ### parseVersions pulls out project refs from prior rest call.
-        // vs.setRESTMetadata (parseVersions(session, projects, state, restLookupProjectVersionParamList, pvResultResult));
 
         final Map<ArtifactRef, String> overrides = new HashMap<>();
 
