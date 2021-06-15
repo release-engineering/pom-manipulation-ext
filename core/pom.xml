@@ -182,11 +182,6 @@
        <artifactId>jetty-server</artifactId>
        <scope>test</scope>
     </dependency>
-    <dependency>
-       <groupId>org.commonjava.util</groupId>
-       <artifactId>http-testserver</artifactId>
-       <scope>test</scope>
-     </dependency>
   </dependencies>
 
 

@@ -17,9 +17,11 @@ package org.commonjava.maven.ext.io.server;
 
 import org.commonjava.maven.ext.io.server.exception.ServerInternalException;
 import org.commonjava.maven.ext.io.server.exception.ServerSetupException;
-import org.commonjava.test.http.util.PortFinder;
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.ServerConnector;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.net.InetSocketAddress;
 
@@ -29,22 +31,18 @@ import java.net.InetSocketAddress;
 public class JettyHttpServer
         implements HttpServer
 {
-    private Integer port;
+    private static final Logger logger = LoggerFactory.getLogger( JettyHttpServer.class );
 
     private final Server jettyServer;
 
-    private Handler handler;
+    private final Handler handler;
+
+    private Integer port;
 
     public JettyHttpServer( Handler handler )
     {
-        this( handler, PortFinder.findOpenPort(5) );
-    }
-
-    public JettyHttpServer( Handler handler, Integer port )
-    {
-        this.port = port;
         this.handler = handler;
-        this.jettyServer = createAndStartJetty( port );
+        this.jettyServer = createAndStartJetty();
     }
 
     public Integer getPort()
@@ -64,9 +62,9 @@ public class JettyHttpServer
         }
     }
 
-    private Server createAndStartJetty( Integer port )
+    private Server createAndStartJetty()
     {
-        Server jetty = new Server(new InetSocketAddress( "127.0.0.1", this.port ) );
+        Server jetty = new Server(new InetSocketAddress( "127.0.0.1", 0 ) );
         jetty.setHandler( handler );
 
         try
@@ -75,8 +73,11 @@ public class JettyHttpServer
         }
         catch ( Exception e )
         {
-            throw new ServerSetupException( "Error starting jetty on port " + port, e );
+            throw new ServerSetupException( "Error starting jetty", e );
         }
+
+        logger.debug( "Returning local port for Jetty {}", ((ServerConnector)jetty.getConnectors()[0]).getLocalPort());
+        port = ((ServerConnector)jetty.getConnectors()[0]).getLocalPort();
 
         return jetty;
     }
