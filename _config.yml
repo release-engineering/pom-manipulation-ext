@@ -12,7 +12,7 @@ projectTitle: "PME"
 title: "POM Manipulation Extension"
 tagline: "Standardize Your Builds"
 owner: "Red Hat"
-ownerEmail: jdcasey@redhat.com
+ownerEmail: ncross@redhat.com
 
 markdown: kramdown
 redcarpet:
