@@ -18,9 +18,9 @@ import org.apache.maven.model.Profile
 import org.commonjava.maven.ext.core.groovy.BaseScript
 import org.commonjava.maven.ext.core.groovy.InvocationStage
 import org.commonjava.maven.ext.core.groovy.PMEBaseScript
-import org.commonjava.maven.ext.core.groovy.PMEInvocationPoint
+import org.commonjava.maven.ext.core.groovy.InvocationPoint
 
-@PMEInvocationPoint(invocationPoint = InvocationStage.FIRST)
+@InvocationPoint(invocationPoint = InvocationStage.FIRST)
 @PMEBaseScript BaseScript pme
 
 println("executed script for ${pme.GAV.artifactId} ")

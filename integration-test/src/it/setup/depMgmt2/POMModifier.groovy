@@ -19,9 +19,9 @@ import groovy.util.logging.Slf4j
 import org.commonjava.maven.ext.common.model.Project
 import org.commonjava.maven.ext.core.groovy.InvocationStage
 import org.commonjava.maven.ext.core.groovy.PMEBaseScript
-import org.commonjava.maven.ext.core.groovy.PMEInvocationPoint
+import org.commonjava.maven.ext.core.groovy.InvocationPoint
 
-@PMEInvocationPoint(invocationPoint = InvocationStage.FIRST)
+@InvocationPoint(invocationPoint = InvocationStage.FIRST)
 @PMEBaseScript org.commonjava.maven.ext.core.groovy.BaseScript pme
 
 @Slf4j

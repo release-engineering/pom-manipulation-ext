@@ -75,8 +75,6 @@ public class ASTTransformer  extends AbstractASTTransformation {
 
     private static final ClassNode MAVEN_TYPE = ClassHelper.make( PMEBaseScript.class );
     private static final ClassNode GRADLE_TYPE = ClassHelper.make( GMEBaseScript.class );
-    @SuppressWarnings( "deprecation" )
-    private static final ClassNode DEPRECATED_COMMAND_TYPE = ClassHelper.make( PMEInvocationPoint.class );
     private static final ClassNode COMMAND_TYPE = ClassHelper.make( InvocationPoint.class );
     private static final ClassNode MAVEN_BASE_SCRIPT_TYPE = ClassHelper.make( BaseScript.class );
     private static final String MAVEN_TYPE_NAME = "@" + MAVEN_TYPE.getNameWithoutPackage();
@@ -111,7 +109,7 @@ public class ASTTransformer  extends AbstractASTTransformation {
             }
         }
     }
-    
+
     private String getType()
     {
         if (type == Type.MAVEN)
@@ -205,11 +203,7 @@ public class ASTTransformer  extends AbstractASTTransformation {
             return;
         }
 
-        List<AnnotationNode> annotations = parent.getAnnotations( DEPRECATED_COMMAND_TYPE );
-        if (cNode.getAnnotations( DEPRECATED_COMMAND_TYPE ).isEmpty()) { // #388 prevent "Duplicate annotation for class" AnnotationFormatError
-            cNode.addAnnotations(annotations);
-        }
-        annotations = parent.getAnnotations( COMMAND_TYPE );
+        List<AnnotationNode> annotations = parent.getAnnotations( COMMAND_TYPE );
         if (cNode.getAnnotations( COMMAND_TYPE ).isEmpty()) { // #388 prevent "Duplicate annotation for class" AnnotationFormatError
 
             cNode.addAnnotations(annotations);
