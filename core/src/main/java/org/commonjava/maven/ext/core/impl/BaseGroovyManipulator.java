@@ -29,7 +29,6 @@ import org.commonjava.maven.ext.core.ManipulationSession;
 import org.commonjava.maven.ext.core.groovy.BaseScript;
 import org.commonjava.maven.ext.core.groovy.InvocationPoint;
 import org.commonjava.maven.ext.core.groovy.InvocationStage;
-import org.commonjava.maven.ext.core.groovy.PMEInvocationPoint;
 import org.commonjava.maven.ext.core.state.GroovyState;
 import org.commonjava.maven.ext.io.FileIO;
 import org.commonjava.maven.ext.io.ModelIO;
@@ -132,16 +131,8 @@ public abstract class BaseGroovyManipulator
         {
             script = shell.parse( groovyScript );
 
-            @SuppressWarnings( "deprecation" )
-            PMEInvocationPoint deprecatedInvocationPoint = script.getClass().getAnnotation( PMEInvocationPoint.class );
             InvocationPoint invocationPoint = script.getClass().getAnnotation( InvocationPoint.class );
-            if ( deprecatedInvocationPoint != null )
-            {
-                logger.warn( "Using deprecated InvocationPoint annotation (for {})", deprecatedInvocationPoint.invocationPoint() );
-                logger.debug( "InvocationPoint is {}", deprecatedInvocationPoint.invocationPoint() );
-                stage = deprecatedInvocationPoint.invocationPoint();
-            }
-            else if ( invocationPoint != null )
+            if ( invocationPoint != null )
             {
                 logger.debug( "InvocationPoint is {}", invocationPoint.invocationPoint() );
                 stage = invocationPoint.invocationPoint();

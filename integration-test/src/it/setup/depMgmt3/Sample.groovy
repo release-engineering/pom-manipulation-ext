@@ -18,9 +18,9 @@ package org.commonjava.maven.ext.depMgmt3
 import org.commonjava.maven.ext.core.groovy.BaseScript
 import org.commonjava.maven.ext.core.groovy.InvocationStage
 import org.commonjava.maven.ext.core.groovy.PMEBaseScript
-import org.commonjava.maven.ext.core.groovy.PMEInvocationPoint
+import org.commonjava.maven.ext.core.groovy.InvocationPoint
 
-@PMEInvocationPoint(invocationPoint = InvocationStage.BOTH)
+@InvocationPoint(invocationPoint = InvocationStage.BOTH)
 @PMEBaseScript BaseScript pme
 
 // These are both debug AND test statements - do NOT remove. If the injection (in GroovyManipulator)
