@@ -86,7 +86,7 @@ Each script <b>must</b> use the following annotations:
 <table bgcolor="#ffff00">
 <tr>
 <td>
-    <b>NOTE</b> : For PME versions <b>from</b> 3.8.1, the <code>PMEInvocationPoint</code> annotation has been deprecated and developers should use <code>InvocationPoint</code> in preference.
+    <b>NOTE</b> : For PME versions <b>from</b> 3.8.1, the <code>PMEInvocationPoint</code> annotation has been deprecated and developers should use <code>InvocationPoint</code> in preference. From version 4.3 it is <b>not</b> supported.
 </td>
 </tr>
 </table>
@@ -96,16 +96,21 @@ Each script <b>must</b> use the following annotations:
 import org.commonjava.maven.ext.core.groovy.BaseScript
 import org.commonjava.maven.ext.core.groovy.InvocationStage
 import org.commonjava.maven.ext.core.groovy.PMEBaseScript
-import org.commonjava.maven.ext.core.groovy.PMEInvocationPoint
+import org.commonjava.maven.ext.core.groovy.InvocationPoint
 ...
 
-// See above note about @PMEInvocationPoint versus @InvocationPoint
 @InvocationPoint(invocationPoint = InvocationStage.FIRST)
 @PMEBaseScript BaseScript pme
 ```
 
 where InvocationStage may be `FIRST`, `LAST` or `BOTH`. This denotes whether the script is ran
 before all other manipulators, after or both. The script therefore encodes how and when it is run.
+
+The API can then be invoked by e.g.
+
+    pme.getBaseDir()
+
+<b>NOTE</b> : Be careful not to use <code>pme.getProperties()</code> or <code>pme.getProject().getProperties()</code> as that actually calls the [Groovy language API](http://docs.groovy-lang.org/latest/html/api/org/codehaus/groovy/runtime/DefaultGroovyMethods.html#getProperties(java.lang.Object))
 
 ### API
 
@@ -168,11 +173,23 @@ The following API is available:
 | [PomIO](https://github.com/release-engineering/pom-manipulation-ext/blob/master/io/src/main/java/org/commonjava/maven/ext/io/PomIO.java) getPomIO() | This will return a PomIO instance for parsing POM models. |
 | [Translator](https://github.com/release-engineering/pom-manipulation-ext/blob/master/io/src/main/java/org/commonjava/maven/ext/io/rest/Translator.java) getRESTAPI() throws [ManipulationException](https://github.com/release-engineering/pom-manipulation-ext/blob/master/common/src/main/java/org/commonjava/maven/ext/common/ManipulationException.java) | Gets a configured VersionTranslator to make REST calls to DA. |
 
-This can then be invoked by e.g.
+<table bgcolor="#ffff00">
+<tr>
+<td>
+    <b>NOTE</b> : From version 4.4 the Translator interface has changed from providing <code>translateVersions</code> to:
 
-    pme.getBaseDir()
-
-<b>NOTE</b> : Be careful not to use <code>pme.getProperties()</code> or <code>pme.getProject().getProperties()</code> as that actually calls http://docs.groovy-lang.org/latest/html/api/org/codehaus/groovy/runtime/DefaultGroovyMethods.html#getProperties(java.lang.Object)
+    <table>
+        <tr>
+        <td><code>lookupVersions</code></td>
+        <td>Lookup versions respecting DA suffix priority schemes which will return the best matched version</td>
+        </tr>
+        <tr>
+        <td><code>lookupProjectVersions</code></td>
+        <td>Lookup versions (e.g. for a project) ignoring DA suffix priority schemes returning the latest version</td></tr>
+    </table>
+</td>
+</tr>
+</table>
 
 ### Utility Functions
 
@@ -210,9 +227,9 @@ A typical groovy script that alters a JSON file on disk might be:
     import org.commonjava.maven.ext.core.groovy.BaseScript
     import org.commonjava.maven.ext.core.groovy.InvocationStage
     import org.commonjava.maven.ext.core.groovy.PMEBaseScript
-    import org.commonjava.maven.ext.core.groovy.PMEInvocationPoint
+    import org.commonjava.maven.ext.core.groovy.InvocationPoint
 
-    @PMEInvocationPoint(invocationPoint = InvocationStage.FIRST)
+    @InvocationPoint(invocationPoint = InvocationStage.FIRST)
     @PMEBaseScript BaseScript pme
 
     @Slf4j
