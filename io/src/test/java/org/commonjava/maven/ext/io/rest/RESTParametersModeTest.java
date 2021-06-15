@@ -41,9 +41,8 @@ import static org.commonjava.maven.ext.io.rest.Translator.DEFAULT_CONNECTION_TIM
 import static org.commonjava.maven.ext.io.rest.Translator.DEFAULT_SOCKET_TIMEOUT_SEC;
 import static org.commonjava.maven.ext.io.rest.Translator.RETRY_DURATION_SEC;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
 
-public class RESTParametersTest
+public class RESTParametersModeTest
 {
     private static final Logger LOGGER = LoggerFactory.getLogger( AddSuffixJettyHandler.class );
 
@@ -70,7 +69,7 @@ public class RESTParametersTest
                 jb.append( line );
             }
             gavSchema = objectMapper.readValue( jb.toString(), GAVSchema.class );
-            LOGGER.info( "Read request body '{}' and read parameters '{}' and Group {} ", jb, request.getParameterMap(), gavSchema.repositoryGroup );
+            LOGGER.info( "Read request body '{}' and read parameters '{}' ", jb, request.getParameterMap() );
             baseRequest.setHandled( true );
 
         }
@@ -79,35 +78,38 @@ public class RESTParametersTest
     @Before
     public void before()
     {
-        LoggerFactory.getLogger( RESTParametersTest.class ).info( "Executing test " + testName.getMethodName() );
+        LoggerFactory.getLogger( RESTParametersModeTest.class ).info( "Executing test " + testName.getMethodName() );
     }
 
     @Test
-    public void testVerifyGroup() throws RestException
+    public void testVerifyMode() throws RestException
     {
-        String group = "indyGroup";
+        String suffix = "rebuild";
         this.versionTranslator = new DefaultTranslator( mockServer.getUrl(), 0,
-                                                        Translator.CHUNK_SPLIT_COUNT, group, null, null, "",
+                                                        Translator.CHUNK_SPLIT_COUNT, false, suffix,
+                                                        Collections.emptyMap(),
                                                         DEFAULT_CONNECTION_TIMEOUT_SEC, DEFAULT_SOCKET_TIMEOUT_SEC,
                                                         RETRY_DURATION_SEC );
         List<ProjectVersionRef> gavs = Collections.singletonList(
             new SimpleProjectVersionRef( "com.example", "example", "1.0" ) );
 
         versionTranslator.translateVersions( gavs );
-        assertEquals( group, gavSchema.repositoryGroup );
+        assertEquals( suffix, gavSchema.mode );
     }
 
     @Test
-    public void testVerifyNoGroup() throws RestException
+    public void testVerifyNoMode() throws RestException
     {
+        String mode = "";
         this.versionTranslator = new DefaultTranslator( mockServer.getUrl(), 0,
-                                                        Translator.CHUNK_SPLIT_COUNT, "", null, null, "",
+                                                        Translator.CHUNK_SPLIT_COUNT, false, mode,
+                                                        Collections.emptyMap(),
                                                         DEFAULT_CONNECTION_TIMEOUT_SEC, DEFAULT_SOCKET_TIMEOUT_SEC,
                                                         RETRY_DURATION_SEC );
         List<ProjectVersionRef> gavs = Collections.singletonList(
             new SimpleProjectVersionRef( "com.example", "example", "1.0" ) );
 
         versionTranslator.translateVersions( gavs );
-        assertNull( gavSchema.repositoryGroup );
+        assertEquals( mode, gavSchema.mode );
     }
 }

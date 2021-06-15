@@ -41,7 +41,12 @@ public interface Translator
      * @return Map of ProjectVersionRef objects as keys and translated versions as values
      * @throws RestException if an error occurs.
      */
+    // TODO: Rename to lookupVersions?
     Map<ProjectVersionRef, String> translateVersions( List<ProjectVersionRef> projects ) throws RestException;
 
+    // TODO: ### Can drop this now and replace with e.g.
+    // translateLatestVersions
+    // lookupLatestVersions
     List<ProjectVersionRef> findBlacklisted( ProjectRef project ) throws RestException;
+
 }

@@ -122,6 +122,7 @@ public class RESTCollector
         Map<ProjectVersionRef, String> restResult = state.getVersionTranslator().translateVersions( restParam );
         logger.info ("REST Client returned {} ", restResult);
 
+        // TODO: ### parseVersions pulls out project refs from prior rest call.
         vs.setRESTMetadata (parseVersions(session, projects, state, newProjectKeys, restResult));
 
         final Map<ArtifactRef, String> overrides = new HashMap<>();

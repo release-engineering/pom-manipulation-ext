@@ -19,8 +19,9 @@ import lombok.experimental.UtilityClass;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.jboss.da.model.rest.GAV;
 
-import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Commonly used manipulations from project profiles.
@@ -28,8 +29,8 @@ import java.util.List;
 @UtilityClass
 public final class GAVUtils
 {
-    public static List<GAV> generateGAVs( List<ProjectVersionRef> dep) {
-        ArrayList<GAV> result = new ArrayList<>();
+    public static Set<GAV> generateGAVs( List<ProjectVersionRef> dep) {
+        Set<GAV> result = new HashSet<>();
 
         dep.forEach( d -> result.add( generateGAVs( d ) ) );
 

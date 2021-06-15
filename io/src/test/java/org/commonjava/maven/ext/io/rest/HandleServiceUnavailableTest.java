@@ -30,6 +30,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -76,8 +77,9 @@ public class HandleServiceUnavailableTest
         logger.info( "Executing test " + testName.getMethodName() );
 
         handler.setStatusCode( HttpServletResponse.SC_SERVICE_UNAVAILABLE );
-        versionTranslator = new DefaultTranslator( mockServer.getUrl(), 0, Translator.CHUNK_SPLIT_COUNT,
-                                                   "", null, null, "", DEFAULT_CONNECTION_TIMEOUT_SEC,
+        versionTranslator = new DefaultTranslator( mockServer.getUrl(), 0, Translator.CHUNK_SPLIT_COUNT, false, "",
+                                                   Collections.emptyMap(),
+                                                   DEFAULT_CONNECTION_TIMEOUT_SEC,
                                                    DEFAULT_SOCKET_TIMEOUT_SEC, RETRY_DURATION_SEC );
     }
 

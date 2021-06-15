@@ -26,6 +26,7 @@ import org.junit.Test;
 import org.junit.rules.TestName;
 import org.slf4j.LoggerFactory;
 
+import java.util.Collections;
 import java.util.List;
 
 import static org.commonjava.maven.ext.io.rest.Translator.DEFAULT_CONNECTION_TIMEOUT_SEC;
@@ -55,8 +56,9 @@ public class BlacklistTranslatorTest
     {
         LoggerFactory.getLogger( BlacklistTranslatorTest.class ).info( "Executing test " + testName.getMethodName() );
 
-        this.blacklistTranslator = new DefaultTranslator( mockServer.getUrl(), 0, Translator.CHUNK_SPLIT_COUNT, "",
-                                                          null, null, "", DEFAULT_CONNECTION_TIMEOUT_SEC,
+        this.blacklistTranslator = new DefaultTranslator( mockServer.getUrl(), 0, Translator.CHUNK_SPLIT_COUNT, false, "",
+                                                          Collections.emptyMap(),
+                                                          DEFAULT_CONNECTION_TIMEOUT_SEC,
                                                           DEFAULT_SOCKET_TIMEOUT_SEC, RETRY_DURATION_SEC );
     }
 

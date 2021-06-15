@@ -18,7 +18,6 @@ package org.commonjava.maven.ext.common.util;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonDeserializer;
@@ -32,14 +31,14 @@ import com.fasterxml.jackson.databind.node.JsonNodeType;
 import kong.unirest.jackson.JacksonObjectMapper;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef;
-import org.goots.hiderdoclet.doclet.JavadocExclude;
-import org.commonjava.maven.ext.common.json.ExtendedLookupReport;
+import org.commonjava.maven.ext.common.json.ExtendedMavenLookupResult;
 import org.commonjava.maven.ext.common.json.PME;
-import org.jboss.da.reports.model.response.LookupReport;
+import org.goots.hiderdoclet.doclet.JavadocExclude;
+import org.jboss.da.lookup.model.MavenLookupResult;
+import org.jboss.da.model.rest.GAV;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.List;
 
 public class JSONUtils
 {
@@ -49,10 +48,6 @@ public class JSONUtils
     private static final String BEST_MATCH = "bestMatchVersion";
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
-
-    private static final TypeReference<List<String>> stringList = new TypeReference<List<String>>()
-    {
-    };
 
     static
     {
@@ -119,29 +114,27 @@ public class JSONUtils
     }
 
     @JavadocExclude
-    public static class LookupReportDeserializer extends JsonDeserializer<LookupReport>
+    public static class MavenLookupResultDeserializer extends JsonDeserializer<MavenLookupResult>
     {
         @Override
-        public ExtendedLookupReport deserialize( JsonParser p, DeserializationContext ctxt)
+        public ExtendedMavenLookupResult deserialize( JsonParser p, DeserializationContext ctxt)
                         throws IOException
         {
             JsonNode node = p.getCodec().readTree( p);
             final String groupId = node.get(GROUP_ID).asText();
-            final String artifactId = node.get(ARTIFACT_ID).asText();
-            final String version = node.get(VERSION).asText();
+            final String artifactId = node.get( ARTIFACT_ID ).asText();
+            final String version = node.get( VERSION ).asText();
 
-            ExtendedLookupReport result = new ExtendedLookupReport();
-            // TODO: Is there any point in demarshalling this?
-            result.setAvailableVersions( node.get("availableVersions").traverse( p.getCodec() ).readValueAs( stringList ) );
+            ExtendedMavenLookupResult result;
 
-            result.setBlacklisted( node.get("blacklisted").asBoolean() );
-            if ( node.has( BEST_MATCH ) &&
-                            ! node.get(BEST_MATCH).getNodeType().equals( JsonNodeType.NULL ) )
+            String bestMatch = null;
+            if ( node.has( BEST_MATCH ) && !node.get( BEST_MATCH ).getNodeType().equals( JsonNodeType.NULL ) )
             {
-                // Calling asText on a NullNode returns a String ' "null" '.
-                result.setBestMatchVersion( node.get(BEST_MATCH).asText() );
+                bestMatch = node.get( BEST_MATCH ).asText();
             }
-            result.setProjectVersionRef( new SimpleProjectVersionRef( groupId, artifactId, version) );
+
+            result = new ExtendedMavenLookupResult( new GAV( groupId, artifactId, version ), bestMatch );
+            result.setProjectVersionRef( new SimpleProjectVersionRef( groupId, artifactId, version ) );
 
             return result;
         }
@@ -156,12 +149,12 @@ public class JSONUtils
 
             mapper.configure( JsonGenerator.Feature.IGNORE_UNKNOWN, true );
             mapper.configure( DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false );
-            mapper.setSerializationInclusion( JsonInclude.Include.NON_EMPTY);
+            mapper.setSerializationInclusion( JsonInclude.Include.NON_NULL);
 
             SimpleModule module = new SimpleModule();
             module.addDeserializer( ProjectVersionRef.class, new ProjectVersionRefDeserializer());
             module.addSerializer(ProjectVersionRef.class, new ProjectVersionRefSerializer());
-            module.addDeserializer( LookupReport.class, new LookupReportDeserializer() );
+            module.addDeserializer( MavenLookupResult.class, new MavenLookupResultDeserializer() );
             mapper.registerModule( module );
 
         }

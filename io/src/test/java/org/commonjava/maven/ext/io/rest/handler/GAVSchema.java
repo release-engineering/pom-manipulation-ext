@@ -16,47 +16,22 @@
 package org.commonjava.maven.ext.io.rest.handler;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import lombok.ToString;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+@ToString
 public class GAVSchema
 {
     @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
-    public String versionSuffix;
+    public List<Map<String, Object>> artifacts;
 
-    @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
-    public String[] productNames;
+    @JsonInclude(value = JsonInclude.Include.NON_NULL)
+    public String mode;
 
-    @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
-    public String[] productVersionIds;
-
-    // Backwards compatibility for versions of DependencyAnalyser that don't have this field.
-    @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
-    public String repositoryGroup;
-
-    public List<Map<String, Object>> gavs;
+    @JsonInclude(value = JsonInclude.Include.NON_NULL)
+    public Boolean brewPullActive;
 
     public GAVSchema() {}
-
-    public GAVSchema( String[] productNames, String[] productVersionIds, String repositoryGroup, String versionSuffix,
-                        List<Map<String, Object>> gavs )
-    {
-        this.productNames = productNames;
-        this.productVersionIds = productVersionIds;
-        this.repositoryGroup = repositoryGroup;
-        this.gavs = gavs;
-        this.versionSuffix = versionSuffix;
-    }
-
-    @Override
-    public String toString()
-    {
-        return "ProductNames '" + Arrays.toString( productNames ) +
-                        "' :: ProductVersionIds '" + Arrays.toString( productVersionIds )+
-                        "' :: RepositoryGroup '" + repositoryGroup +
-                        "' :: versionSuffix '" + versionSuffix +
-                        "' :: gavs " + gavs;
-    }
 }

@@ -67,7 +67,8 @@ public class HttpMessageTranslatorTest
         LoggerFactory.getLogger( HttpMessageTranslatorTest.class ).info ( "Executing test " + testName.getMethodName());
 
         this.versionTranslator = new DefaultTranslator( mockServer.getUrl(), 0,
-                                                        Translator.CHUNK_SPLIT_COUNT, "", null, null, "",
+                                                        Translator.CHUNK_SPLIT_COUNT, false, "",
+                                                        Collections.emptyMap(),
                                                         DEFAULT_CONNECTION_TIMEOUT_SEC, DEFAULT_SOCKET_TIMEOUT_SEC,
                                                         RETRY_DURATION_SEC );
     }
