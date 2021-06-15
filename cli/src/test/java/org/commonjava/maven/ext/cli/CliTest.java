@@ -293,7 +293,7 @@ public class CliTest
         // Strip out PME itself otherwise it causes issues on releasing a new version.
         String cliOutput = systemOutRule.getLogWithNormalizedLineSeparator().replaceAll( "org.commonjava.maven.ext:pom-manipulation-.*\\n", "" );
 
-        assertTrue( cliOutput.contains( "Found 83" ) );
+        assertTrue( cliOutput.contains( "Found 82" ) );
         assertTrue( cliOutput.matches( "(?s).*"
                 + "ch.qos.logback:logback-classic:1.2.3                                            jar                                     compile             \n"
                 + "ch.qos.logback:logback-core:1.2.3                                               jar                                     compile             \n"
@@ -350,7 +350,6 @@ public class CliTest
                 + "org.commonjava.maven.galley:galley-maven:0.16.6                                 jar                                     compile             \n"
                 + "org.commonjava.maven.galley:galley-transport-filearc:0.16.6                     jar                                     compile             \n"
                 + "org.commonjava.maven.galley:galley-transport-httpclient:0.16.6                  jar                                     compile             \n"
-                + "org.commonjava.util:http-testserver:1.1                                         jar                                     test                \n"
                 + "org.eclipse.aether:aether-api:1.1.0                                             jar                                     provided            \n"
                 + "org.eclipse.jetty:jetty-server:9.[.\\d+]+[v\\d+]*\\s+                           jar                                     compile             \n"
                 + "org.eclipse.sisu:org.eclipse.sisu.plexus:0.3.4                                  jar                                     compile             \n"
