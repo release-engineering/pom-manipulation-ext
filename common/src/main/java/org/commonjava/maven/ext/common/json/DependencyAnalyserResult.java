@@ -15,8 +15,14 @@
  */
 package org.commonjava.maven.ext.common.json;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonUnwrapped;
+import lombok.AllArgsConstructor;
+import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.Setter;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
@@ -24,23 +30,21 @@ import org.goots.hiderdoclet.doclet.JavadocExclude;
 import org.jboss.da.lookup.model.MavenLookupResult;
 import org.jboss.da.model.rest.GAV;
 
-@Setter
-@Getter
-@EqualsAndHashCode(callSuper = true)
 @JavadocExclude
-public class ExtendedMavenLookupResult
-                extends MavenLookupResult
+@EqualsAndHashCode(exclude = "projectVersionRef")
+@NoArgsConstructor
+@Data
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class DependencyAnalyserResult
 {
+    @NonNull
+    @JsonUnwrapped
+    private GAV gav;
+
+    @JsonIgnore
     private ProjectVersionRef projectVersionRef;
 
-    public ExtendedMavenLookupResult(@NonNull GAV gav, String bestMatchVersion )
-    {
-        super( gav, bestMatchVersion );
-    }
+    private String latestVersion;
 
-    @Override
-    public String toString ()
-    {
-        return "PVR : " + projectVersionRef + " ; BestMatch : " + getBestMatchVersion();
-    }
+    private String bestMatchVersion;
 }

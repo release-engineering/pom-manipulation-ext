@@ -23,13 +23,13 @@ import lombok.Getter;
 import org.apache.http.HttpStatus;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.ext.common.ManipulationUncheckedException;
+import org.commonjava.maven.ext.common.json.DependencyAnalyserResult;
 import org.commonjava.maven.ext.common.json.ErrorMessage;
-import org.commonjava.maven.ext.common.json.ExtendedMavenLookupResult;
 import org.commonjava.maven.ext.common.util.GAVUtils;
 import org.commonjava.maven.ext.common.util.JSONUtils.InternalObjectMapper;
 import org.commonjava.maven.ext.common.util.ListUtils;
+import org.jboss.da.lookup.model.MavenLatestRequest;
 import org.jboss.da.lookup.model.MavenLookupRequest;
-import org.jboss.da.lookup.model.MavenLookupResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -54,7 +54,7 @@ import static org.apache.http.HttpStatus.SC_OK;
 public class DefaultTranslator
     implements Translator
 {
-    private static final GenericType<List<MavenLookupResult>> lookupType = new GenericType<List<MavenLookupResult>>()
+    private static final GenericType<List<DependencyAnalyserResult>> lookupType = new GenericType<List<DependencyAnalyserResult>>()
     {
     };
 
@@ -107,8 +107,11 @@ public class DefaultTranslator
      * @param restMaxSize initial (maximum) size of the rest call; if zero will send everything.
      * @param restMinSize minimum size for the call
      * @param brewPullActive flag saying if brew pull should be used for version retrieval
-     * @param mode lookup mode, either STANDARD (default if empty) or SERVICE
+     * @param mode lookup mode, either PERSISTENT, TEMPORARY, SERVICE or SERVICE-TEMPORARY
      * @param restHeaders the headers to pass to the endpoint
+     * @param restConnectionTimeout the timeout for the REST request; defaults to {@link Translator#DEFAULT_CONNECTION_TIMEOUT_SEC}
+     * @param restSocketTimeout the timeout for the REST socket calls; defaults to {@link Translator#DEFAULT_SOCKET_TIMEOUT_SEC}
+     * @param restRetryDuration the retry duration configuration; ; defaults to {@link Translator#RETRY_DURATION_SEC}
      */
     public DefaultTranslator( String endpointUrl, int restMaxSize, int restMinSize, Boolean brewPullActive, String mode,
                               Map<String, String> restHeaders, int restConnectionTimeout, int restSocketTimeout,
@@ -177,8 +180,7 @@ public class DefaultTranslator
     @Override
     public Map<ProjectVersionRef, String>  lookupProjectVersions( List<ProjectVersionRef> p ) throws RestException
     {
-        // TODO: ### Change to LOOKUP_LATEST
-        return internalLookup( ENDPOINT.LOOKUP_GAVS, p );
+        return internalLookup( ENDPOINT.LOOkUP_LATEST, p );
     }
 
     private void partition( ENDPOINT endpointType, List<ProjectVersionRef> projects, Queue<Task> queue ) {
@@ -362,12 +364,12 @@ public class DefaultTranslator
 
         void executeTranslate()
         {
-            HttpResponse<List<MavenLookupResult>> r;
+            HttpResponse<List<DependencyAnalyserResult>> r;
 
             try
             {
-                // TODO: Change to this to the new type from DA
-                Object request = endpointType == ENDPOINT.LOOKUP_GAVS ?
+                final boolean lookup = (endpointType == ENDPOINT.LOOKUP_GAVS);
+                Object request = lookup ?
                                 ( MavenLookupRequest
                                                 .builder()
                                                 .mode( mode )
@@ -375,10 +377,9 @@ public class DefaultTranslator
                                                 .artifacts( GAVUtils.generateGAVs( chunk ) )
                                                 .build() )
                                 :
-                                ( MavenLookupRequest
+                                ( MavenLatestRequest
                                                 .builder()
                                                 .mode( mode )
-                                                .brewPullActive( brewPullActive )
                                                 .artifacts( GAVUtils.generateGAVs( chunk ) )
                                                 .build() );
 
@@ -390,15 +391,14 @@ public class DefaultTranslator
                            .connectTimeout(restConnectionTimeout * 1000)
                            .socketTimeout(restSocketTimeout * 1000)
                            .body( request )
-                           // TODO: #### Change this to add the new DA lookup type differentiation
-                           .asObject( lookupType )
+                           .asObject( lookupType  )
                            .ifSuccess( successResponse -> result = successResponse.getBody()
                                                                                   .stream()
-                                                                                  .filter( f -> isNotBlank( f.getBestMatchVersion() ) )
+                                                                                  .filter( f -> lookup ? isNotBlank( f.getBestMatchVersion() ) : isNotBlank( f.getLatestVersion() ) )
                                                                                   .collect(
                                                                                                   Collectors.toMap(
-                                                                                                  e -> ( (ExtendedMavenLookupResult) e ).getProjectVersionRef(),
-                                                                                                  MavenLookupResult::getBestMatchVersion,
+                                                                                                                  DependencyAnalyserResult::getProjectVersionRef,
+                                                                                                  lookup ? DependencyAnalyserResult::getBestMatchVersion : DependencyAnalyserResult::getLatestVersion,
                                                                                                   // If there is a duplicate key, use the original.
                                                                                                   (o, n) -> {
                                                                                                       logger.warn( "Located duplicate key {}", o);

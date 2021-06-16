@@ -22,6 +22,7 @@ import org.commonjava.maven.ext.io.rest.DefaultTranslator;
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.handler.AbstractHandler;
+import org.jboss.da.lookup.model.MavenLatestResult;
 import org.jboss.da.lookup.model.MavenLookupRequest;
 import org.jboss.da.lookup.model.MavenLookupResult;
 import org.jboss.da.model.rest.GAV;
@@ -119,7 +120,7 @@ public class AddSuffixJettyHandler
 
             Set<GAV> requestBody;
 
-            List<MavenLookupResult> responseBody = new ArrayList<>();
+            List<Object> responseBody = new ArrayList<>();
 
             // Protocol analysis
             MavenLookupRequest lookupGAVsRequest = objectMapper.readValue( jb.toString(), MavenLookupRequest.class );
@@ -130,7 +131,7 @@ public class AddSuffixJettyHandler
             // Prepare Response
             for ( GAV gav : requestBody )
             {
-                MavenLookupResult lr;
+                Object lr;
 
                 String version = gav.getVersion();
                 String bestMatchVersion;
@@ -225,7 +226,14 @@ public class AddSuffixJettyHandler
                 }
                 logger.info( "For GA {}, requesting version {} and got bestMatch {}", gav, version, bestMatchVersion);
 
-                lr = new MavenLookupResult( gav, !returnNullBestMatch ? bestMatchVersion : null );
+                if (request.getPathInfo().contains( DefaultTranslator.ENDPOINT.LOOkUP_LATEST.getEndpoint() ) )
+                {
+                    lr = new MavenLatestResult( gav, !returnNullBestMatch ? bestMatchVersion : null );
+                }
+                else
+                {
+                    lr = new MavenLookupResult( gav, !returnNullBestMatch ? bestMatchVersion : null );
+                }
 
                 responseBody.add( lr );
             }
