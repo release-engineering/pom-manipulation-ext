@@ -60,10 +60,11 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
 
 public class VersioningCalculatorTest
 {
@@ -1194,6 +1195,50 @@ public class VersioningCalculatorTest
 
         final String result = calculate( oldValue );
         assertThat( result, equalTo( v ) );
+    }
+
+    @Test
+    public void incrementUsingCustomCalculatorAndRESTMetadata()
+                    throws Exception
+    {
+        final Properties props = new Properties();
+        props.setProperty( VersioningState.INCREMENT_SERIAL_SUFFIX_SYSPROP, "rebuild" );
+
+        final VersioningState state = setupSession( props );
+        final String origVersion = "1.2.0";
+        final String candidateVersion = "1.2.0.rebuild-1";
+        final String newVersion = "1.2.0.rebuild-2";
+
+        final ProjectVersionRef projectVersionRef = SimpleProjectVersionRef.parse( "org.jboss:bar:" + origVersion );
+        final Map<ProjectRef, Set<String>> metadata = new HashMap<>();
+        final Set<String> candidates = new HashSet<>();
+        candidates.add( candidateVersion );
+        metadata.put( projectVersionRef.asProjectRef(), candidates );
+        state.setRESTMetadata( metadata );
+
+        VersionCalculator vc = new VersionCalculator( null );
+
+        final String result = vc.calculate( "org.jboss", "bar", origVersion, state );
+        System.out.println(state);
+        assertThat(result,  equalTo( newVersion ) );
+    }
+
+    @Test
+    public void incrementUsingCustomCalculatorWithNoMetadata()
+                    throws Exception
+    {
+        final Properties props = new Properties();
+        props.setProperty( VersioningState.INCREMENT_SERIAL_SUFFIX_SYSPROP, "rebuild" );
+
+        final VersioningState state = setupSession( props );
+        final String origVersion = "1.2.0";
+        final String newVersion = "1.2.0.rebuild-1";
+
+        VersionCalculator vc = new VersionCalculator( null );
+
+        final String result = vc.calculate( "org.jboss", "bar", origVersion, state );
+        System.out.println(state);
+        assertThat(result,  equalTo( newVersion ) );
     }
 
 

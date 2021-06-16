@@ -171,7 +171,7 @@ public class VersionCalculator
      * @return the new version string
      * @throws ManipulationException if an error occurs.
      */
-    protected String calculate( final String groupId, final String artifactId, final String version,
+    public String calculate( final String groupId, final String artifactId, final String version,
                                 final VersioningState state )
                     throws ManipulationException
     {
@@ -235,7 +235,8 @@ public class VersionCalculator
     }
 
     /**
-     * Find matching version strings in the remote repo.
+     * Find matching version strings in the remote repo. This might be a result of a REST call, local maven
+     * repo, or a cached result file.
      *
      * @param state Current VersionState configuration
      * @param groupId to look for
@@ -282,20 +283,22 @@ public class VersionCalculator
     {
         logger.debug( "Reading available versions from repository metadata for: " + groupId + ":" + artifactId );
 
+        Set<String> versions = new HashSet<>();
         try
         {
-            final MavenMetadataView metadataView =
-                readerWrapper.readMetadataView( new SimpleProjectRef( groupId, artifactId ) );
+            if ( readerWrapper != null )
+            {
+                final MavenMetadataView metadataView =
+                                readerWrapper.readMetadataView( new SimpleProjectRef( groupId, artifactId ) );
 
-            final List<String> versions =
-                metadataView.resolveXPathToAggregatedStringList( "/metadata/versioning/versions/version", true, -1 );
-
-            return new HashSet<>( versions );
+                versions.addAll( metadataView.resolveXPathToAggregatedStringList( "/metadata/versioning/versions/version", true, -1 ) );
+            }
         }
         catch ( final GalleyMavenException e )
         {
             throw new ManipulationException( "Failed to resolve metadata for: {}:{}", groupId, artifactId, e );
         }
+        return versions;
     }
 
     /**
