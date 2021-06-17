@@ -16,10 +16,13 @@
 package org.commonjava.maven.ext.io.rest.handler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.Setter;
 import org.commonjava.maven.ext.common.util.JSONUtils;
+import org.commonjava.maven.ext.io.rest.DefaultTranslator;
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.handler.AbstractHandler;
+import org.jboss.da.lookup.model.MavenLatestResult;
 import org.jboss.da.lookup.model.MavenLookupRequest;
 import org.jboss.da.lookup.model.MavenLookupResult;
 import org.jboss.da.model.rest.GAV;
@@ -31,14 +34,9 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Enumeration;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
-
-import static org.apache.commons.lang.StringUtils.isEmpty;
 
 /**
  * @author vdedik@redhat.com
@@ -47,8 +45,6 @@ public class AddSuffixJettyHandler
                 extends AbstractHandler
                 implements Handler
 {
-    private static final String DEFAULT_ENDPOINT = "/lookup/maven";
-
     public static final String SUFFIX = "redhat";
 
     public static final String DEFAULT_SUFFIX = SUFFIX + "-1";
@@ -65,13 +61,18 @@ public class AddSuffixJettyHandler
 
     private final JSONUtils.InternalObjectMapper objectMapper = new JSONUtils.InternalObjectMapper( new ObjectMapper(  ));
 
+    @Setter
     private String suffix;
 
-    private String blacklistVersion = null;
+    @Setter
+    private boolean useCustomMixedSuffix;
+
+    @Setter
+    private boolean usePartialCustomMixedSuffix;
 
     public AddSuffixJettyHandler()
     {
-        this( DEFAULT_ENDPOINT, DEFAULT_SUFFIX );
+        this( "/" + DefaultTranslator.ENDPOINT.LOOKUP_GAVS.getEndpoint(), DEFAULT_SUFFIX );
     }
 
     public AddSuffixJettyHandler( String endpoint, String suffix )
@@ -97,7 +98,7 @@ public class AddSuffixJettyHandler
             }
         }
 
-        if ( target.startsWith( this.endpoint ) )
+        if ( target.contains( this.endpoint ) )
         {
             // Get Request Body
             StringBuilder jb = new StringBuilder();
@@ -119,141 +120,127 @@ public class AddSuffixJettyHandler
 
             Set<GAV> requestBody;
 
-            if ( target.equals( DEFAULT_ENDPOINT ) )
+            List<Object> responseBody = new ArrayList<>();
+
+            // Protocol analysis
+            MavenLookupRequest lookupGAVsRequest = objectMapper.readValue( jb.toString(), MavenLookupRequest.class );
+            requestBody = lookupGAVsRequest.getArtifacts();
+
+            boolean returnNullBestMatch = "NullBestMatchVersion".equals( lookupGAVsRequest.getMode() );
+
+            // Prepare Response
+            for ( GAV gav : requestBody )
             {
-                List<MavenLookupResult> responseBody = new ArrayList<>();
+                Object lr;
 
-                // Protocol analysis
-                MavenLookupRequest lookupGAVsRequest = objectMapper.readValue( jb.toString(), MavenLookupRequest.class );
-                requestBody = lookupGAVsRequest.getArtifacts();
+                String version = gav.getVersion();
+                String bestMatchVersion;
 
-                boolean returnNullBestMatch = "NullBestMatchVersion".equals( lookupGAVsRequest.getMode() );
-                boolean useCustomMixedSuffix = requestBody.stream().anyMatch( r -> r.getArtifactId().equals( "rest-version-manip-mixed-suffix-orig-rh" ) );
-                boolean usePartialCustomMixedSuffix = requestBody.stream().anyMatch( r -> r.getArtifactId().equals( "rest-version-manip-mixed-suffix-orig-rh-norhalign" ) );
+                logger.debug( "Processing artifactId {} with version {}", gav.getArtifactId(), version );
 
-                // Prepare Response
-                for ( GAV gav : requestBody )
+                // Specific to certain integration tests. For the SNAPSHOT test we want to verify it can handle
+                // a already built version. The PME code should remove SNAPSHOT before sending it.
+                if ( gav.getArtifactId().startsWith( "rest-dependency-version-manip-child-module" ) )
                 {
-                    MavenLookupResult lr;
-
-                    String version = gav.getVersion();
-                    String bestMatchVersion;
-
-                    logger.debug( "Processing artifactId {} with version {}", gav.getArtifactId(), version );
-
-                    // Specific to certain integration tests. For the SNAPSHOT test we want to verify it can handle
-                    // a already built version. The PME code should remove SNAPSHOT before sending it.
-                    if ( gav.getArtifactId().startsWith( "rest-dependency-version-manip-child-module" ) )
+                    bestMatchVersion = version + "-" + EXTENDED_SUFFIX;
+                }
+                else if ( gav.getGroupId().equals( "org.goots.maven.circulardependencies-test-parent" ) )
+                {
+                    bestMatchVersion = version + "." + SUFFIX + "-3";
+                }
+                else if ( gav.getArtifactId().equals( "rest-version-manip-mixed-suffix-orig-rh" ) )
+                {
+                    bestMatchVersion = version + "-" + this.suffix;
+                }
+                else if ( gav.getArtifactId().startsWith( "depMgmt2" ) ||
+                                gav.getArtifactId().startsWith( "pluginMgmt3" ) )
+                {
+                    bestMatchVersion = "1.0.0-" + EXTENDED_SUFFIX;
+                }
+                else if ( gav.getArtifactId().startsWith( "rest-version-manip-suffix-strip-increment" ) )
+                {
+                    if ( version.contains( "jbossorg" ) )
                     {
-                        bestMatchVersion = version + "-" + EXTENDED_SUFFIX;
-                    }
-                    else if ( gav.getGroupId().equals( "org.goots.maven.circulardependencies-test-parent" ) )
-                    {
-                        bestMatchVersion = version + "." + SUFFIX + "-3";
-                    }
-                    else if ( gav.getArtifactId().equals( "rest-version-manip-mixed-suffix-orig-rh" ) )
-                    {
-                        bestMatchVersion = version + "-" + this.suffix;
-                    }
-                    else if ( gav.getArtifactId().startsWith( "depMgmt2" ) ||
-                                    gav.getArtifactId().startsWith( "pluginMgmt3" ) )
-                    {
-                        bestMatchVersion = "1.0.0-" + EXTENDED_SUFFIX;
-                    }
-                    else if ( gav.getArtifactId().startsWith( "rest-version-manip-suffix-strip-increment" ) )
-                    {
-                        if ( version.contains( "jbossorg" ) )
-                        {
-                            bestMatchVersion = "";
-                        }
-                        else
-                        {
-                            bestMatchVersion = version + "-" + EXTENDED_SUFFIX;
-                        }
-                    }
-                    else if ( useCustomMixedSuffix || usePartialCustomMixedSuffix || "GroovyWithTemporary".equals( lookupGAVsRequest.getMode() ) )
-                    {
-                        if ( useCustomMixedSuffix && gav.getArtifactId().equals( "commons-lang" ) )
-                        {
-                            // We know its redhat-1 (hardcoded in the pom).
-                            int separatorIndex = version.indexOf( SUFFIX ) - 1;
-                            bestMatchVersion =
-                                            version.substring( 0, separatorIndex ) + version.substring( separatorIndex,
-                                                                                                        separatorIndex + 1 )
-                                                            + MIXED_SUFFIX;
-                        }
-                        else if ( useCustomMixedSuffix && gav.getArtifactId().equals( "errai-tools" ) )
-                        {
-                            int separatorIndex = version.indexOf( SUFFIX ) - 1;
-                            bestMatchVersion =
-                                            version.substring( 0, separatorIndex ) + version.substring( separatorIndex,
-                                                                                                           separatorIndex + 1 )
-                                            + EXTENDED_SUFFIX;
-                        }
-                        else if ( useCustomMixedSuffix && gav.getArtifactId().equals( "commons-httpclient" ) )
-                        {
-                            int separatorIndex = version.indexOf( "temporary-redhat" ) - 1;
-                            bestMatchVersion =
-                                            version.substring( 0, separatorIndex ) + version.substring( separatorIndex,
-                                                                                                           separatorIndex + 1 )
-                                            + "temporary-redhat-2";
-                        }
-                        // For GroovyFunctionsTest::testTempOverrideWithNonTemp
-                        else if ( gav.getArtifactId().equals( "groovy-project-removal" ) )
-                        {
-                            bestMatchVersion = version + "-" + this.suffix;
-                        }
-                        // For GroovyFunctionsTest::testOverrideWithTemp
-                        else if ( gav.getGroupId().equals( "io.hawt" ) )
-                        {
-                            bestMatchVersion = version + "-" + MIXED_SUFFIX;
-                        }
-                        // For GroovyFunctionsTest::testOverrideWithTemp
-                        else if ( gav.getArtifactId().equals( "testTempOverrideWithNonTemp" ) )
-                        {
-                            bestMatchVersion = version + "-" + SUFFIX + "-5";
-                        }
-                        else
-                        {
-                            bestMatchVersion = version + "-" + MIXED_SUFFIX;
-                        }
-                    }
-                    else if ( gav.getVersion().equals("2.7.2_3-fuse") )
-                    {
-                        // For RESTVersionManipOnly - simulate whether version modification has been already performed or not.
-                        bestMatchVersion = version;
+                        bestMatchVersion = "";
                     }
                     else
                     {
+                        bestMatchVersion = version + "-" + EXTENDED_SUFFIX;
+                    }
+                }
+                else if ( useCustomMixedSuffix || usePartialCustomMixedSuffix || "GroovyWithTemporary".equals( lookupGAVsRequest.getMode() ) )
+                {
+                    if ( useCustomMixedSuffix && gav.getArtifactId().equals( "commons-lang" ) )
+                    {
+                        // We know its redhat-1 (hardcoded in the pom).
+                        int separatorIndex = version.indexOf( SUFFIX ) - 1;
+                        bestMatchVersion =
+                                        version.substring( 0, separatorIndex ) + version.substring( separatorIndex,
+                                                                                                    separatorIndex + 1 )
+                                                        + MIXED_SUFFIX;
+                    }
+                    else if ( useCustomMixedSuffix && gav.getArtifactId().equals( "errai-tools" ) )
+                    {
+                        int separatorIndex = version.indexOf( SUFFIX ) - 1;
+                        bestMatchVersion =
+                                        version.substring( 0, separatorIndex ) + version.substring( separatorIndex,
+                                                                                                       separatorIndex + 1 )
+                                        + EXTENDED_SUFFIX;
+                    }
+                    else if ( useCustomMixedSuffix && gav.getArtifactId().equals( "commons-httpclient" ) )
+                    {
+                        int separatorIndex = version.indexOf( "temporary-redhat" ) - 1;
+                        bestMatchVersion =
+                                        version.substring( 0, separatorIndex ) + version.substring( separatorIndex,
+                                                                                                       separatorIndex + 1 )
+                                        + "temporary-redhat-2";
+                    }
+                    // For GroovyFunctionsTest::testTempOverrideWithNonTemp
+                    else if ( gav.getArtifactId().equals( "groovy-project-removal" ) )
+                    {
                         bestMatchVersion = version + "-" + this.suffix;
                     }
-                    logger.info( "For GA {}, requesting version {} and got bestMatch {}", gav, version, bestMatchVersion);
-
-                    lr = new MavenLookupResult( gav, !returnNullBestMatch ? bestMatchVersion : null );
-
-                    responseBody.add( lr );
+                    // For GroovyFunctionsTest::testOverrideWithTemp
+                    else if ( gav.getGroupId().equals( "io.hawt" ) )
+                    {
+                        bestMatchVersion = version + "-" + MIXED_SUFFIX;
+                    }
+                    // For GroovyFunctionsTest::testOverrideWithTemp
+                    else if ( gav.getArtifactId().equals( "testTempOverrideWithNonTemp" ) )
+                    {
+                        bestMatchVersion = version + "-" + SUFFIX + "-5";
+                    }
+                    else
+                    {
+                        bestMatchVersion = version + "-" + MIXED_SUFFIX;
+                    }
                 }
-
-                logger.info( "Returning response body size {}", responseBody.size() );
-
-                response.getWriter().println( objectMapper.writeValue( responseBody ) );
-            }
-            else
-            {
-                Map<String, Object> gav = new HashMap<>(  );
-                gav.put ("groupId", request.getParameter( "groupid" ));
-                gav.put ("artifactId", request.getParameter( "artifactid" ));
-                if ( isEmpty ( blacklistVersion ) )
+                else if ( gav.getVersion().equals("2.7.2_3-fuse") )
                 {
-                    gav.put( "version", "1.0" + '.' + suffix );
+                    // For RESTVersionManipOnly - simulate whether version modification has been already performed or not.
+                    bestMatchVersion = version;
                 }
                 else
                 {
-                    gav.put ( "version", blacklistVersion );
+                    bestMatchVersion = version + "-" + this.suffix;
+                }
+                logger.info( "For GA {}, requesting version {} and got bestMatch {}", gav, version, bestMatchVersion);
+
+                if (request.getPathInfo().contains( DefaultTranslator.ENDPOINT.LOOkUP_LATEST.getEndpoint() ) )
+                {
+                    lr = new MavenLatestResult( gav, !returnNullBestMatch ? bestMatchVersion : null );
+                }
+                else
+                {
+                    lr = new MavenLookupResult( gav, !returnNullBestMatch ? bestMatchVersion : null );
                 }
 
-                response.getWriter().println( objectMapper.writeValue( Collections.singletonList( gav ) ) );
+                responseBody.add( lr );
             }
+
+            logger.info( "Returning response body size {}", responseBody.size() );
+
+            response.getWriter().println( objectMapper.writeValue( responseBody ) );
 
             // Set Response
             response.setContentType( "application/json;charset=utf-8" );
@@ -266,15 +253,4 @@ public class AddSuffixJettyHandler
                          request.getMethod(), request.getPathInfo(), this.endpoint );
         }
     }
-
-    public void setBlacklist( String s )
-    {
-        blacklistVersion = s;
-    }
-
-    public void setSuffix( String suffix )
-    {
-        this.suffix = suffix;
-    }
-
 }

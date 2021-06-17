@@ -31,10 +31,9 @@ import com.fasterxml.jackson.databind.node.JsonNodeType;
 import kong.unirest.jackson.JacksonObjectMapper;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef;
-import org.commonjava.maven.ext.common.json.ExtendedMavenLookupResult;
+import org.commonjava.maven.ext.common.json.DependencyAnalyserResult;
 import org.commonjava.maven.ext.common.json.PME;
 import org.goots.hiderdoclet.doclet.JavadocExclude;
-import org.jboss.da.lookup.model.MavenLookupResult;
 import org.jboss.da.model.rest.GAV;
 
 import java.io.File;
@@ -45,7 +44,8 @@ public class JSONUtils
     private static final String GROUP_ID = "groupId";
     private static final String ARTIFACT_ID = "artifactId";
     private static final String VERSION = "version";
-    private static final String BEST_MATCH = "bestMatchVersion";
+    private static final String BEST_MATCH_VERSION = "bestMatchVersion";
+    private static final String LATEST_VERSION = "latestVersion";
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
@@ -114,10 +114,10 @@ public class JSONUtils
     }
 
     @JavadocExclude
-    public static class MavenLookupResultDeserializer extends JsonDeserializer<MavenLookupResult>
+    public static class MavenResultDeserializer extends JsonDeserializer<DependencyAnalyserResult>
     {
         @Override
-        public ExtendedMavenLookupResult deserialize( JsonParser p, DeserializationContext ctxt)
+        public DependencyAnalyserResult deserialize( JsonParser p, DeserializationContext ctxt)
                         throws IOException
         {
             JsonNode node = p.getCodec().readTree( p);
@@ -125,20 +125,24 @@ public class JSONUtils
             final String artifactId = node.get( ARTIFACT_ID ).asText();
             final String version = node.get( VERSION ).asText();
 
-            ExtendedMavenLookupResult result;
+            DependencyAnalyserResult result = new DependencyAnalyserResult();
+            result.setGav( new GAV( groupId, artifactId, version ) );
 
-            String bestMatch = null;
-            if ( node.has( BEST_MATCH ) && !node.get( BEST_MATCH ).getNodeType().equals( JsonNodeType.NULL ) )
+            if ( node.has( BEST_MATCH_VERSION ) && !node.get( BEST_MATCH_VERSION ).getNodeType().equals( JsonNodeType.NULL ) )
             {
-                bestMatch = node.get( BEST_MATCH ).asText();
+                result.setBestMatchVersion( node.get( BEST_MATCH_VERSION ).asText() );
+            }
+            if ( node.has( LATEST_VERSION ) && !node.get( LATEST_VERSION ).getNodeType().equals( JsonNodeType.NULL ) )
+            {
+                result.setLatestVersion( node.get( LATEST_VERSION ).asText() );
             }
 
-            result = new ExtendedMavenLookupResult( new GAV( groupId, artifactId, version ), bestMatch );
             result.setProjectVersionRef( new SimpleProjectVersionRef( groupId, artifactId, version ) );
 
             return result;
         }
     }
+
 
     @JavadocExclude
     public static class InternalObjectMapper extends JacksonObjectMapper
@@ -154,7 +158,7 @@ public class JSONUtils
             SimpleModule module = new SimpleModule();
             module.addDeserializer( ProjectVersionRef.class, new ProjectVersionRefDeserializer());
             module.addSerializer(ProjectVersionRef.class, new ProjectVersionRefSerializer());
-            module.addDeserializer( MavenLookupResult.class, new MavenLookupResultDeserializer() );
+            module.addDeserializer( DependencyAnalyserResult.class, new MavenResultDeserializer() );
             mapper.registerModule( module );
 
         }

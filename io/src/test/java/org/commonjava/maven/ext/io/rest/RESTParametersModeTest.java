@@ -93,7 +93,7 @@ public class RESTParametersModeTest
         List<ProjectVersionRef> gavs = Collections.singletonList(
             new SimpleProjectVersionRef( "com.example", "example", "1.0" ) );
 
-        versionTranslator.translateVersions( gavs );
+        versionTranslator.lookupVersions( gavs );
         assertEquals( suffix, gavSchema.mode );
     }
 
@@ -109,7 +109,7 @@ public class RESTParametersModeTest
         List<ProjectVersionRef> gavs = Collections.singletonList(
             new SimpleProjectVersionRef( "com.example", "example", "1.0" ) );
 
-        versionTranslator.translateVersions( gavs );
+        versionTranslator.lookupVersions( gavs );
         assertEquals( mode, gavSchema.mode );
     }
 }

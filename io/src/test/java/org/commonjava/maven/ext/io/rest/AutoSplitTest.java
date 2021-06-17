@@ -95,7 +95,7 @@ public class AutoSplitTest
         handler.getRequestData().clear();
         try
         {
-            versionTranslator.translateVersions( data );
+            versionTranslator.lookupVersions( data );
         }
         catch ( RestException exception )
         {

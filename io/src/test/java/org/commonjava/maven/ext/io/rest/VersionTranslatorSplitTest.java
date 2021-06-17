@@ -99,7 +99,7 @@ public class VersionTranslatorSplitTest
         handler.getRequestData().clear();
         try
         {
-            versionTranslator.translateVersions( data );
+            versionTranslator.lookupVersions( data );
             fail();
         }
         catch ( RestException ex )
@@ -139,7 +139,7 @@ public class VersionTranslatorSplitTest
         handler.getRequestData().clear();
         try
         {
-            versionTranslator.translateVersions( data );
+            versionTranslator.lookupVersions( data );
             fail();
         }
         catch ( RestException ex )
@@ -180,7 +180,7 @@ public class VersionTranslatorSplitTest
         handler.getRequestData().clear();
         try
         {
-            versionTranslator.translateVersions( data );
+            versionTranslator.lookupVersions( data );
             fail();
         }
         catch ( RestException ignored )
@@ -217,7 +217,7 @@ public class VersionTranslatorSplitTest
         handler.setStatusCode( HttpServletResponse.SC_BAD_GATEWAY );
         try
         {
-            versionTranslator.translateVersions( data );
+            versionTranslator.lookupVersions( data );
             fail();
         }
         catch ( RestException ex )
@@ -244,7 +244,7 @@ public class VersionTranslatorSplitTest
         handler.getRequestData().clear();
         try
         {
-            versionTranslator.translateVersions( data );
+            versionTranslator.lookupVersions( data );
             fail();
         }
         catch ( RestException ignored )

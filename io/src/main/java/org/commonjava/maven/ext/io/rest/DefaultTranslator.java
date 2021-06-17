@@ -19,17 +19,17 @@ import kong.unirest.GenericType;
 import kong.unirest.HttpResponse;
 import kong.unirest.Unirest;
 import kong.unirest.UnirestException;
+import lombok.Getter;
 import org.apache.http.HttpStatus;
-import org.commonjava.maven.atlas.ident.ref.ProjectRef;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.ext.common.ManipulationUncheckedException;
+import org.commonjava.maven.ext.common.json.DependencyAnalyserResult;
 import org.commonjava.maven.ext.common.json.ErrorMessage;
-import org.commonjava.maven.ext.common.json.ExtendedMavenLookupResult;
 import org.commonjava.maven.ext.common.util.GAVUtils;
 import org.commonjava.maven.ext.common.util.JSONUtils.InternalObjectMapper;
 import org.commonjava.maven.ext.common.util.ListUtils;
+import org.jboss.da.lookup.model.MavenLatestRequest;
 import org.jboss.da.lookup.model.MavenLookupRequest;
-import org.jboss.da.lookup.model.MavenLookupResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,7 +41,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang.StringUtils.isNotBlank;
@@ -55,16 +54,22 @@ import static org.apache.http.HttpStatus.SC_OK;
 public class DefaultTranslator
     implements Translator
 {
-    private static final GenericType<List<MavenLookupResult>> lookupType = new GenericType<List<MavenLookupResult>>()
-    {
-    };
-    private static final GenericType<List<ProjectVersionRef>> pvrTyoe = new GenericType<List<ProjectVersionRef>>()
+    private static final GenericType<List<DependencyAnalyserResult>> lookupType = new GenericType<List<DependencyAnalyserResult>>()
     {
     };
 
-    private static final String LOOKUP_GAVS = "lookup/maven";
+    public enum ENDPOINT {
+        LOOKUP_GAVS ("lookup/maven"),
+        LOOkUP_LATEST ("lookup/maven/latest");
 
-    private static final String LISTING_BLACKLIST_GA = "listings/blacklist/ga";
+        @Getter
+        private final String endpoint;
+
+        ENDPOINT( String s )
+        {
+            this.endpoint = s;
+        }
+    }
 
     private final Logger logger = LoggerFactory.getLogger( getClass() );
 
@@ -102,8 +107,11 @@ public class DefaultTranslator
      * @param restMaxSize initial (maximum) size of the rest call; if zero will send everything.
      * @param restMinSize minimum size for the call
      * @param brewPullActive flag saying if brew pull should be used for version retrieval
-     * @param mode lookup mode, either STANDARD (default if empty) or SERVICE
+     * @param mode lookup mode, either PERSISTENT, TEMPORARY, SERVICE or SERVICE-TEMPORARY
      * @param restHeaders the headers to pass to the endpoint
+     * @param restConnectionTimeout the timeout for the REST request; defaults to {@link Translator#DEFAULT_CONNECTION_TIMEOUT_SEC}
+     * @param restSocketTimeout the timeout for the REST socket calls; defaults to {@link Translator#DEFAULT_SOCKET_TIMEOUT_SEC}
+     * @param restRetryDuration the retry duration configuration; ; defaults to {@link Translator#RETRY_DURATION_SEC}
      */
     public DefaultTranslator( String endpointUrl, int restMaxSize, int restMinSize, Boolean brewPullActive, String mode,
                               Map<String, String> restHeaders, int restConnectionTimeout, int restSocketTimeout,
@@ -119,146 +127,6 @@ public class DefaultTranslator
         this.restSocketTimeout = restSocketTimeout;
         this.retryDuration = restRetryDuration;
     }
-
-
-    private void partition(List<ProjectVersionRef> projects, Queue<Task> queue) {
-        if ( initialRestMaxSize != 0 )
-        {
-            if (initialRestMaxSize == -1)
-            {
-                autoPartition(projects, queue);
-            }
-            else
-            {
-                userDefinedPartition(projects, queue);
-            }
-        }
-        else
-        {
-            noOpPartition(projects, queue);
-        }
-    }
-
-    private void noOpPartition(List<ProjectVersionRef> projects, Queue<Task> queue) {
-        logger.info("Using NO-OP partition strategy");
-
-        queue.add(new Task( projects, endpointUrl + LOOKUP_GAVS ));
-    }
-
-    private void userDefinedPartition(List<ProjectVersionRef> projects, Queue<Task> queue) {
-        logger.info("Using user defined partition strategy");
-
-        // Presplit
-        final List<List<ProjectVersionRef>> partition = ListUtils.partition( projects, initialRestMaxSize );
-
-        for ( List<ProjectVersionRef> p : partition )
-        {
-            queue.add( new Task( p, endpointUrl + LOOKUP_GAVS ) );
-        }
-
-        logger.debug( "For initial sizing of {} have split the queue into {} ", initialRestMaxSize , queue.size() );
-    }
-
-    private void autoPartition(List<ProjectVersionRef> projects, Queue<Task> queue) {
-        List<List<ProjectVersionRef>> partition;
-
-        if (projects.size() < 600)
-        {
-            logger.info("Using auto partition strategy: {} projects divided in chunks with {} each", projects.size(), 128);
-            partition = ListUtils.partition( projects, 128 );
-        }
-        else {
-            if (projects.size() > 600 && projects.size() < 1200)
-            {
-                logger.info("Using auto partition strategy: {} projects divided in chunks with {} each", projects.size(), 64);
-                partition = ListUtils.partition( projects, 64 );
-            }
-            else
-            {
-                logger.info("Using auto partition strategy: {} projects divided in chunks with {} each", projects.size(), 32);
-                partition = ListUtils.partition( projects, 32 );
-            }
-        }
-
-        for ( List<ProjectVersionRef> p : partition )
-        {
-            queue.add( new Task( p, endpointUrl + LOOKUP_GAVS ) );
-        }
-    }
-
-    @Override
-    public List<ProjectVersionRef> findBlacklisted( ProjectRef ga ) throws RestException
-    {
-        final String blacklistEndpointUrl = endpointUrl + LISTING_BLACKLIST_GA;
-        final AtomicReference<List<ProjectVersionRef>> result = new AtomicReference<>();
-        final String[] errorString = new String[1];
-        final HttpResponse<List<ProjectVersionRef>> r;
-
-        logger.debug( "Called findBlacklisted to {} with {} and custom headers {}", blacklistEndpointUrl, ga, restHeaders );
-
-        try
-        {
-            r = Unirest.get( blacklistEndpointUrl )
-                       .header( "accept", "application/json" )
-                       .header( "Content-Type", "application/json" )
-                       .headers( restHeaders )
-                       .connectTimeout(restConnectionTimeout * 1000)
-                       .socketTimeout(restSocketTimeout * 1000)
-                       .queryString( "groupid", ga.getGroupId() )
-                       .queryString( "artifactid", ga.getArtifactId() )
-                       .asObject( pvrTyoe )
-                       .ifSuccess( successResponse -> result.set( successResponse.getBody() ) )
-                       .ifFailure( failedResponse -> {
-                           if ( !failedResponse.getParsingError().isPresent() )
-                           {
-                               logger.debug( "Parsing error but no message. Status text {}", failedResponse.getStatusText() );
-                               throw new ManipulationUncheckedException( failedResponse.getStatusText() );
-                           }
-                           else
-                           {
-                               String originalBody = failedResponse.getParsingError().get().getOriginalBody();
-
-                               if ( originalBody.length() == 0 )
-                               {
-                                   errorString[0] = "No content to read.";
-                               }
-                               else if ( originalBody.startsWith( "<" ) )
-                               {
-                                   // Read an HTML string.
-                                   String stripped = originalBody.replaceAll( "<.*?>", "" ).replaceAll( "\n", " " ).trim();
-                                   logger.debug( "Read HTML string '{}' rather than a JSON stream; stripping message to '{}'",
-                                                 originalBody, stripped );
-                                   errorString[0] = stripped;
-                               }
-                               else if ( originalBody.startsWith( "{\"" ) )
-                               {
-                                   errorString[0] = failedResponse.mapError( ErrorMessage.class ).toString();
-
-                                   logger.debug( "Read message string {}, processed to {} ", originalBody, errorString );
-                               }
-                               else
-                               {
-                                   logger.error( "### HTTP comm failure: {}", originalBody );
-                                   throw new ManipulationUncheckedException( "Problem in HTTP communication with status code {} and message {}",
-                                                                             failedResponse.getStatus(), failedResponse.getStatusText() );
-                               }
-                           }
-                       } );
-
-            if ( !r.isSuccess() )
-            {
-                throw new RestException( "Failed to establish blacklist calling {} with error {}", endpointUrl, errorString[0] );
-            }
-        }
-        catch ( ManipulationUncheckedException | UnirestException e )
-        {
-            throw new RestException( "Unable to contact DA", e );
-        }
-
-        return result.get();
-    }
-
-
 
     /**
      * Translate the versions.
@@ -289,9 +157,98 @@ public class DefaultTranslator
      * </pre>
      * There may be a lot of them, possibly causing timeouts or other issues.
      * This is mitigated by splitting them into smaller chunks when an error occurs and retrying.
+     *
+     * @param p the list of ProjectVersionRef to lookup
+     * @return the resulting map of ProjectVersionRef to new Version
+     * @throws RestException if an error occurs
      */
     @Override
-    public Map<ProjectVersionRef, String> translateVersions( List<ProjectVersionRef> p ) throws RestException
+    public Map<ProjectVersionRef, String> lookupVersions( List<ProjectVersionRef> p ) throws RestException
+    {
+        return internalLookup( ENDPOINT.LOOKUP_GAVS, p );
+    }
+
+    /**
+     * This is similar to {@link DefaultTranslator#lookupVersions}} in that it contacts DA to lookup versions but this
+     * call ignores suffix priority and returns the latest version for the configured suffix mode. This is typically
+     * used for project version lookups.
+     *
+     * @param p the list of ProjectVersionRef to lookup
+     * @return the resulting map of ProjectVersionRef to new Version
+     * @throws RestException if an error occurs
+     */
+    @Override
+    public Map<ProjectVersionRef, String>  lookupProjectVersions( List<ProjectVersionRef> p ) throws RestException
+    {
+        return internalLookup( ENDPOINT.LOOkUP_LATEST, p );
+    }
+
+    private void partition( ENDPOINT endpointType, List<ProjectVersionRef> projects, Queue<Task> queue ) {
+        if ( initialRestMaxSize != 0 )
+        {
+            if (initialRestMaxSize == -1)
+            {
+                autoPartition(endpointType, projects, queue);
+            }
+            else
+            {
+                userDefinedPartition(endpointType, projects, queue);
+            }
+        }
+        else
+        {
+            noOpPartition(endpointType, projects, queue);
+        }
+    }
+
+    private void noOpPartition( ENDPOINT endpointType, List<ProjectVersionRef> projects, Queue<Task> queue ) {
+        logger.info("Using NO-OP partition strategy");
+
+        queue.add(new Task( projects, endpointUrl, endpointType ));
+    }
+
+    private void userDefinedPartition( ENDPOINT endpointType, List<ProjectVersionRef> projects, Queue<Task> queue ) {
+        logger.info("Using user defined partition strategy");
+
+        // Presplit
+        final List<List<ProjectVersionRef>> partition = ListUtils.partition( projects, initialRestMaxSize );
+
+        for ( List<ProjectVersionRef> p : partition )
+        {
+            queue.add( new Task( p, endpointUrl, endpointType ) );
+        }
+
+        logger.debug( "For initial sizing of {} have split the queue into {} ", initialRestMaxSize , queue.size() );
+    }
+
+    private void autoPartition( ENDPOINT endpointType, List<ProjectVersionRef> projects, Queue<Task> queue ) {
+        List<List<ProjectVersionRef>> partition;
+
+        if (projects.size() < 600)
+        {
+            logger.info("Using auto partition strategy: {} projects divided in chunks with {} each", projects.size(), 128);
+            partition = ListUtils.partition( projects, 128 );
+        }
+        else {
+            if (projects.size() > 600 && projects.size() < 1200)
+            {
+                logger.info("Using auto partition strategy: {} projects divided in chunks with {} each", projects.size(), 64);
+                partition = ListUtils.partition( projects, 64 );
+            }
+            else
+            {
+                logger.info("Using auto partition strategy: {} projects divided in chunks with {} each", projects.size(), 32);
+                partition = ListUtils.partition( projects, 32 );
+            }
+        }
+
+        for ( List<ProjectVersionRef> p : partition )
+        {
+            queue.add( new Task( p, endpointUrl, endpointType ) );
+        }
+    }
+
+    private Map<ProjectVersionRef, String> internalLookup( ENDPOINT endpointType, List<ProjectVersionRef> p ) throws RestException
     {
         final List<ProjectVersionRef> projects = p.stream().distinct().collect( Collectors.toList() );
         if ( p.size() != projects.size() )
@@ -308,7 +265,8 @@ public class DefaultTranslator
 
         try
         {
-            partition( projects, queue );
+
+            partition( endpointType, projects, queue );
 
             while ( !queue.isEmpty() )
             {
@@ -330,7 +288,7 @@ public class DefaultTranslator
                             waitBeforeRetry( retryDuration );
                         }
 
-                        List<Task> tasks = task.split();
+                        List<Task> tasks = task.split(endpointType);
 
                         logger.warn( "Failed to translate versions for task @{} due to {}, splitting and retrying. Chunk size was: {} and new chunk size {} in {} segments.",
                                      task.hashCode(), task.getStatus(), task.getChunkSize(), tasks.get( 0 ).getChunkSize(),
@@ -385,6 +343,8 @@ public class DefaultTranslator
 
         private final String endpointUrl;
 
+        private final ENDPOINT endpointType;
+
         private Map<ProjectVersionRef, String> result = Collections.emptyMap();
 
         private int status = -1;
@@ -394,41 +354,51 @@ public class DefaultTranslator
         private String errorString;
 
 
-        Task( List<ProjectVersionRef> chunk, String endpointUrl )
+
+        Task( List<ProjectVersionRef> chunk, String endpointUrl, ENDPOINT endpointType )
         {
             this.chunk = chunk;
             this.endpointUrl = endpointUrl;
+            this.endpointType = endpointType;
         }
 
         void executeTranslate()
         {
-            HttpResponse<List<MavenLookupResult>> r;
+            HttpResponse<List<DependencyAnalyserResult>> r;
 
             try
             {
-                MavenLookupRequest request = MavenLookupRequest
-                                .builder()
-                                .mode( mode )
-                                .brewPullActive( brewPullActive )
-                                .artifacts( GAVUtils.generateGAVs( chunk ) )
-                                .build();
+                final boolean lookup = (endpointType == ENDPOINT.LOOKUP_GAVS);
+                Object request = lookup ?
+                                ( MavenLookupRequest
+                                                .builder()
+                                                .mode( mode )
+                                                .brewPullActive( brewPullActive )
+                                                .artifacts( GAVUtils.generateGAVs( chunk ) )
+                                                .build() )
+                                :
+                                ( MavenLatestRequest
+                                                .builder()
+                                                .mode( mode )
+                                                .artifacts( GAVUtils.generateGAVs( chunk ) )
+                                                .build() );
 
 
-                r = Unirest.post( this.endpointUrl )
+                r = Unirest.post( endpointUrl + endpointType.getEndpoint() )
                            .header( "accept", "application/json" )
                            .header( "Content-Type", "application/json" )
                            .headers( restHeaders )
                            .connectTimeout(restConnectionTimeout * 1000)
                            .socketTimeout(restSocketTimeout * 1000)
                            .body( request )
-                           .asObject( lookupType )
+                           .asObject( lookupType  )
                            .ifSuccess( successResponse -> result = successResponse.getBody()
                                                                                   .stream()
-                                                                                  .filter( f -> isNotBlank( f.getBestMatchVersion() ) )
+                                                                                  .filter( f -> lookup ? isNotBlank( f.getBestMatchVersion() ) : isNotBlank( f.getLatestVersion() ) )
                                                                                   .collect(
                                                                                                   Collectors.toMap(
-                                                                                                  e -> ( (ExtendedMavenLookupResult) e ).getProjectVersionRef(),
-                                                                                                  MavenLookupResult::getBestMatchVersion,
+                                                                                                                  DependencyAnalyserResult::getProjectVersionRef,
+                                                                                                  lookup ? DependencyAnalyserResult::getBestMatchVersion : DependencyAnalyserResult::getLatestVersion,
                                                                                                   // If there is a duplicate key, use the original.
                                                                                                   (o, n) -> {
                                                                                                       logger.warn( "Located duplicate key {}", o);
@@ -485,7 +455,7 @@ public class DefaultTranslator
             }
         }
 
-        public List<Task> split()
+        public List<Task> split( ENDPOINT endpointType )
         {
             List<Task> res = new ArrayList<>( CHUNK_SPLIT_COUNT );
             if ( chunk.size() >= CHUNK_SPLIT_COUNT )
@@ -494,17 +464,18 @@ public class DefaultTranslator
                 int chunkSize = chunk.size() / CHUNK_SPLIT_COUNT;
                 for ( int i = 0; i < ( CHUNK_SPLIT_COUNT - 1 ); i++ )
                 {
-                    res.add( new Task( chunk.subList( i * chunkSize, ( i + 1 ) * chunkSize ), endpointUrl ) );
+                    res.add( new Task( chunk.subList( i * chunkSize, ( i + 1 ) * chunkSize ), endpointUrl, endpointType ) );
                 }
                 // Last chunk may have different size
-                res.add( new Task( chunk.subList( ( CHUNK_SPLIT_COUNT - 1 ) * chunkSize, chunk.size() ),
-                                   endpointUrl ) );
+                res.add( new Task( chunk.subList( ( CHUNK_SPLIT_COUNT - 1 ) * chunkSize, chunk.size() ), endpointUrl,
+                                   endpointType ) );
             }
             else
             {
                 for ( int i = 0 ; i < ( chunk.size() - initialRestMinSize ) + 1; i++ )
                 {
-                    res.add( new Task( chunk.subList( i * initialRestMinSize, ( i + 1 ) * initialRestMinSize ), endpointUrl ) );
+                    res.add( new Task( chunk.subList( i * initialRestMinSize, ( i + 1 ) * initialRestMinSize ),
+                                       endpointUrl, endpointType ) );
                 }
             }
             return res;

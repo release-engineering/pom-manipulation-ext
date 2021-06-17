@@ -15,7 +15,6 @@
  */
 package org.commonjava.maven.ext.integrationtest;
 
-import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.io.rest.handler.AddSuffixJettyHandler;
 import org.commonjava.maven.ext.io.rest.rule.MockServer;
 import org.junit.Before;
@@ -111,15 +110,31 @@ public class RESTIntegrationTest
     @Test
     public void testRESTVersionManipMixedOrigHasSuffix() throws Exception
     {
-        String test = getDefaultTestLocation( "rest-version-manip-mixed-suffix-orig-rh" );
-        runLikeInvoker( test, mockServer.getUrl() );
+        try
+        {
+            handler.setUseCustomMixedSuffix( true );
+            String test = getDefaultTestLocation( "rest-version-manip-mixed-suffix-orig-rh" );
+            runLikeInvoker( test, mockServer.getUrl() );
+        }
+        finally
+        {
+            handler.setUseCustomMixedSuffix( false );
+        }
     }
 
     @Test
     public void testRESTVersionManipMixedOrigHasSuffixNoRHAlign() throws Exception
     {
-        String test = getDefaultTestLocation( "rest-version-manip-mixed-suffix-orig-rh-norhalign" );
-        runLikeInvoker( test, mockServer.getUrl() );
+        try
+        {
+            handler.setUsePartialCustomMixedSuffix( true );
+            String test = getDefaultTestLocation( "rest-version-manip-mixed-suffix-orig-rh-norhalign" );
+            runLikeInvoker( test, mockServer.getUrl() );
+        }
+        finally
+        {
+            handler.setUsePartialCustomMixedSuffix( false );
+        }
     }
 
     @Test
@@ -184,35 +199,6 @@ public class RESTIntegrationTest
         runLikeInvoker( test, mockServer.getUrl() );
     }
 
-    @Test(expected = ManipulationException.class)
-    public void testRESTBlacklist() throws Exception
-    {
-        try
-        {
-            handler.setBlacklist ("1.0");
-            String test = getDefaultTestLocation( "rest-blacklist" );
-            runLikeInvoker( test, mockServer.getUrl() );
-        }
-        finally
-        {
-            handler.setBlacklist (null);
-        }
-    }
-
-    @Test
-    public void testRESTBlacklist2() throws Exception
-    {
-        try
-        {
-            handler.setBlacklist ("1.0.redhat-3");
-            String test = getDefaultTestLocation( "rest-blacklist" );
-            runLikeInvoker( test, mockServer.getUrl() );
-        }
-        finally
-        {
-            handler.setBlacklist (null);
-        }
-    }
 
     @Test
     public void testRESTHeaders() throws Exception

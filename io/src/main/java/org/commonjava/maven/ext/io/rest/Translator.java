@@ -15,7 +15,6 @@
  */
 package org.commonjava.maven.ext.io.rest;
 
-import org.commonjava.maven.atlas.ident.ref.ProjectRef;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 
 import java.util.List;
@@ -41,12 +40,16 @@ public interface Translator
      * @return Map of ProjectVersionRef objects as keys and translated versions as values
      * @throws RestException if an error occurs.
      */
-    // TODO: Rename to lookupVersions?
-    Map<ProjectVersionRef, String> translateVersions( List<ProjectVersionRef> projects ) throws RestException;
+    Map<ProjectVersionRef, String> lookupVersions( List<ProjectVersionRef> projects ) throws RestException;
 
-    // TODO: ### Can drop this now and replace with e.g.
-    // translateLatestVersions
-    // lookupLatestVersions
-    List<ProjectVersionRef> findBlacklisted( ProjectRef project ) throws RestException;
-
+    /**
+     * Executes HTTP request to a REST service that translates versions. While similar to {@link Translator#lookupVersions(List)}
+     * for this version, the DependencyAnalyser will ignore suffix priority and return the latest version for the
+     * configured suffix mode. This is typically used for project version lookups.
+     *
+     * @param projects - List of projects (GAVs)
+     * @return Map of ProjectVersionRef objects as keys and translated versions as values
+     * @throws RestException if an error occurs.
+     */
+    Map<ProjectVersionRef, String>  lookupProjectVersions( List<ProjectVersionRef> projects ) throws RestException;
 }

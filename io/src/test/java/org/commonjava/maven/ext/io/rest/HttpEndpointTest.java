@@ -64,7 +64,7 @@ public class HttpEndpointTest extends HttpHeaderHeaderTest
 
         try
         {
-            versionTranslator.translateVersions( gavs );
+            versionTranslator.lookupVersions( gavs );
             fail( "Failed to throw RestException." );
         }
         catch ( RestException ex )

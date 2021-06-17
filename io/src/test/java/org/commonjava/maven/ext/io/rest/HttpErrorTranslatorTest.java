@@ -112,7 +112,7 @@ public class HttpErrorTranslatorTest
 
         try
         {
-            versionTranslator.translateVersions( gavs );
+            versionTranslator.lookupVersions( gavs );
             fail( "Failed to throw RestException when server failed to respond." );
         }
         catch ( RestException ex )
