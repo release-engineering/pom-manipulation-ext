@@ -58,16 +58,23 @@ public class DefaultTranslator
     {
     };
 
-    public enum ENDPOINT {
+    public enum Endpoint
+    {
         LOOKUP_GAVS ("lookup/maven"),
-        LOOkUP_LATEST ("lookup/maven/latest");
+        LOOKUP_LATEST( "lookup/maven/latest");
 
         @Getter
         private final String endpoint;
 
-        ENDPOINT( String s )
+        Endpoint( String s )
         {
             this.endpoint = s;
+        }
+
+        @Override
+        public String toString()
+        {
+            return endpoint;
         }
     }
 
@@ -165,7 +172,7 @@ public class DefaultTranslator
     @Override
     public Map<ProjectVersionRef, String> lookupVersions( List<ProjectVersionRef> p ) throws RestException
     {
-        return internalLookup( ENDPOINT.LOOKUP_GAVS, p );
+        return internalLookup( Endpoint.LOOKUP_GAVS, p );
     }
 
     /**
@@ -180,10 +187,10 @@ public class DefaultTranslator
     @Override
     public Map<ProjectVersionRef, String>  lookupProjectVersions( List<ProjectVersionRef> p ) throws RestException
     {
-        return internalLookup( ENDPOINT.LOOkUP_LATEST, p );
+        return internalLookup( Endpoint.LOOKUP_LATEST, p );
     }
 
-    private void partition( ENDPOINT endpointType, List<ProjectVersionRef> projects, Queue<Task> queue ) {
+    private void partition( Endpoint endpointType, List<ProjectVersionRef> projects, Queue<Task> queue ) {
         if ( initialRestMaxSize != 0 )
         {
             if (initialRestMaxSize == -1)
@@ -201,13 +208,13 @@ public class DefaultTranslator
         }
     }
 
-    private void noOpPartition( ENDPOINT endpointType, List<ProjectVersionRef> projects, Queue<Task> queue ) {
+    private void noOpPartition( Endpoint endpointType, List<ProjectVersionRef> projects, Queue<Task> queue ) {
         logger.info("Using NO-OP partition strategy");
 
         queue.add(new Task( projects, endpointUrl, endpointType ));
     }
 
-    private void userDefinedPartition( ENDPOINT endpointType, List<ProjectVersionRef> projects, Queue<Task> queue ) {
+    private void userDefinedPartition( Endpoint endpointType, List<ProjectVersionRef> projects, Queue<Task> queue ) {
         logger.info("Using user defined partition strategy");
 
         // Presplit
@@ -221,7 +228,7 @@ public class DefaultTranslator
         logger.debug( "For initial sizing of {} have split the queue into {} ", initialRestMaxSize , queue.size() );
     }
 
-    private void autoPartition( ENDPOINT endpointType, List<ProjectVersionRef> projects, Queue<Task> queue ) {
+    private void autoPartition( Endpoint endpointType, List<ProjectVersionRef> projects, Queue<Task> queue ) {
         List<List<ProjectVersionRef>> partition;
 
         if (projects.size() < 600)
@@ -248,7 +255,7 @@ public class DefaultTranslator
         }
     }
 
-    private Map<ProjectVersionRef, String> internalLookup( ENDPOINT endpointType, List<ProjectVersionRef> p ) throws RestException
+    private Map<ProjectVersionRef, String> internalLookup( Endpoint endpointType, List<ProjectVersionRef> p ) throws RestException
     {
         final List<ProjectVersionRef> projects = p.stream().distinct().collect( Collectors.toList() );
         if ( p.size() != projects.size() )
@@ -343,7 +350,7 @@ public class DefaultTranslator
 
         private final String endpointUrl;
 
-        private final ENDPOINT endpointType;
+        private final Endpoint endpointType;
 
         private Map<ProjectVersionRef, String> result = Collections.emptyMap();
 
@@ -355,7 +362,7 @@ public class DefaultTranslator
 
 
 
-        Task( List<ProjectVersionRef> chunk, String endpointUrl, ENDPOINT endpointType )
+        Task( List<ProjectVersionRef> chunk, String endpointUrl, Endpoint endpointType )
         {
             this.chunk = chunk;
             this.endpointUrl = endpointUrl;
@@ -368,7 +375,7 @@ public class DefaultTranslator
 
             try
             {
-                final boolean lookup = (endpointType == ENDPOINT.LOOKUP_GAVS);
+                final boolean lookup = (endpointType == Endpoint.LOOKUP_GAVS);
                 Object request = lookup ?
                                 ( MavenLookupRequest
                                                 .builder()
@@ -384,7 +391,7 @@ public class DefaultTranslator
                                                 .build() );
 
 
-                r = Unirest.post( endpointUrl + endpointType.getEndpoint() )
+                r = Unirest.post( endpointUrl + endpointType )
                            .header( "accept", "application/json" )
                            .header( "Content-Type", "application/json" )
                            .headers( restHeaders )
@@ -455,7 +462,7 @@ public class DefaultTranslator
             }
         }
 
-        public List<Task> split( ENDPOINT endpointType )
+        public List<Task> split( Endpoint endpointType )
         {
             List<Task> res = new ArrayList<>( CHUNK_SPLIT_COUNT );
             if ( chunk.size() >= CHUNK_SPLIT_COUNT )

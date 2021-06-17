@@ -36,7 +36,7 @@ public interface Translator
     /**
      * Executes HTTP request to a REST service that translates versions
      *
-     * @param projects - List of projects (GAVs)
+     * @param projects List of projects (GAVs)
      * @return Map of ProjectVersionRef objects as keys and translated versions as values
      * @throws RestException if an error occurs.
      */
@@ -47,7 +47,7 @@ public interface Translator
      * for this version, the DependencyAnalyser will ignore suffix priority and return the latest version for the
      * configured suffix mode. This is typically used for project version lookups.
      *
-     * @param projects - List of projects (GAVs)
+     * @param projects List of projects (GAVs)
      * @return Map of ProjectVersionRef objects as keys and translated versions as values
      * @throws RestException if an error occurs.
      */
