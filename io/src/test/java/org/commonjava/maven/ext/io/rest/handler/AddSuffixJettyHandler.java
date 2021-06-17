@@ -18,7 +18,7 @@ package org.commonjava.maven.ext.io.rest.handler;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Setter;
 import org.commonjava.maven.ext.common.util.JSONUtils;
-import org.commonjava.maven.ext.io.rest.DefaultTranslator;
+import org.commonjava.maven.ext.io.rest.DefaultTranslator.Endpoint;
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.handler.AbstractHandler;
@@ -72,7 +72,7 @@ public class AddSuffixJettyHandler
 
     public AddSuffixJettyHandler()
     {
-        this( "/" + DefaultTranslator.ENDPOINT.LOOKUP_GAVS.getEndpoint(), DEFAULT_SUFFIX );
+        this( Endpoint.LOOKUP_GAVS.getEndpoint(), DEFAULT_SUFFIX );
     }
 
     public AddSuffixJettyHandler( String endpoint, String suffix )
@@ -226,7 +226,7 @@ public class AddSuffixJettyHandler
                 }
                 logger.info( "For GA {}, requesting version {} and got bestMatch {}", gav, version, bestMatchVersion);
 
-                if (request.getPathInfo().contains( DefaultTranslator.ENDPOINT.LOOkUP_LATEST.getEndpoint() ) )
+                if (request.getPathInfo().contains( Endpoint.LOOKUP_LATEST.getEndpoint() ) )
                 {
                     lr = new MavenLatestResult( gav, !returnNullBestMatch ? bestMatchVersion : null );
                 }
