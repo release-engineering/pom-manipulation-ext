@@ -40,11 +40,6 @@
       <artifactId>junit</artifactId>
       <version>${version.junit}</version>
     </dependency>
-    <!-- <dependency> -->
-    <!--   <groupId>org.dummy</groupId> -->
-    <!--   <artifactId>not-real</artifactId> -->
-    <!--   <version>${version.junit}</version> -->
-    <!-- </dependency> -->
     <dependency>
       <groupId>org.another.fake</groupId>
       <artifactId>aRandomID</artifactId>

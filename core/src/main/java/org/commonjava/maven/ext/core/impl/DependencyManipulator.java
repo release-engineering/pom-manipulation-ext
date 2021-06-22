@@ -246,15 +246,10 @@ public class DependencyManipulator extends CommonManipulator implements Manipula
                 logger.info( "Iterating to validate dependency updates..." );
                 for ( Project p : versionPropertyUpdateMap.keySet() )
                 {
-                    validateDependenciesUpdatedProperty( cState, p, p.getResolvedManagedDependencies( session ) );
                     validateDependenciesUpdatedProperty( cState, p, p.getResolvedDependencies( session ) );
                     for ( Profile profile : p.getResolvedProfileDependencies( session ).keySet() )
                     {
                         validateDependenciesUpdatedProperty( cState, p, p.getResolvedProfileDependencies( session ).get( profile ) );
-                    }
-                    for ( Profile profile : p.getResolvedProfileManagedDependencies( session ).keySet() )
-                    {
-                        validateDependenciesUpdatedProperty( cState, p, p.getResolvedProfileManagedDependencies( session ).get( profile ) );
                     }
                 }
             }
