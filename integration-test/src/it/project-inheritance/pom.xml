@@ -162,7 +162,7 @@
     <version.org.apache.servicemix.bundles.antlr>2.7.7_5</version.org.apache.servicemix.bundles.antlr>
     <version.org.apache.servicemix.bundles.cglib>3.0_1</version.org.apache.servicemix.bundles.cglib>
     <version.org.apache.servicemix.bundles.dom4j>1.6.1_5</version.org.apache.servicemix.bundles.dom4j>
-    <version.org.eclipse.jetty>9.4.12.v20180830</version.org.eclipse.jetty>
+    <version.org.eclipse.jetty>9.4.41.v20210516</version.org.eclipse.jetty>
     <version.org.elasticsearch>1.7.2</version.org.elasticsearch>
     <version.org.hibernate.commons.annotations>5.0.1.Final</version.org.hibernate.commons.annotations>
     <version.org.hibernate.javax.persistence.hibernate-jpa-2.1-api>1.0.0.Final</version.org.hibernate.javax.persistence.hibernate-jpa-2.1-api>
