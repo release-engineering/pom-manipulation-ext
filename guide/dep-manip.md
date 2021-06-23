@@ -354,16 +354,7 @@ The property `strictAlignmentIgnoreSuffix` will mean that the comparison will ig
 
 #### Strict Property Validation
 
-The property `strictPropertyValidation` is similar to the property clash replacement below. However, while the below case detects two dependencies/plugins that update the property to different values, this validation ensures that *every* dependency (or plugin) that uses a matching property attempted to update it. This validates that the source of the information (e.g. BOM or REST) for the following example passed in both `org.foo:bar1` and `org.foo:bar2`. If `bar2` has not been passed in then the validation fails and, depending upon the configuration, either an Exception can be thrown (if set to `true`) or it will attempt to revert the changes (if set to `revert`). The default is `false` (i.e. off). Enabling this can avoid a potential later failure in a build where the bar2 alignment doesn't exist but has been implicitly updated through the `bar1` alignment.
-
-<table bgcolor="#ffff00">
-<tr>
-<td>
-    <b>NOTE</b> : This option is in beta and is currently off by default.
-</td>
-</tr>
-</table>
-
+The property `strictPropertyValidation` is similar to the property clash replacement below. However, while the below case detects two dependencies/plugins that update the property to different values, this validation ensures that *every* dependency (or plugin) that uses a matching property attempted to update it. This validates that the source of the information (e.g. BOM or REST) for the following example passed in both `org.foo:bar1` and `org.foo:bar2`. If `bar2` has not been passed in then the validation fails and, depending upon the configuration, either an Exception can be thrown (if set to `true`) or it will attempt to revert the changes (if set to `revert`). The default is `false` (i.e. off). Enabling this can avoid a potential later failure in a build where the bar2 alignment doesn't exist but has been implicitly updated through the `bar1` alignment. Note that this does **not** validate for `dependencyManagement` blocks but only for dependencies.
 
     propertyX = 1.0
 
