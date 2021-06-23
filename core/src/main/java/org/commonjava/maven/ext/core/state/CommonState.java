@@ -88,7 +88,9 @@ public class CommonState
 
     /**
      * Whether to override transitive as well. This is common between {@link DependencyState} and
-     * {@link DependencyState}
+     * {@link DependencyState}.
+     *
+     * @return whether to override transitive
      */
     private boolean overrideTransitive;
 
@@ -101,7 +103,11 @@ public class CommonState
     private boolean strictIgnoreSuffix;
 
     /**
-     * For beta strictPropertyValidation ; if 2 then assume we are 'reverting'.
+     * This is a beta option for overriding strict property validation. If 0, then strict dependency plugin property
+     * validation is disabled. If 1, then strict dependency plugin property validation is enabled. If 2, then assume we
+     * are reverting.
+     *
+     * @return 0 if strict dependency plugin property validation is disabled, 1 if enabled, or 2 if we are reverting
      */
     private Integer strictDependencyPluginPropertyValidation;
 
