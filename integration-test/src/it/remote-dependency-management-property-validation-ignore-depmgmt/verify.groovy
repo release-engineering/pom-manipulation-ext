@@ -17,4 +17,4 @@ def pomFile = new File( basedir, 'pom.xml' )
 System.out.println( "Slurping POM: ${pomFile.getAbsolutePath()}" )
 
 def buildLog = new File( basedir, 'build.log' )
-assert buildLog.getText().contains( 'ManipulationException' )
+assert buildLog.getText().contains( 'Property : key version.junit ; value 3.8.2 --> 4.1' )

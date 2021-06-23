@@ -21,17 +21,18 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>org.commonjava.maven.ext.integration-test</groupId>
-  <artifactId>remote-dependency-management-property-validation-revert</artifactId>
-  <version>1.0-SNAPSHOT</version>
-  <packaging>pom</packaging>
+  <parent>
+    <groupId>org.commonjava.maven.ext.integration-test</groupId>
+    <artifactId>remote-dependency-management-property-validation-ignore-depmgmt</artifactId>
+    <version>1.0-SNAPSHOT</version>
+  </parent>
 
-  <name>Test override dependency version when the version is defined by a property.</name>
+  <artifactId>remote-dependency-management-property-validation-ignore-depmgmt-child</artifactId>
+
+  <name>Test override dependency property when the property is in a child</name>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <version.junit>3.8.2</version.junit>
-    <version.fake>1.0</version.fake>
   </properties>
 
   <dependencies>
@@ -40,15 +41,6 @@
       <artifactId>junit</artifactId>
       <version>${version.junit}</version>
     </dependency>
-    <dependency>
-      <groupId>org.another.fake</groupId>
-      <artifactId>aRandomID</artifactId>
-      <version>${version.fake}</version>
-    </dependency>
   </dependencies>
-
-  <modules>
-    <module>child</module>
-  </modules>
 
 </project>
