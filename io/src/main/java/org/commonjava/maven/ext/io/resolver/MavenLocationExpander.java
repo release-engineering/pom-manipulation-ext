@@ -118,15 +118,12 @@ public class MavenLocationExpander
                 }
                 else
                 {
-                    final List<Mirror> mirrors = settings.getMirrors();
-                    if ( mirrors != null )
+                    final List<Mirror> mirrors = settings.getMirrors(); // Settings::getMirrors never returns null
+                    final Mirror mirror = mirrorSelector == null ? null : mirrorSelector.getMirror( repo, mirrors );
+                    if ( mirror != null )
                     {
-                        final Mirror mirror = mirrorSelector == null ? null : mirrorSelector.getMirror( repo, mirrors );
-                        if ( mirror != null )
-                        {
-                            id = mirror.getId();
-                            url = mirror.getUrl();
-                        }
+                        id = mirror.getId();
+                        url = mirror.getUrl();
                     }
 
                     final ArtifactRepositoryPolicy releases = repo.getReleases();
@@ -152,13 +149,13 @@ public class MavenLocationExpander
     {
         if ( settings != null )
         {
-            final Map<String, Profile> profiles = settings.getProfilesAsMap();
-            if ( profiles != null && activeProfiles != null && !activeProfiles.isEmpty() )
+            final Map<String, Profile> profiles = settings.getProfilesAsMap(); // Settings::getProfilesAsMap never returns null
+            if ( activeProfiles != null && !activeProfiles.isEmpty() )
             {
                 final LinkedHashSet<String> active = new LinkedHashSet<>( activeProfiles );
 
-                final List<String> settingsActiveProfiles = settings.getActiveProfiles();
-                if ( settingsActiveProfiles != null && !settingsActiveProfiles.isEmpty() )
+                final List<String> settingsActiveProfiles = settings.getActiveProfiles(); // Settings::getActiveProfiles never returns null
+                if ( !settingsActiveProfiles.isEmpty() )
                 {
                     active.addAll( settingsActiveProfiles );
                 }
@@ -168,42 +165,35 @@ public class MavenLocationExpander
                     final Profile profile = profiles.get( profileId );
                     if ( profile != null )
                     {
-                        final List<Repository> repositories = profile.getRepositories();
-                        if ( repositories != null )
+                        final List<Repository> repositories = profile.getRepositories(); // Profile::getRepositories never returns null
+                        final List<Mirror> mirrors = settings.getMirrors(); // Settings::getMirrors never returns null
+                        final ArtifactRepositoryLayout layout = new DefaultRepositoryLayout();
+                        for ( final Repository repo : repositories )
                         {
-                            final List<Mirror> mirrors = settings.getMirrors();
-                            final ArtifactRepositoryLayout layout = new DefaultRepositoryLayout();
-                            for ( final Repository repo : repositories )
+                            String id = repo.getId();
+                            String url = repo.getUrl();
+
+                            final ArtifactRepositoryPolicy snapshots = convertPolicy( repo.getSnapshots() );
+                            final ArtifactRepositoryPolicy releases = convertPolicy( repo.getReleases() );
+
+                            final MavenArtifactRepository arepo =
+                                new MavenArtifactRepository( id, url, layout, snapshots, releases );
+
+                            final Mirror mirror =
+                                mirrorSelector == null ? null : mirrorSelector.getMirror( arepo, mirrors );
+
+                            if ( mirror != null )
                             {
-                                String id = repo.getId();
-                                String url = repo.getUrl();
-
-                                if ( mirrors != null )
-                                {
-                                    final ArtifactRepositoryPolicy snapshots = convertPolicy( repo.getSnapshots() );
-                                    final ArtifactRepositoryPolicy releases = convertPolicy( repo.getReleases() );
-
-                                    final MavenArtifactRepository arepo =
-                                        new MavenArtifactRepository( id, url, layout, snapshots, releases );
-
-                                    final Mirror mirror =
-                                        mirrorSelector == null ? null : mirrorSelector.getMirror( arepo, mirrors );
-
-                                    if ( mirror != null )
-                                    {
-                                        id = mirror.getId();
-                                        url = mirror.getUrl();
-                                    }
-
-                                    SimpleHttpLocation addition = new SimpleHttpLocation( id, url, snapshots.isEnabled(), releases.isEnabled(), true, false, null );
-
-                                    addition.setAttribute(Location.CONNECTION_TIMEOUT_SECONDS, 60);
-
-                                    locs.add (addition);
-                                }
+                                id = mirror.getId();
+                                url = mirror.getUrl();
                             }
-                        }
 
+                            SimpleHttpLocation addition = new SimpleHttpLocation( id, url, snapshots.isEnabled(), releases.isEnabled(), true, false, null );
+
+                            addition.setAttribute(Location.CONNECTION_TIMEOUT_SECONDS, 60);
+
+                            locs.add (addition);
+                        }
                     }
                 }
             }

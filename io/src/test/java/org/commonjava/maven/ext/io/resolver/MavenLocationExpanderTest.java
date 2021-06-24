@@ -34,10 +34,19 @@ import java.util.Iterator;
 import java.util.List;
 
 import static org.hamcrest.CoreMatchers.equalTo;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 public class MavenLocationExpanderTest
 {
+    @Test
+    public void emptyValues()
+                    throws Exception
+    {
+        final MavenLocationExpander ex =
+                        new MavenLocationExpander( null, null, null,
+                                                   null, null, null );
+        assertThat( ex.expand( Collections.emptyList() ), equalTo( Collections.emptyList() ) );
+    }
 
     @Test
     public void mirrorAdjustsLocationURLs()
@@ -72,9 +81,9 @@ public class MavenLocationExpanderTest
         settings.addMirror( mirror );
 
         final MavenLocationExpander ex =
-            new MavenLocationExpander( Collections.<Location> emptyList(),
-                                       Collections.<ArtifactRepository> singletonList( remote ), local,
-                                       new DefaultMirrorSelector(), settings, Collections.<String> emptyList() );
+            new MavenLocationExpander( Collections.emptyList(),
+                                       Collections.singletonList( remote ), local,
+                                       new DefaultMirrorSelector(), settings, Collections.emptyList() );
 
         final List<Location> result = ex.expand( MavenLocationExpander.EXPANSION_TARGET );
 
@@ -125,10 +134,10 @@ public class MavenLocationExpanderTest
         settings.addProfile( profile );
 
         final MavenLocationExpander ex =
-            new MavenLocationExpander( Collections.<Location> emptyList(),
-                                       Collections.<ArtifactRepository> emptyList(), local,
+            new MavenLocationExpander( Collections.emptyList(),
+                                       Collections.emptyList(), local,
                                        new DefaultMirrorSelector(), settings,
-                                       Collections.<String> singletonList( profile.getId() ) );
+                                       Collections.singletonList( profile.getId() ) );
 
         final List<Location> result = ex.expand( MavenLocationExpander.EXPANSION_TARGET );
 
@@ -173,9 +182,9 @@ public class MavenLocationExpanderTest
         final Settings settings = new Settings();
 
         final MavenLocationExpander ex =
-                        new MavenLocationExpander( Collections.<Location> emptyList(),
-                                                   Collections.<ArtifactRepository> singletonList( remote ), local,
-                                                   new DefaultMirrorSelector(), settings, Collections.<String> emptyList() );
+                        new MavenLocationExpander( Collections.emptyList(),
+                                                   Collections.singletonList( remote ), local,
+                                                   new DefaultMirrorSelector(), settings, Collections.emptyList() );
 
         final List<Location> result = ex.expand( MavenLocationExpander.EXPANSION_TARGET );
 
