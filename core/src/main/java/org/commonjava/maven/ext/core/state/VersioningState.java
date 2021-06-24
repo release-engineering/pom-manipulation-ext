@@ -85,6 +85,7 @@ public class VersioningState
 
     /**
      * Forcibly override the version to a new one.
+     *
      * @return the new version
      */
     private String override;
@@ -101,6 +102,8 @@ public class VersioningState
     /**
      * Record the versions to change. Essentially this contains a mapping of original
      * project GAV to new version to change.
+     *
+     * @return the mapping of original project GAV to new version to change
      */
     private final Map<ProjectVersionRef, String> versionsByGAV = new HashMap<>();
 

@@ -112,6 +112,8 @@ public class ManipulationManager
 
     /**
      * Determined from {@link Manipulator#getExecutionIndex()} comparisons during {@link #init(ManipulationSession)}.
+     *
+     * @return the ordered manipulators
      */
     @Getter
     private List<Manipulator> orderedManipulators;

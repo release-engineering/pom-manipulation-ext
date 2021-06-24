@@ -53,6 +53,8 @@ public interface CommonBaseScript
 
     /**
      * Gets a configured VersionTranslator to make REST calls to DA
+     *
+     * @throws ManipulationException if an error occurs
      * @return a VersionTranslator
      */
     Translator getRESTAPI() throws ManipulationException;

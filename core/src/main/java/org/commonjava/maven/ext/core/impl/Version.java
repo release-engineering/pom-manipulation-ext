@@ -305,6 +305,7 @@ public class Version
     /**
      * Checks if the string is a valid version according to section 3.2.5 of the OSGi specification
      *
+     * @param version the version
      * @return true if the version is valid
      */
     public static boolean isValidOSGi(String version)
@@ -313,7 +314,10 @@ public class Version
     }
 
     /**
-     * Remove the build number (and associated delimiter) portion of the version string
+     * Remove the build number (and associated delimiter) portion of the version string.
+     *
+     * @param version the version
+     * @return the version with the build number portion removed
      */
     public static String removeBuildNumber( String version )
     {
@@ -327,7 +331,10 @@ public class Version
 
     /**
      * Remove the snapshot (and associated delimiter) portion of the version string.
-     * Converts something like "1.0-SNAPSHOT" to "1.0"
+     * Converts something like "1.0-SNAPSHOT" to "1.0".
+     *
+     * @param version the version
+     * @return the version with the snapshot portion removed
      */
     public static String removeSnapshot( String version )
     {
@@ -349,15 +356,22 @@ public class Version
     }
 
     /**
-     * Remove any leading delimiters from the partial version string
+     * Remove any leading delimiters from the partial version string.
+     *
+     * @param versionPart the partial version
+     * @return the partial version with any leading delimiters removed
      */
-    static String removeLeadingDelimiter(String versionPart )
+    static String removeLeadingDelimiter( String versionPart )
     {
         return versionPart.replaceAll(LEADING_DELIMITER_REGEX, "");
     }
 
     /**
-     * Prepends the given delimiter only if the versionPart does not already start with a delimiter
+     * Prepends the given delimiter only if the versionPart does not already start with a delimiter.
+     *
+     * @param versionPart the partial version
+     * @param delimiter the delimiter
+     * @return the partial version with the delimiter prepended (if necessary)
      */
     private static String prependDelimiter( String versionPart, String delimiter )
     {
@@ -388,9 +402,11 @@ public class Version
      * Appends the given qualifier suffix.  Attempts to match the given qualifier suffix to the current suffix
      * to avoid duplicates like "1.0-beta-beta.  If the suffix matches the existing one, does nothing.
      *
+     * @param version the version
      * @param suffix The qualifier suffix to append. This can be a simple string like "foo", or it can optionally
      *            include a build number, for example "foo-1", which will automatically be set as the build number for
      *            this version.
+     * @return the version with the qualifier suffix appended (if necessary)
      */
     public static String appendQualifierSuffix( final String version, final String suffix )
     {
@@ -473,7 +489,9 @@ public class Version
      * Appends a build number to the qualifier. The build number should be a string of digits, or null if the build
      * number should be removed.
      *
-     * @param buildNumber to append to the qualifier.
+     * @param version the version
+     * @param buildNumber the build number to append to the qualifier
+     * @return the version with the build number appended (if necessary)
      */
     public static String setBuildNumber( String version, String buildNumber )
     {
@@ -505,9 +523,9 @@ public class Version
     /**
      * Appends the "SNAPSHOT" suffix to this version if not already present
      *
-     * @param version the version to modify.
+     * @param version the version to modify
      * @param snapshot set to true if the version should be a snapshot, false otherwise
-     * @return The updated version string
+     * @return the updated version string
      */
     public static String setSnapshot( String version, boolean snapshot )
     {
@@ -533,11 +551,11 @@ public class Version
      * Matches a version object to versions in a set by comparing the non build number portion of the string. Then find
      * which of the matching versions has the highest build number and is therefore the latest version.
      *
-     * @param version the Version object to use.
-     * @param versionSet a collection of versions to compare to.
+     * @param version the Version object to use
+     * @param versionSet a collection of versions to compare to
      * @return the highest build number, or 0 if no matching build numbers are found.
      */
-    public static int findHighestMatchingBuildNumber(String version, Set<String> versionSet )
+    public static int findHighestMatchingBuildNumber( String version, Set<String> versionSet )
     {
         int highestBuildNum = 0;
 
@@ -586,8 +604,9 @@ public class Version
     }
 
     /**
-     * Get the build number as an integer instead of a string for each numeric comparison
+     * Get the build number as an integer instead of a string for each numeric comparison.
      *
+     * @param version the version
      * @return the build number as an integer.
      */
     public static int getIntegerBuildNumber( String version )
