@@ -23,6 +23,7 @@ import org.apache.commons.io.filefilter.FileFilterUtils;
 import org.jboss.byteman.contrib.bmunit.BMRule;
 import org.jboss.byteman.contrib.bmunit.BMUnitConfig;
 import org.jboss.byteman.contrib.bmunit.BMUnitRunner;
+import org.junit.Assume;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.contrib.java.lang.system.SystemOutRule;
@@ -206,53 +207,76 @@ public class CliLoggingTest
             targetClass = "Cli",
             targetMethod = "getCGroups()",
             targetLocation = "AT ENTRY",
-            action = "return org.commonjava.maven.ext.cli.CliLoggingTest.getCgroupDoesNotExist()"
+            action = "return \"/tmp/bd604820-7945-4932-9ceb-286fbd1bc3db\""
     )
-    public void testCgroupDoesNotExist() throws Exception
+    public void testNoCGroups() throws Exception
     {
-        File folder = temp.newFolder();
-        File target = new File( folder, "pom.xml" );
-        File logfile = new File( folder, "logfile" );
+        try
+        {
+            File folder = temp.newFolder();
+            File target = new File( folder, "pom.xml" );
+            File logfile = new File( folder, "logfile" );
 
-        FileUtils.copyDirectory( ROOT_DIRECTORY.toFile(), folder,
-                FileFilterUtils.or( DirectoryFileFilter.DIRECTORY, FileFilterUtils.suffixFileFilter( "xml" ) ) );
+            FileUtils.copyDirectory( ROOT_DIRECTORY.toFile(), folder, FileFilterUtils.or( DirectoryFileFilter.DIRECTORY,
+                                                                                          FileFilterUtils.suffixFileFilter(
+                                                                                                          "xml" ) ) );
 
-        Cli c = new Cli();
-        c.run( new String[] { "-d", "--settings=" + getClass().getResource( "/settings-test.xml" ).getPath(),
-                "-Dmaven.repo.local=" + folder, "-l", logfile.getCanonicalPath(),
-                "-DversionSuffix=rebuild-1",
-                "--file",
-                target.getCanonicalPath() } );
+            Cli c = new Cli();
+            c.run( new String[] { "-d", "--settings=" + getClass().getResource( "/settings-test.xml" ).getPath(),
+                            "-Dmaven.repo.local=" + folder, "-l", logfile.getCanonicalPath(),
+                            "-DversionSuffix=rebuild-1", "--file", target.getCanonicalPath() } );
 
-        assertFalse( logfile.exists() );
-        assertFalse( systemOutRule.getLog().contains( "Disabling log file as running in container" ) );
+            assertTrue( logfile.exists() );
+        }
+        finally
+        {
+            // Reload the default configuration otherwise strange errors happen to later tests.
+            LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
+            loggerContext.reset();
+            ContextInitializer ci = new ContextInitializer( loggerContext );
+            ci.autoConfig();
+        }
     }
+
 
     @Test
     @BMRule( name = "fake-cgroups-4",
             targetClass = "Cli",
             targetMethod = "getCGroups()",
             targetLocation = "AT ENTRY",
-            action = "return org.commonjava.maven.ext.cli.CliLoggingTest.getCgroupException()"
+            action = "return \"/tmp/\""
     )
     public void testCgroupException() throws Exception
     {
-        File folder = temp.newFolder();
-        File target = new File( folder, "pom.xml" );
-        File logfile = new File( folder, "logfile" );
+        Assume.assumeTrue(System.getProperty("os.name").toLowerCase().equals("linux"));
 
-        FileUtils.copyDirectory( ROOT_DIRECTORY.toFile(), folder,
-                FileFilterUtils.or( DirectoryFileFilter.DIRECTORY, FileFilterUtils.suffixFileFilter( "xml" ) ) );
+        try
+        {
+            File folder = temp.newFolder();
+            File target = new File( folder, "pom.xml" );
+            File logfile = new File( folder, "logfile" );
 
-        Cli c = new Cli();
-        c.run( new String[] { "-d", "--settings=" + getClass().getResource( "/settings-test.xml" ).getPath(),
-                "-Dmaven.repo.local=" + folder, "-l", logfile.getCanonicalPath(),
-                "-DversionSuffix=rebuild-1",
-                "--file",
-                target.getCanonicalPath() } );
+            FileUtils.copyDirectory( ROOT_DIRECTORY.toFile(), folder,
+                                     FileFilterUtils.or( DirectoryFileFilter.DIRECTORY, FileFilterUtils.suffixFileFilter( "xml" ) ) );
 
-        assertTrue( logfile.exists() );
-        assertFalse( systemOutRule.getLog().contains( "Disabling log file as running in container" ) );
-        assertTrue( systemOutRule.getLog().contains( "Unable to determine if running in a container" ) );
+            Cli c = new Cli();
+            c.run( new String[] { "-d", "--settings=" + getClass().getResource( "/settings-test.xml" ).getPath(),
+                    "-Dmaven.repo.local=" + folder, "-l", logfile.getCanonicalPath(),
+                    "-DversionSuffix=rebuild-1",
+                    "--file",
+                    target.getCanonicalPath() } );
+
+            assertTrue( logfile.exists() );
+            assertFalse( systemOutRule.getLog().contains( "Disabling log file as running in container" ) );
+            assertTrue( systemOutRule.getLog().contains( "Unable to determine if running in a container" ) );
+        }
+        finally
+        {
+            // Reload the default configuration otherwise strange errors happen to later tests.
+            LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
+            loggerContext.reset();
+            ContextInitializer ci = new ContextInitializer( loggerContext );
+            ci.autoConfig();
+        }
     }
 }

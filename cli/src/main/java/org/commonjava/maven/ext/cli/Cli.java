@@ -464,7 +464,7 @@ public class Cli implements Callable<Integer>
             {
                 result = stream.anyMatch( line -> line.contains( "docker" ) || line.contains( "kubepods" ) );
             }
-            catch ( IOException e )
+            catch ( Exception e )
             {
                 logger.error( "Unable to determine if running in a container", e );
             }
