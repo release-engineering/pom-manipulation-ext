@@ -31,7 +31,10 @@ import org.junit.runner.RunWith;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Stream;
@@ -40,20 +43,37 @@ import static org.commonjava.maven.ext.core.fixture.TestUtils.ROOT_DIRECTORY;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-@RunWith( BMUnitRunner.class)
-@BMUnitConfig(verbose = true, debug = true, bmunitVerbose = true )
+@RunWith( BMUnitRunner.class )
+@BMUnitConfig( verbose = true, debug = true, bmunitVerbose = true )
 public class CliLoggingTest
 {
     @SuppressWarnings( "unused" )
-    static final Map<String,String> PODMAN_MAP = new HashMap<String,String>() {{
+    static final Map<String,String> PODMAN_MAP = new HashMap<String,String>()
+    {{
         put( "container", "podman" );
     }};
 
-    @SuppressWarnings( { "unused", "ConstantConditions" } )
-    static final String CGROUP_DOCKER = Thread.currentThread().getContextClassLoader().getResource( "cgroup-docker" ).getPath();
+    private static String getCgroupDocker() throws URISyntaxException
+    {
+        final URI uri = Thread.currentThread().getContextClassLoader().getResource( "cgroup-docker" ).toURI();
+        return Paths.get( uri ).toString();
+    }
 
-    @SuppressWarnings( { "unused", "ConstantConditions" } )
-    static final String CGROUP_KUBE = Thread.currentThread().getContextClassLoader().getResource( "cgroup-kubernetes" ).getPath();
+    private static String getCgroupKube() throws URISyntaxException
+    {
+        final URI uri = Thread.currentThread().getContextClassLoader().getResource( "cgroup-kubernetes" ).toURI();
+        return Paths.get( uri ).toString();
+    }
+
+    private static String getCgroupException()
+    {
+        return new File( "." ).getAbsolutePath();
+    }
+
+    private static String getCgroupDoesNotExist()
+    {
+        return new File( "does-not-exist" ).getAbsolutePath();
+    }
 
     @Rule
     public TemporaryFolder temp = new TemporaryFolder();
@@ -70,17 +90,17 @@ public class CliLoggingTest
         File logfile = new File( folder, "logfile" );
 
         FileUtils.copyDirectory( ROOT_DIRECTORY.toFile(), folder,
-                                 FileFilterUtils.or( DirectoryFileFilter.DIRECTORY, FileFilterUtils.suffixFileFilter( "xml" ) ) );
+                FileFilterUtils.or( DirectoryFileFilter.DIRECTORY, FileFilterUtils.suffixFileFilter( "xml" ) ) );
 
         try
         {
             Cli c = new Cli();
-            c.run( new String[] { "-d", "--settings=" + getClass().getResource( "/settings-test.xml" ).getFile(),
-                            "-Dmaven.repo.local=" + folder.toString(), "-l", logfile.getCanonicalPath(),
+            c.run( new String[] { "-d", "--settings=" + getClass().getResource( "/settings-test.xml" ).getPath(),
+                            "-Dmaven.repo.local=" + folder, "-l", logfile.getCanonicalPath(),
                             "-DversionSuffix=rebuild-1", "--file", target.getCanonicalPath() } );
 
             assertTrue( logfile.exists() );
-            try (Stream<String> stream = Files.lines( logfile.toPath() ))
+            try ( Stream<String> stream = Files.lines( logfile.toPath() ) )
             {
                 assertTrue( stream.anyMatch( line -> line.contains( "Running manipulator" ) ) );
             }
@@ -91,7 +111,7 @@ public class CliLoggingTest
             // Reload the default configuration otherwise strange errors happen to later tests.
             LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
             loggerContext.reset();
-            ContextInitializer ci = new ContextInitializer(loggerContext);
+            ContextInitializer ci = new ContextInitializer( loggerContext );
             ci.autoConfig();
         }
     }
@@ -110,11 +130,11 @@ public class CliLoggingTest
         File logfile = new File( folder, "logfile" );
 
         FileUtils.copyDirectory( ROOT_DIRECTORY.toFile(), folder,
-                                 FileFilterUtils.or( DirectoryFileFilter.DIRECTORY, FileFilterUtils.suffixFileFilter( "xml" ) ) );
+                FileFilterUtils.or( DirectoryFileFilter.DIRECTORY, FileFilterUtils.suffixFileFilter( "xml" ) ) );
 
         Cli c = new Cli();
-        c.run( new String[] { "-d", "--settings=" + getClass().getResource( "/settings-test.xml" ).getFile(),
-                        "-Dmaven.repo.local=" + folder.toString(), "-l", logfile.getCanonicalPath(),
+        c.run( new String[] { "-d", "--settings=" + getClass().getResource( "/settings-test.xml" ).getPath(),
+                        "-Dmaven.repo.local=" + folder, "-l", logfile.getCanonicalPath(),
                         "-DversionSuffix=rebuild-1",
                         "--file",
                         target.getCanonicalPath() } );
@@ -129,7 +149,7 @@ public class CliLoggingTest
              targetClass = "Cli",
              targetMethod = "getCGroups()",
              targetLocation = "AT ENTRY",
-             action = "return org.commonjava.maven.ext.cli.CliLoggingTest.CGROUP_DOCKER"
+             action = "return org.commonjava.maven.ext.cli.CliLoggingTest.getCgroupDocker()"
     )
     public void testLogfileWithDocker() throws Exception
     {
@@ -138,12 +158,12 @@ public class CliLoggingTest
         File logfile = new File( folder, "logfile" );
 
         FileUtils.copyDirectory( ROOT_DIRECTORY.toFile(), folder,
-                                 FileFilterUtils.or( DirectoryFileFilter.DIRECTORY, FileFilterUtils.suffixFileFilter( "xml" ) ) );
+                FileFilterUtils.or( DirectoryFileFilter.DIRECTORY, FileFilterUtils.suffixFileFilter( "xml" ) ) );
 
         systemOutRule.clearLog();
         Cli c = new Cli();
-        c.run( new String[] { "-d", "--settings=" + getClass().getResource( "/settings-test.xml" ).getFile(),
-                        "-Dmaven.repo.local=" + folder.toString(), "-l", logfile.getCanonicalPath(),
+        c.run( new String[] { "-d", "--settings=" + getClass().getResource( "/settings-test.xml" ).getPath(),
+                        "-Dmaven.repo.local=" + folder, "-l", logfile.getCanonicalPath(),
                         "-DversionSuffix=rebuild-1",
                         "--file",
                         target.getCanonicalPath() } );
@@ -158,7 +178,7 @@ public class CliLoggingTest
              targetClass = "Cli",
              targetMethod = "getCGroups()",
              targetLocation = "AT ENTRY",
-             action = "return org.commonjava.maven.ext.cli.CliLoggingTest.CGROUP_KUBE"
+             action = "return org.commonjava.maven.ext.cli.CliLoggingTest.getCgroupKube()"
     )
     public void testLogfileWithKubernetes() throws Exception
     {
@@ -167,11 +187,11 @@ public class CliLoggingTest
         File logfile = new File( folder, "logfile" );
 
         FileUtils.copyDirectory( ROOT_DIRECTORY.toFile(), folder,
-                                 FileFilterUtils.or( DirectoryFileFilter.DIRECTORY, FileFilterUtils.suffixFileFilter( "xml" ) ) );
+                FileFilterUtils.or( DirectoryFileFilter.DIRECTORY, FileFilterUtils.suffixFileFilter( "xml" ) ) );
 
         Cli c = new Cli();
-        c.run( new String[] { "-d", "--settings=" + getClass().getResource( "/settings-test.xml" ).getFile(),
-                        "-Dmaven.repo.local=" + folder.toString(), "-l", logfile.getCanonicalPath(),
+        c.run( new String[] { "-d", "--settings=" + getClass().getResource( "/settings-test.xml" ).getPath(),
+                        "-Dmaven.repo.local=" + folder, "-l", logfile.getCanonicalPath(),
                         "-DversionSuffix=rebuild-1",
                         "--file",
                         target.getCanonicalPath() } );
@@ -179,5 +199,60 @@ public class CliLoggingTest
         assertFalse( logfile.exists() );
         assertTrue( systemOutRule.getLog().contains( "Disabling log file as running in container" ) );
         assertTrue( systemOutRule.getLog().contains( "Running manipulator" ) );
+    }
+
+    @Test
+    @BMRule( name = "fake-cgroups-3",
+            targetClass = "Cli",
+            targetMethod = "getCGroups()",
+            targetLocation = "AT ENTRY",
+            action = "return org.commonjava.maven.ext.cli.CliLoggingTest.getCgroupDoesNotExist()"
+    )
+    public void testCgroupDoesNotExist() throws Exception
+    {
+        File folder = temp.newFolder();
+        File target = new File( folder, "pom.xml" );
+        File logfile = new File( folder, "logfile" );
+
+        FileUtils.copyDirectory( ROOT_DIRECTORY.toFile(), folder,
+                FileFilterUtils.or( DirectoryFileFilter.DIRECTORY, FileFilterUtils.suffixFileFilter( "xml" ) ) );
+
+        Cli c = new Cli();
+        c.run( new String[] { "-d", "--settings=" + getClass().getResource( "/settings-test.xml" ).getPath(),
+                "-Dmaven.repo.local=" + folder, "-l", logfile.getCanonicalPath(),
+                "-DversionSuffix=rebuild-1",
+                "--file",
+                target.getCanonicalPath() } );
+
+        assertFalse( logfile.exists() );
+        assertFalse( systemOutRule.getLog().contains( "Disabling log file as running in container" ) );
+    }
+
+    @Test
+    @BMRule( name = "fake-cgroups-4",
+            targetClass = "Cli",
+            targetMethod = "getCGroups()",
+            targetLocation = "AT ENTRY",
+            action = "return org.commonjava.maven.ext.cli.CliLoggingTest.getCgroupException()"
+    )
+    public void testCgroupException() throws Exception
+    {
+        File folder = temp.newFolder();
+        File target = new File( folder, "pom.xml" );
+        File logfile = new File( folder, "logfile" );
+
+        FileUtils.copyDirectory( ROOT_DIRECTORY.toFile(), folder,
+                FileFilterUtils.or( DirectoryFileFilter.DIRECTORY, FileFilterUtils.suffixFileFilter( "xml" ) ) );
+
+        Cli c = new Cli();
+        c.run( new String[] { "-d", "--settings=" + getClass().getResource( "/settings-test.xml" ).getPath(),
+                "-Dmaven.repo.local=" + folder, "-l", logfile.getCanonicalPath(),
+                "-DversionSuffix=rebuild-1",
+                "--file",
+                target.getCanonicalPath() } );
+
+        assertTrue( logfile.exists() );
+        assertFalse( systemOutRule.getLog().contains( "Disabling log file as running in container" ) );
+        assertTrue( systemOutRule.getLog().contains( "Unable to determine if running in a container" ) );
     }
 }
