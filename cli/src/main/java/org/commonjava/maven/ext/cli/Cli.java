@@ -68,6 +68,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -454,26 +455,31 @@ public class Cli implements Callable<Integer>
      */
     private boolean runningInContainer()
     {
+        final Path cgroup = Paths.get( getCGroups() );
         boolean result = false;
 
-        // Don't use Paths.get as causes issues on Windows.
-        try (Stream<String> stream = Files.lines( new File( getCGroups() ).toPath() ) )
+        if ( Files.isReadable( cgroup ) )
         {
-            result = stream.anyMatch( line -> line.contains( "docker") || line.contains( "kubepods" ) );
+            try ( Stream<String> stream = Files.lines( cgroup ) )
+            {
+                result = stream.anyMatch( line -> line.contains( "docker" ) || line.contains( "kubepods" ) );
+            }
+            catch ( Exception e )
+            {
+                logger.error( "Unable to determine if running in a container", e );
+            }
         }
-        catch ( IOException e )
-        {
-            logger.error( "Unable to determine if running in a container", e );
-        }
+
         if ( !result )
         {
             result = System.getenv().containsKey( "container" );
         }
+
         return result;
     }
 
     // Split into separate method for testing only.
-    private String getCGroups()
+    private static String getCGroups()
     {
         return "/proc/1/cgroup";
     }
