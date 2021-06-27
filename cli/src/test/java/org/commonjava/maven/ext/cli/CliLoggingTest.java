@@ -244,12 +244,10 @@ public class CliLoggingTest
             targetClass = "Cli",
             targetMethod = "getCGroups()",
             targetLocation = "AT ENTRY",
-            action = "return \"/tmp/\""
+            action = "return System.getProperty(\"java.io.tmpdir\")"
     )
     public void testCgroupException() throws Exception
     {
-        Assume.assumeTrue(System.getProperty("os.name").toLowerCase().equals("linux"));
-
         try
         {
             File folder = temp.newFolder();
