@@ -23,7 +23,6 @@ import org.apache.commons.io.filefilter.FileFilterUtils;
 import org.jboss.byteman.contrib.bmunit.BMRule;
 import org.jboss.byteman.contrib.bmunit.BMUnitConfig;
 import org.jboss.byteman.contrib.bmunit.BMUnitRunner;
-import org.junit.Assume;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.contrib.java.lang.system.SystemOutRule;

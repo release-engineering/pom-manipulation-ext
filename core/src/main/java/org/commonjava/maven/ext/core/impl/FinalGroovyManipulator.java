@@ -32,7 +32,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * {@link Manipulator} implementation that can resolve a remote groovy file and execute it on executionRoot. Configuration

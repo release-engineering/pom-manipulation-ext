@@ -19,9 +19,7 @@ import org.commonjava.maven.ext.common.model.Project;
 import org.commonjava.maven.ext.core.ManipulationSession;
 import org.commonjava.maven.ext.core.fixture.TestUtils;
 import org.commonjava.maven.ext.io.PomIO;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.contrib.java.lang.system.RestoreSystemProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

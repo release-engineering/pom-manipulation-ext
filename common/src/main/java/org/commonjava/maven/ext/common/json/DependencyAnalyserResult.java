@@ -18,16 +18,12 @@ package org.commonjava.maven.ext.common.json;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
-import lombok.Setter;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.goots.hiderdoclet.doclet.JavadocExclude;
-import org.jboss.da.lookup.model.MavenLookupResult;
 import org.jboss.da.model.rest.GAV;
 
 @JavadocExclude
