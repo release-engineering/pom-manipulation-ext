@@ -18,7 +18,9 @@ package org.commonjava.maven.ext.integrationtest.invoker;
 import org.apache.commons.lang.SystemUtils;
 
 import java.io.File;
-import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.Reader;
+import java.nio.file.Files;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -146,12 +148,11 @@ public interface ExecutionParser
         Properties props = new Properties();
         if ( propsFile.isFile() )
         {
-            try
+            try ( Reader reader = Files.newBufferedReader( propsFile.toPath() ) )
             {
-                FileInputStream fis = new FileInputStream( propsFile );
-                props.load( fis );
+                props.load( reader );
             }
-            catch ( Exception e )
+            catch ( IOException e )
             {
                 // ignore
             }
@@ -162,7 +163,7 @@ public interface ExecutionParser
 
     static Map<String, String> propsToMap(Properties props)
     {
-        Map<String, String> map = new HashMap<>();
+        Map<String, String> map = new HashMap<>( props.size() );
         for ( Object p : props.keySet() )
         {
             map.put( (String) p, props.getProperty( (String) p ) );
