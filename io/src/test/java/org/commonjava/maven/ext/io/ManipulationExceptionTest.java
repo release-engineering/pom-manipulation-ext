@@ -22,6 +22,7 @@ import org.junit.Test;
 import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 
 public class ManipulationExceptionTest
@@ -47,7 +48,7 @@ public class ManipulationExceptionTest
         }
         catch (ManipulationException e)
         {
-            assertSame( e.getCause(), null );
+            assertNull( e.getCause() );
             assertEquals( e.getMessage(), "TEST 1 WITH " + uuid + " PARAM" );
         }
     }

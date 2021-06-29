@@ -44,6 +44,7 @@ import java.nio.charset.Charset;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.xmlunit.builder.Input.fromFile;
@@ -221,7 +222,7 @@ public class XMLIOTest
         XPath xPath = XPathFactory.newInstance().newXPath();
         NodeList nodeList = (NodeList) xPath.evaluate( "//include[starts-with(.,\"org.apache.tomcat\")]", doc, XPathConstants.NODESET );
 
-        assertTrue( nodeList.getLength() != 0 );
+        assertNotEquals( 0, nodeList.getLength() );
     }
 
     @Test

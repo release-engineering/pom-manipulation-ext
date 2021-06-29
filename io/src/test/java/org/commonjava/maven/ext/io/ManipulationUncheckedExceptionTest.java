@@ -21,6 +21,7 @@ import org.junit.Test;
 import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 
 public class ManipulationUncheckedExceptionTest
@@ -38,7 +39,7 @@ public class ManipulationUncheckedExceptionTest
         catch ( ManipulationUncheckedException e )
         {
             assertSame( e.getCause(), exception );
-            assertEquals( e.getMessage(), "java.lang.IndexOutOfBoundsException" );
+            assertEquals( "java.lang.IndexOutOfBoundsException", e.getMessage() );
         }
     }
 
@@ -60,7 +61,7 @@ public class ManipulationUncheckedExceptionTest
         }
         catch (ManipulationUncheckedException e)
         {
-            assertSame( e.getCause(), null );
+            assertNull( e.getCause() );
             assertEquals( e.getMessage(), "TEST 1 WITH " + uuid + " PARAM" );
         }
     }

@@ -93,6 +93,6 @@ public class PropertyInterpolatorTest
 
         Map<ArtifactRef, Dependency> deps = project.getResolvedManagedDependencies( new ManipulationSession() );
 
-        assertTrue( deps.size() == 66 );
+        assertEquals( 66, deps.size() );
     }
 }
