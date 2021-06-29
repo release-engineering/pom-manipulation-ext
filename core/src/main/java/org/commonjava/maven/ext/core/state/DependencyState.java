@@ -45,7 +45,8 @@ public class DependencyState
      * <pre>
      * <code>-DdependencyExclusion.junit:junit@org.groupId:artifactId</code>
      * </pre>
-     * This has now been deprecated and is now an alias for {@link DependencyState#DEPENDENCY_OVERRIDE_PREFIX}
+     *
+     * @deprecated This is now an alias for {@link DependencyState#DEPENDENCY_OVERRIDE_PREFIX}
      */
     @SuppressWarnings("DeprecatedIsStillUsed")
     @Deprecated
