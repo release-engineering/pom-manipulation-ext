@@ -31,7 +31,7 @@ public class JSONUtilsTest
     {
         PME pme = JSONUtils.fileToJSON( resolveFileResource() );
 
-        assertEquals( pme.getGav().getOriginalGAV(), "org.kie:kie-parent:7.24.0.Final" );
+        assertEquals( "org.kie:kie-parent:7.24.0.Final", pme.getGav().getOriginalGAV() );
         assertEquals( 11, pme.getModules().size() );
         assertEquals( pme.getModules().get( 0 ).getGav().getPVR(), pme.getGav().getPVR() );
     }

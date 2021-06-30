@@ -92,7 +92,7 @@ public class GroovyFunctionsTest
         final PomIO pomIO = container.lookup( PomIO.class );
         final List<Project> projects = pomIO.parseProject( new File( root, "pom.xml" ) );
 
-        assertEquals( projects.size(), 3 );
+        assertEquals( 3, projects.size() );
 
         BaseScriptImplTest impl = new BaseScriptImplTest();
         Properties p = new Properties(  );
