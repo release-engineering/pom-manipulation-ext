@@ -28,7 +28,7 @@ public class StaticResourceHandler
 
     public StaticResourceHandler( String target )
     {
-        logger.info( "Handling: {} ", target );
+        logger.info( "Handling: {}", target );
 
         setDirectoriesListed(true);
         setWelcomeFiles(new String[]{ target });

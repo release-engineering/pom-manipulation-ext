@@ -134,7 +134,7 @@ public class Version
         {
             result = getBuildNumber( versions.stream().max( Comparator.comparing( v -> getBuildNumber( v ).length() ) ).orElse("") ).length();
         }
-        logger.debug( "Returning padding of {} ", result );
+        logger.debug( "Returning padding of {}", result );
         return result;
     }
 
@@ -410,7 +410,7 @@ public class Version
      */
     public static String appendQualifierSuffix( final String version, final String suffix )
     {
-        logger.debug( "Applying suffix: " + suffix + " to version " + version );
+        logger.debug( "Applying suffix: {} to version {}", suffix, version );
 
         if ( isEmpty( suffix ) )
         {
@@ -598,7 +598,7 @@ public class Version
                 }
             }
         }
-        logger.debug ("Found highest matching build number {} from set {} ", highestBuildNum, versionSet);
+        logger.debug ("Found highest matching build number {} from set {}", highestBuildNum, versionSet);
 
         return highestBuildNum;
     }

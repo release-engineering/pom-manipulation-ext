@@ -225,7 +225,7 @@ public class DefaultTranslator
             queue.add( new Task( p, endpointUrl, endpointType ) );
         }
 
-        logger.debug( "For initial sizing of {} have split the queue into {} ", initialRestMaxSize , queue.size() );
+        logger.debug( "For initial sizing of {} have split the queue into {}", initialRestMaxSize , queue.size() );
     }
 
     private void autoPartition( Endpoint endpointType, List<ProjectVersionRef> projects, Queue<Task> queue ) {
@@ -439,7 +439,7 @@ public class DefaultTranslator
                                    {
                                        this.errorString = failedResponse.mapError( ErrorMessage.class ).toString();
 
-                                       logger.debug( "Read message string {}, processed to {} ", originalBody, errorString );
+                                       logger.debug( "Read message string {}, processed to {}", originalBody, errorString );
                                    }
                                    else if (originalBody.startsWith( "javax.validation.ValidationException: " )) {
                                        this.errorString = originalBody;

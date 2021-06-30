@@ -138,7 +138,7 @@ public class ModelIO
     public Map<ArtifactRef, String> getRemoteDependencyVersionOverrides( final ProjectVersionRef ref )
                     throws ManipulationException
     {
-        logger.debug( "Resolving dependency management GAV: " + ref );
+        logger.debug( "Resolving dependency management GAV: {}", ref );
 
         final Map<ArtifactRef, String> versionOverrides = new LinkedHashMap<>();
         try
@@ -162,7 +162,7 @@ public class ModelIO
         }
         catch ( final GalleyMavenException e )
         {
-            throw new ManipulationException( "Unable to resolve: {} ", ref, e );
+            throw new ManipulationException( "Unable to resolve: {}", ref, e );
         }
 
         return versionOverrides;
@@ -185,13 +185,14 @@ public class ModelIO
     public Properties getRemotePropertyMappingOverrides( final ProjectVersionRef ref )
                     throws ManipulationException
     {
-        logger.debug( "Resolving remote property mapping POM: " + ref );
+        logger.debug( "Resolving remote property mapping POM: {}", ref );
 
         final Model m = resolveRawModel( ref );
+        final Properties p = m.getProperties();
 
-        logger.debug( "Returning override of " + m.getProperties() );
+        logger.debug( "Returning override of {}", p );
 
-        return m.getProperties();
+        return p;
     }
 
     /**
@@ -221,10 +222,10 @@ public class ModelIO
         }
         catch ( GalleyMavenException e )
         {
-            throw new ManipulationException( "Unable to resolve: {} ", ref, e );
+            throw new ManipulationException( "Unable to resolve: {}", ref, e );
         }
 
-        logger.debug( "Found pluginOverridesResolvedVersions {} ", pluginOverridesPomView );
+        logger.debug( "Found pluginOverridesResolvedVersions {}", pluginOverridesPomView );
 
         // The list of pluginOverridesPomView may be larger than those in current model pluginMgtm. Dummy up an extra
         // set of plugins with versions to handle those.
@@ -299,10 +300,9 @@ public class ModelIO
                     {
                         if ( ! isEmpty(d.getVersion()) && d.getVersion().startsWith( "${" ) )
                         {
-                            logger.debug( "Processing dependency {} and updating with {} ", d,
-                                          resolveProperty( userProperties, m.getProperties(), d.getVersion() ) );
-                            d.setVersion( resolveProperty( userProperties, m.getProperties(), d.getVersion() ) );
-
+                            final String version = resolveProperty( userProperties, m.getProperties(), d.getVersion() );
+                            logger.debug( "Processing dependency {} and updating with {}", d, version );
+                            d.setVersion( version );
                         }
                     }
                 }

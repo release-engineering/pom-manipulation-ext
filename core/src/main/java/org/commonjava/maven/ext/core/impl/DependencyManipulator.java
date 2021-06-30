@@ -257,7 +257,7 @@ public class DependencyManipulator extends CommonManipulator implements Manipula
             logger.info ("Iterating for property overrides...{}", versionPropertyUpdateMap);
             for ( Project project : versionPropertyUpdateMap.keySet() )
             {
-                logger.debug( "Checking property override within project {} ", project );
+                logger.debug( "Checking property override within project {}", project );
                 for ( final Entry<String, PropertyMapper> entry : versionPropertyUpdateMap.get( project ).entrySet() )
                 {
                     PropertiesUtils.PropertyUpdate found =
@@ -270,7 +270,7 @@ public class DependencyManipulator extends CommonManipulator implements Manipula
                         // property to update. Its possible this property has been inherited from a parent. Override in the
                         // top pom for safety.
                         logger.info( "Unable to find a property for {} to update", entry.getKey() );
-                        logger.info( "Adding property {} with {} ", entry.getKey(), entry.getValue().getNewVersion() );
+                        logger.info( "Adding property {} with {}", entry.getKey(), entry.getValue().getNewVersion() );
                         // We know the inheritance root is at position 0 in the inherited list...
                         project.getInheritedList()
                                .get( 0 )
@@ -298,7 +298,7 @@ public class DependencyManipulator extends CommonManipulator implements Manipula
         final DependencyState dependencyState = session.getState( DependencyState.class );
         final CommonState commonState = session.getState( CommonState.class );
 
-        logger.debug( "Processing project {} ", projectGA );
+        logger.debug( "Processing project {}", projectGA );
 
         Map<ArtifactRef, String> originalOverrides = new LinkedHashMap<>( overrides );
         originalOverrides = removeReactorGAs( originalOverrides );
@@ -314,7 +314,7 @@ public class DependencyManipulator extends CommonManipulator implements Manipula
         }
         catch ( InvalidRefException e )
         {
-            logger.error( "Invalid module exclusion override {} : {} ", originalOverrides, explicitOverrides );
+            logger.error( "Invalid module exclusion override {} : {}", originalOverrides, explicitOverrides );
             throw e;
         }
 
@@ -344,8 +344,9 @@ public class DependencyManipulator extends CommonManipulator implements Manipula
                                 }
                                 else
                                 {
-                                    logger.warn( "Parent reference {} replacement: {} of original version: {} violates the strict version-alignment rule!",
-                                                 ga( project.getModelParent() ), newValue, oldValue );
+                                    logger.warn( "Parent reference {}:{} replacement: {} of original version: {} violates the strict version-alignment rule!",
+                                            project.getModelParent().getGroupId(),
+                                            project.getModelParent().getArtifactId(), newValue, oldValue );
                                     // Ignore the dependency override. As found has been set to true it won't inject
                                     // a new property either.
                                     continue;
@@ -353,8 +354,9 @@ public class DependencyManipulator extends CommonManipulator implements Manipula
                             }
                         }
 
-                        logger.debug( " Modifying parent reference from {} to {} for {} ",
-                                      model.getParent().getVersion(), newValue, ga( project.getModelParent() ) );
+                        logger.debug( "Modifying parent reference from {} to {} for {}:{}",
+                                model.getParent().getVersion(), newValue, project.getModelParent().getGroupId(),
+                                project.getModelParent().getArtifactId() );
                         model.getParent().setVersion( newValue );
                         break;
                     }
@@ -406,7 +408,7 @@ public class DependencyManipulator extends CommonManipulator implements Manipula
                     newDependency.setVersion( artifactVersion );
 
                     extraDeps.add( newDependency );
-                    logger.debug( "New entry added to <DependencyManagement/> - {} : {} ", var, artifactVersion );
+                    logger.debug( "New entry added to <DependencyManagement/> - {} : {}", var, artifactVersion );
                 }
 
                 // If the model doesn't have any Dependency Management set by default, create one for it
@@ -590,7 +592,7 @@ public class DependencyManipulator extends CommonManipulator implements Manipula
                                         // foo-suffix.x-suffix. Therefore just replace with overrideVersion
                                         replaceVersion = overrideVersion;
                                     }
-                                    logger.debug ( "Resolved value is {} and replacement version is {} ", resolvedValue, replaceVersion );
+                                    logger.debug ( "Resolved value is {} and replacement version is {}", resolvedValue, replaceVersion );
 
                                     // In this case the previous value couldn't be cached even though it contained a property
                                     // as it was either multiple properties or a property combined with a hardcoded value. Therefore

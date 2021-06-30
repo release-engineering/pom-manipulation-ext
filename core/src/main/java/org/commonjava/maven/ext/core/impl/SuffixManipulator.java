@@ -93,8 +93,9 @@ public class SuffixManipulator
 
                 if ( m.matches() )
                 {
-                    logger.info( "Stripping suffix for {} and resetting parent version from {} to {}", project.getKey(), parent.getVersion(), m.group( 1 ) );
-                    parent.setVersion( m.group( 1 ) );
+                    final String version = m.group( 1 );
+                    logger.info( "Stripping suffix for {} and resetting parent version from {} to {}", project.getKey(), parent.getVersion(), version );
+                    parent.setVersion( version );
                     changed.add( project );
                 }
             }
@@ -104,8 +105,9 @@ public class SuffixManipulator
                 Matcher m = suffixStripPattern.matcher( project.getModel().getVersion() );
                 if ( m.matches() )
                 {
-                    logger.info( "Stripping suffix and resetting project version from {} to {}", project.getModel().getVersion(), m.group( 1 ) );
-                    project.getModel().setVersion( m.group( 1 ) );
+                    final String version = m.group( 1 );
+                    logger.info( "Stripping suffix and resetting project version from {} to {}", project.getModel().getVersion(), version );
+                    project.getModel().setVersion( version );
                     changed.add( project );
                 }
             }
@@ -142,7 +144,7 @@ public class SuffixManipulator
                     {
                         String stripped = m.group( 1 );
 
-                        logger.info( "Stripping suffix from plugin {} (version {}) to {} ", a, original.getVersion(), stripped );
+                        logger.info( "Stripping suffix from plugin {} (version {}) to {}", a, original.getVersion(), stripped );
 
                         // If its a property update the value otherwise inline the version change.
                         if ( original.getVersion().contains( "$" ) )
@@ -178,7 +180,7 @@ public class SuffixManipulator
                     {
                         String stripped = m.group( 1 );
 
-                        logger.info( "Stripping suffix from dependency {} (version {}) to {} ", a, original.getVersion(), stripped );
+                        logger.info( "Stripping suffix from dependency {} (version {}) to {}", a, original.getVersion(), stripped );
 
                         // If its a property update the value otherwise inline the version change.
                         if ( original.getVersion().contains( "$" ) )

@@ -69,7 +69,7 @@ public class JSONIOTest
                     throws ManipulationException, IOException
     {
         DocumentContext o = jsonIO.parseJSON( npmFile );
-        logger.debug ("Read {} ", o.jsonString());
+        logger.debug ("Read {}", o.jsonString());
         logger.debug ("File {}", FileUtils.readFileToString( npmFile, jsonIO.getCharset() ) );
         // They won't be equal as jsonString is not pretty printed.
         assertNotEquals( o.jsonString(), FileUtils.readFileToString( npmFile, jsonIO.getCharset() ) );
@@ -183,7 +183,7 @@ public class JSONIOTest
         DocumentContext doc = jsonIO.parseJSON( pluginFile );
         doc.set( modifyPath, "1.3.0.rebuild-1" );
 
-        logger.debug ("Modified {} ", doc.jsonString());
+        logger.debug ("Modified {}", doc.jsonString());
 
         File target = tf.newFile();
 
@@ -202,7 +202,7 @@ public class JSONIOTest
         DocumentContext doc = jsonIO.parseJSON( pluginFile );
         doc.set( modifyPath, "https://maven.repository.redhat.com/ga/" );
 
-        logger.debug ("Modified {} ", doc.jsonString());
+        logger.debug ("Modified {}", doc.jsonString());
 
         File target = tf.newFile();
 

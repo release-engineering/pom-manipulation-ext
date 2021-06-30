@@ -90,7 +90,8 @@ public class PropertyManipulator
                 // Only inject the new properties at the top level.
                 if ( project.isInheritanceRoot() )
                 {
-                    logger.info( "Applying property changes to: {} with {}", ga( project ), overrides );
+                    logger.info( "Applying property changes to: {}:{} with {}", project.getGroupId(),
+                            project.getArtifactId(), overrides );
 
                     project.getModel().getProperties().putAll( overrides );
 
@@ -103,13 +104,14 @@ public class PropertyManipulator
                     final Set<String> keyClone = new HashSet( project.getModel().getProperties().keySet());
                     keyClone.retainAll( overrides.keySet() );
 
-                    if (!keyClone.isEmpty())
+                    if ( !keyClone.isEmpty() )
                     {
                         final Iterator<String> keys = keyClone.iterator();
                         while (keys.hasNext())
                         {
                             final String matchingKey = keys.next();
-                            logger.info( "Overwriting property ({} in: {} with value {}", matchingKey, ga( project ), overrides.get( matchingKey ));
+                            logger.info( "Overwriting property ({} in: {}:{} with value {}", matchingKey,
+                                    project.getGroupId(), project.getArtifactId(), overrides.get( matchingKey ) );
                             project.getModel().getProperties().put( matchingKey, overrides.get( matchingKey ) );
 
                             changed.add( project );

@@ -181,7 +181,7 @@ public class PluginManipulator extends CommonManipulator implements Manipulator
                         {
                             if ( p.isInheritanceRoot() )
                             {
-                                logger.info( "Adding property {} with {} ", entry.getKey(), entry.getValue().getNewVersion() );
+                                logger.info( "Adding property {} with {}", entry.getKey(), entry.getValue().getNewVersion() );
                                 p.getModel().getProperties().setProperty( entry.getKey(), entry.getValue().getNewVersion() );
                             }
                         }
@@ -257,9 +257,9 @@ public class PluginManipulator extends CommonManipulator implements Manipulator
     private void apply( final Project project, final Model model, final Set<Plugin> overrides )
         throws ManipulationException
     {
-        if (logger.isDebugEnabled())
+        if ( logger.isDebugEnabled() )
         {
-            logger.debug( "Applying plugin changes for {} to: {} ", PluginType.RemotePM, ga( project));
+            logger.debug( "Applying plugin changes for {} to: {}", PluginType.RemotePM, ga( project ) );
         }
 
         final CommonState commonState = session.getState( CommonState.class );
@@ -475,7 +475,7 @@ public class PluginManipulator extends CommonManipulator implements Manipulator
                             }
                             else
                             {
-                                logger.debug( "Injecting execution {} ", pe );
+                                logger.debug( "Injecting execution {}", pe );
                                 plugin.getExecutions().add( pe );
                             }
                         }
@@ -499,7 +499,7 @@ public class PluginManipulator extends CommonManipulator implements Manipulator
                                 if ( originalD.getGroupId().equals( newD.getGroupId() ) && originalD.getArtifactId()
                                                                                                     .equals( newD.getArtifactId() ) )
                                 {
-                                    logger.debug( "Removing original dependency {} in favour of {} ", originalD, newD );
+                                    logger.debug( "Removing original dependency {} in favour of {}", originalD, newD );
                                     originalIt.remove();
                                     break;
                                 }

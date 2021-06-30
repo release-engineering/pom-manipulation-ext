@@ -76,7 +76,7 @@ public class XMLIO
     {
         if ( xmlFile == null || !xmlFile.exists() )
         {
-            logger.error( "Unable to locate XML File {} ", xmlFile );
+            logger.error( "Unable to locate XML File {}", xmlFile );
             throw new ManipulationException( "XML file ({}) not found.", xmlFile);
         }
         Document doc;

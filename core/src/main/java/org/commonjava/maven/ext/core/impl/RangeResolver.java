@@ -188,7 +188,7 @@ public class RangeResolver
                 final List<ArtifactVersion> versions = getVersions( new SimpleProjectRef( p.getGroupId(), p.getArtifactId() ) );
                 final ArtifactVersion result = versionRange.matchVersion( versions );
 
-                logger.debug( "Resolved range for plugin {} got versionRange {} and potential replacement of {} ", p, versionRange, result );
+                logger.debug( "Resolved range for plugin {} got versionRange {} and potential replacement of {}", p, versionRange, result );
 
                 if ( result != null )
                 {
@@ -218,7 +218,7 @@ public class RangeResolver
                 final List<ArtifactVersion> versions = getVersions( new SimpleProjectRef( d.getGroupId(), d.getArtifactId() ) );
                 final ArtifactVersion result = versionRange.matchVersion( versions );
 
-                logger.debug( "Resolved range for dependency {} got versionRange {} and potential replacement of {} ", d, versionRange, result );
+                logger.debug( "Resolved range for dependency {} got versionRange {} and potential replacement of {}", d, versionRange, result );
 
                 if ( result != null )
                 {

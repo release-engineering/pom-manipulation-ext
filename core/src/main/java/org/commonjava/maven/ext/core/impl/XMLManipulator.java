@@ -133,7 +133,7 @@ public class XMLManipulator
                 }
                 else
                 {
-                    logger.error( "XPath {} did not find any expressions within {} ", operation.getXPath(), operation.getFile() );
+                    logger.error( "XPath {} did not find any expressions within {}", operation.getXPath(), operation.getFile() );
                     throw new ManipulationException( "Did not locate XML using XPath {}", operation.getXPath() );
                 }
             }
@@ -158,7 +158,7 @@ public class XMLManipulator
         }
         catch ( XPathExpressionException e )
         {
-            logger.error( "Caught XML exception processing file {}, document context {} ", target, doc, e );
+            logger.error( "Caught XML exception processing file {}, document context {}", target, doc, e );
             throw new ManipulationException( "Caught XML exception processing file", e );
         }
     }

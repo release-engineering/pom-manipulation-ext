@@ -29,13 +29,13 @@ class GroovyModifier {
     Project project
 
      def execute() {
-         log.info("Running alterations... {} ", project.getKey() )
+         log.info("Running alterations... {}", project.getKey() )
 
          Properties p = project.getModel().getProperties();
 
          for ( String prop : p.stringPropertyNames() )
          {
-             log.debug( "Found property {} ", prop )
+             log.debug( "Found property {}", prop )
              if ( prop.equals("myMavenVersion"))
              {
                  // Split it to prevent it being interpolated by integration tests.

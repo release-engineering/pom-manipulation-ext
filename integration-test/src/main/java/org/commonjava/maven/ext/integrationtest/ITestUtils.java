@@ -208,7 +208,7 @@ public class ITestUtils
         {
             arguments.add( "--file=" + workingDir + File.separator + "pom.xml" );
         }
-        logger.info( "Invoking CLI with {} ", arguments );
+        logger.info( "Invoking CLI with {}", arguments );
         int result = new Cli().run( arguments.toArray( new String[0] ) );
 
         // This is a bit of a hack. The CLI, if log-to-file is enabled resets the logging. As we don't fork and run

@@ -115,7 +115,7 @@ public class XMLIOTest
 
         Diff diff = DiffBuilder.compare( fromFile( xmlFile ) ).withTest( Input.fromFile( target ) ).build();
 
-        logger.debug( "Difference {} ", diff );
+        logger.debug( "Difference {}", diff );
 
         String targetXML = FileUtils.readFileToString( target, Charset.defaultCharset());
         // XMLUnit only seems to support XPath 1.0 so modify the expression to find the value.
@@ -135,12 +135,12 @@ public class XMLIOTest
 
         XPath xPath = XPathFactory.newInstance().newXPath();
         NodeList nodeList = (NodeList) xPath.evaluate( updatePath, doc, XPathConstants.NODESET);
-        logger.debug  ("Found node {} with size {} ", nodeList, nodeList.getLength());
+        logger.debug  ("Found node {} with size {}", nodeList, nodeList.getLength());
 
         for ( int i = 0; i < nodeList.getLength(); i++)
         {
             Node node = nodeList.item( i );
-            logger.debug  ("Found node {} with type {} and value {} ", node.getNodeName(), node.getNodeType(), node.getTextContent());
+            logger.debug  ("Found node {} with type {} and value {}", node.getNodeName(), node.getNodeType(), node.getTextContent());
             node.setTextContent("NEW-FORMAT-" + i);
         }
 
@@ -172,7 +172,7 @@ public class XMLIOTest
 
         XPath xPath = XPathFactory.newInstance().newXPath();
         NodeList nodeList = (NodeList) xPath.evaluate( tomcatPath, doc, XPathConstants.NODESET);
-        logger.debug  ("Found node {} with size {} ", nodeList, nodeList.getLength());
+        logger.debug  ("Found node {} with size {}", nodeList, nodeList.getLength());
 
         assertEquals( 1, nodeList.getLength() );
         for ( int i = 0; i < nodeList.getLength(); i++)
@@ -210,7 +210,7 @@ public class XMLIOTest
 
         XPath xPath = XPathFactory.newInstance().newXPath();
         NodeList nodeList = (NodeList) xPath.evaluate( tomcatPath, doc, XPathConstants.NODESET );
-        logger.debug( "Found node {} with size {} ", nodeList, nodeList.getLength() );
+        logger.debug( "Found node {} with size {}", nodeList, nodeList.getLength() );
 
         assertEquals( 0, nodeList.getLength() );
     }
@@ -235,7 +235,7 @@ public class XMLIOTest
 
         XPath xPath = XPathFactory.newInstance().newXPath();
         NodeList nodeList = (NodeList) xPath.evaluate( tomcatPath, doc, XPathConstants.NODESET);
-        logger.debug  ("Found node {} with size {} ", nodeList, nodeList.getLength());
+        logger.debug  ("Found node {} with size {}", nodeList, nodeList.getLength());
 
         assertEquals( 1, nodeList.getLength() );
 

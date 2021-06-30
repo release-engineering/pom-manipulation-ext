@@ -102,10 +102,10 @@ public class RESTBOMCollector
         if ( restParam.size() > 0 )
         {
             // Call the REST to populate the result.
-            logger.debug( "Passing {} BOM GAVs following into the REST client api {} ", restParam.size(), restParam );
+            logger.debug( "Passing {} BOM GAVs following into the REST client api {}", restParam.size(), restParam );
             logger.info( "Calling REST client for BOMs..." );
             Map<ProjectVersionRef, String> restResult = state.getVersionTranslator().lookupVersions( restParam );
-            logger.debug( "REST Client returned for BOMs {} ", restResult );
+            logger.debug( "REST Client returned for BOMs {}", restResult );
 
             final ListIterator<ProjectVersionRef> emptyIterator = Collections.<ProjectVersionRef>emptyList().listIterator();
 

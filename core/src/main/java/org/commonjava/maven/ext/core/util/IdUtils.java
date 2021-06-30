@@ -95,7 +95,7 @@ public final class IdUtils
                 }
                 catch ( final InvalidRefException e )
                 {
-                    logger.error( "Skipping invalid remote management GAV: " + gav );
+                    logger.error( "Skipping invalid remote management GAV: {}", gav );
                     throw e;
                 }
             }
@@ -103,7 +103,7 @@ public final class IdUtils
             return refs;
         }
     }
-    
+
     public static String gav( final Project project )
     {
         return String.format( "%s:%s:%s", project.getGroupId(), project.getArtifactId(), project.getVersion() );

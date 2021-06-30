@@ -96,7 +96,7 @@ public class ProjectVersioningManipulator
 
         if ( !session.isEnabled() || state == null || !state.isEnabled() )
         {
-            logger.debug( getClass().getSimpleName() + ": Nothing to do!" );
+            logger.debug( "{}: Nothing to do!", getClass().getSimpleName() );
             return Collections.emptySet();
         }
 
@@ -239,7 +239,7 @@ public class ProjectVersioningManipulator
                         final String newVersion = versionsByGAV.get( gav );
                         if ( newVersion != null )
                         {
-                            logger.debug ("Examining dependency (from depMgmt) {} to change version to {} ", d, newVersion);
+                            logger.debug ("Examining dependency (from depMgmt) {} to change version to {}", d, newVersion);
                             if (d.getVersion().startsWith( "${" ))
                             {
                                 if ( PropertiesUtils.updateProperties( session, project, false, PropertiesUtils.extractPropertyName( d.getVersion() ), newVersion ) == PropertiesUtils.PropertyUpdate.NOTFOUND )
@@ -257,7 +257,7 @@ public class ProjectVersioningManipulator
                     }
                     catch ( InvalidRefException ire)
                     {
-                        logger.debug( "Unable to change version for dependency {} due to {} ", d, ire );
+                        logger.debug( "Unable to change version for dependency {} due to {}", d, ire );
                         throw ire;
                     }
                 }
@@ -283,7 +283,7 @@ public class ProjectVersioningManipulator
 
                         if ( newVersion != null && d.getVersion() != null )
                         {
-                            logger.debug ("Examining dependency {} to change version to {} ", d, newVersion);
+                            logger.debug ("Examining dependency {} to change version to {}", d, newVersion);
                             if (d.getVersion().startsWith( "${" ))
                             {
                                 if ( PropertiesUtils.updateProperties( session, project, false, PropertiesUtils.extractPropertyName( d.getVersion() ), newVersion ) == PropertiesUtils.PropertyUpdate.NOTFOUND )
@@ -301,7 +301,7 @@ public class ProjectVersioningManipulator
                     }
                     catch ( InvalidRefException ire)
                     {
-                        logger.debug( "Unable to change version for dependency {} due to {} ", d, ire );
+                        logger.debug( "Unable to change version for dependency {} due to {}", d, ire );
                         throw ire;
                     }
                 }
