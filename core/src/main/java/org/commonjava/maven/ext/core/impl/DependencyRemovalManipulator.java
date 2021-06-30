@@ -76,7 +76,7 @@ public class DependencyRemovalManipulator
 
         if ( !session.isEnabled() || !state.isEnabled() )
         {
-            logger.debug( getClass().getSimpleName() + ": Nothing to do!" );
+            logger.debug( "{}: Nothing to do!", getClass().getSimpleName() );
             return Collections.emptySet();
         }
 
@@ -99,7 +99,7 @@ public class DependencyRemovalManipulator
     {
         final DependencyRemovalState state = session.getState(DependencyRemovalState.class);
 
-        logger.info("Applying Dependency changes to: " + ga(project));
+        logger.info( "Applying Dependency changes to: {}:{}", project.getGroupId(), project.getArtifactId() );
 
         List<ProjectRef> dependenciesToRemove = state.getDependencyRemoval();
         boolean result = scanDependencies( project.getAllResolvedDependencies( session ), dependenciesToRemove, model.getDependencies());
@@ -145,7 +145,7 @@ public class DependencyRemovalManipulator
             {
                 if ( dependenciesToRemove.contains( pvr.asProjectRef() ) )
                 {
-                    logger.debug( "Removing {} ", resolvedDependencies.get( pvr ) );
+                    logger.debug( "Removing {}", resolvedDependencies.get( pvr ) );
                     dependencies.remove( resolvedDependencies.get( pvr ) );
                     result = true;
                 }

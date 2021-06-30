@@ -104,7 +104,7 @@ public class CommonManipulator
                 }
 
                 final boolean isModuleWildcard = currentKey.endsWith( "@*" );
-                logger.debug( "Is wildcard? {} and in module wildcard mode? {} ", isModuleWildcard, aWildcardMode );
+                logger.debug( "Is wildcard? {} and in module wildcard mode? {}", isModuleWildcard, aWildcardMode );
 
                 String artifactGA;
                 boolean replace = false;
@@ -146,7 +146,7 @@ public class CommonManipulator
                         {
                             // Override prevention...
                             removeGA( remainingOverrides, SimpleProjectRef.parse( artifactGA ) );
-                            logger.debug( "For module {}, ignoring dependency override for {} ", moduleGA, artifactGA);
+                            logger.debug( "For module {}, ignoring dependency override for {}", moduleGA, artifactGA);
                         }
                     }
                 }
@@ -272,24 +272,26 @@ public class CommonManipulator
                 {
                     if ( isEmpty( oldVersion ) )
                     {
-                        logger.debug( "Unable to force align as no existing version field to update for " + groupIdArtifactId + "; ignoring" );
+                        logger.debug( "Unable to force align as no existing version field to update for {}; ignoring",
+                                groupIdArtifactId );
                     }
                     else
                     {
-                        logger.warn( "Unable to force align as override version is empty for " + groupIdArtifactId
-                                                     + "; ignoring" );
+                        logger.warn( "Unable to force align as override version is empty for {}; ignoring",
+                                groupIdArtifactId );
                     }
                 }
                 else
                 {
-                    for ( String target : overrideVersion.split( "," ) )
+                    for ( final String target : overrideVersion.split( "," ) )
                     {
                         if ( target.startsWith( "+" ) )
                         {
-                            logger.info( "Adding dependency exclusion {} to dependency {} ", target.substring( 1 ),
-                                         projectVersionRef );
-                            Exclusion e = new Exclusion();
-                            e.setGroupId( target.substring( 1 ).split( ":" )[0] );
+                            final String exclusion = target.substring( 1 );
+                            logger.info( "Adding dependency exclusion {} to dependency {}", exclusion,
+                                    projectVersionRef );
+                            final Exclusion e = new Exclusion();
+                            e.setGroupId( exclusion.split( ":" )[0] );
                             e.setArtifactId( target.split( ":" )[1] );
                             wrapper.addExclusion( e );
                         }
@@ -317,14 +319,13 @@ public class CommonManipulator
         }
     }
 
-
     protected void explicitOverridePropertyUpdates( ManipulationSession session ) throws ManipulationException
     {
         // Moved this to debug as otherwise it deluges the logging.
         logger.debug ("Iterating for explicit overrides...");
         for ( Project project : explicitVersionPropertyUpdateMap.keySet() )
         {
-            logger.debug( "Checking property override within project {} ", project );
+            logger.debug( "Checking property override within project {}", project );
             for ( final Map.Entry<String, PropertyMapper> entry : explicitVersionPropertyUpdateMap.get( project ).entrySet() )
             {
                 PropertiesUtils.PropertyUpdate found =
@@ -337,7 +338,7 @@ public class CommonManipulator
                     // property to update. Its possible this property has been inherited from a parent. Override in the
                     // top pom for safety.
                     logger.info( "Unable to find a property for {} to update for explicit overrides", entry.getKey() );
-                    logger.info( "Adding property {} with {} ", entry.getKey(), entry.getValue().getNewVersion() );
+                    logger.info( "Adding property {} with {}", entry.getKey(), entry.getValue().getNewVersion() );
                     // We know the inheritance root is at position 0 in the inherited list...
                     project.getInheritedList()
                            .get( 0 )

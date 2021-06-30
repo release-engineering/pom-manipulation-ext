@@ -116,13 +116,13 @@ public class RESTCollector
         }
 
         // Call the REST to populate the result.
-        logger.debug ("Passing {} GAVs into the REST client api {} ", restLookupVersionsParamList.size(), restLookupVersionsParamList);
+        logger.debug ("Passing {} GAVs into the REST client api {}", restLookupVersionsParamList.size(), restLookupVersionsParamList);
         Map<ProjectVersionRef, String> vRestResult = state.getVersionTranslator().lookupVersions( restLookupVersionsParamList );
-        logger.info ("REST Client returned: {} ", vRestResult);
+        logger.info ("REST Client returned: {}", vRestResult);
 
-        logger.debug ("Passing {} Project GAVs into the REST client api {} ", restLookupProjectVersionParamList.size(), restLookupProjectVersionParamList);
+        logger.debug ("Passing {} Project GAVs into the REST client api {}", restLookupProjectVersionParamList.size(), restLookupProjectVersionParamList);
         Map<ProjectVersionRef, String> pvResultResult = state.getVersionTranslator().lookupProjectVersions( restLookupProjectVersionParamList );
-        logger.info ("REST Client returned for project versions: {} ", pvResultResult);
+        logger.info ("REST Client returned for project versions: {}", pvResultResult);
         Map<ProjectRef, Set<String>> versionStates = new HashMap<>();
         pvResultResult.forEach( ( key, value ) -> {
             Set<String> versions = versionStates.computeIfAbsent( key.asProjectRef(), k -> new HashSet<>() );
@@ -146,7 +146,7 @@ public class RESTCollector
                 overrides.put( a, pvResultResult.get( pvr ));
             }
         }
-        logger.debug( "Setting REST Overrides {} ", overrides );
+        logger.debug( "Setting REST Overrides {}", overrides );
         ds.setRemoteRESTOverrides( overrides );
         // Unfortunately as everything is just GAVs we have to send everything to the PluginManipulator as well.
         ps.setRemoteRESTOverrides( overrides );

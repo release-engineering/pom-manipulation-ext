@@ -802,7 +802,7 @@ public class Project
 
                     if ( profile.getId().equals( p.getId() ) )
                     {
-                        logger.debug( "Removing local profile {} ", p );
+                        logger.debug( "Removing local profile {}", p );
                         i.remove();
                         // Don't break out of the loop so we can check for active profiles
                     }

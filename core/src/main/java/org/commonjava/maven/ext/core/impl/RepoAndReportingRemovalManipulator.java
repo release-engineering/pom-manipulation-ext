@@ -87,7 +87,7 @@ public class RepoAndReportingRemovalManipulator
         final RepoReportingState state = session.getState( RepoReportingState.class );
         if ( !session.isEnabled() || !state.isEnabled() )
         {
-            logger.debug( getClass().getSimpleName() + ": Nothing to do!" );
+            logger.debug( "{}: Nothing to do!", getClass().getSimpleName() );
             return Collections.emptySet();
         }
 
@@ -100,8 +100,7 @@ public class RepoAndReportingRemovalManipulator
 
         for ( final Project project : projects )
         {
-            final String ga = ga( project );
-            logger.debug( "Applying changes to: {}", ga );
+            logger.debug( "Applying changes to: {}:{}", project.getGroupId(), project.getArtifactId() );
             final Model model = project.getModel();
 
             Iterator<Repository> it = model.getRepositories().iterator();

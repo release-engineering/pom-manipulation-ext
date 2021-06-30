@@ -62,14 +62,14 @@ public class ParentInjectionManipulator
         final ParentInjectionState state = session.getState( ParentInjectionState.class );
         if ( !session.isEnabled() || !state.isEnabled() )
         {
-            logger.debug("{}: Nothing to do!", getClass().getSimpleName());
+            logger.debug( "{}: Nothing to do!", getClass().getSimpleName() );
             return Collections.emptySet();
         }
 
         final Set<Project> changed = new HashSet<>();
 
         projects.stream().filter( Project::isInheritanceRoot ).forEach( p -> {
-            logger.debug( "Injecting parent reference {} ", state.getParentInjection() );
+            logger.debug( "Injecting parent reference {}", state.getParentInjection() );
             p.getModel().setParent( state.getParentInjection() );
             changed.add( p );
         } );
@@ -84,4 +84,3 @@ public class ParentInjectionManipulator
         return 25;
     }
 }
-

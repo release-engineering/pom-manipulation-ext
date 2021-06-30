@@ -127,7 +127,7 @@ public class ManipulationManager
      */
     public void init( final ManipulationSession session )
         throws ManipulationException {
-        logger.debug("Initialising ManipulationManager with user properties {}", session.getUserProperties());
+        logger.debug( "Initialising ManipulationManager with user properties {}", session.getUserProperties() );
 
         // We invert it as the property is to _enable_ deprecated properties - which is off by default.
         final boolean deprecatedDisabled = !Boolean.parseBoolean(session.getUserProperties().getProperty(DEPRECATED_PROPERTIES,
@@ -136,19 +136,20 @@ public class ManipulationManager
 
         session.getUserProperties().stringPropertyNames().forEach(
                 p -> {
-                    if (!p.equals("maven.repo.local") && ConfigList.allConfigValues.keySet().stream().noneMatch(p::startsWith)) {
-                        logger.warn("Unknown configuration value {}", p);
+                    if ( !p.equals("maven.repo.local") && ConfigList.allConfigValues.keySet().stream().noneMatch( p::startsWith ) )
+                    {
+                        logger.warn( "Unknown configuration value {}", p );
                     }
                     // Track deprecated properties. We have to do a rather ugly starts with instead of direct keying as
                     // some properties operate upon a prefix basis.
-                    logger.debug("Examining for deprecated properties for {}", p);
+                    logger.debug( "Examining for deprecated properties for {}", p );
                     ConfigList.allConfigValues.entrySet().stream().
-                            filter(e -> p.startsWith(e.getKey())).
-                            filter(Map.Entry::getValue).
-                            forEach(up -> deprecatedUsage.put(p, up.getKey()));
+                            filter(e -> p.startsWith( e.getKey() ) ).
+                            filter( Map.Entry::getValue ).
+                            forEach( up -> deprecatedUsage.put(p, up.getKey() ) );
                 });
 
-        if (deprecatedUsage.size() > 0)
+        if ( deprecatedUsage.size() > 0 )
         {
             deprecatedUsage.forEach( (k,v) -> logger.warn ("Located deprecated property {} in user properties (with matcher of {})", k, v) );
             if ( deprecatedDisabled )
@@ -262,7 +263,7 @@ public class ManipulationManager
         final Set<String> activeProfiles = new HashSet<>();
         final DefaultProfileManager dpm = new DefaultProfileManager( session.getSession().getContainer(), session.getUserProperties() );
 
-        logger.debug("Explicitly activating {}", session.getActiveProfiles());
+        logger.debug( "Explicitly activating {}", session.getActiveProfiles() );
         dpm.explicitlyActivate( session.getActiveProfiles() );
 
         for ( Project p : projects )
@@ -284,11 +285,13 @@ public class ManipulationManager
         }
 
 
-        if (logger.isDebugEnabled())
+        if ( logger.isDebugEnabled() )
         {
-            logger.debug("Will {}scan all profiles and returning active profiles of {} ",
-                    Boolean.parseBoolean(session.getUserProperties().getProperty(PROFILE_SCANNING, PROFILE_SCANNING_DEFAULT)) ? "not " : "",
-                    activeProfiles);
+            final String profileScanningProp = session.getUserProperties().getProperty( PROFILE_SCANNING,
+                    PROFILE_SCANNING_DEFAULT );
+            final boolean profileScanning = Boolean.parseBoolean( profileScanningProp );
+            logger.debug( "Will {}scan all profiles and returning active profiles of {}", profileScanning ? "not " : "",
+                    activeProfiles );
         }
 
         return activeProfiles;

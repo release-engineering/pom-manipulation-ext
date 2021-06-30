@@ -80,7 +80,7 @@ public class JSONManipulator
         final JSONState state = session.getState( JSONState.class );
         if ( !session.isEnabled() || !state.isEnabled() )
         {
-            logger.debug( getClass().getSimpleName() + ": Nothing to do!" );
+            logger.debug( "{}: Nothing to do!", getClass().getSimpleName() );
             return Collections.emptySet();
         }
 
@@ -117,7 +117,7 @@ public class JSONManipulator
         {
             if ( !target.exists() )
             {
-                logger.error( "Unable to locate JSON file {} ", target );
+                logger.error( "Unable to locate JSON file {}", target );
                 throw new ManipulationException( "Unable to locate JSON file {}", target );
             }
 
@@ -128,12 +128,12 @@ public class JSONManipulator
             {
                 if ( project.isIncrementalPME() )
                 {
-                    logger.warn ("Did not locate JSON using XPath " + operation.getXPath() );
+                    logger.warn( "Did not locate JSON using XPath {}", operation.getXPath() );
                     return;
                 }
                 else
                 {
-                    logger.error( "XPath {} did not find any expressions within {} ", operation.getXPath(), operation.getFile() );
+                    logger.error( "XPath {} did not find any expressions within {}", operation.getXPath(), operation.getFile() );
                     throw new ManipulationException( "XPath did not resolve to a valid value" );
                 }
             }
@@ -155,7 +155,7 @@ public class JSONManipulator
         }
         catch ( JsonPathException e )
         {
-            logger.error( "Caught JSON exception processing file {}, document context {} ", target, dc, e );
+            logger.error( "Caught JSON exception processing file {}, document context {}", target, dc, e );
             throw new ManipulationException( "Caught JsonPath", e );
         }
     }

@@ -127,7 +127,8 @@ public class WildcardMap<T>
             // Erase any previous mappings.
             if (!vMap.isEmpty())
             {
-                logger.warn ("Emptying map with keys " + vMap.keySet() + " as replacing with wildcard mapping " + key);
+                logger.warn( "Emptying map with keys {} as replacing with wildcard mapping {}",
+                        vMap.keySet(), key );
             }
             vMap.clear();
         }
@@ -144,8 +145,8 @@ public class WildcardMap<T>
         }
         if ( wildcard )
         {
-            logger.warn ("Unable to add " + key + " with value " + value +
-                    " as wildcard mapping for " + groupId + " already exists.");
+            logger.warn( "Unable to add {} with value {} as wildcard mapping for {} already exists.",
+                    key, value, groupId );
         }
         else
         {

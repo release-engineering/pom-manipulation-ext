@@ -155,10 +155,10 @@ public class PomIO
             if ( executionRoot.equals( pom ))
             {
 
-                if (logger.isDebugEnabled())
+                if ( logger.isDebugEnabled() )
                 {
-                    logger.debug("Setting execution root to {} with file {}" +
-                            (project.isInheritanceRoot() ? " and is the inheritance root. " : ""), project, pom);
+                    final String s = project.isInheritanceRoot() ? " and is the inheritance root. " : "";
+                    logger.debug( "Setting execution root to {} with file {}{}", project, pom, s );
                 }
 
                 project.setExecutionRoot ();
@@ -361,7 +361,7 @@ public class PomIO
                 final File pom = pendingPoms.removeFirst();
                 seen.add( pom );
 
-                logger.debug("PEEK: {}", pom);
+                logger.debug( "PEEK: {}", pom );
 
                 final PomPeek peek = new PomPeek( pom );
 
@@ -379,7 +379,7 @@ public class PomIO
                     final String relPath = peek.getParentRelativePath();
                     if ( relPath != null )
                     {
-                        logger.debug("Found parent relativePath: {} in pom: {}", relPath, pom);
+                        logger.debug( "Found parent relativePath: {} in pom: {}", relPath, pom );
 
                         File parent = new File( dir, relPath );
                         if ( parent.isDirectory() )
@@ -400,8 +400,8 @@ public class PomIO
                         }
                         else
                         {
-                            logger.debug("Skipping reference to non-existent parent relativePath: '{}' in: {}",
-                                    relPath, pom);
+                            logger.debug( "Skipping reference to non-existent parent relativePath: '{}' in: {}",
+                                    relPath, pom );
                         }
                     }
 
@@ -410,9 +410,9 @@ public class PomIO
                     {
                         for ( final String module : modules )
                         {
-                            if (logger.isDebugEnabled())
+                            if ( logger.isDebugEnabled() )
                             {
-                                logger.debug("Found module: {} in pom: {}", module, pom);
+                                logger.debug( "Found module: {} in pom: {}", module, pom );
                             }
 
                             File modPom = new File( dir, module );
@@ -428,7 +428,7 @@ public class PomIO
                             }
                             else
                             {
-                                logger.debug("Skipping reference to non-existent module: '{}' in: {}", module, pom);
+                                logger.debug( "Skipping reference to non-existent module: '{}' in: {}", module, pom );
                             }
                         }
                     }
@@ -449,7 +449,7 @@ public class PomIO
                 }
                 if ( p.getPom().equals( topLevelParent ) )
                 {
-                    logger.debug("Setting top level parent to {} :: {}", p.getPom(), p.getKey());
+                    logger.debug( "Setting top level parent to {} :: {}", p.getPom(), p.getKey() );
                     p.setInheritanceRoot( true );
                 }
             }

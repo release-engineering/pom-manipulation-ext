@@ -75,10 +75,7 @@ public abstract class BasePluginRemovalManipulator
 
     protected boolean apply( final Project project, final Model model, final PluginRemovalState state )
     {
-        if ( logger.isDebugEnabled() )
-        {
-            logger.debug( "Applying plugin changes to: {}", ga( project ) );
-        }
+        logger.debug( "Applying plugin changes to: {}:{}", project.getGroupId(), project.getArtifactId() );
 
         boolean result = false;
         List<ProjectRef> pluginsToRemove = state.getPluginRemoval();
@@ -108,7 +105,7 @@ public abstract class BasePluginRemovalManipulator
                 Plugin p = it.next();
                 if ( pluginsToRemove.contains( SimpleProjectRef.parse( p.getKey() ) ) )
                 {
-                    logger.debug( "Removing {} ", p );
+                    logger.debug( "Removing {}", p );
                     it.remove();
                     result = true;
                 }

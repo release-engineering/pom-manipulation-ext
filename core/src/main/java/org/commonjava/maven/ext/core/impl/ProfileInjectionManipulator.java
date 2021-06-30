@@ -28,6 +28,7 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
+
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -79,7 +80,7 @@ public class ProfileInjectionManipulator
         final ProfileInjectionState state = session.getState( ProfileInjectionState.class );
         if ( !session.isEnabled() || !state.isEnabled() )
         {
-            logger.debug( getClass().getSimpleName() + ": Nothing to do!" );
+            logger.debug( "{}: Nothing to do!", getClass().getSimpleName() );
             return Collections.emptySet();
         }
 
@@ -90,10 +91,10 @@ public class ProfileInjectionManipulator
             final List<Profile> remoteProfiles = modelBuilder.resolveRawModel( p ).getProfiles();
 
             projects.stream().filter( Project::isInheritanceRoot ).forEach( project -> {
-                    logger.info( "Applying changes to: {} ", ga( project ) );
-                    project.updateProfiles( remoteProfiles );
-                    changed.add( project );
-                } );
+                logger.info( "Applying changes to: {}:{}", project.getGroupId(), project.getArtifactId() );
+                project.updateProfiles(remoteProfiles);
+                changed.add(project);
+            });
         }
 
         return changed;

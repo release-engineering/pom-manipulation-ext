@@ -167,7 +167,7 @@ public abstract class BaseScriptUtils extends Script implements MavenBaseScript
         }
         if ( thisMapping != null )
         {
-            logger.info( "Comparing requested GAV {} with target GAV build {} to this GAV {} with known build {} ",
+            logger.info( "Comparing requested GAV {} with target GAV build {} to this GAV {} with known build {}",
                          gav, targetBuild, getGAV(), thisMapping );
             if ( ! gav.getVersionString().equals( getGAV().getVersionString() ) )
             {

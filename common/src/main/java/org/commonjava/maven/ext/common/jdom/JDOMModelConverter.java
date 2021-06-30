@@ -1799,7 +1799,7 @@ public class JDOMModelConverter
     {
         if ( element != null )
         {
-            logger.debug ("Removing pre-existing for " + element);
+            logger.debug( "Removing pre-existing for {}", element );
             Iterator elIt = element.getChildren( tag, element.getNamespace() ).iterator();
 
             while ( elIt.hasNext() )

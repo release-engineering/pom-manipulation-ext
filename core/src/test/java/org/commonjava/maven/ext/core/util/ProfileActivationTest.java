@@ -59,7 +59,7 @@ public class ProfileActivationTest
         Set<String> activeProfiles = (Set<String>) TestUtils.executeMethod( smc.getManager(), "parseActiveProfiles", new Class[] { ManipulationSession.class,
                         List.class }, new Object[] { smc.getSession(), p } );
 
-        logger.info( "Returning active profiles of {} ", activeProfiles );
+        logger.info( "Returning active profiles of {}", activeProfiles );
 
         assertEquals( 2, activeProfiles.size() );
     }

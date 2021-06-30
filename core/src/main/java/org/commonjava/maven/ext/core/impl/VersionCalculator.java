@@ -182,7 +182,7 @@ public class VersionCalculator
 
         if (logger.isDebugEnabled())
         {
-            logger.debug( "Got the following original version: {} for groupId:artifactId {}:{} ", version, groupId,
+            logger.debug( "Got the following original version: {} for groupId:artifactId {}:{}", version, groupId,
                     artifactId );
             logger.debug( "Got the following version suffixes:{}  Static: {}{}  Incremental: {}", System.lineSeparator(),
                     staticSuffix, System.lineSeparator(), incrementalSuffix );
@@ -281,7 +281,7 @@ public class VersionCalculator
     private Set<String> getMetadataVersions( final String groupId, final String artifactId )
         throws ManipulationException
     {
-        logger.debug( "Reading available versions from repository metadata for: " + groupId + ":" + artifactId );
+        logger.debug( "Reading available versions from repository metadata for: {}:{}", groupId, artifactId );
 
         Set<String> versions = new HashSet<>();
         try

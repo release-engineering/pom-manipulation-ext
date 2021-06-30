@@ -91,7 +91,7 @@ public abstract class BaseGroovyManipulator
         {
             final List<File> result = new ArrayList<>();
 
-            logger.debug( "Processing groovy scripts {} ", value );
+            logger.debug( "Processing groovy scripts {}", value );
             try
             {
                 final String[] scripts = value.split( "," );
@@ -100,13 +100,14 @@ public abstract class BaseGroovyManipulator
                     File found;
                     if ( script.startsWith( "http" ) || script.startsWith( "file" ))
                     {
-                        logger.info( "Attempting to read URL {} ", script );
+                        logger.info( "Attempting to read URL {}", script );
                         found = fileIO.resolveURL( script );
                     }
                     else
                     {
                         final ArtifactRef ar = SimpleScopedArtifactRef.parse( script );
-                        logger.info( "Attempting to read GAV {} with classifier {} and type {} ", ar.asProjectVersionRef(), ar.getClassifier(), ar.getType() );
+                        logger.info( "Attempting to read GAV {} with classifier {} and type {}",
+                                ar.asProjectVersionRef(), ar.getClassifier(), ar.getType() );
                         found = modelIO.resolveRawFile( ar );
                     }
                     result.add( found );
@@ -158,11 +159,12 @@ public abstract class BaseGroovyManipulator
         {
             try
             {
-                logger.debug ( "Failure when injecting into script {} ", FileUtils.readFileToString( groovyScript, StandardCharsets.UTF_8 ), e );
+                    logger.error( "Failure when injecting into script {}",
+                            FileUtils.readFileToString( groovyScript, StandardCharsets.UTF_8 ), e );
             }
             catch ( IOException e1 )
             {
-                logger.debug ("Unable to read script file {} for debugging! {} ", groovyScript, e1);
+                logger.error( "Unable to read script file {} for debugging!", groovyScript, e1 );
             }
             throw new ManipulationException( "Unable to inject values into base script", e );
         }
@@ -170,11 +172,12 @@ public abstract class BaseGroovyManipulator
         {
             try
             {
-                logger.debug ( "Failure when parsing script {} ", FileUtils.readFileToString( groovyScript, StandardCharsets.UTF_8 ), e );
+                logger.error( "Failure when parsing script {}",
+                        FileUtils.readFileToString( groovyScript, StandardCharsets.UTF_8 ), e );
             }
             catch ( IOException e1 )
             {
-                logger.debug ("Unable to read script file {} for debugging! {} ", groovyScript, e1);
+                logger.error( "Unable to read script file {} for debugging!", groovyScript, e1 );
             }
             throw new ManipulationException( "Unable to parse script", e );
         }

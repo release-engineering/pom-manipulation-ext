@@ -93,8 +93,8 @@ public class RepositoryInjectionManipulator
 
         for ( final Project project : projects )
         {
-            final String ga = ga( project );
-            logger.info( "Applying changes to: " + ga );
+            logger.info( "Applying changes to: {}:{}", project.getGroupId(), project.getArtifactId() );
+
             final Model model = project.getModel();
 
             if ( checkProject( state, project ) )
@@ -145,7 +145,7 @@ public class RepositoryInjectionManipulator
 
             if ( repository.getId().equals( r.getId() ) )
             {
-                logger.debug("Removing local repository {} ", r);
+                logger.debug("Removing local repository {}", r);
                 i.remove();
                 break;
             }
@@ -190,4 +190,3 @@ public class RepositoryInjectionManipulator
         return 65;
     }
 }
-

@@ -114,7 +114,7 @@ public class JSONIO
         catch ( ManipulationException e )
         {
             logger.error( "Unable to detect eol for file: {}", jsonFile, e );
-            throw new ManipulationException( "Unable to detect eol for file {} ", jsonFile, e );
+            throw new ManipulationException( "Unable to detect eol for file {}", jsonFile, e );
         }
         return lf;
     }

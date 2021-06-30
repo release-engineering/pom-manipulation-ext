@@ -125,7 +125,7 @@ public class RelocationState
             dependencyRelocations.put( sp, new SimpleProjectVersionRef( newGroupId, newArtifactId, version ) );
         }
 
-        logger.trace ("Wildcard map {} ", dependencyRelocations);
+        logger.trace ("Wildcard map {}", dependencyRelocations);
     }
 
     /**

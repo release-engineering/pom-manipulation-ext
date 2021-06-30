@@ -101,11 +101,11 @@ public final class PropertiesUtils
     {
         final String resolvedValue = PropertyResolver.resolveProperties( session, project.getInheritedList(), "${" + key + '}' );
 
-        logger.debug( "Fully resolvedValue is {} for {} ", resolvedValue, key );
+        logger.debug( "Fully resolvedValue is {} for {}", resolvedValue, key );
 
         if ( "project.version".equals( key ) )
         {
-            logger.debug( "Not updating key {} with {} ", key, newValue );
+            logger.debug( "Not updating key {} with {}", key, newValue );
             return PropertyUpdate.IGNORE;
         }
 
@@ -113,7 +113,7 @@ public final class PropertiesUtils
         {
             if ( p.getModel().getProperties().containsKey( key ) )
             {
-                logger.trace( "Searching properties of {} ", p );
+                logger.trace( "Searching properties of {}", p );
                 return internalUpdateProperty( session, p, ignoreStrict, key, newValue, resolvedValue,
                                                p.getModel().getProperties() );
             }
@@ -121,7 +121,7 @@ public final class PropertiesUtils
             {
                 for ( Profile pr : ProfileUtils.getProfiles( session, p.getModel() ) )
                 {
-                    logger.trace( "Searching properties of profile {} within project {} ", pr.getId(), p );
+                    logger.trace( "Searching properties of profile {} within project {}", pr.getId(), p );
                     // Lets check the profiles for property updates...
                     if ( pr.getProperties().containsKey( key ) )
                     {
@@ -141,7 +141,7 @@ public final class PropertiesUtils
         final CommonState state = session.getState( CommonState.class );
         final String oldValue = props.getProperty( key );
 
-        logger.debug( "Examining property {} / {} (resolved {}) with {} ", key, oldValue, resolvedValue, newValue );
+        logger.debug( "Examining property {} / {} (resolved {}) with {}", key, oldValue, resolvedValue, newValue );
 
         PropertyUpdate found = PropertyUpdate.FOUND;
 
@@ -155,12 +155,13 @@ public final class PropertiesUtils
         if ( oldValue != null && oldValue.startsWith( "${" ) && oldValue.endsWith( "}" ) && !(
                         StringUtils.countMatches( oldValue, "${" ) > 1 ) )
         {
-            logger.debug( "Recursively resolving {} ", oldValue.substring( 2, oldValue.length() - 1 ) );
+            final String newKey = oldValue.substring( 2, oldValue.length() - 1 );
 
-            if ( updateProperties( session, p, ignoreStrict, oldValue.substring( 2, oldValue.length() - 1 ), newValue )
-                            == PropertyUpdate.NOTFOUND )
+            logger.debug( "Recursively resolving {}", newKey );
+
+            if ( updateProperties( session, p, ignoreStrict, newKey, newValue ) == PropertyUpdate.NOTFOUND )
             {
-                logger.error( "Recursive property not found for {} with {} ", oldValue, newValue );
+                logger.error( "Recursive property not found for {} with {}", oldValue, newValue );
                 return PropertyUpdate.NOTFOUND;
             }
         }
@@ -207,11 +208,11 @@ public final class PropertiesUtils
                 }
                 if ( resolvedValue.equals( newValue ) )
                 {
-                    logger.warn( "Nothing to update as original key {} value matches new value {} ", key, newValue );
+                    logger.warn( "Nothing to update as original key {} value matches new value {}", key, newValue );
                     found = PropertyUpdate.IGNORE;
                 }
                 newValue = oldValue + StringUtils.removeStart( newValue, resolvedValue );
-                logger.info( "Ignoring new value due to embedded property {} and appending {} ", oldValue, newValue );
+                logger.info( "Ignoring new value due to embedded property {} and appending {}", oldValue, newValue );
             }
 
             props.setProperty( key, newValue );
@@ -333,7 +334,7 @@ public final class PropertiesUtils
                             origValue = origValue.substring( 0, origValue.indexOf( suffix ) - 1 );
                             v = origValue;
                             osgiVersion = Version.getOsgiVersion( v );
-                            logger.debug( "Updating version to {} and for oldValue {} with newValue {} ", v,
+                            logger.debug( "Updating version to {} and for oldValue {} with newValue {}", v,
                                           oldValueCache, newValue );
 
                         }
@@ -424,7 +425,7 @@ public final class PropertiesUtils
             }
             else
             {
-                logger.debug( "For {} ; original version was a property mapping; caching new value for update {} -> {} for project {} ",
+                logger.debug( "For {} ; original version was a property mapping; caching new value for update {} -> {} for project {}",
                               originalType, oldProperty, newVersion, project );
 
                 final String oldVersionProp = oldVersion.substring( 2, oldVersion.length() - 1 );
@@ -463,7 +464,7 @@ public final class PropertiesUtils
                                           oldVersionProp, existingPropertyMapping, newVersion, originalType,
                                           container.getDependencies() );
                             throw new ManipulationException(
-                                            "Property replacement clash - updating property '{}' to both {} and {} ",
+                                            "Property replacement clash - updating property '{}' to both {} and {}",
                                             oldVersionProp, existingPropertyMapping, newVersion );
                         }
                         else
@@ -482,7 +483,7 @@ public final class PropertiesUtils
                 container.setOriginalVersion( findProperty( project, oldVersionProp ) );
                 container.setNewVersion( newVersion );
 
-                logger.debug( "Container is {} ", container );
+                logger.debug( "Container is {}", container );
                 result = true;
             }
         }
@@ -527,7 +528,7 @@ public final class PropertiesUtils
 
             if ( !currentProjectVersionMapper.getDependencies().contains( pvr.asProjectRef() ) )
             {
-                logger.debug( "Scanning project {} with version {} and original value {} ", project, version,
+                logger.debug( "Scanning project {} with version {} and original value {}", project, version,
                               currentProjectVersionMapper.getOriginalVersion() );
 
                 if ( cState.getStrictDependencyPluginPropertyValidation() == 2 )
@@ -545,7 +546,7 @@ public final class PropertiesUtils
                                                                    .equals( allProjectMapper.get( version )
                                                                                             .getOriginalVersion() ) )
                         {
-                            logger.warn( "Project {} had a property {} that failed to validate to new version {} and is reverted to {} ",
+                            logger.warn( "Project {} had a property {} that failed to validate to new version {} and is reverted to {}",
                                          p, version, allProjectMapper.get( version ).getNewVersion(),
                                          allProjectMapper.get( version ).getOriginalVersion() );
                             allProjectMapper.get( version ).setNewVersion( currentProjectVersionMapper.getOriginalVersion() );

@@ -76,8 +76,7 @@ public class ProfileRemovalManipulator
 
         for ( final Project project : projects )
         {
-            final String ga = ga( project );
-            logger.info( "Applying changes to: " + ga );
+            logger.info( "Applying changes to: {}:{}", project.getGroupId(), project.getArtifactId() );
 
             final Model model = project.getModel();
             final List<Profile> profiles = model.getProfiles();
