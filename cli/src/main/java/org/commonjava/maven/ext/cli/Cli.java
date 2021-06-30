@@ -275,8 +275,8 @@ public class Cli implements Callable<Integer>
             {
                 List<ArtifactRef> ts = RESTCollector.establishAllDependencies( session, pomIO.parseProject( session.getPom() ),
                                                                               profiles ).stream().sorted().collect(Collectors.toList());
-                System.out.format( "Found %s dependencies\n", ts.size());
-                System.out.format("\u001B[32m%-80s%-20s%-20s%-20s\033[0m%n",
+                System.out.format( "Found %d dependencies%n", ts.size() );
+                System.out.format( "\u001B[32m%-80s%-20s%-20s%-20s\033[0m%n",
                                   StringUtils.center( "GAV", 60 ), "TYPE", "CLASSIFIER", "SCOPE" );
 
                 for ( ArtifactRef a : ts )
