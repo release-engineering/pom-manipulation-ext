@@ -567,7 +567,7 @@
                 <goal>perform</goal>
               </goals>
               <configuration>
-                <arguments>-Prelease -DskipTests=true</arguments>
+                <arguments>-Prelease -DskipTests=true -Dlicense.skip=true</arguments>
               </configuration>
             </execution>
           </executions>
