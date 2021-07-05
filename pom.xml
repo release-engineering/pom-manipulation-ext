@@ -22,7 +22,7 @@
   <parent>
     <groupId>com.redhat.rcm</groupId>
     <artifactId>redhat-releng-tools</artifactId>
-    <version>11-SNAPSHOT</version>
+    <version>11</version>
   </parent>
 
   <groupId>org.commonjava.maven.ext</groupId>
@@ -75,6 +75,7 @@
 
     <javaVersion>1.8</javaVersion>
     <javaTestVersion>${javaVersion}</javaTestVersion>
+    <addJarIndex>false</addJarIndex>
 
     <mavenVersion>3.5.0</mavenVersion>
     <atlasVersion>0.17.1</atlasVersion>
@@ -542,26 +543,9 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-release-plugin</artifactId>
-          <executions>
-            <execution>
-              <id>default-cli</id>
-              <goals>
-                <goal>prepare</goal>
-              </goals>
-              <configuration>
-                <arguments>-Prelease,run-its</arguments>
-              </configuration>
-            </execution>
-            <execution>
-              <id>second-cli</id>
-              <goals>
-                <goal>perform</goal>
-              </goals>
-              <configuration>
-                <arguments>-Prelease -DskipTests=true -Dlicense.skip=true</arguments>
-              </configuration>
-            </execution>
-          </executions>
+          <configuration>
+            <releaseProfiles>run-its,skipLicenseOnPerformRelease</releaseProfiles>
+          </configuration>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>

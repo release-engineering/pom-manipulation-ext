@@ -358,13 +358,18 @@ fi
 ### Run the Release
 
 ```
-mvn clean release:prepare release:perform@second-cli -Prelease
+mvn clean release:prepare release:perform -Prelease
 ```
 
 Or, if you have a GPG profile in your `$HOME/.m2/settings.xml`:
 ```
-mvn clean release:prepare release:perform@second-cli -Prelease -Pgpg
+mvn clean release:prepare release:perform -Prelease -Pgpg
 ```
+
+**Note**: Due to quirks with the Maven release plugin, to avoid running the integration tests for both `prepare` and `perform`
+goals, the pom is configured to run the tests in the `perform` goal using the `releaseProfiles` configuration.
+This does mean that if an error occurs the developer may have to roll back changes from GitHub and drop the Sonatype staging
+repositories.
 
 ### Roll Back a Release
 

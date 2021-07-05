@@ -306,7 +306,7 @@ public class CliTest
                 + "com.jayway.jsonpath:json-path:2.3.0                                             jar                                     compile             \n"
                 + "com.konghq:unirest-java:3.[.\\d+]+\\s+                                          jar                                     compile             \n"
                 + "com.konghq:unirest-objectmapper-jackson:3.[.\\d+]+\\s+                          jar                                     compile             \n"
-                + "com.redhat.rcm:redhat-releng-tools:11-SNAPSHOT\\s+                              pom                                     compile             \n"
+                + "com.redhat.rcm:redhat-releng-tools:11\\s+                                       pom                                     compile             \n"
                 + "com.soebes.maven.plugins:iterator-maven-plugin:0.[.\\d+]+\\s+                   maven-plugin                                                \n"
                 + "com.squareup:javapoet:1.[.\\d+]+\\s+                                            jar                                     compile             \n"
                 + "commons-codec:commons-codec:1.[.\\d+]+\\s+                                      jar                                     compile             \n"
