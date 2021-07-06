@@ -338,6 +338,7 @@
               <skipTests>false</skipTests>
               <runOrder>alphabetical</runOrder>
               <systemPropertyVariables>
+                <selectedTest>${selectedTest}</selectedTest>
                 <buildDirectory>${project.build.directory}</buildDirectory>
                 <maven.home>${it.maven.home}</maven.home>
                 <localRepositoryPath>${localRepositoryUrlCli}</localRepositoryPath>
