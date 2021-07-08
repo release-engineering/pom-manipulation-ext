@@ -79,6 +79,8 @@ import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static org.commonjava.maven.ext.core.state.VersioningState.VERSION_SUFFIX_SNAPSHOT_SYSPROP;
+
 @Command( name = "PME",
           description = "CLI to run PME",
           mixinStandardHelpOptions = true, // add --help and --version options
@@ -273,6 +275,9 @@ public class Cli implements Callable<Integer>
 
             if (printProjectDeps)
             {
+                // When just listing dependencies we don't want to strip any snapshot suffix.
+                session.getUserProperties().put( VERSION_SUFFIX_SNAPSHOT_SYSPROP, "true");
+                session.reinitialiseStates();
                 List<ArtifactRef> ts = RESTCollector.establishAllDependencies( session, pomIO.parseProject( session.getPom() ),
                                                                               profiles ).stream().sorted().collect(Collectors.toList());
                 System.out.format( "Found %d dependencies%n", ts.size() );

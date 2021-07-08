@@ -22,7 +22,7 @@
   <parent>
     <groupId>com.redhat.rcm</groupId>
     <artifactId>redhat-releng-tools</artifactId>
-    <version>10</version>
+    <version>11</version>
   </parent>
 
   <groupId>org.commonjava.maven.ext</groupId>
@@ -75,6 +75,7 @@
 
     <javaVersion>1.8</javaVersion>
     <javaTestVersion>${javaVersion}</javaTestVersion>
+    <addJarIndex>false</addJarIndex>
 
     <mavenVersion>3.5.0</mavenVersion>
     <atlasVersion>0.17.1</atlasVersion>
@@ -522,11 +523,6 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-assembly-plugin</artifactId>
-          <configuration>
-            <archive>
-              <index>false</index>
-            </archive>
-          </configuration>
           <executions>
             <execution>
               <id>make-assembly</id>
@@ -548,49 +544,28 @@
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-release-plugin</artifactId>
           <configuration>
-            <mavenExecutorId>forked-path</mavenExecutorId>
-            <useReleaseProfile>false</useReleaseProfile>
+            <releaseProfiles>run-its,skipLicenseOnPerformRelease</releaseProfiles>
           </configuration>
-          <executions>
-            <execution>
-              <id>default-cli</id>
-              <goals>
-                <goal>prepare</goal>
-              </goals>
-              <configuration>
-                <arguments>-Prelease,run-its</arguments>
-              </configuration>
-            </execution>
-            <execution>
-              <id>second-cli</id>
-              <goals>
-                <goal>perform</goal>
-              </goals>
-              <configuration>
-                <arguments>-Prelease -DskipTests=true -Dlicense.skip=true</arguments>
-              </configuration>
-            </execution>
-          </executions>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-shade-plugin</artifactId>
-          <version>3.2.1</version>
+          <version>3.2.4</version>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-dependency-plugin</artifactId>
-          <version>3.1.1</version>
+          <version>3.2.0</version>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-invoker-plugin</artifactId>
-          <version>3.2.1</version>
+          <version>3.2.2</version>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-project-info-reports-plugin</artifactId>
-          <version>3.0.0</version>
+          <version>3.1.2</version>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
@@ -632,12 +607,12 @@
         <plugin>
           <groupId>org.codehaus.mojo</groupId>
           <artifactId>animal-sniffer-maven-plugin</artifactId>
-          <version>1.18</version>
+          <version>1.20</version>
         </plugin>
         <plugin>
           <groupId>org.jacoco</groupId>
           <artifactId>jacoco-maven-plugin</artifactId>
-          <version>0.8.6</version>
+          <version>0.8.7</version>
         </plugin>
         <plugin>
           <groupId>org.bsc.maven</groupId>
@@ -647,15 +622,7 @@
         <plugin>
           <groupId>org.projectlombok</groupId>
           <artifactId>lombok-maven-plugin</artifactId>
-          <version>1.18.12.0</version>
-        </plugin>
-        <plugin>
-          <artifactId>maven-jar-plugin</artifactId>
-          <configuration>
-            <archive>
-              <index>false</index>
-            </archive>
-          </configuration>
+          <version>1.18.20.0</version>
         </plugin>
       </plugins>
     </pluginManagement>

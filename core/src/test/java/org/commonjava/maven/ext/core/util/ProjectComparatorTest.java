@@ -167,14 +167,14 @@ public class ProjectComparatorTest
 
         String result = ProjectComparator.compareProjects( session, new PME(), relocationState.getDependencyRelocations(),
                                            projectOriginal, projectNew );
-   
+
         assertTrue( result.contains( "Managed dependencies :" ) );
         assertTrue( result.contains( "Project version :" ) );
         assertTrue( result.contains( "-redhat-1" ) );
         assertTrue( result.contains( "-->" ) );
         assertFalse( result.contains( "org.foobar" ) );
         assertTrue( result.contains( "Non-Aligned Managed dependencies : com.fasterxml.jackson.core:jackson-annotations:jar:2." ) );
-        assertTrue( result.contains( "Non-Aligned Managed plugins : org.codehaus.mojo:animal-sniffer-maven-plugin:1.1" ) );
+        assertTrue( result.contains( "Non-Aligned Managed plugins : org.codehaus.mojo:animal-sniffer-maven-plugin:1.2" ) );
     }
 
     @Test
