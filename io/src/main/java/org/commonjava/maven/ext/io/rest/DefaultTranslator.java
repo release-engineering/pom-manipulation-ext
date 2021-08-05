@@ -423,7 +423,7 @@ public class DefaultTranslator
                                {
                                    String originalBody = failedResponse.getParsingError().get().getOriginalBody();
 
-                                   if ( originalBody.length() == 0 )
+                                   if ( originalBody.isEmpty() )
                                    {
                                        this.errorString = "No content to read.";
                                    }
@@ -441,7 +441,8 @@ public class DefaultTranslator
 
                                        logger.debug( "Read message string {}, processed to {}", originalBody, errorString );
                                    }
-                                   else if (originalBody.startsWith( "javax.validation.ValidationException: " )) {
+                                   else if ( originalBody.startsWith( "javax.validation.ValidationException: " ) )
+                                   {
                                        this.errorString = originalBody;
                                    }
                                    else

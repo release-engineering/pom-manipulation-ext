@@ -25,4 +25,4 @@ pomFile.eachLine {
    }
 }
 
-assert message == 0
+assert message == 2

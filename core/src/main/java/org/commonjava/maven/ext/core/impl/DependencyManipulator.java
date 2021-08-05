@@ -55,6 +55,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import static org.apache.commons.lang.StringUtils.isEmpty;
+import static org.apache.commons.lang.StringUtils.startsWith;
 import static org.commonjava.maven.ext.core.util.IdUtils.ga;
 
 /**
@@ -641,12 +642,13 @@ public class DependencyManipulator extends CommonManipulator implements Manipula
     private void validateDependenciesUpdatedProperty( CommonState cState, Project p, Map<ArtifactRef, Dependency> dependencies )
                     throws ManipulationException
     {
-        for ( ArtifactRef d : dependencies.keySet() )
+        for ( Entry<ArtifactRef, Dependency> entry : dependencies.entrySet() )
         {
-            String versionProperty = dependencies.get( d ).getVersion();
-            if ( versionProperty.startsWith( "${" ) )
+            String versionProperty = entry.getValue().getVersion();
+
+            if ( startsWith( versionProperty, "${" ) )
             {
-                PropertiesUtils.verifyPropertyMapping( cState, p, versionPropertyUpdateMap, d,
+                PropertiesUtils.verifyPropertyMapping( cState, p, versionPropertyUpdateMap, entry.getKey(),
                                                        PropertiesUtils.extractPropertyName( versionProperty ) );
             }
         }

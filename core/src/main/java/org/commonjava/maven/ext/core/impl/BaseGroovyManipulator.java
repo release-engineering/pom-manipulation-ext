@@ -98,7 +98,7 @@ public abstract class BaseGroovyManipulator
                 for ( final String script : scripts )
                 {
                     File found;
-                    if ( script.startsWith( "http" ) || script.startsWith( "file" ))
+                    if ( script.startsWith( "http" ) || script.startsWith( "file" ) )
                     {
                         logger.info( "Attempting to read URL {}", script );
                         found = fileIO.resolveURL( script );

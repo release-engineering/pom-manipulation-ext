@@ -55,6 +55,7 @@ import java.util.stream.Collectors;
 
 import static org.apache.commons.lang.StringUtils.isEmpty;
 import static org.apache.commons.lang.StringUtils.isNotEmpty;
+import static org.apache.commons.lang.StringUtils.startsWith;
 
 /**
  * Class to resolve artifact descriptors (pom files) from a maven repository
@@ -255,12 +256,12 @@ public class ModelIO
                 Plugin p = plit.next();
                 ProjectRef pr = new SimpleProjectRef( p.getGroupId(), p.getArtifactId() );
 
-                if ( ( isNotEmpty( p.getVersion() ) && p.getVersion().startsWith( "${" ) ) || isEmpty( p.getVersion() ) )
+                if ( isEmpty( p.getVersion() ) || startsWith( p.getVersion(), "${" ) )
                 {
                     // Property reference to something in the remote pom. Resolve and inline it now.
                     String newVersion = resolveProperty( userProperties, m.getProperties(), p.getVersion() );
 
-                    if ( newVersion.startsWith("${") || newVersion.length() == 0)
+                    if ( isEmpty( newVersion ) || startsWith( newVersion, "${" ) )
                     {
                         // Use PomView as that contains a pre-resolved list of plugins.
                         newVersion = pluginOverridesPomView.get( pr ).getVersionString();
@@ -298,7 +299,7 @@ public class ModelIO
                 {
                     for ( Dependency d : p.getDependencies())
                     {
-                        if ( ! isEmpty(d.getVersion()) && d.getVersion().startsWith( "${" ) )
+                        if ( startsWith( d.getVersion(), "${" ) )
                         {
                             final String version = resolveProperty( userProperties, m.getProperties(), d.getVersion() );
                             logger.debug( "Processing dependency {} and updating with {}", d, version );
@@ -336,11 +337,11 @@ public class ModelIO
             {
                 processChildren( userProperties, model, child );
             }
-            if ( child.getValue() != null && child.getValue().startsWith( "${" ) )
+            if ( startsWith( child.getValue(), "${" ) )
             {
                 String replacement = resolveProperty( userProperties, model.getProperties(), child.getValue() );
 
-                if ( replacement != null && !replacement.isEmpty() )
+                if ( !isEmpty( replacement ) )
                 {
                     logger.debug( "Replacing child value {} with {}", child.getValue(), replacement );
                     child.setValue( replacement );
@@ -362,7 +363,7 @@ public class ModelIO
         {
             result = p.getProperty( child );
 
-            if ( result.startsWith( "${" ) )
+            if ( startsWith( result, "${" ) )
             {
                 result = resolveProperty( userProperties, p, result );
             }

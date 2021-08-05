@@ -41,7 +41,11 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static org.apache.commons.lang.StringUtils.contains;
+import static org.apache.commons.lang.StringUtils.countMatches;
+import static org.apache.commons.lang.StringUtils.endsWith;
 import static org.apache.commons.lang.StringUtils.isNotEmpty;
+import static org.apache.commons.lang.StringUtils.startsWith;
 
 /**
  * Commonly used manipulations / extractions from project / user (CLI) properties.
@@ -72,7 +76,7 @@ public final class PropertiesUtils
             {
                 final String trimmedPropertyName = propertyName.substring( prefixLength );
                 String value = properties.getProperty( propertyName );
-                if ( value != null && value.equals( "true" ) )
+                if ( "true".equals( value ) )
                 {
                     logger.warn( "Work around Brew/Maven bug - removing erroneous 'true' value for {}.",
                                  trimmedPropertyName );
@@ -152,8 +156,8 @@ public final class PropertiesUtils
         // >${foo}value<
         // it becomes hairy to verify strict compliance and to correctly split the old value and
         // update it with a portion of the new value.
-        if ( oldValue != null && oldValue.startsWith( "${" ) && oldValue.endsWith( "}" ) && !(
-                        StringUtils.countMatches( oldValue, "${" ) > 1 ) )
+        if ( startsWith( oldValue, "${" ) && endsWith( oldValue, "}" ) && !(
+                        countMatches( oldValue, "${" ) > 1 ) )
         {
             final String newKey = oldValue.substring( 2, oldValue.length() - 1 );
 
@@ -189,8 +193,8 @@ public final class PropertiesUtils
             }
 
             // TODO: Does not handle explicit overrides.
-            if ( oldValue != null && oldValue.contains( "${" ) && !( oldValue.startsWith( "${" ) && oldValue.endsWith(
-                            "}" ) ) || ( StringUtils.countMatches( oldValue, "${" ) > 1 ) )
+            if ( contains( oldValue, "${" ) && !( startsWith( oldValue, "${" ) && endsWith( oldValue,
+                            "}" ) ) || ( countMatches( oldValue, "${" ) > 1 ) )
             {
                 // This block handles
                 // >${foo}value${foo}<
@@ -405,15 +409,15 @@ public final class PropertiesUtils
         final Map<String, PropertyMapper> projectProps = versionPropertyUpdateMap.computeIfAbsent( project, k -> new HashMap<>() );
         boolean result = false;
 
-        if ( oldVersion != null && oldVersion.contains( "${" ) )
+        if ( contains( oldVersion, "${" ) )
         {
             final int endIndex = oldVersion.indexOf( '}' );
             final String oldProperty = oldVersion.substring( 2, endIndex );
 
             // We don't attempt to cache any value that contains more than one property or contains a property
             // combined with a hardcoded value.
-            if ( oldVersion.contains( "${" ) && !( oldVersion.startsWith( "${" ) && oldVersion.endsWith( "}" ) ) || (
-                            StringUtils.countMatches( oldVersion, "${" ) > 1 ) )
+            if ( !( startsWith( oldVersion, "${" ) && endsWith( oldVersion, "}" ) ) || (
+                            countMatches( oldVersion, "${" ) > 1 ) )
             {
                 logger.debug( "For {} ; original version contains hardcoded value or multiple embedded properties. Not caching value ( {} -> {} )",
                               originalType, oldVersion, newVersion );
