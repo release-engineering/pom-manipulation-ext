@@ -15,6 +15,7 @@
  */
 package org.commonjava.maven.ext.core.state;
 
+import lombok.Getter;
 import org.commonjava.maven.atlas.ident.ref.ProjectRef;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleProjectRef;
@@ -56,9 +57,17 @@ public class RelocationState
     @ConfigValue( docIndex = "dep-manip.html#dependency-relocations" )
     public static final String DEPENDENCY_RELOCATIONS = "dependencyRelocations.";
 
+    @ConfigValue( docIndex = "plugin-manip.html#dependency-relocations" )
+    public static final String PLUGIN_RELOCATIONS = "pluginRelocations.";
+
+
     private static final Logger logger = LoggerFactory.getLogger( RelocationState.class );
 
+    @Getter
     private final WildcardMap<ProjectVersionRef> dependencyRelocations = new WildcardMap<>();
+
+    @Getter
+    private final WildcardMap<ProjectVersionRef> pluginRelocations = new WildcardMap<>();
 
     public RelocationState( final Properties userProps )
                     throws ManipulationException
@@ -70,7 +79,17 @@ public class RelocationState
     {
         // This contains everything before the equals and a possibly null set of values. We now need to further
         // post-process this into something useful i.e. establish whether we are relocating groupIds and artifactIds.
-        Map<String,String> propRelocs = PropertiesUtils.getPropertiesByPrefix( userProps, DEPENDENCY_RELOCATIONS );
+        Map<String, String> depPropRelocs = PropertiesUtils.getPropertiesByPrefix( userProps, DEPENDENCY_RELOCATIONS );
+        Map<String, String> pluginPropRelocs = PropertiesUtils.getPropertiesByPrefix( userProps, PLUGIN_RELOCATIONS );
+
+        processProperties( dependencyRelocations, depPropRelocs);
+        processProperties( pluginRelocations, pluginPropRelocs);
+    }
+
+
+    private void processProperties(WildcardMap<ProjectVersionRef> map, Map<String,String> propRelocs)
+                    throws ManipulationException
+    {
         for ( Map.Entry<String, String> entry : propRelocs.entrySet() )
         {
             String[] split = entry.getKey().split( ":", 3 );
@@ -122,25 +141,20 @@ public class RelocationState
 
             ProjectRef sp = new SimpleProjectRef( groupId, artifactId );
 
-            dependencyRelocations.put( sp, new SimpleProjectVersionRef( newGroupId, newArtifactId, version ) );
+            map.put( sp, new SimpleProjectVersionRef( newGroupId, newArtifactId, version ) );
         }
 
-        logger.trace ("Wildcard map {}", dependencyRelocations);
+        logger.trace ("Wildcard map {}", map);
     }
 
     /**
-     * Enabled ONLY if dependencyRelocation is provided in the user properties / CLI -D options.
+     * Enabled ONLY if dependencyRelocation/pluginRelocations is provided in the user properties / CLI -D options.
      *
      * @see State#isEnabled()
      */
     @Override
     public boolean isEnabled()
     {
-        return !dependencyRelocations.isEmpty();
-    }
-
-    public WildcardMap<ProjectVersionRef> getDependencyRelocations()
-    {
-        return dependencyRelocations;
+        return (!dependencyRelocations.isEmpty() || !pluginRelocations.isEmpty());
     }
 }
