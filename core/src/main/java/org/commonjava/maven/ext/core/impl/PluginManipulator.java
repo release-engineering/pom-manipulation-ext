@@ -54,6 +54,8 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
+import static org.apache.commons.lang.StringUtils.startsWith;
+import static org.commonjava.maven.ext.core.impl.Version.isEmpty;
 import static org.commonjava.maven.ext.core.util.IdUtils.ga;
 
 /**
@@ -551,10 +553,13 @@ public class PluginManipulator extends CommonManipulator implements Manipulator
     private void validatePluginsUpdatedProperty( CommonState cState, Project p, Map<ProjectVersionRef, Plugin> dependencies )
                     throws ManipulationException
     {
-        for ( ProjectVersionRef d : dependencies.keySet() )
+        for ( Map.Entry<ProjectVersionRef, Plugin> entry : dependencies.entrySet() )
         {
-            String versionProperty = dependencies.get( d ).getVersion();
-            if ( versionProperty.startsWith( "${" ) )
+            ProjectVersionRef d = entry.getKey();
+            Plugin plugin = entry.getValue();
+            String versionProperty = plugin.getVersion();
+
+            if ( startsWith( versionProperty, "${" ) )
             {
                 versionProperty = PropertiesUtils.extractPropertyName( versionProperty );
                 PropertiesUtils.verifyPropertyMapping( cState, p, versionPropertyUpdateMap, d, versionProperty );

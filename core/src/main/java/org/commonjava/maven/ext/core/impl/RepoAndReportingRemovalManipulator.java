@@ -256,7 +256,7 @@ public class RepoAndReportingRemovalManipulator
             String url = repo.getUrl();
             // According to https://maven.apache.org/plugins/maven-site-plugin/examples/adding-deploy-protocol.html
             // supported repositories are file, http and https.
-            if (url.startsWith( "file:" ) ||
+            if ( url.startsWith( "file:" ) ||
                 url.startsWith( "http://localhost" ) ||
                 url.startsWith( "https://localhost" ) ||
                 url.startsWith( "http://127.0.0.1" ) ||

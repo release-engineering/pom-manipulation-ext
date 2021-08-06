@@ -43,6 +43,7 @@ import java.util.Map;
 import java.util.Set;
 
 import static org.apache.commons.lang.StringUtils.isEmpty;
+import static org.apache.commons.lang.StringUtils.startsWith;
 
 /**
  * {@link Manipulator} implementation that can modify a project's version with either static or calculated, incremental version qualifier. Snapshot
@@ -163,7 +164,7 @@ public class ProjectVersioningManipulator
             {
                 final String newVersion = versionsByGAV.get( parentGAV );
                 logger.debug( "Changed parent (GAV {}) version to: {}", parent, newVersion );
-                if (parentGAV.getVersionString().startsWith( "${" ))
+                if ( startsWith( parentGAV.getVersionString(), "${" ) )
                 {
                     if ( PropertiesUtils.updateProperties( session, project, false, PropertiesUtils.extractPropertyName( parentGAV.getVersionString() ), newVersion ) == PropertiesUtils.PropertyUpdate.NOTFOUND )
                     {
@@ -185,7 +186,7 @@ public class ProjectVersioningManipulator
             logger.info( "Looking for new version: {} (found: {})", gav, newVersion );
             if ( newVersion != null )
             {
-                if (gav.getVersionString().startsWith( "${" ))
+                if ( startsWith( gav.getVersionString(), "${" ) )
                 {
                     if ( PropertiesUtils.updateProperties( session, project, false, PropertiesUtils.extractPropertyName( gav.getVersionString() ), newVersion ) == PropertiesUtils.PropertyUpdate.NOTFOUND )
                     {
@@ -240,7 +241,7 @@ public class ProjectVersioningManipulator
                         if ( newVersion != null )
                         {
                             logger.debug ("Examining dependency (from depMgmt) {} to change version to {}", d, newVersion);
-                            if (d.getVersion().startsWith( "${" ))
+                            if ( startsWith( d.getVersion(), "${" ) )
                             {
                                 if ( PropertiesUtils.updateProperties( session, project, false, PropertiesUtils.extractPropertyName( d.getVersion() ), newVersion ) == PropertiesUtils.PropertyUpdate.NOTFOUND )
                                 {
@@ -269,7 +270,7 @@ public class ProjectVersioningManipulator
                 {
                     try
                     {
-                        if ( isEmpty (pi.interp( d.getVersion() )))
+                        if ( isEmpty ( pi.interp( d.getVersion() ) ) )
                         {
                             logger.trace( "Skipping dependency {} as empty version.", d );
                             continue;
@@ -283,8 +284,8 @@ public class ProjectVersioningManipulator
 
                         if ( newVersion != null && d.getVersion() != null )
                         {
-                            logger.debug ("Examining dependency {} to change version to {}", d, newVersion);
-                            if (d.getVersion().startsWith( "${" ))
+                            logger.debug( "Examining dependency {} to change version to {}", d, newVersion );
+                            if ( startsWith( d.getVersion(), "${" ) )
                             {
                                 if ( PropertiesUtils.updateProperties( session, project, false, PropertiesUtils.extractPropertyName( d.getVersion() ), newVersion ) == PropertiesUtils.PropertyUpdate.NOTFOUND )
                                 {
@@ -299,7 +300,7 @@ public class ProjectVersioningManipulator
                             changed = true;
                         }
                     }
-                    catch ( InvalidRefException ire)
+                    catch ( InvalidRefException ire )
                     {
                         logger.debug( "Unable to change version for dependency {} due to {}", d, ire );
                         throw ire;
