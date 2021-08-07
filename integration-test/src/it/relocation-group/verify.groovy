@@ -50,7 +50,7 @@ assert dependency.version.text() == "4.1"
 
 def passed = false
 pom.properties.each {
-    if ( it.text().contains ("slf4j") )
+    if ( it.text().contains ("org.slf4j") )
     {
         passed = true
     }

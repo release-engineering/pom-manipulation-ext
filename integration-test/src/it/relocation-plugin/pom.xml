@@ -30,6 +30,7 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <junitProp>3.8.2</junitProp>
+    <shade>maven-shad-plugin</shade>
   </properties>
 
   <dependencies>
@@ -59,7 +60,7 @@
     <plugins>
       <plugin>
         <groupId>com.soebes.maven.plugins</groupId>
-        <artifactId>iterator-maven-plugin</artifactId>
+        <artifactId>repeater-maven-plugin</artifactId>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -138,6 +139,11 @@
       <build>
         <pluginManagement>
           <plugins>
+            <plugin>
+              <groupId>org.apache.maven.plugins</groupId>
+              <artifactId>${shade}</artifactId>
+              <version>3.2.4</version>
+            </plugin>
             <plugin>
               <groupId>org.apache.maven.plugins</groupId>
               <artifactId>maven-dependency-plugin</artifactId>
