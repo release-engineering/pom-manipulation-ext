@@ -143,6 +143,14 @@ Default is `REMOTE` which means the remote configuration takes precedence over l
 
 If when attempting to merge the remote execution blocks into local, the `<id>`'s clash an exception will be thrown.
 
+### Plugin Relocations
+
+In order to handle the situation where one GAV is changed to another (e.g. from community to product) the relocation manipulator can be used. An optional version component may be added; the version will override any prior version used in the plugin. The artifact override is optional. The relocated GAV is subject to alignment ; if the developer wishes to force a particular version (i.e. one with an existing suffix) they may use `pluginOverride`.
+
+    -DpluginRelocations.oldGroupId:[oldArtifact]@newGroupId:[newArtifactId]=[version],...
+
+**Note:** Multiple relocations may be added using multiple instances of `-DpluginRelocation...`.
+
 ### Plugin Removal
 
 If the property `pluginRemoval` (*Deprecated property `plugin-removal` for versions **3.8.1 and prior***) is set, PME will remove the specified plugins from the POM files. The argument should be a comma separated list of group:artifact. For example:
