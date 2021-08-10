@@ -29,6 +29,7 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <slf4jApi>slf4j-10</slf4jApi>
   </properties>
 
   <dependencies>
@@ -44,7 +45,7 @@
     </dependency>
     <dependency>
       <groupId>slf4j</groupId>
-      <artifactId>slf4j-api10</artifactId>
+      <artifactId>${slf4jApi}</artifactId>
       <version>3.8.2</version>
     </dependency>
   </dependencies>

@@ -46,3 +46,13 @@ assert profile1.size() != 0
 dependency = pom.dependencyManagement.dependencies.dependency.find { it.artifactId.text() == "junit-dep" }
 assert dependency != null
 assert dependency.version.text() == "4.1"
+
+
+def passed = false
+pom.properties.each {
+    if ( it.text().contains ("org.slf4j") )
+    {
+        passed = true
+    }
+}
+assert (passed == true)

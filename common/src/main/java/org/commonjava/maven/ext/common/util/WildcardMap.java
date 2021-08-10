@@ -21,7 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.LinkedHashMap;
-import java.util.TreeMap;
+import java.util.Map;
 
 /**
  * Custom limited map implementation that handles the following format:
@@ -43,7 +43,7 @@ public class WildcardMap<T>
      * </p>
      * artifactId may be a wildcard '*'.
      */
-    private final TreeMap<String, LinkedHashMap<String,T>> map = new TreeMap<>();
+    private final Map<String, Map<String,T>> map = new LinkedHashMap<>();
 
     /**
      * Size implementation
@@ -84,7 +84,7 @@ public class WildcardMap<T>
     {
         boolean result;
 
-        LinkedHashMap<String, T> vMap = map.get( groupId);
+        Map<String, T> vMap = map.get( groupId);
 
         if ( vMap == null || vMap.isEmpty())
         {
@@ -115,7 +115,7 @@ public class WildcardMap<T>
         String groupId = key.getGroupId();
         String artifactId = key.getArtifactId();
 
-        LinkedHashMap<String,T> vMap = map.get(groupId);
+        Map<String,T> vMap = map.get(groupId);
         if ( vMap == null)
         {
             vMap = new LinkedHashMap<>();
@@ -188,7 +188,7 @@ public class WildcardMap<T>
     {
         T result = null;
 
-        LinkedHashMap<String, T> value = map.get(groupId);
+        Map<String, T> value = map.get(groupId);
         if (value != null)
         {
             if ( value.get(WILDCARD) != null)

@@ -48,14 +48,22 @@ def artifactItem4 = plugin3.executions.execution.configuration.artifactItems.art
 assert artifactItem4.size() != 0
 assert artifactItem4.version.text() == "1.7.30"
 
-def passed = false
+def plugin4 = pom.build.plugins.plugin.find { it.groupId.text() == "com.soebes.maven.plugins" && it.artifactId.text() == "iterator-maven-plugin" }
+assert plugin4.size() != 0
+
+
+int passed = 0
 pom.properties.each {
     if ( it.text().contains ("4.1") )
     {
-        passed = true
+        passed++
+    }
+    if ( it.text().contains ("shade") )
+    {
+        passed++
     }
 }
-assert (passed == true)
+assert (passed == 2)
 
 plugin1 = pom.build.plugins.plugin.find { it.groupId.text() == "com.soebes.maven.plugins" }
 assert plugin1.artifactId.text() == "iterator-maven-plugin"
