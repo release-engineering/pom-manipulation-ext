@@ -35,6 +35,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
 
 /**
@@ -221,9 +222,12 @@ public class ManipulationSession
     {
         boolean result = false;
 
-        for ( Class<?> c : states.keySet() )
+        for ( final Entry<Class<?>, State> entry : states.entrySet() )
         {
-            if ( !ignoreList.contains( c ) && states.get( c ).isEnabled() )
+            final Class<?> c = entry.getKey();
+            final State state = entry.getValue();
+
+            if ( !ignoreList.contains( c ) && state.isEnabled() )
             {
                 result = true;
                 break;

@@ -36,6 +36,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import static org.commonjava.maven.ext.core.util.IdUtils.ga;
@@ -112,24 +113,26 @@ public class DependencyRemovalManipulator
 
         final Map<Profile, Map<ArtifactRef, Dependency>> pd = project.getAllResolvedProfileDependencies( session );
         final Map<Profile, Map<ArtifactRef, Dependency>> pmd = project.getResolvedProfileManagedDependencies( session );
-        for ( Profile profile : pd.keySet())
+        for ( final Entry<Profile, Map<ArtifactRef, Dependency>> entry : pd.entrySet() )
         {
-            int index = model.getProfiles().indexOf( profile );
-            if ( scanDependencies( pd.get( profile ), dependenciesToRemove, model.getProfiles().get( index ).getDependencies() ) )
+            final Profile profile = entry.getKey();
+            final Map<ArtifactRef, Dependency> resolvedDependencies = entry.getValue();
+            final int index = model.getProfiles().indexOf( profile );
+            if ( scanDependencies( resolvedDependencies, dependenciesToRemove,
+                 model.getProfiles().get( index ).getDependencies() ) )
             {
                 result = true;
             }
         }
-        for ( Profile profile : pmd.keySet())
+        for ( final Entry<Profile, Map<ArtifactRef, Dependency>> entry : pmd.entrySet() )
         {
-            int index = model.getProfiles().indexOf( profile );
+            final Profile profile = entry.getKey();
+            final Map<ArtifactRef, Dependency> resolvedDependencies = entry.getValue();
+            final int index = model.getProfiles().indexOf( profile );
             DependencyManagement dm = model.getProfiles().get( index ).getDependencyManagement();
-            if ( dm != null )
+            if ( dm != null && scanDependencies( resolvedDependencies, dependenciesToRemove, dm.getDependencies() ) )
             {
-                if ( scanDependencies( pmd.get( profile ), dependenciesToRemove, dm.getDependencies() ) )
-                {
-                    result = true;
-                }
+                result = true;
             }
         }
         return result;
@@ -141,12 +144,14 @@ public class DependencyRemovalManipulator
         boolean result = false;
         if ( dependencies != null )
         {
-            for ( ArtifactRef pvr : resolvedDependencies.keySet() )
+            for ( final Entry<ArtifactRef, Dependency> entry : resolvedDependencies.entrySet() )
             {
+                final ArtifactRef pvr = entry.getKey();
+                final Dependency dependency = entry.getValue();
                 if ( dependenciesToRemove.contains( pvr.asProjectRef() ) )
                 {
-                    logger.debug( "Removing {}", resolvedDependencies.get( pvr ) );
-                    dependencies.remove( resolvedDependencies.get( pvr ) );
+                    logger.debug( "Removing {}", dependency );
+                    dependencies.remove( dependency );
                     result = true;
                 }
             }

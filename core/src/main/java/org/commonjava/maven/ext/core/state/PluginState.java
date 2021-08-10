@@ -27,6 +27,7 @@ import org.commonjava.maven.ext.core.util.IdUtils;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
 
@@ -187,12 +188,13 @@ public class PluginState
 
     public void setRemoteRESTOverrides( Map<ArtifactRef, String> overrides )
     {
-        for ( ArtifactRef a : overrides.keySet() )
+        for ( final Entry<ArtifactRef, String> entry : overrides.entrySet() )
         {
-            Plugin p = new Plugin();
+            final ArtifactRef a = entry.getKey();
+            final Plugin p = new Plugin();
             p.setGroupId( a.getGroupId() );
             p.setArtifactId( a.getArtifactId() );
-            p.setVersion( overrides.get( a ) );
+            p.setVersion( entry.getValue() );
             remoteRESTplugins.add( p );
         }
     }

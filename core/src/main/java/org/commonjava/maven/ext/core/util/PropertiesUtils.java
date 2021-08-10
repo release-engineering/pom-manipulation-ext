@@ -36,6 +36,7 @@ import org.slf4j.LoggerFactory;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -522,13 +523,13 @@ public final class PropertiesUtils
     public static void verifyPropertyMapping( CommonState cState, Project project, Map<Project, Map<String, PropertyMapper>> versionPropertyMap,
                                               ProjectVersionRef pvr, String version ) throws ManipulationException
     {
-        Map<String, PropertyMapper> mapping = versionPropertyMap.get( project );
+        final Map<String, PropertyMapper> mapping = versionPropertyMap.get( project );
 
         // Its possible some dependencies that have versions were not updated at all and therefore are
         // not stored here.
         if ( mapping.containsKey( version ) )
         {
-            PropertyMapper currentProjectVersionMapper = mapping.get( version );
+            final PropertyMapper currentProjectVersionMapper = mapping.get( version );
 
             if ( !currentProjectVersionMapper.getDependencies().contains( pvr.asProjectRef() ) )
             {
@@ -537,10 +538,10 @@ public final class PropertiesUtils
 
                 if ( cState.getStrictDependencyPluginPropertyValidation() == 2 )
                 {
-                    for ( Project p : versionPropertyMap.keySet() )
+                    for ( final Entry<Project, Map<String, PropertyMapper>> entry : versionPropertyMap.entrySet() )
                     {
-                        Map<String, PropertyMapper> allProjectMapper = versionPropertyMap.get( p );
-
+                        final Project p = entry.getKey();
+                        final Map<String, PropertyMapper> allProjectMapper = entry.getValue();
                         if ( allProjectMapper.containsKey( version ) &&
                                         // Ignore when we have already caught this scenario and original / new versions match
                                         !currentProjectVersionMapper.getOriginalVersion()

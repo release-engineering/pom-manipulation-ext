@@ -42,6 +42,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import static org.apache.commons.lang.StringUtils.isEmpty;
@@ -279,7 +280,6 @@ public class RESTCollector
         }
     }
 
-
     /**
      * Translate a given set of pvr:dependencies into ArtifactRefs.
      * @param session the ManipulationSession
@@ -292,11 +292,11 @@ public class RESTCollector
         final VersioningState vs = session.getState( VersioningState.class );
         final RESTState state = session.getState( RESTState.class );
 
-        for ( ArtifactRef pvr : dependencies.keySet() )
+        for ( final Entry<ArtifactRef, Dependency> entry : dependencies.entrySet() )
         {
-            Dependency d = dependencies.get( pvr );
-
-            SimpleScopedArtifactRef sa = new SimpleScopedArtifactRef(
+            final ArtifactRef pvr = entry.getKey();
+            final Dependency d = entry.getValue();
+            final SimpleScopedArtifactRef sa = new SimpleScopedArtifactRef(
                             new SimpleProjectVersionRef( pvr.asProjectRef(), handlePotentialSnapshotVersion( vs, pvr.getVersionString() ) ),
                             new SimpleTypeAndClassifier( d.getType(), d.getClassifier() ),
                             d.getScope() );
@@ -304,7 +304,7 @@ public class RESTCollector
             boolean validate = true;
 
             // Don't bother adding an artifact with a property that couldn't be resolved.
-            if (sa.getVersionString().contains( "$" ))
+            if ( sa.getVersionString().contains( "$" ) )
             {
                 validate = false;
             }
@@ -316,7 +316,7 @@ public class RESTCollector
             {
                 validate = false;
             }
-            if (validate)
+            if ( validate )
             {
                 deps.add( sa );
             }

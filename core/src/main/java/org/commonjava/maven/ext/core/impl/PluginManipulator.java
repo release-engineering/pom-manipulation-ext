@@ -43,6 +43,8 @@ import org.commonjava.maven.ext.io.ModelIO;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
+
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -51,11 +53,11 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
 
 import static org.apache.commons.lang.StringUtils.startsWith;
-import static org.commonjava.maven.ext.core.impl.Version.isEmpty;
 import static org.commonjava.maven.ext.core.util.IdUtils.ga;
 
 /**
@@ -144,34 +146,39 @@ public class PluginManipulator extends CommonManipulator implements Manipulator
             }
         }
         // If we've changed something now update any old properties with the new values.
-        if (!changed.isEmpty())
+        if ( !changed.isEmpty() )
         {
             if ( cState.getStrictDependencyPluginPropertyValidation() > 0 )
             {
                 logger.info( "Iterating to validate plugin updates..." );
-                for ( Project p : versionPropertyUpdateMap.keySet() )
+                for ( final Project p : versionPropertyUpdateMap.keySet() )
                 {
                     validatePluginsUpdatedProperty( cState, p, p.getResolvedManagedPlugins( session ) );
                     validatePluginsUpdatedProperty( cState, p, p.getResolvedPlugins( session ) );
-                    for ( Profile profile : p.getResolvedProfilePlugins( session ).keySet() )
+                    for ( final Map<ProjectVersionRef, Plugin> dependencies :
+                          p.getResolvedProfilePlugins( session ).values() )
                     {
-                        validatePluginsUpdatedProperty( cState, p, p.getResolvedProfilePlugins( session ).get( profile ) );
+                        validatePluginsUpdatedProperty( cState, p, dependencies );
                     }
-                    for ( Profile profile : p.getResolvedProfileManagedPlugins( session ).keySet() )
+                    for ( final Map<ProjectVersionRef, Plugin> dependencies :
+                          p.getResolvedProfileManagedPlugins( session ).values() )
                     {
-                        validatePluginsUpdatedProperty( cState, p, p.getResolvedProfileManagedPlugins( session ).get( profile ) );
+                        validatePluginsUpdatedProperty( cState, p, dependencies );
                     }
                 }
             }
             logger.info( "Iterating for property overrides...{}", versionPropertyUpdateMap );
-            for ( Project project : versionPropertyUpdateMap.keySet() )
+            for ( final Entry<Project, Map<String, PropertyMapper>> e : versionPropertyUpdateMap.entrySet() )
             {
-                for ( final Map.Entry<String, PropertyMapper> entry : versionPropertyUpdateMap.get( project ).entrySet() )
+                final Project project = e.getKey();
+                for ( final Entry<String, PropertyMapper> entry : e.getValue().entrySet() )
                 {
+                    final String key = entry.getKey();
+                    final String newVersion = entry.getValue().getNewVersion();
                     // Ignore strict alignment for plugins ; if we're attempting to use a differing plugin
                     // its unlikely to be an exact match.
-                    PropertiesUtils.PropertyUpdate found =
-                                    PropertiesUtils.updateProperties( session, project, true, entry.getKey(), entry.getValue().getNewVersion() );
+                    final PropertiesUtils.PropertyUpdate found =
+                            PropertiesUtils.updateProperties( session, project , true, key, newVersion );
 
                     if ( found == PropertiesUtils.PropertyUpdate.NOTFOUND )
                     {
@@ -183,8 +190,8 @@ public class PluginManipulator extends CommonManipulator implements Manipulator
                         {
                             if ( p.isInheritanceRoot() )
                             {
-                                logger.info( "Adding property {} with {}", entry.getKey(), entry.getValue().getNewVersion() );
-                                p.getModel().getProperties().setProperty( entry.getKey(), entry.getValue().getNewVersion() );
+                                logger.info( "Adding property {} with {}", key, newVersion );
+                                p.getModel().getProperties().setProperty( key, newVersion );
                             }
                         }
                     }
@@ -279,10 +286,10 @@ public class PluginManipulator extends CommonManipulator implements Manipulator
 
         // Now we have a reduced list of wrapper plugins (due to removing those are being explicitly overridden).
         // Therefore reflect that in the original plugin list.
-        Iterator<Plugin> it = overrides.iterator();
+        final Iterator<Plugin> it = overrides.iterator();
         while (it.hasNext())
         {
-            Plugin existing = it.next();
+            final Plugin existing = it.next();
             if ( originalOverridesReduced.keySet().stream().anyMatch( a -> ((ArtifactPluginWrapper)a).getOriginal().equals( existing ) ) )
             {
                 continue;
@@ -323,22 +330,22 @@ public class PluginManipulator extends CommonManipulator implements Manipulator
         final Map<Profile, Map<ProjectVersionRef, Plugin>> pd = project.getResolvedProfilePlugins( session );
         final Map<Profile, Map<ProjectVersionRef, Plugin>> pmd = project.getResolvedProfileManagedPlugins( session );
 
-        logger.debug ("Processing profiles with plugin management");
-        for ( Profile p : pmd.keySet() )
+        logger.debug( "Processing profiles with plugin management" );
+        for ( final Map<ProjectVersionRef, Plugin> plugins : pmd.values() )
         {
-            applyOverrides( project, PluginType.LocalPM, pmd.get( p ), overrides );
-            applyExplicitOverrides( project, pmd.get( p ), explicitOverrides,
-                                    commonState, explicitVersionPropertyUpdateMap );
+            applyOverrides( project, PluginType.LocalPM, plugins, overrides );
+            applyExplicitOverrides( project, plugins, explicitOverrides, commonState,
+                                    explicitVersionPropertyUpdateMap );
         }
-        logger.debug ("Processing profiles with plugins");
-        for ( Profile p : pd.keySet() )
+        logger.debug( "Processing profiles with plugins" );
+        for ( final Map<ProjectVersionRef, Plugin> plugins : pd.values() )
         {
-            applyOverrides( project, PluginType.LocalP, pd.get( p ), overrides );
-            applyExplicitOverrides( project, pd.get( p ), explicitOverrides,
-                                    commonState, explicitVersionPropertyUpdateMap );
+            applyOverrides( project, PluginType.LocalP, plugins, overrides );
+            applyExplicitOverrides( project, plugins, explicitOverrides, commonState,
+                                    explicitVersionPropertyUpdateMap );
         }
 
-        explicitOverridePropertyUpdates(session);
+        explicitOverridePropertyUpdates( session );
     }
 
     /**
@@ -553,15 +560,15 @@ public class PluginManipulator extends CommonManipulator implements Manipulator
     private void validatePluginsUpdatedProperty( CommonState cState, Project p, Map<ProjectVersionRef, Plugin> dependencies )
                     throws ManipulationException
     {
-        for ( Map.Entry<ProjectVersionRef, Plugin> entry : dependencies.entrySet() )
+        for ( final Entry<ProjectVersionRef, Plugin> entry : dependencies.entrySet() )
         {
-            ProjectVersionRef d = entry.getKey();
-            Plugin plugin = entry.getValue();
-            String versionProperty = plugin.getVersion();
+            final ProjectVersionRef d = entry.getKey();
+            final Plugin plugin = entry.getValue();
+            final String pluginVersion = plugin.getVersion();
 
-            if ( startsWith( versionProperty, "${" ) )
+            if ( startsWith( pluginVersion, "${" ) )
             {
-                versionProperty = PropertiesUtils.extractPropertyName( versionProperty );
+                final String versionProperty = PropertiesUtils.extractPropertyName( pluginVersion );
                 PropertiesUtils.verifyPropertyMapping( cState, p, versionPropertyUpdateMap, d, versionProperty );
             }
         }

@@ -33,10 +33,10 @@ import org.commonjava.maven.ext.io.ModelIO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import static org.apache.commons.lang.StringUtils.isEmpty;
 import static org.apache.commons.lang.StringUtils.join;
@@ -91,9 +91,10 @@ public class CommonManipulator
         final boolean[] wildcardMode = { false, true };
         for ( boolean aWildcardMode : wildcardMode )
         {
-            for ( final String currentKey : new HashSet<>( moduleOverrides.keySet() ) )
+            for ( final Entry<String, String> entry : moduleOverrides.entrySet() )
             {
-                final String currentValue = moduleOverrides.get( currentKey );
+                final String currentKey = entry.getKey();
+                final String currentValue = entry.getValue();
 
                 logger.debug( "Processing key {} for override with value {}", currentKey, currentValue );
 
@@ -106,7 +107,7 @@ public class CommonManipulator
                 final boolean isModuleWildcard = currentKey.endsWith( "@*" );
                 logger.debug( "Is wildcard? {} and in module wildcard mode? {}", isModuleWildcard, aWildcardMode );
 
-                String artifactGA;
+                final String artifactGA;
                 boolean replace = false;
                 // process module-specific overrides (first)
                 if ( !aWildcardMode )
@@ -189,10 +190,10 @@ public class CommonManipulator
 
                 if ( replace )
                 {
-                    ProjectRef projectRef = SimpleProjectRef.parse( artifactGA );
-                    String newArtifactValue;
+                    final ProjectRef projectRef = SimpleProjectRef.parse( artifactGA );
+                    final String newArtifactValue;
                     // Expand values that reference an extra BOM
-                    Map<ProjectRef, String> extraBOM = extraBOMOverrides.get( currentValue );
+                    final Map<ProjectRef, String> extraBOM = extraBOMOverrides.get( currentValue );
                     if ( extraBOM == null )
                     {
                         newArtifactValue = currentValue;
@@ -258,14 +259,16 @@ public class CommonManipulator
                     throws ManipulationException
     {
         // Apply matching overrides to dependencies
-        for ( final ProjectVersionRef projectVersionRef : dependencies.keySet() )
+        for ( final Entry<? extends ProjectVersionRef, ? extends InputLocationTracker> entry : dependencies.entrySet() )
         {
-            final ProjectRef groupIdArtifactId = new SimpleProjectRef( projectVersionRef.getGroupId(), projectVersionRef.getArtifactId() );
+            final ProjectVersionRef projectVersionRef = entry.getKey();
+            final ProjectRef groupIdArtifactId = new SimpleProjectRef( projectVersionRef.getGroupId(),
+                                                                       projectVersionRef.getArtifactId() );
 
             if ( explicitOverrides.containsKey( groupIdArtifactId ) )
             {
                 final String overrideVersion = explicitOverrides.get( groupIdArtifactId );
-                final DependencyPluginWrapper wrapper = new DependencyPluginWrapper( dependencies.get( projectVersionRef ) );
+                final DependencyPluginWrapper wrapper = new DependencyPluginWrapper( entry.getValue() );
                 final String oldVersion = wrapper.getVersion();
 
                 if ( isEmpty( overrideVersion ) || isEmpty( oldVersion ) )
@@ -323,10 +326,11 @@ public class CommonManipulator
     {
         // Moved this to debug as otherwise it deluges the logging.
         logger.debug ("Iterating for explicit overrides...");
-        for ( Project project : explicitVersionPropertyUpdateMap.keySet() )
+        for ( final Entry<Project, Map<String, PropertyMapper>> e : explicitVersionPropertyUpdateMap.entrySet() )
         {
+            Project project = e.getKey();
             logger.debug( "Checking property override within project {}", project );
-            for ( final Map.Entry<String, PropertyMapper> entry : explicitVersionPropertyUpdateMap.get( project ).entrySet() )
+            for ( final Entry<String, PropertyMapper> entry : e.getValue().entrySet() )
             {
                 PropertiesUtils.PropertyUpdate found =
                                 PropertiesUtils.updateProperties( session, project, true,
