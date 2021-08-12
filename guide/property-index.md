@@ -23,7 +23,7 @@ title: "Index of Properties"
   * [pluginManagement](plugin-manip.html#basic-plugin-alignment)
   * [pluginManagementPrecedence](plugin-manip.html#basic-plugin-alignment)
   * [pluginOverride.](plugin-manip.html#plugin-override)
-  * [pluginRelocations.](plugin-manip.html#dependency-relocations)
+  * [pluginRelocations.](plugin-manip.html#plugin-relocations)
   * [pluginRemoval](plugin-manip.html#plugin-removal)
   * [pluginSource](plugin-manip.html#plugin-source)
   * [profileInjection](misc.html#profile-injection)
