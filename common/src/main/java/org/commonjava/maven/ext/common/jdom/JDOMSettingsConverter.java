@@ -30,14 +30,14 @@ import org.apache.maven.settings.Server;
 import org.apache.maven.settings.Settings;
 import org.codehaus.plexus.util.WriterFactory;
 import org.codehaus.plexus.util.xml.Xpp3Dom;
-import org.jdom.Document;
-import org.jdom.Element;
-import org.jdom.JDOMException;
-import org.jdom.JDOMFactory;
-import org.jdom.UncheckedJDOMFactory;
-import org.jdom.input.SAXBuilder;
-import org.jdom.output.Format;
-import org.jdom.output.XMLOutputter;
+import org.jdom2.Document;
+import org.jdom2.Element;
+import org.jdom2.JDOMException;
+import org.jdom2.JDOMFactory;
+import org.jdom2.UncheckedJDOMFactory;
+import org.jdom2.input.SAXBuilder;
+import org.jdom2.output.Format;
+import org.jdom2.output.XMLOutputter;
 
 import java.io.File;
 import java.io.IOException;
@@ -87,6 +87,9 @@ public class JDOMSettingsConverter
     {
         final SAXBuilder builder = new SAXBuilder();
         final Document document;
+
+        // CVE-2021-33813  https://github.com/hunterhacker/jdom/issues/189
+        builder.setExpandEntities( false );
 
         // TODO: Improve this.
         // If we are building from an existing file then use that as a base otherwise we need to construct the Document

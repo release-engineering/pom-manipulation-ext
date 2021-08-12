@@ -18,10 +18,10 @@ package org.commonjava.maven.ext.common.jdom;
 
 import org.apache.maven.model.*;
 import org.codehaus.plexus.util.xml.Xpp3Dom;
-import org.jdom.Document;
-import org.jdom.Element;
-import org.jdom.JDOMFactory;
-import org.jdom.UncheckedJDOMFactory;
+import org.jdom2.Document;
+import org.jdom2.Element;
+import org.jdom2.JDOMFactory;
+import org.jdom2.UncheckedJDOMFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

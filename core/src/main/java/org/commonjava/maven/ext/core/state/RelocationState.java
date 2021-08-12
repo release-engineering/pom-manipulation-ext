@@ -57,7 +57,7 @@ public class RelocationState
     @ConfigValue( docIndex = "dep-manip.html#dependency-relocations" )
     public static final String DEPENDENCY_RELOCATIONS = "dependencyRelocations.";
 
-    @ConfigValue( docIndex = "plugin-manip.html#dependency-relocations" )
+    @ConfigValue( docIndex = "plugin-manip.html#plugin-relocations" )
     public static final String PLUGIN_RELOCATIONS = "pluginRelocations.";
 
 

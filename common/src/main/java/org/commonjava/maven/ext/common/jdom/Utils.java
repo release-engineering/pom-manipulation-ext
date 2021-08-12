@@ -32,13 +32,13 @@ package org.commonjava.maven.ext.common.jdom;
 
 import lombok.experimental.UtilityClass;
 import org.codehaus.plexus.util.xml.Xpp3Dom;
-import org.jdom.Attribute;
-import org.jdom.CDATA;
-import org.jdom.Content;
-import org.jdom.DefaultJDOMFactory;
-import org.jdom.Element;
-import org.jdom.Namespace;
-import org.jdom.Text;
+import org.jdom2.Attribute;
+import org.jdom2.CDATA;
+import org.jdom2.Content;
+import org.jdom2.DefaultJDOMFactory;
+import org.jdom2.Element;
+import org.jdom2.Namespace;
+import org.jdom2.Text;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -70,7 +70,7 @@ public final class Utils
 
     /**
      * Method updateElement.
-     * 
+     *
      * @param counter
      * @param shouldExist
      * @param name
@@ -112,7 +112,7 @@ public final class Utils
 
     /**
      * Method findAndReplaceXpp3DOM.
-     * 
+     *
      * @param counter
      * @param dom
      * @param name
@@ -133,7 +133,7 @@ public final class Utils
 
     /**
      * Method replaceXpp3DOM.
-     * 
+     *
      * @param parent
      * @param counter
      * @param parentDom
@@ -245,7 +245,7 @@ public final class Utils
 
     /**
      * Method insertAtPreferredLocation.
-     * 
+     *
      * @param parent
      * @param counter
      * @param child
@@ -301,7 +301,7 @@ public final class Utils
 
     /**
      * Method findAndReplaceProperties.
-     * 
+     *
      * @param counter
      * @param props
      * @param name
@@ -339,7 +339,7 @@ public final class Utils
 
     /**
      * Method findAndReplaceSimpleElement.
-     * 
+     *
      * @param counter
      * @param defaultValue
      * @param text
@@ -378,7 +378,7 @@ public final class Utils
 
     /**
      * Method findAndReplaceSimpleLists.
-     * 
+     *
      * @param counter
      * @param childName
      * @param parentName

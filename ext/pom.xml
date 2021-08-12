@@ -128,7 +128,7 @@
     </dependency>
     <dependency>
       <groupId>org.jdom</groupId>
-      <artifactId>jdom</artifactId>
+      <artifactId>jdom2</artifactId>
     </dependency>
 
     <dependency>
@@ -208,7 +208,7 @@
                   <include>org.codehaus.groovy:groovy-xml</include>
                   <include>org.codehaus.groovy:groovy</include>
                   <include>org.jboss.da:reports-model</include>
-                  <include>org.jdom:jdom</include>
+                  <include>org.jdom:jdom2</include>
                   <include>org.ow2.asm:asm</include>
                   <include>org.yaml:snakeyaml</include>
                 </includes>

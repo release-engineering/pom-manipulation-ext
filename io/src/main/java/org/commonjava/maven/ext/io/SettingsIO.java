@@ -27,12 +27,12 @@ import org.apache.maven.settings.building.SettingsBuildingException;
 import org.apache.maven.shared.release.ReleaseExecutionException;
 import org.apache.maven.shared.release.transform.ModelETL;
 import org.apache.maven.shared.release.transform.ModelETLRequest;
-import org.apache.maven.shared.release.transform.jdom.JDomModelETL;
-import org.apache.maven.shared.release.transform.jdom.JDomModelETLFactory;
+import org.apache.maven.shared.release.transform.jdom2.JDomModelETL;
+import org.apache.maven.shared.release.transform.jdom2.JDomModelETLFactory;
 import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.common.jdom.JDOMSettingsConverter;
 import org.commonjava.maven.ext.common.util.LineSeparator;
-import org.jdom.JDOMException;
+import org.jdom2.JDOMException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
