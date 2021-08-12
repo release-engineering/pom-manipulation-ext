@@ -37,6 +37,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -63,8 +64,6 @@ public class SuffixManipulator
         this.session = session;
         session.setState( new SuffixState( session.getUserProperties() ) );
     }
-
-
 
     /**
      * Apply the property changes to the list of {@link Project}'s given.
@@ -136,17 +135,20 @@ public class SuffixManipulator
         {
             if ( plugins != null )
             {
-                plugins.keySet().forEach( a -> {
-                    Plugin original = plugins.get( a );
-                    Matcher m = suffixStripPattern.matcher( a.getVersionString() );
+                for ( final Entry<ProjectVersionRef, Plugin> entry : plugins.entrySet() )
+                {
+                    final ProjectVersionRef a = entry.getKey();
+                    final Plugin original = entry.getValue();
+                    final Matcher m = suffixStripPattern.matcher( a.getVersionString() );
 
                     if ( m.matches() )
                     {
-                        String stripped = m.group( 1 );
+                        final String stripped = m.group( 1 );
 
-                        logger.info( "Stripping suffix from plugin {} (version {}) to {}", a, original.getVersion(), stripped );
+                        logger.info( "Stripping suffix from plugin {} (version {}) to {}", a, original.getVersion(),
+                                stripped );
 
-                        // If its a property update the value otherwise inline the version change.
+                        // If it's a property, update the value, otherwise inline the version change.
                         if ( original.getVersion().contains( "$" ) )
                         {
                             handleProperties( project, original.getVersion(), stripped );
@@ -156,7 +158,7 @@ public class SuffixManipulator
                             original.setVersion( stripped );
                         }
                     }
-                } );
+                }
             }
         }
         catch ( ManipulationUncheckedException e )
@@ -172,17 +174,20 @@ public class SuffixManipulator
         {
             if ( deps != null )
             {
-                deps.keySet().forEach( a -> {
-                    Dependency original = deps.get( a );
-                    Matcher m = suffixStripPattern.matcher( a.getVersionString() );
+                for ( Entry<ArtifactRef, Dependency> entry : deps.entrySet() )
+                {
+                    final ArtifactRef a = entry.getKey();
+                    final Dependency original = entry.getValue();
+                    final Matcher m = suffixStripPattern.matcher( a.getVersionString() );
 
                     if ( m.matches() )
                     {
-                        String stripped = m.group( 1 );
+                        final String stripped = m.group( 1 );
 
-                        logger.info( "Stripping suffix from dependency {} (version {}) to {}", a, original.getVersion(), stripped );
+                        logger.info( "Stripping suffix from dependency {} (version {}) to {}", a,
+                                original.getVersion(), stripped );
 
-                        // If its a property update the value otherwise inline the version change.
+                        // If it's a property, update the value, otherwise inline the version change.
                         if ( original.getVersion().contains( "$" ) )
                         {
                             handleProperties( project, original.getVersion(), stripped );
@@ -192,7 +197,7 @@ public class SuffixManipulator
                             original.setVersion( stripped );
                         }
                     }
-                } );
+                }
             }
         }
         catch ( ManipulationUncheckedException e )
@@ -206,7 +211,8 @@ public class SuffixManipulator
     {
         try
         {
-            PropertiesUtils.updateProperties( this.session, project, true, PropertiesUtils.extractPropertyName( original ), stripped );
+            PropertiesUtils.updateProperties( session, project, true,
+                    PropertiesUtils.extractPropertyName( original ), stripped );
         }
         catch ( ManipulationException e )
         {

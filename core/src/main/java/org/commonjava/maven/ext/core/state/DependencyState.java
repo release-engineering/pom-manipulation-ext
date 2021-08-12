@@ -29,6 +29,7 @@ import org.commonjava.maven.ext.core.util.PropertiesUtils;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
 
 import static org.commonjava.maven.ext.core.util.PropertiesUtils.getPropertiesByPrefix;
@@ -148,17 +149,18 @@ public class DependencyState
         extraBOMDepMgmts = new HashMap<>();
         extraBOMs = new HashMap<>();
 
-        for ( Map.Entry<String, String> extra : getPropertiesByPrefix( userProps, EXTRA_BOM_PREFIX ).entrySet() )
+        for ( Entry<String, String> extra : getPropertiesByPrefix( userProps, EXTRA_BOM_PREFIX ).entrySet() )
         {
             extraBOMs.put( extra.getKey(), SimpleProjectVersionRef.parse( extra.getValue() ) );
         }
 
         dependencyOverrides = getPropertiesByPrefix( userProps, DEPENDENCY_EXCLUSION_PREFIX );
 
-        Map<String, String> oP = PropertiesUtils.getPropertiesByPrefix( userProps, DEPENDENCY_OVERRIDE_PREFIX );
-        for ( String s : oP.keySet() )
+        final Map<String, String> oP = getPropertiesByPrefix( userProps, DEPENDENCY_OVERRIDE_PREFIX );
+        for ( final Entry<String, String> entry : oP.entrySet() )
         {
-            if ( dependencyOverrides.put( s, oP.get( s ) ) != null )
+            final String s = entry.getKey();
+            if ( dependencyOverrides.put( s, entry.getValue() ) != null )
             {
                 throw new ManipulationException( "Property clash between dependencyOverride and dependencyExclusion for {}", s );
             }

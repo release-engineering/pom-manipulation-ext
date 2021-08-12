@@ -195,19 +195,22 @@ public class DependencyManipulator extends CommonManipulator implements Manipula
 
     private void removeDuplicateArtifacts( Map<ArtifactRef, String> mergedOverrides, Map<ArtifactRef, String> targetOverrides )
     {
-        Iterator<ArtifactRef> i = mergedOverrides.keySet().iterator();
-        while ( i.hasNext() )
+        final Iterator<Entry<ArtifactRef, String>> it = mergedOverrides.entrySet().iterator();
+        while ( it.hasNext() )
         {
-            ArtifactRef key = i.next();
-            ProjectRef pRef = key.asProjectRef();
+            final Entry<ArtifactRef, String> mergedOverridesEntry = it.next();
+            final ArtifactRef key = mergedOverridesEntry.getKey();
+            final ProjectRef pRef = key.asProjectRef();
 
-            for ( ArtifactRef target : targetOverrides.keySet() )
+            for ( final Entry<ArtifactRef, String> tatgetOverridesEntry : targetOverrides.entrySet() )
             {
+                final ArtifactRef target = tatgetOverridesEntry.getKey();
+
                 if ( pRef.equals( target.asProjectRef() ) )
                 {
                     logger.debug( "Merging sources ; entry {}={} clashes (and will be removed) with precedence given to {}={}",
-                                  key, mergedOverrides.get( key ), target, targetOverrides.get( target ) );
-                    i.remove();
+                                  key, mergedOverridesEntry.getValue(), target, tatgetOverridesEntry.getValue() );
+                    it.remove();
                     break;
                 }
             }
@@ -225,13 +228,13 @@ public class DependencyManipulator extends CommonManipulator implements Manipula
     {
         final DependencyState state = session.getState( DependencyState.class );
         final CommonState cState = session.getState( CommonState.class );
-        final Set<Project> result = new HashSet<>();
+        final Set<Project> result = new HashSet<>( projects.size() );
 
         for ( final Project project : projects )
         {
             final Model model = project.getModel();
 
-            if (!overrides.isEmpty() || !state.getDependencyOverrides().isEmpty())
+            if ( !overrides.isEmpty() || !state.getDependencyOverrides().isEmpty() )
             {
                 apply( project, model, overrides );
 
@@ -240,50 +243,53 @@ public class DependencyManipulator extends CommonManipulator implements Manipula
         }
 
         // If we've changed something now update any old properties with the new values.
-        if (!result.isEmpty())
+        if ( !result.isEmpty() )
         {
             if ( cState.getStrictDependencyPluginPropertyValidation() > 0 )
             {
                 logger.info( "Iterating to validate dependency updates..." );
-                for ( Project p : versionPropertyUpdateMap.keySet() )
+                for ( final Project p : versionPropertyUpdateMap.keySet() )
                 {
                     validateDependenciesUpdatedProperty( cState, p, p.getResolvedDependencies( session ) );
-                    for ( Profile profile : p.getResolvedProfileDependencies( session ).keySet() )
+                    for ( final Map<ArtifactRef, Dependency> dependencies :
+                          p.getResolvedProfileDependencies( session ).values() )
                     {
-                        validateDependenciesUpdatedProperty( cState, p, p.getResolvedProfileDependencies( session ).get( profile ) );
+                        validateDependenciesUpdatedProperty( cState, p, dependencies );
                     }
                 }
             }
 
-            logger.info ("Iterating for property overrides...{}", versionPropertyUpdateMap);
-            for ( Project project : versionPropertyUpdateMap.keySet() )
+            logger.info( "Iterating for property overrides...{}", versionPropertyUpdateMap );
+            for ( final Entry<Project, Map<String, PropertyMapper>> e : versionPropertyUpdateMap.entrySet() )
             {
+                final Project project = e.getKey();
+                final Map<String, PropertyMapper> map = e.getValue();
                 logger.debug( "Checking property override within project {}", project );
-                for ( final Entry<String, PropertyMapper> entry : versionPropertyUpdateMap.get( project ).entrySet() )
+
+                for ( final Entry<String, PropertyMapper> entry : map.entrySet() )
                 {
-                    PropertiesUtils.PropertyUpdate found =
-                                    PropertiesUtils.updateProperties( session, project, false,
-                                                                      entry.getKey(), entry.getValue().getNewVersion() );
+                    final String key = entry.getKey();
+                    final PropertyMapper mapper = entry.getValue();
+                    final String newVersion = mapper.getNewVersion();
+                    final PropertiesUtils.PropertyUpdate found = PropertiesUtils.updateProperties( session, project,
+                            false, key, newVersion );
 
                     if ( found == PropertiesUtils.PropertyUpdate.NOTFOUND )
                     {
                         // Problem in this scenario is that we know we have a property update map but we have not found a
                         // property to update. Its possible this property has been inherited from a parent. Override in the
                         // top pom for safety.
-                        logger.info( "Unable to find a property for {} to update", entry.getKey() );
-                        logger.info( "Adding property {} with {}", entry.getKey(), entry.getValue().getNewVersion() );
+                        logger.info( "Unable to find a property for {} to update", key );
+                        logger.info( "Adding property {} with {}", key, newVersion );
                         // We know the inheritance root is at position 0 in the inherited list...
-                        project.getInheritedList()
-                               .get( 0 )
-                               .getModel()
-                               .getProperties()
-                               .setProperty( entry.getKey(), entry.getValue().getNewVersion() );
+                        project.getInheritedList().get( 0 ).getModel().getProperties().setProperty( key, newVersion );
                     }
                 }
             }
 
-            explicitOverridePropertyUpdates(session);
+            explicitOverridePropertyUpdates( session );
         }
+
         return result;
     }
 
@@ -326,12 +332,11 @@ public class DependencyManipulator extends CommonManipulator implements Manipula
             {
                 for ( Entry<ArtifactRef, String> entry : originalOverrides.entrySet() )
                 {
-                    String oldValue = project.getModelParent().getVersion();
-                    String newValue = entry.getValue();
+                    final ArtifactRef pvr = entry.getKey();
+                    final String oldValue = project.getModelParent().getVersion();
+                    final String newValue = entry.getValue();
 
-                    if ( entry.getKey()
-                              .asProjectRef()
-                              .equals( SimpleProjectRef.parse( ga( project.getModelParent() ) ) ) )
+                    if ( pvr.asProjectRef().equals( SimpleProjectRef.parse( ga( project.getModelParent() ) ) ) )
                     {
                         if ( commonState.isStrict() )
                         {
@@ -365,12 +370,12 @@ public class DependencyManipulator extends CommonManipulator implements Manipula
 
                 // Apply any explicit overrides to the top level parent. Convert it to a simulated
                 // dependency so we can reuse applyExplicitOverrides.
-                HashMap<ArtifactRef, Dependency> pDepMap = new HashMap<>();
-                Dependency d = new Dependency();
+                final Dependency d = new Dependency();
                 d.setGroupId( project.getModelParent().getGroupId() );
                 d.setArtifactId( project.getModelParent().getArtifactId() );
                 d.setVersion( project.getModelParent().getVersion() );
-                pDepMap.put( new SimpleScopedArtifactRef( d ), d );
+                final Map<ArtifactRef, Dependency> pDepMap =
+                        Collections.singletonMap( new SimpleScopedArtifactRef( d ), d ) ;
                 applyExplicitOverrides( project, pDepMap, explicitOverrides, commonState,
                                         explicitVersionPropertyUpdateMap );
                 project.getModelParent().setVersion( d.getVersion() );
@@ -391,30 +396,31 @@ public class DependencyManipulator extends CommonManipulator implements Manipula
                 final List<Dependency> extraDeps = new ArrayList<>();
 
                 // Add dependencies to Dependency Management which did not match any existing dependency
-                for ( final ArtifactRef var : overrides.keySet() )
+                for ( final ArtifactRef pvr : overrides.keySet() )
                 {
-                    if ( !nonMatchingVersionOverrides.containsKey( var ) )
+                    if ( !nonMatchingVersionOverrides.containsKey( pvr ) )
                     {
                         // This one in the remote pom was already dealt with ; continue.
                         continue;
                     }
 
                     final Dependency newDependency = new Dependency();
-                    newDependency.setGroupId( var.getGroupId() );
-                    newDependency.setArtifactId( var.getArtifactId() );
-                    newDependency.setType( var.getType() );
-                    newDependency.setClassifier( var.getClassifier() );
+                    newDependency.setGroupId( pvr.getGroupId() );
+                    newDependency.setArtifactId( pvr.getArtifactId() );
+                    newDependency.setType( pvr.getType() );
+                    newDependency.setClassifier( pvr.getClassifier() );
 
-                    final String artifactVersion = originalOverrides.get( var );
+                    final String artifactVersion = originalOverrides.get( pvr );
                     newDependency.setVersion( artifactVersion );
 
                     extraDeps.add( newDependency );
-                    logger.debug( "New entry added to <DependencyManagement/> - {} : {}", var, artifactVersion );
+                    logger.debug( "New entry added to <DependencyManagement/> - {} : {}", pvr, artifactVersion );
                 }
 
                 // If the model doesn't have any Dependency Management set by default, create one for it
                 DependencyManagement dependencyManagement = model.getDependencyManagement();
-                if ( extraDeps.size() > 0 )
+
+                if ( !extraDeps.isEmpty() )
                 {
                     if ( dependencyManagement == null )
                     {
@@ -448,16 +454,17 @@ public class DependencyManipulator extends CommonManipulator implements Manipula
         final Map<Profile, Map<ArtifactRef, Dependency>> pd = project.getResolvedProfileDependencies( session );
         final Map<Profile, Map<ArtifactRef, Dependency>> pmd = project.getResolvedProfileManagedDependencies( session );
 
-        for ( Profile p : pd.keySet() )
+        for ( final Map<ArtifactRef, Dependency> dependencies : pd.values() )
         {
-            applyOverrides( project, pd.get( p ), explicitOverrides, originalOverrides );
-            applyExplicitOverrides( project, pd.get( p ), explicitOverrides, commonState,
+            applyOverrides( project, dependencies, explicitOverrides, originalOverrides );
+            applyExplicitOverrides( project, dependencies, explicitOverrides, commonState,
                                     explicitVersionPropertyUpdateMap );
         }
-        for ( Profile p : pmd.keySet() )
+
+        for ( final Map<ArtifactRef, Dependency> dependencies : pmd.values() )
         {
-            applyOverrides( project, pmd.get( p ), explicitOverrides, originalOverrides );
-            applyExplicitOverrides( project, pmd.get( p ), explicitOverrides, commonState,
+            applyOverrides( project, dependencies, explicitOverrides, originalOverrides );
+            applyExplicitOverrides( project, dependencies, explicitOverrides, commonState,
                                     explicitVersionPropertyUpdateMap );
         }
     }
@@ -479,7 +486,7 @@ public class DependencyManipulator extends CommonManipulator implements Manipula
         // Duplicate the override map so unused overrides can be easily recorded
         final Map<ArtifactRef, String> unmatchedVersionOverrides = new LinkedHashMap<>( overrides );
 
-        if ( dependencies == null || dependencies.size() == 0 )
+        if ( dependencies == null || dependencies.isEmpty() )
         {
             return unmatchedVersionOverrides;
         }
@@ -488,8 +495,9 @@ public class DependencyManipulator extends CommonManipulator implements Manipula
         final boolean strict = commonState.isStrict();
 
         // Apply matching overrides to dependencies
-        for ( final ArtifactRef dependency : dependencies.keySet() )
+        for ( final Entry<ArtifactRef, Dependency> e : dependencies.entrySet() )
         {
+            final ArtifactRef dependency = e.getKey();
             ProjectRef depPr = new SimpleProjectRef( dependency.getGroupId(), dependency.getArtifactId() );
 
             // We might have junit:junit:3.8.2 and junit:junit:4.1 for differing override scenarios within the
@@ -502,7 +510,7 @@ public class DependencyManipulator extends CommonManipulator implements Manipula
                 ProjectRef groupIdArtifactId = entry.getKey().asProjectRef();
                 if ( depPr.equals( groupIdArtifactId ) )
                 {
-                    final String oldVersion = dependencies.get( dependency ).getVersion();
+                    final String oldVersion = e.getValue().getVersion();
                     final String overrideVersion = entry.getValue();
                     final String resolvedValue = dependency.getVersionString();
 
@@ -543,12 +551,12 @@ public class DependencyManipulator extends CommonManipulator implements Manipula
                         {
                             throw new ManipulationException(
                                             "For {} replacing original property version {} (fully resolved: {} ) with new version {} for {} violates the strict version-alignment rule!",
-                                            depPr.toString(), dependencies.get( dependency ).getVersion(), resolvedValue, entry.getKey().getVersionString(), entry.getKey().asProjectRef().toString());
+                                            depPr.toString(), e.getValue().getVersion(), resolvedValue, entry.getKey().getVersionString(), entry.getKey().asProjectRef().toString());
                         }
                         else
                         {
                             logger.warn( "Replacing original property version {} with new version {} for {} violates the strict version-alignment rule!",
-                                         resolvedValue, overrideVersion, dependencies.get( dependency ).getVersion() );
+                                         resolvedValue, overrideVersion, e.getValue().getVersion() );
                         }
                     }
                     else
@@ -598,11 +606,11 @@ public class DependencyManipulator extends CommonManipulator implements Manipula
                                     // In this case the previous value couldn't be cached even though it contained a property
                                     // as it was either multiple properties or a property combined with a hardcoded value. Therefore
                                     // just append the suffix.
-                                    dependencies.get( dependency ).setVersion( replaceVersion );
+                                    e.getValue().setVersion( replaceVersion );
                                 }
                                 else
                                 {
-                                    dependencies.get( dependency ).setVersion( overrideVersion );
+                                    e.getValue().setVersion( overrideVersion );
                                 }
                             }
                         }
@@ -642,13 +650,15 @@ public class DependencyManipulator extends CommonManipulator implements Manipula
     private void validateDependenciesUpdatedProperty( CommonState cState, Project p, Map<ArtifactRef, Dependency> dependencies )
                     throws ManipulationException
     {
-        for ( Entry<ArtifactRef, Dependency> entry : dependencies.entrySet() )
+        for ( final Entry<ArtifactRef, Dependency> entry : dependencies.entrySet() )
         {
-            String versionProperty = entry.getValue().getVersion();
+            final ArtifactRef pvr = entry.getKey();
+            final Dependency dependency = entry.getValue();
+            final String versionProperty = dependency.getVersion();
 
             if ( startsWith( versionProperty, "${" ) )
             {
-                PropertiesUtils.verifyPropertyMapping( cState, p, versionPropertyUpdateMap, entry.getKey(),
+                PropertiesUtils.verifyPropertyMapping( cState, p, versionPropertyUpdateMap, pvr,
                                                        PropertiesUtils.extractPropertyName( versionProperty ) );
             }
         }
