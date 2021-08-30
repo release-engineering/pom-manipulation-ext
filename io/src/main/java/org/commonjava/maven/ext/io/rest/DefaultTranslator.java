@@ -447,7 +447,7 @@ public class DefaultTranslator
                                    }
                                    else
                                    {
-                                       logger.error( "### HTTP comm failure: {}", failedResponse.getParsingError().get().getMessage() );
+                                       logger.error( "HTTP comm failure: {}", failedResponse.getParsingError().get().getMessage() );
                                        throw new ManipulationUncheckedException( "Problem in HTTP communication with status code {} and message {}",
                                                                                  failedResponse.getStatus(), failedResponse.getStatusText() );
                                    }
