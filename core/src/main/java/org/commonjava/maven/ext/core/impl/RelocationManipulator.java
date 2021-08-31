@@ -186,7 +186,7 @@ public class RelocationManipulator
     {
         final Map<ArtifactRef, Dependency> postFixUp = new HashMap<>();
         boolean result = false;
- logger.error( "### relocations {} " , relocations);
+
         // If we do a single pass over the dependencies that will handle the relocations *but* it will not handle
         // where one relocation alters the dependency and a subsequent relocation alters it again. For instance, the
         // first might wildcard alter the groupId and the second, more specifically alters one with the artifactId
@@ -322,9 +322,6 @@ public class RelocationManipulator
                     }
 
                     updateString( project, plugin.getGroupId(), relocation, relocation.getGroupId(), d -> plugin.setGroupId( relocation.getGroupId() ) );
-
-                    logger.error( "### plugin {}", plugin.getId());
-
 
                     postFixUp.put( new SimpleProjectVersionRef( plugin.getGroupId(), plugin.getArtifactId(),
                                                                 isEmpty( plugin.getVersion() ) ? "*" : plugin.getVersion()), plugin );
