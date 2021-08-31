@@ -94,6 +94,100 @@
             </instructions>
           </configuration>
         </plugin>
+        <plugin>
+          <artifactId>maven-antrun-plugin</artifactId>
+          <executions>
+            <execution>
+              <id>transform-jar</id>
+              <phase>package</phase>
+              <goals>
+                <goal>run</goal>
+              </goals>
+              <configuration>
+                <target>
+                  <property name="plugin_classpath" refid="maven.plugin.classpath" />
+                  <java classname="org.eclipse.transformer.jakarta.JakartaTransformer">
+                    <arg value="${org.jboss.narayana.jta:narayana-jta:jar}" />
+                    <arg value="${project.build.directory}/${project.build.finalName}.jar" />
+                    <arg value="-q" />
+                    <arg value="-o" />
+                    <arg value="-tr" />
+                    <arg value="${project.basedir}/rules/jakarta-renames.properties" />
+                    <classpath>
+                      <pathelement path="${plugin_classpath}" />
+                    </classpath>
+                  </java>
+                </target>
+              </configuration>
+            </execution>
+            <execution>
+              <id>transform-sources-jar</id>
+              <phase>package</phase>
+              <goals>
+                <goal>run</goal>
+              </goals>
+              <configuration>
+                <target>
+                  <property name="plugin_classpath" refid="maven.plugin.classpath" />
+                  <propertyregex input="${org.jboss.narayana.jta:narayana-jta:jar}" regexp="\.jar$" property="source" replace="-sources.jar" global="true" />
+                  <java classname="org.eclipse.transformer.jakarta.JakartaTransformer">
+                    <arg value="${source}" />
+                    <arg value="${project.build.directory}/${project.build.finalName}-sources.jar" />
+                    <arg value="-q" />
+                    <arg value="-o" />
+                    <arg value="-tr" />
+                    <arg value="${project.basedir}/rules/jakarta-renames.properties" />
+                    <classpath>
+                      <pathelement path="${plugin_classpath}" />
+                    </classpath>
+                  </java>
+                </target>
+              </configuration>
+            </execution>
+            <execution>
+              <id>transform-javadoc</id>
+              <phase>package</phase>
+              <goals>
+                <goal>run</goal>
+              </goals>
+              <configuration>
+                <target>
+                  <property name="plugin_classpath" refid="maven.plugin.classpath" />
+                  <ac:propertyregex xmlns:ac="antlib:net.sf.antcontrib" input="${org.jboss.narayana.jta:narayana-jta:jar}" regexp="\.jar$" property="source" replace="-javadoc.jar" global="true" />
+                  <java classname="org.eclipse.transformer.jakarta.JakartaTransformer">
+                    <arg value="${source}" />
+                    <arg value="${project.build.directory}/${project.build.finalName}-javadoc.jar" />
+                    <arg value="-q" />
+                    <arg value="-o" />
+                    <arg value="-tr" />
+                    <arg value="${project.basedir}/rules/jakarta-renames.properties" />
+                    <classpath>
+                      <pathelement path="${plugin_classpath}" />
+                    </classpath>
+                  </java>
+                </target>
+              </configuration>
+            </execution>
+          </executions>
+          <dependencies>
+            <dependency>
+              <groupId>org.eclipse.transformer</groupId>
+              <artifactId>org.eclipse.transformer.cli</artifactId>
+              <version>0.2.0</version>
+            </dependency>
+            <dependency>
+              <groupId>ant-contrib</groupId>
+              <artifactId>ant-contrib</artifactId>
+              <version>1.0b3</version>
+              <exclusions>
+                <exclusion>
+                  <groupId>ant</groupId>
+                  <artifactId>ant</artifactId>
+                </exclusion>
+              </exclusions>
+            </dependency>
+          </dependencies>
+        </plugin>
       </plugins>
 
       <!-- Set the name of the war, used as the context root when the app
