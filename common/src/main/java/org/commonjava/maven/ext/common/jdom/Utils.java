@@ -53,8 +53,7 @@ import java.util.ListIterator;
 import java.util.Properties;
 import java.util.TreeMap;
 
-// @SuppressWarnings( "all" )
-@SuppressWarnings( { "JavaDoc", "RedundantModifiersUtilityClassLombok", "UnusedReturnValue", "unchecked" } )
+@SuppressWarnings( { "JavaDoc", "RedundantModifiersUtilityClassLombok", "UnusedReturnValue" } )
 @UtilityClass
 public final class Utils
 {
@@ -65,7 +64,7 @@ public final class Utils
 
     private static final DefaultJDOMFactory factory = new DefaultJDOMFactory();
 
-    protected final Logger logger = LoggerFactory.getLogger( Utils.class );
+    private final Logger logger = LoggerFactory.getLogger( Utils.class );
 
 
     /**
@@ -153,7 +152,8 @@ public final class Utils
                 while ( it2.hasNext() )
                 {
                     final Xpp3Dom dm = it2.next();
-                    if ( dm.getName().equals( elem.getName() ) )
+                    // Elem::getName, unlike getQualifiedName, does not return namespaced names which can fail the comparison
+                    if ( dm.getName().equals( elem.getQualifiedName() ) )
                     {
                         corrDom = dm;
                         break;
@@ -275,7 +275,7 @@ public final class Utils
         }
         if ( lastText != null && lastText.getTextTrim().length() == 0 )
         {
-            lastText = (Text) lastText.clone();
+            lastText = lastText.clone();
         }
         else
         {
@@ -288,7 +288,7 @@ public final class Utils
         }
         if ( parent.getContentSize() == 0 )
         {
-            final Text finalText = (Text) lastText.clone();
+            final Text finalText = lastText.clone();
             final String newVersion = finalText.getText().substring( 0, finalText.getText().length() - INDENT.length() );
             // TODO: Not sure if we need to handle this text replacement specially (like elsewhere).
             logger.trace( "Replacing original text of {} with modified text of {}", finalText.getText() , newVersion);
@@ -360,6 +360,7 @@ public final class Utils
             }
         }
         // TODO: IntelliJ warns this is always true but having .length() > 0 removes elements by mistake.
+        @SuppressWarnings( "ConstantConditions" )
         final boolean shouldExist = ( text != null ) && ( text.trim().length() >= 0 );
         final Element element = updateElement( counter, parent, name, shouldExist );
         if ( shouldExist )
@@ -507,21 +508,21 @@ public final class Utils
         namespaces.put(Namespace.XML_NAMESPACE.getPrefix(), Namespace.XML_NAMESPACE);
         namespaces.put(element.getNamespacePrefix(), element.getNamespace());
         if (element.getAdditionalNamespaces() != null) {
-            for (Namespace ns : (List<Namespace>)element.getAdditionalNamespaces()) {
+            for (Namespace ns : element.getAdditionalNamespaces() ) {
                 if (!namespaces.containsKey(ns.getPrefix())) {
                     namespaces.put(ns.getPrefix(), ns);
                 }
             }
         }
         if (element.getAttributes() != null) {
-            for (Attribute att : (List< Attribute>)element.getAttributes()) {
+            for (Attribute att : element.getAttributes() ) {
                 Namespace ns = att.getNamespace();
                 if (!namespaces.containsKey(ns.getPrefix())) {
                     namespaces.put(ns.getPrefix(), ns);
                 }
             }
         }
-        // Right, we now have all the namespaces that are current on this ELement.
+        // Right, we now have all the namespaces that are current on this Element.
         // Include any other namespaces that are inherited.
         final Element pnt = element.getParentElement();
         if (pnt != null) {
