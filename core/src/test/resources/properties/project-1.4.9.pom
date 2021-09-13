@@ -508,13 +508,6 @@
     </profile>
 
     <profile>
-      <id>fabricSnapshot</id>
-      <properties>
-        <fabric-version>99-master-SNAPSHOT</fabric-version>
-      </properties>
-    </profile>
-
-    <profile>
       <id>amqSnapshot</id>
       <properties>
         <activemq-version>5.9-SNAPSHOT</activemq-version>
@@ -554,7 +547,6 @@
         <activemq-version>5.10-SNAPSHOT</activemq-version>
         <activemq-leveldb-artifactid>activemq-leveldb-store</activemq-leveldb-artifactid>
         <camel-version>2.14-SNAPSHOT</camel-version>
-        <fabric-version>99-master-SNAPSHOT</fabric-version>
       </properties>
 
       <repositories>

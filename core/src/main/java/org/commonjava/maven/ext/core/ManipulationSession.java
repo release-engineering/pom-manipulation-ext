@@ -77,7 +77,7 @@ public class ManipulationSession
     }
 
     /**
-     * True (enabled) by default, this is the master kill switch for all manipulations. Manipulator implementations MAY also be enabled/disabled
+     * True (enabled) by default, this is the kill switch for all manipulations. Manipulator implementations MAY also be enabled/disabled
      * individually.
      *
      * @see #MANIPULATIONS_DISABLED_PROP
