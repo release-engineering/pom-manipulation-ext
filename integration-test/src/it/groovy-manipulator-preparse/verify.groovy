@@ -13,26 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.commonjava.maven.ext.core.groovy;
+final def pomFile = new File( basedir, 'pom.xml' )
+println 'Slurping POM: ' + pomFile.getAbsolutePath()
 
-import lombok.Getter;
+final def pom = new XmlSlurper().parse( pomFile )
+assert pom.version == '2.0.0.redhat-1'
 
-/**
- * Denotes when the groovy script should be run in relation to the other manipulators.
- */
-public enum InvocationStage
-{
-    PREPARSE( 0 ),
-    FIRST( 1 ),
-    LAST( 99 ),
-    BOTH( Integer.MAX_VALUE ),
-    ALL( Integer.MAX_VALUE );
-
-    @Getter
-    private final int stageValue;
-
-    InvocationStage( int stageValue )
-    {
-        this.stageValue = stageValue;
-    }
+final def profileToKeep = pom.profiles.'**'.find { final profile ->
+    profile.id.text() == 'keep'
 }
+
+assert profileToKeep != null
+
+final def profileToRemove = pom.profiles.'**'.find { final profile ->
+    profile.id.text() == 'remove'
+}
+
+assert profileToRemove == null

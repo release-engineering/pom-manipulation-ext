@@ -29,6 +29,7 @@ import org.commonjava.maven.ext.common.util.JSONUtils;
 import org.commonjava.maven.ext.common.util.ProjectComparator;
 import org.commonjava.maven.ext.common.util.WildcardMap;
 import org.commonjava.maven.ext.core.impl.Manipulator;
+import org.commonjava.maven.ext.core.impl.PreparseGroovyManipulator;
 import org.commonjava.maven.ext.core.state.CommonState;
 import org.commonjava.maven.ext.core.state.RelocationState;
 import org.commonjava.maven.ext.core.util.ManipulatorPriorityComparator;
@@ -99,15 +100,19 @@ public class ManipulationManager
 
     private final PomIO pomIO;
 
+    private final PreparseGroovyManipulator preparseGroovyManipulator;
+
     private final PME jsonReport = new PME();
 
     @Inject
     public ManipulationManager( Map<String, Manipulator> manipulators,
-                                Map<String, ExtensionInfrastructure> infrastructure, PomIO pomIO)
+                                Map<String, ExtensionInfrastructure> infrastructure, PomIO pomIO,
+                                PreparseGroovyManipulator preparseGroovyManipulator )
     {
         this.manipulators = manipulators;
         this.infrastructure = infrastructure;
         this.pomIO = pomIO;
+        this.preparseGroovyManipulator = preparseGroovyManipulator;
     }
 
     /**
@@ -191,6 +196,8 @@ public class ManipulationManager
     public void scanAndApply( final ManipulationSession session )
                     throws ManipulationException
     {
+        preparseGroovyManipulator.applyChanges( session );
+
         final List<Project> currentProjects = pomIO.parseProject( session.getPom() );
         final List<Project> originalProjects = new ArrayList<>(  );
         currentProjects.forEach( p -> originalProjects.add( new Project( p ) ) );
@@ -215,7 +222,6 @@ public class ManipulationManager
 
             jsonReport.getGav().setPVR( executionRoot );
             jsonReport.getGav().setOriginalGAV( originalExecutionRoot.getKey().toString() );
-
 
             try
             {

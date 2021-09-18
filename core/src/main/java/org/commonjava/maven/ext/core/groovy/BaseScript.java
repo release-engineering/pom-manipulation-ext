@@ -48,7 +48,7 @@ public abstract class BaseScript extends BaseScriptUtils
 
     private Properties userProperties;
 
-    private MavenSessionHandler sessionHandler;
+    private MavenSessionHandler session;
 
     private InvocationStage stage;
 
@@ -118,7 +118,7 @@ public abstract class BaseScript extends BaseScriptUtils
      */
     public MavenSessionHandler getSession()
     {
-        return sessionHandler;
+        return session;
     }
 
     /**
@@ -153,21 +153,29 @@ public abstract class BaseScript extends BaseScriptUtils
      * @param projects ArrayList of Project instances
      * @param project Current project
      * @param stage the current InvocationStage of the groovy script
+     * @throws ManipulationException if an error occurs getting the base directory
      */
-    public void setValues(PomIO pomIO, FileIO fileIO, ModelIO modelIO, ManipulationSession session, List<Project> projects, Project project,
-                          InvocationStage stage)
+    public void setValues( PomIO pomIO, FileIO fileIO, ModelIO modelIO, ManipulationSession session,
+                           List<Project> projects, Project project, InvocationStage stage )
+            throws ManipulationException
     {
         this.fileIO = fileIO;
         this.pomIO = pomIO;
         this.modelIO = modelIO;
-        this.sessionHandler = session;
+        this.session = session;
         this.projects = projects;
+
+        if ( project != null )
+        {
+            this.gav = project.getKey();
+        }
+
         this.project = project;
-        this.gav = project.getKey();
-        this.basedir = project.getPom().getParentFile();
+        this.basedir = session.getPom().getParentFile();
         this.userProperties = session.getUserProperties();
         this.stage = stage;
 
-        logger.info ("Injecting values. Project is " + project + " with basedir " + basedir + " and properties " + userProperties);
+        logger.info( "Injecting values. Project is {} with basedir {} and properties {}", project, basedir,
+                userProperties );
     }
 }

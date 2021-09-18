@@ -13,20 +13,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import org.commonjava.maven.ext.common.ManipulationException
+package org.commonjava.maven.ext.depMgmt5
+
 import org.commonjava.maven.ext.core.groovy.BaseScript
-import org.commonjava.maven.ext.core.groovy.InvocationPoint
 import org.commonjava.maven.ext.core.groovy.InvocationStage
 import org.commonjava.maven.ext.core.groovy.PMEBaseScript
+import org.commonjava.maven.ext.core.groovy.InvocationPoint
 
-@InvocationPoint(invocationPoint = InvocationStage.FIRST)
+@InvocationPoint(invocationPoint = InvocationStage.ALL)
 @PMEBaseScript BaseScript pme
 
-if ( "true".equals(pme.getUserProperties().getProperty("manipExcep")))
-{
-    throw new ManipulationException("Manip Except")
-}
-else if ( "false".equals(pme.getUserProperties().getProperty("manipExcep")))
-{
-    throw new IOException("IO problems")
-}
+// These are both debug AND test statements - do NOT remove. If the injection (in GroovyManipulator)
+// fails these prints will cause the test to fail.
+println "#### BASESCRIPT:"
+println pme.getBaseDir()
+println pme.getBaseDir().getClass().getName()
+println pme.getGAV()
+println pme.getGAV().getClass().getName()
+println pme.getProjects()
+println pme.getProject().getClass().getName()
+println pme.getProjects()
+println pme.getProject().getClass().getName()
+println "#### BASESCRIPT END"
+// End...
+
+pme.getProject().getModel().setVersion("1.0.0")

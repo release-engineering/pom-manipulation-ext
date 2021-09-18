@@ -17,12 +17,13 @@ package org.commonjava.maven.ext.depMgmt2
 
 import groovy.util.logging.Slf4j
 import org.commonjava.maven.ext.common.model.Project
+import org.commonjava.maven.ext.core.groovy.BaseScript
 import org.commonjava.maven.ext.core.groovy.InvocationStage
 import org.commonjava.maven.ext.core.groovy.PMEBaseScript
 import org.commonjava.maven.ext.core.groovy.InvocationPoint
 
 @InvocationPoint(invocationPoint = InvocationStage.FIRST)
-@PMEBaseScript org.commonjava.maven.ext.core.groovy.BaseScript pme
+@PMEBaseScript BaseScript pme
 
 @Slf4j
 class GroovyModifier {

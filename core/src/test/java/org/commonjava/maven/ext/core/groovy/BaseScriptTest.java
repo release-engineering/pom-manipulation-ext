@@ -46,12 +46,12 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.Properties;
 
-import static junit.framework.TestCase.assertEquals;
-import static junit.framework.TestCase.assertNull;
 import static org.commonjava.maven.ext.core.fixture.TestUtils.INTEGRATION_TEST;
 import static org.commonjava.maven.ext.core.fixture.TestUtils.ROOT_DIRECTORY;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -76,10 +76,10 @@ public class BaseScriptTest
 
         PomIO pomIO = new PomIO();
         List<Project> projects = pomIO.parseProject( projectroot );
-        ManipulationSession ms = TestUtils.createSession( null );
+        ManipulationSession ms = TestUtils.createSession( null, projectroot );
 
         Project root = projects.stream().filter( p -> p.getProjectParent() == null ).findAny().orElse( null );
-        logger.info( "Found project root " + root );
+        logger.info( "Found project root {}", root );
 
         InitialGroovyManipulator gm = new InitialGroovyManipulator( null, null, null );
         gm.init( ms );
@@ -97,10 +97,10 @@ public class BaseScriptTest
 
         PomIO pomIO = new PomIO();
         List<Project> projects = pomIO.parseProject( projectroot );
-        ManipulationSession ms = TestUtils.createSession( null );
+        ManipulationSession ms = TestUtils.createSession( null, projectroot );
 
         Project root = projects.stream().filter( p -> p.getProjectParent() == null ).findAny().orElse( null );
-        logger.info( "Found project root " + root );
+        logger.info( "Found project root {}", root );
 
         FinalGroovyManipulator gm = new FinalGroovyManipulator( null, null, null );
         gm.init( ms );
@@ -124,7 +124,7 @@ public class BaseScriptTest
         FileIO fileIO = new FileIO( new GalleyInfrastructure( null, null ).init( temporaryFolder.newFolder() ) );
 
         List<Project> projects = pomIO.parseProject( projectroot );
-        ManipulationSession ms = TestUtils.createSession( null );
+        ManipulationSession ms = TestUtils.createSession( null, projectroot );
 
         Project root = projects.stream()
                                .filter( p -> p.getProjectParent() == null )
@@ -203,7 +203,7 @@ public class BaseScriptTest
 
         Properties userProperties = new Properties(  );
         userProperties.setProperty( "versionIncrementalSuffix", "rebuild" );
-        ManipulationSession session = TestUtils.createSession( userProperties );
+        ManipulationSession session = TestUtils.createSession( userProperties, projectroot );
 
         VersioningState state = session.getState( VersioningState.class );
         assertNotNull( state );
@@ -211,9 +211,8 @@ public class BaseScriptTest
         assertEquals( "rebuild", state.getIncrementalSerialSuffix() );
         assertNull( state.getSuffix() );
 
-
         Project root = projects.stream().filter( p -> p.getProjectParent() == null ).findAny().orElse( null );
-        logger.info( "Found project root " + root );
+        logger.info( "Found project root {}", root );
 
         InitialGroovyManipulator gm = new InitialGroovyManipulator( null, null, null );
         gm.init( session );
@@ -237,12 +236,13 @@ public class BaseScriptTest
         FileUtils.copyFileToDirectory( pom, tmpFolder);
 
 
-        List<Project> projects = new PomIO().parseProject( new File (tmpFolder, "pom.xml" ));
+        final File projectroot = new File( tmpFolder, "pom.xml" );
+        List<Project> projects = new PomIO().parseProject( projectroot );
 
         Properties userProperties = new Properties();
         userProperties.setProperty( "versionIncrementalSuffix", "rebuild" );
         userProperties.setProperty( "groovyScripts", groovy.toURI().toString() );
-        ManipulationSession session = TestUtils.createSession( userProperties );
+        ManipulationSession session = TestUtils.createSession( userProperties, projectroot );
 
         VersioningState state = session.getState( VersioningState.class );
         assertNotNull( state );
@@ -251,7 +251,7 @@ public class BaseScriptTest
         assertNull( state.getSuffix() );
 
         Project root = projects.stream().filter( p -> p.getProjectParent() == null ).findAny().orElse( null );
-        logger.info( "Found project root " + root );
+        logger.info( "Found project root {}", root );
 
         final DefaultContainerConfiguration config = new DefaultContainerConfiguration();
 

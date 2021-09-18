@@ -20,6 +20,7 @@ import org.commonjava.maven.ext.common.model.Project;
 import org.commonjava.maven.ext.core.ManipulationSession;
 import org.commonjava.maven.ext.core.groovy.InvocationStage;
 import org.commonjava.maven.ext.core.state.GroovyState;
+import org.commonjava.maven.ext.core.state.State;
 import org.commonjava.maven.ext.io.FileIO;
 import org.commonjava.maven.ext.io.ModelIO;
 import org.commonjava.maven.ext.io.PomIO;
@@ -50,15 +51,15 @@ public class FinalGroovyManipulator
     }
     /**
      * Initialize the {@link GroovyState} state holder in the {@link ManipulationSession}. This state holder detects
-     * version-change configuration from the Maven user properties (-D properties from the CLI) and makes it available for
-     * later.
+     * version-change configuration from the Maven user properties (-D properties from the CLI) and makes it available
+     * for later.
      */
     @Override
     public void init( final ManipulationSession session ) throws ManipulationException
     {
-        GroovyState gs = new GroovyState( session.getUserProperties() );
+        final State state = new GroovyState( session.getUserProperties() );
         this.session = session;
-        session.setState( gs );
+        session.setState( state );
     }
 
     /**
@@ -75,14 +76,16 @@ public class FinalGroovyManipulator
             return Collections.emptySet();
         }
 
-        final Set<Project> changed = new HashSet<>();
+        final List<File> groovyScripts = parseGroovyScripts( state.getGroovyScripts() );
+        final Set<Project> changed = new HashSet<>( groovyScripts.size() );
 
-        for ( File groovyScript : parseGroovyScripts( state.getGroovyScripts() ))
+        for ( final File groovyScript : groovyScripts )
         {
-            Project project = projects.stream()
-                                      .filter( Project::isExecutionRoot )
-                                      .findFirst()
-                                      .orElseThrow( () -> new ManipulationException( "Unable to find execution root" ) );
+            final Project project = projects.stream()
+                                            .filter( Project::isExecutionRoot )
+                                            .findFirst()
+                                            .orElseThrow( () -> new ManipulationException( "Unable to find execution"
+                                                     + " root" ) );
             applyGroovyScript( projects, project, groovyScript);
             changed.add( project );
         }

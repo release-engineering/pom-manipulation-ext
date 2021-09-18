@@ -19,6 +19,7 @@ import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.core.impl.Manipulator;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 
 /**
@@ -35,7 +36,7 @@ public interface State
     /**
      * Contains list of manipulations that are active by default for checking in applyChanges.
      */
-    ArrayList<Class<? extends State>> activeByDefault = new ArrayList<>();
+    List<Class<? extends State>> activeByDefault = new ArrayList<>();
 
     /**
      * @return true if this State is enabled.

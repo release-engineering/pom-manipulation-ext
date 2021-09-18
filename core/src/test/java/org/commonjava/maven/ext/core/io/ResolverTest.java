@@ -45,14 +45,14 @@ public class ResolverTest
         final GalleyInfrastructure galleyInfra =
                         new GalleyInfrastructure( session, null).init( null, null, cache );
         final GalleyAPIWrapper wrapper = new GalleyAPIWrapper( galleyInfra );
-        final ModelIO model = new ModelIO(wrapper);
+        final ModelIO model = new ModelIO( wrapper );
 
-        File c = model.resolveRawFile( SimpleScopedArtifactRef.parse( "academy.alex:custommatcher:1.0"  ) );
+        File c = model.resolveRawFile( SimpleScopedArtifactRef.parse( "academy.alex:custommatcher:1.0" ) );
 
-        assertTrue (c.exists());
+        assertTrue( c.exists() );
 
-        String academy = FileUtils.readFileToString( c, StandardCharsets.UTF_8);
+        String academy = FileUtils.readFileToString( c, StandardCharsets.UTF_8 );
 
-        assertTrue (academy.contains( "This is Custom Matcher to validate Credit Card" ));
+        assertTrue( academy.contains( "This is Custom Matcher to validate Credit Card" ) );
     }
 }

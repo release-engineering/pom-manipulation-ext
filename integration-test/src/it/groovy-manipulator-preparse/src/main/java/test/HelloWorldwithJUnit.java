@@ -13,26 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.commonjava.maven.ext.core.groovy;
+package test;
 
-import lombok.Getter;
+import org.junit.Test;
 
-/**
- * Denotes when the groovy script should be run in relation to the other manipulators.
- */
-public enum InvocationStage
+public class HelloWorldwithJUnit
 {
-    PREPARSE( 0 ),
-    FIRST( 1 ),
-    LAST( 99 ),
-    BOTH( Integer.MAX_VALUE ),
-    ALL( Integer.MAX_VALUE );
-
-    @Getter
-    private final int stageValue;
-
-    InvocationStage( int stageValue )
+    public static void main (String [] args)
     {
-        this.stageValue = stageValue;
+        System.out.println("hello");
+    }
+
+    @Test
+    public void test()
+    {
+        // Just a dummy method to verify that we can compile again JUnit 4
     }
 }

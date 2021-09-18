@@ -37,13 +37,13 @@ public class ProfileActivationTest
 
     private static final String RESOURCE_BASE = "";
 
+    // Locate the PME project pom file. Use that to verify inheritance tracking.
+    private static final File PROJECTROOT = TestUtils.resolveFileResource( RESOURCE_BASE, "profile.pom" );
+
     private List<Project> getProject() throws Exception
     {
-        // Locate the PME project pom file. Use that to verify inheritance tracking.
-        final File projectroot = TestUtils.resolveFileResource( RESOURCE_BASE, "profile.pom" );
-
         PomIO pomIO = new PomIO();
-        List<Project> projects = pomIO.parseProject( projectroot );
+        List<Project> projects = pomIO.parseProject( PROJECTROOT );
         assertEquals( 1, projects.size() );
 
         return projects;
@@ -54,7 +54,7 @@ public class ProfileActivationTest
     public void testVerifyProfile1() throws Exception
     {
         List<Project> p = getProject();
-        TestUtils.SMContainer smc = TestUtils.createSessionAndManager( null );
+        TestUtils.SMContainer smc = TestUtils.createSessionAndManager( null, PROJECTROOT );
 
         Set<String> activeProfiles = (Set<String>) TestUtils.executeMethod( smc.getManager(), "parseActiveProfiles", new Class[] { ManipulationSession.class,
                         List.class }, new Object[] { smc.getSession(), p } );
@@ -71,7 +71,7 @@ public class ProfileActivationTest
         List<Project> p = getProject();
         Properties properties = new Properties(  );
         properties.setProperty( "testProperty", "testvalue" );
-        TestUtils.SMContainer smc = TestUtils.createSessionAndManager( properties );
+        TestUtils.SMContainer smc = TestUtils.createSessionAndManager( properties, PROJECTROOT );
 
         Set<String> activeProfiles = (Set<String>) TestUtils.executeMethod( smc.getManager(), "parseActiveProfiles",
                                                                             new Class[] { ManipulationSession.class, List.class },

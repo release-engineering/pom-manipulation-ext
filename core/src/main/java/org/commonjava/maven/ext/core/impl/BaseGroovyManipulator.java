@@ -73,10 +73,10 @@ public abstract class BaseGroovyManipulator
 
     public abstract int getExecutionIndex();
 
-
     /**
-     * Splits the value on ',', then wraps each value in {@link SimpleArtifactRef#parse(String)} and prints a warning / skips in the event of a
-     * parsing error. Returns null if the input value is null.
+     * Splits the value on ',', then wraps each value in {@link SimpleArtifactRef#parse(String)} and prints a
+     * warning / skips in the event of a parsing error. Returns null if the input value is null.
+     *
      * @param value a comma separated list of GAVTC to parse
      * @return a collection of parsed ArtifactRef.
      * @throws ManipulationException if an error occurs.
@@ -124,7 +124,7 @@ public abstract class BaseGroovyManipulator
 
     void applyGroovyScript( List<Project> projects, Project project, File groovyScript ) throws ManipulationException
     {
-        final GroovyShell shell = new GroovyShell( );
+        final GroovyShell shell = new GroovyShell();
         final Script script;
         final InvocationStage stage;
 
@@ -148,11 +148,11 @@ public abstract class BaseGroovyManipulator
             }
             if ( script instanceof BaseScript )
             {
-                ((BaseScript) script).setValues(pomIO, fileIO, modelIO, session, projects, project, stage);
+                ( ( BaseScript ) script ).setValues( pomIO, fileIO, modelIO, session, projects, project, stage );
             }
             else
             {
-                throw new ManipulationException( "Cannot cast {} to a BaseScript to set values.", groovyScript );
+                throw new ManipulationException( "Cannot cast {} to a BaseScript to set values", groovyScript );
             }
         }
         catch (MissingMethodException e)
@@ -168,7 +168,7 @@ public abstract class BaseGroovyManipulator
             }
             throw new ManipulationException( "Unable to inject values into base script", e );
         }
-        catch (CompilationFailedException e)
+        catch ( CompilationFailedException e )
         {
             try
             {
@@ -186,22 +186,23 @@ public abstract class BaseGroovyManipulator
             throw new ManipulationException( "Unable to parse script", e );
         }
 
-        if ( getExecutionIndex() == stage.getStageValue() || stage == InvocationStage.BOTH )
+        if ( getExecutionIndex() == stage.getStageValue() || stage == InvocationStage.BOTH
+                || stage == InvocationStage.ALL )
         {
             try
             {
-                logger.info ("Executing {} on {} at invocation point {}", groovyScript, project, stage);
+                logger.info( "Executing {} on {} at invocation point {}", groovyScript, project, stage );
 
                 script.run();
 
-                logger.info ("Completed {}.", groovyScript);
+                logger.info( "Completed {}", groovyScript );
             }
             catch ( Exception e )
             {
                 //noinspection ConstantConditions
                 if ( e instanceof ManipulationException )
                 {
-                    throw ((ManipulationException)e);
+                    throw ( ManipulationException ) e;
                 }
                 else
                 {
@@ -211,7 +212,8 @@ public abstract class BaseGroovyManipulator
         }
         else
         {
-            logger.debug( "Ignoring script {} as invocation point {} does not match index {}", groovyScript, stage, getExecutionIndex() );
+            logger.debug( "Ignoring script {} as invocation point {} does not match index {}", groovyScript, stage,
+                    getExecutionIndex() );
         }
     }
 }

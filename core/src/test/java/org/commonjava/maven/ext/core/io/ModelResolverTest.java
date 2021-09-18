@@ -70,7 +70,7 @@ public class ModelResolverTest
                         new GalleyInfrastructure( session, new DefaultMirrorSelector()).init( null, null, temp.newFolder(
                                         "cache-dir" ) );
         final GalleyAPIWrapper wrapper = new GalleyAPIWrapper( galleyInfra );
-        final ModelIO model = new ModelIO(wrapper);
+        final ModelIO model = new ModelIO( wrapper );
 
         Model m = model.resolveRawModel( SimpleProjectVersionRef.parse( "org.commonjava:commonjava:12"  ) );
         assertNull( m.getModelEncoding() );
@@ -87,7 +87,7 @@ public class ModelResolverTest
                         new GalleyInfrastructure( session, new DefaultMirrorSelector()).init( null, null, temp.newFolder(
                                         "cache-dir" ) );
         final GalleyAPIWrapper wrapper = new GalleyAPIWrapper( galleyInfra );
-        final ModelIO model = new ModelIO(wrapper);
+        final ModelIO model = new ModelIO( wrapper );
 
         assertEquals( "groovy-cps",
                       model.resolveRawModel( SimpleProjectVersionRef.parse( "com.cloudbees:groovy-cps:1.20" ) ).

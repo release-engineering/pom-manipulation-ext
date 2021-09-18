@@ -179,7 +179,7 @@ public abstract class BaseScriptUtils extends Script implements MavenBaseScript
                 // This is simpler test than using the more comprehensive comparisons available in org.jboss.da.common.version.*
                 VersioningState vs = ((ManipulationSession)getSession()).getState( VersioningState.class );
                 List<String> suffixes = vs.getSuffixAlternatives();
-                if ( suffixes.size() > 0 )
+                if ( !suffixes.isEmpty() )
                 {
                     // We know we have alternate + default (e.g. temporary-redhat + redhat) so examine the incremental
                     // to see if they match ; if not we can continue as it should not clash.
@@ -199,7 +199,7 @@ public abstract class BaseScriptUtils extends Script implements MavenBaseScript
 
         String newSuffix = targetBuild.substring( gav.getVersionString().length() + 1 );
         logger.info( "From version {}, updating versionSuffix to {}", targetBuild, newSuffix );
-        getUserProperties().put( VersioningState.VERSION_SUFFIX_SYSPROP, newSuffix );
+        getUserProperties().setProperty( VersioningState.VERSION_SUFFIX_SYSPROP, newSuffix );
 
         reinitialiseSessionStates();
     }
