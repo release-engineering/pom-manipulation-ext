@@ -13,30 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.commonjava.maven.ext.core.groovy;
+final def txtFile = new File( basedir, 'count.txt' )
+final def count = txtFile.text.trim() as Integer
 
-import lombok.Getter;
+println "Manipulator count: ${count}"
 
-/**
- * Denotes when the groovy script should be run in relation to the other manipulators.
- */
-public enum InvocationStage
-{
-    PREPARSE( 0 ),
-    FIRST( 1 ),
-    LAST( 99 ),
-    /**
-     * @deprecated use {@link #ALL ALL} instead.
-     */
-    @Deprecated
-    BOTH( Integer.MAX_VALUE - 1 ),
-    ALL( Integer.MAX_VALUE );
-
-    @Getter
-    private final int stageValue;
-
-    InvocationStage( int stageValue )
-    {
-        this.stageValue = stageValue;
-    }
-}
+assert count == 3

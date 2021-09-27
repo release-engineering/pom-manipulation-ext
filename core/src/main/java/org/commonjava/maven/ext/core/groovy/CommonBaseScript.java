@@ -49,7 +49,7 @@ public interface CommonBaseScript
      * Return a FileIO instance to read a raw file from a given URL
      * @return a {@link FileIO} reference.
      */
-    FileIO getFileIO ();
+    FileIO getFileIO();
 
     /**
      * Gets a configured VersionTranslator to make REST calls to DA

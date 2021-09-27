@@ -44,6 +44,11 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.apache.commons.lang.StringUtils.isEmpty;
+import static org.commonjava.maven.ext.core.groovy.InvocationStage.ALL;
+import static org.commonjava.maven.ext.core.groovy.InvocationStage.BOTH;
+import static org.commonjava.maven.ext.core.groovy.InvocationStage.FIRST;
+import static org.commonjava.maven.ext.core.groovy.InvocationStage.LAST;
+import static org.commonjava.maven.ext.core.groovy.InvocationStage.PREPARSE;
 
 /**
  * {@link Manipulator} implementation that can resolve a remote groovy file and execute it on executionRoot. Configuration
@@ -186,12 +191,17 @@ public abstract class BaseGroovyManipulator
             throw new ManipulationException( "Unable to parse script", e );
         }
 
-        if ( getExecutionIndex() == stage.getStageValue() || stage == InvocationStage.BOTH
-                || stage == InvocationStage.ALL )
+        if ( getExecutionIndex() == stage.getStageValue() || stage == ALL || ( stage == BOTH
+                && ( getExecutionIndex() == FIRST.getStageValue() || getExecutionIndex() == LAST.getStageValue() ) ) )
         {
             try
             {
                 logger.info( "Executing {} on {} at invocation point {}", groovyScript, project, stage );
+
+                if ( stage == BOTH )
+                {
+                    logger.warn( "Stage BOTH is deprecated. Please use ALL instead" );
+                }
 
                 script.run();
 

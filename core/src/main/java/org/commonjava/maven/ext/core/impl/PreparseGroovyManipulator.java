@@ -77,23 +77,7 @@ public class PreparseGroovyManipulator
 
         for ( final File groovyScript : groovyScripts )
         {
-            final GroovyShell shell = new GroovyShell();
-
-            try
-            {
-                final Script script = shell.parse(groovyScript);
-                final InvocationPoint invocationPoint = script.getClass().getAnnotation(InvocationPoint.class);
-                final InvocationStage stage = invocationPoint != null ? invocationPoint.invocationPoint() : null;
-
-                if ( InvocationStage.PREPARSE == stage )
-                {
-                    applyGroovyScript( Collections.emptyList(), null, groovyScript );
-                }
-            }
-            catch ( IOException e )
-            {
-                throw new ManipulationException( e.getMessage(), e );
-            }
+            applyGroovyScript( Collections.emptyList(), null, groovyScript );
         }
 
         return Collections.emptySet();
