@@ -15,15 +15,11 @@
  */
 package org.commonjava.maven.ext.core.impl;
 
-import groovy.lang.GroovyShell;
-import groovy.lang.Script;
 import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.common.model.Project;
 import org.commonjava.maven.ext.core.ManipulationSession;
-import org.commonjava.maven.ext.core.groovy.InvocationPoint;
 import org.commonjava.maven.ext.core.groovy.InvocationStage;
 import org.commonjava.maven.ext.core.state.GroovyState;
-import org.commonjava.maven.ext.core.state.State;
 import org.commonjava.maven.ext.io.FileIO;
 import org.commonjava.maven.ext.io.ModelIO;
 import org.commonjava.maven.ext.io.PomIO;
@@ -33,7 +29,6 @@ import javax.inject.Named;
 import javax.inject.Singleton;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
