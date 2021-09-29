@@ -150,7 +150,7 @@ public class TestUtils
         session.setMavenSession( mavenSession );
         manipulationManager.init( session );
 
-        return new SMContainer( req, session,  manipulationManager );
+        return new SMContainer( session,  manipulationManager );
     }
 
     /**
@@ -181,7 +181,7 @@ public class TestUtils
 
     /**
      * Container object to allow a {@link ManipulationSession} to be created but also return the
-     * {@link ManipulationManager} and {@link MavenExecutionRequest}.
+     * {@link ManipulationManager}.
      */
     public static class SMContainer
     {
@@ -191,12 +191,8 @@ public class TestUtils
         @Getter
         private final ManipulationManager manager;
 
-        @Getter
-        private final MavenExecutionRequest request;
-
-        private SMContainer( MavenExecutionRequest request, ManipulationSession session, ManipulationManager manager )
+        private SMContainer( ManipulationSession session, ManipulationManager manager )
         {
-            this.request = request;
             this.session = session;
             this.manager = manager;
         }
