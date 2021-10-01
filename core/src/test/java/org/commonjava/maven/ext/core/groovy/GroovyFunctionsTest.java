@@ -71,7 +71,8 @@ public class GroovyFunctionsTest
         Properties p = new Properties(  );
         p.setProperty( "restURL", mockServer.getUrl() );
 
-        impl.setValues(pomIO, null, null, TestUtils.createSession( p ), projects, projects.get( 0 ), InvocationStage.FIRST );
+        impl.setValues(pomIO, null, null, TestUtils.createSession( p, projectroot ), projects, projects.get( 0 ),
+                InvocationStage.FIRST );
 
         impl.overrideProjectVersion( SimpleProjectVersionRef.parse( "org.foo:bar:1.0" ) );
     }
@@ -90,7 +91,8 @@ public class GroovyFunctionsTest
 
         final PlexusContainer container = new DefaultPlexusContainer( config);
         final PomIO pomIO = container.lookup( PomIO.class );
-        final List<Project> projects = pomIO.parseProject( new File( root, "pom.xml" ) );
+        final File projectroot = new File( root, "pom.xml" );
+        final List<Project> projects = pomIO.parseProject( projectroot );
 
         assertEquals( 3, projects.size() );
 
@@ -100,7 +102,8 @@ public class GroovyFunctionsTest
         p.setProperty( "restRepositoryGroup", "GroovyWithTemporary" );
         p.setProperty( "restURL", mockServer.getUrl() );
 
-        impl.setValues(pomIO, null, null, TestUtils.createSession( p ), projects, projects.get( 0 ), InvocationStage.FIRST );
+        impl.setValues(pomIO, null, null, TestUtils.createSession( p, projectroot ), projects, projects.get( 0 ),
+                InvocationStage.FIRST );
 
         impl.overrideProjectVersion( SimpleProjectVersionRef.parse( "org.goots:sample:1.0.0" ) );
     }
@@ -130,7 +133,8 @@ public class GroovyFunctionsTest
         p.setProperty( "restMode", "GroovyWithTemporary" );
         p.setProperty( "restURL", mockServer.getUrl() );
 
-        impl.setValues(pomIO, null, null, TestUtils.createSession( p ), projects, projects.get( 0 ), InvocationStage.FIRST );
+        impl.setValues(pomIO, null, null, TestUtils.createSession( p, target ), projects, projects.get( 0 ),
+                InvocationStage.FIRST );
 
         impl.overrideProjectVersion( SimpleProjectVersionRef.parse( "org.goots:testTempOverrideWithNonTemp:1.0.0" ) );
 

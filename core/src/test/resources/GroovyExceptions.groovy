@@ -22,7 +22,6 @@ import org.commonjava.maven.ext.core.groovy.PMEBaseScript
 @InvocationPoint(invocationPoint = InvocationStage.FIRST)
 @PMEBaseScript BaseScript pme
 
-
 if ( "true".equals(pme.getUserProperties().getProperty("manipExcep")))
 {
     throw new ManipulationException("Manip Except")

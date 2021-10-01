@@ -33,9 +33,9 @@ import java.util.Optional;
 import java.util.Properties;
 
 import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
 /**
@@ -73,8 +73,7 @@ public class InitialGroovyManipulatorTest
         userProperties.setProperty( "versionIncrementalSuffix", "rebuild" );
         userProperties.setProperty( "groovyScripts", groovy.toURI().toString() );
 
-        TestUtils.SMContainer smc = TestUtils.createSessionAndManager( userProperties );
-        smc.getRequest().setPom( projectroot );
+        TestUtils.SMContainer smc = TestUtils.createSessionAndManager( userProperties, projectroot );
         smc.getManager().scanAndApply( smc.getSession() );
 
         // re-read the projects:

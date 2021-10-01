@@ -22,15 +22,60 @@ import lombok.Getter;
  */
 public enum InvocationStage
 {
-    FIRST(1),
-    LAST(99),
-    BOTH(Integer.MAX_VALUE);
+    /**
+     * Run before any projects are parsed, i.e., before any manipulators.
+     *
+     * @since 4.6
+     */
+    PREPARSE( 0 ),
+    /**
+     * Run before any other manipulators.
+     */
+    FIRST( 1 ),
+    /**
+     * Run after any other manipulators.
+     */
+    LAST( 99 ),
+    /**
+     * Run during all stages.
+     *
+     * @since 4.6
+     */
+    ALL( Integer.MAX_VALUE );
 
+    /**
+     * Gets the stage value.
+     *
+     * @return the stage value
+     */
     @Getter
-    private int stageValue;
+    private final int stageValue;
 
-    InvocationStage( int i )
+    InvocationStage( int stageValue )
     {
-        this.stageValue = i;
+        this.stageValue = stageValue;
+    }
+
+    /**
+     * Returns the {@code InvocationStage} representing the specified {@code int} value.
+     *
+     * @param stageValue an {@code int} value
+     * @return the {@code InvocationStage} representing {@code stageValue}
+     * @since 4.6
+     */
+    public static InvocationStage valueOf( int stageValue )
+    {
+        InvocationStage result = null;
+
+        for ( InvocationStage stage : values() )
+        {
+            if ( stage.getStageValue() == stageValue )
+            {
+                result = stage;
+                break;
+            }
+        }
+
+        return result;
     }
 }

@@ -37,13 +37,13 @@ public class ProfileActivationTest
 
     private static final String RESOURCE_BASE = "";
 
+    // Locate the PME project pom file. Use that to verify inheritance tracking.
+    private static final File PROJECTROOT = TestUtils.resolveFileResource( RESOURCE_BASE, "profile.pom" );
+
     private List<Project> getProject() throws Exception
     {
-        // Locate the PME project pom file. Use that to verify inheritance tracking.
-        final File projectroot = TestUtils.resolveFileResource( RESOURCE_BASE, "profile.pom" );
-
         PomIO pomIO = new PomIO();
-        List<Project> projects = pomIO.parseProject( projectroot );
+        List<Project> projects = pomIO.parseProject( PROJECTROOT );
         assertEquals( 1, projects.size() );
 
         return projects;
@@ -54,10 +54,10 @@ public class ProfileActivationTest
     public void testVerifyProfile1() throws Exception
     {
         List<Project> p = getProject();
-        TestUtils.SMContainer smc = TestUtils.createSessionAndManager( null );
+        TestUtils.SMContainer smc = TestUtils.createSessionAndManager( null, PROJECTROOT );
 
-        Set<String> activeProfiles = (Set<String>) TestUtils.executeMethod( smc.getManager(), "parseActiveProfiles", new Class[] { ManipulationSession.class,
-                        List.class }, new Object[] { smc.getSession(), p } );
+        Set<String> activeProfiles = (Set<String>) TestUtils.executeMethod( smc.getManager(), "parseActiveProfiles",
+                new Class[] { ManipulationSession.class, List.class }, new Object[] { smc.getSession(), p } );
 
         logger.info( "Returning active profiles of {}", activeProfiles );
 
@@ -71,17 +71,19 @@ public class ProfileActivationTest
         List<Project> p = getProject();
         Properties properties = new Properties(  );
         properties.setProperty( "testProperty", "testvalue" );
-        TestUtils.SMContainer smc = TestUtils.createSessionAndManager( properties );
+        TestUtils.SMContainer smc = TestUtils.createSessionAndManager( properties, PROJECTROOT );
 
         Set<String> activeProfiles = (Set<String>) TestUtils.executeMethod( smc.getManager(), "parseActiveProfiles",
-                                                                            new Class[] { ManipulationSession.class, List.class },
+                                                                            new Class[] { ManipulationSession.class,
+                                                                                          List.class },
                                                                             new Object[] { smc.getSession(), p } );
 
-        activeProfiles.forEach( i -> System.out.println( "Active list is " + i ) );
+        if ( logger.isInfoEnabled() )
+        {
+            activeProfiles.forEach( activeProfile -> logger.info( "Active list is {}", activeProfile ) );
+        }
 
         assertEquals( 3, activeProfiles.size() );
-        assertTrue( activeProfiles.stream().anyMatch( i -> i.equals( "testProperty" ) ) );
-
+        assertTrue( activeProfiles.stream().anyMatch( activeProfile -> "testProperty".equals( activeProfile ) ) );
     }
-
 }
