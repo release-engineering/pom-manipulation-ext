@@ -16,7 +16,6 @@
 package org.commonjava.maven.ext.core.fixture;
 
 import lombok.Getter;
-import lombok.experimental.UtilityClass;
 import org.apache.commons.lang.StringUtils;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.artifact.repository.ArtifactRepositoryPolicy;
@@ -52,8 +51,7 @@ import java.util.Properties;
 /**
  * Common test utilities.
  */
-@UtilityClass
-public class TestUtils
+public final class TestUtils
 {
     /**
      * The test root directory.
@@ -82,7 +80,7 @@ public class TestUtils
     public static Model resolveModelResource( final String resourceBase, final String resourceName )
         throws Exception
     {
-        try ( Reader reader = Files.newBufferedReader( resolveFileResource(resourceBase, resourceName ).toPath() ) )
+        try ( Reader reader = Files.newBufferedReader( resolveFileResource( resourceBase, resourceName ).toPath() ) )
         {
             return new MavenXpp3Reader().read( reader );
         }
@@ -257,7 +255,7 @@ public class TestUtils
         /**
          * Gets the session.
          *
-         * @retyrn the session
+         * @return the session
          */
         @Getter
         private final ManipulationSession session;
@@ -265,7 +263,7 @@ public class TestUtils
         /**
          * Gets the manager.
          *
-         * @retyrn the manager
+         * @return the manager
          */
         @Getter
         private final ManipulationManager manager;

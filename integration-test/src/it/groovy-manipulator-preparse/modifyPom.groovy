@@ -15,9 +15,6 @@
  */
 import groovy.xml.XmlSlurper
 import groovy.xml.XmlUtil
-import java.nio.charset.StandardCharsets
-import java.nio.file.Files
-import java.nio.file.StandardOpenOption
 import org.commonjava.maven.ext.core.groovy.BaseScript
 import org.commonjava.maven.ext.core.groovy.InvocationStage
 import org.commonjava.maven.ext.core.groovy.PMEBaseScript
@@ -30,14 +27,11 @@ assert pme.getBaseDir() != null
 assert pme.getGAV() == null
 assert pme.getProjects().isEmpty()
 
-final def basedir = pme.getBaseDir()
-def filename = 'interpolated-pom.xml'
-def pomFile = new File( basedir, filename )
+def pomFile = new File( pme.getBaseDir(), 'interpolated-pom.xml' )
 
 if ( !pomFile.exists() )
 {
-    filename = 'pom.xml'
-    pomFile = new File( basedir, filename )
+    pomFile = new File( pme.getBaseDir(), 'pom.xml' )
 }
 
 println "Slurping POM: ${pomFile.getAbsolutePath()}"
