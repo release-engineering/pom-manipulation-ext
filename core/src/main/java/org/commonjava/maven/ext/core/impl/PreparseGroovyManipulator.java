@@ -37,7 +37,7 @@ import java.util.Set;
  * The preparse groovy manipulator runs before any projects are loaded. The configuration is stored in a
  * {@link GroovyState} instance, which is in turn stored in the {@link ManipulationSession}.
  */
-@Named("groovy-injection-preparse")
+@Named( "groovy-injection-preparse" )
 @Singleton
 public class PreparseGroovyManipulator
     extends BaseGroovyManipulator

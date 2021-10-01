@@ -30,17 +30,18 @@ assert pme.getBaseDir() != null
 assert pme.getGAV() == null
 assert pme.getProjects().isEmpty()
 
-final def basedir = pme.getBaseDir().toPath()
+final def basedir = pme.getBaseDir()
 def filename = 'interpolated-pom.xml'
-def pomFile = basedir.resolve( filename )
+def pomFile = new File( basedir, filename )
 
-if ( !Files.exists( pomFile ) )
+if ( !pomFile.exists() )
 {
     filename = 'pom.xml'
-    pomFile = basedir.resolve( filename )
+    pomFile = new File( basedir, filename )
 }
 
-println 'Slurping POM: ' + pomFile.toAbsolutePath()
+println "Slurping POM: ${pomFile.getAbsolutePath()}"
+
 final def pom = new XmlSlurper( false, false ).parse( pomFile )
 
 println 'Original version: ' + pom.version
@@ -49,16 +50,16 @@ pom.version = '2.0'
 println 'New Version: ' + pom.version
 assert pom.version == '2.0'
 
-final def profileToRemove = pom.profiles.'**'.find { final profile ->
-    profile.id.text() == 'remove'
+final def profileToRemove = pom.profiles.'**'.find
+{
+    final profile -> profile.id.text() == 'remove'
 }
 
 assert profileToRemove != null
 
-profileToRemove.replaceNode {
+profileToRemove.replaceNode
+{
 
 }
 
-
-final def xml = XmlUtil.serialize( pom )
-Files.write( pomFile, xml.getBytes( StandardCharsets.UTF_8.name() ), StandardOpenOption.TRUNCATE_EXISTING )
+pomFile.write XmlUtil.serialize( pom )

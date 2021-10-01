@@ -44,15 +44,11 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.apache.commons.lang.StringUtils.isEmpty;
-import static org.commonjava.maven.ext.core.groovy.InvocationStage.ALL;
-import static org.commonjava.maven.ext.core.groovy.InvocationStage.BOTH;
-import static org.commonjava.maven.ext.core.groovy.InvocationStage.FIRST;
-import static org.commonjava.maven.ext.core.groovy.InvocationStage.LAST;
-import static org.commonjava.maven.ext.core.groovy.InvocationStage.PREPARSE;
 
 /**
- * {@link Manipulator} implementation that can resolve a remote groovy file and execute it on executionRoot. Configuration
- * is stored in a {@link GroovyState} instance, which is in turn stored in the {@link ManipulationSession}.
+ * {@link Manipulator} implementation that can resolve a remote groovy file and execute it on executionRoot.
+ * Configuration is stored in a {@link GroovyState} instance, which is in turn stored in the {@link
+ * ManipulationSession}.
  */
 public abstract class BaseGroovyManipulator
 {
@@ -80,7 +76,7 @@ public abstract class BaseGroovyManipulator
 
     /**
      * Splits the value on ',', then wraps each value in {@link SimpleArtifactRef#parse(String)} and prints a
-     * warning / skips in the event of a parsing error. Returns null if the input value is null.
+     * warning/skips in the event of a parsing error. Returns null if the input value is null.
      *
      * @param value a comma separated list of GAVTC to parse
      * @return a collection of parsed ArtifactRef.
@@ -94,12 +90,12 @@ public abstract class BaseGroovyManipulator
         }
         else
         {
-            final List<File> result = new ArrayList<>();
+            final String[] scripts = value.split( "," );
+            final List<File> result = new ArrayList<>( scripts.length );
 
             logger.debug( "Processing groovy scripts {}", value );
             try
             {
-                final String[] scripts = value.split( "," );
                 for ( final String script : scripts )
                 {
                     File found;
@@ -153,14 +149,25 @@ public abstract class BaseGroovyManipulator
             }
             if ( script instanceof BaseScript )
             {
-                ( ( BaseScript ) script ).setValues( pomIO, fileIO, modelIO, session, projects, project, stage );
+                InvocationStage currentStage;
+
+                if ( stage == InvocationStage.ALL )
+                {
+                    currentStage = InvocationStage.valueOf( getExecutionIndex() );
+                }
+                else
+                {
+                    currentStage = stage;
+                }
+
+                ( ( BaseScript ) script ).setValues( pomIO, fileIO, modelIO, session, projects, project, currentStage );
             }
             else
             {
                 throw new ManipulationException( "Cannot cast {} to a BaseScript to set values", groovyScript );
             }
         }
-        catch (MissingMethodException e)
+        catch ( MissingMethodException e )
         {
             try
             {
@@ -191,17 +198,11 @@ public abstract class BaseGroovyManipulator
             throw new ManipulationException( "Unable to parse script", e );
         }
 
-        if ( getExecutionIndex() == stage.getStageValue() || stage == ALL || ( stage == BOTH
-                && ( getExecutionIndex() == FIRST.getStageValue() || getExecutionIndex() == LAST.getStageValue() ) ) )
+        if ( getExecutionIndex() == stage.getStageValue() || stage == InvocationStage.ALL )
         {
             try
             {
                 logger.info( "Executing {} on {} at invocation point {}", groovyScript, project, stage );
-
-                if ( stage == BOTH )
-                {
-                    logger.warn( "Stage BOTH is deprecated. Please use ALL instead" );
-                }
 
                 script.run();
 

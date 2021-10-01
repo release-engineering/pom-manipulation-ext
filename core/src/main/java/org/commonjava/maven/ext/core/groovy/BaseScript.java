@@ -171,7 +171,11 @@ public abstract class BaseScript extends BaseScriptUtils
         }
 
         this.project = project;
-        this.basedir = session.getPom().getParentFile();
+        if ( session.getPom() != null )
+        {
+            this.basedir = session.getPom().getParentFile();
+        }
+
         this.userProperties = session.getUserProperties();
         this.stage = stage;
 

@@ -16,6 +16,7 @@
 package org.commonjava.maven.ext.core.fixture;
 
 import lombok.Getter;
+import lombok.experimental.UtilityClass;
 import org.apache.commons.lang.StringUtils;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.artifact.repository.ArtifactRepositoryPolicy;
@@ -48,15 +49,36 @@ import java.nio.file.Path;
 import java.util.Collections;
 import java.util.Properties;
 
+/**
+ * Common test utilities.
+ */
+@UtilityClass
 public class TestUtils
 {
+    /**
+     * The test root directory.
+     */
     public static final Path ROOT_DIRECTORY = resolveFileResource( "", "" ).getParentFile()
             .getParentFile().getParentFile().toPath();
 
+    /**
+     * The integration test directory.
+     */
     public static final Path INTEGRATION_TEST = ROOT_DIRECTORY.resolve( "integration-test" );
 
+    /**
+     * The URL for maven central.
+     */
     public static final String MVN_CENTRAL = "https://repo1.maven.org/maven2";
 
+    /**
+     * Resolves a resource as a maven model.
+     *
+     * @param resourceBase the resource base directory
+     * @param resourceName the resource name
+     * @return the maven model
+     * @throws Exception if an error occurs while reading the resource
+     */
     public static Model resolveModelResource( final String resourceBase, final String resourceName )
         throws Exception
     {
@@ -66,7 +88,13 @@ public class TestUtils
         }
     }
 
-
+    /**
+     * Resolves a resource as a file.
+     *
+     * @param resourceBase the resource base directory
+     * @param resourceName the resource name
+     * @return the file
+     */
     public static File resolveFileResource( final String resourceBase, final String resourceName )
     {
         final String separator = StringUtils.isNotEmpty( resourceBase ) ? "/" : "";
@@ -82,6 +110,11 @@ public class TestUtils
         return new File( resource.getPath() );
     }
 
+    /**
+     * Gets a dummy model.
+     *
+     * @return the dummy model
+     */
     public static Model getDummyModel()
     {
         Model result = new Model();
@@ -92,18 +125,40 @@ public class TestUtils
     }
 
     // Public API for manipulator-examples-project
+    /**
+     * Creates a new manipulation session from the given properties and the given POM file.
+     *
+     * @param p the properties
+     * @param pom the POM file
+     * @return the manipulation session
+     * @throws ManipulationException if an error occurs while creating the session
+     */
     public static ManipulationSession createSession( Properties p, File pom ) throws ManipulationException
     {
         return createSessionAndManager( p, pom ).getSession();
     }
 
     // Public API for manipulator-examples-project
+    /**
+     * Creates a new manipulation session from the given properties.
+     *
+     * @param p the properties
+     * @return the manipulation session
+     * @throws ManipulationException if an error occurs while creating the session
+     */
     public static ManipulationSession createSession( Properties p ) throws ManipulationException
     {
         return createSessionAndManager( p, null ).getSession();
     }
 
     // Public API for manipulator-examples-project
+    /**
+     * Creates a new manipulation session/manager from the given properties.
+     *
+     * @param p the properties
+     * @return the manipulation session/manager
+     * @throws ManipulationException if an error occurs while creating the session/manager
+     */
     @SuppressWarnings( "deprecation" )
     public static SMContainer createSessionAndManager( Properties  p ) throws ManipulationException
     {
@@ -111,6 +166,14 @@ public class TestUtils
     }
 
     // Public API for manipulator-examples-project
+    /**
+     * Creates a new manipulation session/manager from the given properties and the given POM file.
+     *
+     * @param p the properties
+     * @param pom the POM file
+     * @return the manipulation session/manager
+     * @throws ManipulationException if an error occurs while creating the session/manager
+     */
     @SuppressWarnings( "deprecation" )
     public static SMContainer createSessionAndManager( Properties p, File pom ) throws ManipulationException
     {
@@ -157,6 +220,12 @@ public class TestUtils
      * Executes a method on an object instance.  The name and parameters of
      * the method are specified.  The method will be executed and the value
      * of it returned, even if the method would have private or protected access.
+     *
+     * @param instance the object the underlying method is invoked from
+     * @param name the name of the method
+     * @param types the parameter array
+     * @param params the arguments used for the method call
+     * @throws Exception if an error occurs while executing the method
      */
     public static Object executeMethod( Object instance, String name, Class<?>[] types, Object[] params )
         throws Exception
@@ -185,9 +254,19 @@ public class TestUtils
      */
     public static class SMContainer
     {
+        /**
+         * Gets the session.
+         *
+         * @retyrn the session
+         */
         @Getter
         private final ManipulationSession session;
 
+        /**
+         * Gets the manager.
+         *
+         * @retyrn the manager
+         */
         @Getter
         private final ManipulationManager manager;
 

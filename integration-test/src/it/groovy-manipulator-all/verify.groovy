@@ -13,9 +13,4 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-final def txtFile = new File( basedir, 'count.txt' )
-final def count = txtFile.text.trim() as Integer
-
-println "Manipulator count: ${count}"
-
-assert count == 3
+assert new File( basedir, 'stages.txt' ).readLines() == [ 'PREPARSE', 'FIRST', 'LAST' ]

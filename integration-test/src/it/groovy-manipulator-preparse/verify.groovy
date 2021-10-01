@@ -14,19 +14,23 @@
  * limitations under the License.
  */
 final def pomFile = new File( basedir, 'pom.xml' )
-println 'Slurping POM: ' + pomFile.getAbsolutePath()
+
+println "Slurping POM: ${pomFile.getAbsolutePath()}"
 
 final def pom = new XmlSlurper().parse( pomFile )
+
 assert pom.version == '2.0.0.redhat-1'
 
-final def profileToKeep = pom.profiles.'**'.find { final profile ->
-    profile.id.text() == 'keep'
+final def profileToKeep = pom.profiles.'**'.find
+{
+    final profile -> profile.id.text() == 'keep'
 }
 
 assert profileToKeep != null
 
-final def profileToRemove = pom.profiles.'**'.find { final profile ->
-    profile.id.text() == 'remove'
+final def profileToRemove = pom.profiles.'**'.find
+{
+    final profile -> profile.id.text() == 'remove'
 }
 
 assert profileToRemove == null
