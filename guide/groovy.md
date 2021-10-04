@@ -83,7 +83,6 @@ Each script <b>must</b> use the following annotations:
 </table>
 
 ```
-
 import org.commonjava.maven.ext.core.groovy.BaseScript
 import org.commonjava.maven.ext.core.groovy.InvocationStage
 import org.commonjava.maven.ext.core.groovy.PMEBaseScript
@@ -113,6 +112,11 @@ made. The table below provides a description of the invocation stages available 
 | `FIRST`    | Runs the script _first_ after all POM files have been read into memory, but before any manipulations have been performed.                                                                |
 | `LAST`     | Runs the script _last_ after all modifications to the in-memory POM files have been performed.                                                                                           |
 | `ALL`      | Runs the during _all_ possible stages: `PREPARSE`, `FIRST`, and `LAST`.  The `getInvocationStage()` API can be used to determine in which stage the script is currently running.         |
+
+It is safe to modify POM files on disk during the `PREPARSE` stage. However, if you modify a POM file on disk during any
+other stage, the modifications will be overwritten when the in-memory POM file is written back out to disk. To alter a
+POM file in memory, call `Project.getModel()` to  retrieve the `org.apache.maven.model.Model` instance and modify
+that instead, .e.g., `pme.getProject().getModel().setVersion( "1.0.0" )`.
 
 ### API
 
