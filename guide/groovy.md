@@ -8,15 +8,6 @@ title: Groovy Script Injection
 ### Overview
 
 PME offers the ability to run arbitrary groovy scripts on the sources prior to running the build. This allows PME to be extensible by the user and to process other files not just Maven POMs.
-<table bgcolor="red">
-<tr>
-<td>
-    <b>Warning : Do NOT alter POM files directly on the disk; they will get overwriten by the POM Manipulator. The Manipulator processes the POM files in memory and then writes them back out to disk. If you wish to alter the POM files access the <i>Project</i> class and call <i>getModel()</i> to retrieve the <i>org.apache.maven.model.Model instance.</i></b>
-</td>
-</tr>
-</table>
-
-
 
 ### Configuration
 
@@ -69,7 +60,7 @@ Each groovy script will be run on the execution root (i.e. where Maven is invoke
 <table bgcolor="#ffff00">
 <tr>
 <td>
-    <b>NOTE</b> : Prior to PME 3.5 groovy manipulator precendence was controlled via a flag ; by setting <i>groovyManipulatorPrecedence</i> to <i>FIRST</i> instead of the default <i>LAST</i> value. Further, annotation was different; the scripts used the <a href="http://docs.groovy-lang.org/latest/html/gapi/groovy/transform/BaseScript.html">BaseScript</a> annotation e.g.
+    <b>NOTE</b> : Prior to PME 3.5 groovy manipulator precedence was controlled via a flag ; by setting <i>groovyManipulatorPrecedence</i> to <i>FIRST</i> instead of the default <i>LAST</i> value. Further, annotation was different; the scripts used the <a href="http://docs.groovy-lang.org/latest/html/gapi/groovy/transform/BaseScript.html">BaseScript</a> annotation e.g.
 <br/>
 <i>@BaseScript org.commonjava.maven.ext.core.groovy.BaseScript pme</i>
 </td>
@@ -92,7 +83,6 @@ Each script <b>must</b> use the following annotations:
 </table>
 
 ```
-
 import org.commonjava.maven.ext.core.groovy.BaseScript
 import org.commonjava.maven.ext.core.groovy.InvocationStage
 import org.commonjava.maven.ext.core.groovy.PMEBaseScript
@@ -103,14 +93,36 @@ import org.commonjava.maven.ext.core.groovy.InvocationPoint
 @PMEBaseScript BaseScript pme
 ```
 
-where InvocationStage may be `FIRST`, `LAST` or `BOTH`. This denotes whether the script is ran
-before all other manipulators, after or both. The script therefore encodes how and when it is run.
-
 The API can then be invoked by e.g.
 
     pme.getBaseDir()
 
 <b>NOTE</b> : Be careful not to use <code>pme.getProperties()</code> or <code>pme.getProject().getProperties()</code> as that actually calls the [Groovy language API](http://docs.groovy-lang.org/latest/html/api/org/codehaus/groovy/runtime/DefaultGroovyMethods.html#getProperties(java.lang.Object))
+
+#### Invocation stages
+
+In the example script, we saw the use of the `@InvocationPoint` annotation which controls when the script is run. It
+takes a single argument, `invocationPoint`, with the type `InvocationStage`. The possible values for `InvocationStage`
+are `PREPARSE`, `FIRST`, `LAST`, and `ALL`. These values are relative to when the manipulations to the POM files are
+made. The table below provides a description of the invocation stages available for running a script.
+
+| Stage      | Description                                                                                                                                                                              |
+|------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `PREPARSE` | Runs the script _prior to parsing any POM files_ and before any manipulations have been performed, thus allowing the modification of POM files on disk before they are read into memory. |
+| `FIRST`    | Runs the script _first_ after all POM files have been read into memory, but before any manipulations have been performed.                                                                |
+| `LAST`     | Runs the script _last_ after all modifications to the in-memory POM files have been performed.                                                                                           |
+| `ALL`      | Runs the during _all_ possible stages: `PREPARSE`, `FIRST`, and `LAST`.  The `getInvocationStage()` API can be used to determine in which stage the script is currently running.         |
+
+<table bgcolor="#ffff00">
+<tr>
+<td>
+    <b>NOTE</b> : It is safe to modify POM files on disk during the `PREPARSE` stage. However, if you modify a POM file
+on disk during any other stage, the modifications will be overwritten when the in-memory POM file is written back out to
+disk. To alter a POM file in memory, call `Project.getModel()` to  retrieve the `org.apache.maven.model.Model` instance
+and modify that instead, .e.g., `pme.getProject().getModel().setVersion( "1.0.0" )`.
+</td>
+</tr>
+</table>
 
 ### API
 
@@ -193,7 +205,7 @@ The following API is available:
 
 ### Utility Functions
 
-Currently two main utility functions are provided:
+Currently, two main utility functions are provided:
 
 #### inlineProperty
 
@@ -214,7 +226,7 @@ Occasionally upstream projects have circular dependencies in their build. This c
 
 ![circular example][circular]
 
-The above diagram shows two different SCM builds. The first has a sub-module that is a BOM that references the following SCM builds. This BOM is imported into the parent's `dependencyManagement`. The second SCM build inherits this parent. If the first has been rebuilt twice (hence the `rebuild-2` suffix) then the BOM will refer to the incorrect version of SCM Build 2 (`1.0.rebuild-2` instead of `1.0.rebuild-1`). By using `overrideProjectVersion` it is possible to force SCM Build 2 to use suffix `rebuild-2` therebye making it have the correct version.
+The above diagram shows two different SCM builds. The first has a sub-module that is a BOM that references the following SCM builds. This BOM is imported into the parent's `dependencyManagement`. The second SCM build inherits this parent. If the first has been rebuilt twice (hence the `rebuild-2` suffix) then the BOM will refer to the incorrect version of SCM Build 2 (`1.0.rebuild-2` instead of `1.0.rebuild-1`). By using `overrideProjectVersion` it is possible to force SCM Build 2 to use suffix `rebuild-2` thereby making it have the correct version.
 
 ### Example
 
@@ -269,6 +281,6 @@ A typical groovy script that alters a JSON file on disk might be:
 
 ### Developing Groovy Scripts
 
-To make it easier to develop scripts for both PME (this project) and [GME](https://github.com/project-ncl/gradle-manipulator) an example project has been setup. The [manipulator-groovy-examples](https://github.com/project-ncl/manipulator-groovy-examples) provides a framework to develop and test such scripts.
+To make it easier to develop scripts for both PME (this project) and [GME](https://github.com/project-ncl/gradle-manipulator) an example project has been set up. The [manipulator-groovy-examples](https://github.com/project-ncl/manipulator-groovy-examples) provides a framework to develop and test such scripts.
 
 [circular]: ../images/circular.png "Circular Example"
