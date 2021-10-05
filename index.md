@@ -132,9 +132,20 @@ package.
 
 ### Javadoc
 
-This is available [here](https://www.javadoc.io/doc/org.commonjava.maven.ext)
+This is available [here](https://www.javadoc.io/doc/org.commonjava.maven.ext).
 
 ### Feature Guide
+
+#### Operation
+
+  * Maven POM files are read from disk into memory before all manipulators, including the Groovy manipulators. The one
+    exception is the `PREPARSE` Groovy manipulator, which runs before the POM files are loaded into memory. Therefore,
+    `PREPARSE` is the only stage where it is safe to modify POM files on disk without risking losing modifications. For
+    more information about Groovy script invocation stages, see the [Groovy Script Injection](guide/groovy.html)
+    section of this guide.
+  * In-memory POM models are written back to disk after all manipulators have executed. It is possible to modify the POM
+    at any time before this by accessing its in-memory model via `Project.getModel()`.
+  * The Groovy manipulators can safely modify non-model files on disk at any time.
 
 Below are links to more specific information about configuring sets of features in PME:
 
