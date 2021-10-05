@@ -116,10 +116,11 @@ made. The table below provides a description of the invocation stages available 
 <table bgcolor="#ffff00">
 <tr>
 <td>
-    <b>NOTE</b> : It is safe to modify POM files on disk during the `PREPARSE` stage. However, if you modify a POM file
-on disk during any other stage, the modifications will be overwritten when the in-memory POM file is written back out to
-disk. To alter a POM file in memory, call `Project.getModel()` to  retrieve the `org.apache.maven.model.Model` instance
-and modify that instead, .e.g., `pme.getProject().getModel().setVersion( "1.0.0" )`.
+    <b>NOTE</b> : It is safe to modify POM files on disk during the <code>PREPARSE</code> stage. However, if you modify
+a POM file on disk during any other stage, the modifications will be overwritten when the in-memory POM file is written
+back out to disk. To alter a POM file in memory, call <code>Project.getModel()</code> to retrieve the
+<code>org.apache.maven.model.Model</code> instance and modify that instead, .e.g.,
+<code>pme.getProject().getModel().setVersion( "1.0.0" )</code>.
 </td>
 </tr>
 </table>
