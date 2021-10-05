@@ -31,4 +31,16 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
+  <build>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-enforcer-plugin</artifactId>
+          <version>3.0.0</version>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+  </build>
+
 </project>

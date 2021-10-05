@@ -24,7 +24,7 @@
   <parent>
     <groupId>org.jboss.integration-platform</groupId>
     <artifactId>jboss-integration-platform-bom</artifactId>
-    <version>6.0.0.CR12</version>
+    <version>8.0.0.Final</version>
   </parent>
 
   <groupId>org.commonjava.maven.ext.integration-test</groupId>
@@ -35,7 +35,7 @@
   <name>Test overriding dependency versions</name>
 
   <properties>
-    <org.jboss.integration-platform>6.0.6.Final</org.jboss.integration-platform>
+    <org.jboss.integration-platform>8.6.0.Final</org.jboss.integration-platform>
   </properties>
 
   <dependencyManagement>

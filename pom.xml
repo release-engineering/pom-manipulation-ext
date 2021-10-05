@@ -82,7 +82,7 @@
     <daVersion>2.1.0</daVersion>
     <galleyVersion>0.16.6</galleyVersion>
 
-    <groovyVersion>3.0.7</groovyVersion>
+    <groovyVersion>3.0.8</groovyVersion>
     <unirestVersion>3.11.10</unirestVersion>
     <jsonPathVersion>2.3.0</jsonPathVersion>
     <slf4jVersion>1.7.30</slf4jVersion>
@@ -538,6 +538,7 @@
           <artifactId>maven-resources-plugin</artifactId>
           <configuration>
             <escapeString>\</escapeString>
+            <propertiesEncoding>UTF-8</propertiesEncoding>
           </configuration>
         </plugin>
         <plugin>

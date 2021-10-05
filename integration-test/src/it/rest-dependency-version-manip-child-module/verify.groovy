@@ -26,7 +26,7 @@ System.out.println( "POM Child Version: ${pomChild.version.text()}" )
 assert pomChild.parent.version.text().endsWith( '.redhat-3' )
 
 System.out.println( "POM parent Version: ${pom.parent.version.text()}" )
-assert pom.parent.version.text().endsWith( '-redhat-1' )
+assert pom.parent.version.text().endsWith( '.redhat-00001' )
 
 // Currently the AddSuffixJettyHandler doesn't do OSGi compatibility.
 def dependency = pom.dependencyManagement.dependencies.dependency.find { it.artifactId.text() == "commons-lang" }
