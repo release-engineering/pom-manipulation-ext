@@ -56,7 +56,7 @@ jobs:
     # - name: Setup tmate session
     #   uses: mxschmitt/action-tmate@v3
     - name: Codecov
-      uses: codecov/codecov-action@v1
+      uses: codecov/codecov-action@v2
 
   snapshot:
     if: github.repository == 'release-engineering/pom-manipulation-ext' && github.event_name == 'push' && github.ref == 'refs/heads/main'
@@ -89,4 +89,4 @@ jobs:
     - name: Deploy Snapshot
       run: mvn -B -V org.apache.maven.plugins:maven-source-plugin:jar-no-fork deploy -Prun-its
     - name: Codecov
-      uses: codecov/codecov-action@v1
+      uses: codecov/codecov-action@v2
