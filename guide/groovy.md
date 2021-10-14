@@ -20,33 +20,35 @@ The argument should a comma separated list of either:
 
 If using a GAVTC, the remote groovy file can be deployed by e.g.
 
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>build-helper-maven-plugin</artifactId>
-                <version>1.5</version>
-                <inherited>false</inherited>
-                <executions>
-                    <execution>
-                        <id>attach-artifacts</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>attach-artifact</goal>
-                        </goals>
-                        <configuration>
-                            <artifacts>
-                                <artifact>
-                                    <file>Sample.groovy</file>
-                                    <type>groovy</type>
-                                </artifact>
-                            </artifacts>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-        </plugins>
-    </build>
+```xml
+<build>
+  <plugins>
+    <plugin>
+      <groupId>org.codehaus.mojo</groupId>
+      <artifactId>build-helper-maven-plugin</artifactId>
+      <version>1.5</version>
+      <inherited>false</inherited>
+      <executions>
+        <execution>
+          <id>attach-artifacts</id>
+          <phase>package</phase>
+          <goals>
+            <goal>attach-artifact</goal>
+          </goals>
+          <configuration>
+            <artifacts>
+              <artifact>
+                <file>Sample.groovy</file>
+                <type>groovy</type>
+              </artifact>
+            </artifacts>
+          </configuration>
+        </execution>
+      </executions>
+    </plugin>
+  </plugins>
+</build>
+```
 
 The deployed file can then be used with e.g.
 
@@ -94,7 +96,9 @@ import org.commonjava.maven.ext.core.groovy.InvocationPoint
 
 The API can then be invoked by e.g.
 
-    pme.getBaseDir()
+```groovy
+pme.getBaseDir()
+```
 
 <b>NOTE</b> : Be careful not to use <code>pme.getProperties()</code> or <code>pme.getProject().getProperties()</code> as that actually calls the [Groovy language API](http://docs.groovy-lang.org/latest/html/api/org/codehaus/groovy/runtime/DefaultGroovyMethods.html#getProperties(java.lang.Object))
 
