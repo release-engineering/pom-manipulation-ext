@@ -81,7 +81,7 @@ Each script <b>must</b> use the following annotations:
 </tr>
 </table>
 
-```
+```groovy
 import org.commonjava.maven.ext.core.groovy.BaseScript
 import org.commonjava.maven.ext.core.groovy.InvocationStage
 import org.commonjava.maven.ext.core.groovy.PMEBaseScript
@@ -110,7 +110,7 @@ made. The table below provides a description of the invocation stages available 
 | `PREPARSE` | Runs the script _prior to parsing any POM files_ and before any manipulations have been performed, thus allowing the modification of POM files on disk before they are read into memory. | 4.6        |
 | `FIRST`    | Runs the script _first_ after all POM files have been read into memory, but before any manipulations have been performed.                                                                | 3.5        |
 | `LAST`     | Runs the script _last_ after all modifications to the in-memory POM files have been performed.                                                                                           | 3.5        |
-| ~`BOTH`~   | Runs the script during stages `FIRST` and `LAST`. _Note that as of version 4.6, `BOTH` has been replaced by `ALL`_.                                                                      | [3.5, 4.5] |
+| ~~`BOTH`~~ | Runs the script during stages `FIRST` and `LAST`. _Note that as of version 4.6, `BOTH` has been replaced by `ALL`_.                                                                      | [3.5, 4.5] |
 | `ALL`      | Runs the script during _all_ possible stages: `PREPARSE`, `FIRST`, and `LAST`.  The `getInvocationStage()` API can be used to determine in which stage the script is currently running.  | 4.6        |
 
 <table bgcolor="#ffff00">
@@ -131,7 +131,7 @@ The following API is available:
 
 | Method | Description | Since      |
 | -------|:------------|:-----------|
-| ~[Map](https://docs.oracle.com/javase/7/docs/api/java/util/Map.html)<[ProjectVersionRef](https://github.com/Commonjava/atlas/blob/master/identities/src/main/java/org/commonjava/atlas/maven/ident/ref/ProjectVersionRef.java), [String](https://docs.oracle.com/javase/7/docs/api/java/lang/String.html)> translateVersions([List](https://docs.oracle.com/javase/7/docs/api/java/util/List.html)<[Project](https://github.com/release-engineering/pom-manipulation-ext/blob/master/common/src/main/java/org/commonjava/maven/ext/common/model/Project.java)>)~ | Translate the versions. _Removed in 4.4; use `lookupProjectVersions` or `lookupVersions` instead_. | [1.7, 4.3] |
+| ~~[Map](https://docs.oracle.com/javase/7/docs/api/java/util/Map.html)<[ProjectVersionRef](https://github.com/Commonjava/atlas/blob/master/identities/src/main/java/org/commonjava/atlas/maven/ident/ref/ProjectVersionRef.java), [String](https://docs.oracle.com/javase/7/docs/api/java/lang/String.html)> translateVersions([List](https://docs.oracle.com/javase/7/docs/api/java/util/List.html)<[Project](https://github.com/release-engineering/pom-manipulation-ext/blob/master/common/src/main/java/org/commonjava/maven/ext/common/model/Project.java)>)~~ | Translate the versions. _Removed in 4.4; use `lookupProjectVersions` or `lookupVersions` instead_. | [1.7, 4.3] |
 | [File](https://docs.oracle.com/javase/7/docs/api/java/io/File.html) getBaseDir() | Get the working directory (the execution root). | 1.10 |
 | [ProjectVersionRef](https://github.com/Commonjava/atlas/blob/master/identities/src/main/java/org/commonjava/atlas/maven/ident/ref/ProjectVersionRef.java) getGAV() | Get the GAV of the current project. | 1.10 |
 | [Project](https://github.com/release-engineering/pom-manipulation-ext/blob/master/common/src/main/java/org/commonjava/maven/ext/common/model/Project.java) getProject() | Return the current Project. | 1.10 |
@@ -148,7 +148,7 @@ The following API is available:
 | [FileIO](https://github.com/release-engineering/pom-manipulation-ext/blob/master/io/src/main/java/org/commonjava/maven/ext/io/FileIO.java) getFileIO() | This will return a FileIO instance for remote File resolving. | 4.0 |
 | [PomIO](https://github.com/release-engineering/pom-manipulation-ext/blob/master/io/src/main/java/org/commonjava/maven/ext/io/PomIO.java) getPomIO() | This will return a PomIO instance for parsing POM models. | 4.0 |
 | [Translator](https://github.com/release-engineering/pom-manipulation-ext/blob/master/io/src/main/java/org/commonjava/maven/ext/io/rest/Translator.java) getRESTAPI() throws [ManipulationException](https://github.com/release-engineering/pom-manipulation-ext/blob/master/common/src/main/java/org/commonjava/maven/ext/common/ManipulationException.java) | Gets a configured VersionTranslator to make REST calls to DA. | 4.0 |
-| [Map](https://docs.oracle.com/javase/7/docs/api/java/util/Map.html)<[ProjectVersionRef](https://github.com/Commonjava/atlas/blob/master/identities/src/main/java/org/commonjava/atlas/maven/ident/ref/ProjectVersionRef.java), [String](https://docs.oracle.com/javase/7/docs/api/java/lang/String.html)> lookupProjectVersions[List](https://docs.oracle.com/javase/7/docs/api/java/util/List.html)<[Project](https://github.com/release-engineering/pom-manipulation-ext/blob/master/common/src/main/java/org/commonjava/maven/ext/common/model/Project.java)>) throws [RestException](https://github.com/release-engineering/pom-manipulation-ext/blob/main/io/src/main/java/org/commonjava/maven/ext/io/rest/RestException.java) | Lookup versions (e.g. for a project) ignoring DA suffix priority schemes returning the latest version. | 4.4 |
+| [Map](https://docs.oracle.com/javase/7/docs/api/java/util/Map.html)<[ProjectVersionRef](https://github.com/Commonjava/atlas/blob/master/identities/src/main/java/org/commonjava/atlas/maven/ident/ref/ProjectVersionRef.java), [String](https://docs.oracle.com/javase/7/docs/api/java/lang/String.html)> lookupProjectVersions([List](https://docs.oracle.com/javase/7/docs/api/java/util/List.html)<[Project](https://github.com/release-engineering/pom-manipulation-ext/blob/master/common/src/main/java/org/commonjava/maven/ext/common/model/Project.java)>) throws [RestException](https://github.com/release-engineering/pom-manipulation-ext/blob/main/io/src/main/java/org/commonjava/maven/ext/io/rest/RestException.java) | Lookup versions (e.g. for a project) ignoring DA suffix priority schemes returning the latest version. | 4.4 |
 | [Map](https://docs.oracle.com/javase/7/docs/api/java/util/Map.html)<[ProjectVersionRef](https://github.com/Commonjava/atlas/blob/master/identities/src/main/java/org/commonjava/atlas/maven/ident/ref/ProjectVersionRef.java), [String](https://docs.oracle.com/javase/7/docs/api/java/lang/String.html)> lookupVersions([List](https://docs.oracle.com/javase/7/docs/api/java/util/List.html)<[Project](https://github.com/release-engineering/pom-manipulation-ext/blob/master/common/src/main/java/org/commonjava/maven/ext/common/model/Project.java)>) throws [RestException](https://github.com/release-engineering/pom-manipulation-ext/blob/main/io/src/main/java/org/commonjava/maven/ext/io/rest/RestException.java) | Lookup versions respecting DA suffix priority schemes which will return the best matched version. | 4.4 |
 
 ### Utility Functions
@@ -179,50 +179,49 @@ The above diagram shows two different SCM builds. The first has a sub-module tha
 
 A typical groovy script that alters a JSON file on disk might be:
 
-    import groovy.json.JsonOutput
-    import groovy.json.JsonSlurper
-    import groovy.util.logging.Slf4j
-    import org.commonjava.maven.ext.core.groovy.BaseScript
-    import org.commonjava.maven.ext.core.groovy.InvocationStage
-    import org.commonjava.maven.ext.core.groovy.PMEBaseScript
-    import org.commonjava.maven.ext.core.groovy.InvocationPoint
+```groovy
+import groovy.json.JsonOutput
+import groovy.json.JsonSlurper
+import groovy.util.logging.Slf4j
+import org.commonjava.maven.ext.core.groovy.BaseScript
+import org.commonjava.maven.ext.core.groovy.InvocationStage
+import org.commonjava.maven.ext.core.groovy.PMEBaseScript
+import org.commonjava.maven.ext.core.groovy.InvocationPoint
 
-    @InvocationPoint(invocationPoint = InvocationStage.FIRST)
-    @PMEBaseScript BaseScript pme
+@InvocationPoint(invocationPoint = InvocationStage.FIRST)
+@PMEBaseScript BaseScript pme
 
-    @Slf4j
-    public class Processor
-    {
-        File basedir
+@Slf4j
+public class Processor
+{
+    File basedir
 
-        private void processJson(Map n) {
-            ....
-        }
-
-        def execute() {
-            log.info("Running ShrinkwrapProcessor...")
-
-            def shrinkwrap = new File (basedir.toString() + File.separator +
-                "shrink.json")
-
-            log.info("shrinkwrap json is " + shrinkwrap)
-
-            if (shrinkwrap.exists()) {
-                log.info ("Found file {}", shrinkwrap)
-
-                LinkedHashMap json = new
-                    JsonSlurper().parseText(shrinkwrap.text)
-
-                processJson(json)
-
-                shrinkwrap.write(
-                    JsonOutput.prettyPrint(JsonOutput.toJson(json)))
-            }
-        }
+    private void processJson(Map n) {
+        ...
     }
 
-    def Processor sp = new Processor(basedir:pme.getBaseDir()))
-    sp.execute()
+    def execute() {
+        log.info("Running ShrinkwrapProcessor...")
+
+        def shrinkwrap = new File(basedir.toString() + File.separator + "shrink.json")
+
+        log.info("shrinkwrap json is " + shrinkwrap)
+
+        if (shrinkwrap.exists()) {
+            log.info ("Found file {}", shrinkwrap)
+
+            LinkedHashMap json = new JsonSlurper().parseText(shrinkwrap.text)
+
+            processJson(json)
+
+            shrinkwrap.write(JsonOutput.prettyPrint(JsonOutput.toJson(json)))
+        }
+    }
+}
+
+def Processor sp = new Processor(basedir:pme.getBaseDir()))
+sp.execute()
+```
 
 ### Developing Groovy Scripts
 
