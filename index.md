@@ -60,19 +60,21 @@ You can disable PME using the `manipulation.disable` property:
 
 If you want to make it more permanent, you could add it to your `settings.xml`:
 
-    <settings>
-        <profiles>
-            <profile>
-                <id>disable-pme</id>
-                <properties>
-                    <manipulation.disable>true</manipulation.disable>
-                </properties>
-            </profile>
-        </profiles>
-        <activeProfiles>
-            <activeProfile>disable-pme</activeProfile>
-        </activeProfiles>
-    </settings>
+```xml
+<settings>
+  <profiles>
+    <profile>
+      <id>disable-pme</id>
+      <properties>
+        <manipulation.disable>true</manipulation.disable>
+      </properties>
+    </profile>
+  </profiles>
+  <activeProfiles>
+    <activeProfile>disable-pme</activeProfile>
+  </activeProfiles>
+</settings>
+```
 
 ### Deprecated and Unknown Properties
 
@@ -109,22 +111,26 @@ execution root `target` directory (next to the marker file above). By default, t
 `alignmentReport.json`. However, the name of this file may be changed by setting the `reportJSONOutputFile` property to
 an alternate name for the file.
 
-    {
-      "executionRoot" : {
-        "groupId" : "org.foo",
-        "artifactId" : "foo-parent",
-        "version" : "7.0.0.Final-rebuild-1",
-        "originalGAV" : "org.foo:foo-parent:7.0.0.Final"
-      },
-      "modules" : [ {
-        "gav" : {
-          "groupId" : "org.foo",
-          "artifactId" : "foo-parent",
-          "version" : "7.0.0.Final-rebuild-1",
-          "originalGAV" : "org.foo:foo-parent:7.0.0.Final"
-        },
-        "properties" : {
-        ...
+```json
+{
+  "executionRoot" : {
+    "groupId" : "org.foo",
+    "artifactId" : "foo-parent",
+    "version" : "7.0.0.Final-rebuild-1",
+    "originalGAV" : "org.foo:foo-parent:7.0.0.Final"
+  },
+  "modules" : [ {
+    "gav" : {
+      "groupId" : "org.foo",
+      "artifactId" : "foo-parent",
+      "version" : "7.0.0.Final-rebuild-1",
+      "originalGAV" : "org.foo:foo-parent:7.0.0.Final"
+    },
+    "properties" : {
+    ...
+    }
+}
+```
 
 This JSON file may be read as POJO by using the [JSONUtils](https://github.com/release-engineering/pom-manipulation-ext/blob/master/common/src/main/java/org/commonjava/maven/ext/common/util/JSONUtils.java)
 class which utilises the [json](https://github.com/release-engineering/pom-manipulation-ext/blob/master/common/src/main/java/org/commonjava/maven/ext/common/json)

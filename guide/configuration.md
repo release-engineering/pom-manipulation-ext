@@ -20,12 +20,13 @@ However, PME also offers the ability to read a local configuration file. This fi
 
 The format is as follows
 
-    pme:
-        key : value
-        key2 : value2
-    other-configuration:
-        ....
-
+```yaml
+pme:
+    key : value
+    key2 : value2
+other-configuration:
+    ...
+```
 
 Any other configuration sections are ignored by PME.
 
@@ -33,16 +34,17 @@ Any other configuration sections are ignored by PME.
 
 The format is as follows
 
-    {
-        "pme": {
-            "key" : "value",
-            "key2" : "value2"
-            },
-        "other-configuration": {
-            ....
-        }
+```json
+{
+    "pme": {
+        "key" : "value",
+        "key2" : "value2"
+    },
+    "other-configuration": {
+        ...
     }
-
+}
+```
 
 Any other configuration sections are ignored by PME.
 

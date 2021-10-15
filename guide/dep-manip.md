@@ -57,7 +57,7 @@ The lookup REST endpoint should follow:
 </tr>
 <tr>
 <td>
-   <pre lang="xml" style="font-size: 10px">
+   <pre style="font-size: 10px"><code class="language-json">
 [
     [ "repositoryGroup" : "id", ]
     [ "brewPullActive": true, ]
@@ -69,10 +69,10 @@ The lookup REST endpoint should follow:
     },
     ...
 ]
-    </pre>
+    </code></pre>
 </td>
 <td>
-  <pre lang="xml" style="font-size: 10px">
+   <pre style="font-size: 10px"><code class="language-json">
 [
     {
         "groupId": "org.foo",
@@ -85,7 +85,8 @@ The lookup REST endpoint should follow:
         "whitelisted": true
     },
     ...
-]  </pre>
+]
+   </code></pre>
 </td>
 </tr>
 </table>
@@ -99,15 +100,15 @@ The blacklist REST endpoint should follow:
 </tr>
 <tr>
 <td>
-   <pre lang="xml" style="font-size: 10px">
+   <pre style="font-size: 10px"><code class="language-json">
 
     "groupid": "org.foo",
     "artifactid": "bar"
 
-    </pre>
+   </code></pre>
 </td>
 <td>
-  <pre lang="xml" style="font-size: 10px">
+  <pre style="font-size: 10px"><code class="language-json">
 [
     {
         "groupId": "org.foo",
@@ -115,7 +116,8 @@ The blacklist REST endpoint should follow:
         "version": "1.0.0.Final-rebuild-1",
     },
     ...
-]  </pre>
+]
+  </code></pre>
 </td>
 </tr>
 </table>
@@ -138,7 +140,6 @@ The underlying HTTP client library responsible for calling the REST endpoints is
 </tr>
 </table>
 
-
 You can add custom HTTP headers to your REST calls by setting a property named `restHeaders`. HTTP headers must be comma-separated and each non-empty name-value pair must be colon-separated.
 
 For example:
@@ -159,25 +160,29 @@ The extension can inject all dependencies declared in the remote BOM. This will 
 
     mvn install -DdependencyManagement=org.foo:my-dep-pom:1.0 -DoverrideTransitive=false
 
-
 ### Parent Version Override
 
 PME will also change any parent reference it finds that matches an entry in the remote BOM.
 
 For example:
 
-      <parent>
-         <groupId>org.switchyard</groupId>
-         <artifactId>switchyard-parent</artifactId>
-         <version>2.0.0.Alpha1</version>
+```xml
+<parent>
+  <groupId>org.switchyard</groupId>
+  <artifactId>switchyard-parent</artifactId>
+  <version>2.0.0.Alpha1</version>
+</parent>
+```
 
 will change to:
 
-      <parent>
-         <groupId>org.switchyard</groupId>
-         <artifactId>switchyard-parent</artifactId>
-         <version>2.0.0.Alpha1-rebuild-1</version>
-
+```xml
+<parent>
+  <groupId>org.switchyard</groupId>
+  <artifactId>switchyard-parent</artifactId>
+  <version>2.0.0.Alpha1-rebuild-1</version>
+</parent>
+```
 
 ### Exclusions and Overrides
 
@@ -266,17 +271,19 @@ It is also possible to inject specific exclusions into a dependency. For instanc
 
 will, as per above, apply the explicit 4.10-rebuild-10 version to the junit:junit dependency but also add an exclusion e.g.
 
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>4.1</version>
-      <exclusions>
-        <exclusion>
-          <artifactId>slf4j</artifactId>
-          <groupId>slf4j</groupId>
-        </exclusion>
-      </exclusions>
-    </dependency>
+```xml
+<dependency>
+  <groupId>junit</groupId>
+  <artifactId>junit</artifactId>
+  <version>4.1</version>
+  <exclusions>
+    <exclusion>
+      <artifactId>slf4j</artifactId>
+      <groupId>slf4j</groupId>
+    </exclusion>
+  </exclusions>
+</dependency>
+```
 
 Multiple exclusions to a dependency may be added using comma separators e.g.
 
@@ -318,11 +325,11 @@ By default strict-mode version alignment checks are enabled. This is **highly re
 
 Strict-mode alignment will detect cases where the adjusted version, once OSGi and suffix are handled, does not match with the old version, **not** do the alignment and report the mismatch as a warning in the build's console output. For example, if the incremental or manual suffix is configured to be `rebuild` then these are valid changes.
 
-| Original Version | Potential New Versions |
-| --- | --- |
-| 2.6 | 2.6-rebuild-2 ; 2.6.0.rebuild-4 |
-| 3 | 3.0.0.rebuild-1 ; 3-rebuild-1 |
-| 3.1 | 3.1.0.rebuild-1 ; 3.1-rebuild-1 |
+| Original Version | Potential New Versions              |
+| ---------------- | ----------------------------------- |
+| 2.6              | 2.6-rebuild-2 ; 2.6.0.rebuild-4     |
+| 3                | 3.0.0.rebuild-1 ; 3-rebuild-1       |
+| 3.1              | 3.1.0.rebuild-1 ; 3.1-rebuild-1     |
 
 Note that it will not consider 3 -> 3.1 as a valid transition.
 
@@ -360,7 +367,6 @@ The property `strictPropertyValidation` is similar to the property clash replace
 
     org.foo:bar1:$propertyX
     org.foo:bar2:$propertyX
-
 
 ### Property Clash Replacement
 
