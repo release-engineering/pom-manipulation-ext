@@ -20,20 +20,14 @@ import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
 import org.apache.maven.artifact.versioning.VersionRange;
-import org.apache.maven.model.Build;
-import org.apache.maven.model.BuildBase;
 import org.apache.maven.model.Dependency;
-import org.apache.maven.model.DependencyManagement;
-import org.apache.maven.model.Model;
 import org.apache.maven.model.Plugin;
-import org.apache.maven.model.PluginManagement;
-import org.apache.maven.model.Profile;
 import org.commonjava.maven.atlas.ident.ref.ProjectRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleProjectRef;
 import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.common.ManipulationUncheckedException;
 import org.commonjava.maven.ext.common.model.Project;
-import org.commonjava.maven.ext.common.util.PropertyInterpolator;
+import org.commonjava.maven.ext.common.util.PropertyResolver;
 import org.commonjava.maven.ext.core.ManipulationSession;
 import org.commonjava.maven.ext.core.state.RangeResolverState;
 import org.commonjava.maven.ext.core.state.State;
@@ -46,6 +40,7 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
+
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -94,110 +89,67 @@ public class RangeResolver
 
         final Set<Project> changed = new HashSet<>( projects.size() );
 
-        for ( final Project project : projects )
+        for ( final Project p : projects )
         {
-            final PropertyInterpolator pi = new PropertyInterpolator( project.getModel().getProperties(), project );
-
-            try {
-                final Model model = project.getModel();
-                final Build build = model.getBuild();
-
-                if ( build  != null )
+            try
+            {
+                if ( p.getModel().getBuild() != null )
                 {
-                    final PluginManagement pluginManagement = build.getPluginManagement();
-
-                    if ( pluginManagement != null )
+                    // PluginManagement
+                    if ( p.getModel().getBuild().getPluginManagement() != null )
                     {
-                        final List<Plugin> plugins = pluginManagement.getPlugins();
-
-                        for ( final Plugin plugin : plugins )
-                        {
-                            handleVersionWithRange( plugin, pi );
-                        }
+                        p.getModel()
+                         .getBuild()
+                         .getPluginManagement()
+                         .getPlugins()
+                         .forEach( plugin -> handleVersionWithRange( projects, plugin ) );
                     }
-
-                    final List<Plugin> plugins = build.getPlugins();
-
-                    if ( plugins != null )
-                    {
-                        for ( final Plugin plugin : plugins )
-                        {
-                            handleVersionWithRange( plugin, pi );
-                        }
-                    }
+                    // Plugins
+                    p.getModel()
+                     .getBuild()
+                     .getPlugins()
+                     .forEach( plugin -> handleVersionWithRange( projects, plugin ) );
                 }
 
-                final DependencyManagement dependencyManagement = model.getDependencyManagement();
-
-                if ( dependencyManagement != null )
+                // DependencyManagement
+                if ( p.getModel().getDependencyManagement() != null )
                 {
-                    final List<Dependency> dependencies = dependencyManagement.getDependencies();
-
-                    for ( final Dependency dependency : dependencies )
-                    {
-                        handleVersionWithRange( dependency, pi );
-                    }
+                    p.getModel().getDependencyManagement().getDependencies()
+                     .forEach(dependency -> handleVersionWithRange( projects, dependency ) );
                 }
+                // Dependencies
+                p.getModel().getDependencies().stream()
+                 .forEach(dependency -> handleVersionWithRange( projects, dependency ) );
 
-                final List<Dependency> dependencies = model.getDependencies();
+                p.getModel().getProfiles().stream().filter( profile -> profile.getDependencyManagement() != null )
+                  .forEach( profile -> {
+                    // DependencyManagement
+                        profile.getDependencyManagement().getDependencies()
+                         .forEach(dependency -> handleVersionWithRange( projects, dependency ) );
+                    // Dependencies
+                    profile.getDependencies()
+                     .forEach(dependency -> handleVersionWithRange( projects, dependency ) );
 
-                for ( final Dependency dependency : dependencies )
-                {
-                    handleVersionWithRange( dependency, pi );
-                }
-
-                final List<Profile> profiles = model.getProfiles();
-
-                for ( final Profile profile : profiles )
-                {
-                    final DependencyManagement profileDependencyManagement = profile.getDependencyManagement();
-
-                    if ( profileDependencyManagement != null )
+                    if ( profile.getBuild() != null )
                     {
-                        final List<Dependency> profileDependencyManagementDependencies
-                                = profileDependencyManagement.getDependencies();
-
-                        for ( final Dependency dependency : profileDependencyManagementDependencies )
+                        // PluginManagement
+                        if ( profile.getBuild().getPluginManagement() != null )
                         {
-                            handleVersionWithRange( dependency, pi );
+                            profile.getBuild()
+                             .getPluginManagement()
+                             .getPlugins()
+                             .forEach( plugin -> handleVersionWithRange( projects, plugin ) );
                         }
+                        // Plugins
+                        profile.getBuild()
+                         .getPlugins()
+                         .forEach( plugin -> handleVersionWithRange( projects, plugin ) );
                     }
+                } );
 
-                    final List<Dependency> profileDependencies = profile.getDependencies();
-
-                    for ( final Dependency dependency : profileDependencies )
-                    {
-                        handleVersionWithRange( dependency, pi );
-                    }
-
-                    final BuildBase profileBuild = profile.getBuild();
-
-                    if ( profileBuild != null )
-                    {
-                        final PluginManagement profilePluginManagement = profileBuild.getPluginManagement();
-
-                        if ( profilePluginManagement != null )
-                        {
-                            final List<Plugin> plugins = profilePluginManagement.getPlugins();
-
-                            for ( final Plugin plugin : plugins )
-                            {
-                                handleVersionWithRange( plugin, pi );
-                            }
-                        }
-
-                        final List<Plugin> profilePlugins = profileBuild.getPlugins();
-
-                        for ( final Plugin plugin : profilePlugins )
-                        {
-                            handleVersionWithRange( plugin, pi );
-                        }
-                    }
-                }
-
-                changed.add( project );
+                changed.add( p );
             }
-            catch ( final RuntimeException e )
+            catch ( RuntimeException e )
             {
                 if ( e.getCause() instanceof ManipulationException )
                 {
@@ -209,15 +161,17 @@ public class RangeResolver
         return changed;
     }
 
-    private void handleVersionWithRange( final Plugin plugin, final PropertyInterpolator pi )
-            throws ManipulationException
+    private void handleVersionWithRange( List<Project> projects, Plugin p )
     {
-        final String version = pi.interp ( plugin.getVersion() );
+        final String version = PropertyResolver.resolvePropertiesUnchecked( session, projects, p.getVersion() );
 
         if ( StringUtils.isEmpty( version ) )
         {
             return;
         }
+
+        final String groupId = PropertyResolver.resolvePropertiesUnchecked( session, projects, p.getGroupId() );
+        final String artifactId = PropertyResolver.resolvePropertiesUnchecked( session, projects, p.getArtifactId() );
 
         try
         {
@@ -226,18 +180,15 @@ public class RangeResolver
             // If it's a range then try to use a matching version...
             if ( versionRange.hasRestrictions() )
             {
-                final String groupId = pi.interp( plugin.getGroupId() );
-                final String artifactId = pi.interp( plugin.getArtifactId() );
-                final ProjectRef ref = new SimpleProjectRef( groupId, artifactId );
-                final List<ArtifactVersion> versions = getVersions( ref );
+                final List<ArtifactVersion> versions = getVersions( new SimpleProjectRef( groupId, artifactId ) );
                 final ArtifactVersion result = versionRange.matchVersion( versions );
 
-                logger.debug( "Resolved range for plugin {} got versionRange {} and potential replacement of {}",
-                        plugin, versionRange, result );
+                logger.debug( "Resolved range for plugin {} got versionRange {} and potential replacement of {}", p,
+                        versionRange, result );
 
                 if ( result != null )
                 {
-                    plugin.setVersion( result.toString() );
+                    p.setVersion( result.toString() );
                 }
                 else
                 {
@@ -245,40 +196,40 @@ public class RangeResolver
                 }
             }
         }
-        catch ( final InvalidVersionSpecificationException | ManipulationException e )
+        catch ( InvalidVersionSpecificationException e )
         {
             throw new ManipulationUncheckedException( new ManipulationException( "Invalid range", e ) );
         }
     }
 
-    private void handleVersionWithRange( Dependency dependency, PropertyInterpolator pi ) throws ManipulationException
+    private void handleVersionWithRange( List<Project> projects, Dependency d )
     {
-        final String version = pi.interp( dependency.getVersion() );
+        final String version = PropertyResolver.resolvePropertiesUnchecked( session, projects, d.getVersion() );
 
         if ( StringUtils.isEmpty( version ) )
         {
             return;
         }
 
+        final String groupId = PropertyResolver.resolvePropertiesUnchecked( session, projects, d.getGroupId() );
+        final String artifactId = PropertyResolver.resolvePropertiesUnchecked( session, projects, d.getArtifactId() );
+
         try
         {
             final VersionRange versionRange = VersionRange.createFromVersionSpec( version );
 
-            // If it's a range then try to use a matching version
+            // If it's a range then try to use a matching version...
             if ( versionRange.hasRestrictions() )
             {
-                final String groupId = pi.interp( dependency.getGroupId() );
-                final String artifactId = pi.interp( dependency.getArtifactId() );
-                final ProjectRef ref = new SimpleProjectRef( groupId, artifactId );
-                final List<ArtifactVersion> versions = getVersions( ref );
+                final List<ArtifactVersion> versions = getVersions( new SimpleProjectRef(groupId, artifactId) );
                 final ArtifactVersion result = versionRange.matchVersion( versions );
 
-                logger.debug( "Resolved range for dependency {} got versionRange {} and potential replacement of {}",
-                        dependency, versionRange, result );
+                logger.debug( "Resolved range for dependency {} got versionRange {} and potential replacement of {}", d,
+                        versionRange, result );
 
                 if ( result != null )
                 {
-                    dependency.setVersion( result.toString() );
+                    d.setVersion( result.toString() );
                 }
                 else
                 {
@@ -286,7 +237,7 @@ public class RangeResolver
                 }
             }
         }
-        catch ( final InvalidVersionSpecificationException | ManipulationException e )
+        catch ( InvalidVersionSpecificationException e )
         {
             throw new ManipulationUncheckedException( new ManipulationException( "Invalid range", e ) );
         }
@@ -295,17 +246,15 @@ public class RangeResolver
     private List<ArtifactVersion> getVersions( ProjectRef ga )
     {
         final MavenMetadataView mavenMetadataView;
-
         try
         {
             mavenMetadataView = readerWrapper.readMetadataView( ga );
         }
-        catch ( final GalleyMavenException e )
+        catch ( GalleyMavenException e )
         {
-            final Throwable t = new ManipulationException( "Caught Galley exception processing artifact", e );
-            throw new ManipulationUncheckedException( t );
+            throw new ManipulationUncheckedException(
+                    new ManipulationException( "Caught Galley exception processing artifact", e ) );
         }
-
         return mavenMetadataView.resolveXPathToAggregatedStringList( "/metadata/versioning/versions/version", true, -1 )
                                 .stream()
                                 .distinct()
