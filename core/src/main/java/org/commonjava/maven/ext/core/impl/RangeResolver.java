@@ -20,8 +20,13 @@ import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
 import org.apache.maven.artifact.versioning.VersionRange;
+import org.apache.maven.model.Build;
+import org.apache.maven.model.BuildBase;
 import org.apache.maven.model.Dependency;
+import org.apache.maven.model.DependencyManagement;
+import org.apache.maven.model.Model;
 import org.apache.maven.model.Plugin;
+import org.apache.maven.model.PluginManagement;
 import org.apache.maven.model.Profile;
 import org.commonjava.maven.atlas.ident.ref.ProjectRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleProjectRef;
@@ -41,13 +46,11 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * This Manipulator runs first and is active by default. It will resolve any ranges and update
@@ -95,155 +98,126 @@ public class RangeResolver
         {
             final PropertyInterpolator pi = new PropertyInterpolator( project.getModel().getProperties(), project );
 
-            try
-            {
-                if ( project.getModel().getBuild() != null )
+            try {
+                final Model model = project.getModel();
+                final Build build = model.getBuild();
+
+                if ( build  != null )
                 {
-                    // PluginManagement
-                    if ( project.getModel().getBuild().getPluginManagement() != null )
-                    {
-                        project.getModel()
-                         .getBuild()
-                         .getPluginManagement()
-                         .getPlugins()
-                         .stream()
-                         .filter( plugin ->
-                         {
-                             try
-                             {
-                                 return StringUtils.isNotEmpty( pi.interp ( plugin.getVersion() ) );
-                             }
-                             catch ( final ManipulationException e )
-                             {
-                                 throw new ManipulationUncheckedException( e );
-                             }
-                         } )
-                         .forEach( plugin -> handleVersionWithRange( plugin, pi ) );
-                    }
-                    // Plugins
-                    project.getModel()
-                     .getBuild()
-                     .getPlugins()
-                     .stream()
-                     .filter( plugin ->
-                     {
-                         try
-                         {
-                             return StringUtils.isNotEmpty( pi.interp (  plugin.getVersion() ) );
-                         }
-                         catch ( final ManipulationException e )
-                         {
-                             throw new ManipulationUncheckedException( e );
-                         }
-                     } )
-                     .forEach( plugin -> handleVersionWithRange( plugin, pi ) );
-                }
+                    final PluginManagement pluginManagement = build.getPluginManagement();
 
-                // DependencyManagement
-                if ( project.getModel().getDependencyManagement() != null )
-                {
-                    project.getModel().getDependencyManagement().getDependencies().stream()
-                     .filter( dependency ->
-                     {
-                         try
-                         {
-                             return StringUtils.isNotEmpty( pi.interp ( dependency.getVersion() ) );
-                         }
-                         catch ( final ManipulationException e )
-                         {
-                             throw new ManipulationUncheckedException( e );
-                         }
-                     } )
-                     .forEach( dependency -> handleVersionWithRange( dependency, pi ) );
-                }
-                // Dependencies
-                project.getModel().getDependencies().stream()
-                 .filter( dependency ->
-                 {
-                     try
-                     {
-                         return StringUtils.isNotEmpty( pi.interp ( dependency.getVersion() ) );
-                     }
-                     catch ( final ManipulationException e )
-                     {
-                         throw new ManipulationUncheckedException( e );
-                     }
-                 } )
-                 .forEach( dependency -> handleVersionWithRange( dependency, pi ) );
-
-                asStream( project.getModel().getProfiles() ).forEach( profile -> {
-                    // DependencyManagement
-                    if ( profile.getDependencyManagement() != null )
+                    if ( pluginManagement != null )
                     {
-                        profile.getDependencyManagement().getDependencies().stream()
-                         .filter( dependency ->
-                         {
-                             try
-                             {
-                                 return StringUtils.isNotEmpty( pi.interp ( dependency.getVersion() ) );
-                             }
-                             catch ( final ManipulationException e )
-                             {
-                                 throw new ManipulationUncheckedException( e );
-                             }
-                         } )
-                         .forEach( dependency -> handleVersionWithRange( dependency, pi ) );
-                    }
-                    // Dependencies
-                    profile.getDependencies().stream()
-                     .filter( dependency ->
-                     {
-                         try
-                         {
-                             return StringUtils.isNotEmpty( pi.interp ( dependency.getVersion() ) );
-                         }
-                         catch ( final ManipulationException e )
-                         {
-                             throw new ManipulationUncheckedException( e );
-                         }
-                     } )
-                     .forEach( dependency -> handleVersionWithRange( dependency, pi ) );
+                        final List<Plugin> plugins = pluginManagement.getPlugins();
 
-                    if ( profile.getBuild() != null )
-                    {
-                        // PluginManagement
-                        if ( profile.getBuild().getPluginManagement() != null )
+                        for ( final Plugin plugin : plugins )
                         {
-                            profile.getBuild()
-                             .getPluginManagement()
-                             .getPlugins()
-                             .stream()
-                             .filter( plugin ->
-                             {
-                                 try
-                                 {
-                                     return StringUtils.isNotEmpty( pi.interp ( plugin.getVersion() ) );
-                                 }
-                                 catch ( final ManipulationException e )
-                                 {
-                                     throw new ManipulationUncheckedException( e );
-                                 }
-                             } )
-                             .forEach( plugin -> handleVersionWithRange( plugin, pi ) );
+                            if ( StringUtils.isNotEmpty( pi.interp( plugin.getVersion() ) ) )
+                            {
+                                handleVersionWithRange( plugin, pi );
+                            }
                         }
-                        // Plugins
-                        profile.getBuild()
-                         .getPlugins()
-                         .stream()
-                         .filter( plugin ->
-                         {
-                             try
-                             {
-                                 return StringUtils.isNotEmpty( pi.interp ( plugin.getVersion() ) );
-                             }
-                             catch ( final ManipulationException e )
-                             {
-                                 throw new ManipulationUncheckedException( e );
-                             }
-                         } )
-                         .forEach( plugin -> handleVersionWithRange( plugin, pi ) );
                     }
-                } );
+
+                    final List<Plugin> plugins = build.getPlugins();
+
+                    if ( plugins != null )
+                    {
+                        for ( final Plugin plugin : plugins )
+                        {
+                            if ( StringUtils.isNotEmpty( pi.interp( plugin.getVersion() ) ) )
+                            {
+                                handleVersionWithRange( plugin, pi );
+                            }
+                        }
+                    }
+                }
+
+                final DependencyManagement dependencyManagement = model.getDependencyManagement();
+
+                if ( dependencyManagement != null )
+                {
+                    final List<Dependency> dependencies = dependencyManagement.getDependencies();
+
+                    for ( final Dependency dependency : dependencies )
+                    {
+                        if ( StringUtils.isNotEmpty( pi.interp( dependency.getVersion() ) ) )
+                        {
+                            handleVersionWithRange( dependency, pi );
+                        }
+                    }
+                }
+
+                final List<Dependency> dependencies = model.getDependencies();
+
+                for ( final Dependency dependency : dependencies )
+                {
+                    if ( StringUtils.isNotEmpty( pi.interp( dependency.getVersion() ) ) )
+                    {
+                        handleVersionWithRange( dependency, pi );
+                    }
+                }
+
+                final List<Profile> profiles = model.getProfiles();
+
+                for ( final Profile profile : profiles )
+                {
+                    final DependencyManagement profileDependencyManagement = profile.getDependencyManagement();
+
+                    if ( profileDependencyManagement != null )
+                    {
+                        final List<Dependency> profileDependencyManagementDependencies
+                                = profileDependencyManagement.getDependencies();
+
+                        for ( final Dependency dependency : profileDependencyManagementDependencies )
+                        {
+                            if ( StringUtils.isNotEmpty( pi.interp ( dependency.getVersion() ) ) )
+                            {
+                                handleVersionWithRange( dependency, pi );
+                            }
+                        }
+                    }
+
+                    final List<Dependency> profileDependencies = profile.getDependencies();
+
+                    for ( final Dependency dependency : profileDependencies )
+                    {
+                        if ( StringUtils.isNotEmpty( pi.interp ( dependency.getVersion() ) ) )
+                        {
+                            handleVersionWithRange( dependency, pi );
+                        }
+                    }
+
+                    final BuildBase profileBuild = profile.getBuild();
+
+                    if ( profileBuild != null )
+                    {
+                        final PluginManagement profilePluginManagement = profileBuild.getPluginManagement();
+
+                        if ( profilePluginManagement != null )
+                        {
+                            final List<Plugin> plugins = profilePluginManagement.getPlugins();
+
+                            for ( final Plugin plugin : plugins )
+                            {
+                                if ( StringUtils.isNotEmpty( pi.interp ( plugin.getVersion() ) ) )
+                                {
+                                    handleVersionWithRange( plugin, pi );
+                                }
+                            }
+                        }
+
+                        final List<Plugin> profilePlugins = profileBuild.getPlugins();
+
+                        for ( final Plugin plugin : profilePlugins )
+                        {
+                            if ( StringUtils.isNotEmpty( pi.interp ( plugin.getVersion() ) ) )
+                            {
+                                handleVersionWithRange( plugin, pi );
+                            }
+                        }
+                    }
+                }
 
                 changed.add( project );
             }
@@ -352,10 +326,5 @@ public class RangeResolver
     {
         // Low value index so it runs very early in order to lock the versions down prior to attempting REST alignment.
         return 2;
-    }
-
-    private static Stream<Profile> asStream( final Collection<Profile> collection )
-    {
-        return ( collection == null ? Stream.empty() : collection.stream() );
     }
 }
