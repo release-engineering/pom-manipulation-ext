@@ -112,10 +112,7 @@ public class RangeResolver
 
                         for ( final Plugin plugin : plugins )
                         {
-                            if ( StringUtils.isNotEmpty( pi.interp( plugin.getVersion() ) ) )
-                            {
-                                handleVersionWithRange( plugin, pi );
-                            }
+                            handleVersionWithRange( plugin, pi );
                         }
                     }
 
@@ -125,10 +122,7 @@ public class RangeResolver
                     {
                         for ( final Plugin plugin : plugins )
                         {
-                            if ( StringUtils.isNotEmpty( pi.interp( plugin.getVersion() ) ) )
-                            {
-                                handleVersionWithRange( plugin, pi );
-                            }
+                            handleVersionWithRange( plugin, pi );
                         }
                     }
                 }
@@ -141,10 +135,7 @@ public class RangeResolver
 
                     for ( final Dependency dependency : dependencies )
                     {
-                        if ( StringUtils.isNotEmpty( pi.interp( dependency.getVersion() ) ) )
-                        {
-                            handleVersionWithRange( dependency, pi );
-                        }
+                        handleVersionWithRange( dependency, pi );
                     }
                 }
 
@@ -152,10 +143,7 @@ public class RangeResolver
 
                 for ( final Dependency dependency : dependencies )
                 {
-                    if ( StringUtils.isNotEmpty( pi.interp( dependency.getVersion() ) ) )
-                    {
-                        handleVersionWithRange( dependency, pi );
-                    }
+                    handleVersionWithRange( dependency, pi );
                 }
 
                 final List<Profile> profiles = model.getProfiles();
@@ -171,10 +159,7 @@ public class RangeResolver
 
                         for ( final Dependency dependency : profileDependencyManagementDependencies )
                         {
-                            if ( StringUtils.isNotEmpty( pi.interp ( dependency.getVersion() ) ) )
-                            {
-                                handleVersionWithRange( dependency, pi );
-                            }
+                            handleVersionWithRange( dependency, pi );
                         }
                     }
 
@@ -182,10 +167,7 @@ public class RangeResolver
 
                     for ( final Dependency dependency : profileDependencies )
                     {
-                        if ( StringUtils.isNotEmpty( pi.interp ( dependency.getVersion() ) ) )
-                        {
-                            handleVersionWithRange( dependency, pi );
-                        }
+                        handleVersionWithRange( dependency, pi );
                     }
 
                     final BuildBase profileBuild = profile.getBuild();
@@ -200,10 +182,7 @@ public class RangeResolver
 
                             for ( final Plugin plugin : plugins )
                             {
-                                if ( StringUtils.isNotEmpty( pi.interp ( plugin.getVersion() ) ) )
-                                {
-                                    handleVersionWithRange( plugin, pi );
-                                }
+                                handleVersionWithRange( plugin, pi );
                             }
                         }
 
@@ -211,10 +190,7 @@ public class RangeResolver
 
                         for ( final Plugin plugin : profilePlugins )
                         {
-                            if ( StringUtils.isNotEmpty( pi.interp ( plugin.getVersion() ) ) )
-                            {
-                                handleVersionWithRange( plugin, pi );
-                            }
+                            handleVersionWithRange( plugin, pi );
                         }
                     }
                 }
@@ -234,16 +210,25 @@ public class RangeResolver
     }
 
     private void handleVersionWithRange( final Plugin plugin, final PropertyInterpolator pi )
+            throws ManipulationException
     {
+        final String version = pi.interp ( plugin.getVersion() );
+
+        if ( StringUtils.isEmpty( version ) )
+        {
+            return;
+        }
+
         try
         {
-            final VersionRange versionRange = VersionRange.createFromVersionSpec( pi.interp( plugin.getVersion() ) );
+            final VersionRange versionRange = VersionRange.createFromVersionSpec( version );
 
             // If it's a range then try to use a matching version...
             if ( versionRange.hasRestrictions() )
             {
-                final ProjectRef ref = new SimpleProjectRef( pi.interp( plugin.getGroupId() ),
-                        pi.interp( plugin.getArtifactId() ) );
+                final String groupId = pi.interp( plugin.getGroupId() );
+                final String artifactId = pi.interp( plugin.getArtifactId() );
+                final ProjectRef ref = new SimpleProjectRef( groupId, artifactId );
                 final List<ArtifactVersion> versions = getVersions( ref );
                 final ArtifactVersion result = versionRange.matchVersion( versions );
 
@@ -266,18 +251,25 @@ public class RangeResolver
         }
     }
 
-    private void handleVersionWithRange( Dependency dependency, PropertyInterpolator pi )
+    private void handleVersionWithRange( Dependency dependency, PropertyInterpolator pi ) throws ManipulationException
     {
+        final String version = pi.interp( dependency.getVersion() );
+
+        if ( StringUtils.isEmpty( version ) )
+        {
+            return;
+        }
+
         try
         {
-            final VersionRange versionRange
-                    = VersionRange.createFromVersionSpec( pi.interp( dependency.getVersion() ) );
+            final VersionRange versionRange = VersionRange.createFromVersionSpec( version );
 
             // If it's a range then try to use a matching version
             if ( versionRange.hasRestrictions() )
             {
-                final ProjectRef ref = new SimpleProjectRef( pi.interp( dependency.getGroupId() ),
-                        pi.interp( dependency.getArtifactId() ) );
+                final String groupId = pi.interp( dependency.getGroupId() );
+                final String artifactId = pi.interp( dependency.getArtifactId() );
+                final ProjectRef ref = new SimpleProjectRef( groupId, artifactId );
                 final List<ArtifactVersion> versions = getVersions( ref );
                 final ArtifactVersion result = versionRange.matchVersion( versions );
 
