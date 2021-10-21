@@ -115,20 +115,20 @@ public class RangeResolver
                 if ( p.getModel().getDependencyManagement() != null )
                 {
                     p.getModel().getDependencyManagement().getDependencies()
-                     .forEach(dependency -> handleVersionWithRange( projects, dependency ) );
+                     .forEach( dependency -> handleVersionWithRange( projects, dependency ) );
                 }
                 // Dependencies
-                p.getModel().getDependencies().stream()
-                 .forEach(dependency -> handleVersionWithRange( projects, dependency ) );
+                p.getModel().getDependencies()
+                 .forEach( dependency -> handleVersionWithRange( projects, dependency ) );
 
                 p.getModel().getProfiles().stream().filter( profile -> profile.getDependencyManagement() != null )
                   .forEach( profile -> {
                     // DependencyManagement
                         profile.getDependencyManagement().getDependencies()
-                         .forEach(dependency -> handleVersionWithRange( projects, dependency ) );
+                         .forEach( dependency -> handleVersionWithRange( projects, dependency ) );
                     // Dependencies
                     profile.getDependencies()
-                     .forEach(dependency -> handleVersionWithRange( projects, dependency ) );
+                     .forEach( dependency -> handleVersionWithRange( projects, dependency ) );
 
                     if ( profile.getBuild() != null )
                     {
@@ -221,7 +221,7 @@ public class RangeResolver
             // If it's a range then try to use a matching version...
             if ( versionRange.hasRestrictions() )
             {
-                final List<ArtifactVersion> versions = getVersions( new SimpleProjectRef(groupId, artifactId) );
+                final List<ArtifactVersion> versions = getVersions( new SimpleProjectRef( groupId, artifactId ) );
                 final ArtifactVersion result = versionRange.matchVersion( versions );
 
                 logger.debug( "Resolved range for dependency {} got versionRange {} and potential replacement of {}", d,
