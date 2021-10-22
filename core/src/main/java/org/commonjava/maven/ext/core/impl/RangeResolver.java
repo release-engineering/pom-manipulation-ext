@@ -102,33 +102,47 @@ public class RangeResolver
                          .getBuild()
                          .getPluginManagement()
                          .getPlugins()
+                         .stream()
+                         .filter( plugin -> StringUtils.isNotEmpty( plugin.getVersion() ) )
                          .forEach( plugin -> handleVersionWithRange( projects, plugin ) );
                     }
                     // Plugins
                     p.getModel()
                      .getBuild()
                      .getPlugins()
+                     .stream()
+                     .filter( plugin -> StringUtils.isNotEmpty( plugin.getVersion() ) )
                      .forEach( plugin -> handleVersionWithRange( projects, plugin ) );
                 }
 
                 // DependencyManagement
                 if ( p.getModel().getDependencyManagement() != null )
                 {
-                    p.getModel().getDependencyManagement().getDependencies()
+                    p.getModel().getDependencyManagement()
+                     .getDependencies()
+                     .stream()
+                     .filter( dependency -> StringUtils.isNotEmpty( dependency.getVersion() ) )
                      .forEach( dependency -> handleVersionWithRange( projects, dependency ) );
                 }
                 // Dependencies
                 p.getModel().getDependencies()
+                 .stream()
+                 .filter( dependency -> StringUtils.isNotEmpty( dependency.getVersion() ) )
                  .forEach( dependency -> handleVersionWithRange( projects, dependency ) );
 
                 p.getModel().getProfiles().stream().filter( profile -> profile.getDependencyManagement() != null )
                   .forEach( profile -> {
                     // DependencyManagement
-                        profile.getDependencyManagement().getDependencies()
-                         .forEach( dependency -> handleVersionWithRange( projects, dependency ) );
+                        profile.getDependencyManagement()
+                               .getDependencies()
+                               .stream()
+                               .filter( dependency -> StringUtils.isNotEmpty( dependency.getVersion() ) )
+                               .forEach( dependency -> handleVersionWithRange( projects, dependency ) );
                     // Dependencies
                     profile.getDependencies()
-                     .forEach( dependency -> handleVersionWithRange( projects, dependency ) );
+                           .stream()
+                           .filter( dependency -> StringUtils.isNotEmpty( dependency.getVersion() ) )
+                           .forEach( dependency -> handleVersionWithRange( projects, dependency ) );
 
                     if ( profile.getBuild() != null )
                     {
@@ -136,14 +150,18 @@ public class RangeResolver
                         if ( profile.getBuild().getPluginManagement() != null )
                         {
                             profile.getBuild()
-                             .getPluginManagement()
-                             .getPlugins()
-                             .forEach( plugin -> handleVersionWithRange( projects, plugin ) );
+                                   .getPluginManagement()
+                                   .getPlugins()
+                                   .stream()
+                                   .filter( plugin -> StringUtils.isNotEmpty( plugin.getVersion() ) )
+                                   .forEach( plugin -> handleVersionWithRange( projects, plugin ) );
                         }
                         // Plugins
                         profile.getBuild()
-                         .getPlugins()
-                         .forEach( plugin -> handleVersionWithRange( projects, plugin ) );
+                               .getPlugins()
+                               .stream()
+                               .filter( plugin -> StringUtils.isNotEmpty( plugin.getVersion() ) )
+                               .forEach( plugin -> handleVersionWithRange( projects, plugin ) );
                     }
                 } );
 
@@ -164,11 +182,6 @@ public class RangeResolver
     private void handleVersionWithRange( List<Project> projects, Plugin p )
     {
         final String version = PropertyResolver.resolvePropertiesUnchecked( session, projects, p.getVersion() );
-
-        if ( StringUtils.isEmpty( version ) )
-        {
-            return;
-        }
 
         try
         {
@@ -205,11 +218,6 @@ public class RangeResolver
     private void handleVersionWithRange( List<Project> projects, Dependency d )
     {
         final String version = PropertyResolver.resolvePropertiesUnchecked( session, projects, d.getVersion() );
-
-        if ( StringUtils.isEmpty( version ) )
-        {
-            return;
-        }
 
         try
         {
