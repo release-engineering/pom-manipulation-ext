@@ -170,9 +170,6 @@ public class RangeResolver
             return;
         }
 
-        final String groupId = PropertyResolver.resolvePropertiesUnchecked( session, projects, p.getGroupId() );
-        final String artifactId = PropertyResolver.resolvePropertiesUnchecked( session, projects, p.getArtifactId() );
-
         try
         {
             final VersionRange versionRange = VersionRange.createFromVersionSpec( version );
@@ -180,6 +177,9 @@ public class RangeResolver
             // If it's a range then try to use a matching version...
             if ( versionRange.hasRestrictions() )
             {
+                final String groupId = PropertyResolver.resolvePropertiesUnchecked( session, projects, p.getGroupId() );
+                final String artifactId = PropertyResolver.resolvePropertiesUnchecked( session, projects,
+                        p.getArtifactId() );
                 final List<ArtifactVersion> versions = getVersions( new SimpleProjectRef( groupId, artifactId ) );
                 final ArtifactVersion result = versionRange.matchVersion( versions );
 
@@ -211,9 +211,6 @@ public class RangeResolver
             return;
         }
 
-        final String groupId = PropertyResolver.resolvePropertiesUnchecked( session, projects, d.getGroupId() );
-        final String artifactId = PropertyResolver.resolvePropertiesUnchecked( session, projects, d.getArtifactId() );
-
         try
         {
             final VersionRange versionRange = VersionRange.createFromVersionSpec( version );
@@ -221,6 +218,9 @@ public class RangeResolver
             // If it's a range then try to use a matching version...
             if ( versionRange.hasRestrictions() )
             {
+                final String groupId = PropertyResolver.resolvePropertiesUnchecked( session, projects, d.getGroupId() );
+                final String artifactId = PropertyResolver.resolvePropertiesUnchecked( session, projects,
+                        d.getArtifactId() );
                 final List<ArtifactVersion> versions = getVersions( new SimpleProjectRef( groupId, artifactId ) );
                 final ArtifactVersion result = versionRange.matchVersion( versions );
 
