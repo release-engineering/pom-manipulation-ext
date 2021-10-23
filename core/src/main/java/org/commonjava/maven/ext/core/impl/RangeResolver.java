@@ -22,12 +22,12 @@ import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException
 import org.apache.maven.artifact.versioning.VersionRange;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.Plugin;
-import org.apache.maven.model.Profile;
 import org.commonjava.maven.atlas.ident.ref.ProjectRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleProjectRef;
 import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.common.ManipulationUncheckedException;
 import org.commonjava.maven.ext.common.model.Project;
+import org.commonjava.maven.ext.common.util.PropertyResolver;
 import org.commonjava.maven.ext.core.ManipulationSession;
 import org.commonjava.maven.ext.core.state.RangeResolverState;
 import org.commonjava.maven.ext.core.state.State;
@@ -40,19 +40,18 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
-import java.util.Collection;
+
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * This Manipulator runs first and is active by default. It will resolve any ranges and update
  * them to locked values.
  */
-@Named("range-resolver")
+@Named( "range-resolver" )
 @Singleton
 public class RangeResolver
                 implements Manipulator
@@ -61,7 +60,7 @@ public class RangeResolver
 
     private ManipulationSession session;
 
-    private GalleyAPIWrapper readerWrapper;
+    private final GalleyAPIWrapper readerWrapper;
 
     @Inject
     public RangeResolver( final GalleyAPIWrapper readerWrapper )
@@ -79,21 +78,21 @@ public class RangeResolver
     @Override
     public Set<Project> applyChanges( final List<Project> projects ) throws ManipulationException
     {
-        final Set<Project> changed = new HashSet<>();
         final RangeResolverState state = session.getState( RangeResolverState.class );
 
-        if ( !session.isEnabled() || !session.anyStateEnabled( State.activeByDefault ) || state == null || !state.isEnabled() )
+        if ( !session.isEnabled() || !session.anyStateEnabled( State.activeByDefault ) || state == null
+                || !state.isEnabled() )
         {
-            logger.debug("{}: Nothing to do!", getClass().getSimpleName());
+            logger.debug( "{}: Nothing to do!", getClass().getSimpleName() );
             return Collections.emptySet();
         }
 
-        for ( Project p : projects )
+        final Set<Project> changed = new HashSet<>( projects.size() );
+
+        for ( final Project p : projects )
         {
             try
             {
-                // TODO: Ranges in properties are not currently handled.
-
                 if ( p.getModel().getBuild() != null )
                 {
                     // PluginManagement
@@ -104,42 +103,46 @@ public class RangeResolver
                          .getPluginManagement()
                          .getPlugins()
                          .stream()
-                         .filter( d -> StringUtils.isNotEmpty( d.getVersion() ) )
-                         .forEach( this::handleVersionWithRange );
+                         .filter( plugin -> StringUtils.isNotEmpty( plugin.getVersion() ) )
+                         .forEach( plugin -> handleVersionWithRange( projects, plugin ) );
                     }
                     // Plugins
                     p.getModel()
                      .getBuild()
                      .getPlugins()
                      .stream()
-                     .filter( d -> StringUtils.isNotEmpty( d.getVersion() ) )
-                     .forEach( this::handleVersionWithRange );
+                     .filter( plugin -> StringUtils.isNotEmpty( plugin.getVersion() ) )
+                     .forEach( plugin -> handleVersionWithRange( projects, plugin ) );
                 }
 
                 // DependencyManagement
                 if ( p.getModel().getDependencyManagement() != null )
                 {
-                    p.getModel().getDependencyManagement().getDependencies().stream()
-                     .filter( d -> StringUtils.isNotEmpty( d.getVersion() ) )
-                     .forEach( this::handleVersionWithRange );
+                    p.getModel().getDependencyManagement()
+                     .getDependencies()
+                     .stream()
+                     .filter( dependency -> StringUtils.isNotEmpty( dependency.getVersion() ) )
+                     .forEach( dependency -> handleVersionWithRange( projects, dependency ) );
                 }
                 // Dependencies
-                p.getModel().getDependencies().stream()
-                 .filter( d -> StringUtils.isNotEmpty( d.getVersion() ) )
-                 .forEach( this::handleVersionWithRange );
+                p.getModel().getDependencies()
+                 .stream()
+                 .filter( dependency -> StringUtils.isNotEmpty( dependency.getVersion() ) )
+                 .forEach( dependency -> handleVersionWithRange( projects, dependency ) );
 
-                asStream( p.getModel().getProfiles() ).forEach( profile -> {
+                p.getModel().getProfiles().stream().filter( profile -> profile.getDependencyManagement() != null )
+                  .forEach( profile -> {
                     // DependencyManagement
-                    if ( profile.getDependencyManagement() != null )
-                    {
-                        profile.getDependencyManagement().getDependencies().stream()
-                         .filter( d -> StringUtils.isNotEmpty( d.getVersion() ) )
-                         .forEach( this::handleVersionWithRange );
-                    }
+                        profile.getDependencyManagement()
+                               .getDependencies()
+                               .stream()
+                               .filter( dependency -> StringUtils.isNotEmpty( dependency.getVersion() ) )
+                               .forEach( dependency -> handleVersionWithRange( projects, dependency ) );
                     // Dependencies
-                    profile.getDependencies().stream()
-                     .filter( d -> StringUtils.isNotEmpty( d.getVersion() ) )
-                     .forEach( this::handleVersionWithRange );
+                    profile.getDependencies()
+                           .stream()
+                           .filter( dependency -> StringUtils.isNotEmpty( dependency.getVersion() ) )
+                           .forEach( dependency -> handleVersionWithRange( projects, dependency ) );
 
                     if ( profile.getBuild() != null )
                     {
@@ -147,18 +150,18 @@ public class RangeResolver
                         if ( profile.getBuild().getPluginManagement() != null )
                         {
                             profile.getBuild()
-                             .getPluginManagement()
-                             .getPlugins()
-                             .stream()
-                             .filter( d -> StringUtils.isNotEmpty( d.getVersion() ) )
-                             .forEach( this::handleVersionWithRange );
+                                   .getPluginManagement()
+                                   .getPlugins()
+                                   .stream()
+                                   .filter( plugin -> StringUtils.isNotEmpty( plugin.getVersion() ) )
+                                   .forEach( plugin -> handleVersionWithRange( projects, plugin ) );
                         }
                         // Plugins
                         profile.getBuild()
-                         .getPlugins()
-                         .stream()
-                         .filter( d -> StringUtils.isNotEmpty( d.getVersion() ) )
-                         .forEach( this::handleVersionWithRange );
+                               .getPlugins()
+                               .stream()
+                               .filter( plugin -> StringUtils.isNotEmpty( plugin.getVersion() ) )
+                               .forEach( plugin -> handleVersionWithRange( projects, plugin ) );
                     }
                 } );
 
@@ -168,7 +171,7 @@ public class RangeResolver
             {
                 if ( e.getCause() instanceof ManipulationException )
                 {
-                    throw (ManipulationException)e.getCause();
+                    throw ( ManipulationException ) e.getCause();
                 }
                 throw e;
             }
@@ -176,19 +179,25 @@ public class RangeResolver
         return changed;
     }
 
-    private void handleVersionWithRange( Plugin p )
+    private void handleVersionWithRange( List<Project> projects, Plugin p )
     {
+        final String version = PropertyResolver.resolvePropertiesUnchecked( session, projects, p.getVersion() );
+
         try
         {
-            VersionRange versionRange = VersionRange.createFromVersionSpec( p.getVersion() );
+            final VersionRange versionRange = VersionRange.createFromVersionSpec( version );
 
-            // If its a range then try to use a matching version...
+            // If it's a range then try to use a matching version...
             if ( versionRange.hasRestrictions() )
             {
-                final List<ArtifactVersion> versions = getVersions( new SimpleProjectRef( p.getGroupId(), p.getArtifactId() ) );
+                final String groupId = PropertyResolver.resolvePropertiesUnchecked( session, projects, p.getGroupId() );
+                final String artifactId = PropertyResolver.resolvePropertiesUnchecked( session, projects,
+                        p.getArtifactId() );
+                final List<ArtifactVersion> versions = getVersions( new SimpleProjectRef( groupId, artifactId ) );
                 final ArtifactVersion result = versionRange.matchVersion( versions );
 
-                logger.debug( "Resolved range for plugin {} got versionRange {} and potential replacement of {}", p, versionRange, result );
+                logger.debug( "Resolved range for plugin {} got versionRange {} and potential replacement of {}", p,
+                        versionRange, result );
 
                 if ( result != null )
                 {
@@ -206,19 +215,25 @@ public class RangeResolver
         }
     }
 
-    private void handleVersionWithRange( Dependency d )
+    private void handleVersionWithRange( List<Project> projects, Dependency d )
     {
+        final String version = PropertyResolver.resolvePropertiesUnchecked( session, projects, d.getVersion() );
+
         try
         {
-            VersionRange versionRange = VersionRange.createFromVersionSpec( d.getVersion() );
+            final VersionRange versionRange = VersionRange.createFromVersionSpec( version );
 
-            // If its a range then try to use a matching version...
+            // If it's a range then try to use a matching version...
             if ( versionRange.hasRestrictions() )
             {
-                final List<ArtifactVersion> versions = getVersions( new SimpleProjectRef( d.getGroupId(), d.getArtifactId() ) );
+                final String groupId = PropertyResolver.resolvePropertiesUnchecked( session, projects, d.getGroupId() );
+                final String artifactId = PropertyResolver.resolvePropertiesUnchecked( session, projects,
+                        d.getArtifactId() );
+                final List<ArtifactVersion> versions = getVersions( new SimpleProjectRef( groupId, artifactId ) );
                 final ArtifactVersion result = versionRange.matchVersion( versions );
 
-                logger.debug( "Resolved range for dependency {} got versionRange {} and potential replacement of {}", d, versionRange, result );
+                logger.debug( "Resolved range for dependency {} got versionRange {} and potential replacement of {}", d,
+                        versionRange, result );
 
                 if ( result != null )
                 {
@@ -226,7 +241,7 @@ public class RangeResolver
                 }
                 else
                 {
-                    logger.warn( "Unable to find replacement for range." );
+                    logger.warn( "Unable to find replacement for range" );
                 }
             }
         }
@@ -238,22 +253,21 @@ public class RangeResolver
 
     private List<ArtifactVersion> getVersions( ProjectRef ga )
     {
-        MavenMetadataView mavenMetadataView;
+        final MavenMetadataView mavenMetadataView;
         try
         {
             mavenMetadataView = readerWrapper.readMetadataView( ga );
         }
         catch ( GalleyMavenException e )
         {
-            throw new ManipulationUncheckedException( new ManipulationException( "Caught Galley exception processing artifact", e ) );
+            throw new ManipulationUncheckedException(
+                    new ManipulationException( "Caught Galley exception processing artifact", e ) );
         }
         return mavenMetadataView.resolveXPathToAggregatedStringList( "/metadata/versioning/versions/version", true, -1 )
                                 .stream()
                                 .distinct()
                                 .map( DefaultArtifactVersion::new )
                                 .collect( Collectors.toList() );
-
-
     }
 
     @Override
@@ -261,10 +275,5 @@ public class RangeResolver
     {
         // Low value index so it runs very early in order to lock the versions down prior to attempting REST alignment.
         return 2;
-    }
-
-    private static Stream<Profile> asStream ( final Collection<Profile> collection)
-    {
-        return ( collection == null ? Stream.empty() : collection.stream() );
     }
 }
