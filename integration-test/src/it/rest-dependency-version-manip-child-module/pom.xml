@@ -24,7 +24,7 @@
   <parent>
     <groupId>org.jboss</groupId>
     <artifactId>jboss-parent</artifactId>
-    <version>11</version>
+    <version>37</version>
   </parent>
 
   <groupId>org.commonjava.maven.ext.integration-test</groupId>

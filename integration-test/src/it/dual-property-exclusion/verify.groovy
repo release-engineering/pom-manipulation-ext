@@ -15,14 +15,14 @@
  */
 def pomFile = new File( basedir, 'pom.xml' )
 def pomChildFile = new File( basedir, 'child/pom.xml' )
-System.out.println( "Slurping POM: ${pomFile.getAbsolutePath()} and ${pomChildFile.getAbsolutePath()}" )
+println "Slurping POM: ${pomFile.getAbsolutePath()} and ${pomChildFile.getAbsolutePath()}"
 
 def pom = new XmlSlurper().parse( pomFile )
 def pomChild = new XmlSlurper().parse( pomChildFile )
 
 def passed = false
 pom.properties.each {
-    if ( it.text().contains ("6.0.6.Final") )
+    if ( it.text().contains( "8.6.0.Final" ) )
     {
         passed = true
     }
@@ -32,10 +32,10 @@ assert (passed == true)
 
 passed = false
 pomChild.properties.each {
-    if ( it.text().contains ("6.0.6.Final") )
+    if ( it.text().contains( "8.6.0.Final" ) )
     {
         passed = true
     }
 }
 
-assert (passed == true)
+assert passed
