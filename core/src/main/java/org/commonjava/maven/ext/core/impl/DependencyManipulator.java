@@ -44,7 +44,6 @@ import javax.inject.Named;
 import javax.inject.Singleton;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -103,7 +102,7 @@ public class DependencyManipulator extends CommonManipulator implements Manipula
 
         if ( !session.isEnabled() || !state.isEnabled() )
         {
-            logger.debug("{}: Nothing to do!", getClass().getSimpleName());
+            logger.debug( "{}: Nothing to do!", getClass().getSimpleName() );
             return Collections.emptySet();
         }
         return internalApplyChanges( projects, loadRemoteOverrides() );
@@ -129,11 +128,11 @@ public class DependencyManipulator extends CommonManipulator implements Manipula
         // org.foo:foobar -> 1.2.0.redhat-2
         // org.foo:foobar -> 2.0.0.redhat-2
         // Which is useful for strictAlignment scenarios (although undefined for non-strict).
-        Map<ArtifactRef, String> restOverrides = depState.getRemoteRESTOverrides();
-        Map<ArtifactRef, String> bomOverrides = new LinkedHashMap<>();
+        final Map<ArtifactRef, String> restOverrides = depState.getRemoteRESTOverrides();
+        final Map<ArtifactRef, String> bomOverrides = new LinkedHashMap<>();
         Map<ArtifactRef, String> mergedOverrides = new LinkedHashMap<>();
 
-        logger.info ( "Remote precedence is {}", depState.getPrecedence() );
+        logger.info( "Remote precedence is {}", depState.getPrecedence() );
         if ( gavs != null )
         {
             final ListIterator<ProjectVersionRef> iter = gavs.listIterator( gavs.size() );
@@ -166,7 +165,7 @@ public class DependencyManipulator extends CommonManipulator implements Manipula
                 logger.warn( "No dependencies found for dependencySource {}. Has {} been configured? ", depState.getPrecedence(), msg );
             }
         }
-        if ( depState.getPrecedence() == DependencyPrecedence.REST )
+        else if ( depState.getPrecedence() == DependencyPrecedence.REST )
         {
             mergedOverrides = restOverrides;
             if ( mergedOverrides.isEmpty() )
@@ -188,7 +187,7 @@ public class DependencyManipulator extends CommonManipulator implements Manipula
             mergedOverrides.putAll( bomOverrides );
         }
 
-        logger.debug ("Final remote override list is {}", mergedOverrides);
+        logger.debug( "Final remote override list is {}", mergedOverrides );
         return mergedOverrides;
     }
 
