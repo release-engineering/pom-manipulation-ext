@@ -51,15 +51,27 @@ If the current version of the project is "1.2.0.GA", the new version set during 
 
 ### Version override
 
-The version can be forcibly overridden by using the property `versionOverride` (*Deprecated property `version.override` for versions **3.8.1 and prior***)
+The version can be forcibly overridden by using the property `versionOverride` (*Deprecated property `version.override`
+for versions **3.8.1 and prior***)
 
     mvn install -DversionOverride=6.1.0.Final
 
-If the current version of the project is "6.2.0", the new version set during the build will be "6.1.0.Final". A combination of properties may be used e.g.
+If the current version of the project is "6.2.0", the new version set during the build will be "6.1.0.Final".
+
+Note that the `versionOverride` property is meant to be used to override the version only, not the suffix. If the
+version already contains a suffix, the result may not be as expected due to automatic version increment. For example,
+suppose you wish to force the version to "6.1.0.Final-rebuild-1". Running
+
+    mvn install -DversionOverride=6.1.0.Final-rebuild-1
+
+would result in the final version being "6.1.0.Final-rebuild-2", not "6.1.0.Final-rebuild-1" as intended.
+
+If you wish to override both the version and the suffix, you need to combine the `versionOverride` and `versionSuffix`
+properties. For example, running
 
     mvn install -DversionOverride=6.1.0.Final -DversionSuffix=rebuild-1
 
-Using the above example, this would result in the version being "6.1.0.Final-rebuild-1".
+would result in the final version being "6.1.0.Final-rebuild-1" as intended.
 
 ### Snapshot Detection
 
