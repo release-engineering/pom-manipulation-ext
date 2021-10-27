@@ -22,8 +22,16 @@ name: CI
 on:
   push:
     branches: main
+    paths-ignore:
+    - 'DEVELOPING.md'
+    - 'LICENSE'
+    - 'README.md'
   pull_request:
     branches: main
+    paths-ignore:
+    - 'DEVELOPING.md'
+    - 'LICENSE'
+    - 'README.md'
 
 jobs:
   build:
