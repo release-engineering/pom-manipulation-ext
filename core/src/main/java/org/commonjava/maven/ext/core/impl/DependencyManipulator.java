@@ -644,14 +644,11 @@ public class DependencyManipulator extends CommonManipulator implements Manipula
         while ( it.hasNext() )
         {
             final Entry<ArtifactRef, String> e = it.next();
-
             session.getProjects().forEach( p -> {
-                final ProjectRef currentOverride = e.getKey().asProjectRef();
-                final ProjectRef projectGA = new SimpleProjectRef( p.getGroupId(), p.getArtifactId() );
-
-                if ( currentOverride.equals( projectGA ) )
+                if ( e.getKey().getGroupId().equals( p.getGroupId() )
+                        && e.getKey().getArtifactId().equals( p.getArtifactId() ) )
                 {
-                    logger.warn( "Removing version override for {} since it matches project", currentOverride );
+                    logger.warn( "Removing version override for {} since it matches project", e.getKey() );
                     it.remove();
                 }
             } );
