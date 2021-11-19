@@ -24,7 +24,6 @@ import org.commonjava.maven.ext.annotation.ConfigValue;
 import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.core.impl.DependencyManipulator;
 import org.commonjava.maven.ext.core.util.IdUtils;
-import org.commonjava.maven.ext.core.util.PropertiesUtils;
 
 import java.util.HashMap;
 import java.util.List;

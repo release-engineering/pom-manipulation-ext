@@ -43,6 +43,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -390,12 +391,13 @@ public class DependencyManipulator extends CommonManipulator implements Manipula
             applyExplicitOverrides( project, project.getResolvedManagedDependencies( session ), explicitOverrides,
                                     commonState, explicitVersionPropertyUpdateMap );
 
-            if ( commonState.isOverrideTransitive() )
+            if ( commonState.isOverrideTransitive() && dependencyState.getRemoteBOMDepMgmt() != null )
             {
-                final List<Dependency> extraDeps = new ArrayList<>();
+                final Collection<ArtifactRef> overrideRefs = overrides.keySet();
+                final Collection<Dependency> extraDeps = new ArrayList<>( overrideRefs.size() );
 
                 // Add dependencies to Dependency Management which did not match any existing dependency
-                for ( final ArtifactRef pvr : overrides.keySet() )
+                for ( final ArtifactRef pvr : overrideRefs )
                 {
                     if ( !nonMatchingVersionOverrides.containsKey( pvr ) )
                     {
@@ -413,7 +415,7 @@ public class DependencyManipulator extends CommonManipulator implements Manipula
                     newDependency.setVersion( artifactVersion );
 
                     extraDeps.add( newDependency );
-                    logger.debug( "New entry added to <DependencyManagement/> - {} : {}", pvr, artifactVersion );
+                    logger.debug( "New entry added to <dependencyManagement/> - {} : {}", pvr, artifactVersion );
                 }
 
                 // If the model doesn't have any Dependency Management set by default, create one for it
@@ -429,6 +431,11 @@ public class DependencyManipulator extends CommonManipulator implements Manipula
                     }
                     dependencyManagement.getDependencies().addAll( 0, extraDeps );
                 }
+            }
+            else if ( commonState.isOverrideTransitive() && dependencyState.getRemoteBOMDepMgmt() == null )
+            {
+                logger.warn( "Ignoring {}={} since it was used without the {} option", "overrideTransitive",
+                        commonState.isOverrideTransitive(), "dependencyManagement" );
             }
             else
             {
@@ -626,19 +633,25 @@ public class DependencyManipulator extends CommonManipulator implements Manipula
      * Remove version overrides which refer to projects in the current reactor.
      * Projects in the reactor include things like inter-module dependencies
      * which should never be overridden.
+     *
      * @param versionOverrides current set of ArtifactRef:newVersion overrides.
      * @return A new Map with the reactor GAs removed.
      */
     private Map<ArtifactRef, String> removeReactorGAs( final Map<ArtifactRef, String> versionOverrides )
     {
         final Map<ArtifactRef, String> reducedVersionOverrides = new LinkedHashMap<>( versionOverrides );
-        Iterator<Entry<ArtifactRef, String>> it = reducedVersionOverrides.entrySet().iterator();
+        final Iterator<Entry<ArtifactRef, String>> it = reducedVersionOverrides.entrySet().iterator();
         while ( it.hasNext() )
         {
-            Entry<ArtifactRef, String> e = it.next();
+            final Entry<ArtifactRef, String> e = it.next();
+
             session.getProjects().forEach( p -> {
-                if ( e.getKey().asProjectVersionRef().equals( new SimpleProjectVersionRef( p.getGroupId(), p.getArtifactId(), p.getVersion() ) ) )
+                final ProjectRef currentOverride = e.getKey().asProjectRef();
+                final ProjectRef projectGA = new SimpleProjectRef( p.getGroupId(), p.getArtifactId() );
+
+                if ( currentOverride.equals( projectGA ) )
                 {
+                    logger.warn( "Removing version override for {} since it matches project", currentOverride );
                     it.remove();
                 }
             } );

@@ -199,6 +199,12 @@ public class RESTIntegrationTest
         runLikeInvoker( test, mockServer.getUrl() );
     }
 
+    @Test
+    public void testRESTOverrideTransitiveDependencyManagement() throws Exception
+    {
+        String test = getDefaultTestLocation( "rest-override-transitive-dependency-management" );
+        runLikeInvoker( test, mockServer.getUrl() );
+    }
 
     @Test
     public void testRESTHeaders() throws Exception
