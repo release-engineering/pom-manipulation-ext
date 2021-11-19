@@ -57,7 +57,7 @@ public class DependencyState
      * Defines how dependencies are located.
      */
     @ConfigValue( docIndex = "dep-manip.html#dependency-source")
-    static final String DEPENDENCY_SOURCE = "dependencySource";
+    public static final String DEPENDENCY_SOURCE = "dependencySource";
 
     /**
      * Merging precedence for dependency sources:
