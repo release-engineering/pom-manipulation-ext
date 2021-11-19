@@ -118,7 +118,7 @@ public class DependencyState
      * For example, used to align only parts of a project to a different BOM
      * <pre>
      * <code>-DdependencyManagement:org.foo:bar-dep-mgmt:1.0</code>
-     * <code>-DdependencyManagement.xyzzy=org.foo:bar-dep-mgmt:2.0<code/>
+     * <code>-DdependencyManagement.xyzzy=org.foo:bar-dep-mgmt:2.0</code>
      * <code>-DdependencyExclusion.junit:junit@org.groupId:artifactId=xyzzy</code>
      * </pre>
      */
