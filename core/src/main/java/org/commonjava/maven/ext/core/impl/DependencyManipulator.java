@@ -649,7 +649,8 @@ public class DependencyManipulator extends CommonManipulator implements Manipula
                 if ( e.getKey().getGroupId().equals( p.getGroupId() )
                         && e.getKey().getArtifactId().equals( p.getArtifactId() ) )
                 {
-                    logger.warn( "Removing version override for {} since it matches project", e.getKey() );
+                    logger.warn( "Removing version override for {}:{} since it matches project",
+                            e.getKey().getGroupId(), e.getKey().getArtifactId() );
                     it.remove();
                 }
             } );
