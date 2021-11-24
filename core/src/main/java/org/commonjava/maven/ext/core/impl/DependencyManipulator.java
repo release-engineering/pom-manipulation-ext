@@ -434,8 +434,8 @@ public class DependencyManipulator extends CommonManipulator implements Manipula
             }
             else if ( commonState.isOverrideTransitive() && dependencyState.getRemoteBOMDepMgmt() == null )
             {
-                logger.warn( "Ignoring {}={} since it was used without the {} option",
-                        CommonState.TRANSITIVE_OVERRIDE_PROPERTY, commonState.isOverrideTransitive(),
+                logger.warn( "Ignoring {} flag since it was used without the {} option",
+                        CommonState.TRANSITIVE_OVERRIDE_PROPERTY,
                         DependencyState.DEPENDENCY_MANAGEMENT_POM_PROPERTY );
             }
             else
