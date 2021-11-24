@@ -89,6 +89,7 @@ public class ITestUtils
             }
         }
         add( "groovy-manipulator-first-http" );
+        add( "pom-extension" );
     }};
 
     static final Map<String, String> LOCATION_REWRITE = new HashMap<String, String>()
