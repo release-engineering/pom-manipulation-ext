@@ -18,8 +18,8 @@ println "Slurping POM: ${pomFile.getAbsolutePath()}"
 
 def pom = new XmlSlurper().parse( pomFile )
 
-def dependency = pom.dependencyManagement.dependencies.dependency.find { it.artifactId.text() == 'commons-lang' }
+def dependency = pom.dependencyManagement.dependencies.dependency.find { it.artifactId.text() == 'commons-net' }
 assert dependency.version.text() == '\${project.version}'
 
 def buildLog = new File( basedir, 'build.log' )
-assert buildLog.text.contains( 'Removing version override for commons-lang:commons-lang since it matches project' )
+assert buildLog.text.contains( 'so skipping' )

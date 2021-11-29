@@ -29,8 +29,8 @@
   <dependencyManagement>
     <dependencies>
       <dependency>
-        <groupId>commons-lang</groupId>
-        <artifactId>commons-lang</artifactId>
+        <groupId>commons-net</groupId>
+        <artifactId>commons-net</artifactId>
         <version>\${project.version}</version>
       </dependency>
     </dependencies>
