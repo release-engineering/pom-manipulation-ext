@@ -333,6 +333,28 @@
                   <settingsFile>target/it-${testMode}/settings.xml</settingsFile>
                 </configuration>
               </execution>
+              <!-- Need to run as separate phase as we don't want the built in Maven with custom extension -->
+              <execution>
+                <id>integration-test-pom-extension</id>
+                <goals>
+                  <goal>integration-test</goal>
+                  <goal>verify</goal>
+                </goals>
+                <configuration>
+                  <debug>true</debug>
+                  <goals>
+                    <goal>package</goal>
+                  </goals>
+                  <mavenHome>${maven.home}</mavenHome>
+                  <pomIncludes>
+                    <pomInclude>pom-extension/pom.xml</pomInclude>
+                  </pomIncludes>
+                  <projectsDirectory>${project.build.directory}/it-${extIter}</projectsDirectory>
+                  <preBuildHookScript>setup</preBuildHookScript>
+                  <postBuildHookScript>verify</postBuildHookScript>
+                  <settingsFile>target/it-${testMode}/settings.xml</settingsFile>
+                </configuration>
+              </execution>
             </executions>
           </plugin>
           <plugin>
