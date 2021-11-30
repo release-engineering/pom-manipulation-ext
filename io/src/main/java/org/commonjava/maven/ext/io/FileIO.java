@@ -86,7 +86,7 @@ public class FileIO
         return result;
     }
 
-    static LineSeparator determineEOL( File file ) throws ManipulationException
+    public static LineSeparator determineEOL( File file ) throws ManipulationException
     {
         try (BufferedReader bufferIn = new BufferedReader(
                         new InputStreamReader( new FileInputStream( file ), StandardCharsets.UTF_8 ) ))
