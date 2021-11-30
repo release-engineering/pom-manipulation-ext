@@ -13,13 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-def pomFile = new File( basedir, 'pom.xml' )
-println "Slurping POM: ${pomFile.getAbsolutePath()}"
+final def pomFile = new File( basedir, 'pom.xml' )
+final def pomChildFile = new File( basedir, 'child/pom.xml' )
 
-def pom = new XmlSlurper().parse( pomFile )
+println "Slurping POM: ${pomFile.getAbsolutePath()} and ${pomChildFile.getAbsolutePath()}"
 
-def dependency = pom.dependencyManagement.dependencies.dependency.find { it.artifactId.text() == 'commons-net' }
-assert dependency.version.text() == '\${project.version}'
+final def pom = new XmlSlurper().parse( pomFile )
+final def pomChild = new XmlSlurper().parse( pomChildFile )
 
-def buildLog = new File( basedir, 'build.log' )
-assert buildLog.text.contains( 'so skipping' )
+assert pom.dependencyManagement.dependencies == pomChild.dependencyManagement.dependencies
+assert pom.dependencyManagement.dependencies.dependency.size() == 5

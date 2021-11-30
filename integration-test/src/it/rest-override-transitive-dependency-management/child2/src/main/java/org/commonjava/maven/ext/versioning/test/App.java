@@ -13,13 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-def pomFile = new File( basedir, 'pom.xml' )
-println "Slurping POM: ${pomFile.getAbsolutePath()}"
+package org.commonjava.maven.ext.versioning.test;
 
-def pom = new XmlSlurper().parse( pomFile )
-
-def dependency = pom.dependencyManagement.dependencies.dependency.find { it.artifactId.text() == 'commons-net' }
-assert dependency.version.text() == '\${project.version}'
-
-def buildLog = new File( basedir, 'build.log' )
-assert buildLog.text.contains( 'so skipping' )
+/**
+ * Hello world!
+ *
+ */
+public class App
+{
+    public static void main( String[] args )
+    {
+        System.out.println( "Hello World!" );
+    }
+}

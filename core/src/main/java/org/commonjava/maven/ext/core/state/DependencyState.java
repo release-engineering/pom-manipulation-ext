@@ -24,7 +24,6 @@ import org.commonjava.maven.ext.annotation.ConfigValue;
 import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.core.impl.DependencyManipulator;
 import org.commonjava.maven.ext.core.util.IdUtils;
-import org.commonjava.maven.ext.core.util.PropertiesUtils;
 
 import java.util.HashMap;
 import java.util.List;
@@ -52,13 +51,13 @@ public class DependencyState
     @SuppressWarnings("DeprecatedIsStillUsed")
     @Deprecated
     @ConfigValue( docIndex = "dep-manip.html#exclusions-and-overrides", deprecated = true )
-    private static final String DEPENDENCY_EXCLUSION_PREFIX = "dependencyExclusion.";
+    public static final String DEPENDENCY_EXCLUSION_PREFIX = "dependencyExclusion.";
 
     /**
      * Defines how dependencies are located.
      */
     @ConfigValue( docIndex = "dep-manip.html#dependency-source")
-    static final String DEPENDENCY_SOURCE = "dependencySource";
+    public static final String DEPENDENCY_SOURCE = "dependencySource";
 
     /**
      * Merging precedence for dependency sources:
@@ -102,7 +101,7 @@ public class DependencyState
      * </pre>
      */
     @ConfigValue( docIndex = "dep-manip.html#exclusions-and-overrides")
-    private static final String DEPENDENCY_OVERRIDE_PREFIX = "dependencyOverride.";
+    public static final String DEPENDENCY_OVERRIDE_PREFIX = "dependencyOverride.";
 
     /**
      * The name of the property which contains the GAV of the remote pom from which to retrieve dependency management
@@ -112,18 +111,18 @@ public class DependencyState
      * </pre>
      */
     @ConfigValue( docIndex = "dep-manip.html#remote-pom")
-    private static final String DEPENDENCY_MANAGEMENT_POM_PROPERTY = "dependencyManagement";
+    public static final String DEPENDENCY_MANAGEMENT_POM_PROPERTY = "dependencyManagement";
 
     /**
      * The String that needs to be prepended a system property to make it an extra BOM.
      * For example, used to align only parts of a project to a different BOM
      * <pre>
      * <code>-DdependencyManagement:org.foo:bar-dep-mgmt:1.0</code>
-     * <code>-DdependencyManagement.xyzzy=org.foo:bar-dep-mgmt:2.0<code/>
+     * <code>-DdependencyManagement.xyzzy=org.foo:bar-dep-mgmt:2.0</code>
      * <code>-DdependencyExclusion.junit:junit@org.groupId:artifactId=xyzzy</code>
      * </pre>
      */
-    private static final String EXTRA_BOM_PREFIX = DEPENDENCY_MANAGEMENT_POM_PROPERTY + ".";
+    public static final String EXTRA_BOM_PREFIX = DEPENDENCY_MANAGEMENT_POM_PROPERTY + ".";
 
     private List<ProjectVersionRef> remoteBOMdepMgmt;
 
@@ -142,7 +141,8 @@ public class DependencyState
         initialise( userProps );
     }
 
-    public void initialise( Properties userProps ) throws ManipulationException
+    @Override
+    public void initialise(Properties userProps ) throws ManipulationException
     {
         remoteBOMdepMgmt = IdUtils.parseGAVs( userProps.getProperty( DEPENDENCY_MANAGEMENT_POM_PROPERTY ) );
 

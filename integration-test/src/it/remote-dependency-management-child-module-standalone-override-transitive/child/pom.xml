@@ -21,19 +21,31 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>commons-lang</groupId>
-  <artifactId>commons-lang</artifactId>
-  <version>2.6.0</version>
-  <packaging>war</packaging>
+  <parent>
+      <groupId>org.sonatype.oss</groupId>
+      <artifactId>oss-parent</artifactId>
+      <version>7</version>
+  </parent>
 
-  <dependencyManagement>
-    <dependencies>
-      <dependency>
-        <groupId>commons-net</groupId>
-        <artifactId>commons-net</artifactId>
-        <version>\${project.version}</version>
-      </dependency>
-    </dependencies>
-  </dependencyManagement>
+  <artifactId>child-module-dependency-override-child</artifactId>
+
+  <name>Test override dependency version using command line property with remote pom</name>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  </properties>
+
+  <dependencies>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.yammer.metrics</groupId>
+      <artifactId>metrics-core</artifactId>
+      <version>2.2.0</version>
+      <scope>provided</scope>
+    </dependency>
+  </dependencies>
 
 </project>
