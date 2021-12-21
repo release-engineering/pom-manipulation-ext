@@ -295,8 +295,8 @@ public class CliTest
 
         assertTrue( cliOutput.contains( "Found 82" ) );
         assertTrue( cliOutput.matches( "(?s).*"
-                + "ch.qos.logback:logback-classic:1.2.3                                            jar                                     compile             \n"
-                + "ch.qos.logback:logback-core:1.2.3                                               jar                                     compile             \n"
+                + "ch.qos.logback:logback-classic:1.2.[.\\d+]+\\s+                                 jar                                     compile             \n"
+                + "ch.qos.logback:logback-core:1.2.[.\\d+]+\\s+                                    jar                                     compile             \n"
                 + "com.fasterxml.jackson.core:jackson-annotations:2.[.\\d+]+\\s+                   jar                                     compile             \n"
                 + "com.fasterxml.jackson.core:jackson-core:2.[.\\d+]+\\s+                          jar                                     compile             \n"
                 + "com.fasterxml.jackson.core:jackson-databind:2.[.\\d+]+\\s+                      jar                                     compile             \n"
