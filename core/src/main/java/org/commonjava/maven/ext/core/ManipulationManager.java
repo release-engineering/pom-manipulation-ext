@@ -15,6 +15,7 @@
  */
 package org.commonjava.maven.ext.core;
 
+import lombok.Getter;
 import org.apache.commons.io.FileUtils;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.profiles.DefaultProfileManager;
@@ -31,6 +32,7 @@ import org.commonjava.maven.ext.common.util.WildcardMap;
 import org.commonjava.maven.ext.core.impl.Manipulator;
 import org.commonjava.maven.ext.core.impl.PreparseGroovyManipulator;
 import org.commonjava.maven.ext.core.state.CommonState;
+import org.commonjava.maven.ext.core.state.DependencyState;
 import org.commonjava.maven.ext.core.state.RelocationState;
 import org.commonjava.maven.ext.core.util.ManipulatorPriorityComparator;
 import org.commonjava.maven.ext.io.PomIO;
@@ -53,8 +55,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-
-import lombok.Getter;
 
 import static org.apache.commons.lang.StringUtils.isNotEmpty;
 import static org.commonjava.maven.ext.common.util.ProfileUtils.PROFILE_SCANNING;
@@ -183,7 +183,14 @@ public class ManipulationManager
         orderedManipulators.sort( new ManipulatorPriorityComparator() );
 
         // Now init the common state
-        session.setState( new CommonState( session.getUserProperties()) );
+        CommonState cState = new CommonState( session.getUserProperties() );
+        DependencyState dState = session.getState( DependencyState.class );
+        if (!dState.getDependencyOverrides().isEmpty() && cState.getStrictDependencyPluginPropertyValidation() != 0)
+        {
+            logger.warn( "Disabling strictPropertyValidation as dependencyOverrides are enabled" );
+            cState.setStrictDependencyPluginPropertyValidation( 0 );
+        }
+        session.setState( cState );
     }
 
     /**
