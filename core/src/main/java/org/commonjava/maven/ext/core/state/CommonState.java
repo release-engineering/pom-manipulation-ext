@@ -16,6 +16,7 @@
 package org.commonjava.maven.ext.core.state;
 
 import lombok.Getter;
+import lombok.Setter;
 import org.apache.maven.artifact.ArtifactScopeEnum;
 import org.commonjava.maven.ext.annotation.ConfigValue;
 import org.commonjava.maven.ext.common.ManipulationException;
@@ -109,6 +110,7 @@ public class CommonState
      *
      * @return 0 if strict dependency plugin property validation is disabled, 1 if enabled, or 2 if we are reverting
      */
+    @Setter
     private Integer strictDependencyPluginPropertyValidation;
 
     private List<String> excludedScopes;

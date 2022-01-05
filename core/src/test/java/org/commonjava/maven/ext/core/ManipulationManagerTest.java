@@ -15,17 +15,27 @@
  */
 package org.commonjava.maven.ext.core;
 
+import org.apache.commons.io.FileUtils;
+import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.core.fixture.PlexusTestRunner;
+import org.commonjava.maven.ext.core.fixture.TestUtils;
 import org.commonjava.maven.ext.core.impl.Manipulator;
+import org.commonjava.maven.ext.core.state.CommonState;
+import org.commonjava.maven.ext.core.state.DependencyState;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.contrib.java.lang.system.SystemOutRule;
+import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
 
 import javax.inject.Inject;
 import javax.inject.Named;
+import java.io.File;
+import java.io.IOException;
 import java.util.Map;
+import java.util.Properties;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
@@ -34,8 +44,10 @@ import static org.junit.Assert.assertTrue;
 public class ManipulationManagerTest
 {
     @Rule
-    public final SystemOutRule systemRule = new SystemOutRule().enableLog().muteForSuccessfulTests();
+    public final TemporaryFolder folder = new TemporaryFolder();
 
+    @Rule
+    public final SystemOutRule systemRule = new SystemOutRule().enableLog().muteForSuccessfulTests();
 
     @SuppressWarnings( "unused" )
     @Inject
@@ -57,5 +69,22 @@ public class ManipulationManagerTest
     {
         new ManipulationSession();
         assertTrue( systemRule.getLog().contains( "Running Maven Manipulation Extension (PME)" ) );
+    }
+
+    @Test
+    public void testDepOverrideAndStrictPropertyValidation()
+                    throws IOException, ManipulationException
+    {
+        final File projectroot = folder.newFile();
+        final File resource = TestUtils.resolveFileResource( "", "pom-variables.xml" );
+        FileUtils.copyFile( resource, projectroot );
+        Properties p = new Properties();
+        p.put( DependencyState.DEPENDENCY_OVERRIDE_PREFIX + ".com.fasterxml.jackson.dataformat:*@*", "" );
+        p.put( CommonState.DEPENDENCY_PROPERTY_VALIDATION, "true" );
+
+        CommonState commonState = TestUtils.createSessionAndManager( p, projectroot ).getSession().getState( CommonState.class );
+
+        assertTrue( systemRule.getLog().contains( "Disabling strictPropertyValidation as dependencyOverrides are enabled" ) );
+        assertEquals( 0, (int) commonState.getStrictDependencyPluginPropertyValidation() );
     }
 }
