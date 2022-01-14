@@ -13,7 +13,7 @@ PME can override a set of dependency versions using a remote source which may be
 
 #### BOM and REST
 
-There are two sources of dependencies used to align to in PME. The property `dependencySource` is used to alter the behaviour of how PME handles the multiple sources of dependency information. The `BOM` value (the default and the behaviour if this property is not specified) is that PME will use the BOM (i.e. Remote POM) source. Alternatively the `REST` source may be specified to use only the REST Endpoint information. However by setting the property to either `RESTBOM` or `BOMREST` it will instead merge the two sets of values. With `RESTBOM` precendence is given to the REST information and for `BOMREST` precendence is given to the BOM information. If the setting is `NONE` no remote alignment will be performned.
+There are two sources of dependencies used to align to in PME. The property `dependencySource` is used to alter the behaviour of how PME handles the multiple sources of dependency information. The `BOM` value (the default and the behaviour if this property is not specified) is that PME will use the BOM (i.e., Remote POM) source. Alternatively, the `REST` source may be specified to use only the REST Endpoint information. However, by setting the property to either `RESTBOM` or `BOMREST` it will instead merge the two sets of values. With `RESTBOM`, precedence is given to the REST information and for `BOMREST` precedence is given to the BOM information. If the setting is `NONE` no remote alignment will be performed.
 
 #### Remote POM
 
@@ -23,30 +23,30 @@ Use the `dependencyManagement` property to list your BOMs:
 
     mvn install -DdependencyManagement=org.foo:my-dep-pom:1.0
 
-Multiple remote dependency-management poms can be specified using a comma separated list of GAVs (groupId, artifactId, version). The poms are specified in order of priority, so if the remote boms contain some of the same dependencies, the versions listed in the first bom in the list will be used.
+Multiple remote dependency-management poms can be specified using a comma separated list of GAVs (groupId, artifactId, version). The poms are specified in order of priority, so if the remote BOMs contain some of the same dependencies, the versions listed in the first bom in the list will be used.
 
     mvn install -DdependencyManagement=org.foo:my-dep-pom:1.0,org.bar:my-dep-pom:2.0
 
-**Note:** If the BOM is specified in the format `-DdependencyManagement=org.foo:my-dep-pom:1.0-rebuild` i.e. a rebuild suffix is specified *but without a numeric portion* then PME will automatically replace the BOM GAV with the latest suffix via a REST call. For instance, assuming the latest suffix is rebuild-3, the above will be replaced implicitly by `-DdependencyManagement=org.foo:my-dep-pom:1.0-rebuild-3`.
+**Note:** If the BOM is specified in the format `-DdependencyManagement=org.foo:my-dep-pom:1.0-rebuild` i.e., a rebuild suffix is specified *but without a numeric portion* then PME will automatically replace the BOM GAV with the latest suffix via a REST call. For instance, assuming the latest suffix is rebuild-3, the above will be replaced implicitly by `-DdependencyManagement=org.foo:my-dep-pom:1.0-rebuild-3`.
 
 #### REST Endpoint
 
-Alternatively, rather than using a remote BOM file as a source, it is possible to instruct PME to prescan the project, collect up all group:artifact:version's used and call a REST endpoint using the endpoint property `restURL` (provided from the Dependency Analysis tool [here](https://github.com/project-ncl/dependency-analysis), hereinafter referred to as DA) **and** specifying `dependencySource` of `REST`, which will then return a list of possible new versions. Note that the URL should be the subset of the endpoint e.g.
+Alternatively, rather than using a remote BOM file as a source, it is possible to instruct PME to pre-scan the project, collect up all group:artifact:version's used and call a REST endpoint using the endpoint property `restURL` (provided from the Dependency Analysis tool [here](https://github.com/project-ncl/dependency-analysis), hereinafter referred to as DA) **and** specifying `dependencySource` of `REST`, which will then return a list of possible new versions. Note that the URL should be the subset of the endpoint e.g.,
 
     http://foo.bar.com/da/rest/v-1
 
 PME will then call the following endpoints
 
-    reports/lookup/gavs
-    listings/blacklist/ga
+    lookup/maven/latest
+    lookup/maven
 
-It will initially call the `lookup/gavs` endpoint. By default PME will pass *all* the GAVs to the endpoint **automatically auto-sizing** the data sent to DA according to the project size. Note that the initial split batches can also be configured manually via `-DrestMaxSize=<...>`. If that value is set to 0, then everything is sent without any auto-sizing. If the endpoint returns a 503 or 504 timeout the batch is automatically split into smaller chunks in an attempt to reduce load on the endpoint and the request retried. It will by default chunk down to size of 4 before aborting. This can be configured with `-DrestMinSize=<...>`.
+in that order. By default, PME will pass *all* the GAVs to the endpoint **automatically sizing** the data sent to DA according to the project size. Note that the initial split batches can also be configured manually via `-DrestMaxSize=<...>`. If that value is set to 0, then everything is sent without any auto-sizing. If the endpoint returns a 503 or 504 timeout the batch is automatically split into smaller chunks in an attempt to reduce load on the endpoint and the request retried. It will by default chunk down to size of 4 before aborting. This can be configured with `-DrestMinSize=<...>`.
 
 An optional `restRepositoryGroup` parameter may be specified so that the endpoint can use a particular repository group. This parameter is meant to be used with DA versions up to 2.0.
 
-With DA 2.1 it is being replaced with a boolean flag `restBrewPullActive` and a string identifier `restMode`. The `restBrewPullActive` flag switches on and off the version lookup in Brew and the default value is false. Switching it off might have positive effect on performance. The `restMode` indicates type of versions to lookup. Modes are configurable in DA, so it is needed to check the DA config/consult with DA maintainers for the list of configured modes. Usual modes mmight be e.g. PERSISTENT and TEMPORARY.
+With DA 2.1 it is being replaced with a boolean flag `restBrewPullActive` and a string identifier `restMode`. The `restBrewPullActive` flag switches on and off the version lookup in Brew and the default value is false. Switching it off might have positive effect on performance. The `restMode` indicates type of versions to lookup. Modes are configurable in DA, so it is needed to check the DA config/consult with DA maintainers for the list of configured modes. Usual modes might be e.g., `PERSISTENT` and `TEMPORARY`.
 
-Finally it will call the `blacklist/ga` endpoint in order to check that the version being build is not in the blacklist.
+Finally, it will call the `blacklist/ga` endpoint in order to check that the version being build is not in the blacklist.
 
 The lookup REST endpoint should follow:
 
@@ -122,7 +122,7 @@ The blacklist REST endpoint should follow:
 </tr>
 </table>
 
-**Note:** For existing dependencies that reference a property, PME will update this property with the new version. If the property can't be found (e.g. it was inherited), a new one will be injected at the top level. This update of the property's value **may** implicitly align other dependencies using the same property that were not explicitly requested to be aligned.
+**Note:** For existing dependencies that reference a property, PME will update this property with the new version. If the property can't be found (e.g., it was inherited), a new one will be injected at the top level. This update of the property's value **may** implicitly align other dependencies using the same property that were not explicitly requested to be aligned.
 
 ##### REST Timeouts and retries
 
@@ -188,7 +188,7 @@ will change to:
 
 In a multi-module build it is considered good practice to coordinate dependency version among the modules using dependency management.  In other words, if module A and B both use dependency X, both modules should use the same version of dependency X.  Therefore, the default behaviour of this extension is to use a single set of dependency versions applied to all modules.
 
-It is possible to flexibly override or exclude a dependency globally or on a per module basis. The property starts with `dependencyOverride.` and has the following format:
+It is possible to flexibly override or exclude a dependency globally or on a per-module basis. The property starts with `dependencyOverride.` and has the following format:
 
     mvn install -DdependencyOverride.[groupId]:[artifactId]@[moduleGroupId]:[moduleArtifactId]=[version] | ,+[group:artifact]...
 
@@ -205,7 +205,7 @@ It is possible to flexibly override or exclude a dependency globally or on a per
 
 #### Global Version Override
 
-Sometimes it is more convenient to use the command line rather than a BOM. Therefore extending the above it is possible to set the version of a dependency via:
+Sometimes it is more convenient to use the command line rather than a BOM. Therefore, extending the above it is possible to set the version of a dependency via:
 
     mvn install -DdependencyOverride.junit:junit@*=4.10-rebuild-10
 
@@ -225,7 +225,7 @@ However, there are certain cases where it is useful to use different versions of
 
 #### Per-Module Prevention of Override
 
-It is also possible to **prevent overriding dependency versions** on a per module basis:
+It is also possible to **prevent overriding dependency versions** on a per-module basis:
 
     mvn install -DdependencyOverride.[groupId]:[artifactId]@[moduleGroupId]:[moduleArtifactId]=
 
@@ -253,15 +253,14 @@ For example:
 
 #### Per Module Override Prevention with Wildcards
 
-Linking the two prior concepts it is also possible to prevent overriding using wildcards on a per-module basis e.g.
-
+Linking the two prior concepts it is also possible to prevent overriding using wildcards on a per-module basis e.g.,
     mvn install -DdependencyOverride.*:*@org.foo:moduleB=
 
 This will prevent any alignment within the org.foo:moduleB.
 
     mvn install -DdependencyOverride.*:*@org.foo:*=
 
-This will prevent any alignment within org.foo and all sub-modules within that.
+This will prevent any alignment within `org.foo` and all submodules within that.
 
 #### Dependency Exclusion Addition
 
@@ -269,8 +268,7 @@ It is also possible to inject specific exclusions into a dependency. For instanc
 
     mvn install -DdependencyOverride.junit:junit@*=4.10-rebuild-1,+slf4j:slf4j
 
-will, as per above, apply the explicit 4.10-rebuild-10 version to the junit:junit dependency but also add an exclusion e.g.
-
+will, as per above, apply the explicit 4.10-rebuild-10 version to the junit:junit dependency but also add an exclusion e.g.,
 ```xml
 <dependency>
   <groupId>junit</groupId>
@@ -285,8 +283,7 @@ will, as per above, apply the explicit 4.10-rebuild-10 version to the junit:juni
 </dependency>
 ```
 
-Multiple exclusions to a dependency may be added using comma separators e.g.
-
+Multiple exclusions to a dependency may be added using comma separators e.g.,
     mvn install -DdependencyOverride.junit:junit@*=+slf4j:slf4j,+commons-lang:commons-lang
 
 #### Using a version from a Remote POM
@@ -321,15 +318,15 @@ These extra BOMs have no affect unless referenced by one or more `dependencyOver
 
 When aligning dependency versions to some shared standard, it's possible to introduce incompatibilities that stem from changing the version. This may be due to unexpected API changes. While _in general_ it might be safe to revise a dependency's version from 1.5 to 1.5.1, it may not be safe to revise it to 2.0, or even 1.6.
 
-By default strict-mode version alignment checks are enabled. This is **highly recommended** to prevent API conflicts and when dependencies are aligned via a BOM or REST source (not via explicit overrides, as explained above).
+By default, strict-mode version alignment checks are enabled. This is **highly recommended** to prevent API conflicts and when dependencies are aligned via a BOM or REST source (not via explicit overrides, as explained above).
 
 Strict-mode alignment will detect cases where the adjusted version, once OSGi and suffix are handled, does not match with the old version, **not** do the alignment and report the mismatch as a warning in the build's console output. For example, if the incremental or manual suffix is configured to be `rebuild` then these are valid changes.
 
-| Original Version | Potential New Versions              |
-| ---------------- | ----------------------------------- |
-| 2.6              | 2.6-rebuild-2 ; 2.6.0.rebuild-4     |
-| 3                | 3.0.0.rebuild-1 ; 3-rebuild-1       |
-| 3.1              | 3.1.0.rebuild-1 ; 3.1-rebuild-1     |
+| Original Version | Potential New Versions          |
+|------------------|---------------------------------|
+| 2.6              | 2.6-rebuild-2 ; 2.6.0.rebuild-4 |
+| 3                | 3.0.0.rebuild-1 ; 3-rebuild-1   |
+| 3.1              | 3.1.0.rebuild-1 ; 3.1-rebuild-1 |
 
 Note that it will not consider 3 -> 3.1 as a valid transition.
 
@@ -355,13 +352,12 @@ This will cause the build to fail with a ManipulationException, and prevent the 
 </tr>
 </table>
 
-The property `strictAlignmentIgnoreSuffix` will mean that the comparison will ignore the suffix depicted by `version.incremental.suffix` or `version.suffix` during version comparisons. It will also only allow alignment to a higher incrementing suffix e.g.
-
+The property `strictAlignmentIgnoreSuffix` will mean that the comparison will ignore the suffix depicted by `version.incremental.suffix` or `version.suffix` during version comparisons. It will also only allow alignment to a higher incrementing suffix e.g.,
     3.1.0.Final-rebuild-1 --> 3.1.0.Final-rebuild-3
 
 #### Strict Property Validation
 
-The property `strictPropertyValidation` is similar to the property clash replacement below. However, while the below case detects two dependencies/plugins that update the property to different values, this validation ensures that *every* dependency (or plugin) that uses a matching property attempted to update it. This validates that the source of the information (e.g. BOM or REST) for the following example passed in both `org.foo:bar1` and `org.foo:bar2`. If `bar2` has not been passed in then the validation fails and, depending upon the configuration, either an Exception can be thrown (if set to `true`) or it will attempt to revert the changes (if set to `revert`). The default is `false` (i.e. off). Enabling this can avoid a potential later failure in a build where the bar2 alignment doesn't exist but has been implicitly updated through the `bar1` alignment. Note that this does **not** validate for `dependencyManagement` blocks but only for dependencies.
+The property `strictPropertyValidation` is similar to the property clash replacement below. However, while the below case detects two dependencies/plugins that update the property to different values, this validation ensures that *every* dependency (or plugin) that uses a matching property attempted to update it. This validates that the source of the information (e.g., BOM or REST) for the following example passed in both `org.foo:bar1` and `org.foo:bar2`. If `bar2` has not been passed in then the validation fails and, depending upon the configuration, either an Exception can be thrown (if set to `true`) or it will attempt to revert the changes (if set to `revert`). The default is `false` (i.e., off). Enabling this can avoid a potential later failure in a build where the bar2 alignment doesn't exist but has been implicitly updated through the `bar1` alignment. Note that this does **not** validate for `dependencyManagement` blocks but only for dependencies.
 
     propertyX = 1.0
 
@@ -370,18 +366,17 @@ The property `strictPropertyValidation` is similar to the property clash replace
 
 ### Property Clash Replacement
 
-When replacing a dependency PME will trace back and update the property value. However there are scenarios where the dependency versions returned from either the BOM or the REST source can be different even though they refer to the same property e.g.
-
+When replacing a dependency PME will trace back and update the property value. However, there are scenarios where the dependency versions returned from either the BOM or the REST source can be different even though they refer to the same property e.g.,
     propertyX = 1.0
 
     org.foo:bar1:$propertyX
     org.foo:bar2:$propertyX
 
-And the REST source returns 1.0.rebuild-2 for bar1 and rebuild-4 for bar2. In this case PME will detect the clash and throw an error. It is possible to configure PME so it will not update the property and continue by setting `propertyClashFails` to false (default: true).
+And the REST source returns 1.0.rebuild-2 for bar1 and rebuild-4 for bar2. In this case PME will detect the clash and throw an error. It is possible to configure PME so that it will not update the property and continue by setting `propertyClashFails` to false (default: true).
 
 ### Dependency Relocations
 
-In order to handle the situation where one GAV is changed to another (e.g. from community to product) the relocation manipulator can be used. An optional version component may be added; the version will override any prior version used in the dependency. The artifact override is optional. The relocated GAV is subject to alignment ; if the developer wishes to force a particular version (i.e. one with an existing suffix) they may use `dependencyOverride`.
+In order to handle the situation where one GAV is changed to another (e.g., from community to product) the relocation manipulator can be used. An optional version component may be added; the version will override any prior version used in the dependency. The artifact override is optional. The relocated GAV is subject to alignment ; if the developer wishes to force a particular version (i.e., one with an existing suffix) they may use `dependencyOverride`.
 
 <table bgcolor="#ffff00">
 <tr>
@@ -401,8 +396,7 @@ If the property `-DdependencyRemoval=group:artifact,....` is set, PME will remov
 
 ### BOM Generation
 
-If the property `-DbomBuilder=true` is set, then the PME BOM Builder will be activated. This will deploy a new POM to the repository under the GAV `<project-top-level-groupId>.<project-top-level-artifactId>:pme-bom:<version>` e.g. `org.projectOne.artifactOne:pme-bom:1.0.0`. It will contain a list of all adjusted modules and is suitable for use as a remote BOM. As it has a predictable name it may be used in a build of a subsequent project to align to this one e.g.
-
+If the property `-DbomBuilder=true` is set, then the PME BOM Builder will be activated. This will deploy a new POM to the repository under the GAV `<project-top-level-groupId>.<project-top-level-artifactId>:pme-bom:<version>` e.g., `org.projectOne.artifactOne:pme-bom:1.0.0`. It will contain a list of all adjusted modules and is suitable for use as a remote BOM. As it has a predictable name it may be used in a build of a subsequent project to align to this one e.g.,
     PWD=<project two> ; mvn -DdependencyManagement=org.projectOne.artifactOne:pme-bom:1.0.0 -Dversion.suffix=rebuild-1 clean install
 
 **Note:** The new BOM will be installed and deployed via a custom plugin that is added to the top level project. The plugin is configured to only run on the top level POM and will not fail if the BOM POM does not exist.
