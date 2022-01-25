@@ -31,7 +31,7 @@ Multiple remote dependency-management poms can be specified using a comma separa
 
 #### REST Endpoint
 
-Alternatively, rather than using a remote BOM file as a source, it is possible to instruct PME to pre-scan the project, collect up all group:artifact:version's used and call a REST endpoint using the endpoint property `restURL` (provided from the Dependency Analysis tool [here](https://github.com/project-ncl/dependency-analysis), hereinafter referred to as DA) **and** specifying `dependencySource` of `REST`, which will then return a list of possible new versions. Note that the URL should be the subset of the endpoint e.g.,
+Alternatively, rather than using a remote BOM file as a source, it is possible to instruct PME to pre-scan the project, collect up all group:artifact:version's used and call a REST endpoint using the endpoint property `restURL` (provided from the Dependency Analysis tool [here](https://github.com/project-ncl/dependency-analysis), versions >= 2.1, hereinafter referred to as DA) **and** specifying `dependencySource` of `REST`, which will then return a list of possible new versions. Note that the URL should be the subset of the endpoint e.g.,
 
     http://foo.bar.com/da/rest/v-1
 
@@ -42,13 +42,14 @@ PME will then call the following endpoints
 
 in that order. By default, PME will pass *all* the GAVs to the endpoint **automatically sizing** the data sent to DA according to the project size. Note that the initial split batches can also be configured manually via `-DrestMaxSize=<...>`. If that value is set to 0, then everything is sent without any auto-sizing. If the endpoint returns a 503 or 504 timeout the batch is automatically split into smaller chunks in an attempt to reduce load on the endpoint and the request retried. It will by default chunk down to size of 4 before aborting. This can be configured with `-DrestMinSize=<...>`.
 
-An optional `restRepositoryGroup` parameter may be specified so that the endpoint can use a particular repository group. This parameter is meant to be used with DA versions up to 2.0.
+A boolean flag `restBrewPullActive` flag switches on and off the version lookup in Brew and the default value is false. Switching it off might have positive effect on performance. Finally, the string identifier `restMode` indicates type of versions to lookup. Modes are configurable in DA, so it is needed to check the DA config/consult with DA maintainers for the list of configured modes. Usual modes might be e.g.
 
-With DA 2.1 it is being replaced with a boolean flag `restBrewPullActive` and a string identifier `restMode`. The `restBrewPullActive` flag switches on and off the version lookup in Brew and the default value is false. Switching it off might have positive effect on performance. The `restMode` indicates type of versions to lookup. Modes are configurable in DA, so it is needed to check the DA config/consult with DA maintainers for the list of configured modes. Usual modes might be e.g., `PERSISTENT` and `TEMPORARY`.
+- `PERSISTENT`
+- `TEMPORARY`
+- `SERVICE`
+- `SERVICE-TEMPORARY`
 
-Finally, it will call the `blacklist/ga` endpoint in order to check that the version being build is not in the blacklist.
-
-The lookup REST endpoint should follow:
+with more to be added in the future. The lookup REST endpoint should follow:
 
 <table>
 <tr>
@@ -59,7 +60,6 @@ The lookup REST endpoint should follow:
 <td>
    <pre style="font-size: 10px"><code class="language-json">
 [
-    [ "repositoryGroup" : "id", ]
     [ "brewPullActive": true, ]
     [ "mode": "MODE-ID", ]
     {
@@ -78,11 +78,7 @@ The lookup REST endpoint should follow:
         "groupId": "org.foo",
         "artifactId": "bar",
         "version": "1.0.0.Final",
-        "availableVersions": ["1.0.0.Final-rebuild-2",
-"1.0.0.Final-rebuild-1", "1.0.1.Final-rebuild-1"],
         "bestMatchVersion": "1.0.0.Final-rebuild-2",
-        "blacklisted": false,
-        "whitelisted": true
     },
     ...
 ]
@@ -91,36 +87,6 @@ The lookup REST endpoint should follow:
 </tr>
 </table>
 
-The blacklist REST endpoint should follow:
-
-<table>
-<tr>
-   <th id="Parameters">Parameters</th>
-   <th id="Returns">Returns</th>
-</tr>
-<tr>
-<td>
-   <pre style="font-size: 10px"><code class="language-json">
-
-    "groupid": "org.foo",
-    "artifactid": "bar"
-
-   </code></pre>
-</td>
-<td>
-  <pre style="font-size: 10px"><code class="language-json">
-[
-    {
-        "groupId": "org.foo",
-        "artifactId": "bar",
-        "version": "1.0.0.Final-rebuild-1",
-    },
-    ...
-]
-  </code></pre>
-</td>
-</tr>
-</table>
 
 **Note:** For existing dependencies that reference a property, PME will update this property with the new version. If the property can't be found (e.g., it was inherited), a new one will be injected at the top level. This update of the property's value **may** implicitly align other dependencies using the same property that were not explicitly requested to be aligned.
 
