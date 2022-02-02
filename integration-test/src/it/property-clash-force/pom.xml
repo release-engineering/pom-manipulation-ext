@@ -26,7 +26,7 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-    <myprop>1.0</myprop>
+    <myprop>2.7</myprop>
     <junit>3</junit>
   </properties>
 
