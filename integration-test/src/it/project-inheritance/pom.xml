@@ -154,7 +154,6 @@
     <version.org.apache.servicemix.bundles.antlr>2.7.7_5</version.org.apache.servicemix.bundles.antlr>
     <version.org.apache.servicemix.bundles.cglib>3.0_1</version.org.apache.servicemix.bundles.cglib>
     <version.org.apache.servicemix.bundles.dom4j>1.6.1_5</version.org.apache.servicemix.bundles.dom4j>
-    <version.org.elasticsearch>1.7.2</version.org.elasticsearch>
     <version.org.hibernate.commons.annotations>5.0.1.Final</version.org.hibernate.commons.annotations>
     <version.org.hibernate.javax.persistence.hibernate-jpa-2.1-api>1.0.0.Final</version.org.hibernate.javax.persistence.hibernate-jpa-2.1-api>
     <version.org.hibernate>5.0.9.Final</version.org.hibernate>
@@ -626,11 +625,6 @@
         <groupId>com.zaxxer</groupId>
         <artifactId>HikariCP</artifactId>
         <version>${version.com.zaxxer}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.elasticsearch</groupId>
-        <artifactId>elasticsearch</artifactId>
-        <version>${version.org.elasticsearch}</version>
       </dependency>
       <dependency>
         <groupId>io.prometheus</groupId>
