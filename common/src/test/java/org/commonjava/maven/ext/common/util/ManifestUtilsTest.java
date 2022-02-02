@@ -17,13 +17,19 @@ package org.commonjava.maven.ext.common.util;
 
 import org.apache.maven.model.Model;
 import org.commonjava.maven.ext.common.ManipulationException;
+import org.jboss.byteman.contrib.bmunit.BMRule;
+import org.jboss.byteman.contrib.bmunit.BMUnitRunner;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.contrib.java.lang.system.SystemOutRule;
+import org.junit.runner.RunWith;
+
+import java.io.IOException;
 
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+@RunWith( BMUnitRunner.class)
 public class ManifestUtilsTest
 {
     @Rule
@@ -67,5 +73,22 @@ public class ManifestUtilsTest
     {
         String m = ManifestUtils.getManifestInformation( Test.class );
         assertTrue( m.contains( "4" ) );
+    }
+
+    // If this is used from Gradle (e.g. GME) Gradle might create a test-kit jar of the form
+    // /tmp/.gradle-test-kit-rnc/caches/jars-8/a16e8d7cbf89ad68270cbc6dd442f546/main.jar which
+    // has no manifest.
+    @Test
+    @BMRule(name = "return-empty-manifest",
+                    targetClass = "JarInputStream",
+                    targetMethod = "getManifest()",
+                    targetLocation = "AT ENTRY",
+                    action = "RETURN null"
+    )
+    public void testNoManifestJar() throws ManipulationException
+    {
+        String result = ManifestUtils.getManifestInformation( Model.class );
+
+        assertTrue( result.isEmpty() );
     }
 }
