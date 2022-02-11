@@ -172,7 +172,7 @@
     <version.org.slf4j>1.7.7</version.org.slf4j>
     <version.io.swagger>1.5.7</version.io.swagger>
     <version.xmlunit>1.6</version.xmlunit>
-    <version.io.vertx>3.5.4</version.io.vertx>
+    <version.io.vertx>3.9.4</version.io.vertx>
     <version.net.openhft>0.6</version.net.openhft>
   </properties>
 
