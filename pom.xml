@@ -90,8 +90,8 @@
 
     <!-- Both Jackson versions should be identical except if Jackson has not -->
     <!-- published javadoc for the micro version -->
-    <jacksonVersion>2.12.6.1</jacksonVersion>
-    <jacksonJavadocVersion>2.12</jacksonJavadocVersion>
+    <jacksonVersion>2.13.3</jacksonVersion>
+    <jacksonJavadocVersion>2.13</jacksonJavadocVersion>
 
     <argLine />
     <surefireSecurityManager />
