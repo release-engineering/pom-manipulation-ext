@@ -364,7 +364,13 @@ public final class PropertiesUtils
                         osgiVersion = Version.getOsgiVersion( v );
                         osgiVersion = osgiVersion.substring( 0, osgiVersion.indexOf( suffix ) - 1 );
                     }
-                    if ( newValue.contains( suffix ) )
+                    // Don't attempt to match if we have suffix that is a substring of another suffix or we're matching
+                    // against such a substring
+                    boolean suffixSubstring = vState.getAllSuffixes()
+                                                    .stream()
+                                                    .filter( as -> !as.equals( suffix ) )
+                                                    .noneMatch( s -> newValue.contains( s ) && !suffix.contains( s ) );
+                    if ( suffixSubstring && newValue.matches( "(.*)([.|-])" + suffix + ".*" ) )
                     {
                         newVersion = newValue.substring( 0, newValue.indexOf( suffix ) - 1 );
                     }
