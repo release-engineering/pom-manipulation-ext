@@ -19,6 +19,7 @@ import com.fasterxml.jackson.core.JsonEncoding;
 import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.PrettyPrinter;
+import com.fasterxml.jackson.core.io.ContentReference;
 import com.fasterxml.jackson.core.io.IOContext;
 import com.fasterxml.jackson.core.json.ByteSourceJsonBootstrapper;
 import com.fasterxml.jackson.core.util.BufferRecycler;
@@ -63,7 +64,7 @@ public class JSONIO
         {
             byte[] inputBuffer = new byte[4];
             in.read( inputBuffer );
-            IOContext ctxt = new IOContext( new BufferRecycler(), null, false );
+            IOContext ctxt = new IOContext( new BufferRecycler(), ContentReference.unknown(), false );
             ByteSourceJsonBootstrapper strapper = new ByteSourceJsonBootstrapper( ctxt, inputBuffer, 0,
                     4 );
             JsonEncoding encoding = strapper.detectEncoding();
