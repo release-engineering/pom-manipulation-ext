@@ -41,6 +41,7 @@ import org.commonjava.maven.ext.io.PomIO;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.contrib.java.lang.system.SystemOutRule;
 import org.junit.rules.TemporaryFolder;
 
 import java.io.File;
@@ -69,6 +70,9 @@ public class PropertiesUtilsTest
     private static final String RESOURCE_BASE = "properties/";
 
     @Rule
+    public final SystemOutRule systemOutRule = new SystemOutRule().enableLog().muteForSuccessfulTests();
+
+    @Rule
     public TemporaryFolder temp = new TemporaryFolder();
 
     private final Properties p = new Properties();
@@ -93,6 +97,27 @@ public class PropertiesUtilsTest
         assertTrue( PropertiesUtils.checkStrictValue( session, "1.0.0-SNAPSHOT", "1.0.0.redhat-1" ) );
         assertFalse( PropertiesUtils.checkStrictValue( session, "1.0.Final-SNAPSHOT", "1.0.0.redhat-1" ) );
         assertTrue( PropertiesUtils.checkStrictValue( session, "1.0-SNAPSHOT", "1.0.0.redhat-1" ) );
+    }
+
+    @Test
+    public void testCheckStrictValueWithMgdSvc1() throws Exception
+    {
+        p.remove( "versionSuffix" );
+        p.setProperty( "versionIncrementalSuffix", "managedsvc-temporary-redhat" );
+        p.setProperty( "versionSuffixAlternatives", "redhat,managedsvc-redhat" );
+        ManipulationSession session = createUpdateSession();
+        assertTrue( PropertiesUtils.checkStrictValue( session, "0.26.0", "0.26.0.managedsvc-redhat-00014" ) );
+        assertFalse( systemOutRule.getLog().contains( "0.26.0 to 0.26.0.managedsvc and" ) );
+    }
+
+    @Test
+    public void testCheckStrictValueWithMgdSvc2() throws Exception
+    {
+        p.remove( "versionSuffix" );
+        p.setProperty( "versionIncrementalSuffix", "managedsvc-temporary-redhat" );
+        p.setProperty( "versionSuffixAlternatives", "redhat" );
+        ManipulationSession session = createUpdateSession();
+        assertFalse( PropertiesUtils.checkStrictValue( session, "0.26.0", "0.26.0.managedsvc-redhat-00014" ) );
     }
 
     @Test
