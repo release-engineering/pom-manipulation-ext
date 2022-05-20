@@ -398,21 +398,21 @@ public final class PropertiesUtils
      * This will check if the old version (e.g. in a plugin or dependency) is a property and if so
      * store the mapping in a map.
      *
-     *
-     * @param project the current project the needs to cache the value.
-     * @param state CommonState to retrieve property clash value QoS.
+     * @param session                  the manipulation session
+     * @param project                  the current project the needs to cache the value.
      * @param versionPropertyUpdateMap the map to store any updates in
-     * @param oldVersion original property name
-     * @param newVersion new property value
-     * @param originalType that this property is used in (i.e. a plugin or a dependency)
-     * @param force Whether to check for an existing property or force the insertion
+     * @param oldVersion               original property name
+     * @param newVersion               new property value
+     * @param originalType             that this property is used in (i.e. a plugin or a dependency)
+     * @param force                    Whether to check for an existing property or force the insertion
      * @return true if a property was found and cached.
      * @throws ManipulationException if an error occurs.
      */
-    public static boolean cacheProperty( Project project, CommonState state, Map<Project, Map<String, PropertyMapper>> versionPropertyUpdateMap,
+    public static boolean cacheProperty( ManipulationSession session, Project project, Map<Project, Map<String, PropertyMapper>> versionPropertyUpdateMap,
                                          String oldVersion, String newVersion, Object originalType, boolean force )
                     throws ManipulationException
     {
+        final CommonState state = session.getState( CommonState.class );
         final Map<String, PropertyMapper> projectProps = versionPropertyUpdateMap.computeIfAbsent( project, k -> new HashMap<>() );
         boolean result = false;
 
@@ -448,11 +448,16 @@ public final class PropertiesUtils
                 final ProjectRef originalReference;
                 if ( originalType instanceof ProjectVersionRef )
                 {
+                    // Don't need to call resolveProperties as these are already resolved.
                     originalReference = ( ( ProjectVersionRef ) originalType ).asProjectRef();
                 }
                 else if ( originalType instanceof Plugin )
                 {
-                    originalReference = new SimpleProjectRef( ( (Plugin) originalType ).getGroupId(), ( (Plugin) originalType ).getArtifactId() );
+                    originalReference = new SimpleProjectRef(
+                                    PropertyResolver.resolveProperties( session, project.getInheritedList(),
+                                                                        ( (Plugin) originalType ).getGroupId() ),
+                                    PropertyResolver.resolveProperties( session, project.getInheritedList(),
+                                                                        ( (Plugin) originalType ).getArtifactId() ) );
                 }
                 else
                 {

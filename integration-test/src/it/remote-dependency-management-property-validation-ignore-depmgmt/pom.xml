@@ -32,6 +32,9 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <version.junit>3.8.2</version.junit>
     <version.fake>1.0</version.fake>
+    <junit>junit</junit>
+    <jar>maven-jar-plugin</jar>
+    <jarv>2.6</jarv>
   </properties>
 
   <dependencyManagement>
@@ -46,7 +49,7 @@
 
   <dependencies>
     <dependency>
-      <groupId>junit</groupId>
+      <groupId>${junit}</groupId>
       <artifactId>junit</artifactId>
       <version>${version.junit}</version>
     </dependency>
@@ -56,6 +59,25 @@
       <version>${version.fake}</version>
     </dependency>
   </dependencies>
+
+  <build>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.dummy</groupId>
+          <artifactId>fake</artifactId>
+          <version>${jarv}</version>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>${jar}</artifactId>
+        <version>${jarv}</version>
+      </plugin>
+    </plugins>
+  </build>
 
   <modules>
     <module>child</module>

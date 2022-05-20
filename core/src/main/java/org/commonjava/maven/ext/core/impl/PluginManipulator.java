@@ -44,7 +44,6 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
 
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -153,15 +152,9 @@ public class PluginManipulator extends CommonManipulator implements Manipulator
                 logger.info( "Iterating to validate plugin updates..." );
                 for ( final Project p : versionPropertyUpdateMap.keySet() )
                 {
-                    validatePluginsUpdatedProperty( cState, p, p.getResolvedManagedPlugins( session ) );
                     validatePluginsUpdatedProperty( cState, p, p.getResolvedPlugins( session ) );
                     for ( final Map<ProjectVersionRef, Plugin> dependencies :
                           p.getResolvedProfilePlugins( session ).values() )
-                    {
-                        validatePluginsUpdatedProperty( cState, p, dependencies );
-                    }
-                    for ( final Map<ProjectVersionRef, Plugin> dependencies :
-                          p.getResolvedProfileManagedPlugins( session ).values() )
                     {
                         validatePluginsUpdatedProperty( cState, p, dependencies );
                     }
@@ -325,7 +318,7 @@ public class PluginManipulator extends CommonManipulator implements Manipulator
 
         applyOverrides( project, PluginType.LocalP, project.getResolvedPlugins( session ), overrides );
         applyExplicitOverrides( project, project.getResolvedManagedPlugins( session ), explicitOverrides,
-                                commonState, explicitVersionPropertyUpdateMap );
+                                explicitVersionPropertyUpdateMap );
 
         final Map<Profile, Map<ProjectVersionRef, Plugin>> pd = project.getResolvedProfilePlugins( session );
         final Map<Profile, Map<ProjectVersionRef, Plugin>> pmd = project.getResolvedProfileManagedPlugins( session );
@@ -334,15 +327,13 @@ public class PluginManipulator extends CommonManipulator implements Manipulator
         for ( final Map<ProjectVersionRef, Plugin> plugins : pmd.values() )
         {
             applyOverrides( project, PluginType.LocalPM, plugins, overrides );
-            applyExplicitOverrides( project, plugins, explicitOverrides, commonState,
-                                    explicitVersionPropertyUpdateMap );
+            applyExplicitOverrides( project, plugins, explicitOverrides, explicitVersionPropertyUpdateMap );
         }
         logger.debug( "Processing profiles with plugins" );
         for ( final Map<ProjectVersionRef, Plugin> plugins : pd.values() )
         {
             applyOverrides( project, PluginType.LocalP, plugins, overrides );
-            applyExplicitOverrides( project, plugins, explicitOverrides, commonState,
-                                    explicitVersionPropertyUpdateMap );
+            applyExplicitOverrides( project, plugins, explicitOverrides, explicitVersionPropertyUpdateMap );
         }
 
         explicitOverridePropertyUpdates( session );
@@ -527,7 +518,7 @@ public class PluginManipulator extends CommonManipulator implements Manipulator
 
                 // Due to StandardMaven304PluginDefaults::getDefault version returning "[0.0.0.1]" override version
                 // will never be null.
-                if ( !PropertiesUtils.cacheProperty( project, commonState, versionPropertyUpdateMap, oldVersion,
+                if ( !PropertiesUtils.cacheProperty( session, project, versionPropertyUpdateMap, oldVersion,
                                                      newValue, plugin, false ) )
                 {
                     if ( oldVersion != null && oldVersion.equals( Version.PROJECT_VERSION ) )
@@ -568,8 +559,8 @@ public class PluginManipulator extends CommonManipulator implements Manipulator
 
             if ( startsWith( pluginVersion, "${" ) )
             {
-                final String versionProperty = PropertiesUtils.extractPropertyName( pluginVersion );
-                PropertiesUtils.verifyPropertyMapping( cState, p, versionPropertyUpdateMap, d, versionProperty );
+                PropertiesUtils.verifyPropertyMapping( cState, p, versionPropertyUpdateMap, d,
+                                                       PropertiesUtils.extractPropertyName( pluginVersion ) );
             }
         }
     }
