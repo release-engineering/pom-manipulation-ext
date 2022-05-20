@@ -25,7 +25,6 @@ import org.commonjava.maven.atlas.ident.ref.InvalidRefException;
 import org.commonjava.maven.atlas.ident.ref.ProjectRef;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleProjectRef;
-import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef;
 import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.common.model.Project;
 import org.commonjava.maven.ext.common.model.SimpleScopedArtifactRef;
@@ -376,8 +375,7 @@ public class DependencyManipulator extends CommonManipulator implements Manipula
                 d.setVersion( project.getModelParent().getVersion() );
                 final Map<ArtifactRef, Dependency> pDepMap =
                         Collections.singletonMap( new SimpleScopedArtifactRef( d ), d ) ;
-                applyExplicitOverrides( project, pDepMap, explicitOverrides, commonState,
-                                        explicitVersionPropertyUpdateMap );
+                applyExplicitOverrides( project, pDepMap, explicitOverrides, explicitVersionPropertyUpdateMap );
                 project.getModelParent().setVersion( d.getVersion() );
             }
 
@@ -389,7 +387,7 @@ public class DependencyManipulator extends CommonManipulator implements Manipula
                                             explicitOverrides, originalOverrides );
 
             applyExplicitOverrides( project, project.getResolvedManagedDependencies( session ), explicitOverrides,
-                                    commonState, explicitVersionPropertyUpdateMap );
+                                    explicitVersionPropertyUpdateMap );
 
             if ( commonState.isOverrideTransitive() && dependencyState.getRemoteBOMDepMgmt() != null )
             {
@@ -449,13 +447,13 @@ public class DependencyManipulator extends CommonManipulator implements Manipula
             applyOverrides( project, project.getResolvedManagedDependencies( session ), explicitOverrides,
                             originalOverrides );
             applyExplicitOverrides( project, project.getResolvedManagedDependencies( session ), explicitOverrides,
-                                    commonState, explicitVersionPropertyUpdateMap );
+                                    explicitVersionPropertyUpdateMap );
         }
 
         logger.debug( "Applying overrides to concrete dependencies for: {}", projectGA );
         // Apply overrides to project direct dependencies
         applyOverrides( project, project.getResolvedDependencies( session ), explicitOverrides, originalOverrides );
-        applyExplicitOverrides( project, project.getResolvedDependencies( session ), explicitOverrides, commonState,
+        applyExplicitOverrides( project, project.getResolvedDependencies( session ), explicitOverrides,
                                 explicitVersionPropertyUpdateMap );
 
         final Map<Profile, Map<ArtifactRef, Dependency>> pd = project.getResolvedProfileDependencies( session );
@@ -464,15 +462,13 @@ public class DependencyManipulator extends CommonManipulator implements Manipula
         for ( final Map<ArtifactRef, Dependency> dependencies : pd.values() )
         {
             applyOverrides( project, dependencies, explicitOverrides, originalOverrides );
-            applyExplicitOverrides( project, dependencies, explicitOverrides, commonState,
-                                    explicitVersionPropertyUpdateMap );
+            applyExplicitOverrides( project, dependencies, explicitOverrides, explicitVersionPropertyUpdateMap );
         }
 
         for ( final Map<ArtifactRef, Dependency> dependencies : pmd.values() )
         {
             applyOverrides( project, dependencies, explicitOverrides, originalOverrides );
-            applyExplicitOverrides( project, dependencies, explicitOverrides, commonState,
-                                    explicitVersionPropertyUpdateMap );
+            applyExplicitOverrides( project, dependencies, explicitOverrides, explicitVersionPropertyUpdateMap );
         }
     }
 
@@ -568,7 +564,7 @@ public class DependencyManipulator extends CommonManipulator implements Manipula
                     }
                     else
                     {
-                        if ( ! PropertiesUtils.cacheProperty( project, commonState, versionPropertyUpdateMap, oldVersion, overrideVersion, entry.getKey(), false ))
+                        if ( ! PropertiesUtils.cacheProperty( session, project, versionPropertyUpdateMap, oldVersion, overrideVersion, entry.getKey(), false ))
                         {
                             if ( strict && ! PropertiesUtils.checkStrictValue( session, resolvedValue, overrideVersion) )
                             {

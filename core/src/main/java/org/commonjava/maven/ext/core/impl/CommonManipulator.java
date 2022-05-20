@@ -26,7 +26,6 @@ import org.commonjava.maven.ext.common.model.DependencyPluginWrapper;
 import org.commonjava.maven.ext.common.model.Project;
 import org.commonjava.maven.ext.common.util.WildcardMap;
 import org.commonjava.maven.ext.core.ManipulationSession;
-import org.commonjava.maven.ext.core.state.CommonState;
 import org.commonjava.maven.ext.core.util.PropertiesUtils;
 import org.commonjava.maven.ext.core.util.PropertyMapper;
 import org.commonjava.maven.ext.io.ModelIO;
@@ -245,17 +244,15 @@ public class CommonManipulator
      * dependencyExclusion. However they have to be separated out from standard overrides so we can easily
      * ignore any property references (and overwrite them).
      *
-     * @param project the current Project
-     * @param dependencies dependencies to check
-     * @param explicitOverrides a custom map to handle wildcard overrides
-     * @param state the CommonState, to retrieve Common Properties
+     * @param project                  the current Project
+     * @param dependencies             dependencies to check
+     * @param explicitOverrides        a custom map to handle wildcard overrides
      * @param versionPropertyUpdateMap properties to update
      * @throws ManipulationException if an error occurs
      */
     protected void applyExplicitOverrides( final Project project,
                                            final Map<? extends ProjectVersionRef, ? extends InputLocationTracker> dependencies,
-                                           final WildcardMap<String> explicitOverrides, final CommonState state,
-                                           final Map<Project, Map<String, PropertyMapper>> versionPropertyUpdateMap )
+                                           final WildcardMap<String> explicitOverrides, final Map<Project, Map<String, PropertyMapper>> versionPropertyUpdateMap )
                     throws ManipulationException
     {
         // Apply matching overrides to dependencies
@@ -302,7 +299,8 @@ public class CommonManipulator
                         {
                             logger.info( "Explicit overrides : force aligning {} to {}.", groupIdArtifactId, target );
 
-                            if ( !PropertiesUtils.cacheProperty( project, state, versionPropertyUpdateMap, oldVersion,
+                            if ( !PropertiesUtils.cacheProperty( session, project, versionPropertyUpdateMap,
+                                                                 oldVersion,
                                                                  target, projectVersionRef, true ) )
                             {
                                 if ( oldVersion.contains( "${" ) )

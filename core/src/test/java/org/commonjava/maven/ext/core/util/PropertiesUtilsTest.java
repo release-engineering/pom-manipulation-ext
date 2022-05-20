@@ -154,21 +154,21 @@ public class PropertiesUtilsTest
     @Test
     public void testCacheProperty() throws Exception
     {
+        ManipulationSession session = createUpdateSession();
         Map<Project, Map<String, PropertyMapper>> propertyMap = new HashMap<>();
-        CommonState state = new CommonState( new Properties() );
         Project project = getProject();
         Plugin dummy = new Plugin();
         dummy.setGroupId( "org.dummy" );
         dummy.setArtifactId( "dummyArtifactId" );
 
-        assertFalse( PropertiesUtils.cacheProperty( project, state, propertyMap, "${foobar}${foobar2}", null, dummy,
+        assertFalse( PropertiesUtils.cacheProperty( session, project, propertyMap, "${foobar}${foobar2}", null, dummy,
                                                     false ) );
-        assertFalse( PropertiesUtils.cacheProperty( project, state, propertyMap, "suffix.${foobar}", null, dummy, false ) );
-        assertFalse( PropertiesUtils.cacheProperty( project, state, propertyMap, null, "2.0", dummy, false ) );
-        assertFalse( PropertiesUtils.cacheProperty( project, state, propertyMap, "1.0", "2.0", dummy, false ) );
-        assertTrue( PropertiesUtils.cacheProperty( project, state, propertyMap, "${version.org.jboss}", "2.0", dummy,
+        assertFalse( PropertiesUtils.cacheProperty( session, project, propertyMap, "suffix.${foobar}", null, dummy, false ) );
+        assertFalse( PropertiesUtils.cacheProperty( session, project, propertyMap, null, "2.0", dummy, false ) );
+        assertFalse( PropertiesUtils.cacheProperty( session, project, propertyMap, "1.0", "2.0", dummy, false ) );
+        assertTrue( PropertiesUtils.cacheProperty( session, project, propertyMap, "${version.org.jboss}", "2.0", dummy,
                                                    false ) );
-        assertFalse( PropertiesUtils.cacheProperty( project, state, propertyMap, Version.PROJECT_VERSION, "2.0", dummy,
+        assertFalse( PropertiesUtils.cacheProperty( session, project, propertyMap, Version.PROJECT_VERSION, "2.0", dummy,
                                                     false ) );
 
         // DependencyManipulator does dependency.getVersion(). This could return e.g. ${version.scala} which can
@@ -179,14 +179,14 @@ public class PropertiesUtilsTest
         // However we don't need to change the value of the property. If the property is foobar.${....} then
         // we want to append suffix to the property ... but we need to handle that part of the property is hardcoded.
 
-        assertFalse( PropertiesUtils.cacheProperty( project, state, propertyMap, "${version.scala}.7", "2.0", null,
+        assertFalse( PropertiesUtils.cacheProperty( session, project, propertyMap, "${version.scala}.7", "2.0", null,
                                                     false ) );
-        assertFalse( PropertiesUtils.cacheProperty( project, state, propertyMap, "${version.foo}.${version.scala}.7",
+        assertFalse( PropertiesUtils.cacheProperty( session, project, propertyMap, "${version.foo}.${version.scala}.7",
                                                     "2.0", null, false ) );
 
         try
         {
-            PropertiesUtils.cacheProperty( project, state, propertyMap, "${version.scala}.7.${version.scala2}", "2.0",
+            PropertiesUtils.cacheProperty( session, project, propertyMap, "${version.scala}.7.${version.scala2}", "2.0",
                                            null, false );
         }
         catch ( ManipulationException e )
@@ -446,13 +446,13 @@ public class PropertiesUtilsTest
     @Test
     public void testOriginalTypeChecking() throws Exception
     {
+        ManipulationSession session = createUpdateSession();
         Map<Project, Map<String, PropertyMapper>> propertyMap = new HashMap<>();
-        CommonState state = new CommonState( new Properties() );
         Project project = getProject();
 
         try
         {
-            assertFalse( PropertiesUtils.cacheProperty( project, state, propertyMap, "${foobar}", null, null,
+            assertFalse( PropertiesUtils.cacheProperty( session, project, propertyMap, "${foobar}", null, null,
                                                         false ) );
             fail("Should have thrown an exception");
         }
