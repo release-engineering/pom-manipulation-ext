@@ -16,15 +16,13 @@
 package org.commonjava.maven.ext.common.util;
 
 import org.apache.maven.model.Model;
-import org.commonjava.maven.ext.common.ManipulationException;
+import org.commonjava.maven.ext.common.ManipulationUncheckedException;
 import org.jboss.byteman.contrib.bmunit.BMRule;
 import org.jboss.byteman.contrib.bmunit.BMUnitRunner;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.contrib.java.lang.system.SystemOutRule;
 import org.junit.runner.RunWith;
-
-import java.io.IOException;
 
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -43,14 +41,14 @@ public class ManifestUtilsTest
             ManifestUtils.getManifestInformation( null );
             fail("No exception thrown");
         }
-        catch (ManipulationException e)
+        catch ( ManipulationUncheckedException e)
         {
             assertTrue( e.getMessage().contains( "No target specified" ) );
         }
     }
 
     @Test
-    public void testThisClass() throws ManipulationException
+    public void testThisClass()
     {
         ManifestUtils.getManifestInformation( ManifestUtilsTest.class );
 
@@ -61,7 +59,7 @@ public class ManifestUtilsTest
     }
 
     @Test
-    public void testThirdPartyClass() throws ManipulationException
+    public void testThirdPartyClass()
     {
         String result = ManifestUtils.getManifestInformation( Model.class );
 
@@ -69,7 +67,7 @@ public class ManifestUtilsTest
     }
 
     @Test
-    public void testJarClass() throws ManipulationException
+    public void testJarClass()
     {
         String m = ManifestUtils.getManifestInformation( Test.class );
         assertTrue( m.contains( "4" ) );
@@ -85,10 +83,30 @@ public class ManifestUtilsTest
                     targetLocation = "AT ENTRY",
                     action = "RETURN null"
     )
-    public void testNoManifestJar() throws ManipulationException
+    public void testNoManifestJar()
     {
         String result = ManifestUtils.getManifestInformation( Model.class );
 
         assertTrue( result.isEmpty() );
+    }
+
+    @Test
+    @BMRule(name = "jar-stream",
+                    targetClass = "URL",
+                    targetMethod = "openStream()",
+                    targetLocation = "AT ENTRY",
+                    action = "throw new IOException()"
+    )
+    public void testJarStreamFailure()
+    {
+        try
+        {
+            ManifestUtils.getManifestInformation( Model.class );
+            fail("No exception thrown");
+        }
+        catch ( ManipulationUncheckedException e)
+        {
+            assertTrue( e.getMessage().contains( "Error retrieving information" ) );
+        }
     }
 }

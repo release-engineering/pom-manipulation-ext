@@ -16,7 +16,7 @@
 package org.commonjava.maven.ext.common.util;
 
 import lombok.experimental.UtilityClass;
-import org.commonjava.maven.ext.common.ManipulationException;
+import org.commonjava.maven.ext.common.ManipulationUncheckedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,16 +37,14 @@ public class ManifestUtils
      *
      * @param target the Class within the jar to find and locate.
      * @return the GIT sha of this codebase.
-     * @throws ManipulationException if an error occurs.
      */
     public static String getManifestInformation(Class<?> target)
-        throws ManipulationException
     {
         String result = "";
 
         if (target == null)
         {
-            throw new ManipulationException( "No target specified." );
+            throw new ManipulationUncheckedException( "No target specified." );
         }
 
         try
@@ -83,7 +81,7 @@ public class ManifestUtils
         }
         catch ( final IOException e )
         {
-            throw new ManipulationException( "Error retrieving information from manifest", e );
+            throw new ManipulationUncheckedException( "Error retrieving information from manifest", e );
         }
 
         return result;
