@@ -205,6 +205,11 @@ public class ManipulationManager
     {
         preparseGroovyManipulator.applyChanges( session );
 
+        if ( !session.getPom().exists() )
+        {
+            throw new ManipulationException( "Manipulation engine disabled. Project {} cannot be found.", session.getPom() );
+        }
+
         final List<Project> currentProjects = pomIO.parseProject( session.getPom() );
         final List<Project> originalProjects = new ArrayList<>(  );
         currentProjects.forEach( p -> originalProjects.add( new Project( p ) ) );
