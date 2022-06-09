@@ -222,13 +222,8 @@ public class Cli implements Callable<Integer>
             logger.info( "Manipulation engine disabled via command-line option" );
             return 0;
         }
-        if ( !target.exists() )
-        {
-            logger.info( "Manipulation engine disabled. Project {} cannot be found.", target );
-            return 10;
-        }
         // Don't bother skipping if we're just trying to analyse dependencies/print manipulator order.
-        else if ( new File( target.getParentFile(), ManipulationManager.MARKER_FILE ).exists() && !printManipulatorOrder && !printProjectDeps)
+        if ( new File( target.getParentFile(), ManipulationManager.MARKER_FILE ).exists() && !printManipulatorOrder && !printProjectDeps)
         {
             logger.info( "Skipping manipulation as previous execution found." );
             return 0;
