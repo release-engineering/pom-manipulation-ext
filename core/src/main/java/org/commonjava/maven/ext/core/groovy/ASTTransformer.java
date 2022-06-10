@@ -53,6 +53,7 @@ import org.codehaus.groovy.control.CompilePhase;
 import org.codehaus.groovy.control.SourceUnit;
 import org.codehaus.groovy.transform.AbstractASTTransformation;
 import org.codehaus.groovy.transform.GroovyASTTransformation;
+import org.commonjava.maven.ext.common.ManipulationUncheckedException;
 
 import java.util.List;
 
@@ -75,13 +76,16 @@ public class ASTTransformer  extends AbstractASTTransformation {
 
     private static final ClassNode MAVEN_TYPE = ClassHelper.make( PMEBaseScript.class );
     private static final ClassNode GRADLE_TYPE = ClassHelper.make( GMEBaseScript.class );
+    private static final ClassNode SBT_TYPE = ClassHelper.make( SMEGBaseScript.class );
     private static final ClassNode COMMAND_TYPE = ClassHelper.make( InvocationPoint.class );
     private static final ClassNode MAVEN_BASE_SCRIPT_TYPE = ClassHelper.make( BaseScript.class );
     private static final String MAVEN_TYPE_NAME = "@" + MAVEN_TYPE.getNameWithoutPackage();
     private static final ClassNode GRADLE_BASE_SCRIPT_TYPE = ClassHelper.make( GradleBaseScript.class );
+    private static final ClassNode SBT_BASE_SCRIPT_TYPE = ClassHelper.make( SBTBaseScript.class );
     private static final String GRADLE_TYPE_NAME = "@" + GRADLE_TYPE.getNameWithoutPackage();
+    private static final String SBT_TYPE_NAME = "@" + SBT_TYPE.getNameWithoutPackage();
 
-    enum Type { GRADLE, MAVEN }
+    enum Type { GRADLE, MAVEN, SBT}
 
     private Type type;
 
@@ -91,9 +95,22 @@ public class ASTTransformer  extends AbstractASTTransformation {
         init(nodes, source);
         AnnotatedNode parent = (AnnotatedNode) nodes[1];
         AnnotationNode node = (AnnotationNode) nodes[0];
-        if (MAVEN_TYPE.equals( node.getClassNode()) || GRADLE_TYPE.equals( node.getClassNode() ))
+        if (MAVEN_TYPE.equals( node.getClassNode())
+                        || GRADLE_TYPE.equals( node.getClassNode() )
+                        || SBT_TYPE.equals( node.getClassNode() ) )
         {
-            type = ( MAVEN_TYPE.equals( node.getClassNode()) ) ? Type.MAVEN : Type.GRADLE;
+            if (MAVEN_TYPE.equals( node.getClassNode() ) )
+            {
+                type = Type.MAVEN;
+            }
+            else if (GRADLE_TYPE.equals( node.getClassNode() ) )
+            {
+                type = Type.GRADLE;
+            }
+            else if ( SBT_TYPE.equals( node.getClassNode() ) )
+            {
+                type = Type.SBT;
+            }
 
             if ( parent instanceof DeclarationExpression )
             {
@@ -112,13 +129,31 @@ public class ASTTransformer  extends AbstractASTTransformation {
 
     private String getType()
     {
-        if (type == Type.MAVEN)
+        switch ( type )
         {
-            return MAVEN_TYPE_NAME;
+            case MAVEN:
+                return MAVEN_TYPE_NAME;
+            case GRADLE:
+                return GRADLE_TYPE_NAME;
+            case SBT:
+                return SBT_TYPE_NAME;
+            default:
+                throw new ManipulationUncheckedException( "Unknown type " + type );
         }
-        else
+    }
+
+    private ClassNode getType (Type type)
+    {
+        switch (type)
         {
-            return GRADLE_TYPE_NAME;
+            case MAVEN:
+                return MAVEN_BASE_SCRIPT_TYPE;
+            case GRADLE:
+                return GRADLE_BASE_SCRIPT_TYPE;
+            case SBT:
+                return SBT_BASE_SCRIPT_TYPE;
+            default:
+                throw new ManipulationUncheckedException( "Unknown type " + type );
         }
     }
 
@@ -127,14 +162,7 @@ public class ASTTransformer  extends AbstractASTTransformation {
         ClassNode scriptType;
 
         if (value == null) {
-            if ( type == Type.MAVEN )
-            {
-                scriptType = MAVEN_BASE_SCRIPT_TYPE;
-            }
-            else
-            {
-                scriptType = GRADLE_BASE_SCRIPT_TYPE;
-            }
+            scriptType = getType(type);
         } else {
             if (!(value instanceof ClassExpression)) {
                 addError( "Annotation " + getType() + " member 'value' should be a class literal.", value);
@@ -179,14 +207,7 @@ public class ASTTransformer  extends AbstractASTTransformation {
             }
             de.setRightExpression(new VariableExpression("this"));
         } else {
-            if ( type == Type.MAVEN )
-            {
-                baseScriptType = MAVEN_BASE_SCRIPT_TYPE;
-            }
-            else
-            {
-                baseScriptType = GRADLE_BASE_SCRIPT_TYPE;
-            }
+            baseScriptType = getType(type);
         }
 
         changeBaseScriptType(de, cNode, baseScriptType);
