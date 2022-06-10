@@ -14,6 +14,10 @@
 # limitations under the License.
 #
 
+ignore:
+  # File causes spurious coverage changes.
+  - "**/MavenLocationExpander.java"
+
 coverage:
   status:
     project:
@@ -21,5 +25,6 @@ coverage:
         threshold: 1%
     patch:
       default:
+        informational: true
         target: 70%
         threshold: 1%
