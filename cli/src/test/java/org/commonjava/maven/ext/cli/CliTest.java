@@ -32,6 +32,7 @@ import org.junit.rules.TemporaryFolder;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -43,6 +44,7 @@ import static org.commonjava.maven.ext.core.fixture.TestUtils.INTEGRATION_TEST;
 import static org.commonjava.maven.ext.core.fixture.TestUtils.ROOT_DIRECTORY;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 public class CliTest
@@ -51,7 +53,7 @@ public class CliTest
     public final ProvideSystemProperty ansiOFF = new ProvideSystemProperty( "picocli.ansi", "false" );
 
     @Rule
-    public TemporaryFolder temp = new TemporaryFolder();
+    public final TemporaryFolder temp = new TemporaryFolder();
 
     @Rule
     public final SystemOutRule systemOutRule = new SystemOutRule().enableLog().muteForSuccessfulTests();
@@ -437,5 +439,34 @@ public class CliTest
                                         target.getCanonicalPath() } );
 
         assertTrue( systemOutRule.getLog().contains( "Wildcard map " ) );
+    }
+
+    @Test
+    public void invokeCLI() throws Exception
+    {
+        Cli c = new Cli();
+
+        URL resource = CliTest.class.getResource( "/test.pom" );
+        assertNotNull( resource );
+        File pom = new File( resource.getFile() );
+        assertTrue( pom.exists() );
+
+        File pom1 = temp.newFile( "pom.xml" );
+        FileUtils.copyFile( pom, pom1 );
+
+        int result = c.run( new String[] { "-f", pom1.toString() } );
+        assertTrue (systemOutRule.getLog().contains( "Maven-Manipulation-Extension: Finished" ));
+        assertEquals( 0, result );
+    }
+
+    @Test
+    public void invokeCLIFails() throws Exception
+    {
+        Cli c = new Cli();
+
+        int result = c.run( new String[] { "-d", "-f", temp.getRoot().toString() + "/pom.xml" } );
+        assertTrue (systemOutRule.getLog().contains( "PreparseGroovyManipulator: Nothing to do!" ));
+        assertTrue (systemOutRule.getLog().contains( "Manipulation engine disabled" ));
+        assertEquals( 10, result );
     }
 }
