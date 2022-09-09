@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd"
+         child.project.url.inherit.append.path="false">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.jboss</groupId>
+        <artifactId>jboss-parent</artifactId>
+        <version>39</version>
+    </parent>
+
+    <groupId>io.quarkus</groupId>
+    <artifactId>quarkus-parent</artifactId>
+    <name>Quarkus - Parent pom</name>
+    <version>2.12.0.Final</version>
+    <packaging>pom</packaging>
+
+    <description>Quarkus - Kubernetes Native Java stack tailored for OpenJDK HotSpot and GraalVM</description>
+    <url>https://github.com/quarkusio/quarkus</url>
+
+    <developers>
+        <developer>
+            <id>quarkus</id>
+            <name>Quarkus Community</name>
+            <organization>Quarkus</organization>
+            <organizationUrl>https://quarkus.io</organizationUrl>
+        </developer>
+    </developers>
+
+    <licenses>
+        <license>
+            <name>The Apache Software License, Version 2.0</name>
+            <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
+    <scm child.scm.connection.inherit.append.path="false"
+         child.scm.developerConnection.inherit.append.path="false"
+         child.scm.url.inherit.append.path="false">
+        <url>https://github.com/quarkusio/quarkus</url>
+        <connection>scm:git:git@github.com:quarkusio/quarkus.git</connection>
+        <developerConnection>scm:git:git@github.com:quarkusio/quarkus.git</developerConnection>
+        <tag>HEAD</tag>
+    </scm>
+
+    <issueManagement>
+        <system>GitHub</system>
+        <url>https://github.com/quarkusio/quarkus/issues/</url>
+    </issueManagement>
+
+    <properties>
+        <maven.compiler.target>11</maven.compiler.target>
+        <maven.compiler.source>11</maven.compiler.source>
+        <maven.compiler.release>11</maven.compiler.release>
+        <maven.compiler.parameters>true</maven.compiler.parameters>
+
+        <graalvmHome>${env.GRAALVM_HOME}</graalvmHome>
+        <postgres.url>jdbc:postgresql:hibernate_orm_test</postgres.url>
+
+        <nexus-staging-maven-plugin.version>1.6.8</nexus-staging-maven-plugin.version>
+        <gitflow-incremental-builder.version>4.1.1</gitflow-incremental-builder.version>
+        <quarkus-platform-bom-plugin.version>0.0.51</quarkus-platform-bom-plugin.version>
+
+        <skipDocs>false</skipDocs>
+        <skip.gradle.tests>false</skip.gradle.tests>
+
+        <!-- Dependency versions -->
+
+        <!-- Make sure to check compatibility between these 2 gRPC components before upgrade -->
+        <grpc.version>1.48.1</grpc.version> <!-- when updating, verify if com.google.auth should not be updated too -->
+        <grpc-jprotoc.version>1.2.1</grpc-jprotoc.version>
+        <protoc.version>3.19.3</protoc.version>
+        <protobuf-java.version>${protoc.version}</protobuf-java.version>
+        <proto-google-common-protos.version>2.9.2</proto-google-common-protos.version>
+
+    </properties>
+</project>

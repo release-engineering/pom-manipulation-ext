@@ -69,4 +69,19 @@ public class PomIOTest
         assertEquals( 0, projects.size() );
         assertTrue( systemOutRule.getLog().contains( "PomPeek - Could not peek at POM coordinate for" ) );
     }
+
+
+    @Test
+    public void testVerifyParsePom() throws Exception
+    {
+        final File projectroot = folder.newFile();
+        final File resource = TestUtils.resolveFileResource( "", "pom-quarkus.xml" );
+        assertNotNull( resource );
+        FileUtils.copyFile( resource, projectroot );
+
+        Properties p = new Properties();
+        PomIO pomIO = new PomIO(TestUtils.createSessionAndManager( p, projectroot ).getSession() );
+        List<Project> projects = pomIO.parseProject( projectroot );
+        assertEquals( 1, projects.size() );
+    }
 }
