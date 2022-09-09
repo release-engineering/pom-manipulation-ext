@@ -63,7 +63,7 @@ public class ManifestUtilsTest
     {
         String result = ManifestUtils.getManifestInformation( Model.class );
 
-        assertTrue( result.contains( "3.5.0 ( SHA: null )" ) );
+        assertTrue( result.contains( "3.6.3 ( SHA: null )" ) );
     }
 
     @Test
