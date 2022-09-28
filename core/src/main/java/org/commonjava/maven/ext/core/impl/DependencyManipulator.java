@@ -18,25 +18,33 @@ package org.commonjava.maven.ext.core.impl;
 import org.apache.commons.lang.StringUtils;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.DependencyManagement;
+import org.apache.maven.model.InputLocationTracker;
 import org.apache.maven.model.Model;
+import org.apache.maven.model.Plugin;
 import org.apache.maven.model.Profile;
 import org.commonjava.maven.atlas.ident.ref.ArtifactRef;
 import org.commonjava.maven.atlas.ident.ref.InvalidRefException;
 import org.commonjava.maven.atlas.ident.ref.ProjectRef;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleProjectRef;
+import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef;
 import org.commonjava.maven.ext.common.ManipulationException;
+import org.commonjava.maven.ext.core.util.PluginReference;
+import org.commonjava.maven.ext.core.util.DependencyPluginWrapper;
 import org.commonjava.maven.ext.common.model.Project;
 import org.commonjava.maven.ext.common.model.SimpleScopedArtifactRef;
+import org.commonjava.maven.ext.common.util.PropertyResolver;
 import org.commonjava.maven.ext.common.util.WildcardMap;
 import org.commonjava.maven.ext.core.ManipulationSession;
 import org.commonjava.maven.ext.core.state.CommonState;
 import org.commonjava.maven.ext.core.state.DependencyState;
 import org.commonjava.maven.ext.core.state.DependencyState.DependencyPrecedence;
 import org.commonjava.maven.ext.core.state.RESTState;
+import org.commonjava.maven.ext.core.util.DependencyPluginUtils;
 import org.commonjava.maven.ext.core.util.PropertiesUtils;
 import org.commonjava.maven.ext.core.util.PropertyMapper;
 import org.commonjava.maven.ext.io.ModelIO;
+import org.commonjava.maven.ext.io.resolver.GalleyAPIWrapper;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -44,6 +52,7 @@ import javax.inject.Singleton;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -65,6 +74,8 @@ import static org.commonjava.maven.ext.core.util.IdUtils.ga;
 @Singleton
 public class DependencyManipulator extends CommonManipulator implements Manipulator
 {
+    private final GalleyAPIWrapper galleyWrapper;
+
     /**
      * Used to store mappings of old property to new version - the new version is encapsulated within the {@link PropertyMapper}
      * which also contains reference to the old version and the dependency that changed this. This allows complete tracking of
@@ -74,9 +85,10 @@ public class DependencyManipulator extends CommonManipulator implements Manipula
     private final Map<Project,Map<String, PropertyMapper>> versionPropertyUpdateMap = new LinkedHashMap<>();
 
     @Inject
-    public DependencyManipulator(ModelIO effectiveModelBuilder)
+    public DependencyManipulator(ModelIO effectiveModelBuilder, GalleyAPIWrapper galleyWrapper)
     {
         this.effectiveModelBuilder = effectiveModelBuilder;
+        this.galleyWrapper = galleyWrapper;
     }
 
     /**
@@ -470,6 +482,57 @@ public class DependencyManipulator extends CommonManipulator implements Manipula
             applyOverrides( project, dependencies, explicitOverrides, originalOverrides );
             applyExplicitOverrides( project, dependencies, explicitOverrides, explicitVersionPropertyUpdateMap );
         }
+
+        // Apply dependency changes to dependencies that occur within plugins.
+        final  Map<ProjectVersionRef, Plugin> resolvedPlugins = project.getAllResolvedPlugins( session );
+        applyPlugins( project, resolvedPlugins, explicitOverrides, originalOverrides);
+        applyExplicitOverrides( project, resolvedPlugins, explicitOverrides, explicitVersionPropertyUpdateMap );
+
+        final  Map<ProjectVersionRef, Plugin> resolvedManagedPlugins = project.getResolvedManagedPlugins( session );
+        applyPlugins( project, resolvedManagedPlugins, explicitOverrides, originalOverrides);
+        applyExplicitOverrides( project, resolvedManagedPlugins, explicitOverrides, explicitVersionPropertyUpdateMap );
+
+        for (Map<ProjectVersionRef, Plugin> resolvedProfilePlugins : project.getAllResolvedProfilePlugins( session ).values() )
+        {
+            applyPlugins( project, resolvedProfilePlugins, explicitOverrides, originalOverrides);
+            applyExplicitOverrides( project, resolvedProfilePlugins, explicitOverrides, explicitVersionPropertyUpdateMap );
+        }
+        for (Map<ProjectVersionRef, Plugin> resolvedManagedProfilePlugins : project.getResolvedProfileManagedPlugins( session ).values() )
+        {
+            applyPlugins( project, resolvedManagedProfilePlugins, explicitOverrides, originalOverrides);
+            applyExplicitOverrides( project, resolvedManagedProfilePlugins, explicitOverrides, explicitVersionPropertyUpdateMap );
+        }
+
+        // This handles dependencies of plugins themselves.
+        final List<Map<ArtifactRef, Dependency>> pluginDependencies = project.getAllResolvedPluginDependencies( session );
+        for (Map<ArtifactRef, Dependency> depMap : pluginDependencies)
+        {
+            applyOverrides( project, depMap, explicitOverrides, originalOverrides );
+            applyExplicitOverrides( project, depMap, explicitOverrides, explicitVersionPropertyUpdateMap );
+        }
+    }
+
+    private void applyPlugins( Project project, Map<ProjectVersionRef, Plugin> plugins,
+                               WildcardMap<String> explicitOverrides, Map<ArtifactRef, String> overrides )
+                    throws ManipulationException
+    {
+        // Handles plugin configurations
+        final List<PluginReference> refs = DependencyPluginUtils.findPluginReferences( galleyWrapper, project, plugins );
+
+        // We need to create a map of PVR to PluginReference (which need to extend InputLocationTracker)
+        // Use PropertyResolver to resolve the version (if it exists) inside PluginReference (ignore if doesn't)
+        final Map<ProjectVersionRef, InputLocationTracker> pluginsWithDeps = new HashMap<>();
+        for ( PluginReference reference : refs )
+        {
+            String resolvedVersion = PropertyResolver.resolveInheritedProperties( session, project, reference.getVersion());
+            ProjectVersionRef resolvedRef = new SimpleProjectVersionRef( reference.getGroupId(), reference.getArtifactId(), resolvedVersion );
+            pluginsWithDeps.put(resolvedRef, reference);
+        }
+        logger.debug( "Located plugins with resolved artifact references: {}", pluginsWithDeps );
+
+        // Reuse prior apply* to handle plugin with dependencies as well.
+        applyOverrides( project, pluginsWithDeps, explicitOverrides, overrides );
+        applyExplicitOverrides( project, pluginsWithDeps, explicitOverrides, explicitVersionPropertyUpdateMap );
     }
 
     /**
@@ -482,7 +545,8 @@ public class DependencyManipulator extends CommonManipulator implements Manipula
      * @return The map of overrides that were not matched in the dependencies
      * @throws ManipulationException if an error occurs
      */
-    private Map<ArtifactRef, String> applyOverrides( final Project project, final Map<ArtifactRef, Dependency> dependencies,
+    private Map<ArtifactRef, String> applyOverrides( final Project project,
+                                                     final Map<? extends ProjectVersionRef, ? extends InputLocationTracker> dependencies,
                                                      final WildcardMap<String> explicitOverrides, final Map<ArtifactRef, String> overrides )
                     throws ManipulationException
     {
@@ -498,9 +562,9 @@ public class DependencyManipulator extends CommonManipulator implements Manipula
         final boolean strict = commonState.isStrict();
 
         // Apply matching overrides to dependencies
-        for ( final Entry<ArtifactRef, Dependency> e : dependencies.entrySet() )
+        for ( final Entry<? extends ProjectVersionRef, ? extends InputLocationTracker> e : dependencies.entrySet() )
         {
-            final ArtifactRef dependency = e.getKey();
+            final ProjectVersionRef dependency = e.getKey();
             ProjectRef depPr = new SimpleProjectRef( dependency.getGroupId(), dependency.getArtifactId() );
 
             // We might have junit:junit:3.8.2 and junit:junit:4.1 for differing override scenarios within the
@@ -513,7 +577,8 @@ public class DependencyManipulator extends CommonManipulator implements Manipula
                 ProjectRef groupIdArtifactId = entry.getKey().asProjectRef();
                 if ( depPr.equals( groupIdArtifactId ) )
                 {
-                    final String oldVersion = e.getValue().getVersion();
+                    final DependencyPluginWrapper wrapper = new DependencyPluginWrapper( e.getValue() );
+                    final String oldVersion = wrapper.getVersion();
                     final String overrideVersion = entry.getValue();
                     final String resolvedValue = dependency.getVersionString();
 
@@ -554,12 +619,12 @@ public class DependencyManipulator extends CommonManipulator implements Manipula
                         {
                             throw new ManipulationException(
                                             "For {} replacing original property version {} (fully resolved: {} ) with new version {} for {} violates the strict version-alignment rule!",
-                                            depPr.toString(), e.getValue().getVersion(), resolvedValue, entry.getKey().getVersionString(), entry.getKey().asProjectRef().toString());
+                                            depPr.toString(), wrapper.getVersion(), resolvedValue, entry.getKey().getVersionString(), entry.getKey().asProjectRef().toString());
                         }
                         else
                         {
                             logger.warn( "Replacing original property version {} with new version {} for {} violates the strict version-alignment rule!",
-                                         resolvedValue, overrideVersion, e.getValue().getVersion() );
+                                         resolvedValue, overrideVersion, wrapper.getVersion() );
                         }
                     }
                     else
@@ -609,11 +674,11 @@ public class DependencyManipulator extends CommonManipulator implements Manipula
                                     // In this case the previous value couldn't be cached even though it contained a property
                                     // as it was either multiple properties or a property combined with a hardcoded value. Therefore
                                     // just append the suffix.
-                                    e.getValue().setVersion( replaceVersion );
+                                    wrapper.setVersion( replaceVersion );
                                 }
                                 else
                                 {
-                                    e.getValue().setVersion( overrideVersion );
+                                    wrapper.setVersion( overrideVersion );
                                 }
                             }
                         }

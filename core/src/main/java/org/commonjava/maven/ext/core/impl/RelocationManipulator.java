@@ -15,21 +15,16 @@
  */
 package org.commonjava.maven.ext.core.impl;
 
-import org.apache.commons.lang.StringUtils;
-import org.apache.maven.model.ConfigurationContainer;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.DependencyManagement;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Plugin;
-import org.apache.maven.model.PluginExecution;
 import org.apache.maven.model.Profile;
-import org.codehaus.plexus.util.xml.Xpp3Dom;
-import org.codehaus.plexus.util.xml.Xpp3DomBuilder;
-import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 import org.commonjava.maven.atlas.ident.ref.ArtifactRef;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef;
 import org.commonjava.maven.ext.common.ManipulationException;
+import org.commonjava.maven.ext.core.util.PluginReference;
 import org.commonjava.maven.ext.common.model.Project;
 import org.commonjava.maven.ext.common.model.SimpleScopedArtifactRef;
 import org.commonjava.maven.ext.common.util.ProfileUtils;
@@ -37,35 +32,21 @@ import org.commonjava.maven.ext.common.util.WildcardMap;
 import org.commonjava.maven.ext.core.ManipulationSession;
 import org.commonjava.maven.ext.core.state.RelocationState;
 import org.commonjava.maven.ext.core.state.State;
-import org.commonjava.maven.ext.core.util.PropertiesUtils;
+import org.commonjava.maven.ext.core.util.DependencyPluginUtils;
 import org.commonjava.maven.ext.io.resolver.GalleyAPIWrapper;
-import org.commonjava.maven.galley.maven.parse.GalleyMavenXMLException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.w3c.dom.Document;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
-import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathExpressionException;
-import javax.xml.xpath.XPathFactory;
-import java.io.IOException;
-import java.io.StringReader;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.Consumer;
 
 import static org.apache.commons.lang.StringUtils.isEmpty;
 
@@ -207,7 +188,8 @@ public class RelocationManipulator
 
                     if ( !relocation.getArtifactId().equals( WildcardMap.WILDCARD ) )
                     {
-                        updateString( project, dependency.getArtifactId(), relocation, relocation.getArtifactId(),
+                        DependencyPluginUtils.updateString( project, session, dependency.getArtifactId(), relocation,
+                                                            relocation.getArtifactId(),
                                       d -> dependency.setArtifactId( relocation.getArtifactId() ) );
                     }
                     if (relocation.getVersionString().equals( WildcardMap.WILDCARD ) )
@@ -216,12 +198,12 @@ public class RelocationManipulator
                     }
                     else
                     {
-                        updateString( project, dependency.getVersion(),
-                                      relocation, relocation.getVersionString(),
+                        DependencyPluginUtils.updateString( project, session, dependency.getVersion(),
+                                                            relocation, relocation.getVersionString(),
                                       d -> dependency.setVersion( relocation.getVersionString() ) );
                     }
 
-                    updateString( project, dependency.getGroupId(), relocation, relocation.getGroupId(),
+                    DependencyPluginUtils.updateString( project, session, dependency.getGroupId(), relocation, relocation.getGroupId(),
                                   d -> dependency.setGroupId( relocation.getGroupId() ) );
 
                     // Unfortunately because we iterate using the resolved project keys if the relocation updates those
@@ -246,7 +228,7 @@ public class RelocationManipulator
         boolean result = false;
 
         // Handles plugin configurations
-        final List<PluginReference> refs = findPluginReferences( project, pluginMap );
+        final List<PluginReference> refs = DependencyPluginUtils.findPluginReferences( galleyWrapper, project, pluginMap );
         final int size = dependencyRelocations.size();
 
         for ( int i = 0; i < size; i++ )
@@ -255,19 +237,21 @@ public class RelocationManipulator
             {
                 final Dependency dependency = new Dependency();
 
-                dependency.setGroupId( pluginReference.groupIdNode.getTextContent() );
-                dependency.setArtifactId( pluginReference.artifactIdNode.getTextContent() );
+                dependency.setGroupId( pluginReference.getGroupId() );
+                dependency.setArtifactId( pluginReference.getArtifactId() );
 
                 final ProjectVersionRef relocation = dependencyRelocations.get( dependency );
 
                 if ( relocation != null )
                 {
-                    updateString( project, pluginReference.groupIdNode.getTextContent(), relocation, relocation.getGroupId(),
+                    DependencyPluginUtils.updateString( project, session, pluginReference.getGroupId(), relocation,
+                                                        relocation.getGroupId(),
                                   d -> pluginReference.groupIdNode.setTextContent( relocation.getGroupId() ) );
 
                     if ( !relocation.getArtifactId().equals( WildcardMap.WILDCARD ) )
                     {
-                        updateString( project, pluginReference.artifactIdNode.getTextContent(), relocation, relocation.getArtifactId(),
+                        DependencyPluginUtils.updateString( project, session, pluginReference.getArtifactId(), relocation,
+                                                            relocation.getArtifactId(),
                                       d -> pluginReference.artifactIdNode.setTextContent( relocation.getArtifactId() ) );
                     }
 
@@ -279,11 +263,12 @@ public class RelocationManipulator
                         }
                         else
                         {
-                            updateString( project, pluginReference.versionNode.getTextContent(), relocation, relocation.getVersionString(),
+                            DependencyPluginUtils.updateString( project, session, pluginReference.versionNode.getTextContent(), relocation, relocation.getVersionString(),
                                           d -> pluginReference.versionNode.setTextContent( relocation.getVersionString() ) );
                         }
                     }
-                    pluginReference.container.setConfiguration( getConfigXml( pluginReference.groupIdNode ) );
+                    pluginReference.container.setConfiguration( DependencyPluginUtils.getConfigXml( galleyWrapper,
+                                                                                                    pluginReference.groupIdNode ) );
 
                     logger.debug( "Update plugin: set {} to {}", relocation, pluginReference );
 
@@ -310,7 +295,7 @@ public class RelocationManipulator
 
                     if ( !relocation.getArtifactId().equals( WildcardMap.WILDCARD ) )
                     {
-                        updateString( project, plugin.getArtifactId(), relocation, relocation.getArtifactId(), d -> plugin.setArtifactId( relocation.getArtifactId() ) );
+                        DependencyPluginUtils.updateString( project, session, plugin.getArtifactId(), relocation, relocation.getArtifactId(), d -> plugin.setArtifactId( relocation.getArtifactId() ) );
                     }
                     if ( relocation.getVersionString().equals( WildcardMap.WILDCARD ) )
                     {
@@ -318,10 +303,10 @@ public class RelocationManipulator
                     }
                     else
                     {
-                        updateString( project, plugin.getVersion(), relocation, relocation.getVersionString(), d -> plugin.setVersion( relocation.getVersionString() ) );
+                        DependencyPluginUtils.updateString( project, session, plugin.getVersion(), relocation, relocation.getVersionString(), d -> plugin.setVersion( relocation.getVersionString() ) );
                     }
 
-                    updateString( project, plugin.getGroupId(), relocation, relocation.getGroupId(), d -> plugin.setGroupId( relocation.getGroupId() ) );
+                    DependencyPluginUtils.updateString( project, session, plugin.getGroupId(), relocation, relocation.getGroupId(), d -> plugin.setGroupId( relocation.getGroupId() ) );
 
                     postFixUp.put( new SimpleProjectVersionRef( plugin.getGroupId(), plugin.getArtifactId(),
                                                                 isEmpty( plugin.getVersion() ) ? "*" : plugin.getVersion()), plugin );
@@ -336,231 +321,9 @@ public class RelocationManipulator
         return result;
     }
 
-    /**
-     * This handles updating a value (be it from a Dependency or Plugin) e.g. {@code artifactId} to its new value taking into
-     * account if there are any properties.
-     *
-     * @param project a references to the Maven Project
-     * @param originalValue the original property value e.g. the value of {@code artifactId}
-     * @param originalRelocation the complete original relocation
-     * @param relocation the portion of the relocation that is currently being processed
-     * @param c a Consumer function that will update the corresponding Dependency/Plugin if its not a property.
-     * @throws ManipulationException if an error occurs.
-     */
-    private void updateString( Project project, String originalValue, ProjectVersionRef originalRelocation, String relocation,
-                               Consumer<String> c ) throws ManipulationException
-    {
-        if ( StringUtils.contains( originalValue, "$" ))
-        {
-            originalValue = originalValue.substring( 2, originalValue.length() - 1 );
-            if ( StringUtils.countMatches( originalValue, "${" ) > 1 )
-            {
-                throw new ManipulationException( "Relocations with multiple embedded version properties not supported" );
-            }
-            logger.debug( "Updating relocation for {} with property {} to new value {}", originalRelocation, originalValue, relocation );
-            PropertiesUtils.updateProperties( session, project, true, originalValue, relocation );
-        }
-        else
-        {
-            c.accept( relocation );
-        }
-    }
-
-    private PluginReference findPluginReference( final ConfigurationContainer container, final Node parent )
-    {
-        if ( parent == null )
-        {
-            return null;
-        }
-
-        final NodeList children = parent.getChildNodes();
-        final int length = children.getLength();
-
-        logger.debug( "Update child nodes for {} with {} children", parent.getNodeName(), length );
-
-        Node groupIdNode = null;
-        Node artifactIdNode = null;
-        Node versionNode = null;
-
-        for ( int i = 0; i < length; i++ )
-        {
-            final Node node = children.item( i );
-
-            switch ( node.getNodeName() )
-            {
-                case "groupId":
-                    groupIdNode = node;
-                    break;
-                case "artifactId":
-                    artifactIdNode = node;
-                    break;
-                case "version":
-                    versionNode = node;
-                    break;
-            }
-        }
-
-        if ( groupIdNode != null && artifactIdNode != null )
-        {
-            PluginReference ref = new PluginReference( container, groupIdNode, artifactIdNode, versionNode );
-
-            logger.debug( "Found plugin reference: {}", ref );
-
-            return ref;
-        }
-
-        return null;
-    }
-
-    private List<PluginReference> findPluginReferences( final Map.Entry<ConfigurationContainer, String> entry, final NodeList children )
-    {
-        final int length = children.getLength();
-
-        logger.debug( "Got {} children to update plugin GAVs", length );
-
-        final List<PluginReference> refs = new ArrayList<>( length );
-
-        for ( int i = 0; i < length; i++ )
-        {
-            final Node node = children.item( i );
-
-            logger.debug( "Child name is {} and text content is {}", node.getNodeName(), node.getTextContent() );
-
-            final PluginReference ref = findPluginReference( entry.getKey(), node );
-
-            if ( ref != null )
-            {
-                refs.add( ref );
-            }
-        }
-
-        return refs;
-    }
-
-    private List<PluginReference> findPluginReferences( final Project project, final Map<ProjectVersionRef, Plugin> pluginMap ) throws ManipulationException
-    {
-        final Collection<Plugin> plugins = pluginMap.values();
-        final List<PluginReference> refs = new ArrayList<>();
-
-        for ( final Plugin plugin : plugins )
-        {
-            final Map<ConfigurationContainer, String> configs = findConfigurations( plugin );
-
-            logger.debug( "Found {} configs for plugin {}:{}:{}", configs.size(), plugin.getGroupId(), plugin.getArtifactId(), plugin.getVersion() );
-
-            for ( final Map.Entry<ConfigurationContainer, String> entry : configs.entrySet() )
-            {
-                try
-                {
-                    final Document doc = galleyWrapper.parseXml( entry.getValue() );
-                    final XPath xPath = XPathFactory.newInstance().newXPath();
-                    final PluginReference ref = findPluginReference( entry.getKey(), doc.getFirstChild() );
-
-                    if ( ref !=  null )
-                    {
-                        refs.add( ref );
-                    }
-
-                    final NodeList artifactItems = (NodeList) xPath.evaluate( ".//artifactItems/*", doc, XPathConstants.NODESET );
-                    final List<PluginReference> artifactItemRefs = findPluginReferences( entry, artifactItems );
-
-                    refs.addAll( artifactItemRefs );
-                }
-                catch ( final GalleyMavenXMLException e )
-                {
-                    throw new ManipulationException( "Unable to parse config for plugin {} in {}", plugin.getId(), project.getKey(), e );
-                }
-                catch ( final  XPathExpressionException e )
-                {
-                    throw new ManipulationException( "Invalid XPath expression for plugin {} in {}", plugin.getId(), project.getKey(), e );
-                }
-            }
-        }
-
-        return refs;
-    }
-
-    private Map<ConfigurationContainer, String> findConfigurations( final Plugin plugin )
-    {
-        if ( plugin == null )
-        {
-            return Collections.emptyMap();
-        }
-
-        final Map<ConfigurationContainer, String> configs = new LinkedHashMap<>();
-        final Object pluginConfiguration = plugin.getConfiguration();
-
-        if ( pluginConfiguration != null )
-        {
-            configs.put( plugin, pluginConfiguration.toString() );
-        }
-
-        final List<PluginExecution> executions = plugin.getExecutions();
-
-        if ( executions != null )
-        {
-            for ( PluginExecution execution : executions )
-            {
-                final Object executionConfiguration = execution.getConfiguration();
-
-                if ( executionConfiguration != null )
-                {
-                    configs.put( execution, executionConfiguration.toString() );
-                }
-            }
-        }
-
-        return configs;
-    }
-
-    private Xpp3Dom getConfigXml( final Node node ) throws ManipulationException
-    {
-        final String config = galleyWrapper.toXML( node.getOwnerDocument(), false ).trim();
-
-        try
-        {
-            return Xpp3DomBuilder.build( new StringReader( config ) );
-        }
-        catch ( final XmlPullParserException | IOException e )
-        {
-            throw new ManipulationException( "Failed to re-parse plugin configuration into Xpp3Dom: {}. Config was: {}", e.getMessage(), config, e );
-        }
-    }
-
     @Override
     public int getExecutionIndex()
     {
         return 7;
-    }
-
-    private static final class PluginReference
-    {
-        private final ConfigurationContainer container;
-
-        private final Node groupIdNode;
-
-        private final Node artifactIdNode;
-
-        private final Node versionNode;
-
-        PluginReference( final ConfigurationContainer container, final Node groupIdNode, final Node artifactIdNode,
-                         final Node versionNode )
-        {
-            this.container = container;
-            this.groupIdNode = groupIdNode;
-            this.artifactIdNode = artifactIdNode;
-            this.versionNode = versionNode;
-        }
-
-        @Override
-        public String toString()
-        {
-            return "PluginReference{" + "container=" + container + nodeToString(groupIdNode) + nodeToString(artifactIdNode) + nodeToString(versionNode) + '}';
-        }
-
-        private String nodeToString(Node node)
-        {
-            return node == null ? "" : ", [" + node.getNodeName() + "=" + node.getTextContent() + "]";
-        }
     }
 }

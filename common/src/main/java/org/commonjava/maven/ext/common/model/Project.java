@@ -552,6 +552,67 @@ public class Project
 
 
     /**
+     * This method will scan the dependencies for *every* plugin in this project and return a list of
+     * maps of fully resolved version to dependency.
+     *
+     * Note that this will scan for plugins included managed plugins, build plugins and those in profiles.
+     * It utilises a list to return as each plugin could have the same dependencies which would conflict.
+     *
+     * Note that while updating the {@link Dependency} reference returned will be reflected in the Model
+     * as it is the same object, if you wish to remove or add items to the Model then you must use {@link #getModel()}
+     *
+     * @param session MavenSessionHandler, used by {@link PropertyResolver}
+     * @return a list containing maps of fully resolved {@link ArtifactRef} to the original {@link Dependency}
+     * @throws ManipulationException if an error occurs
+     */
+    public List<Map<ArtifactRef, Dependency>> getAllResolvedPluginDependencies( MavenSessionHandler session ) throws ManipulationException
+    {
+        List<Map<ArtifactRef, Dependency>> allResolvedDependencies = new ArrayList<>();
+
+        if ( getModel().getBuild() != null )
+        {
+            for (Plugin p : getModel().getBuild().getPlugins())
+            {
+                Map<ArtifactRef, Dependency> dependencies = new HashMap<>();
+                resolveDeps( session, p.getDependencies(), false, dependencies );
+                allResolvedDependencies.add( dependencies );
+            }
+            if ( getModel().getBuild().getPluginManagement() != null )
+            {
+                for (Plugin p : getModel().getBuild().getPluginManagement().getPlugins())
+                {
+                    Map<ArtifactRef, Dependency> dependencies = new HashMap<>();
+                    resolveDeps( session, p.getDependencies(), false, dependencies );
+                    allResolvedDependencies.add( dependencies );
+                }
+            }
+        }
+        for ( final Profile profile : ProfileUtils.getProfiles( session, model ) )
+        {
+            if ( profile.getBuild() != null )
+            {
+                for (Plugin p : profile.getBuild().getPlugins())
+                {
+                    Map<ArtifactRef, Dependency> dependencies = new HashMap<>();
+                    resolveDeps( session, p.getDependencies(), false, dependencies );
+                    allResolvedDependencies.add( dependencies );
+                }
+                if (profile.getBuild().getPluginManagement() != null)
+                {
+                    for (Plugin p : profile.getBuild().getPluginManagement().getPlugins())
+                    {
+                        Map<ArtifactRef, Dependency> dependencies = new HashMap<>();
+                        resolveDeps( session, p.getDependencies(), false, dependencies );
+                        allResolvedDependencies.add( dependencies );
+                    }
+                }
+            }
+        }
+        return allResolvedDependencies;
+    }
+
+
+    /**
      * This method will scan the dependencies in the dependencyManagement section of this project and return a
      * fully resolved list. Note that while updating the {@link Dependency} reference returned will be reflected
      * in the Model as it is the same object, if you wish to remove or add items to the Model then you must use {@link #getModel()}
