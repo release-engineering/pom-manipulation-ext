@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.commonjava.maven.ext.common.model;
+package org.commonjava.maven.ext.core.util;
 
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.Exclusion;
@@ -30,6 +30,8 @@ public class DependencyPluginWrapper
 
     private Dependency dependency = null;
 
+    private PluginReference pluginReference = null;
+
     public DependencyPluginWrapper( InputLocationTracker o ) throws ManipulationException
     {
         if ( o instanceof Dependency)
@@ -39,6 +41,10 @@ public class DependencyPluginWrapper
         else if (o instanceof Plugin)
         {
             plugin = (Plugin)o;
+        }
+        else if (o instanceof PluginReference)
+        {
+            pluginReference = (PluginReference)o;
         }
         else
         {
@@ -52,23 +58,31 @@ public class DependencyPluginWrapper
         {
             return dependency.getVersion();
         }
-        else
+        else if (plugin != null)
         {
             return plugin.getVersion();
+        }
+        else
+        {
+            return pluginReference.getVersion();
         }
     }
 
     public void setVersion( String target )
+                    throws ManipulationException
     {
         if ( dependency != null )
         {
             dependency.setVersion( target );
         }
-        else
+        else if (plugin != null)
         {
             plugin.setVersion( target );
         }
-
+        else
+        {
+            pluginReference.setVersion( target );
+        }
     }
 
     public void addExclusion( Exclusion e ) throws ManipulationException

@@ -264,10 +264,7 @@ public class PluginManipulator extends CommonManipulator implements Manipulator
             logger.debug( "Applying plugin changes for {} to: {}", PluginType.RemotePM, ga( project ) );
         }
 
-        final CommonState commonState = session.getState( CommonState.class );
         final PluginState pluginState = session.getState( PluginState.class );
-
-        // TODO: Do we need removeReactorGAs ?
 
         // Map of Group : Map of artifactId [ may be wildcard ] : value
         final WildcardMap<String> explicitOverrides = new WildcardMap<>();
