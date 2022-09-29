@@ -305,7 +305,7 @@ public class CliTest
                 + "com.github.olivergondza:maven-jdk-tools-wrapper:0.1                             jar                                     compile             \n"
                 + "com.github.stefanbirkner:system-rules:1.[.\\d+]+\\s+                            jar                                     test                \n"
                 + "com.google.inject:guice:4.0                                                     jar                 no_aop              compile             \n"
-                + "com.jayway.jsonpath:json-path:2.3.0                                             jar                                     compile             \n"
+                + "com.jayway.jsonpath:json-path:2.[.\\d+]+\\s+                                    jar                                     compile             \n"
                 + "com.konghq:unirest-java:3.[.\\d+]+\\s+                                          jar                                     compile             \n"
                 + "com.konghq:unirest-objectmapper-jackson:3.[.\\d+]+\\s+                          jar                                     compile             \n"
                 + "com.redhat.rcm:redhat-releng-tools:11\\s+                                       pom                                     compile             \n"
@@ -346,7 +346,7 @@ public class CliTest
                 + "org.codehaus.mojo:animal-sniffer-maven-plugin:1.[.\\d+]+\\s+                    maven-plugin                                                \n"
                 + "org.codehaus.plexus:plexus-interpolation:[.\\d+]+\\s+                           jar                                     provided            \n"
                 + "org.codehaus.plexus:plexus-utils:[.\\d+]+\\s+                                   jar                                     compile             \n"
-                + "org.commonjava.maven.atlas:atlas-identities:0.17.1                              jar                                     compile             \n"
+                + "org.commonjava.maven.atlas:atlas-identities:0.17.2                              jar                                     compile             \n"
                 + "org.commonjava.maven.galley:galley-api:0.16.6                                   jar                                     compile             \n"
                 + "org.commonjava.maven.galley:galley-core:0.16.6                                  jar                                     compile             \n"
                 + "org.commonjava.maven.galley:galley-maven:0.16.6                                 jar                                     compile             \n"
@@ -364,8 +364,8 @@ public class CliTest
                 + "org.projectlombok:lombok:1.[.\\d+]+\\s+                                         jar                                     provided            \n"
                 + "org.projectlombok:lombok-maven-plugin:1.[.\\d+]+\\s+                            maven-plugin                                                \n"
                 + "org.slf4j:slf4j-api:1.[.\\d+]+\\s+                                              jar                                     compile             \n"
-                + "org.xmlunit:xmlunit-core:2.7.0                                                  jar                                     test                \n"
-                + "org.xmlunit:xmlunit-matchers:2.7.0                                              jar                                     test                \n"
+                + "org.xmlunit:xmlunit-core:2.[.\\d+]+\\s+                                         jar                                     test                \n"
+                + "org.xmlunit:xmlunit-matchers:2.[.\\d+]+\\s+                                     jar                                     test                \n"
                 + "org.yaml:snakeyaml:1.[.\\d+]+\\s+                                               jar                                     compile.*") );
 
     }

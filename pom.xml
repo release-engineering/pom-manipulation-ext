@@ -78,13 +78,13 @@
     <addJarIndex>false</addJarIndex>
 
     <mavenVersion>3.6.3</mavenVersion>
-    <atlasVersion>0.17.1</atlasVersion>
+    <atlasVersion>0.17.2</atlasVersion>
     <daVersion>2.1.0</daVersion>
     <galleyVersion>0.16.6</galleyVersion>
 
-    <groovyVersion>3.0.10</groovyVersion>
-    <unirestVersion>3.11.10</unirestVersion>
-    <jsonPathVersion>2.3.0</jsonPathVersion>
+    <groovyVersion>3.0.13</groovyVersion>
+    <unirestVersion>3.13.11</unirestVersion>
+    <jsonPathVersion>2.7.0</jsonPathVersion>
     <slf4jVersion>1.7.30</slf4jVersion>
     <docletVersion>1.1</docletVersion>
 
@@ -287,7 +287,7 @@
       <dependency>
         <groupId>org.codehaus.plexus</groupId>
         <artifactId>plexus-utils</artifactId>
-        <version>3.3.0</version>
+        <version>3.4.2</version>
       </dependency>
 
       <dependency>
@@ -300,7 +300,7 @@
       <dependency>
         <groupId>info.picocli</groupId>
         <artifactId>picocli</artifactId>
-        <version>4.6.1</version>
+        <version>4.6.3</version>
       </dependency>
       <dependency>
         <groupId>commons-codec</groupId>
@@ -310,7 +310,7 @@
       <dependency>
         <groupId>commons-io</groupId>
         <artifactId>commons-io</artifactId>
-        <version>2.10.0</version>
+        <version>2.11.0</version>
       </dependency>
       <dependency>
         <groupId>commons-lang</groupId>
@@ -325,7 +325,7 @@
       <dependency>
         <groupId>org.jdom</groupId>
         <artifactId>jdom2</artifactId>
-        <version>2.0.6</version>
+        <version>2.0.6.1</version>
       </dependency>
       <dependency>
         <groupId>org.apache.maven.release</groupId>
@@ -400,6 +400,7 @@
         <version>9.4.42.v20210604</version>
       </dependency>
 
+      <!-- Attempting to upgrade this causes performance issues on Appveyor CI -->
       <dependency>
         <groupId>org.eclipse.sisu</groupId>
         <artifactId>org.eclipse.sisu.plexus</artifactId>
@@ -446,7 +447,7 @@
       <dependency>
         <groupId>org.yaml</groupId>
         <artifactId>snakeyaml</artifactId>
-        <version>1.32</version>
+        <version>1.33</version>
       </dependency>
       <dependency>
         <groupId>com.squareup</groupId>
@@ -469,7 +470,7 @@
       <dependency>
         <groupId>org.projectlombok</groupId>
         <artifactId>lombok</artifactId>
-        <version>1.18.20</version>
+        <version>1.18.24</version>
         <scope>provided</scope>
       </dependency>
 
@@ -494,25 +495,25 @@
       <dependency>
         <groupId>org.jboss.byteman</groupId>
         <artifactId>byteman-bmunit</artifactId>
-        <version>4.0.18</version>
+        <version>4.0.19</version>
         <scope>test</scope>
       </dependency>
       <dependency>
         <groupId>org.xmlunit</groupId>
         <artifactId>xmlunit-core</artifactId>
-        <version>2.7.0</version>
+        <version>2.9.0</version>
         <scope>test</scope>
       </dependency>
       <dependency>
         <groupId>org.xmlunit</groupId>
         <artifactId>xmlunit-matchers</artifactId>
-        <version>2.7.0</version>
+        <version>2.9.0</version>
         <scope>test</scope>
       </dependency>
       <dependency>
         <groupId>com.github.stefanbirkner</groupId>
         <artifactId>system-rules</artifactId>
-        <version>1.18.0</version>
+        <version>1.19.0</version>
         <scope>test</scope>
       </dependency>
     </dependencies>

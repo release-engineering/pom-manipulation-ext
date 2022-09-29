@@ -160,7 +160,7 @@ public class BaseScriptTest
             // else pass
         }
 
-        assertEquals( "0.17.1", root.getModel()
+        assertEquals( "0.17.2", root.getModel()
                                     .getDependencyManagement()
                                     .getDependencies()
                                     .stream()
