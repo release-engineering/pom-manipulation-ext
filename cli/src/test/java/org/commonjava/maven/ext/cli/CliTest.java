@@ -382,6 +382,7 @@ public class CliTest
                                                             + "         5          ProfileInjectionManipulator             \n"
                                                             + "         6          SuffixManipulator                       \n"
                                                             + "         7          RelocationManipulator                   \n"
+                                                            + "         8          DependencyInjectionManipulator          \n"
                                                             + "         10         RESTCollector                           \n"
                                                             + "         20         ProjectVersioningManipulator            \n"
                                                             + "         25         ParentInjectionManipulator              \n"

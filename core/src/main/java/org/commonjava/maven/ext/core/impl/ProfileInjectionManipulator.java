@@ -34,7 +34,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static org.commonjava.maven.ext.core.util.IdUtils.ga;
 
 /**
  * {@link Manipulator} implementation that can resolve a remote pom file and inject the remote pom's
@@ -48,7 +47,7 @@ public class ProfileInjectionManipulator
 {
     private final Logger logger = LoggerFactory.getLogger( getClass() );
 
-    private ModelIO modelBuilder;
+    private final ModelIO modelBuilder;
 
     private ManipulationSession session;
 
