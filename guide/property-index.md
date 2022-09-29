@@ -5,6 +5,7 @@ title: "Index of Properties"
   * [allowConfigFilePrecedence](configuration.html#overview)
   * [bomBuilder](dep-manip.html#bom-generation)
   * [dependencyExclusion.](dep-manip.html#exclusions-and-overrides)	(deprecated)
+  * [dependencyInjection](dep-manip.html#dependency-injection)
   * [dependencyManagement](dep-manip.html#remote-pom)
   * [dependencyOverride.](dep-manip.html#exclusions-and-overrides)
   * [dependencyRelocations.](dep-manip.html#dependency-relocations)

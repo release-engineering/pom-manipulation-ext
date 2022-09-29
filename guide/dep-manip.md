@@ -360,6 +360,13 @@ In order to handle the situation where one GAV is changed to another (e.g., from
 
 If the property `-DdependencyRemoval=group:artifact,....` is set, PME will remove the specified dependency from the POM files. The argument should be a comma separated list of group:artifact.
 
+### Dependency Injection
+
+If the property `-DdependencyInjection=group:artifact:version,....` is set, PME will inject the
+specified dependency into the top level (inheritance root) POM files. The argument should be a
+comma separated list of group:artifact:version. The injection dependencies <b>are</b> subject to
+alignment.
+
 ### BOM Generation
 
 If the property `-DbomBuilder=true` is set, then the PME BOM Builder will be activated. This will deploy a new POM to the repository under the GAV `<project-top-level-groupId>.<project-top-level-artifactId>:pme-bom:<version>` e.g., `org.projectOne.artifactOne:pme-bom:1.0.0`. It will contain a list of all adjusted modules and is suitable for use as a remote BOM. As it has a predictable name it may be used in a build of a subsequent project to align to this one e.g.,
