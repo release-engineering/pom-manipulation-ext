@@ -39,8 +39,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import static org.commonjava.maven.ext.core.util.IdUtils.ga;
-
 /**
  * {@link Manipulator} implementation that can remove specified plugins from a project's pom file.
  * Configuration is stored in a {@link DependencyState} instance, which is in turn stored in the {@link ManipulationSession}.
