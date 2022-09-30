@@ -30,8 +30,8 @@ install:
       mvn --version
 
 cache:
-  - C:\apache-maven -> appveyor.yml
-  - C:\Users\appveyor\.m2 -> pom.xml
+  - C:\apache-maven
+  - C:\Users\appveyor\.m2
 
 build_script:
   - ps: mvn '-Denforcer.skip=true' '-Danimal.sniffer.skip=true' '-Dmaven.javadoc.skip=true' -B -Prun-its clean install
