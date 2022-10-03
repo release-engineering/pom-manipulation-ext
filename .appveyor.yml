@@ -27,14 +27,13 @@ environment:
 install:
   - cmd: >-
       SET PATH=C:\apache-maven\apache-maven-%MAVEN_VERSION%\bin;%JAVA_HOME%\bin;%PATH%
-      mvn --version
 
 cache:
   - C:\apache-maven
   - C:\Users\appveyor\.m2
 
 build_script:
-  - ps: mvn '-Denforcer.skip=true' '-Danimal.sniffer.skip=true' '-Dmaven.javadoc.skip=true' -B -Prun-its clean install
+  - ps: mvn '-Denforcer.skip=true' '-Danimal.sniffer.skip=true' '-Dmaven.javadoc.skip=true' '-Djacoco.skip=true' -B -V -Prun-its install
 
 #on_finish:
 #  - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
