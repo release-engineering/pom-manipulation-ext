@@ -604,6 +604,7 @@
               <exclude>ide-config/eclipse.importorder</exclude>
               <exclude>**/commonjava/maven/ext/common/ExceptionHelper.java</exclude>
               <exclude>**/src/test/resources/org/commonjava/maven/ext/io/pom.xml</exclude>
+              <exclude>**/src/test/resources/gavs.txt</exclude>
             </excludes>
           </configuration>
         </plugin>
