@@ -23,7 +23,9 @@ Use the `dependencyManagement` property to list your BOMs:
 
     mvn install -DdependencyManagement=org.foo:my-dep-pom:1.0
 
-Multiple remote dependency-management poms can be specified using a comma separated list of GAVs (groupId, artifactId, version). The poms are specified in order of priority, so if the remote BOMs contain some of the same dependencies, the versions listed in the first bom in the list will be used.
+Multiple remote dependency-management poms can be specified using a comma separated list of GAVs (groupId,
+artifactId, version). The list also supports a remote HTTP file containing a comma or newline separated list of GAVs.
+The poms are specified in order of priority, so if the remote BOMs contain some of the same dependencies, the versions listed in the first bom in the list will be used.
 
     mvn install -DdependencyManagement=org.foo:my-dep-pom:1.0,org.bar:my-dep-pom:2.0
 
@@ -358,13 +360,16 @@ In order to handle the situation where one GAV is changed to another (e.g., from
 
 ### Dependency Removal
 
-If the property `-DdependencyRemoval=group:artifact,....` is set, PME will remove the specified dependency from the POM files. The argument should be a comma separated list of group:artifact.
+If the property `-DdependencyRemoval=group:artifact,....` is set, PME will remove the specified dependency from the
+POM files. The argument should be a comma separated list of group:artifact. The list also supports a remote HTTP
+file containing a comma or newline separated list of GAs.
 
 ### Dependency Injection
 
 If the property `-DdependencyInjection=group:artifact:version,....` is set, PME will inject the
 specified dependency into the top level (inheritance root) POM files. The argument should be a
-comma separated list of group:artifact:version. The injection dependencies <b>are</b> subject to
+comma separated list of group:artifact:version. The list also supports a remote HTTP file containing a comma or
+newline separated list of GAVs. The injection dependencies <b>are</b> subject to
 alignment.
 
 ### BOM Generation
