@@ -26,11 +26,11 @@ import javax.inject.Named;
 import javax.inject.Singleton;
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.UUID;
 
 /**
@@ -89,7 +89,7 @@ public class FileIO
     public static LineSeparator determineEOL( File file ) throws ManipulationException
     {
         try (BufferedReader bufferIn = new BufferedReader(
-                        new InputStreamReader( new FileInputStream( file ), StandardCharsets.UTF_8 ) ))
+                        new InputStreamReader( Files.newInputStream( file.toPath() ), StandardCharsets.UTF_8 ) ))
         {
             int prev = -1;
             int ch;

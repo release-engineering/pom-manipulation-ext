@@ -15,6 +15,7 @@
  */
 package org.commonjava.maven.ext.core.util;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Parent;
 import org.apache.maven.project.MavenProject;
@@ -23,14 +24,21 @@ import org.commonjava.maven.atlas.ident.ref.ProjectRef;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleProjectRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef;
+import org.commonjava.maven.ext.common.ManipulationUncheckedException;
 import org.commonjava.maven.ext.common.model.Project;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
+import java.io.IOException;
+import java.net.URL;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import static org.apache.commons.lang.StringUtils.isEmpty;
+import static org.apache.commons.lang.StringUtils.isNotEmpty;
 
 /**
  * Convenience utilities for converting between {@link ProjectVersionRef}, {@link Model}, {@link MavenProject} and GA / GAV strings.
@@ -46,8 +54,8 @@ public final class IdUtils
     }
 
     /**
-     * Splits the value on ',', then wraps each value in {@link SimpleProjectVersionRef#parse(String)} and prints a warning / skips in the event of a
-     * parsing error. Returns null if the input value is null.
+     * Splits the value on ',', then wraps each value in {@link SimpleProjectVersionRef#parse(String)}. Returns null
+     * if the input value is null.
      * @param value a comma separated list of GAV to parse
      * @return a collection of parsed ProjectVersionRef.
      */
@@ -63,16 +71,41 @@ public final class IdUtils
             final List<ProjectVersionRef> refs = new ArrayList<>();
             for ( final String gav : gavs )
             {
-                refs.add( SimpleProjectVersionRef.parse( gav ) );
+                if (isNotEmpty( gav ))
+                {
+                    if ( gav.startsWith( "http://" ) || gav.startsWith( "https://") )
+                    {
+                        logger.debug( "Found remote file in {}", gav );
+                        try
+                        {
+                            File found = File.createTempFile( UUID.randomUUID().toString(), null );
+                            FileUtils.copyURLToFile( new URL( gav ), found );
+                            String potentialRefs =
+                                            FileUtils.readFileToString( found, Charset.defaultCharset() ).trim().replace( "\n", "," );
+                            List<ProjectVersionRef> readRefs = parseGAVs( potentialRefs );
+                            if ( readRefs != null )
+                            {
+                                refs.addAll( readRefs );
+                            }
+                        }
+                        catch ( InvalidRefException | IOException e )
+                        {
+                            throw new ManipulationUncheckedException( e );
+                        }
+                    }
+                    else
+                    {
+                        refs.add( SimpleProjectVersionRef.parse( gav ) );
+                    }
+                }
             }
-
             return refs;
         }
     }
 
     /**
-     * Splits the value on ',', then wraps each value in {@link SimpleProjectRef#parse(String)} and prints a warning / skips in the event of a
-     * parsing error. Returns null if the input value is null.
+     * Splits the value on ',', then wraps each value in {@link SimpleProjectRef#parse(String)}. Returns null if the
+     * input value is null.
      * @param value a comma separated list of GA to parse
      * @return a collection of parsed ProjectRef.
      */
@@ -88,15 +121,32 @@ public final class IdUtils
             final List<ProjectRef> refs = new ArrayList<>();
             for ( final String gav : gavs )
             {
-                try
+                if (isNotEmpty( gav ))
                 {
-                    final ProjectRef ref = SimpleProjectRef.parse( gav );
-                    refs.add( ref );
-                }
-                catch ( final InvalidRefException e )
-                {
-                    logger.error( "Skipping invalid remote management GAV: {}", gav );
-                    throw e;
+                    if ( gav.startsWith( "http://" ) || gav.startsWith( "https://") )
+                    {
+                        logger.debug( "Found remote file in {}", gav );
+                        try
+                        {
+                            File found = File.createTempFile( UUID.randomUUID().toString(), null );
+                            FileUtils.copyURLToFile( new URL( gav ), found );
+                            String potentialRefs =
+                                            FileUtils.readFileToString( found, Charset.defaultCharset() ).trim().replace( "\n", "," );
+                            List<ProjectRef> readRefs = parseGAs( potentialRefs );
+                            if ( readRefs != null )
+                            {
+                                refs.addAll( readRefs );
+                            }
+                        }
+                        catch ( InvalidRefException | IOException e )
+                        {
+                            throw new ManipulationUncheckedException( e );
+                        }
+                    }
+                    else
+                    {
+                        refs.add( SimpleProjectRef.parse( gav ) );
+                    }
                 }
             }
 
