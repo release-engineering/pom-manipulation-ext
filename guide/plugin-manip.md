@@ -32,7 +32,7 @@ A remote plugin management POM is used to specify the plugin versions (and confi
 
     mvn install -DpluginManagement=org.jboss:jboss-parent:10
 
-This will inject all `<pluginManagement/>` versions, executions and configuration from the remote POM into the local POM. As with [dependency management](dep-manip.html), multiple remote plugin management POMs can be specified on the command line using a comma separated list of GAVs.  The first POM specified will be given the highest priority if conflicts occur.
+This will inject all `<pluginManagement/>` versions, executions and configuration from the remote POM into the local POM. As with [dependency management](dep-manip.html), multiple remote plugin management POMs can be specified on the command line using a comma separated list of GAVs. The list also supports a remote HTTP file containing a comma or newline separated list of GAVs. The first POM specified will be given the highest priority if conflicts occur.
 
     mvn install -DpluginManagement=org.company:pluginMgrA:1.0,org.company:pluginMgrB:2.0
 
@@ -153,7 +153,7 @@ In order to handle the situation where one GAV is changed to another (e.g. from 
 
 ### Plugin Removal
 
-If the property `pluginRemoval` (*Deprecated property `plugin-removal` for versions **3.8.1 and prior***) is set, PME will remove the specified plugins from the POM files. The argument should be a comma separated list of group:artifact. For example:
+If the property `pluginRemoval` (*Deprecated property `plugin-removal` for versions **3.8.1 and prior***) is set, PME will remove the specified plugins from the POM files. The argument should be a comma separated list of group:artifact. The list also supports a remote HTTP file containing a comma or newline separated list of GAs. For example:
 
     -DpluginRemoval=group:artifact,....
 
