@@ -82,7 +82,7 @@ public final class PluginReference implements InputLocationTracker
 
     public String getVersion()
     {
-        return versionNode.getTextContent();
+        return versionNode == null ? null : versionNode.getTextContent();
     }
 
     public void setVersion( String version ) throws ManipulationException

@@ -524,9 +524,14 @@ public class DependencyManipulator extends CommonManipulator implements Manipula
         final Map<ProjectVersionRef, InputLocationTracker> pluginsWithDeps = new HashMap<>();
         for ( PluginReference reference : refs )
         {
-            String resolvedVersion = PropertyResolver.resolveInheritedProperties( session, project, reference.getVersion());
-            ProjectVersionRef resolvedRef = new SimpleProjectVersionRef( reference.getGroupId(), reference.getArtifactId(), resolvedVersion );
-            pluginsWithDeps.put(resolvedRef, reference);
+            if (reference.getVersion() != null)
+            {
+                String resolvedVersion =
+                                PropertyResolver.resolveInheritedProperties( session, project, reference.getVersion() );
+                ProjectVersionRef resolvedRef = new SimpleProjectVersionRef( reference.getGroupId(), reference.getArtifactId(),
+                                                                             resolvedVersion );
+                pluginsWithDeps.put( resolvedRef, reference );
+            }
         }
         logger.debug( "Located plugins with resolved artifact references: {}", pluginsWithDeps );
 
