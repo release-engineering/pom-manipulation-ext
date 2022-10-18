@@ -28,3 +28,6 @@ assert dependency.version.text() == "2.5"
 dependency = pom.dependencyManagement.dependencies.dependency.find { it.artifactId.text() == "commons-codec" }
 assert dependency != null
 assert dependency.version.text() == "1.10"
+
+assert pomFile.text.contains("ignoredUnusedDeclaredDependency>commons-lang:commons-lang</ignoredUnusedDeclaredDependency")
+assert pomFile.text.contains("ignoredUnusedDeclaredDependency>commons-codec:commons-codec</ignoredUnusedDeclaredDependency")
