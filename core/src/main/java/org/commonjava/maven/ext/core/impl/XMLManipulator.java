@@ -52,7 +52,7 @@ public class XMLManipulator
 {
     private final Logger logger = LoggerFactory.getLogger( getClass() );
 
-    private final XPath xPath = XPathFactory.newInstance().newXPath();
+    private final XPath xPath;
 
     private final XMLIO xmlIO;
 
@@ -62,6 +62,7 @@ public class XMLManipulator
     public XMLManipulator(XMLIO xmlIO)
     {
         this.xmlIO = xmlIO;
+        this.xPath = xmlIO.getXPath();
     }
 
     /**
