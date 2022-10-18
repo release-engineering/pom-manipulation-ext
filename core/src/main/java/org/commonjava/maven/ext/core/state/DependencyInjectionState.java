@@ -15,6 +15,7 @@
  */
 package org.commonjava.maven.ext.core.state;
 
+import lombok.Getter;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.ext.annotation.ConfigValue;
 import org.commonjava.maven.ext.core.util.IdUtils;
@@ -37,7 +38,23 @@ public class DependencyInjectionState
     @ConfigValue( docIndex = "dep-manip.html#dependency-injection")
     private static final String DEPENDENCY_INJECTION_PROPERTY = "dependencyInjection";
 
+    /**
+     * This will update the
+     * <a href="https://maven.apache.org/plugins/maven-dependency-plugin/analyze-mojo.html#dependency-analyze">maven-dependency-plugin</a>
+     * plugin so that a section with ignoredUnusedDeclaredDependencies is added for each dependency if the
+     * maven-dependency-plugin is declared in the root pom.
+     */
+    @ConfigValue( docIndex = "dep-manip.html#dependency-injection-assembly")
+    private static final String DEPENDENCY_INJECTION_ANALYZE_PLUGIN_PROPERTY = "dependencyInjectionAnalyzeIgnoreUnused";
+
+    /**
+     * @return the dependencies we wish to remove.
+     */
+    @Getter
     private List<ProjectVersionRef> dependencyInjection;
+
+    @Getter
+    private boolean addIgnoreUnusedAnalzyePlugin;
 
     public DependencyInjectionState( final Properties userProps)
     {
@@ -47,6 +64,9 @@ public class DependencyInjectionState
     public void initialise( Properties userProps )
     {
         dependencyInjection = IdUtils.parseGAVs( userProps.getProperty( DEPENDENCY_INJECTION_PROPERTY ) );
+        addIgnoreUnusedAnalzyePlugin =
+                        Boolean.parseBoolean( userProps.getProperty( DEPENDENCY_INJECTION_ANALYZE_PLUGIN_PROPERTY,
+                                                                     "false" ) );
     }
 
     /**
@@ -58,13 +78,5 @@ public class DependencyInjectionState
     public boolean isEnabled()
     {
         return dependencyInjection != null && !dependencyInjection.isEmpty();
-    }
-
-    /**
-     * @return the dependencies we wish to remove.
-     */
-    public List<ProjectVersionRef> getDependencyInjection()
-    {
-        return dependencyInjection;
     }
 }

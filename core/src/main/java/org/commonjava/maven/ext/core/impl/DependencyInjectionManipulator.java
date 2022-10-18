@@ -17,6 +17,8 @@ package org.commonjava.maven.ext.core.impl;
 
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.DependencyManagement;
+import org.apache.maven.model.Plugin;
+import org.apache.maven.model.PluginExecution;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.common.model.Project;
@@ -24,13 +26,14 @@ import org.commonjava.maven.ext.core.ManipulationSession;
 import org.commonjava.maven.ext.core.state.DependencyInjectionState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
+import org.codehaus.plexus.util.xml.Xpp3Dom;
 import javax.inject.Named;
 import javax.inject.Singleton;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -44,6 +47,7 @@ import java.util.Set;
 public class DependencyInjectionManipulator
         implements Manipulator
 {
+    private static final String UNUSED_DECLARED = "ignoredUnusedDeclaredDependencies";
     private final Logger logger = LoggerFactory.getLogger( getClass() );
 
     private ManipulationSession session;
@@ -89,6 +93,49 @@ public class DependencyInjectionManipulator
                 logger.debug( "Added <DependencyManagement/> for current project" );
             }
             dependencyManagement.getDependencies().addAll( 0, getDependencies( state.getDependencyInjection() ));
+
+            if (state.isAddIgnoreUnusedAnalzyePlugin())
+            {
+                Optional<Plugin> mdpPlugin = project.getModel()
+                                                    .getBuild()
+                                                    .getPlugins()
+                                                    .stream()
+                                                    .filter( p -> p.getArtifactId().equals( "maven-dependency-plugin" ) )
+                                                    .findFirst();
+
+                if ( mdpPlugin.isPresent() )
+                {
+                    logger.info( "Found plugin {} to add ignoredUnusedDeclaredDependency for {}", mdpPlugin, state.getDependencyInjection() );
+                    PluginExecution execution = mdpPlugin.get().getExecutionsAsMap().get( "analyze" );
+                    if ( execution != null )
+                    {
+                        Xpp3Dom originalConfiguration = (Xpp3Dom) execution.getConfiguration();
+                        for ( ProjectVersionRef pvr : state.getDependencyInjection() )
+                        {
+                            Xpp3Dom ignoreToAdd = new Xpp3Dom( "ignoredUnusedDeclaredDependency" );
+                            ignoreToAdd.setValue( pvr.getGroupId() + ":" + pvr.getArtifactId() );
+                            Xpp3Dom ignoredUnusedDeclaredDeps;
+
+                            if (originalConfiguration == null)
+                            {
+                                originalConfiguration = new Xpp3Dom( "configuration" );
+                                execution.setConfiguration( originalConfiguration );
+                            }
+                            if ( originalConfiguration.getChild( UNUSED_DECLARED ) == null )
+                            {
+                                ignoredUnusedDeclaredDeps = new Xpp3Dom( UNUSED_DECLARED );
+                                originalConfiguration.addChild( ignoredUnusedDeclaredDeps );
+                            }
+                            else
+                            {
+                                ignoredUnusedDeclaredDeps = originalConfiguration.getChild( UNUSED_DECLARED );
+                            }
+                            ignoredUnusedDeclaredDeps.addChild( ignoreToAdd );
+                        }
+                        logger.debug( "ignoreUnusedDeclaredDependencies is now {}", originalConfiguration.getChild( UNUSED_DECLARED ) );
+                    }
+                }
+            }
             changed.add( project );
         } );
 
