@@ -372,6 +372,18 @@ comma separated list of group:artifact:version. The list also supports a remote 
 newline separated list of GAVs. The injection dependencies <b>are</b> subject to
 alignment.
 
+#### Maven Dependency Plugin
+<table bgcolor="#ffff00">
+<tr>
+<td>
+    <b>NOTE</b> : Available from PME 4.13.
+</td>
+</tr>
+</table>
+If the property `dependencyInjectionAnalyzeIgnoreUnused` is set to true (default: false) and if the maven-dependency-plugin 
+with the analyze goal exists in the root pom, then for every injected dependency, it will add each to the
+`ignoreUnusedDeclaredDependencies` configuration.
+
 ### BOM Generation
 
 If the property `-DbomBuilder=true` is set, then the PME BOM Builder will be activated. This will deploy a new POM to the repository under the GAV `<project-top-level-groupId>.<project-top-level-artifactId>:pme-bom:<version>` e.g., `org.projectOne.artifactOne:pme-bom:1.0.0`. It will contain a list of all adjusted modules and is suitable for use as a remote BOM. As it has a predictable name it may be used in a build of a subsequent project to align to this one e.g.,
