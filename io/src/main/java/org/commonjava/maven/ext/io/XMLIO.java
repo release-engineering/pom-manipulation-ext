@@ -15,11 +15,14 @@
  */
 package org.commonjava.maven.ext.io;
 
+import lombok.Getter;
 import org.apache.commons.io.FileUtils;
 import org.commonjava.maven.ext.common.ManipulationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 import javax.inject.Named;
@@ -34,6 +37,10 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpressionException;
+import javax.xml.xpath.XPathFactory;
 import java.io.File;
 import java.io.IOException;
 import java.io.StringWriter;
@@ -45,7 +52,10 @@ public class XMLIO
 {
     private final Logger logger = LoggerFactory.getLogger( getClass() );
 
+    @Getter
+    private final XPath xPath = XPathFactory.newInstance().newXPath();
     private final DocumentBuilder builder;
+
     private final Transformer transformer;
 
     public XMLIO()
@@ -83,8 +93,16 @@ public class XMLIO
         try
         {
             doc = builder.parse( xmlFile);
+
+            // https://bugs.java.com/bugdatabase/view_bug.do?bug_id=8262285
+            // https://stackoverflow.com/questions/12669686/how-to-remove-extra-empty-lines-from-xml-file/12670194#12670194
+            NodeList nl = (NodeList) xPath.evaluate( "//text()[normalize-space(.)='']", doc, XPathConstants.NODESET);
+            for (int i=0; i < nl.getLength(); ++i) {
+                Node node = nl.item( i);
+                node.getParentNode().removeChild(node);
+            }
         }
-        catch ( SAXException | IOException e )
+        catch ( SAXException | IOException | XPathExpressionException e )
         {
             logger.error( "Unable to parse XML File", e );
             throw new ManipulationException( "Unable to parse XML File", e );
@@ -104,6 +122,13 @@ public class XMLIO
             String result = convert( contents );
             // Adjust for comment before root node and possibly insert a newline.
             result = result.replaceFirst("(?s)(<!--.*-->)<", "$1\n<");
+
+            // JDK adds extra newlines to CDATA sections.
+            // https://bugs.java.com/bugdatabase/view_bug.do?bug_id=JDK-8223291
+            // See
+            // https://exchangetuts.com/handling-change-in-newlines-by-xml-transformation-for-cdata-from-java-8-to-java-11-1640168583549032
+            result = result.replaceAll("(?s)>\\s*(<\\!\\[CDATA\\[.*?]]>)\\s*<", ">$1<");
+
             FileUtils.writeStringToFile( target, result, StandardCharsets.UTF_8);
         }
         catch ( IOException e )

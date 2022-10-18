@@ -28,7 +28,9 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xmlunit.builder.DiffBuilder;
 import org.xmlunit.builder.Input;
+import org.xmlunit.diff.DefaultNodeMatcher;
 import org.xmlunit.diff.Diff;
+import org.xmlunit.diff.ElementSelectors;
 import org.xmlunit.matchers.EvaluateXPathMatcher;
 import org.xmlunit.xpath.JAXPXPathEngine;
 
@@ -42,10 +44,10 @@ import java.net.URL;
 import java.nio.charset.Charset;
 
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.xmlunit.builder.Input.fromFile;
 import static org.xmlunit.matchers.HasXPathMatcher.hasXPath;
@@ -77,10 +79,9 @@ public class XMLIOTest
 
         String strResult = xmlIO.convert( doc );
 
-        Diff diff = DiffBuilder.compare( fromFile( xmlFile ) ).ignoreWhitespace().withTest( Input.fromString( strResult ) ).build();
+        Diff diff = DiffBuilder.compare( fromFile( xmlFile ) ).normalizeWhitespace().withTest
+                        ( Input.fromString( strResult ) ).build();
 
-        System.out.println ("### Original " + strResult);
-        System.out.println ("### Dif is " + diff.toString());
         assertFalse (diff.toString(), diff.hasDifferences());
     }
 
@@ -93,8 +94,29 @@ public class XMLIOTest
 
         xmlIO.writeXML( target, doc );
 
-        Diff diff = DiffBuilder.compare( fromFile( xmlFile ) ).ignoreWhitespace().withTest( Input.fromFile( target ) ).build();
+        Diff diff = DiffBuilder.compare( fromFile( xmlFile ) ).normalizeWhitespace().withNodeMatcher
+                        (new DefaultNodeMatcher(ElementSelectors.byName)).withTest( Input.fromFile( target ) ).build();
 
+        System.out.println(diff.fullDescription());
+        assertFalse (diff.toString(), diff.hasDifferences());
+    }
+
+    @Test
+    public void writeFile2 () throws ManipulationException, IOException
+    {
+        xmlIO = new XMLIO();
+        xmlFile = new File( this.getClass().getResource( "azure-file-system.windup.xml").getFile() );
+
+        Document doc = xmlIO.parseXML( xmlFile );
+
+        File target = tf.newFile();
+
+        xmlIO.writeXML( target, doc );
+
+        Diff diff = DiffBuilder.compare( fromFile( xmlFile ) ).withNodeMatcher
+                        (new DefaultNodeMatcher( ElementSelectors.byName)).withTest( Input.fromFile( target ) ).build();
+
+        System.out.println(diff.fullDescription());
         assertFalse (diff.toString(), diff.hasDifferences());
     }
 
@@ -121,9 +143,9 @@ public class XMLIOTest
         // XMLUnit only seems to support XPath 1.0 so modify the expression to find the value.
         String xpathForHamcrest = "/*/*[local-name() = '" + updatePath.substring( updatePath.lastIndexOf( '/' ) + 1 ) + "']";
 
-        assertThat( targetXML , hasXPath( xpathForHamcrest));
-        assertThat ( targetXML, EvaluateXPathMatcher.hasXPath( xpathForHamcrest, equalTo( newBaseDirectory ) ) );
-        assertTrue (diff.toString(), diff.hasDifferences());
+        assertThat( targetXML , hasXPath( xpathForHamcrest) );
+        assertThat( targetXML, EvaluateXPathMatcher.hasXPath( xpathForHamcrest, equalTo( newBaseDirectory ) ) );
+        assertTrue( diff.toString(), diff.hasDifferences() );
     }
 
     @Test
