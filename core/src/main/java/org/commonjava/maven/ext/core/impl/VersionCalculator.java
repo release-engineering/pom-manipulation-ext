@@ -85,6 +85,13 @@ public class VersionCalculator
         final Map<ProjectVersionRef, String> versionsByGAV = new HashMap<>();
         final Set<String> versionsWithBuildNums = new HashSet<>();
 
+        if (logger.isDebugEnabled())
+        {
+            logger.debug( "Got the following version suffixes:{}  Static: {}{}  Incremental: {}", System.lineSeparator(),
+                          state.getSuffix(), System.lineSeparator(), state.getIncrementalSerialSuffix() );
+            logger.debug( "Got the following version override: {}", state.getOverride() );
+        }
+
         for ( final Project project : projects )
         {
             String originalVersion = PropertyResolver.resolveInheritedProperties( session, project, project.getVersion() );
@@ -184,9 +191,6 @@ public class VersionCalculator
         {
             logger.debug( "Got the following original version: {} for groupId:artifactId {}:{}", version, groupId,
                     artifactId );
-            logger.debug( "Got the following version suffixes:{}  Static: {}{}  Incremental: {}", System.lineSeparator(),
-                    staticSuffix, System.lineSeparator(), incrementalSuffix );
-            logger.debug( "Got the following version override: {}", override );
         }
 
 
