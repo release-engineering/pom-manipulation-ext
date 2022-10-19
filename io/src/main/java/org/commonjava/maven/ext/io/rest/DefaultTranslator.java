@@ -260,7 +260,7 @@ public class DefaultTranslator
         final List<ProjectVersionRef> projects = p.stream().distinct().collect( Collectors.toList() );
         if ( p.size() != projects.size() )
         {
-            logger.debug( "Eliminating duplicates from {} resulting in {}", p, projects );
+            logger.debug( "Eliminating duplicates reduced {} to {}", p.size(), projects.size() );
         }
         logger.info( "Calling REST client... (with {} GAVs)", projects.size() );
 

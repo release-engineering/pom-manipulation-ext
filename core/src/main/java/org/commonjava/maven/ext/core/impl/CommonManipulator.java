@@ -94,17 +94,17 @@ public class CommonManipulator
             {
                 final String currentKey = entry.getKey();
                 final String currentValue = entry.getValue();
+                final boolean isModuleWildcard = currentKey.endsWith( "@*" );
 
-                logger.debug( "Processing key {} for override with value {}", currentKey, currentValue );
+                logger.debug( "Processing key {} for override with value '{}' and is "
+                    + "wildcard {} and in module wildcard {}",
+                    currentKey, currentValue, isModuleWildcard, aWildcardMode );
 
                 if ( !currentKey.contains( "@" ) )
                 {
-                    logger.debug( "Not an override. Skip." );
+                    logger.trace( "Not an override. Skip." );
                     continue;
                 }
-
-                final boolean isModuleWildcard = currentKey.endsWith( "@*" );
-                logger.debug( "Is wildcard? {} and in module wildcard mode? {}", isModuleWildcard, aWildcardMode );
 
                 final String artifactGA;
                 boolean replace = false;
@@ -114,7 +114,7 @@ public class CommonManipulator
                     // skip wildcard overrides in this mode
                     if ( isModuleWildcard )
                     {
-                        logger.debug( "Not currently in wildcard mode. Skip." );
+                        logger.trace( "Not currently in wildcard mode. Skip." );
                         continue;
                     }
 
