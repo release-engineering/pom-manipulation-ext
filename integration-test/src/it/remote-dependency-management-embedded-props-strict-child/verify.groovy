@@ -35,7 +35,7 @@ assert (passed == true)
 def message = 0
 
 pomFile.eachLine {
-    if ( it.contains ( "{jetty.qualifier}-redhat-1" ) ) {
+    if ( it.contains ( "<jetty>9.4.12.v20180830-redhat-1" ) ) {
         message++
     }
 }

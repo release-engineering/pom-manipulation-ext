@@ -53,6 +53,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toSet;
@@ -196,7 +198,7 @@ public class PropertiesUtilsTest
     }
 
     @Test
-    public void testUpdateNestedProperties() throws Exception
+    public void testUpdateNestedProperties1() throws Exception
     {
         Project pP = getProject();
         ManipulationSession session = createUpdateSession();
@@ -260,6 +262,32 @@ public class PropertiesUtilsTest
         {
             // Pass.
         }
+    }
+
+    @Test
+    public void testUpdateNestedProperties4() throws Exception
+    {
+        Project pP = getProject();
+        ManipulationSession session = createUpdateSession();
+
+        assertSame( updateProperties( session, pP, false, "camel.version",
+                                      "3.18.2.redhat-00003" ),
+                    PropertiesUtils.PropertyUpdate.FOUND );
+        assertEquals( "${camel.major.minor}.2.redhat-00003",
+                      pP.getModel().getProperties().getProperty( "camel.version" ) );
+
+        assertSame( updateProperties( session, pP, false, "camel.version.2",
+                                      "3.18.2.redhat-00003" ),
+                    PropertiesUtils.PropertyUpdate.FOUND );
+        assertEquals( "3.18.2.redhat-00003",
+                      pP.getModel().getProperties().getProperty( "camel.version.2" ) );
+        assertTrue( systemOutRule.getLog().contains( "Original value (${camel.major.minor}${rh}) ends with variable so inlining update" ) );
+
+        assertSame( updateProperties( session, pP, false, "camel.version.3",
+                                      "3.18.2.redhat-00003" ),
+                    PropertiesUtils.PropertyUpdate.FOUND );
+        assertEquals( "3.${camel.minor}.2.redhat-00003",
+                      pP.getModel().getProperties().getProperty( "camel.version.3" ) );
     }
 
     @Test

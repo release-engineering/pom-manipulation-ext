@@ -37,7 +37,7 @@ pomFile.eachLine {
     if ( it.contains ( "2.6.0.redhat-4" ) ) {
         message++
     }
-    if ( it.contains ( "{jetty.qualifier}-redhat-1" ) ) {
+    if ( it.contains ( "<jetty>9.4.12.v20180830-redhat-1" ) ) {
         message++
     }
 }
