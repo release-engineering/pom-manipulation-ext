@@ -73,9 +73,9 @@
       <infinispan.core.schema.version>8.2</infinispan.core.schema.version>
 
       <version.java>1.8</version.java>
-      
+
       <version.maven-compiler-plugin>3.1</version.maven-compiler-plugin>
-      
+
       <version.protostream>3.0.5.Final</version.protostream>
       <version.aesh>0.33.14</version.aesh>
       <version.antlr>3.5.2</version.antlr>
@@ -110,6 +110,16 @@
       <version.hibernate_dep.javaassist>3.18.1-GA</version.hibernate_dep.javaassist>
 
       <uberjar.deps.optional>true</uberjar.deps.optional>
+      <camel.major.minor>3.18</camel.major.minor>
+      <camel.end>redhat-00002</camel.end>
+      <camel-community.version>${camel.major.minor}.2</camel-community.version> <!-- run after each change: cd docs && mvnd validate -->
+      <camel.version>${camel.major.minor}.2.redhat-00002</camel.version>
+
+      <rh>.2.redhat-00002</rh>
+      <camel.version.2>${camel.major.minor}${rh}</camel.version.2>
+
+      <camel.minor>18</camel.minor>
+      <camel.version.3>3.${camel.minor}.2.redhat-00002</camel.version.3>
    </properties>
 
    <distributionManagement>
@@ -140,7 +150,7 @@
 
    <dependencyManagement>
       <dependencies>
-         
+
          <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>infinispan-cachestore-jdbc</artifactId>
@@ -308,7 +318,7 @@
             <version>${project.version}</version>
          </dependency>
 
-         
+
          <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>infinispan-embedded</artifactId>
@@ -385,7 +395,7 @@
             <artifactId>hibernate-core</artifactId>
             <version>${version.hibernate.core}</version>
          </dependency>
-         
+
          <dependency>
             <groupId>org.rhq</groupId>
             <artifactId>rhq-core-domain</artifactId>
@@ -418,7 +428,7 @@
             <artifactId>rhq-core-native-system</artifactId>
             <version>${version.rhq}</version>
          </dependency>
-         
+
          <dependency>
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-search-engine</artifactId>
@@ -434,7 +444,7 @@
               <artifactId>hibernate-entitymanager</artifactId>
               <version>${version.hibernate.core}</version>
           </dependency>
-         
+
          <dependency>
             <groupId>org.infinispan.protostream</groupId>
             <artifactId>protostream</artifactId>
@@ -494,7 +504,7 @@
             <artifactId>commons-pool</artifactId>
             <version>${version.commons.pool}</version>
          </dependency>
-         
+
          <dependency>
             <groupId>com.mchange</groupId>
             <artifactId>c3p0</artifactId>
@@ -538,14 +548,14 @@
          </activation>
 
          <properties>
-            
+
             <uberjar.deps.optional>false</uberjar.deps.optional>
          </properties>
 
          <build>
             <pluginManagement>
                <plugins>
-                  
+
                   <plugin>
                      <groupId>org.eclipse.m2e</groupId>
                      <artifactId>lifecycle-mapping</artifactId>

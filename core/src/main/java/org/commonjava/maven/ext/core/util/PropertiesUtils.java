@@ -45,6 +45,7 @@ import java.util.regex.Pattern;
 import static org.apache.commons.lang.StringUtils.contains;
 import static org.apache.commons.lang.StringUtils.countMatches;
 import static org.apache.commons.lang.StringUtils.endsWith;
+import static org.apache.commons.lang.StringUtils.isEmpty;
 import static org.apache.commons.lang.StringUtils.isNotEmpty;
 import static org.apache.commons.lang.StringUtils.startsWith;
 
@@ -204,7 +205,6 @@ public final class PropertiesUtils
                 // >${foo}value<
                 // We don't attempt to recursively resolve those as tracking the split of the variables, combined
                 // with the update and strict version checking becomes overly fragile.
-
                 if ( ignoreStrict )
                 {
                     throw new ManipulationException(
@@ -216,10 +216,34 @@ public final class PropertiesUtils
                     logger.warn( "Nothing to update as original key {} value matches new value {}", key, newValue );
                     found = PropertyUpdate.IGNORE;
                 }
-                newValue = oldValue + StringUtils.removeStart( newValue, resolvedValue );
-                logger.info( "Ignoring new value due to embedded property {} and appending {}", oldValue, newValue );
+                // The following handles scenarios where there is embedded properties. If it
+                // ends with a property then the entire value is updated as it can be error prone to determine
+                // where to update. In other scenarios the trailing suffix is determined and updated with
+                // the new resolved information.
+                if ( endsWith( oldValue, "}" ) )
+                {
+                    logger.debug( "Original value ({}) ends with variable so inlining update", oldValue );
+                }
+                else
+                {
+                    final Pattern variablePattern = Pattern.compile( "(.*\\$[{].*[}])(.*)" );
+                    final Matcher variableMatcher = variablePattern.matcher( oldValue );
+                    if ( !variableMatcher.matches() )
+                    {
+                        throw new ManipulationException(
+                                        "Property update error - unable to match against {} to update " + "for {}",
+                                        oldValue, newValue );
+                    }
+                    String prefix = variableMatcher.group( 1 );
+                    String end = variableMatcher.group( 2 );
+                    String oldSuffix = oldValue.replace( prefix, "" );
+                    String common = resolvedValue.replace( end, "" );
+                    String newSuffix = newValue.replace( common, "" );
+                    newValue = oldValue.replace( oldSuffix, newSuffix );
+                    logger.debug( "Replacing old value {} containing suffix {} with new suffix {} giving {}", oldValue,
+                                  oldSuffix, newSuffix, newValue );
+                }
             }
-
             props.setProperty( key, newValue );
         }
         return found;
