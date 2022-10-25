@@ -16,7 +16,8 @@ If the property `-DgroovyScripts=<value>,....` is set, PME will load the remote 
 The argument should a comma separated list of either:
 
 * group:artifact:version (with optional type and classifiers).
-* A HTTP / HTTPS URL.
+* A http:// or https:// URL.
+* A file:// URL
 
 If using a GAVTC, the remote groovy file can be deployed by e.g.
 
