@@ -16,6 +16,9 @@ In addition to the main [project-version](project-version-manip.html), [dependen
 
 PME will by default **only** scan those profiles that are active in the project. To disable this set `scanActiveProfiles` to false to scan all profiles.
 
+Note: This is **only** for blocks such as dependencies/plugins within profiles - currently PME does **NOT** support
+module blocks within profiles and instead will read all available POMs
+
 Note: This will only detect those profiles explicitly activated via -P ; property activation will not be correctly detected.
 
 <table bgcolor="#ffff00">
