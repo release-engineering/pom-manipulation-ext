@@ -21,6 +21,7 @@ import org.codehaus.plexus.DefaultContainerConfiguration;
 import org.codehaus.plexus.DefaultPlexusContainer;
 import org.codehaus.plexus.PlexusConstants;
 import org.codehaus.plexus.PlexusContainer;
+import org.commonjava.maven.atlas.ident.ref.ProjectRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleProjectRef;
 import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.common.model.Project;
@@ -189,7 +190,17 @@ public class BaseScriptTest
                          .getVersion()
                          .contains( "$" ) );
 
+        ProjectRef artifact = SimpleProjectRef.parse("org.projectlombok:lombok-maven-plugin");
+        bs.inlineProperty(root, artifact);
 
+        assertEquals( "1.18.20.0", root.getResolvedPlugins(bs.getSession())
+                                                .entrySet()
+                                                .stream()
+                                                .filter( d -> artifact.getArtifactId().equals("lombok-maven-plugin"))
+                                                .findFirst()
+                                                .orElseThrow(Exception::new)
+                                                .getValue()
+                                                .getVersion() );
     }
 
     @Test

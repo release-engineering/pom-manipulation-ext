@@ -73,6 +73,15 @@ public abstract class BaseScriptUtils extends Script implements MavenBaseScript
                               a.getValue().setVersion(
                                               PropertyResolver.resolvePropertiesUnchecked( getSession(), currentProject.getInheritedList(), a.getValue().getVersion() ) );
                           } );
+            currentProject.getResolvedPlugins( getSession() )
+                          .entrySet().stream()
+                          .filter( a -> ( groupArtifact.getArtifactId().equals( "*" ) && a.getKey().getGroupId().equals( groupArtifact.getGroupId()) ) ||
+                                          ( a.getKey().asProjectRef().equals( groupArtifact ) && a.getValue().getVersion().contains( "$" ) ) )
+                          .forEach( a -> {
+                              logger.debug( "Found plugin artifact {} (original dependency {})", a.getKey(), a.getValue() );
+                              a.getValue().setVersion(
+                                              PropertyResolver.resolvePropertiesUnchecked( getSession(), currentProject.getInheritedList(), a.getValue().getVersion() ) );
+                          } );
         }
         catch (ManipulationUncheckedException e)
         {
@@ -105,6 +114,14 @@ public abstract class BaseScriptUtils extends Script implements MavenBaseScript
                           .filter( a -> a.getValue().getVersion().equals( "${" + propertyKey + "}" ) )
                           .forEach( a -> {
                               logger.debug( "Found artifact {} (original dependency {})", a.getKey(), a.getValue() );
+                              a.getValue().setVersion(
+                                              PropertyResolver.resolvePropertiesUnchecked( getSession(), currentProject.getInheritedList(), a.getValue().getVersion() ) );
+                          } );
+            currentProject.getResolvedPlugins( getSession() )
+                          .entrySet().stream()
+                          .filter( a -> a.getValue().getVersion().equals( "${" + propertyKey + "}" ) )
+                          .forEach( a -> {
+                              logger.debug( "Found plugin artifact {} (original dependency {})", a.getKey(), a.getValue() );
                               a.getValue().setVersion(
                                               PropertyResolver.resolvePropertiesUnchecked( getSession(), currentProject.getInheritedList(), a.getValue().getVersion() ) );
                           } );
