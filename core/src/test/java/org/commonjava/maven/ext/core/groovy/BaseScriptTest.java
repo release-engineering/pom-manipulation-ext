@@ -21,6 +21,7 @@ import org.codehaus.plexus.DefaultContainerConfiguration;
 import org.codehaus.plexus.DefaultPlexusContainer;
 import org.codehaus.plexus.PlexusConstants;
 import org.codehaus.plexus.PlexusContainer;
+import org.commonjava.maven.atlas.ident.ref.ProjectRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleProjectRef;
 import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.common.model.Project;
@@ -189,7 +190,29 @@ public class BaseScriptTest
                          .getVersion()
                          .contains( "$" ) );
 
+        ProjectRef pluginArtifact = SimpleProjectRef.parse("org.projectlombok:lombok-maven-plugin");
+        bs.inlineProperty(root, pluginArtifact);
 
+        assertEquals( "1.18.20.0", root.getResolvedPlugins(bs.getSession())
+                                                .entrySet()
+                                                .stream()
+                                                .filter( d -> d.getKey().getArtifactId().equals(pluginArtifact.getArtifactId()))
+                                                .findFirst()
+                                                .orElseThrow(Exception::new)
+                                                .getValue()
+                                                .getVersion() );
+
+        ProjectRef dependencyPluginArtifact = SimpleProjectRef.parse("org.apache.maven.plugins:maven-shade-plugin");
+        bs.inlineProperty(root, dependencyPluginArtifact);
+
+        assertEquals( "3.2.4", root.getResolvedManagedPlugins(bs.getSession())
+                                                .entrySet()
+                                                .stream()
+                                                .filter( d -> d.getKey().getArtifactId().equals(dependencyPluginArtifact.getArtifactId()))
+                                                .findFirst()
+                                                .orElseThrow(Exception::new)
+                                                .getValue()
+                                                .getVersion() );
     }
 
     @Test
