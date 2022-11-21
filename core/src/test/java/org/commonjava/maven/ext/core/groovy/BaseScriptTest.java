@@ -190,13 +190,25 @@ public class BaseScriptTest
                          .getVersion()
                          .contains( "$" ) );
 
-        ProjectRef artifact = SimpleProjectRef.parse("org.projectlombok:lombok-maven-plugin");
-        bs.inlineProperty(root, artifact);
+        ProjectRef pluginArtifact = SimpleProjectRef.parse("org.projectlombok:lombok-maven-plugin");
+        bs.inlineProperty(root, pluginArtifact);
 
         assertEquals( "1.18.20.0", root.getResolvedPlugins(bs.getSession())
                                                 .entrySet()
                                                 .stream()
-                                                .filter( d -> artifact.getArtifactId().equals("lombok-maven-plugin"))
+                                                .filter( d -> d.getKey().getArtifactId().equals(pluginArtifact.getArtifactId()))
+                                                .findFirst()
+                                                .orElseThrow(Exception::new)
+                                                .getValue()
+                                                .getVersion() );
+
+        ProjectRef dependencyPluginArtifact = SimpleProjectRef.parse("org.apache.maven.plugins:maven-shade-plugin");
+        bs.inlineProperty(root, dependencyPluginArtifact);
+
+        assertEquals( "3.2.4", root.getResolvedManagedPlugins(bs.getSession())
+                                                .entrySet()
+                                                .stream()
+                                                .filter( d -> d.getKey().getArtifactId().equals(dependencyPluginArtifact.getArtifactId()))
                                                 .findFirst()
                                                 .orElseThrow(Exception::new)
                                                 .getValue()

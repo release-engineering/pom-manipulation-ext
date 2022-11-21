@@ -88,6 +88,7 @@
     <slf4jVersion>1.7.30</slf4jVersion>
     <docletVersion>1.1</docletVersion>
     <lombokPluginVersion>1.18.20.0</lombokPluginVersion>
+    <shadePluginVersion>3.2.4</shadePluginVersion>
 
     <!-- Both Jackson versions should be identical except if Jackson has not -->
     <!-- published javadoc for the micro version -->
@@ -554,7 +555,7 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-shade-plugin</artifactId>
-          <version>3.2.4</version>
+          <version>${shadePluginVersion}</version>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
