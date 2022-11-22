@@ -24,4 +24,3 @@ assert pomFile.text.contains("3.6.3")
 def dependency = pom.dependencies.dependency.find { it.artifactId.text() == "junit" }
 assert dependency != null
 assert dependency.version.text() != "4.1"
-def failed = false
