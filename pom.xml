@@ -269,6 +269,18 @@
       </dependency>
 
       <dependency>
+        <groupId>com.redhat.resilience.otel</groupId>
+        <artifactId>opentelemetry-ext-cli-java</artifactId>
+        <version>1.1.0</version>
+      </dependency>
+      <!-- To be removed - should be explicitly in opentelemetry-ext-cli-java -->
+      <dependency>
+        <groupId>io.opentelemetry</groupId>
+        <artifactId>opentelemetry-sdk</artifactId>
+        <version>1.19.0</version>
+      </dependency>
+
+      <dependency>
         <groupId>org.jboss.da</groupId>
         <artifactId>reports-model</artifactId>
         <version>${daVersion}</version>

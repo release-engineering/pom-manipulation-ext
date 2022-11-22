@@ -187,6 +187,16 @@
     </dependency>
 
     <dependency>
+      <groupId>com.redhat.resilience.otel</groupId>
+      <artifactId>opentelemetry-ext-cli-java</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.opentelemetry</groupId>
+      <artifactId>opentelemetry-sdk</artifactId>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
       <groupId>org.eclipse.jetty</groupId>
       <artifactId>jetty-server</artifactId>
       <scope>test</scope>

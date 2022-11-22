@@ -15,6 +15,9 @@
  */
 package org.commonjava.maven.ext.io.rest;
 
+import com.redhat.resilience.otel.OTelCLIHelper;
+import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.api.trace.SpanContext;
 import kong.unirest.GenericType;
 import kong.unirest.HttpResponse;
 import kong.unirest.Unirest;
@@ -92,6 +95,8 @@ public class DefaultTranslator
 
     private final Map<String, String> restHeaders;
 
+    private final Map<String, String> otelHeaders = new HashMap<>();
+
     private final int retryDuration;
 
     private final int restConnectionTimeout;
@@ -133,6 +138,24 @@ public class DefaultTranslator
         this.restConnectionTimeout = restConnectionTimeout;
         this.restSocketTimeout = restSocketTimeout;
         this.retryDuration = restRetryDuration;
+
+        if ( OTelCLIHelper.otelEnabled() )
+        {
+            SpanContext current = Span.current().getSpanContext();
+            if ( current.isValid() )
+            {
+                otelHeaders.put( "trace-id", current.getTraceId() );
+                otelHeaders.put( "span-id", current.getSpanId() );
+                // Code from pnc-common to avoid transitively including that and pnc-api in the classpath
+                otelHeaders.put( "traceparent",
+                                 String.format( "%s-%s-%s-%s", "00", current.getTraceId(), current.getSpanId(),
+                                                current.getTraceFlags().asHex() ) );
+            }
+            else
+            {
+                logger.warn( "Invalid span context {}", current );
+            }
+        }
     }
 
     /**
@@ -390,11 +413,11 @@ public class DefaultTranslator
                                                 .artifacts( GAVUtils.generateGAVs( chunk ) )
                                                 .build() );
 
-
                 r = Unirest.post( endpointUrl + endpointType )
                            .header( "accept", "application/json" )
                            .header( "Content-Type", "application/json" )
                            .headers( restHeaders )
+                           .headers( otelHeaders )
                            .connectTimeout(restConnectionTimeout * 1000)
                            .socketTimeout(restSocketTimeout * 1000)
                            .body( request )

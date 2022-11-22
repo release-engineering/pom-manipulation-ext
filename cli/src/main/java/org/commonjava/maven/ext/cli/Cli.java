@@ -20,6 +20,7 @@ import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.FileAppender;
+import com.redhat.resilience.otel.OTelCLIHelper;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.maven.artifact.repository.ArtifactRepository;
@@ -256,6 +257,18 @@ public class Cli implements Callable<Integer>
                                 : "** File does not exist **"
                  );
             }
+            String endpoint = System.getenv( "OTEL_EXPORTER_OTLP_ENDPOINT" );
+            String service = System.getenv( "OTEL_SERVICE_NAME" );
+            if ( endpoint != null )
+            {
+                if (service == null)
+                {
+                    service = "pom-manipulation-ext";
+                }
+                logger.info( "Enabling OpenTelemetry collection on {} with service name {}", endpoint, service );
+                OTelCLIHelper.startOTel( service, "cli",
+                                         OTelCLIHelper.defaultSpanProcessor( OTelCLIHelper.defaultSpanExporter( endpoint ) ) );
+            }
             manipulationManager.init( session );
 
             if (!profiles.isEmpty())
@@ -302,7 +315,14 @@ public class Cli implements Callable<Integer>
             }
             else
             {
-                manipulationManager.scanAndApply( session );
+                try
+                {
+                    manipulationManager.scanAndApply( session );
+                }
+                finally
+                {
+                    OTelCLIHelper.stopOTel();
+                }
             }
         }
         catch ( RestException e )
