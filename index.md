@@ -140,6 +140,11 @@ package.
 
 This is available [here](https://www.javadoc.io/doc/org.commonjava.maven.ext).
 
+### OpenTelemetry Instrumentation
+
+If `OTEL_EXPORTER_OTLP_ENDPOINT` is defined (and optionally `OTEL_SERVICE_NAME`) then OpenTelemetry instrumentation 
+will be activated. It will read trace information from the environment as described [here](https://github.com/jenkinsci/opentelemetry-plugin/blob/master/docs/job-traces.md#environment-variables-for-trace-context-propagation-and-integrations) and will propagate the information via headers in any REST calls.
+
 ### Feature Guide
 
 #### Operation
