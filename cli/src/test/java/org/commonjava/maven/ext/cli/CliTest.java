@@ -295,7 +295,7 @@ public class CliTest
         // Strip out PME itself otherwise it causes issues on releasing a new version.
         String cliOutput = systemOutRule.getLogWithNormalizedLineSeparator().replaceAll( "org.commonjava.maven.ext:pom-manipulation-.*\\n", "" );
 
-        assertTrue( cliOutput.contains( "Found 84" ) );
+        assertTrue( cliOutput.contains( "Found 83" ) );
         assertTrue( cliOutput.matches( "(?s).*"
                 + "ch.qos.logback:logback-classic:1.2.[.\\d+]+\\s+                                 jar                                     compile             \n"
                 + "ch.qos.logback:logback-core:1.2.[.\\d+]+\\s+                                    jar                                     compile             \n"
@@ -309,7 +309,7 @@ public class CliTest
                 + "com.konghq:unirest-java:3.[.\\d+]+\\s+                                          jar                                     compile             \n"
                 + "com.konghq:unirest-objectmapper-jackson:3.[.\\d+]+\\s+                          jar                                     compile             \n"
                 + "com.redhat.rcm:redhat-releng-tools:11\\s+                                       pom                                     compile             \n"
-                + "com.redhat.resilience.otel:opentelemetry-ext-cli-java:1.1.0                     jar                                     compile             \n"
+                + "com.redhat.resilience.otel:opentelemetry-ext-cli-java:1.2.0                     jar                                     compile             \n"
                 + "com.soebes.maven.plugins:iterator-maven-plugin:0.[.\\d+]+\\s+                   maven-plugin                                                \n"
                 + "com.squareup:javapoet:1.[.\\d+]+\\s+                                            jar                                     compile             \n"
                 + "commons-codec:commons-codec:1.[.\\d+]+\\s+                                      jar                                     compile             \n"
@@ -317,7 +317,6 @@ public class CliTest
                 + "commons-lang:commons-lang:2.6                                                   jar                                     compile             \n"
                 + "commons-logging:commons-logging:1.2                                             jar                                     compile             \n"
                 + "info.picocli:picocli:4.[.\\d+]+\\s+                                             jar                                     compile             \n"
-                + "io.opentelemetry:opentelemetry-sdk:1.19.0                                       jar                                     compile             \n"
                 + "javax.inject:javax.inject:1                                                     jar                                     compile             \n"
                 + "junit:junit:4[.\\d+]+\\s+                                                       jar                                     test                \n"
                 + "org.apache.httpcomponents:httpclient:4.[.\\d+]+\\s+                             jar                                     compile             \n"

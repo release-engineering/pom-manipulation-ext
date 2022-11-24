@@ -109,11 +109,6 @@
       <groupId>com.redhat.resilience.otel</groupId>
       <artifactId>opentelemetry-ext-cli-java</artifactId>
     </dependency>
-    <!-- To be removed - should be explicitly in opentelemetry-ext-cli-java -->
-    <dependency>
-      <groupId>io.opentelemetry</groupId>
-      <artifactId>opentelemetry-sdk</artifactId>
-    </dependency>
 
     <dependency>
       <groupId>org.commonjava.maven.atlas</groupId>
