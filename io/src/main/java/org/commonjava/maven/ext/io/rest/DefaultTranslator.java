@@ -42,6 +42,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Queue;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -146,6 +147,12 @@ public class DefaultTranslator
             {
                 otelHeaders.put( "trace-id", current.getTraceId() );
                 otelHeaders.put( "span-id", current.getSpanId() );
+                otelHeaders.put( "tracestate", current.getTraceState()
+                                                      .asMap()
+                                                      .entrySet()
+                                                      .stream()
+                                                      .map( Objects::toString )
+                                                      .collect( Collectors.joining( "," ) ) );
                 // Code from pnc-common to avoid transitively including that and pnc-api in the classpath
                 otelHeaders.put( "traceparent",
                                  String.format( "%s-%s-%s-%s", "00", current.getTraceId(), current.getSpanId(),
