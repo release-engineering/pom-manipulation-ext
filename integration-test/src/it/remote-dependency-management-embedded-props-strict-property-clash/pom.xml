@@ -33,7 +33,7 @@
     <jetty.major>9</jetty.major>
     <jetty.qualifier>v20180830</jetty.qualifier>
 
-    <commons>3.1</commons>
+    <commons>3.9.0</commons>
     <junit>3.8.2</junit>
 
     <jetty>${jetty.major}.4.12.${jetty.qualifier}</jetty>
