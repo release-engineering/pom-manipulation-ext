@@ -22,7 +22,7 @@ import java.util.List;
  * From Apache Commons Collections. Avoids a dependency (which means shading it in) on the entire collections for a single
  * method.
  *
- * https://github.com/apache/commons-collections/blob/trunk/src/main/java/org/apache/commons/collections4/ListUtils.java#L651
+ * https://github.com/apache/commons-collections/blob/master/src/main/java/org/apache/commons/collections4/ListUtils.java
  *
  * This was originally based upon http://www.vogella.com/tutorials/JavaAlgorithmsPartitionCollection/article.html and
  * background here http://www.baeldung.com/java-list-split
@@ -82,10 +82,6 @@ public final class ListUtils
         public List<T> get( final int index )
         {
             final int listSize = size();
-            if ( listSize < 0 )
-            {
-                throw new IllegalArgumentException( "negative size: " + listSize );
-            }
             if ( index < 0 )
             {
                 throw new IndexOutOfBoundsException( "Index " + index + " must not be negative" );
@@ -103,7 +99,8 @@ public final class ListUtils
         @Override
         public int size()
         {
-            return ( list.size() + size - 1 ) / size;
+            // https://github.com/apache/commons-collections/commit/b88b065aa955d7a7d8f74c427b05d2243eda0779
+            return (int) Math.ceil((double) list.size() / (double) size);
         }
 
         @Override
