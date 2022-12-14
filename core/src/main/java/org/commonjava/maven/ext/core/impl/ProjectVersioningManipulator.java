@@ -49,7 +49,7 @@ import static org.apache.commons.lang.StringUtils.startsWith;
  * {@link Manipulator} implementation that can modify a project's version with either static or calculated, incremental version qualifier. Snapshot
  * versions can be configured to be preserved, though they are truncated to release versions by default. Configuration and accumulated version
  * changes are stored in a {@link VersioningState} instance, which is in turn stored in the {@link ManipulationSession}.
- *
+ * <p>
  * This class orchestrates {@link VersionCalculator} scanning/calculation, along with application of the calculated changes at the end of the
  * manipulation process.
  *
@@ -124,10 +124,10 @@ public class ProjectVersioningManipulator
     /**
      * Apply any project versioning changes applicable for the given {@link Model}, using accumulated version-change information stored in the
      * {@link VersioningState} instance, and also produced during the initial {@link Manipulator#applyChanges(List)} invocation.
-     *
+     * <p>
      * These changes include the main POM version, but may also include the parent declaration and dependencies, if they reference other POMs in the
      * current build.
-     *
+     * <p>
      * If the project is modified, then it is marked as changed in the {@link ManipulationSession}, which triggers the associated POM to be rewritten.
      *
      * @param project Project undergoing modification.

@@ -20,7 +20,7 @@ import org.junit.Test;
 import java.util.Properties;
 
 import static org.hamcrest.CoreMatchers.equalTo;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 public class VersioningStateTest
 {
@@ -55,4 +55,15 @@ public class VersioningStateTest
         assertThat( state.isEnabled(), equalTo( true ) );
     }
 
+    @Test
+    public void versionModificationEnabled()
+    {
+        final Properties p = new Properties();
+        p.setProperty( VersioningState.VERSION_MODIFICATION, "galse" );
+        p.setProperty( VersioningState.INCREMENT_SERIAL_SUFFIX_SYSPROP, "rebuild-1" );
+
+        final VersioningState state = new VersioningState( p );
+
+        assertThat( state.isEnabled(), equalTo( false ) );
+    }
 }

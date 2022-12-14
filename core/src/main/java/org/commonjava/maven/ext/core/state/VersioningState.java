@@ -63,6 +63,9 @@ public class VersioningState
     @ConfigValue( docIndex = "project-version-manip.html#alternate-suffix-handling")
     public static final String VERSION_SUFFIX_ALT = "versionSuffixAlternatives";
 
+    @ConfigValue( docIndex = "project-version-manip.html#version-modification")
+    public static final String VERSION_MODIFICATION = "versionModification";
+
     /**
      * @return the version suffix to be appended to the project version.
      */
@@ -112,6 +115,11 @@ public class VersioningState
      */
     private Map<ProjectRef, Set<String>> restMetaData;
 
+    /**
+     * @return true if version modification is enabled
+     */
+    private boolean versionModification;
+
     public VersioningState( final Properties userProps )
     {
         initialise( userProps );
@@ -125,6 +133,7 @@ public class VersioningState
         preserveSnapshot = Boolean.parseBoolean( userProps.getProperty( VERSION_SUFFIX_SNAPSHOT_SYSPROP ) );
         osgi = Boolean.parseBoolean( userProps.getProperty( VERSION_OSGI_SYSPROP, "true" ) );
         override = userProps.getProperty( VERSION_OVERRIDE_SYSPROP );
+        versionModification = Boolean.parseBoolean( userProps.getProperty( VERSION_MODIFICATION, "true" ) );
 
         // Provide an alternative list of versionSuffixes split via a comma separator. Defaults to 'redhat' IF the current rebuild suffix is not that.
         suffixAlternatives = Arrays.asList(
@@ -144,7 +153,8 @@ public class VersioningState
 
 
     /**
-     * Enabled ONLY if either versionIncrementalSuffix or versionSuffix is provided in the user properties / CLI -D options.
+     * Enabled ONLY if either versionIncrementalSuffix or versionSuffix is provided in the user properties / CLI -D
+     * options and version modification has not been explicitly disabled.
      *
      * @see #VERSION_SUFFIX_SYSPROP
      * @see #INCREMENT_SERIAL_SUFFIX_SYSPROP
@@ -153,7 +163,7 @@ public class VersioningState
     @Override
     public boolean isEnabled()
     {
-        return incrementalSerialSuffix != null || suffix != null || override != null;
+        return versionModification && (incrementalSerialSuffix != null || suffix != null || override != null);
     }
 
     public void setRESTMetadata( Map<ProjectRef, Set<String>> versionStates )
