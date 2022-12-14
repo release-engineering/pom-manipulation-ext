@@ -116,14 +116,24 @@ public class RESTCollector
             restLookupVersionsParamList.add( p.asProjectVersionRef() );
         }
 
-        // Call the REST to populate the result.
-        logger.debug ("Passing {} GAVs into the REST client api {}", restLookupVersionsParamList.size(), restLookupVersionsParamList);
-        Map<ProjectVersionRef, String> vRestResult = state.getVersionTranslator().lookupVersions( restLookupVersionsParamList );
-        logger.info ("REST Client returned: {}", vRestResult);
-
-        logger.debug ("Passing {} Project GAVs into the REST client api {}", restLookupProjectVersionParamList.size(), restLookupProjectVersionParamList);
+        Map<ProjectVersionRef, String> vRestResult;
+        // Call the REST to populate the result if dependency manipulation is enabled. Can't use ds.isEnabled as this
+        // code partly establishes whether it is enabled.
+        if (ds.getPrecedence() != DependencyState.DependencyPrecedence.NONE)
+        {
+            logger.debug( "Passing {} GAVs into the REST client api {}", restLookupVersionsParamList.size(),
+                          restLookupVersionsParamList );
+            vRestResult = state.getVersionTranslator().lookupVersions( restLookupVersionsParamList );
+            logger.info( "REST Client returned: {}", vRestResult );
+        }
+        else
+        {
+            vRestResult = Collections.emptyMap();
+        }
+        logger.debug( "Passing {} Project GAVs into the REST client api {}", restLookupProjectVersionParamList.size(), restLookupProjectVersionParamList );
         Map<ProjectVersionRef, String> pvResultResult = state.getVersionTranslator().lookupProjectVersions( restLookupProjectVersionParamList );
-        logger.info ("REST Client returned for project versions: {}", pvResultResult);
+        logger.info( "REST Client returned for project versions: {}", pvResultResult );
+
         Map<ProjectRef, Set<String>> versionStates = new HashMap<>();
         pvResultResult.forEach( ( key, value ) -> {
             Set<String> versions = versionStates.computeIfAbsent( key.asProjectRef(), k -> new HashSet<>() );

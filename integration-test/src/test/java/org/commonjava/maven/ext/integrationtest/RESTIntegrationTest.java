@@ -212,4 +212,10 @@ public class RESTIntegrationTest
         String test = getDefaultTestLocation( "rest-headers" );
         runLikeInvoker( test, mockServer.getUrl() );
     }
+    @Test
+    public void testRESTVersionManipAlignmentDisabled() throws Exception
+    {
+        String test = getDefaultTestLocation( "rest-version-manip-alignment-disabled" );
+        runLikeInvoker( test, mockServer.getUrl() );
+    }
 }
