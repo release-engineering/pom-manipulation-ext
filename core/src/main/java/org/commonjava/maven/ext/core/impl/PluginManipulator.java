@@ -314,6 +314,8 @@ public class PluginManipulator extends CommonManipulator implements Manipulator
         }
 
         applyOverrides( project, PluginType.LocalP, project.getResolvedPlugins( session ), overrides );
+        applyExplicitOverrides( project, project.getResolvedPlugins( session ), explicitOverrides,
+                                explicitVersionPropertyUpdateMap );
         applyExplicitOverrides( project, project.getResolvedManagedPlugins( session ), explicitOverrides,
                                 explicitVersionPropertyUpdateMap );
 
