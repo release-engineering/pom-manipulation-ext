@@ -240,9 +240,9 @@ public class CommonManipulator
     }
 
     /**
-     * Apply explicit overrides to a set of dependencies from a project. The explicit overrides come from
-     * dependencyExclusion. However they have to be separated out from standard overrides so we can easily
-     * ignore any property references (and overwrite them).
+     * Apply explicit overrides to a set of dependencies/plugins from a project. The explicit overrides come from
+     * dependencyExclusion/Override (or pluginOverride). However they have to be separated out from standard
+     * overrides so we can easily ignore any property references (and overwrite them).
      *
      * @param project                  the current Project
      * @param dependencies             dependencies to check
@@ -262,6 +262,8 @@ public class CommonManipulator
             final ProjectRef groupIdArtifactId = new SimpleProjectRef( projectVersionRef.getGroupId(),
                                                                        projectVersionRef.getArtifactId() );
 
+            logger.warn( "### Explicit overrides {} and {}", explicitOverrides,
+                         explicitOverrides.containsKey( groupIdArtifactId ) );
             if ( explicitOverrides.containsKey( groupIdArtifactId ) )
             {
                 final String overrideVersion = explicitOverrides.get( groupIdArtifactId );

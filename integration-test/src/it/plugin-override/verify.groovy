@@ -24,6 +24,6 @@ assert plugin.version.text() == "3.0.0-M3"
 
 plugin = pom.build.plugins.plugin.find { it.artifactId.text() == "maven-processor-plugin" }
 assert plugin != null
-assert plugin.version.text() == "3.3.3"
+assert plugin.version.text() == "3.3.2"
 
 assert pomFile.text.contains ("<buildNumberPlugin>1.4")
