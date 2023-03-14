@@ -22,6 +22,7 @@ import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.common.model.YamlFile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.representer.Representer;
 
@@ -108,7 +109,7 @@ public class ConfigIO
     private Properties loadYamlFile ( final File configFile ) throws ManipulationException
     {
         Properties result = new Properties( );
-        Representer representer = new Representer();
+        Representer representer = new Representer(new DumperOptions());
 
         representer.getPropertyUtils().setSkipMissingProperties(true);
         Yaml yaml = new Yaml( representer);
