@@ -36,6 +36,7 @@ import java.util.Map;
 import java.util.Properties;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
@@ -86,5 +87,29 @@ public class ManipulationManagerTest
 
         assertTrue( systemRule.getLog().contains( "Disabling strictPropertyValidation as dependencyOverrides are enabled" ) );
         assertEquals( 0, (int) commonState.getStrictDependencyPluginPropertyValidation() );
+    }
+
+
+    @Test
+    public void testRewriteChanged()
+                    throws IOException, ManipulationException
+    {
+        final File root = folder.newFolder();
+        final File base = TestUtils.resolveFileResource( "groovy-project-removal", "" );
+        FileUtils.copyDirectory( base, root );
+        final File projectRoot = new File ( root, "pom.xml");
+        final File projectRootBackup = new File ( root, "pom.backup.xml");
+        FileUtils.copyFile( projectRoot, projectRootBackup );
+
+        Properties p = new Properties();
+        p.setProperty( "versionIncrementalSuffix", "rebuild" );
+        p.put( ManipulationManager.REWRITE_CHANGED, "false" );
+
+        TestUtils.SMContainer smc = TestUtils.createSessionAndManager( p, projectRoot );
+        smc.getManager().scanAndApply( smc.getSession() );
+
+        assertTrue( systemRule.getLog().contains( "Maven-Manipulation-Extension: Finished" ) );
+        assertTrue( FileUtils.contentEquals( projectRoot, projectRootBackup) );
+        assertFalse( systemRule.getLog().contains( "Maven-Manipulation-Extension: Rewrite changed" ) );
     }
 }

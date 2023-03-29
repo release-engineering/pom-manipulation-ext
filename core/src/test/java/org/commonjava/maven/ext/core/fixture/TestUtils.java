@@ -175,7 +175,7 @@ public final class TestUtils
     @SuppressWarnings( "deprecation" )
     public static SMContainer createSessionAndManager( Properties p, File pom ) throws ManipulationException
     {
-        ManipulationSession session = new ManipulationSession();
+        ManipulationSession session;
 
         final ArtifactRepository ar =
                         new MavenArtifactRepository( "test", MVN_CENTRAL, new DefaultRepositoryLayout(),
@@ -199,6 +199,7 @@ public final class TestUtils
         {
             container = new DefaultPlexusContainer( config );
             manipulationManager = container.lookup( ManipulationManager.class );
+            session = container.lookup( ManipulationSession.class );
         }
         catch ( PlexusContainerException | ComponentLookupException e )
         {

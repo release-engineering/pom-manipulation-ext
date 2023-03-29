@@ -42,8 +42,6 @@ import java.util.Properties;
 public class ManipulatingEventSpy
      extends AbstractEventSpy
 {
-    private static final String REQUIRE_EXTENSION = "manipulation.required";
-
     private final Logger logger = LoggerFactory.getLogger( getClass() );
 
     private ManipulationManager manipulationManager;
@@ -70,13 +68,8 @@ public class ManipulatingEventSpy
             if ( event instanceof ExecutionEvent )
             {
                 final ExecutionEvent ee = (ExecutionEvent) event;
-
-                required = Boolean.parseBoolean( ee.getSession()
-                                                   .getRequest()
-                                                   .getUserProperties()
-                                                   .getProperty( REQUIRE_EXTENSION, "false" ) );
-
                 final ExecutionEvent.Type type = ee.getType();
+
                 if ( type == Type.ProjectDiscoveryStarted )
                 {
                     if ( ee.getSession() != null )
@@ -121,27 +114,13 @@ public class ManipulatingEventSpy
         catch ( final ManipulationException e )
         {
             logger.error( "Extension failure", e );
-            if ( required )
-            {
-                throw e;
-            }
-            else
-            {
-                session.setError( e );
-            }
+            session.setError( e );
         }
         // Catch any runtime exceptions and mark them to fail the build as well.
         catch ( final RuntimeException e )
         {
             logger.error( "Extension failure", e );
-            if ( required )
-            {
-                throw e;
-            }
-            else
-            {
-                session.setError( new ManipulationException( "Caught runtime exception", e ) );
-            }
+            session.setError( new ManipulationException( "Caught runtime exception", e ) );
         }
         finally
         {
