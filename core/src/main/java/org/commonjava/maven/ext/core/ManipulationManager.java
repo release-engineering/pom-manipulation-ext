@@ -53,6 +53,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -91,6 +92,10 @@ public class ManipulationManager
 
     @ConfigValue( docIndex = "index.html#deprecated-and-unknown-properties")
     public static final String DEPRECATED_PROPERTIES = "enabledDeprecatedProperties";
+
+    @ConfigValue( docIndex = "index.html#write-changed")
+    public static final String REWRITE_CHANGED = "manipulationWriteChanged";
+
 
     private final Logger logger = LoggerFactory.getLogger( getClass() );
 
@@ -228,34 +233,43 @@ public class ManipulationManager
         // Create a marker file if we made some changes to prevent duplicate runs.
         if ( !changed.isEmpty() )
         {
-            logger.info( "Maven-Manipulation-Extension: Rewrite changed: {}", currentProjects );
+            logger.info( "Maven-Manipulation-Extension: Completed with changed: {}", currentProjects );
 
-            ProjectVersionRef executionRoot = pomIO.rewritePOMs( changed );
-
-            jsonReport.getGav().setPVR( executionRoot );
+            Optional<Project> newExecutionRoot = changed.stream().filter( Project::isExecutionRoot ).findFirst();
+            newExecutionRoot.ifPresent( project -> jsonReport.getGav().setPVR( project.getKey() ) );
             jsonReport.getGav().setOriginalGAV( originalExecutionRoot.getKey().toString() );
+
+            WildcardMap<ProjectVersionRef> map = ( session.getState( RelocationState.class ) == null ?
+                            new WildcardMap<>() :
+                            session.getState( RelocationState.class ).getDependencyRelocations() );
+            String report = ProjectComparator.compareProjects( session, jsonReport, map, originalProjects,
+                                                               currentProjects );
+            logger.info( "{}{}", System.lineSeparator(), report );
+
+            final String reportTxtOutputFile = session.getUserProperties().getProperty( REPORT_TXT_OUTPUT_FILE, "" );
 
             try
             {
                 session.getTargetDir().mkdir();
-                new File( session.getTargetDir().getParentFile(), ManipulationManager.MARKER_FILE ).createNewFile();
-
-                WildcardMap<ProjectVersionRef> map = (session.getState( RelocationState.class) == null ? new WildcardMap<>() : session.getState( RelocationState.class ).getDependencyRelocations());
-                String report = ProjectComparator.compareProjects( session, jsonReport, map , originalProjects, currentProjects );
-                logger.info( "{}{}", System.lineSeparator(), report );
-
-                final String reportTxtOutputFile = session.getUserProperties().getProperty( REPORT_TXT_OUTPUT_FILE, "");
                 if ( isNotEmpty( reportTxtOutputFile ) )
                 {
-                    File reportFile = new File ( reportTxtOutputFile);
+                    File reportFile = new File( reportTxtOutputFile );
                     FileUtils.writeStringToFile( reportFile, report, StandardCharsets.UTF_8 );
                 }
-                final String reportJsonOutputFile = session.getUserProperties().getProperty( REPORT_JSON_OUTPUT_FILE,
-                                                                                             session.getTargetDir() + File.separator + REPORT_JSON_DEFAULT);
+                final String reportJsonOutputFile = session.getUserProperties()
+                                                           .getProperty( REPORT_JSON_OUTPUT_FILE,
+                                                                         session.getTargetDir() + File.separator + REPORT_JSON_DEFAULT );
 
-                try (FileWriter writer = new FileWriter( new File( reportJsonOutputFile ) ) )
+                try (FileWriter writer = new FileWriter( reportJsonOutputFile ))
                 {
                     writer.write( JSONUtils.jsonToString( jsonReport ) );
+                }
+
+                if ( Boolean.parseBoolean( session.getUserProperties().getProperty( REWRITE_CHANGED, "true" ) ) )
+                {
+                    logger.debug( "Maven-Manipulation-Extension: Rewrite changed");
+                    pomIO.rewritePOMs( changed );
+                    new File( session.getTargetDir().getParentFile(), ManipulationManager.MARKER_FILE ).createNewFile();
                 }
             }
             catch ( IOException e )

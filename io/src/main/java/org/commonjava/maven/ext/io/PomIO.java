@@ -16,11 +16,11 @@
 package org.commonjava.maven.ext.io;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -134,7 +134,7 @@ public class PomIO
             // the plugin versions set inside profiles...so they're not entirely
             // raw.
             Model raw;
-            try ( InputStream in = new FileInputStream( pom ) )
+            try ( InputStream in = Files.newInputStream( pom.toPath() ))
             {
                 raw = new MavenXpp3Reader().read( in );
             }
@@ -206,25 +206,16 @@ public class PomIO
      * For any project listed as changed (tracked by GA in the session), write the modified model out to disk.
      * Uses {@link ModelETL} to preserve as much formatting as possible.
      *
-     *
      * @param changed the modified Projects to write out.
-     * @return gav execution root GAV
      * @throws ManipulationException if an error occurs.
      */
-    public ProjectVersionRef rewritePOMs( final Set<Project> changed )
+    public void rewritePOMs( final Set<Project> changed )
         throws ManipulationException
     {
-        ProjectVersionRef result = null;
-
         manifestComment = "Modified by POM Manipulation Extension for Maven " +  ManifestUtils.getManifestInformation(PomIO.class);
 
         for ( final Project project : changed )
         {
-            if ( project.isExecutionRoot() )
-            {
-                result = project.getKey();
-            }
-
             if (logger.isDebugEnabled())
             {
                 logger.debug( "{} modified! Rewriting.", project );
@@ -249,7 +240,6 @@ public class PomIO
                 write( project, pom, model );
             }
         }
-        return result;
     }
 
 
