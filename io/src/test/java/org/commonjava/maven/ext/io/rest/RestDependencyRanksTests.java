@@ -1,0 +1,165 @@
+/*
+ * Copyright (C) 2012 Red Hat, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *         http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.commonjava.maven.ext.io.rest;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
+import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef;
+import org.commonjava.maven.ext.io.rest.handler.GAVSchema;
+import org.commonjava.maven.ext.io.rest.rule.MockServer;
+import org.eclipse.jetty.server.Request;
+import org.eclipse.jetty.server.handler.AbstractHandler;
+import org.jboss.da.model.rest.Constraints;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.TestName;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import static org.commonjava.maven.ext.io.rest.Translator.*;
+import static org.commonjava.maven.ext.io.rest.Translator.RETRY_DURATION_SEC;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
+public class RestDependencyRanksTests {
+    private static final Logger LOGGER = LoggerFactory.getLogger( RestDependencyRanksTests.class );
+
+    private DefaultTranslator versionTranslator;
+
+    private GAVSchema gavSchema;
+
+    @Rule
+    public final TestName testName = new TestName();
+
+    @Rule
+    public final MockServer mockServer = new MockServer(new AbstractHandler()
+    {
+        @Override
+        public void handle(String target, Request baseRequest, HttpServletRequest request,
+                           HttpServletResponse response ) throws IOException
+        {
+            ObjectMapper objectMapper = new ObjectMapper();
+            StringBuilder jb = new StringBuilder();
+            String line;
+            BufferedReader reader = request.getReader();
+            while ( ( line = reader.readLine() ) != null )
+            {
+                jb.append( line );
+            }
+            gavSchema = objectMapper.readValue( jb.toString(), GAVSchema.class );
+            LOGGER.info( "Read request body '{}' and read parameters '{}' ", jb, request.getParameterMap() );
+            baseRequest.setHandled( true );
+
+        }
+    } );
+
+    @Before
+    public void before()
+    {
+        LoggerFactory.getLogger( RESTParametersModeTest.class ).info( "Executing test " + testName.getMethodName() );
+    }
+
+    @Test
+    public void testSingleConstraint() throws RestException
+    {
+        Set<Constraints> constraints = new HashSet<>();
+        constraints.add( Constraints.builder()
+                                    .ranks( Arrays.asList( "PRODUCT:EAP", "SUFFIX-VERSION" ) )
+                                    .build() );
+        
+        this.versionTranslator = new DefaultTranslator( mockServer.getUrl(), 0,
+                Translator.CHUNK_SPLIT_COUNT, false, "",
+                Collections.emptyMap(),
+                DEFAULT_CONNECTION_TIMEOUT_SEC, DEFAULT_SOCKET_TIMEOUT_SEC,
+                RETRY_DURATION_SEC, constraints );
+        List<ProjectVersionRef> gavs = Collections.singletonList(
+                new SimpleProjectVersionRef( "com.example", "example", "1.0" ) );
+
+        versionTranslator.lookupVersions( gavs );
+        
+        assertNotNull( gavSchema.constraints );
+        assertFalse( gavSchema.constraints.isEmpty() );
+
+        LOGGER.info( gavSchema.constraints.toString() );
+        
+        assertEquals( constraints, gavSchema.constraints );
+    }
+
+    @Test
+    public void testMultipleConstraints() throws RestException
+    {
+        Set<Constraints> constraints = new HashSet<>();
+        constraints.add( Constraints.builder()
+                                    .artifactScope("org.slf4j:slf4j-api")
+                                    .ranks( Arrays.asList( "PRODUCT:EAP", "SUFFIX-VERSION" ) )
+                                    .denyList("QUALITY:BLACKLISTED")
+                                    .build() );
+
+        constraints.add( Constraints.builder()
+                                    .ranks( Arrays.asList( "MILESTONE:EAP 7.4.8.CR2", "QUALITY:RELEASED" ) )
+                                    .allowList("VERSION:EAP 7.4")
+                                    .build() );
+
+        this.versionTranslator = new DefaultTranslator( mockServer.getUrl(), 0,
+                Translator.CHUNK_SPLIT_COUNT, false, "",
+                Collections.emptyMap(),
+                DEFAULT_CONNECTION_TIMEOUT_SEC, DEFAULT_SOCKET_TIMEOUT_SEC,
+                RETRY_DURATION_SEC, constraints );
+        List<ProjectVersionRef> gavs = Collections.singletonList(
+                new SimpleProjectVersionRef( "com.example", "example", "1.0" ) );
+
+        versionTranslator.lookupVersions( gavs );
+
+        assertNotNull( gavSchema.constraints );
+        assertFalse( gavSchema.constraints.isEmpty() );
+
+        LOGGER.info( gavSchema.constraints.toString() );
+
+        assertEquals( constraints, gavSchema.constraints );
+    }
+
+    @Test
+    public void testVerifyNoConstraints() throws RestException
+    {
+        Set<Constraints> constraints = new HashSet<>();
+        this.versionTranslator = new DefaultTranslator( mockServer.getUrl(), 0,
+                Translator.CHUNK_SPLIT_COUNT, false, "",
+                Collections.emptyMap(),
+                DEFAULT_CONNECTION_TIMEOUT_SEC, DEFAULT_SOCKET_TIMEOUT_SEC,
+                RETRY_DURATION_SEC, constraints );
+        List<ProjectVersionRef> gavs = Collections.singletonList(
+                new SimpleProjectVersionRef( "com.example", "example", "1.0" ) );
+
+        versionTranslator.lookupVersions( gavs );
+
+        assertNotNull( gavSchema.mode );
+        assertTrue( gavSchema.mode.isEmpty() );
+    }
+}
