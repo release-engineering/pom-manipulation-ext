@@ -33,6 +33,7 @@ import org.commonjava.maven.ext.common.util.JSONUtils.InternalObjectMapper;
 import org.commonjava.maven.ext.common.util.ListUtils;
 import org.jboss.da.lookup.model.MavenLatestRequest;
 import org.jboss.da.lookup.model.MavenLookupRequest;
+import org.jboss.da.model.rest.Constraints;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,6 +45,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Queue;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -104,6 +106,8 @@ public class DefaultTranslator
 
     private final int restSocketTimeout;
 
+    private final Set<Constraints> dependencyConstraints;
+
     static
     {
         // According to https://kong.github.io/unirest-java/#configuration the default connection timeout is 10000
@@ -128,7 +132,7 @@ public class DefaultTranslator
      */
     public DefaultTranslator( String endpointUrl, int restMaxSize, int restMinSize, Boolean brewPullActive, String mode,
                               Map<String, String> restHeaders, int restConnectionTimeout, int restSocketTimeout,
-                              int restRetryDuration )
+                              int restRetryDuration, Set<Constraints> dependencyConstraints )
     {
         this.brewPullActive = brewPullActive;
         this.mode = mode;
@@ -139,6 +143,7 @@ public class DefaultTranslator
         this.restConnectionTimeout = restConnectionTimeout;
         this.restSocketTimeout = restSocketTimeout;
         this.retryDuration = restRetryDuration;
+        this.dependencyConstraints = dependencyConstraints;
 
         if ( OTelCLIHelper.otelEnabled() )
         {
@@ -412,6 +417,7 @@ public class DefaultTranslator
                                                 .mode( mode )
                                                 .brewPullActive( brewPullActive )
                                                 .artifacts( GAVUtils.generateGAVs( chunk ) )
+                                                .constraints(dependencyConstraints)
                                                 .build() )
                                 :
                                 ( MavenLatestRequest

@@ -76,7 +76,8 @@ public class VersionTranslatorSplitTest
         handler.setStatusCode( HttpServletResponse.SC_GATEWAY_TIMEOUT );
         versionTranslator = new DefaultTranslator( mockServer.getUrl(), 0, Translator.CHUNK_SPLIT_COUNT, false, "",
                                                    Collections.emptyMap(), DEFAULT_CONNECTION_TIMEOUT_SEC,
-                                                   DEFAULT_SOCKET_TIMEOUT_SEC, RETRY_DURATION_SEC );
+                                                   DEFAULT_SOCKET_TIMEOUT_SEC, RETRY_DURATION_SEC,
+                                                   Collections.emptySet() );
     }
 
     @Test
@@ -174,7 +175,8 @@ public class VersionTranslatorSplitTest
     {
         this.versionTranslator = new DefaultTranslator( mockServer.getUrl(), 10, Translator.CHUNK_SPLIT_COUNT, false, "",
                                                         Collections.emptyMap(), DEFAULT_CONNECTION_TIMEOUT_SEC,
-                                                        DEFAULT_SOCKET_TIMEOUT_SEC, RETRY_DURATION_SEC );
+                                                        DEFAULT_SOCKET_TIMEOUT_SEC, RETRY_DURATION_SEC,
+                                                        Collections.emptySet() );
 
         List<ProjectVersionRef> data = aLotOfGavs.subList( 0, 30 );
         handler.getRequestData().clear();
@@ -238,7 +240,8 @@ public class VersionTranslatorSplitTest
     {
         this.versionTranslator = new DefaultTranslator( mockServer.getUrl(), 10, 1, false, "",
                                                         Collections.emptyMap(), DEFAULT_CONNECTION_TIMEOUT_SEC,
-                                                        DEFAULT_SOCKET_TIMEOUT_SEC, RETRY_DURATION_SEC );
+                                                        DEFAULT_SOCKET_TIMEOUT_SEC, RETRY_DURATION_SEC,
+                                                        Collections.emptySet() );
 
         List<ProjectVersionRef> data = aLotOfGavs.subList( 0, 30 );
         handler.getRequestData().clear();

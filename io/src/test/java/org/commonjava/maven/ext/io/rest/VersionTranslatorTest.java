@@ -84,8 +84,8 @@ public class VersionTranslatorTest
 
         this.versionTranslator = new DefaultTranslator( mockServer.getUrl(), 0, Translator.CHUNK_SPLIT_COUNT, false, "",
                                                         Collections.emptyMap(),
-                                                        DEFAULT_CONNECTION_TIMEOUT_SEC,
-                                                        DEFAULT_SOCKET_TIMEOUT_SEC, RETRY_DURATION_SEC );
+                                                        DEFAULT_CONNECTION_TIMEOUT_SEC, DEFAULT_SOCKET_TIMEOUT_SEC,
+                                                        RETRY_DURATION_SEC, Collections.emptySet() );
     }
 
     @Test
@@ -128,7 +128,8 @@ public class VersionTranslatorTest
     {
         this.versionTranslator = new DefaultTranslator( mockServer.getUrl(), 0, Translator.CHUNK_SPLIT_COUNT,
                                                         false, "NullBestMatchVersion", Collections.emptyMap(),
-                                                        DEFAULT_CONNECTION_TIMEOUT_SEC, DEFAULT_SOCKET_TIMEOUT_SEC, RETRY_DURATION_SEC );
+                                                        DEFAULT_CONNECTION_TIMEOUT_SEC, DEFAULT_SOCKET_TIMEOUT_SEC,
+                                                        RETRY_DURATION_SEC, Collections.emptySet() );
         List<ProjectVersionRef> gavs = Arrays.asList(
                         new SimpleProjectVersionRef( "com.example", "example", "1.0" ),
                         new SimpleProjectVersionRef( "com.example", "example-dep", "2.0" ),
@@ -153,8 +154,8 @@ public class VersionTranslatorTest
         Translator translator = new DefaultTranslator( "http://127.0.0.2", 0,
                                                        Translator.CHUNK_SPLIT_COUNT, false, "",
                                                        Collections.emptyMap(),
-                                                       DEFAULT_CONNECTION_TIMEOUT_SEC,
-                                                       DEFAULT_SOCKET_TIMEOUT_SEC, RETRY_DURATION_SEC );
+                                                       DEFAULT_CONNECTION_TIMEOUT_SEC, DEFAULT_SOCKET_TIMEOUT_SEC,
+                                                       RETRY_DURATION_SEC, Collections.emptySet() );
 
         List<ProjectVersionRef> gavs = Collections.singletonList(
             new SimpleProjectVersionRef( "com.example", "example", "1.0" ) );

@@ -30,6 +30,7 @@ import org.slf4j.LoggerFactory;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -89,7 +90,7 @@ public class AutoSplitTest
     private List<List<Map<String, Object>>> translate(int size) {
         final DefaultTranslator versionTranslator = new DefaultTranslator(
                         mockServer.getUrl(), -1, 0, false, "", Collections.emptyMap(),
-                        DEFAULT_CONNECTION_TIMEOUT_SEC, DEFAULT_SOCKET_TIMEOUT_SEC, RETRY_DURATION_SEC);
+                        DEFAULT_CONNECTION_TIMEOUT_SEC, DEFAULT_SOCKET_TIMEOUT_SEC, RETRY_DURATION_SEC, Collections.emptySet() );
 
         List<ProjectVersionRef> data = aLotOfGavs.subList( 0, size );
         handler.getRequestData().clear();
