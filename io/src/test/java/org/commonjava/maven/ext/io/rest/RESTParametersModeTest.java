@@ -89,7 +89,7 @@ public class RESTParametersModeTest
                                                         Translator.CHUNK_SPLIT_COUNT, false, suffix,
                                                         Collections.emptyMap(),
                                                         DEFAULT_CONNECTION_TIMEOUT_SEC, DEFAULT_SOCKET_TIMEOUT_SEC,
-                                                        RETRY_DURATION_SEC );
+                                                        RETRY_DURATION_SEC, Collections.emptySet() );
         List<ProjectVersionRef> gavs = Collections.singletonList(
             new SimpleProjectVersionRef( "com.example", "example", "1.0" ) );
 
@@ -105,7 +105,7 @@ public class RESTParametersModeTest
                                                         Translator.CHUNK_SPLIT_COUNT, false, mode,
                                                         Collections.emptyMap(),
                                                         DEFAULT_CONNECTION_TIMEOUT_SEC, DEFAULT_SOCKET_TIMEOUT_SEC,
-                                                        RETRY_DURATION_SEC );
+                                                        RETRY_DURATION_SEC, Collections.emptySet() );
         List<ProjectVersionRef> gavs = Collections.singletonList(
             new SimpleProjectVersionRef( "com.example", "example", "1.0" ) );
 

@@ -17,16 +17,22 @@ package org.commonjava.maven.ext.core.state;
 
 import org.apache.commons.lang.StringUtils;
 import org.commonjava.maven.ext.annotation.ConfigValue;
+import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.core.ManipulationSession;
 import org.commonjava.maven.ext.core.impl.DependencyManipulator;
+import org.commonjava.maven.ext.core.util.PropertiesUtils;
 import org.commonjava.maven.ext.io.rest.DefaultTranslator;
 import org.commonjava.maven.ext.io.rest.Translator;
+import org.jboss.da.model.rest.Constraints;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -64,6 +70,27 @@ public class RESTState implements State
     @ConfigValue( docIndex = "dep-manip.html#rest-timeouts-and-retries" )
     public static final String REST_RETRY_DURATION_SEC = "restRetryDuration";
 
+    @ConfigValue( docIndex = "dep-manip.html#rest-pnc-specific-properties")
+    public static final String REST_GLOBAL_DEPENDENCY_RANKS = "restDependencyRanks";
+
+    @ConfigValue( docIndex = "dep-manip.html#rest-pnc-specific-properties")
+    public static final String REST_GLOBAL_DEPENDENCY_ALLOW_LIST = "restDependencyAllowList";
+
+    @ConfigValue( docIndex = "dep-manip.html#rest-pnc-specific-properties")
+    public static final String REST_GLOBAL_DEPENDENCY_DENY_LIST = "restDependencyDenyList";
+
+    @ConfigValue( docIndex = "dep-manip.html#rest-pnc-specific-properties")
+    public static final String REST_DEPENDENCY_RANKS = "restDependencyRanks.";
+
+    @ConfigValue( docIndex = "dep-manip.html#rest-pnc-specific-properties")
+    public static final String REST_DEPENDENCY_ALLOW_LIST = "restDependencyAllowList.";
+
+    @ConfigValue( docIndex = "dep-manip.html#rest-pnc-specific-properties")
+    public static final String REST_DEPENDENCY_DENY_LIST = "restDependencyDenyList.";
+
+    @ConfigValue( docIndex = "dep-manip.html#rest-pnc-specific-properties")
+    public static final String REST_DEPENDENCY_RANK_DELIMITER = "restDependencyRankDelimiter";
+
     private final ManipulationSession session;
 
     private String restURL;
@@ -72,7 +99,9 @@ public class RESTState implements State
 
     private boolean restSuffixAlign;
 
-    public RESTState( final ManipulationSession session )
+    private String rankListDelimiter;
+
+    public RESTState( final ManipulationSession session ) throws ManipulationException
     {
         this.session = session;
 
@@ -80,7 +109,7 @@ public class RESTState implements State
     }
 
     @Override
-    public void initialise( Properties userProps )
+    public void initialise( Properties userProps ) throws ManipulationException
     {
         restURL = userProps.getProperty( REST_URL );
         restSuffixAlign = Boolean.parseBoolean( userProps.getProperty( REST_SUFFIX, "true" ) );
@@ -98,9 +127,28 @@ public class RESTState implements State
         int restRetryDuration = Integer.parseInt( userProps.getProperty( REST_RETRY_DURATION_SEC,
                                                                          String.valueOf( DefaultTranslator.RETRY_DURATION_SEC ) ) );
 
+        String globalRank = userProps.getProperty( REST_GLOBAL_DEPENDENCY_RANKS );
+        String globalAllow = userProps.getProperty( REST_GLOBAL_DEPENDENCY_ALLOW_LIST );
+        String globalDeny = userProps.getProperty( REST_GLOBAL_DEPENDENCY_DENY_LIST );
+
+        Map<String, String> restRanks = PropertiesUtils.getPropertiesByPrefix( userProps, REST_DEPENDENCY_RANKS );
+        Map<String, String> restAllows = PropertiesUtils.getPropertiesByPrefix( userProps, REST_DEPENDENCY_ALLOW_LIST );
+        Map<String, String> restDenies = PropertiesUtils.getPropertiesByPrefix( userProps, REST_DEPENDENCY_DENY_LIST );
+
+        this.rankListDelimiter = userProps.getProperty( REST_DEPENDENCY_RANK_DELIMITER, ";" );
+
+        if ( rankListDelimiter.length() != 1 )
+        {
+            throw new ManipulationException( "Incorrect rank delimiter format; expecting exactly one character; got {}",
+                                             rankListDelimiter );
+        }
+
+        Set<Constraints> dependencyConstraints =
+            constructConstraints( globalRank, globalAllow, globalDeny, restRanks, restAllows, restDenies );
+
         restEndpoint = new DefaultTranslator( restURL, restMaxSize, restMinSize, brewPullActive, mode,
-                                              restHeaders, restConnectionTimeout,
-                                              restSocketTimeout, restRetryDuration );
+                                              restHeaders, restConnectionTimeout, restSocketTimeout,
+                                              restRetryDuration, dependencyConstraints );
     }
 
     /**
@@ -136,5 +184,53 @@ public class RESTState implements State
                                                      LinkedHashMap::new ) );
         }
         return Collections.emptyMap();
+    }
+
+    public Set<Constraints> constructConstraints( String globalRank, String globalAllow, String globalDeny,
+                                                  Map<String, String> restRanks, Map<String, String> restAllows,
+                                                  Map<String, String> restDenies )
+    {
+        Set<Constraints> constraints = new HashSet<>();
+        // HANDLE GLOBAL SCOPE 
+        if ( globalRank != null || globalAllow != null || globalDeny != null )
+        {
+            constraints.add( Constraints.builder()
+                                        .allowList( globalAllow )
+                                        .denyList( globalDeny )
+                                        .ranks( globalRank == null ? null
+                                                        : Arrays.asList( globalRank.split( rankListDelimiter ) ) )
+                                        .build() );
+        }
+
+        // HANDLE SPECIFIC SCOPES
+        Map<String, Constraints.ConstraintsBuilder> constraintBuilders = new HashMap<>();
+
+        restRanks.forEach( ( scope, ranks ) -> {
+            if ( !constraintBuilders.containsKey( scope ) )
+            {
+                constraintBuilders.put( scope, Constraints.builder().artifactScope( scope ) );
+            }
+            constraintBuilders.get( scope ).ranks( Arrays.asList( ranks.split( rankListDelimiter ) ) );
+        } );
+
+        restAllows.forEach( ( scope, allows ) -> {
+            if ( !constraintBuilders.containsKey( scope ) )
+            {
+                constraintBuilders.put( scope, Constraints.builder().artifactScope( scope ) );
+            }
+            constraintBuilders.get( scope ).allowList( allows );
+        } );
+
+        restDenies.forEach( ( scope, denies ) -> {
+            if ( !constraintBuilders.containsKey( scope ) )
+            {
+                constraintBuilders.put( scope, Constraints.builder().artifactScope( scope ) );
+            }
+            constraintBuilders.get( scope ).denyList( denies );
+        } );
+
+        constraintBuilders.forEach( ( scope, builder ) -> constraints.add( builder.build() ) );
+
+        return constraints;
     }
 }

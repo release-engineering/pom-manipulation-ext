@@ -100,7 +100,8 @@ public class HttpErrorTranslatorTest
                                                         Translator.CHUNK_SPLIT_COUNT, false, "",
                                                         Collections.emptyMap(),
                                                         DEFAULT_CONNECTION_TIMEOUT_SEC,
-                                                        DEFAULT_SOCKET_TIMEOUT_SEC, RETRY_DURATION_SEC );
+                                                        DEFAULT_SOCKET_TIMEOUT_SEC, RETRY_DURATION_SEC,
+                                                        Collections.emptySet() );
     }
 
     @Test

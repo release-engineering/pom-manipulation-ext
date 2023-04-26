@@ -75,7 +75,7 @@ public class RESTHeaderTest
         headers.put( "Bar", "baz" );
         Translator translator = new DefaultTranslator( mockServer.getUrl(), 0,
                 Translator.CHUNK_SPLIT_COUNT, false, "rebuild", headers, DEFAULT_CONNECTION_TIMEOUT_SEC,
-                DEFAULT_SOCKET_TIMEOUT_SEC, RETRY_DURATION_SEC );
+                DEFAULT_SOCKET_TIMEOUT_SEC, RETRY_DURATION_SEC, Collections.emptySet() );
 
         List<ProjectVersionRef> gavs = Collections.singletonList(
                         new SimpleProjectVersionRef( "com.example", "example", "1.0" ) );
@@ -93,8 +93,8 @@ public class RESTHeaderTest
                                                  "http://localhost:9090" ) ) );
         Translator t = new DefaultTranslator( mockServer.getUrl(), 0,
                                Translator.CHUNK_SPLIT_COUNT, false, "rebuild", Collections.emptyMap(),
-                                              DEFAULT_CONNECTION_TIMEOUT_SEC,
-                               DEFAULT_SOCKET_TIMEOUT_SEC, RETRY_DURATION_SEC );
+                                              DEFAULT_CONNECTION_TIMEOUT_SEC, DEFAULT_SOCKET_TIMEOUT_SEC,
+                                              RETRY_DURATION_SEC, Collections.emptySet() );
         List<ProjectVersionRef> gavs = Collections.singletonList(
                         new SimpleProjectVersionRef( "com.example", "example", "1.0" ) );
 

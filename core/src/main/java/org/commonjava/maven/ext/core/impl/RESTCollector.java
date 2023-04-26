@@ -62,7 +62,7 @@ public class RESTCollector
     private ManipulationSession session;
 
     @Override
-    public void init( final ManipulationSession session )
+    public void init( final ManipulationSession session ) throws ManipulationException
     {
         this.session = session;
         session.setState( new RESTState( session ) );

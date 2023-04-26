@@ -17,6 +17,7 @@ package org.commonjava.maven.ext.core.impl;
 
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef;
+import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.common.model.Project;
 import org.commonjava.maven.ext.core.ManipulationSession;
 import org.commonjava.maven.ext.core.state.DependencyState;
@@ -54,7 +55,7 @@ public class RESTBOMCollector
     private ManipulationSession session;
 
     @Override
-    public void init( final ManipulationSession session )
+    public void init( final ManipulationSession session ) throws ManipulationException
     {
         this.session = session;
         session.setState( new RESTState( session ) );
