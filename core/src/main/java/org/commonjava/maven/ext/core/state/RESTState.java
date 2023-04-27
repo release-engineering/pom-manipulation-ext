@@ -99,8 +99,6 @@ public class RESTState implements State
 
     private boolean restSuffixAlign;
 
-    private String rankListDelimiter;
-
     public RESTState( final ManipulationSession session ) throws ManipulationException
     {
         this.session = session;
@@ -135,7 +133,7 @@ public class RESTState implements State
         Map<String, String> restAllows = PropertiesUtils.getPropertiesByPrefix( userProps, REST_DEPENDENCY_ALLOW_LIST );
         Map<String, String> restDenies = PropertiesUtils.getPropertiesByPrefix( userProps, REST_DEPENDENCY_DENY_LIST );
 
-        this.rankListDelimiter = userProps.getProperty( REST_DEPENDENCY_RANK_DELIMITER, ";" );
+        String rankListDelimiter = userProps.getProperty( REST_DEPENDENCY_RANK_DELIMITER, ";" );
 
         if ( rankListDelimiter.length() != 1 )
         {
@@ -143,8 +141,8 @@ public class RESTState implements State
                                              rankListDelimiter );
         }
 
-        Set<Constraints> dependencyConstraints =
-            constructConstraints( globalRank, globalAllow, globalDeny, restRanks, restAllows, restDenies );
+        Set<Constraints> dependencyConstraints = constructConstraints( globalRank, globalAllow, globalDeny, restRanks,
+                                                                       restAllows, restDenies, rankListDelimiter );
 
         restEndpoint = new DefaultTranslator( restURL, restMaxSize, restMinSize, brewPullActive, mode,
                                               restHeaders, restConnectionTimeout, restSocketTimeout,
@@ -186,9 +184,10 @@ public class RESTState implements State
         return Collections.emptyMap();
     }
 
-    public Set<Constraints> constructConstraints( String globalRank, String globalAllow, String globalDeny,
-                                                  Map<String, String> restRanks, Map<String, String> restAllows,
-                                                  Map<String, String> restDenies )
+    // Public API : Used by GME to convert as well.
+    public static Set<Constraints> constructConstraints(String globalRank, String globalAllow, String globalDeny,
+                                                        Map<String, String> restRanks, Map<String, String> restAllows,
+                                                        Map<String, String> restDenies, String rankListDelimiter)
     {
         Set<Constraints> constraints = new HashSet<>();
         // HANDLE GLOBAL SCOPE 
