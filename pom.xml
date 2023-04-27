@@ -82,18 +82,18 @@
     <daVersion>2.1.0</daVersion>
     <galleyVersion>0.16.6</galleyVersion>
 
-    <groovyVersion>3.0.13</groovyVersion>
-    <unirestVersion>3.13.11</unirestVersion>
-    <jsonPathVersion>2.7.0</jsonPathVersion>
-    <slf4jVersion>1.7.30</slf4jVersion>
+    <groovyVersion>3.0.17</groovyVersion>
+    <unirestVersion>3.14.2</unirestVersion>
+    <jsonPathVersion>2.8.0</jsonPathVersion>
+    <slf4jVersion>1.7.36</slf4jVersion>
     <docletVersion>1.1</docletVersion>
     <lombokPluginVersion>1.18.20.0</lombokPluginVersion>
     <shadePluginVersion>3.2.4</shadePluginVersion>
 
     <!-- Both Jackson versions should be identical except if Jackson has not -->
     <!-- published javadoc for the micro version -->
-    <jacksonVersion>2.14.0-rc1</jacksonVersion>
-    <jacksonJavadocVersion>2.13</jacksonJavadocVersion>
+    <jacksonVersion>2.15.0</jacksonVersion>
+    <jacksonJavadocVersion>2.14</jacksonJavadocVersion>
 
     <argLine />
     <surefireSecurityManager />
@@ -478,7 +478,7 @@
       <dependency>
         <groupId>org.projectlombok</groupId>
         <artifactId>lombok</artifactId>
-        <version>1.18.24</version>
+        <version>1.18.26</version>
         <scope>provided</scope>
       </dependency>
 
