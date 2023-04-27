@@ -166,8 +166,15 @@ For example `-DrestDependencyRanks="PRODUCT:EAP;QUALITY:RELEASED"` would result 
 | release-00004 | RHSSO   |          |                              | release-00001     |         |              |
 
 
-`restDependencyAllowList` and `restDependencyDenyList` are fairly straightforward. They are comma-seperated list of 
-Qualifiers that will, in case of allowList, be **exclusively** allowed or in case of denyList, **not allowed at all**.
+`restDependencyAllowList` and `restDependencyDenyList` are fairly straightforward. They are comma-seperated 
+(non-configurable) list of Qualifiers that will, in case of allowList, be **exclusively** allowed or in case of
+denyList, **not allowed at all**.
+
+An example:
+
+    -DrestDependencyAllowList="PRODUCT:EAP, PRODUCT:RHSSO"
+
+    -DrestDependencyDenyList="QUALITY:BLACKLISTED"
 
 Furthermore, you can change the scope of affected dependencies for specific groupIDs or groupID:artifactIDs. For example
 `-DrestDependencyRanks.org.slf4j='PRODUCT:EAP'` would apply only to artifacts with `org.slf4j` groupID. This is the case
