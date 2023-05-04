@@ -33,7 +33,7 @@ import org.commonjava.maven.ext.common.util.JSONUtils.InternalObjectMapper;
 import org.commonjava.maven.ext.common.util.ListUtils;
 import org.jboss.da.lookup.model.MavenLatestRequest;
 import org.jboss.da.lookup.model.MavenLookupRequest;
-import org.jboss.da.model.rest.Constraints;
+import org.jboss.da.model.rest.Strategy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -106,7 +106,7 @@ public class DefaultTranslator
 
     private final int restSocketTimeout;
 
-    private final Set<Constraints> dependencyConstraints;
+    private final Set<Strategy> dependencyStrategies;
 
     static
     {
@@ -129,10 +129,11 @@ public class DefaultTranslator
      * @param restConnectionTimeout the timeout for the REST request; defaults to {@link Translator#DEFAULT_CONNECTION_TIMEOUT_SEC}
      * @param restSocketTimeout the timeout for the REST socket calls; defaults to {@link Translator#DEFAULT_SOCKET_TIMEOUT_SEC}
      * @param restRetryDuration the retry duration configuration; ; defaults to {@link Translator#RETRY_DURATION_SEC}
+     * @param dependencyStrategies alignment strategies passed to REST request
      */
     public DefaultTranslator( String endpointUrl, int restMaxSize, int restMinSize, Boolean brewPullActive, String mode,
                               Map<String, String> restHeaders, int restConnectionTimeout, int restSocketTimeout,
-                              int restRetryDuration, Set<Constraints> dependencyConstraints )
+                              int restRetryDuration, Set<Strategy> dependencyStrategies )
     {
         this.brewPullActive = brewPullActive;
         this.mode = mode;
@@ -143,7 +144,7 @@ public class DefaultTranslator
         this.restConnectionTimeout = restConnectionTimeout;
         this.restSocketTimeout = restSocketTimeout;
         this.retryDuration = restRetryDuration;
-        this.dependencyConstraints = dependencyConstraints;
+        this.dependencyStrategies = dependencyStrategies;
 
         if ( OTelCLIHelper.otelEnabled() )
         {
@@ -417,7 +418,7 @@ public class DefaultTranslator
                                                 .mode( mode )
                                                 .brewPullActive( brewPullActive )
                                                 .artifacts( GAVUtils.generateGAVs( chunk ) )
-                                                .constraints(dependencyConstraints)
+                                                .strategies(dependencyStrategies)
                                                 .build() )
                                 :
                                 ( MavenLatestRequest
