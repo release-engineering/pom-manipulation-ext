@@ -23,7 +23,7 @@ import org.commonjava.maven.ext.io.rest.handler.GAVSchema;
 import org.commonjava.maven.ext.io.rest.rule.MockServer;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.handler.AbstractHandler;
-import org.jboss.da.model.rest.Constraints;
+import org.jboss.da.model.rest.Strategy;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -87,10 +87,10 @@ public class RestDependencyRanksTests {
     }
 
     @Test
-    public void testSingleConstraint() throws RestException
+    public void testSingleStrategy() throws RestException
     {
-        Set<Constraints> constraints = new HashSet<>();
-        constraints.add( Constraints.builder()
+        Set<Strategy> strategies = new HashSet<>();
+        strategies.add( Strategy.builder()
                                     .ranks( Arrays.asList( "PRODUCT:EAP", "SUFFIX-VERSION" ) )
                                     .build() );
         
@@ -98,31 +98,31 @@ public class RestDependencyRanksTests {
                 Translator.CHUNK_SPLIT_COUNT, false, "",
                 Collections.emptyMap(),
                 DEFAULT_CONNECTION_TIMEOUT_SEC, DEFAULT_SOCKET_TIMEOUT_SEC,
-                RETRY_DURATION_SEC, constraints );
+                RETRY_DURATION_SEC, strategies );
         List<ProjectVersionRef> gavs = Collections.singletonList(
                 new SimpleProjectVersionRef( "com.example", "example", "1.0" ) );
 
         versionTranslator.lookupVersions( gavs );
         
-        assertNotNull( gavSchema.constraints );
-        assertFalse( gavSchema.constraints.isEmpty() );
+        assertNotNull( gavSchema.strategies);
+        assertFalse( gavSchema.strategies.isEmpty() );
 
-        LOGGER.info( gavSchema.constraints.toString() );
+        LOGGER.info( gavSchema.strategies.toString() );
         
-        assertEquals( constraints, gavSchema.constraints );
+        assertEquals( strategies, gavSchema.strategies);
     }
 
     @Test
-    public void testMultipleConstraints() throws RestException
+    public void testMultipleStrategies() throws RestException
     {
-        Set<Constraints> constraints = new HashSet<>();
-        constraints.add( Constraints.builder()
+        Set<Strategy> strategies = new HashSet<>();
+        strategies.add( Strategy.builder()
                                     .artifactScope("org.slf4j:slf4j-api")
                                     .ranks( Arrays.asList( "PRODUCT:EAP", "SUFFIX-VERSION" ) )
                                     .denyList("QUALITY:BLACKLISTED")
                                     .build() );
 
-        constraints.add( Constraints.builder()
+        strategies.add( Strategy.builder()
                                     .ranks( Arrays.asList( "MILESTONE:EAP 7.4.8.CR2", "QUALITY:RELEASED" ) )
                                     .allowList("VERSION:EAP 7.4")
                                     .build() );
@@ -131,29 +131,29 @@ public class RestDependencyRanksTests {
                 Translator.CHUNK_SPLIT_COUNT, false, "",
                 Collections.emptyMap(),
                 DEFAULT_CONNECTION_TIMEOUT_SEC, DEFAULT_SOCKET_TIMEOUT_SEC,
-                RETRY_DURATION_SEC, constraints );
+                RETRY_DURATION_SEC, strategies );
         List<ProjectVersionRef> gavs = Collections.singletonList(
                 new SimpleProjectVersionRef( "com.example", "example", "1.0" ) );
 
         versionTranslator.lookupVersions( gavs );
 
-        assertNotNull( gavSchema.constraints );
-        assertFalse( gavSchema.constraints.isEmpty() );
+        assertNotNull( gavSchema.strategies);
+        assertFalse( gavSchema.strategies.isEmpty() );
 
-        LOGGER.info( gavSchema.constraints.toString() );
+        LOGGER.info( gavSchema.strategies.toString() );
 
-        assertEquals( constraints, gavSchema.constraints );
+        assertEquals( strategies, gavSchema.strategies);
     }
 
     @Test
-    public void testVerifyNoConstraints() throws RestException
+    public void testVerifyNoStrategy() throws RestException
     {
-        Set<Constraints> constraints = new HashSet<>();
+        Set<Strategy> strategies = new HashSet<>();
         this.versionTranslator = new DefaultTranslator( mockServer.getUrl(), 0,
                 Translator.CHUNK_SPLIT_COUNT, false, "",
                 Collections.emptyMap(),
                 DEFAULT_CONNECTION_TIMEOUT_SEC, DEFAULT_SOCKET_TIMEOUT_SEC,
-                RETRY_DURATION_SEC, constraints );
+                RETRY_DURATION_SEC, strategies );
         List<ProjectVersionRef> gavs = Collections.singletonList(
                 new SimpleProjectVersionRef( "com.example", "example", "1.0" ) );
 

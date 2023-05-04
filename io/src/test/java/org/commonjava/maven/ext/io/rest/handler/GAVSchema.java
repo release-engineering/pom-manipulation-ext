@@ -17,7 +17,7 @@ package org.commonjava.maven.ext.io.rest.handler;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.ToString;
-import org.jboss.da.model.rest.Constraints;
+import org.jboss.da.model.rest.Strategy;
 
 import java.util.List;
 import java.util.Map;
@@ -36,7 +36,7 @@ public class GAVSchema
     public Boolean brewPullActive;
 
     @JsonInclude(value = JsonInclude.Include.NON_NULL)
-    public Set<Constraints> constraints;
+    public Set<Strategy> strategies;
 
     public GAVSchema() {}
 }

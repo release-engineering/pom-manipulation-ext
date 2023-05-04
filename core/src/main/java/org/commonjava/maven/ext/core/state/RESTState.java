@@ -23,7 +23,7 @@ import org.commonjava.maven.ext.core.impl.DependencyManipulator;
 import org.commonjava.maven.ext.core.util.PropertiesUtils;
 import org.commonjava.maven.ext.io.rest.DefaultTranslator;
 import org.commonjava.maven.ext.io.rest.Translator;
-import org.jboss.da.model.rest.Constraints;
+import org.jboss.da.model.rest.Strategy;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -141,7 +141,7 @@ public class RESTState implements State
                                              rankListDelimiter );
         }
 
-        Set<Constraints> dependencyConstraints = constructConstraints( globalRank, globalAllow, globalDeny, restRanks,
+        Set<Strategy> dependencyConstraints = constructStrategies( globalRank, globalAllow, globalDeny, restRanks,
                                                                        restAllows, restDenies, rankListDelimiter );
 
         restEndpoint = new DefaultTranslator( restURL, restMaxSize, restMinSize, brewPullActive, mode,
@@ -185,15 +185,15 @@ public class RESTState implements State
     }
 
     // Public API : Used by GME to convert as well.
-    public static Set<Constraints> constructConstraints(String globalRank, String globalAllow, String globalDeny,
-                                                        Map<String, String> restRanks, Map<String, String> restAllows,
-                                                        Map<String, String> restDenies, String rankListDelimiter)
+    public static Set<Strategy> constructStrategies(String globalRank, String globalAllow, String globalDeny,
+                                                    Map<String, String> restRanks, Map<String, String> restAllows,
+                                                    Map<String, String> restDenies, String rankListDelimiter)
     {
-        Set<Constraints> constraints = new HashSet<>();
+        Set<Strategy> strategies = new HashSet<>();
         // HANDLE GLOBAL SCOPE 
         if ( globalRank != null || globalAllow != null || globalDeny != null )
         {
-            constraints.add( Constraints.builder()
+            strategies.add( Strategy.builder()
                                         .allowList( globalAllow )
                                         .denyList( globalDeny )
                                         .ranks( globalRank == null ? null
@@ -202,34 +202,34 @@ public class RESTState implements State
         }
 
         // HANDLE SPECIFIC SCOPES
-        Map<String, Constraints.ConstraintsBuilder> constraintBuilders = new HashMap<>();
+        Map<String, Strategy.StrategyBuilder> strategyBuilders = new HashMap<>();
 
         restRanks.forEach( ( scope, ranks ) -> {
-            if ( !constraintBuilders.containsKey( scope ) )
+            if ( !strategyBuilders.containsKey( scope ) )
             {
-                constraintBuilders.put( scope, Constraints.builder().artifactScope( scope ) );
+                strategyBuilders.put( scope, Strategy.builder().artifactScope( scope ) );
             }
-            constraintBuilders.get( scope ).ranks( Arrays.asList( ranks.split( rankListDelimiter ) ) );
+            strategyBuilders.get( scope ).ranks( Arrays.asList( ranks.split( rankListDelimiter ) ) );
         } );
 
         restAllows.forEach( ( scope, allows ) -> {
-            if ( !constraintBuilders.containsKey( scope ) )
+            if ( !strategyBuilders.containsKey( scope ) )
             {
-                constraintBuilders.put( scope, Constraints.builder().artifactScope( scope ) );
+                strategyBuilders.put( scope, Strategy.builder().artifactScope( scope ) );
             }
-            constraintBuilders.get( scope ).allowList( allows );
+            strategyBuilders.get( scope ).allowList( allows );
         } );
 
         restDenies.forEach( ( scope, denies ) -> {
-            if ( !constraintBuilders.containsKey( scope ) )
+            if ( !strategyBuilders.containsKey( scope ) )
             {
-                constraintBuilders.put( scope, Constraints.builder().artifactScope( scope ) );
+                strategyBuilders.put( scope, Strategy.builder().artifactScope( scope ) );
             }
-            constraintBuilders.get( scope ).denyList( denies );
+            strategyBuilders.get( scope ).denyList( denies );
         } );
 
-        constraintBuilders.forEach( ( scope, builder ) -> constraints.add( builder.build() ) );
+        strategyBuilders.forEach( ( scope, builder ) -> strategies.add( builder.build() ) );
 
-        return constraints;
+        return strategies;
     }
 }
