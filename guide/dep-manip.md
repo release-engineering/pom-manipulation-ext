@@ -176,12 +176,13 @@ An example:
 
     -DrestDependencyDenyList="QUALITY:BLACKLISTED"
 
-Furthermore, you can change the scope of affected dependencies for specific groupIDs or groupID:artifactIDs. For example
-`-DrestDependencyRanks.org.slf4j='PRODUCT:EAP'` would apply only to artifacts with `org.slf4j` groupID. This is the case
-also for `-DrestDependencyAllowList.org.slf4j:slf4j-api` and `-DrestDependencyAllowList.org.slf4j:slf4j-api`. 
+Furthermore, you can change the scope of affected dependencies for specific groupIDs or groupID:artifactIDs. The
+`-DrestDependencyRanks` is global, while `-DrestDependencyRanks.artifactID:groupID` is applied on a subset.
+For example`-DrestDependencyRanks.org.slf4j='PRODUCT:EAP'` would apply only to artifacts with `org.slf4j` groupID. This 
+is the case also for `-DrestDependencyAllowList.org.slf4j:slf4j-api` and `-DrestDependencyAllowList.org.slf4j:slf4j-api`. 
 
-Full list of available Qualifiers and much more in-depth guide how ranking system works is available in other document
-(TBD).
+Full list of available Qualifiers and much more in-depth guide how ranking system works will be available in other
+document (TBD).
 
 ### Direct/Transitive Dependencies
 
