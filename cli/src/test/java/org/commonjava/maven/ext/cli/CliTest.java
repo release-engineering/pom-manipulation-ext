@@ -360,7 +360,7 @@ public class CliTest
                 + "org.hamcrest:hamcrest-all:1.3                                                   jar                                     test                \n"
                 + "org.jacoco:jacoco-maven-plugin:0.8[.\\d+]+\\s+                                  maven-plugin                                                \n"
                 + "org.jboss.byteman:byteman-bmunit:4[.\\d+]+\\s+                                  jar                                     test                \n"
-                + "org.jboss.da:reports-model:2.[.\\d+]+\\s+                                       jar                                     compile             \n"
+                + "org.jboss.da:reports-model:2.[.\\d+]+(-SNAPSHOT)?\\s+                           jar                                     compile             \n"
                 + "org.jdom:jdom2:2.[.\\d+]+\\s+                                                   jar                                     compile             \n"
                 + "org.projectlombok:lombok:1.[.\\d+]+\\s+                                         jar                                     provided            \n"
                 + "org.projectlombok:lombok-maven-plugin:1.[.\\d+]+\\s+                            maven-plugin                                                \n"
