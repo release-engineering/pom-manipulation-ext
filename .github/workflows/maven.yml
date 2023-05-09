@@ -39,7 +39,6 @@ on:
 
 jobs:
   build:
-    run: echo ${{ toJson(github) }}
     strategy:
       fail-fast: false
       matrix:
@@ -72,7 +71,7 @@ jobs:
       uses: codecov/codecov-action@v2
 
   snapshot:
-    if: github.repository == 'release-engineering/pom-manipulation-ext' && github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: github.repository == 'release-engineering/pom-manipulation-ext' && github.event_name == 'push' && ( github.ref == 'refs/heads/main' || github.ref == 'refs/heads/4.17-branch' )
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
