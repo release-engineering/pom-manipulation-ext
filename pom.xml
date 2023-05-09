@@ -97,6 +97,9 @@
 
     <argLine />
     <surefireSecurityManager />
+
+    <!-- Disable best practices enforcement to allow SNAPSHOT dependencies -->
+    <enforceBestPractices>false</enforceBestPractices>
   </properties>
 
 
@@ -781,6 +784,19 @@
       </plugin>
     </plugins>
   </reporting>
+
+  <repositories>
+    <repository>
+      <id>JBoss Snapshot</id>
+      <url>https://repository.jboss.org/nexus/content/repositories/snapshots</url>
+      <releases>
+        <enabled>false</enabled>
+      </releases>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+    </repository>
+  </repositories>
 
   <modules>
     <module>annotation</module>
