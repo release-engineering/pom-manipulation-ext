@@ -21,13 +21,17 @@ name: CI
 
 on:
   push:
-    branches: main
+    branches:
+      - 'main'
+      - '4.17-branch'
     paths-ignore:
     - 'DEVELOPING.md'
     - 'LICENSE'
     - 'README.md'
   pull_request:
-    branches: main
+    branches:
+      - 'main'
+      - '4.17-branch'
     paths-ignore:
     - 'DEVELOPING.md'
     - 'LICENSE'
@@ -35,6 +39,7 @@ on:
 
 jobs:
   build:
+    run: echo ${{ toJson(github) }}
     strategy:
       fail-fast: false
       matrix:
