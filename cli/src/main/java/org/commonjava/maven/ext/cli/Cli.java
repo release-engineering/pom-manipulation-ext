@@ -119,7 +119,7 @@ public class Cli implements Callable<Integer>
      * Optional logging file.
      */
     @SuppressWarnings("unused")
-    @Option(names = {"-l", "--log"}, description = "Optional file to log output to")
+    @Option(names = {"--log"}, description = "Optional file to log output to")
     private String logFile;
 
     /**
@@ -141,10 +141,10 @@ public class Cli implements Callable<Integer>
     @Option( names = { "-t", "--trace"}, description = "Enable trace logging")
     boolean trace;
 
-    @Option( names = { "-p", "--printProjectDeps"}, description = "Print project dependencies")
+    @Option( names = {"--printProjectDeps"}, description = "Print project dependencies")
     boolean printProjectDeps;
 
-    @Option( names = { "--printManipulatorOrder"}, description = "Print current manipulator order")
+    @Option( names = {"--printManipulatorOrder"}, description = "Print current manipulator order")
     boolean printManipulatorOrder;
 
     public static void main( String[] args )

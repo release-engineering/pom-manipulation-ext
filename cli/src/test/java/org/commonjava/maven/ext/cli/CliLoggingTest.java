@@ -96,7 +96,7 @@ public class CliLoggingTest
         {
             Cli c = new Cli();
             c.run( new String[] { "-d", "--settings=" + getClass().getResource( "/settings-test.xml" ).getPath(),
-                            "-Dmaven.repo.local=" + folder, "-l", logfile.getCanonicalPath(),
+                            "-Dmaven.repo.local=" + folder, "--log", logfile.getCanonicalPath(),
                             "-DversionSuffix=rebuild-1", "--file", target.getCanonicalPath() } );
 
             assertTrue( logfile.exists() );
@@ -134,7 +134,7 @@ public class CliLoggingTest
 
         Cli c = new Cli();
         c.run( new String[] { "-d", "--settings=" + getClass().getResource( "/settings-test.xml" ).getPath(),
-                        "-Dmaven.repo.local=" + folder, "-l", logfile.getCanonicalPath(),
+                        "-Dmaven.repo.local=" + folder, "--log", logfile.getCanonicalPath(),
                         "-DversionSuffix=rebuild-1",
                         "--file",
                         target.getCanonicalPath() } );
@@ -163,7 +163,7 @@ public class CliLoggingTest
         systemOutRule.clearLog();
         Cli c = new Cli();
         c.run( new String[] { "-d", "--settings=" + getClass().getResource( "/settings-test.xml" ).getPath(),
-                        "-Dmaven.repo.local=" + folder, "-l", logfile.getCanonicalPath(),
+                        "-Dmaven.repo.local=" + folder, "--log", logfile.getCanonicalPath(),
                         "-DversionSuffix=rebuild-1",
                         "--file",
                         target.getCanonicalPath() } );
@@ -191,7 +191,7 @@ public class CliLoggingTest
 
         Cli c = new Cli();
         c.run( new String[] { "-d", "--settings=" + getClass().getResource( "/settings-test.xml" ).getPath(),
-                        "-Dmaven.repo.local=" + folder, "-l", logfile.getCanonicalPath(),
+                        "-Dmaven.repo.local=" + folder, "--log", logfile.getCanonicalPath(),
                         "-DversionSuffix=rebuild-1",
                         "--file",
                         target.getCanonicalPath() } );
@@ -222,7 +222,7 @@ public class CliLoggingTest
 
             Cli c = new Cli();
             c.run( new String[] { "-d", "--settings=" + getClass().getResource( "/settings-test.xml" ).getPath(),
-                            "-Dmaven.repo.local=" + folder, "-l", logfile.getCanonicalPath(),
+                            "-Dmaven.repo.local=" + folder, "--log", logfile.getCanonicalPath(),
                             "-DversionSuffix=rebuild-1", "--file", target.getCanonicalPath() } );
 
             assertTrue( logfile.exists() );
@@ -258,7 +258,7 @@ public class CliLoggingTest
 
             Cli c = new Cli();
             c.run( new String[] { "-d", "--settings=" + getClass().getResource( "/settings-test.xml" ).getPath(),
-                    "-Dmaven.repo.local=" + folder, "-l", logfile.getCanonicalPath(),
+                    "-Dmaven.repo.local=" + folder, "--log", logfile.getCanonicalPath(),
                     "-DversionSuffix=rebuild-1",
                     "--file",
                     target.getCanonicalPath() } );
