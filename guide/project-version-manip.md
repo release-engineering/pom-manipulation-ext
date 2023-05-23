@@ -9,7 +9,17 @@ title: "Project Version Manipulation"
 
 When rebuilding a Maven project's sources from a release tag (or really for any version that has already been released), it's important **NOT** to republish the original GAV (groupId, artifactId, version) coordinate. If you change anything during your rebuild (even a plugin version), you could produce a result that is not a binary equivalent of the original release. To help avoid this, PME supports automatically updating the project version to append a serial rebuild suffix. PME's re-versioning feature may also make other changes to the project version, in order to make the resulting version OSGi-compliant where possible.
 
-PME offers the following version-related configuration:
+### Disabling Version Manipulation
+
+<table bgcolor="#ffff00">
+<tr>
+<td>
+    <b>NOTE</b> : Available from version 4.15
+</td>
+</tr>
+</table>
+
+If `versionModification` is set to false (default: true) then no version change will happen.
 
 ### Automatic version increment
 
