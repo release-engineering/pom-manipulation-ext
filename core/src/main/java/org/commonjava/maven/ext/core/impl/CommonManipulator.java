@@ -262,8 +262,6 @@ public class CommonManipulator
             final ProjectRef groupIdArtifactId = new SimpleProjectRef( projectVersionRef.getGroupId(),
                                                                        projectVersionRef.getArtifactId() );
 
-            logger.warn( "### Explicit overrides {} and {}", explicitOverrides,
-                         explicitOverrides.containsKey( groupIdArtifactId ) );
             if ( explicitOverrides.containsKey( groupIdArtifactId ) )
             {
                 final String overrideVersion = explicitOverrides.get( groupIdArtifactId );
