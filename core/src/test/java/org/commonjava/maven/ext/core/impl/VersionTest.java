@@ -203,6 +203,12 @@ public class VersionTest
         assertThat ( Version.getOsgiVersion( "4.8-2" ), equalTo( "4.8.2" ));
         assertThat ( Version.getOsgiVersion( "4.5.1-1" ), equalTo( "4.5.1.1" ));
         assertThat ( Version.getOsgiVersion( "4.5.1-1.redhat-1" ), equalTo( "4.5.1.1-redhat-1" ));
+        assertThat ( Version.getOsgiVersion( "1.1.foo" ), equalTo( "1.1.0.foo" ));
+
+        String o = "1.1-foo";
+        assertThat ( Version.getOsgiVersion( Version.getOsgiMMM( o, true ) + "." + Version.getQualifier( o )), equalTo( "1.1.0.foo" ));
+        o = "1.2";
+        assertThat ( Version.getOsgiVersion( Version.getOsgiMMM( o, true ) + "." + Version.getQualifier( o )), equalTo( "1.2.0" ));
     }
 
     @Test
@@ -380,6 +386,7 @@ public class VersionTest
         assertTrue( Version.isValidOSGi("1.2.3.beta1") );
         assertTrue( Version.isValidOSGi("1.2.3.beta_1") );
         assertTrue( Version.isValidOSGi("1.2.3.beta-1") );
+        assertTrue( Version.isValidOSGi("1.0.0.beta") );
         assertTrue( Version.isValidOSGi("0.0.1") );
 
         assertFalse( Version.isValidOSGi("1.2.3.beta|1") );
