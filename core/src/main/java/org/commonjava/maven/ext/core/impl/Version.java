@@ -161,7 +161,7 @@ public class Version
      * @param fill Whether to fill the minor and micro versions with zeros if they are missing
      * @return OSGi formatted major, minor, micro
      */
-    static String getOsgiMMM(String version, boolean fill)
+    public static String getOsgiMMM(String version, boolean fill)
     {
         String mmm = getMMM( version );
         Matcher mmmMatcher = mmmPattern.matcher( mmm );
