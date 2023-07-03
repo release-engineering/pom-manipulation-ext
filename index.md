@@ -79,6 +79,11 @@ If you want to make it more permanent, you could add it to your `settings.xml`:
 </settings>
 ```
 
+#### Disabling writing changes
+
+By default PME will always write the changes it makes back to the pom files. It may be that a user wishes to use the tool
+as an extension but not write any changes back to disk. This may be achieved by setting `manipulationWriteChanged` to false.
+
 ### Deprecated and Unknown Properties
 
 <table bgcolor="#ffff00">
@@ -145,7 +150,7 @@ This is available [here](https://www.javadoc.io/doc/org.commonjava.maven.ext).
 
 ### OpenTelemetry Instrumentation
 
-If `OTEL_EXPORTER_OTLP_ENDPOINT` is defined (and optionally `OTEL_SERVICE_NAME`) then OpenTelemetry instrumentation 
+If `OTEL_EXPORTER_OTLP_ENDPOINT` is defined (and optionally `OTEL_SERVICE_NAME`) then OpenTelemetry instrumentation
 will be activated. It will read trace information from the environment as described [here](https://github.com/jenkinsci/opentelemetry-plugin/blob/master/docs/job-traces.md#environment-variables-for-trace-context-propagation-and-integrations) and will propagate the information via headers in any REST calls.
 
 ### Feature Guide
