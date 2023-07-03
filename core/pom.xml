@@ -22,7 +22,7 @@
   <parent>
     <groupId>org.commonjava.maven.ext</groupId>
     <artifactId>pom-manipulation-parent</artifactId>
-    <version>4.16-SNAPSHOT</version>
+    <version>4.16</version>
   </parent>
 
   <artifactId>pom-manipulation-core</artifactId>
@@ -254,7 +254,7 @@
             <groupId>org.commonjava.maven.ext</groupId>
             <artifactId>pom-manipulation-annotation</artifactId>
             <classifier>processor</classifier>
-            <version>4.16-SNAPSHOT</version>
+            <version>4.16</version>
           </dependency>
         </dependencies>
       </plugin>
