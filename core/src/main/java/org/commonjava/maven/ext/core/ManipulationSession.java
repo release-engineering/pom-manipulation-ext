@@ -50,7 +50,7 @@ import java.util.Properties;
 public class ManipulationSession
                 implements MavenSessionHandler
 {
-    @ConfigValue( docIndex = "index.html#disabling-the-extension")
+    @ConfigValue( docIndex = "../index.html#disabling-the-extension")
     private static final String MANIPULATIONS_DISABLED_PROP = "manipulation.disable";
 
     private final Map<Class<?>, State> states = new HashMap<>();

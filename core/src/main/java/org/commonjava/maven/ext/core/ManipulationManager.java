@@ -84,16 +84,16 @@ public class ManipulationManager
 
     public static final String REPORT_JSON_DEFAULT = "alignmentReport.json";
 
-    @ConfigValue( docIndex = "index.html#summary-logging")
+    @ConfigValue( docIndex = "../index.html#summary-logging")
     public static final String REPORT_TXT_OUTPUT_FILE = "reportTxtOutputFile";
 
-    @ConfigValue( docIndex = "index.html#summary-logging")
+    @ConfigValue( docIndex = "../index.html#summary-logging")
     public static final String REPORT_JSON_OUTPUT_FILE = "reportJSONOutputFile";
 
-    @ConfigValue( docIndex = "index.html#deprecated-and-unknown-properties")
+    @ConfigValue( docIndex = "../index.html#deprecated-and-unknown-properties")
     public static final String DEPRECATED_PROPERTIES = "enabledDeprecatedProperties";
 
-    @ConfigValue( docIndex = "index.html#write-changed")
+    @ConfigValue( docIndex = "../index.html#write-changed")
     public static final String REWRITE_CHANGED = "manipulationWriteChanged";
 
 
