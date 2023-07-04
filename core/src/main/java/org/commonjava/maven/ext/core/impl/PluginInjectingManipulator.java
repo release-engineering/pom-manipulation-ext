@@ -45,6 +45,7 @@ import static org.commonjava.maven.ext.core.util.IdUtils.ga;
  */
 @Named("plugin-injection")
 @Singleton
+@Deprecated
 public class PluginInjectingManipulator
     implements Manipulator
 {

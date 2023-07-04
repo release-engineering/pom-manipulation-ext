@@ -30,27 +30,28 @@ import java.util.Properties;
  *   <li><b>project.meta.version</b> - The version of the buildmetadata-maven-plugin to be injected.</li>
  * </ul>
  */
+@Deprecated
 public class PluginInjectingState
     implements State
 {
 
     /** Set this property to true using <code>-DprojectSrcSkip=true</code> in order to turn off injection of the project-sources plugin. */
-    @ConfigValue( docIndex = "plugin-manip.html#project-sources--build-metadata-plugin-injection")
+    @ConfigValue( docIndex = "plugin-manip.html#project-sources--build-metadata-plugin-injection", deprecated = true)
     private static final String PROJECT_SOURCES_SKIP_PROPERTY= "projectSrcSkip";
 
     /** Set this property to true using <code>-DprojectMetaSkip=true</code> in order to turn off injection of the project-sources plugin. */
-    @ConfigValue( docIndex = "plugin-manip.html#project-sources--build-metadata-plugin-injection")
+    @ConfigValue( docIndex = "plugin-manip.html#project-sources--build-metadata-plugin-injection", deprecated = true)
     private static final String BMMP_SKIP_PROPERTY= "projectMetaSkip";
 
     /** Set this property to control the version of the project-sources plugin to be injected. */
-    @ConfigValue( docIndex = "plugin-manip.html#project-sources--build-metadata-plugin-injection")
+    @ConfigValue( docIndex = "plugin-manip.html#project-sources--build-metadata-plugin-injection", deprecated = true)
     private static final String PROJECT_SOURCES_PLUGIN_VERSION_PROPERTY= "projectSrcVersion";
 
     /** The default plugin version to use in case no alternative version is specified on the command line. */
     private static final String DEFAULT_PROJECT_SOURCES_PLUGIN_VERSION = "1.0";
 
     /** Set this property to control the version of the build-metadata plugin to be injected. */
-    @ConfigValue( docIndex = "plugin-manip.html#project-sources--build-metadata-plugin-injection")
+    @ConfigValue( docIndex = "plugin-manip.html#project-sources--build-metadata-plugin-injection", deprecated = true)
     private static final String BMMP_VERSION_PROPERTY= "projectMetaVersion";
 
     private static final String DEFAULT_BMMP_VERSION = "1.7.0";
