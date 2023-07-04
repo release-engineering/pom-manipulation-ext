@@ -193,6 +193,11 @@ Additionally, the feature supports per-module overrides, which can be specified 
 <table bgcolor="#ffff00">
 <tr>
 <td>
+    <b>NOTE</b> : As of PME 3.14 (Jul 2023) these options are now deprecated and may be removed in a future release.
+</td>
+</tr>
+<tr>
+<td>
     <b>NOTE</b> : As of PME 3.0 (May 2018) the defaults for <i>projectSrcSkip</i> and <i>projectMetaSkip</i> have changed from false to true i.e. no plugins will be injected.
 </td>
 </tr>
