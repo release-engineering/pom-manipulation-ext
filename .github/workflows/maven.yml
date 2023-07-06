@@ -98,5 +98,3 @@ jobs:
             }]
     - name: Deploy Snapshot
       run: mvn -B -V org.apache.maven.plugins:maven-source-plugin:jar-no-fork deploy -Prun-its
-    - name: Codecov
-      uses: codecov/codecov-action@v3
