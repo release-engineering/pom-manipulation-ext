@@ -127,7 +127,7 @@
     <!-- Dependency Versions -->
     <version.com.fasterxml.classmate>1.1.0</version.com.fasterxml.classmate>
     <version.com.squareup.okhttp>2.4.0</version.com.squareup.okhttp>
-    <version.com.squareup.okio>1.4.0</version.com.squareup.okio>
+    <version.com.squareup.okio>3.4.0</version.com.squareup.okio>
     <version.commons-codec>1.10</version.commons-codec>
     <version.commons-collections>3.2.2</version.commons-collections>
     <version.commons-configuration>1.6</version.commons-configuration>
