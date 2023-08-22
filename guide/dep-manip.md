@@ -367,7 +367,7 @@ file containing a comma or newline separated list of GAs.
 ### Dependency Injection
 
 If the property `-DdependencyInjection=group:artifact:version,....` is set, PME will inject the
-specified dependency into the top level (inheritance root) POM files. The argument should be a
+specified dependency into the top level (inheritance root) POM files' `<dependencyManagement>` sections. The argument should be a
 comma separated list of group:artifact:version. The list also supports a remote HTTP file containing a comma or
 newline separated list of GAVs. The injection dependencies <b>are</b> subject to
 alignment.
