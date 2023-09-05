@@ -57,7 +57,7 @@ jobs:
         distribution: 'temurin'
         java-version: 11
     - name: Set up Maven
-      uses: stCarolas/setup-maven@v4
+      uses: stCarolas/setup-maven@v4.5
       with:
         maven-version:  ${{ matrix.maven }}
     - name: Build with Maven
@@ -86,7 +86,7 @@ jobs:
         java-version: 11
     # https://github.com/marketplace/actions/maven-setings-action
     - name: Maven Settings
-      uses: s4u/maven-settings-action@v2
+      uses: s4u/maven-settings-action@v2.8.0
       with:
         sonatypeSnapshots: true
         githubServer: false
