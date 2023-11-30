@@ -51,7 +51,6 @@ public class ManifestUtilsTest
     public void testThisClass()
     {
         ManifestUtils.getManifestInformation( ManifestUtilsTest.class );
-
         assertTrue( systemRule.getLog()
                               .contains( "Unable to retrieve manifest for class "
                                                          + "org.commonjava.maven.ext.common.util.ManifestUtilsTest as "
