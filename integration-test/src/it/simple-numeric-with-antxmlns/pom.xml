@@ -30,7 +30,7 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-    <version.ant>1.9.4</version.ant>
+    <version.ant>1.10.11</version.ant>
     <version.ant-nodeps>1.8.1</version.ant-nodeps>
     <version.ant-contrib>1.0b3</version.ant-contrib>
   </properties>
