@@ -86,7 +86,7 @@ jobs:
         java-version: 11
     # https://github.com/marketplace/actions/maven-setings-action
     - name: Maven Settings
-      uses: s4u/maven-settings-action@v2.8.0
+      uses: s4u/maven-settings-action@v3.0.0
       with:
         sonatypeSnapshots: true
         githubServer: false
