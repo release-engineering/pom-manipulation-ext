@@ -31,3 +31,5 @@ assert dependency.version.text() == "1.10"
 
 assert pomFile.text.contains("ignoredUnusedDeclaredDependency>commons-lang:commons-lang</ignoredUnusedDeclaredDependency")
 assert pomFile.text.contains("ignoredUnusedDeclaredDependency>commons-codec:commons-codec</ignoredUnusedDeclaredDependency")
+
+assert pom.dependencyManagement.dependencies.dependency.findAll { it.artifactId.text() == "xxx" }.size() == 1

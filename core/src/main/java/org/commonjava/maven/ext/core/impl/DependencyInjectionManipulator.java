@@ -32,6 +32,7 @@ import javax.inject.Singleton;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -86,13 +87,23 @@ public class DependencyInjectionManipulator
             logger.info( "Applying injection changes to {}", project );
 
             DependencyManagement dependencyManagement = project.getModel().getDependencyManagement();
+            List<Dependency> dependencies = getDependencies( state.getDependencyInjection() );
             if ( dependencyManagement == null )
             {
                 dependencyManagement = new DependencyManagement();
                 project.getModel().setDependencyManagement( dependencyManagement );
                 logger.debug( "Added <DependencyManagement/> for current project" );
             }
-            dependencyManagement.getDependencies().addAll( 0, getDependencies( state.getDependencyInjection() ));
+            else
+            {
+                for (Dependency d : dependencies)
+                {
+                    dependencyManagement.getDependencies().removeIf(
+                            existing -> existing.getGroupId().equals(d.getGroupId()) && existing.getArtifactId()
+                                    .equals(d.getArtifactId()));
+                }
+            }
+            dependencyManagement.getDependencies().addAll(0, dependencies);
 
             if (state.isAddIgnoreUnusedAnalzyePlugin())
             {
