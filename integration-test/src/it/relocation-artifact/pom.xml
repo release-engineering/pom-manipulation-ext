@@ -30,9 +30,16 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <slf4jApi>slf4j-10</slf4jApi>
+    <fooVersion>0</fooVersion>
+
   </properties>
 
   <dependencies>
+    <dependency>
+      <groupId>org.foobar</groupId>
+      <artifactId>xxx</artifactId>
+      <version>1.${fooVersion}</version>
+    </dependency>
     <dependency>
       <groupId>com.junit</groupId>
       <artifactId>junit</artifactId>
