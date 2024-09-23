@@ -51,6 +51,7 @@ import java.util.function.Consumer;
 
 import static org.apache.commons.lang.StringUtils.contains;
 import static org.apache.commons.lang.StringUtils.countMatches;
+import static org.apache.commons.lang.StringUtils.startsWith;
 
 /**
  * Commonly used manipulations on Plugins.
@@ -75,7 +76,7 @@ public final class DependencyPluginUtils
     public static void updateString( Project project, ManipulationSession session, String originalValue, ProjectVersionRef originalRelocation,
                                      String relocation, Consumer<String> c ) throws ManipulationException
     {
-        if ( contains( originalValue, "$" ))
+        if ( startsWith( originalValue, "$" ))
         {
             originalValue = originalValue.substring( 2, originalValue.length() - 1 );
             if ( countMatches( originalValue, "${" ) > 1 )

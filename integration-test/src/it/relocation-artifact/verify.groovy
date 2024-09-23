@@ -28,6 +28,10 @@ assert dependency != null
 assert dependency.version.text() == "3.8.2"
 assert dependency.artifactId.text() == "another-library"
 
+dependency = pom.dependencies.dependency.find { it.groupId.text() == "org.foobar" }
+assert dependency != null
+assert dependency.version.text() == "1.1"
+
 def passed = false
 pom.properties.each {
     if ( it.text().contains ("slf4j-api") )
