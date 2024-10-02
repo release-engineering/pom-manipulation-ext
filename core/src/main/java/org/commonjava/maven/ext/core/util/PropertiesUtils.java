@@ -205,12 +205,6 @@ public final class PropertiesUtils
                 // >${foo}value<
                 // We don't attempt to recursively resolve those as tracking the split of the variables, combined
                 // with the update and strict version checking becomes overly fragile.
-                if ( ignoreStrict )
-                {
-                    throw new ManipulationException(
-                                    "NYI : handling for versions with explicit overrides ({}) with multiple embedded properties is NYI. ",
-                                    oldValue );
-                }
                 if ( resolvedValue.equals( newValue ) )
                 {
                     logger.warn( "Nothing to update as original key {} value matches new value {}", key, newValue );
