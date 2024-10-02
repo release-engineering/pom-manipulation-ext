@@ -274,6 +274,12 @@ public class PropertiesUtilsTest
                                       "3.18.2.redhat-00003" ),
                     PropertiesUtils.PropertyUpdate.FOUND );
         assertEquals( "${camel.major.minor}.2.redhat-00003",
+                pP.getModel().getProperties().getProperty( "camel.version" ) );
+
+        assertSame( updateProperties( session, pP, true, "camel.version",
+                        "3.18.2.redhat-00004" ),
+                PropertiesUtils.PropertyUpdate.FOUND );
+        assertEquals( "${camel.major.minor}.2.redhat-00004",
                       pP.getModel().getProperties().getProperty( "camel.version" ) );
 
         assertSame( updateProperties( session, pP, false, "camel.version.2",
