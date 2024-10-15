@@ -358,6 +358,38 @@ In order to handle the situation where one GAV is changed to another (e.g., from
 
 **Note:** Multiple relocations may be added using multiple instances of `-DdependencyRelocation...`.
 
+#### Dependency Exclusion Addition
+
+Similar to with `dependencyOverrides` it is also possible to inject specific exclusions into a dependency. For instance
+
+    mvn install -DdependencyRelocations.junit:junit@junit:newjunit=4.10-rebuild-1,+slf4j:slf4j
+
+will, as per above, relocate the junit artifactId and apply the explicit 4.10-rebuild-10 version to the junit:junit dependency but also add an exclusion e.g.,
+```xml
+<dependency>
+  <groupId>junit</groupId>
+  <artifactId>newjunit</artifactId>
+  <version>4.1</version>
+  <exclusions>
+    <exclusion>
+      <artifactId>slf4j</artifactId>
+      <groupId>slf4j</groupId>
+    </exclusion>
+  </exclusions>
+</dependency>
+```
+
+Multiple exclusions to a dependency may be added using comma separators e.g.,
+mvn install -DdependencyRelocations.junit:junit@junit:newjunit=+slf4j:slf4j,+commons-lang:commons-lang
+
+<table bgcolor="#ffff00">
+<tr>
+<td>
+    <b>NOTE</b> : Available from PME 4.19.
+</td>
+</tr>
+</table>
+
 ### Dependency Removal
 
 If the property `-DdependencyRemoval=group:artifact,....` is set, PME will remove the specified dependency from the
