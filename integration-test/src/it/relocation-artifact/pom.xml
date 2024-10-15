@@ -55,6 +55,16 @@
       <artifactId>${slf4jApi}</artifactId>
       <version>3.8.2</version>
     </dependency>
+    <dependency>
+      <groupId>org.goots.maven.extensions</groupId>
+      <artifactId>xxx</artifactId>
+      <version>1.8</version>
+    </dependency>
+    <dependency>
+      <groupId>org.goots.maven</groupId>
+      <artifactId>yyy</artifactId>
+      <version>1.0</version>
+    </dependency>
   </dependencies>
 
 </project>

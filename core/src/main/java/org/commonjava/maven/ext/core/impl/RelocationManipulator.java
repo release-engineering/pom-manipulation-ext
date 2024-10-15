@@ -17,6 +17,7 @@ package org.commonjava.maven.ext.core.impl;
 
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.DependencyManagement;
+import org.apache.maven.model.Exclusion;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Plugin;
 import org.apache.maven.model.Profile;
@@ -198,9 +199,19 @@ public class RelocationManipulator
                     }
                     else
                     {
-                        DependencyPluginUtils.updateString( project, session, dependency.getVersion(),
-                                                            relocation, relocation.getVersionString(),
-                                      d -> dependency.setVersion( relocation.getVersionString() ) );
+                        for ( final String target : relocation.getVersionString().split( "," ) )
+                        {
+                            if (target.startsWith("+"))
+                            {
+                                dependency.addExclusion(CommonManipulator.processExclusion(logger, target, dependency));
+                            }
+                            else
+                            {
+                                DependencyPluginUtils.updateString(project, session, dependency.getVersion(),
+                                        relocation, target,
+                                        d -> dependency.setVersion(target));
+                            }
+                        }
                     }
 
                     DependencyPluginUtils.updateString( project, session, dependency.getGroupId(), relocation, relocation.getGroupId(),

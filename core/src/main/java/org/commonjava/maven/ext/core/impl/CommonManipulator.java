@@ -287,13 +287,7 @@ public class CommonManipulator
                     {
                         if ( target.startsWith( "+" ) )
                         {
-                            final String exclusion = target.substring( 1 );
-                            logger.info( "Adding dependency exclusion {} to dependency {}", exclusion,
-                                    projectVersionRef );
-                            final Exclusion e = new Exclusion();
-                            e.setGroupId( exclusion.split( ":" )[0] );
-                            e.setArtifactId( target.split( ":" )[1] );
-                            wrapper.addExclusion( e );
+                            wrapper.addExclusion(CommonManipulator.processExclusion(logger, target, projectVersionRef));
                         }
                         else
                         {
@@ -350,5 +344,14 @@ public class CommonManipulator
                 }
             }
         }
+    }
+
+    static Exclusion processExclusion (Logger logger, String target, Object toLog) {
+        final String exclusion = target.substring( 1 );
+        logger.info( "Adding dependency exclusion {} to dependency {}", exclusion, toLog );
+        final Exclusion result = new Exclusion();
+        result.setGroupId( exclusion.split( ":" )[0] );
+        result.setArtifactId( target.split( ":" )[1] );
+        return result;
     }
 }

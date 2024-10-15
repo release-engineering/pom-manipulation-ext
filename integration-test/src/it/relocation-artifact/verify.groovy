@@ -40,3 +40,18 @@ pom.properties.each {
     }
 }
 assert (passed == true)
+
+dependency = pom.dependencies.dependency.find { it.groupId.text() == "org.goots.maven.extensions" }
+assert dependency != null
+assert dependency.version.text() == "1.8"
+assert dependency.artifactId.text() == "alt-deploy-maven-extension"
+assert dependency.exclusions.exclusion.groupId == "javax.inject"
+assert dependency.exclusions.exclusion.artifactId == "javax.noinject"
+
+dependency = pom.dependencies.dependency.find { it.groupId.text() == "org.goots.maven" }
+assert dependency != null
+assert dependency.version.text() == "1.0"
+exclusion = dependency.exclusions.exclusion.find { it.groupId.text() == "javax.inject" }
+assert exclusion.artifactId == "javax.inject"
+exclusion = dependency.exclusions.exclusion.find { it.groupId.text() == "org.foobar" }
+assert exclusion.artifactId == "xxx"
