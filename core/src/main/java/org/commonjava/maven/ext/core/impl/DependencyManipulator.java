@@ -711,13 +711,13 @@ public class DependencyManipulator extends CommonManipulator implements Manipula
         while ( it.hasNext() )
         {
             final Entry<ArtifactRef, String> e = it.next();
-            session.getProjects().forEach( p -> {
-                if ( e.getKey().getGroupId().equals( p.getGroupId() )
-                        && e.getKey().getArtifactId().equals( p.getArtifactId() ) )
-                {
-                    it.remove();
-                }
-            } );
+            // Rather than iterating through all projects we find the first match to remove from the list. This then
+            // handles the scenario where there is a badly defined project with duplicate GA in the list.
+            if (session.getProjects().stream().anyMatch((p ->
+                e.getKey().getGroupId().equals( p.getGroupId() )
+                        && e.getKey().getArtifactId().equals( p.getArtifactId() )))) {
+                it.remove();
+            }
         }
         return reducedVersionOverrides;
     }
