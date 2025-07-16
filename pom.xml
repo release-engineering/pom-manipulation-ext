@@ -22,7 +22,7 @@
   <parent>
     <groupId>com.redhat.rcm</groupId>
     <artifactId>redhat-releng-tools</artifactId>
-    <version>11</version>
+    <version>12</version>
   </parent>
 
   <groupId>org.commonjava.maven.ext</groupId>
