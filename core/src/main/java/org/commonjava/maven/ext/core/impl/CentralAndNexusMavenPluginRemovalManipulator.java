@@ -17,7 +17,7 @@ package org.commonjava.maven.ext.core.impl;
 
 import org.commonjava.maven.ext.common.model.Project;
 import org.commonjava.maven.ext.core.ManipulationSession;
-import org.commonjava.maven.ext.core.state.NexusStagingMavenPluginRemovalState;
+import org.commonjava.maven.ext.core.state.CentralAndNexusMavenPluginRemovalState;
 import org.commonjava.maven.ext.core.state.PluginState;
 
 import javax.inject.Named;
@@ -33,7 +33,7 @@ import java.util.Set;
  */
 @Named("nexus-staging-maven-plugin-removal-manipulator")
 @Singleton
-public class NexusStagingMavenPluginRemovalManipulator extends BasePluginRemovalManipulator
+public class CentralAndNexusMavenPluginRemovalManipulator extends BasePluginRemovalManipulator
         implements Manipulator
 {
     /**
@@ -47,7 +47,7 @@ public class NexusStagingMavenPluginRemovalManipulator extends BasePluginRemoval
     public void init( ManipulationSession session )
     {
         this.session = session;
-        session.setState( new NexusStagingMavenPluginRemovalState( session.getUserProperties() ) );
+        session.setState( new CentralAndNexusMavenPluginRemovalState( session.getUserProperties() ) );
     }
 
     /**
@@ -58,7 +58,7 @@ public class NexusStagingMavenPluginRemovalManipulator extends BasePluginRemoval
     @Override
     public Set<Project> applyChanges( final List<Project> projects )
     {
-        return applyChanges( projects, session.getState( NexusStagingMavenPluginRemovalState.class ) );
+        return applyChanges( projects, session.getState( CentralAndNexusMavenPluginRemovalState.class ) );
     }
 
     /**

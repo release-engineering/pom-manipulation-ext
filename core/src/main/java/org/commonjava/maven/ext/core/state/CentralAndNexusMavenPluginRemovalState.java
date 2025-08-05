@@ -19,35 +19,41 @@ import org.commonjava.maven.atlas.ident.ref.ProjectRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleVersionlessArtifactRef;
 import org.commonjava.maven.ext.annotation.ConfigValue;
 
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 
 /**
  * Captures configuration relating to nexus-staging-maven-plugin removal from the POMs.
  */
-public final class NexusStagingMavenPluginRemovalState
+public final class CentralAndNexusMavenPluginRemovalState
         extends PluginRemovalState
 {
-    /** The name of the property containing a boolean controlling whether this is enabled, {@code -DnexusStagingMavenPluginRemoval=<true|false>}. */
+    /** The name of the property containing a boolean controlling whether nexus-staging removal is enabled, {@code -DnexusStagingMavenPluginRemoval=<true|false>}. */
     @ConfigValue( docIndex = "plugin-manip.html#nexus-staging-maven-plugin-removal" )
     private static final String NEXUS_STAGING_MAVEN_PLUGIN_REMOVAL_PROPERTY = "nexusStagingMavenPluginRemoval";
+
+    /** The name of the property containing a boolean controlling whether central-publishing removal is enabled, {@code -DcentralPublishingMavenPluginRemoval=<true|false>}. */
+    @ConfigValue( docIndex = "plugin-manip.html#central-publishing-maven-plugin-removal" )
+    private static final String CENTRAL_PUBLISHING_MAVEN_PLUGIN_REMOVAL_PROPERTY = "centralPublishingMavenPluginRemoval";
 
     /** The {@code <groupId>:<artifactId>} coordinates of nexus-staging-maven-plugin. */
     private static final String NEXUS_STAGING_MAVEN_PLUGIN_SPEC = "org.sonatype.plugins:nexus-staging-maven-plugin";
 
+    private static final String CENTRAL_PUBLISHING_MAVEN_PLUGIN_SPEC = "org.sonatype.central:central-publishing-maven-plugin";
+
     /** The list version of the {@code <groupId>:<artifactId>} coordinates of nexus-staging-maven-plugin. */
-    private static final List<ProjectRef> PLUGIN_REMOVAL = Collections.singletonList( SimpleVersionlessArtifactRef.parse( NEXUS_STAGING_MAVEN_PLUGIN_SPEC ) );
+    private static final List<ProjectRef> PLUGIN_REMOVAL = Arrays.asList(SimpleVersionlessArtifactRef.parse( NEXUS_STAGING_MAVEN_PLUGIN_SPEC ), SimpleVersionlessArtifactRef.parse(CENTRAL_PUBLISHING_MAVEN_PLUGIN_SPEC));
 
     /** Whether or not this manipulator is enabled. Defaults to {@code true}. */
     private boolean enabled = true;
 
     static
     {
-        State.activeByDefault.add( NexusStagingMavenPluginRemovalState.class );
+        State.activeByDefault.add( CentralAndNexusMavenPluginRemovalState.class );
     }
 
-    public NexusStagingMavenPluginRemovalState( final Properties userProps )
+    public CentralAndNexusMavenPluginRemovalState( final Properties userProps )
     {
         initialise( userProps );
     }
@@ -64,6 +70,7 @@ public final class NexusStagingMavenPluginRemovalState
     public void initialise( final Properties userProps )
     {
         enabled = Boolean.parseBoolean( userProps.getProperty( NEXUS_STAGING_MAVEN_PLUGIN_REMOVAL_PROPERTY,
+                Boolean.TRUE.toString() ) ) && Boolean.parseBoolean( userProps.getProperty( CENTRAL_PUBLISHING_MAVEN_PLUGIN_REMOVAL_PROPERTY,
                 Boolean.TRUE.toString() ) );
     }
 

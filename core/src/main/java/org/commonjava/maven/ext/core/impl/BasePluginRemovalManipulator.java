@@ -32,7 +32,6 @@ import org.commonjava.maven.ext.core.state.PluginRemovalState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static org.commonjava.maven.ext.core.util.IdUtils.ga;
 
 /**
  * {@link Manipulator} implementation that can remove specified plugins from a project's pom file.
