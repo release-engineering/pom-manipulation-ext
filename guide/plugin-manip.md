@@ -157,19 +157,21 @@ If the property `pluginRemoval` (*Deprecated property `plugin-removal` for versi
 
     -DpluginRemoval=group:artifact,....
 
-#### Removal of nexus-staging-maven-plugin
+#### Removal of central-publishing-maven-plugin and nexus-staging-maven-plugin
 
 <table bgcolor="#ffff00">
 <tr>
 <td>
-    <b>NOTE</b> : From version 4.1, the default behavior has changed as follows:
+    <b>NOTE</b> : central-publishing-maven-plugin removal available from PME 4.21.
 </td>
 </tr>
 </table>
 
-Because nexus-staging-maven-plugin prevents `mvn -DaltDeploymentRepository=... deploy` from working, it is removed by
+As nexus-staging-maven-plugin prevents `mvn -DaltDeploymentRepository=... deploy` from working, it is removed by
 default starting from version 4.1. If you wish to prevent nexus-staging-maven-plugin from being removed, set the
 property `nexusStagingMavenPluginRemoval` to `false`.
+
+From version 4.21 the same policy applies to central-publishing-maven-plugin. To disable it, set the property `centralPublishingMavenPluginRemoval` to `false`.
 
 ### Miscellaneous
 
