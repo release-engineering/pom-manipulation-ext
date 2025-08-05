@@ -393,7 +393,7 @@ public class CliTest
                                                             + "         50         RepoAndReportingRemovalManipulator      \n"
                                                             + "         51         DependencyRemovalManipulator            \n"
                                                             + "         52         PluginRemovalManipulator                \n"
-                                                            + "         53         NexusStagingMavenPluginRemovalManipulator\n"
+                                                            + "         53         CentralAndNexusMavenPluginRemovalManipulator\n"
                                                             + "         55         ProfileRemovalManipulator               \n"
                                                             + "         60         PluginInjectingManipulator              \n"
                                                             + "         65         RepositoryInjectionManipulator          \n"
