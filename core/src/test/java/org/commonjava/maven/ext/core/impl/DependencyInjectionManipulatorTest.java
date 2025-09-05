@@ -32,6 +32,7 @@ import org.junit.Test;
 
 import static org.commonjava.maven.ext.core.fixture.TestUtils.createSession;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThrows;
 
 public class DependencyInjectionManipulatorTest extends DependencyInjectionManipulator {
@@ -115,11 +116,22 @@ public class DependencyInjectionManipulatorTest extends DependencyInjectionManip
     }
 
     @Test
+    public void testDependencyInjectedEmptyNull() throws ManipulationException {
+        Dependency managed = inject("grp1:art1:::ver1:scp1");
+        assertEquals("grp1", managed.getGroupId());
+        assertEquals("art1", managed.getArtifactId());
+        assertNull(managed.getType());
+        assertNull(managed.getClassifier());
+        assertEquals("ver1", managed.getVersion());
+        assertEquals("scp1", managed.getScope());
+    }
+
+    @Test
     public void testDependencyInjectedInvalid() {
         assertThrows(InvalidRefException.class, () -> inject("grp1:art1")); // too short
         assertThrows(InvalidRefException.class, () -> inject(":art1:ver1")); // missing groupId
         assertThrows(InvalidRefException.class, () -> inject("grp1::ver1")); // missing artifactId
-        assertThrows(InvalidRefException.class, () -> inject("grp1:art1:")); // missing version
+        assertThrows(InvalidRefException.class, () -> inject("grp1:art1::::foo1")); // missing version
         assertThrows(InvalidRefException.class, () -> inject("grp1:art1:typ1:cls1:ver1:scp1:foo1")); // too long
     }
 
