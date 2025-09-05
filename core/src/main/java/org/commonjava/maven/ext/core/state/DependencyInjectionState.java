@@ -131,35 +131,40 @@ public class DependencyInjectionState
                         final String[] parts = dep.split( ":" );
                         final Dependency d = new Dependency();
 
-                        if ( parts.length < 3 || isEmpty( parts[0] ) || isEmpty( parts[1] ) || isEmpty( parts[2] ) )
+                        if ( parts.length < 3 )
                         {
                             throw invalidRefException();
                         }
 
-                        d.setGroupId(parts[0]);
-                        d.setArtifactId(parts[1]);
+                        d.setGroupId(nullIfEmpty(parts[0]));
+                        d.setArtifactId(nullIfEmpty(parts[1]));
 
                         switch ( parts.length ) {
                             case 3:
-                                d.setVersion(parts[2]);
+                                d.setVersion(nullIfEmpty(parts[2]));
                                 break;
                             case 4:
-                                d.setType(parts[2]);
-                                d.setVersion(parts[3]);
+                                d.setType(nullIfEmpty(parts[2]));
+                                d.setVersion(nullIfEmpty(parts[3]));
                                 break;
                             case 5:
-                                d.setType(parts[2]);
-                                d.setClassifier(parts[3]);
-                                d.setVersion(parts[4]);
+                                d.setType(nullIfEmpty(parts[2]));
+                                d.setClassifier(nullIfEmpty(parts[3]));
+                                d.setVersion(nullIfEmpty(parts[4]));
                                 break;
                             case 6:
-                                d.setType(parts[2]);
-                                d.setClassifier(parts[3]);
-                                d.setVersion(parts[4]);
-                                d.setScope(parts[5]);
+                                d.setType(nullIfEmpty(parts[2]));
+                                d.setClassifier(nullIfEmpty(parts[3]));
+                                d.setVersion(nullIfEmpty(parts[4]));
+                                d.setScope(nullIfEmpty(parts[5]));
                                 break;
                             default:
                                 throw invalidRefException();
+                        }
+
+                        if ( isEmpty( d.getGroupId() ) || isEmpty( d.getArtifactId() ) || isEmpty( d.getVersion() ) )
+                        {
+                            throw new InvalidRefException( "dependency groupId, artifactId, and version are required" );
                         }
 
                         deps.add( d );
@@ -170,8 +175,12 @@ public class DependencyInjectionState
         }
     }
 
+    private static String nullIfEmpty(String value) {
+        return isEmpty(value) ? null : value;
+    }
+
     static InvalidRefException invalidRefException() {
-        return new InvalidRefException( "dependency must contain be formatted as: "
+        return new InvalidRefException( "dependency must be formatted as one of: "
                 + "groupId:artifactId:version, "
                 + "groupId:artifactId:type:version, "
                 + "groupId:artifactId:type:classifier:version, or"
