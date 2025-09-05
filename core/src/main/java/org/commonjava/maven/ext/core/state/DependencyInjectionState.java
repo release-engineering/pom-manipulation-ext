@@ -15,13 +15,28 @@
  */
 package org.commonjava.maven.ext.core.state;
 
-import lombok.Getter;
-import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
-import org.commonjava.maven.ext.annotation.ConfigValue;
-import org.commonjava.maven.ext.core.util.IdUtils;
-
+import java.io.File;
+import java.io.IOException;
+import java.net.URL;
+import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
+import java.util.UUID;
+
+import org.apache.commons.io.FileUtils;
+import org.apache.maven.model.Dependency;
+import org.commonjava.maven.atlas.ident.ref.InvalidRefException;
+import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef;
+import org.commonjava.maven.ext.annotation.ConfigValue;
+import org.commonjava.maven.ext.common.ManipulationUncheckedException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import static org.apache.commons.lang.StringUtils.isEmpty;
+import static org.apache.commons.lang.StringUtils.isNotEmpty;
+
+import lombok.Getter;
 
 /**
  * Captures configuration relating to dependency injection from the POMs.
@@ -29,6 +44,8 @@ import java.util.Properties;
 public class DependencyInjectionState
     implements State
 {
+    private static final Logger logger = LoggerFactory.getLogger( DependencyInjectionState.class );
+
     /**
      * The name of the property which contains a comma separated list of dependencies (as GAV) to inject.
      * <pre>
@@ -51,7 +68,7 @@ public class DependencyInjectionState
      * @return the dependencies we wish to remove.
      */
     @Getter
-    private List<ProjectVersionRef> dependencyInjection;
+    private List<Dependency> dependencyInjection;
 
     @Getter
     private boolean addIgnoreUnusedAnalzyePlugin;
@@ -63,10 +80,102 @@ public class DependencyInjectionState
 
     public void initialise( Properties userProps )
     {
-        dependencyInjection = IdUtils.parseGAVs( userProps.getProperty( DEPENDENCY_INJECTION_PROPERTY ) );
+        dependencyInjection = parseDependencies( userProps.getProperty( DEPENDENCY_INJECTION_PROPERTY ) );
         addIgnoreUnusedAnalzyePlugin =
                         Boolean.parseBoolean( userProps.getProperty( DEPENDENCY_INJECTION_ANALYZE_PLUGIN_PROPERTY,
                                                                      "false" ) );
+    }
+
+    /**
+     * Splits the value on ',', then wraps each value in {@link SimpleProjectVersionRef#parse(String)}. Returns null
+     * if the input value is null.
+     * @param value a comma separated list of GAV to parse
+     * @return a collection of parsed ProjectVersionRef.
+     */
+    private static List<Dependency> parseDependencies( final String value )
+    {
+        if ( isEmpty( value ) )
+        {
+            return null;
+        }
+        else
+        {
+            final String[] depCoords = value.split( "," );
+            final List<Dependency> deps = new ArrayList<>();
+            for ( final String dep : depCoords )
+            {
+                if (isNotEmpty( dep ))
+                {
+                    if ( dep.startsWith( "http://" ) || dep.startsWith( "https://") )
+                    {
+                        logger.debug( "Found remote file in {}", dep );
+                        try
+                        {
+                            File found = File.createTempFile( UUID.randomUUID().toString(), null );
+                            FileUtils.copyURLToFile( new URL( dep ), found );
+                            String potentialRefs =
+                                            FileUtils.readFileToString( found, Charset.defaultCharset() ).trim().replace( "\n", "," );
+                            List<Dependency> readRefs = parseDependencies( potentialRefs );
+                            if ( readRefs != null )
+                            {
+                                deps.addAll( readRefs );
+                            }
+                        }
+                        catch ( InvalidRefException | IOException e )
+                        {
+                            throw new ManipulationUncheckedException( e );
+                        }
+                    }
+                    else
+                    {
+                        final String[] parts = dep.split( ":" );
+                        final Dependency d = new Dependency();
+
+                        if ( parts.length < 3 || isEmpty( parts[0] ) || isEmpty( parts[1] ) || isEmpty( parts[2] ) )
+                        {
+                            throw invalidRefException();
+                        }
+
+                        d.setGroupId(parts[0]);
+                        d.setArtifactId(parts[1]);
+
+                        switch ( parts.length ) {
+                            case 3:
+                                d.setVersion(parts[2]);
+                                break;
+                            case 4:
+                                d.setType(parts[2]);
+                                d.setVersion(parts[3]);
+                                break;
+                            case 5:
+                                d.setType(parts[2]);
+                                d.setClassifier(parts[3]);
+                                d.setVersion(parts[4]);
+                                break;
+                            case 6:
+                                d.setType(parts[2]);
+                                d.setClassifier(parts[3]);
+                                d.setVersion(parts[4]);
+                                d.setScope(parts[5]);
+                                break;
+                            default:
+                                throw invalidRefException();
+                        }
+
+                        deps.add( d );
+                    }
+                }
+            }
+            return deps;
+        }
+    }
+
+    static InvalidRefException invalidRefException() {
+        return new InvalidRefException( "dependency must contain be formatted as: "
+                + "groupId:artifactId:version, "
+                + "groupId:artifactId:type:version, "
+                + "groupId:artifactId:type:classifier:version, or"
+                + "groupId:artifactId:type:classifier:version:scope" );
     }
 
     /**
