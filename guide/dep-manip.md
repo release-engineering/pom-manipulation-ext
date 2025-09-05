@@ -399,10 +399,19 @@ file containing a comma or newline separated list of GAs.
 ### Dependency Injection
 
 If the property `-DdependencyInjection=group:artifact:version,....` is set, PME will inject the
-specified dependency into the top level (inheritance root) POM files' `<dependencyManagement>` sections. The argument should be a
-comma separated list of group:artifact:version. The list also supports a remote HTTP file containing a comma or
-newline separated list of GAVs. The injection dependencies <b>are</b> subject to
-alignment.
+specified dependencies into the top level (inheritance root) POM file's `<dependencyManagement>` section.
+The argument should be a comma separated list of dependencies using one of the following specifications.
+For all of the supported specification formats, `groupId`, `artifactId`, and `version` are required.
+All other fields are optional and will be treated as `null` when absent or blank.
+
+- `groupId:artifactId:version`
+- `groupId:artifactId:type:version` <span style="background-color:#ffff00">Available from PME 4.22</span>
+- `groupId:artifactId:type:classifier:version` <span style="background-color:#ffff00">Available from PME 4.22</span>
+- `groupId:artifactId:type:classifier:version:scope` <span style="background-color:#ffff00">Available from PME 4.22</span>
+
+The list also supports a remote HTTP file containing a comma or newline separated list of strings having the same format.
+
+**Note:** The injected dependencies <b>are</b> subject to alignment.
 
 #### Maven Dependency Plugin
 <table bgcolor="#ffff00">
@@ -412,7 +421,7 @@ alignment.
 </td>
 </tr>
 </table>
-If the property `dependencyInjectionAnalyzeIgnoreUnused` is set to true (default: false) and if the maven-dependency-plugin 
+If the property `dependencyInjectionAnalyzeIgnoreUnused` is set to true (default: false) and if the maven-dependency-plugin
 with the analyze goal exists in the root pom, then for every injected dependency, it will add each to the
 `ignoreUnusedDeclaredDependencies` configuration.
 
