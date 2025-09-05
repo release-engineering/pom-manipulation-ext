@@ -19,7 +19,6 @@ import org.apache.maven.model.Dependency;
 import org.apache.maven.model.DependencyManagement;
 import org.apache.maven.model.Plugin;
 import org.apache.maven.model.PluginExecution;
-import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.common.model.Project;
 import org.commonjava.maven.ext.core.ManipulationSession;
@@ -29,10 +28,8 @@ import org.slf4j.LoggerFactory;
 import org.codehaus.plexus.util.xml.Xpp3Dom;
 import javax.inject.Named;
 import javax.inject.Singleton;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -87,7 +84,7 @@ public class DependencyInjectionManipulator
             logger.info( "Applying injection changes to {}", project );
 
             DependencyManagement dependencyManagement = project.getModel().getDependencyManagement();
-            List<Dependency> dependencies = getDependencies( state.getDependencyInjection() );
+            List<Dependency> dependencies = state.getDependencyInjection();
             if ( dependencyManagement == null )
             {
                 dependencyManagement = new DependencyManagement();
@@ -121,10 +118,10 @@ public class DependencyInjectionManipulator
                     if ( execution != null )
                     {
                         Xpp3Dom originalConfiguration = (Xpp3Dom) execution.getConfiguration();
-                        for ( ProjectVersionRef pvr : state.getDependencyInjection() )
+                        for ( Dependency dep : state.getDependencyInjection() )
                         {
                             Xpp3Dom ignoreToAdd = new Xpp3Dom( "ignoredUnusedDeclaredDependency" );
-                            ignoreToAdd.setValue( pvr.getGroupId() + ":" + pvr.getArtifactId() );
+                            ignoreToAdd.setValue( dep.getGroupId() + ":" + dep.getArtifactId() );
                             Xpp3Dom ignoredUnusedDeclaredDeps;
 
                             if (originalConfiguration == null)
@@ -151,20 +148,6 @@ public class DependencyInjectionManipulator
         } );
 
         return changed;
-    }
-    private List<Dependency> getDependencies( List<ProjectVersionRef> pvr )
-    {
-        List<Dependency> results = new ArrayList<>(  );
-
-        for ( ProjectVersionRef p : pvr )
-        {
-            Dependency d = new Dependency();
-            d.setGroupId( p.getGroupId() );
-            d.setArtifactId( p.getArtifactId() );
-            d.setVersion( p.getVersionString() );
-            results.add( d );
-        }
-        return results;
     }
 
     @Override
