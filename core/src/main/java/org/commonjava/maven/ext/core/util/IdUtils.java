@@ -15,30 +15,16 @@
  */
 package org.commonjava.maven.ext.core.util;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Parent;
 import org.apache.maven.project.MavenProject;
-import org.commonjava.maven.atlas.ident.ref.InvalidRefException;
 import org.commonjava.maven.atlas.ident.ref.ProjectRef;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleProjectRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef;
-import org.commonjava.maven.ext.common.ManipulationUncheckedException;
 import org.commonjava.maven.ext.common.model.Project;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.URL;
-import java.nio.charset.Charset;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
-
-import static org.apache.commons.lang.StringUtils.isEmpty;
-import static org.apache.commons.lang.StringUtils.isNotEmpty;
 
 /**
  * Convenience utilities for converting between {@link ProjectVersionRef}, {@link Model}, {@link MavenProject} and GA / GAV strings.
@@ -47,8 +33,6 @@ import static org.apache.commons.lang.StringUtils.isNotEmpty;
  */
 public final class IdUtils
 {
-    private static final Logger logger = LoggerFactory.getLogger( IdUtils.class );
-
     private IdUtils()
     {
     }
@@ -61,46 +45,7 @@ public final class IdUtils
      */
     public static List<ProjectVersionRef> parseGAVs( final String value )
     {
-        if ( isEmpty( value ) )
-        {
-            return null;
-        }
-        else
-        {
-            final String[] gavs = value.split( "," );
-            final List<ProjectVersionRef> refs = new ArrayList<>();
-            for ( final String gav : gavs )
-            {
-                if (isNotEmpty( gav ))
-                {
-                    if ( gav.startsWith( "http://" ) || gav.startsWith( "https://") )
-                    {
-                        logger.debug( "Found remote file in {}", gav );
-                        try
-                        {
-                            File found = File.createTempFile( UUID.randomUUID().toString(), null );
-                            FileUtils.copyURLToFile( new URL( gav ), found );
-                            String potentialRefs =
-                                            FileUtils.readFileToString( found, Charset.defaultCharset() ).trim().replace( "\n", "," );
-                            List<ProjectVersionRef> readRefs = parseGAVs( potentialRefs );
-                            if ( readRefs != null )
-                            {
-                                refs.addAll( readRefs );
-                            }
-                        }
-                        catch ( InvalidRefException | IOException e )
-                        {
-                            throw new ManipulationUncheckedException( e );
-                        }
-                    }
-                    else
-                    {
-                        refs.add( SimpleProjectVersionRef.parse( gav ) );
-                    }
-                }
-            }
-            return refs;
-        }
+        return RefParseUtils.parseRefs( value, SimpleProjectVersionRef::parse );
     }
 
     /**
@@ -111,47 +56,7 @@ public final class IdUtils
      */
     public static List<ProjectRef> parseGAs( final String value )
     {
-        if ( isEmpty( value ) )
-        {
-            return null;
-        }
-        else
-        {
-            final String[] gavs = value.split( "," );
-            final List<ProjectRef> refs = new ArrayList<>();
-            for ( final String gav : gavs )
-            {
-                if (isNotEmpty( gav ))
-                {
-                    if ( gav.startsWith( "http://" ) || gav.startsWith( "https://") )
-                    {
-                        logger.debug( "Found remote file in {}", gav );
-                        try
-                        {
-                            File found = File.createTempFile( UUID.randomUUID().toString(), null );
-                            FileUtils.copyURLToFile( new URL( gav ), found );
-                            String potentialRefs =
-                                            FileUtils.readFileToString( found, Charset.defaultCharset() ).trim().replace( "\n", "," );
-                            List<ProjectRef> readRefs = parseGAs( potentialRefs );
-                            if ( readRefs != null )
-                            {
-                                refs.addAll( readRefs );
-                            }
-                        }
-                        catch ( InvalidRefException | IOException e )
-                        {
-                            throw new ManipulationUncheckedException( e );
-                        }
-                    }
-                    else
-                    {
-                        refs.add( SimpleProjectRef.parse( gav ) );
-                    }
-                }
-            }
-
-            return refs;
-        }
+        return RefParseUtils.parseRefs( value, SimpleProjectRef::parse );
     }
 
     public static String gav( final Project project )

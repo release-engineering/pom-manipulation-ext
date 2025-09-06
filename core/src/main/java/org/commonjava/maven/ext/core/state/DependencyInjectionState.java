@@ -15,26 +15,16 @@
  */
 package org.commonjava.maven.ext.core.state;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.URL;
-import java.nio.charset.Charset;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
-import java.util.UUID;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.maven.model.Dependency;
 import org.commonjava.maven.atlas.ident.ref.InvalidRefException;
 import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef;
 import org.commonjava.maven.ext.annotation.ConfigValue;
-import org.commonjava.maven.ext.common.ManipulationUncheckedException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.commonjava.maven.ext.core.util.RefParseUtils;
 
 import static org.apache.commons.lang.StringUtils.isEmpty;
-import static org.apache.commons.lang.StringUtils.isNotEmpty;
 
 import lombok.Getter;
 
@@ -44,8 +34,6 @@ import lombok.Getter;
 public class DependencyInjectionState
     implements State
 {
-    private static final Logger logger = LoggerFactory.getLogger( DependencyInjectionState.class );
-
     /**
      * The name of the property which contains a comma separated list of dependencies (as GAV) to inject.
      * <pre>
@@ -94,85 +82,50 @@ public class DependencyInjectionState
      */
     private static List<Dependency> parseDependencies( final String value )
     {
-        if ( isEmpty( value ) )
+        return RefParseUtils.parseRefs( value, DependencyInjectionState::parseDependency );
+    }
+
+    private static Dependency parseDependency(String dependencySpec) {
+        final String[] parts = dependencySpec.split( ":" );
+        final Dependency d = new Dependency();
+
+        if ( parts.length < 3 )
         {
-            return null;
+            throw invalidRefException();
         }
-        else
+
+        d.setGroupId(nullIfEmpty(parts[0]));
+        d.setArtifactId(nullIfEmpty(parts[1]));
+
+        switch ( parts.length ) {
+            case 3:
+                d.setVersion(nullIfEmpty(parts[2]));
+                break;
+            case 4:
+                d.setType(nullIfEmpty(parts[2]));
+                d.setVersion(nullIfEmpty(parts[3]));
+                break;
+            case 5:
+                d.setType(nullIfEmpty(parts[2]));
+                d.setClassifier(nullIfEmpty(parts[3]));
+                d.setVersion(nullIfEmpty(parts[4]));
+                break;
+            case 6:
+                d.setType(nullIfEmpty(parts[2]));
+                d.setClassifier(nullIfEmpty(parts[3]));
+                d.setVersion(nullIfEmpty(parts[4]));
+                d.setScope(nullIfEmpty(parts[5]));
+                break;
+            default:
+                throw invalidRefException();
+        }
+
+        if ( isEmpty( d.getGroupId() ) || isEmpty( d.getArtifactId() ) || isEmpty( d.getVersion() ) )
         {
-            final String[] depCoords = value.split( "," );
-            final List<Dependency> deps = new ArrayList<>();
-            for ( final String dep : depCoords )
-            {
-                if (isNotEmpty( dep ))
-                {
-                    if ( dep.startsWith( "http://" ) || dep.startsWith( "https://") )
-                    {
-                        logger.debug( "Found remote file in {}", dep );
-                        try
-                        {
-                            File found = File.createTempFile( UUID.randomUUID().toString(), null );
-                            FileUtils.copyURLToFile( new URL( dep ), found );
-                            String potentialRefs =
-                                            FileUtils.readFileToString( found, Charset.defaultCharset() ).trim().replace( "\n", "," );
-                            List<Dependency> readRefs = parseDependencies( potentialRefs );
-                            if ( readRefs != null )
-                            {
-                                deps.addAll( readRefs );
-                            }
-                        }
-                        catch ( InvalidRefException | IOException e )
-                        {
-                            throw new ManipulationUncheckedException( e );
-                        }
-                    }
-                    else
-                    {
-                        final String[] parts = dep.split( ":" );
-                        final Dependency d = new Dependency();
-
-                        if ( parts.length < 3 )
-                        {
-                            throw invalidRefException();
-                        }
-
-                        d.setGroupId(nullIfEmpty(parts[0]));
-                        d.setArtifactId(nullIfEmpty(parts[1]));
-
-                        switch ( parts.length ) {
-                            case 3:
-                                d.setVersion(nullIfEmpty(parts[2]));
-                                break;
-                            case 4:
-                                d.setType(nullIfEmpty(parts[2]));
-                                d.setVersion(nullIfEmpty(parts[3]));
-                                break;
-                            case 5:
-                                d.setType(nullIfEmpty(parts[2]));
-                                d.setClassifier(nullIfEmpty(parts[3]));
-                                d.setVersion(nullIfEmpty(parts[4]));
-                                break;
-                            case 6:
-                                d.setType(nullIfEmpty(parts[2]));
-                                d.setClassifier(nullIfEmpty(parts[3]));
-                                d.setVersion(nullIfEmpty(parts[4]));
-                                d.setScope(nullIfEmpty(parts[5]));
-                                break;
-                            default:
-                                throw invalidRefException();
-                        }
-
-                        if ( isEmpty( d.getGroupId() ) || isEmpty( d.getArtifactId() ) || isEmpty( d.getVersion() ) )
-                        {
-                            throw new InvalidRefException( "dependency groupId, artifactId, and version are required" );
-                        }
-
-                        deps.add( d );
-                    }
-                }
-            }
-            return deps;
+            throw new InvalidRefException( "dependency groupId, artifactId, and version are required" );
         }
+
+        return d;
     }
 
     private static String nullIfEmpty(String value) {
