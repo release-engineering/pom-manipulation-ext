@@ -35,10 +35,12 @@ import java.util.Optional;
 import java.util.Set;
 
 /**
- * {@link Manipulator} implementation that can inject specified GAV into a project's top
- * level pom file in a dependencyManagement block.
+ * {@link Manipulator} implementation that can inject specified dependencies into a project's top
+ * level pom file in a {@code dependencyManagement} block.
+ *
  * Configuration is stored in a {@link DependencyInjectionState} instance, which is in turn stored
- * in the {@link ManipulationSession}.
+ * in the {@link ManipulationSession}. See {@link DependencyInjectionState#DEPENDENCY_INJECTION_PROPERTY}
+ * for details on the supported dependency specification formats.
  */
 @Named("dependency-injection-manipulator")
 @Singleton

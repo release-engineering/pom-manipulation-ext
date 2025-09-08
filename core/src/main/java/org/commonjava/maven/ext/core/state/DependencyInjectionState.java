@@ -20,7 +20,6 @@ import java.util.Properties;
 
 import org.apache.maven.model.Dependency;
 import org.commonjava.maven.atlas.ident.ref.InvalidRefException;
-import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef;
 import org.commonjava.maven.ext.annotation.ConfigValue;
 import org.commonjava.maven.ext.core.util.RefParseUtils;
 
@@ -35,9 +34,20 @@ public class DependencyInjectionState
     implements State
 {
     /**
-     * The name of the property which contains a comma separated list of dependencies (as GAV) to inject.
+     * The name of the property which contains a comma separated list of dependencies to inject. Each
+     * dependency may be specified in one of the following formats. In all cases, the {@code groupId},
+     * {@code artifactId}, and {@code version} are required fields. All other fields are optional and
+     * will be treated as {@code null} when absent or blank.
+     *
+     * <ul>
+     * <li>GAV - {@code groupId:artifactId:version}</li>
+     * <li>GATV - {@code groupId:artifactId:type:version}</li>
+     * <li>GATCV - {@code groupId:artifactId:type:classifier:version}</li>
+     * <li>GATCVS - {@code groupId:artifactId:type:classifier:version:scope}</li>
+     * </ul>
+     *
      * <pre>
-     * <code>-DdependencyInjection=org.foo:bar:1.0,....</code>
+     * <code>-DdependencyInjection=org.foo:bar:1.0,org.baz:bar:pom::2.0:import,....</code>
      * </pre>
      */
     @ConfigValue( docIndex = "dep-manip.html#dependency-injection")
@@ -53,7 +63,8 @@ public class DependencyInjectionState
     private static final String DEPENDENCY_INJECTION_ANALYZE_PLUGIN_PROPERTY = "dependencyInjectionAnalyzeIgnoreUnused";
 
     /**
-     * @return the dependencies we wish to remove.
+     * @return the dependencies we wish to inject into the POM's {@code dependencyManagement}
+     * section.
      */
     @Getter
     private List<Dependency> dependencyInjection;
@@ -75,10 +86,11 @@ public class DependencyInjectionState
     }
 
     /**
-     * Splits the value on ',', then wraps each value in {@link SimpleProjectVersionRef#parse(String)}. Returns null
-     * if the input value is null.
-     * @param value a comma separated list of GAV to parse
-     * @return a collection of parsed ProjectVersionRef.
+     * Splits the value on ',', then parses each element with {@link #parseDependency(String)} Returns null
+     * if the input value is null or empty.
+     *
+     * @param value a comma separated list of dependencies to parse
+     * @return a list of parsed Dependency instances.
      */
     private static List<Dependency> parseDependencies( final String value )
     {
@@ -141,7 +153,7 @@ public class DependencyInjectionState
     }
 
     /**
-     * Enabled ONLY if dependency-removal is provided in the user properties / CLI -D options.
+     * Enabled ONLY if {@code dependencyInjection} is provided in the user properties / CLI -D options.
      *
      * @see State#isEnabled()
      */

@@ -48,7 +48,7 @@ public final class RefParseUtils
     /**
      * Splits the value on ',', then parses each element using the provided parser. If an entry
      * appears to be an HTTP(S) URL, the resulting resource will be fetched and recursively parsed
-     * in the same way. Returns null if the input value is null.
+     * in the same way. Returns null if the input value is null or empty.
      *
      * @param <T> the type of element the entries of the common-delimited value will be parsed as
      * @param value a comma separated list of references to parse
