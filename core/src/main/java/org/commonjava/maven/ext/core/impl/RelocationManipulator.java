@@ -17,7 +17,6 @@ package org.commonjava.maven.ext.core.impl;
 
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.DependencyManagement;
-import org.apache.maven.model.Exclusion;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Plugin;
 import org.apache.maven.model.Profile;
@@ -207,9 +206,20 @@ public class RelocationManipulator
                             }
                             else
                             {
-                                DependencyPluginUtils.updateString(project, session, dependency.getVersion(),
-                                        relocation, target,
-                                        d -> dependency.setVersion(target));
+                                String originalVersion = dependency.getVersion();
+
+                                if (originalVersion != null)
+                                {
+                                    DependencyPluginUtils.updateString(project, session, originalVersion,
+                                            relocation, target,
+                                            d -> dependency.setVersion(target));
+                                }
+                                else
+                                {
+                                    // Do not add a version element where none was originally present.
+                                    logger.debug("For dependency {}, no version present for relocation {}", dependency,
+                                            relocation);
+                                }
                             }
                         }
                     }
