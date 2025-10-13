@@ -212,7 +212,7 @@ public class RelocationManipulator
                                 {
                                     DependencyPluginUtils.updateString(project, session, originalVersion,
                                             relocation, target,
-                                            d -> dependency.setVersion(target));
+                                            dependency::setVersion);
                                 }
                                 else
                                 {
@@ -324,7 +324,20 @@ public class RelocationManipulator
                     }
                     else
                     {
-                        DependencyPluginUtils.updateString( project, session, plugin.getVersion(), relocation, relocation.getVersionString(), d -> plugin.setVersion( relocation.getVersionString() ) );
+                        String originalVersion = plugin.getVersion();
+
+                        if (originalVersion != null)
+                        {
+                            DependencyPluginUtils.updateString(project, session, originalVersion,
+                                    relocation, relocation.getVersionString(),
+                                    plugin::setVersion);
+                        }
+                        else
+                        {
+                            // Do not add a version element where none was originally present.
+                            logger.debug("For plugin {}, no version present for relocation {}", plugin,
+                                    relocation);
+                        }
                     }
 
                     DependencyPluginUtils.updateString( project, session, plugin.getGroupId(), relocation, relocation.getGroupId(), d -> plugin.setGroupId( relocation.getGroupId() ) );
