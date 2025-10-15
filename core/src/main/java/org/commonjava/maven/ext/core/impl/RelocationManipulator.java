@@ -284,8 +284,19 @@ public class RelocationManipulator
                         }
                         else
                         {
-                            DependencyPluginUtils.updateString( project, session, pluginReference.versionNode.getTextContent(), relocation, relocation.getVersionString(),
-                                          d -> pluginReference.versionNode.setTextContent( relocation.getVersionString() ) );
+                            String originalVersion = pluginReference.versionNode.getTextContent();
+
+                            if (originalVersion != null)
+                            {
+                                DependencyPluginUtils.updateString( project, session, originalVersion, relocation, relocation.getVersionString(),
+                                        pluginReference.versionNode::setTextContent );
+                            }
+                            else
+                            {
+                                // Do not add a version element where none was originally present.
+                                logger.debug("For plugin reference {}, no version present for relocation {}", pluginReference,
+                                        relocation);
+                            }
                         }
                     }
                     pluginReference.container.setConfiguration( DependencyPluginUtils.getConfigXml( galleyWrapper,
