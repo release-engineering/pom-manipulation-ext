@@ -31,7 +31,7 @@
   <packaging>pom</packaging>
 
   <name>POM Manipulation Extension for Maven</name>
-  <url>http://github.com/release-engineering/pom-manipulation-ext</url>
+  <url>https://github.com/release-engineering/pom-manipulation-ext</url>
   <inceptionYear>2012</inceptionYear>
 
   <description>
@@ -64,9 +64,9 @@
   </developers>
 
   <scm>
-    <connection>scm:git:http://github.com/release-engineering/pom-manipulation-ext.git</connection>
+    <connection>scm:git:https://github.com/release-engineering/pom-manipulation-ext.git</connection>
     <developerConnection>scm:git:git@github.com:release-engineering/pom-manipulation-ext.git</developerConnection>
-    <url>http://github.com/release-engineering/pom-manipulation-ext</url>
+    <url>https://github.com/release-engineering/pom-manipulation-ext</url>
     <tag>pom-manipulation-parent-4.22</tag>
   </scm>
 
@@ -77,7 +77,7 @@
     <javaTestVersion>${javaVersion}</javaTestVersion>
     <addJarIndex>false</addJarIndex>
 
-    <mavenVersion>3.6.3</mavenVersion>
+    <mavenVersion>3.8.9</mavenVersion>
     <atlasVersion>0.17.2</atlasVersion>
     <daVersion>2.1.0</daVersion>
     <galleyVersion>0.16.6</galleyVersion>
@@ -797,6 +797,7 @@
 
   <profiles>
     <profile>
+      <id>java18</id>
       <activation>
         <jdk>[18,]</jdk>
       </activation>

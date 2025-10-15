@@ -61,8 +61,7 @@ public class ManifestUtilsTest
     public void testThirdPartyClass()
     {
         String result = ManifestUtils.getManifestInformation( Model.class );
-
-        assertTrue( result.contains( "3.6.3 ( SHA: null )" ) );
+        assertTrue( result.matches( "3.[.\\d+]+ [(] SHA: null [)]" ) );
     }
 
     @Test
