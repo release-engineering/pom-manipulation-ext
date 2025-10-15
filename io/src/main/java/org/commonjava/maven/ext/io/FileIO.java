@@ -16,7 +16,7 @@
 package org.commonjava.maven.ext.io;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang.SystemUtils;
+import org.apache.commons.lang3.SystemUtils;
 import org.commonjava.maven.ext.common.util.LineSeparator;
 import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.io.resolver.GalleyInfrastructure;

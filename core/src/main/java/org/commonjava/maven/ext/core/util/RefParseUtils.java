@@ -30,8 +30,8 @@ import java.util.List;
 import java.util.UUID;
 import java.util.function.Function;
 
-import static org.apache.commons.lang.StringUtils.isEmpty;
-import static org.apache.commons.lang.StringUtils.isNotEmpty;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 /**
  * Convenience utility for parsing and fetching nested remote reference specs for strings containing

@@ -22,7 +22,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 
-import static org.apache.commons.lang.StringUtils.isNotEmpty;
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 /**
  * Captures configuration relating to injection profiles from a remote POM.

@@ -56,7 +56,7 @@ import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
 
-import static org.apache.commons.lang.StringUtils.startsWith;
+import static org.apache.commons.lang3.StringUtils.startsWith;
 import static org.commonjava.maven.ext.core.util.IdUtils.ga;
 
 /**

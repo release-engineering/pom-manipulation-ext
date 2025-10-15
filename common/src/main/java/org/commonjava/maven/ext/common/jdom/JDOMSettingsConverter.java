@@ -16,7 +16,7 @@
 
 package org.commonjava.maven.ext.common.jdom;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.maven.settings.Activation;
 import org.apache.maven.settings.ActivationFile;
 import org.apache.maven.settings.ActivationOS;
@@ -47,7 +47,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.Iterator;
 
-import static org.apache.commons.lang.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.commonjava.maven.ext.common.jdom.Utils.findAndReplaceProperties;
 import static org.commonjava.maven.ext.common.jdom.Utils.findAndReplaceSimpleElement;
 import static org.commonjava.maven.ext.common.jdom.Utils.findAndReplaceSimpleLists;

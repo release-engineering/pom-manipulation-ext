@@ -15,7 +15,7 @@
  */
 package org.commonjava.maven.ext.core.state;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.Test;
 
 import java.util.Properties;
