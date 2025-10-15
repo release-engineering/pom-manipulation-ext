@@ -16,7 +16,7 @@
 package org.commonjava.maven.ext.core.state;
 
 import lombok.Getter;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.commonjava.maven.atlas.ident.ref.ProjectRef;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.ext.annotation.ConfigValue;
@@ -30,8 +30,8 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
-import static org.apache.commons.lang.StringUtils.isEmpty;
-import static org.apache.commons.lang.StringUtils.isNotEmpty;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 /**
  * Captures configuration and changes relating to the projects' versions. Used by {@link ProjectVersioningManipulator}.

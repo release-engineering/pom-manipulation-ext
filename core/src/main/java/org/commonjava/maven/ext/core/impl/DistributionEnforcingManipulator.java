@@ -54,7 +54,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static org.apache.commons.lang.StringUtils.isNotEmpty;
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 import static org.commonjava.maven.ext.core.util.IdUtils.ga;
 
 /**

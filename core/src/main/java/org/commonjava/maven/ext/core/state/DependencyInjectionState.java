@@ -23,7 +23,7 @@ import org.commonjava.maven.atlas.ident.ref.InvalidRefException;
 import org.commonjava.maven.ext.annotation.ConfigValue;
 import org.commonjava.maven.ext.core.util.RefParseUtils;
 
-import static org.apache.commons.lang.StringUtils.isEmpty;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 import lombok.Getter;
 

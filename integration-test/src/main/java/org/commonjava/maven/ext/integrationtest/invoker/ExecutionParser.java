@@ -15,7 +15,7 @@
  */
 package org.commonjava.maven.ext.integrationtest.invoker;
 
-import org.apache.commons.lang.SystemUtils;
+import org.apache.commons.lang3.SystemUtils;
 
 import java.io.File;
 import java.io.IOException;

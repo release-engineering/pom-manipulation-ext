@@ -18,7 +18,7 @@ package org.commonjava.maven.ext.cli;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.DirectoryFileFilter;
 import org.apache.commons.io.filefilter.FileFilterUtils;
-import org.apache.commons.lang.reflect.FieldUtils;
+import org.apache.commons.lang3.reflect.FieldUtils;
 import org.apache.maven.execution.MavenSession;
 import org.commonjava.maven.ext.core.ManipulationSession;
 import org.commonjava.maven.ext.core.fixture.TestUtils;
@@ -67,9 +67,9 @@ public class CliTest
     private File writeSettings( File f ) throws IOException
     {
         FileUtils.writeStringToFile( f, "<?xml version=\"1.0\" encoding=\"utf-8\"?>"
-                        + "<settings xmlns=\"http://maven.apache.org/SETTINGS/1.0.0\""
+                        + "<settings xmlns=\"https://maven.apache.org/SETTINGS/1.0.0\""
                         + "xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\""
-                        + "xsi:schemaLocation=\"http://maven.apache.org/SETTINGS/1.0.0 http://maven.apache.org/xsd/settings-1.0.0.xsd\">"
+                        + "xsi:schemaLocation=\"https://maven.apache.org/SETTINGS/1.0.0 http://maven.apache.org/xsd/settings-1.0.0.xsd\">"
                         + "</settings>", StandardCharsets.UTF_8 );
         return f;
     }
@@ -150,7 +150,7 @@ public class CliTest
         boolean restore = false;
         Path source = Paths.get( System.getProperty( "user.home" ) + File.separatorChar + ".m2" + File.separatorChar
                                                  + "settings.xml" );
-        Path backup = Paths.get( source.toString() + '.' + UUID.randomUUID().toString() );
+        Path backup = Paths.get( source.toString() + '.' + UUID.randomUUID());
         Path tmpSettings = Paths.get( getClass().getResource( "/settings-test.xml" ).toURI() );
 
         try
@@ -294,6 +294,7 @@ public class CliTest
 
         // Strip out PME itself otherwise it causes issues on releasing a new version.
         String cliOutput = systemOutRule.getLogWithNormalizedLineSeparator().replaceAll( "org.commonjava.maven.ext:pom-manipulation-.*\\n", "" );
+        System.out.println(cliOutput);
 
         assertTrue( cliOutput.contains( "Found 83" ) );
         assertTrue( cliOutput.matches( "(?s).*"
@@ -314,11 +315,11 @@ public class CliTest
                 + "com.squareup:javapoet:1.[.\\d+]+\\s+                                            jar                                     compile             \n"
                 + "commons-codec:commons-codec:1.[.\\d+]+\\s+                                      jar                                     compile             \n"
                 + "commons-io:commons-io:[.\\d+]+\\s+                                              jar                                     compile             \n"
-                + "commons-lang:commons-lang:2.6                                                   jar                                     compile             \n"
                 + "commons-logging:commons-logging:1.2                                             jar                                     compile             \n"
                 + "info.picocli:picocli:4.[.\\d+]+\\s+                                             jar                                     compile             \n"
                 + "javax.inject:javax.inject:1                                                     jar                                     compile             \n"
                 + "junit:junit:4[.\\d+]+\\s+                                                       jar                                     test                \n"
+                + "org.apache.commons:commons-lang3:3.[.\\d+]+\\s+                                 jar                                     compile             \n"
                 + "org.apache.httpcomponents:httpclient:4.[.\\d+]+\\s+                             jar                                     compile             \n"
                 + "org.apache.ivy:ivy:[.\\d+]+\\s+                                                 jar                                     compile             \n"
                 + "org.apache.maven:apache-maven:3.6.3                                             zip                 bin                 test                \n"
@@ -462,8 +463,7 @@ public class CliTest
     }
 
     @Test
-    public void invokeCLIFails() throws Exception
-    {
+    public void invokeCLIFails() {
         Cli c = new Cli();
 
         int result = c.run( new String[] { "-d", "-f", temp.getRoot().toString() + "/pom.xml" } );

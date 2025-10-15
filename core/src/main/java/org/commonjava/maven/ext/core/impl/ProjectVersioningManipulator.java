@@ -42,8 +42,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static org.apache.commons.lang.StringUtils.isEmpty;
-import static org.apache.commons.lang.StringUtils.startsWith;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
+import static org.apache.commons.lang3.StringUtils.startsWith;
 
 /**
  * {@link Manipulator} implementation that can modify a project's version with either static or calculated, incremental version qualifier. Snapshot

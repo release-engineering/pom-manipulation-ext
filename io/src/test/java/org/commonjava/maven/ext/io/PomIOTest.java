@@ -16,8 +16,8 @@
 package org.commonjava.maven.ext.io;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.reflect.FieldUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.reflect.FieldUtils;
 import org.apache.maven.model.Model;
 import org.commonjava.maven.ext.common.model.Project;
 import org.junit.Before;

@@ -15,7 +15,7 @@
  */
 package org.commonjava.maven.ext.core.impl;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.DependencyManagement;
 import org.apache.maven.model.InputLocationTracker;
@@ -62,8 +62,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import static org.apache.commons.lang.StringUtils.isEmpty;
-import static org.apache.commons.lang.StringUtils.startsWith;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
+import static org.apache.commons.lang3.StringUtils.startsWith;
 import static org.commonjava.maven.ext.core.util.IdUtils.ga;
 
 /**

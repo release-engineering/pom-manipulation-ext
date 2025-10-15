@@ -45,7 +45,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import static org.apache.commons.lang.StringUtils.isEmpty;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 /**
  * This Manipulator runs very early. It makes a REST call to an external service to loadRemoteOverrides the GAVs to align the project version
