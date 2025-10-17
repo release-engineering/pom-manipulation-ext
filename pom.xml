@@ -47,19 +47,9 @@
 
   <developers>
     <developer>
-      <id>jdcasey</id>
-      <name>John Casey</name>
-      <email>jdcasey@commonjava.org</email>
-    </developer>
-    <developer>
       <id>rnc</id>
       <name>Nick Cross</name>
       <email>ncross@redhat.com</email>
-    </developer>
-    <developer>
-      <id>pgier</id>
-      <name>Paul Gier</name>
-      <email>pgier@redhat.com</email>
     </developer>
   </developers>
 
