@@ -14,7 +14,7 @@ PME excels in a cleanroom environment where large numbers of pre-existing projec
 
 ### Release Notes
 
-For a list of changes please see [here](https://github.com/release-engineering/pom-manipulation-ext/releases)
+For a list of changes please see [here](https://github.com/project-ncl/pom-manipulation-ext/releases)
 
 ### Installation
 
@@ -140,8 +140,8 @@ an alternate name for the file.
 }
 ```
 
-This JSON file may be read as POJO by using the [JSONUtils](https://github.com/release-engineering/pom-manipulation-ext/blob/master/common/src/main/java/org/commonjava/maven/ext/common/util/JSONUtils.java)
-class which utilises the [json](https://github.com/release-engineering/pom-manipulation-ext/blob/master/common/src/main/java/org/commonjava/maven/ext/common/json)
+This JSON file may be read as POJO by using the [JSONUtils](https://github.com/project-ncl/pom-manipulation-ext/blob/master/common/src/main/java/org/commonjava/maven/ext/common/util/JSONUtils.java)
+class which utilises the [json](https://github.com/project-ncl/pom-manipulation-ext/blob/master/common/src/main/java/org/commonjava/maven/ext/common/json)
 package.
 
 ### Javadoc
