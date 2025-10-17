@@ -40,7 +40,7 @@ jobs:
       matrix:
         maven: [3.3.9, 3.5.4, 3.6.3, 3.8.7, 3.9.0, 3.9.8]
     # https://docs.github.com/en/free-pro-team@latest/actions/reference/workflow-syntax-for-github-actions#jobsjob_idif
-    if: github.repository == 'release-engineering/pom-manipulation-ext' && github.event_name == 'pull_request'
+    if: github.repository == 'project-ncl/pom-manipulation-ext' && github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v5
@@ -68,7 +68,7 @@ jobs:
       uses: codecov/codecov-action@v5
 
   snapshot:
-    if: github.repository == 'release-engineering/pom-manipulation-ext' && github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: github.repository == 'project-ncl/pom-manipulation-ext' && github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v5

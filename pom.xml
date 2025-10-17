@@ -31,7 +31,7 @@
   <packaging>pom</packaging>
 
   <name>POM Manipulation Extension for Maven</name>
-  <url>https://github.com/release-engineering/pom-manipulation-ext</url>
+  <url>https://github.com/project-ncl/pom-manipulation-ext</url>
   <inceptionYear>2012</inceptionYear>
 
   <description>
@@ -64,9 +64,9 @@
   </developers>
 
   <scm>
-    <connection>scm:git:https://github.com/release-engineering/pom-manipulation-ext.git</connection>
-    <developerConnection>scm:git:git@github.com:release-engineering/pom-manipulation-ext.git</developerConnection>
-    <url>https://github.com/release-engineering/pom-manipulation-ext</url>
+    <connection>scm:git:https://github.com/project-ncl/pom-manipulation-ext.git</connection>
+    <developerConnection>scm:git:git@github.com:project-ncl/pom-manipulation-ext.git</developerConnection>
+    <url>https://github.com/project-ncl/pom-manipulation-ext</url>
     <tag>pom-manipulation-parent-4.22</tag>
   </scm>
 
