@@ -81,6 +81,6 @@ public class IdUtilsTest
     @Test(expected = ManipulationUncheckedException.class)
     public void testParseGAsWithFailure()
     {
-        IdUtils.parseGAs( "https://github.com/release-engineering/pom-manipulation-ext" );
+        IdUtils.parseGAs( "https://github.com/project-ncl/pom-manipulation-ext" );
     }
 }

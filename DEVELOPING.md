@@ -75,7 +75,7 @@ It is also recommended to install:
 
 ## Documentation
 
-In order to edit the website at https://release-engineering.github.io/pom-manipulation-ext checkout the `gh-pages` branch.
+In order to edit the website at https://project-ncl.github.io/pom-manipulation-ext checkout the `gh-pages` branch.
 It is possible to use Jekyll (https://help.github.com/articles/using-jekyll-with-pages) to preview the changes.
 Jekyll can be run with `jekyll serve --watch -V` and may be installed in Fedora via the `rubygem-jekyll` package.
 

@@ -1,5 +1,5 @@
 
-![Build status (GitHub Actions)](https://github.com/release-engineering/pom-manipulation-ext/workflows/CI/badge.svg)
+![Build status (GitHub Actions)](https://github.com/project-ncl/pom-manipulation-ext/workflows/CI/badge.svg)
 
 
 # Table of Contents
@@ -21,7 +21,7 @@ This extension combines many of the features of [VMan](https://github.com/jdcase
 
 # Documentation
 
-For details on usage see the documentation [here](https://release-engineering.github.io/pom-manipulation-ext).
+For details on usage see the documentation [here](https://project-ncl.github.io/pom-manipulation-ext).
 
 # Developing
 

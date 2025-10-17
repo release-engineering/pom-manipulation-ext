@@ -28,9 +28,9 @@
   <name>Test override plugin version using command line property</name>
 
   <scm>
-    <connection>scm:git:http://github.com/release-engineering/pom-manipulation-ext.git</connection>
-    <developerConnection>scm:git:git@github.com:release-engineering/pom-manipulation-ext.git</developerConnection>
-    <url>http://github.com/release-engineering/pom-manipulation-ext</url>
+    <connection>scm:git:http://github.com/project-ncl/pom-manipulation-ext.git</connection>
+    <developerConnection>scm:git:git@github.com:project-ncl/pom-manipulation-ext.git</developerConnection>
+    <url>http://github.com/project-ncl/pom-manipulation-ext</url>
     <tag>HEAD</tag>
   </scm>
 
